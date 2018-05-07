@@ -1,0 +1,31 @@
+version: '2'
+services:
+    deip-server:
+        build: .
+        container_name: "deip-server"
+        restart: always
+        environment:
+            - NODE_ENV=production
+        ports:
+            - "8282:8282"
+        links:
+            - mongodb
+        volumes: 
+          - filestorage:/usr/src/app/files
+        depends_on:
+            - mongodb
+
+    mongodb:
+        image: mongo:3.4.14
+        container_name: mongodb
+        restart: always
+        volumes: 
+          - mongostorage:/data/db
+        ports:
+            - "127.0.0.1:27017:27017" # containers should not be exposed outside! (see ufw + docker security issue)
+
+volumes:
+  mongostorage:
+    external: true
+  filestorage:
+    external: true

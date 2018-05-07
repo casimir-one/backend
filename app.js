@@ -16,8 +16,8 @@ import multer from 'koa-multer';
 const app = new Koa();
 const router = koa_router();
 
-const PORT = 8282;
-const HOST = '0.0.0.0';
+const PORT = process.env.PORT || 8282;
+const HOST = process.env.HOST || '0.0.0.0';
 
 
 app.use(cors());

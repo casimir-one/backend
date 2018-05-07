@@ -89,12 +89,16 @@ const getContent = async function(ctx) {
     let contentService = new ContentService();
     const content = await contentService.findOne(researchId, hash);
 
+    if (content == null) {
+        ctx.status = 404;
+        ctx.body = `Content "${hash}" is not found`
+        return;
+    }
+
     if (isDownload) {
         ctx.response.set('Content-disposition', 'attachment; filename="' + content.filename + '"');
         ctx.body = fs.createReadStream(researchContentPath(researchId, content.filename));
     } else {
-        // await send(ctx, `../files/${researchId}/${hash}`);
-        // await send(ctx, ctx.path, { root: `${basePath}${researchId}/${hash}` });
         await send(ctx, `/files/${researchId}/${content.filename}`);
     }
 }
