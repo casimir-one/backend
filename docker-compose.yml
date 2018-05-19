@@ -6,6 +6,8 @@ services:
         restart: always
         environment:
             - NODE_ENV=production
+        args:
+            - NPM_TOKEN=30100a2f-a641-48a6-ac61-ea3e8f596baf
         ports:
             - "80:80"
         links:
