@@ -1,4 +1,3 @@
-import UsersService from '../services/users.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import config from './../config'
