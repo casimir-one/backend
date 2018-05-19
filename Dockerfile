@@ -1,13 +1,13 @@
 FROM node:carbon
 
-ARG NPM_TOKEN
+# this is for private @deip npm registry
+ARG NPM_TOKEN=30100a2f-a641-48a6-ac61-ea3e8f596baf
+COPY .npmrc .npmrc  
+
 # Create app directory
 WORKDIR /usr/src/app
 
 RUN mkdir files
-
-# this is for private @deip npm registry
-COPY .npmrc .npmrc  
 
 # Install app dependencies
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
