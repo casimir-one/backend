@@ -2,44 +2,65 @@ import UsersService from '../services/users.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import config from './../config'
+import deipRpc from '@deip/deip-rpc';
+import crypto from '@deip/libcrypto';
+import { TextEncoder } from 'util';
 
+function Encodeuint8arr(seed) {
+    return new TextEncoder("utf-8").encode(seed);
+}
 
 const signIn = async function(ctx) {
-    console.log(ctx.request);
-    let usersService = new UsersService()
+    const data = ctx.request.body;
+    const username = data.username;
+    const secretSigHex = data.secretSigHex;
 
-    const data = ctx.request.body
-    const userInfo = await usersService.getUserByUsername(data.username)
-    console.log(userInfo);
+    let accounts = await deipRpc.api.getAccountsAsync([username])
 
-    if (userInfo != null && userInfo.isApproved) {
-        // if (!bcrypt.compareSync(data.password, userInfo.password)) {
-        //     ctx.body = {
-        //         success: false,
-        //         info: 'Password wrong!'
-        //     }
-        // } else {
-        const secret = config.jwtSecret;
-        const token = jwt.sign({
-            // email: userInfo.email,
-            // id: userInfo.id,
-            pubKey: userInfo.pubKey,
-            username: userInfo.username,
-            exp: Math.floor(Date.now() / 1000) + (180 * 60) // 3 hours
-        }, secret)
-        ctx.body = {
+    if (accounts[0]) {
+        const pubWif = accounts[0].owner.key_auths[0][0]
+        console.log(pubWif)
+
+        const publicKey = crypto.PublicKey.from(pubWif);
+        var isValid;
+        try {
+            // sigSeed should be uint8 array with length = 32
+            isValid = publicKey.verify(
+                Encodeuint8arr(config.sigSeed).buffer,
+                crypto.unhexify(secretSigHex).buffer);
+        } catch (err) {
+            isValid = false;
+        }
+
+        if (isValid) {
+            const jwtSecret = config.jwtSecret;
+            const jwtToken = jwt.sign({
+                pubKey: pubWif,
+                username: username,
+                exp: Math.floor(Date.now() / 1000) + (180 * 60) // 3 hours
+            }, jwtSecret)
+
+            ctx.body = {
                 success: true,
-                token: token
+                jwtToken: jwtToken
             }
-            // }
+
+        } else {
+
+            ctx.body = {
+                success: false,
+                error: `Signature is invalid for ${username}, make sure you specify correct private key`
+            }
+        }
+
     } else {
         ctx.body = {
             success: false,
-            info: userInfo != null ?
-                `Please wait for "${userInfo.username}" to be approved. We will send notification to "${userInfo.email}"` : `User "${data.username}" does not exist!`
+            error: `User "${username}" does not exist!`
         }
     }
 }
+
 
 export default {
     signIn

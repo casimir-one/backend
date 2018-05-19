@@ -13,6 +13,10 @@ import cors from '@koa/cors';
 import config from './config';
 import multer from 'koa-multer';
 
+import deipRpc from '@deip/deip-rpc';
+deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
+deipRpc.config.set('chain_id', config.blockchain.chainId);
+
 const app = new Koa();
 const router = koa_router();
 
