@@ -7,7 +7,7 @@ services:
         environment:
             - NODE_ENV=production
         ports:
-            - "8282:8282"
+            - "80:80"
         links:
             - mongodb
         volumes: 
