@@ -33,7 +33,7 @@ const uploader = multer({
     }
 })
 
-const uploadContent = async(ctx, next) => {
+const uploadContent = async(ctx) => {
 
     const researchId = ctx.request.header['research-id'];
     if (isNaN(parseInt(researchId))) {
