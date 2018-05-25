@@ -36,9 +36,10 @@ const uploader = multer({
 const uploadContent = async(ctx) => {
 
     const researchId = ctx.request.header['research-id'];
-    if (isNaN(parseInt(researchId))) {
+    if (!researchId || isNaN(parseInt(researchId))) {
         ctx.status = 400;
         ctx.body = { error: `"Research-Id" header is required` };
+        return;
     }
 
     const researchContent = uploader.single('research-content');
