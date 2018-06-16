@@ -11,7 +11,7 @@ import koa_router from "koa-router";
 import koa_bodyparser from "koa-bodyparser";
 import cors from '@koa/cors';
 import config from './config';
-import multer from 'koa-multer';
+import mongoose from 'mongoose';
 
 import deipRpc from '@deip/deip-rpc';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
@@ -64,8 +64,26 @@ router.use('/api', jwt({ secret: config.jwtSecret }), api.routes())
 
 app.use(router.routes());
 
+mongoose.connect(config.mongo['deip-server'].connection);
+mongoose.connection.on('connected', () => {
+    console.log(`Mongoose default connection open to ${config.mongo['deip-server'].connection}`);
+});
+mongoose.connection.on('error',  (err) => {
+    console.log(`Mongoose default connection error: ${err}`);
+});
+mongoose.connection.on('disconnected', () => {
+    console.log('Mongoose default connection disconnected');
+});
+
 app.listen(PORT, HOST, () => {
     console.log(`Running on http://${HOST}:${PORT}`);
+});
+
+process.on('SIGINT', () => {
+    mongoose.connection.close( () => {
+        console.log('Mongoose default connection closed through app termination');
+        process.exit(0);
+    });
 });
 
 export default app;
