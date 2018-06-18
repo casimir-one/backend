@@ -165,7 +165,7 @@ const uploadAvatar = async(ctx) => {
         return;
     }
 
-    if (oldAvatar && fs.existsSync(avatarPath(oldAvatar))) {
+    if (oldAvatar && oldAvatar != 'default_avatar.png' && fs.existsSync(avatarPath(oldAvatar))) {
         fs.unlinkSync(avatarPath(oldAvatar))
     }
 
