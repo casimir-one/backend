@@ -30,6 +30,7 @@
         "koa-static": "^3.0.0",
         "md5-file": "^4.0.0",
         "mongoose": "^5.1.5",
+        "sharp": "^0.20.3",
         "web3": "^0.18.4"
     },
     "devDependencies": {
