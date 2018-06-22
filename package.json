@@ -8,7 +8,7 @@
         "server": "nodemon --delay 2000ms -w app.js -w server server-entry.js"
     },
     "dependencies": {
-        "@deip/deip-rpc": "^0.0.2",
+        "@deip/deip-rpc": "^0.0.24",
         "@deip/libcrypto": "^1.0.2",
         "@koa/cors": "^2.2.1",
         "@paralect/common-logger": "0.1.10",
