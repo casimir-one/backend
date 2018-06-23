@@ -1,4 +1,5 @@
 import UserProfile from './../schemas/user'
+import qs from 'qs'
 
 const getUserProfile = async (ctx) => {
     const username = ctx.params.username;
@@ -12,6 +13,17 @@ const getUserProfile = async (ctx) => {
 
     ctx.status = 200;
     ctx.body = profile;
+}
+
+
+const getUsersProfiles = async (ctx) => {
+    const query = qs.parse(ctx.query);
+    const accounts = query.accounts || [];
+
+    const profiles = await UserProfile.find({'_id': { $in: accounts }})
+
+    ctx.status = 200;
+    ctx.body = profiles;
 }
 
 const createUserProfile = async (ctx) => {
@@ -74,6 +86,7 @@ const updateUserProfile = async (ctx) => {
 
 export default {
     getUserProfile,
+    getUsersProfiles,
     createUserProfile,
     updateUserProfile
 }
