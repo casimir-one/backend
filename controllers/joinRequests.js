@@ -112,7 +112,6 @@ const updateJoinRequest = async (ctx) => {
         }
 
         const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(jwtUsername);
-        console.log(rgtList)
 
         if (!rgtList.some(rgt => rgt.research_group_id == updatedJoinRequest.groupId)){
             ctx.status = 403;
@@ -134,7 +133,7 @@ const updateJoinRequest = async (ctx) => {
                     });
                 });
                 return await promise;
-              }
+            }
 
               const result = await sendTransaction();
               console.log(result);

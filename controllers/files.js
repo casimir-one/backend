@@ -1,6 +1,7 @@
 import multer from 'koa-multer';
 import md5File from 'md5-file';
 import fs from 'fs';
+import util from 'util';
 import path from 'path';
 import ContentService from '../services/content.js';
 import send from 'koa-send';
@@ -180,9 +181,10 @@ const getAvatar = async (ctx) => {
     const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
 
     var src = avatarPath(picture);
+    const stat = util.promisify(fs.stat);
 
     try {
-        const stats = await fs.stat(src);
+        const check = await stat(src);
     } catch(err) {
         src = avatarPath("default_avatar.png");
     }
