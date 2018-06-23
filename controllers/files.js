@@ -3,10 +3,10 @@ import md5File from 'md5-file';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import ContentService from '../services/content.js';
 import send from 'koa-send';
 import sharp from 'sharp'
 import UserProfile from './../schemas/user'
+import ResearchContent from './../schemas/researchContent'
 
 const basePath = path.join(__dirname, './../files/');
 const researchStoragePath = (researchId) => { return basePath + researchId; }
@@ -56,20 +56,19 @@ const uploadContent = async(ctx) => {
             // may upload the same file - for example raw data set
             const _id = `${researchId}_${md5Hash}`;
 
-            let contentService = new ContentService();
-            const count = await contentService.count(_id);
+            const content = await ResearchContent.findOne({_id: _id});
 
-            if (count != 0) {
+            if (content != null) {
                 console.log(`File with ${md5Hash} hash already exists! Removing uploaded file...`);
                 fs.unlinkSync(researchContentPath(researchId, ctx.req.file.filename));
                 resolve({ hash: md5Hash })
             } else {
-                const rc = {
+                const rc = new ResearchContent({
                     "_id": _id,
                     "filename": ctx.req.file.filename,
                     "research": researchId
-                };
-                const result = await contentService.create(rc);
+                });
+                const savedResearchContent = await rc.save();
                 resolve({ hash: md5Hash })
             }
         })
@@ -90,8 +89,7 @@ const getContent = async function(ctx) {
     const hash = ctx.params.hash;
     const isDownload = ctx.query.download;
 
-    let contentService = new ContentService();
-    const content = await contentService.findOne(researchId, hash);
+    const content = await ResearchContent.findOne({ '_id': `${researchId}_${hash}` });
 
     if (content == null) {
         ctx.status = 404;
