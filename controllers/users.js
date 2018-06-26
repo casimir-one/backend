@@ -18,7 +18,14 @@ const getUserProfile = async (ctx) => {
 
 const getUsersProfiles = async (ctx) => {
     const query = qs.parse(ctx.query);
-    const accounts = query.accounts || [];
+    const parsed = query.accounts || [];
+    const accounts = [];
+
+    if(Array.isArray(parsed)) {
+        accounts.push(...parsed)
+    } else if (typeof parsed === 'object' && parsed != null) {
+        accounts.push(...Object.values(parsed))
+    }
 
     const profiles = await UserProfile.find({'_id': { $in: accounts }})
 
