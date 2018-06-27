@@ -1,4 +1,4 @@
-version: '2'
+version: "3.3"
 services:
     deip-server:
         build: .
@@ -16,13 +16,21 @@ services:
             - mongodb
 
     mongodb:
-        image: mongo:3.4.14
+        image: mongo:3.6.5
         container_name: mongodb
         restart: always
+        environment:
+          - MONGO_INITDB_ROOT_USERNAME=deip
+          - MONGO_INITDB_ROOT_PASSWORD=XTFEaoBKqYr
         volumes: 
           - mongostorage:/data/db
         ports:
-            - "127.0.0.1:27017:27017" # containers should not be exposed outside! (see ufw + docker security issue)
+            - "27017:27017"
+
+networks:  
+  default:
+    external:
+      name: deip
 
 volumes:
   mongostorage:
