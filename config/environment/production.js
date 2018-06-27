@@ -1,7 +1,7 @@
 module.exports = {
     mongo: {
         "deip-server": {
-            connection: 'mongodb://mongodb:27017/deip-server',
+            connection: 'mongodb://deip:XTFEaoBKqYr@mongodb:27017/deip-server?authSource=admin',
         }
     },
     blockchain: {
