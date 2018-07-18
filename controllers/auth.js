@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcryptjs'
 import config from './../config'
-import deipRpc from '@deip/deip-rpc';
-import crypto from '@deip/libcrypto';
+import deipRpc from '@deip/deip-rpc-client';
+import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 
 function Encodeuint8arr(seed) {

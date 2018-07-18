@@ -4,6 +4,7 @@ import logger from 'koa-logger';
 import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
+import dar from './routes/dar.js';
 import jwt from 'koa-jwt';
 import path from 'path';
 import serve from 'koa-static';
@@ -13,7 +14,7 @@ import cors from '@koa/cors';
 import config from './config';
 import mongoose from 'mongoose';
 
-import deipRpc from '@deip/deip-rpc';
+import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
 deipRpc.config.set('chain_id', config.blockchain.chainId);
 
@@ -60,6 +61,7 @@ app.on('error', function(err, ctx) {
 
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
+router.use('/dar', dar.routes())
 router.use('/api', jwt({ secret: config.jwtSecret }), api.routes())
 
 app.use(router.routes());
