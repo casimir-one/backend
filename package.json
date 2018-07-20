@@ -8,8 +8,8 @@
         "server": "nodemon --delay 2000ms -w app.js -w server server-entry.js"
     },
     "dependencies": {
-        "@deip/deip-rpc": "^0.0.24",
-        "@deip/libcrypto": "^1.0.2",
+        "@deip/deip-rpc-client": "^1.0.0",
+        "@deip/lib-crypto": "^1.0.2",
         "@koa/cors": "^2.2.1",
         "axios": "^0.15.3",
         "bcryptjs": "^2.4.0",
@@ -28,8 +28,10 @@
         "koa-static": "^3.0.0",
         "md5-file": "^4.0.0",
         "mongoose": "^5.1.5",
+        "parse-formdata": "^1.0.2",
         "qs": "^6.5.2",
         "sharp": "^0.20.3",
+        "substance": "^1.0.0-preview.53",
         "web3": "^0.18.4"
     },
     "devDependencies": {

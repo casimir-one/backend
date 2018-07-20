@@ -8,8 +8,8 @@ import sharp from 'sharp'
 import UserProfile from './../schemas/user'
 import ResearchContent from './../schemas/researchContent'
 
-const basePath = path.join(__dirname, './../files/');
-const researchStoragePath = (researchId) => { return basePath + researchId; }
+const filesStoragePath = path.join(__dirname, './../files/');
+const researchStoragePath = (researchId) => { return filesStoragePath + researchId; }
 const researchContentPath = (researchId, filename) => { return researchStoragePath(researchId) + '/' + filename }
 
 const contentStorage = multer.diskStorage({
@@ -105,7 +105,7 @@ const getContent = async function(ctx) {
     }
 }
 
-const avatarsStoragePath = () => { return basePath + 'avatars'; }
+const avatarsStoragePath = () => { return filesStoragePath + 'avatars'; }
 const avatarPath = (username) => { return avatarsStoragePath() + '/' + username }
 
 const allowedAvatarMimeTypes = ['image/png', 'image/jpeg']
