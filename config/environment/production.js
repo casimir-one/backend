@@ -8,6 +8,7 @@ module.exports = {
         rpcEndpoint: "http://206.189.175.10",
         chainId: "9d3418f0456d9c96df885443da3c359b0211b12951a34d1bbb6027d21aa2cb8b"
     },
+    host: 'http://146.185.131.175',
     sigSeed: "quickbrownfoxjumpsoverthelazydog",
     jwtSecret: 'shhhhhhhhhhh!!!'
 };

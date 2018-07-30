@@ -12,7 +12,8 @@ import deipRpc from '@deip/deip-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
- 
+import config from './../config'
+
 const filesStoragePath = path.join(__dirname, './../files');
 const opts = {}
 
@@ -46,10 +47,15 @@ const drafts = async (ctx) => {
 
 
 const read = async (ctx) => {
-    const id = ctx.params.dar || 'default'
-    const parts = id.split('-');
-    const link = `/${parts[0]}/${parts[1]}-${parts[2]}`;
-
+    const draftId = ctx.params.dar || 'default'
+    const parsed = parseDraftId(draftId)
+    if (!parsed) {
+        ctx.status = 400;
+        ctx.body = `"Bad request for /${ctx.params.dar}"`;
+        return;
+    }
+    const { link } = parsed;
+    
     try {
  
         const archiveDir = path.join(filesStoragePath, link);
@@ -65,7 +71,7 @@ const read = async (ctx) => {
             if (record._binary) {
                 delete record._binary
                 record.encoding = 'url'
-                record.data = `http://localhost:8282/dar/${id}/assets/${record.path}`
+                record.data = `${config['host']}/dar/${draftId}/assets/${record.path}`
             }
       })
       ctx.status = 200;
@@ -79,8 +85,17 @@ const read = async (ctx) => {
 }
 
 const readStatic = async (ctx) => {
-    const parts = ctx.params.dar.split('-');
-    const link = `/${parts[0]}/${parts[1]}-${parts[2]}`;
+    const draftId = ctx.params.dar;
+    const parsed = parseDraftId(draftId)
+    if (!parsed) {
+        ctx.status = 400;
+        ctx.body = `"Bad request for /${ctx.params.dar}"`;
+        return;
+    }
+    
+    const { link } = parsed;
+
+
     const stat = util.promisify(fs.stat);
     const filePath = path.join(filesStoragePath, link);
     try {
@@ -232,10 +247,10 @@ const create = async (ctx) => {
     const blankPath = path.join(filesStoragePath, 'dar-blank');
     const now = new Date().getTime();
     try {
-        await cloneArchive(blankPath, path.join(filesStoragePath, `/${researchId}/dar-${now}`));
+        await cloneArchive(blankPath, path.join(filesStoragePath, `/${researchId}/dar_${now}`));
         const rc = new ResearchContent({
-            "_id": `${researchId}-dar-${now}`,
-            "filename": `dar-${now}/manifest.xml`,
+            "_id": `${researchId}_dar_${now}`,
+            "filename": `dar_${now}/manifest.xml`,
             "research": researchId,
             "type": "dar",
             "status": "in-progress"
@@ -295,14 +310,12 @@ const calculateHash = async (ctx) => {
         ctx.body = `"Bad request for /${ctx.params.draftId}"`;
         return;
     }
-    const { link, researchId } = parsed;
+    const { link } = parsed;
 
     const options = { algo: 'md5', encoding: 'hex' };
 
     try {
         const hash = await hashElement(path.join(filesStoragePath, link), options);
-        console.log('Result for folder "' + path.join(filesStoragePath, link) + '" (with options)');
-        console.log(hash.toString(), '\n');
         ctx.status = 200;
         ctx.body = hash;
     } catch (err){
@@ -314,13 +327,8 @@ const calculateHash = async (ctx) => {
 
 const getDraftMeta = async (ctx) => {
     const hashOrId = ctx.params.hashOrId;
-    var query = { _id: hashOrId };
-
-    if (hashOrId.indexOf('-') == -1) {
-        query = { hash: hashOrId };
-    }
     try {
-        const draft = await ResearchContent.findOne(query);
+        const draft = await ResearchContent.findOne({ $or: [ { _id: hashOrId }, { hash: hashOrId } ] });
         ctx.status = 200;
         ctx.body = draft;
     } catch (err){
@@ -343,14 +351,14 @@ const authorizeResearchGroup = async (researchId, username) => {
 }
 
 const parseDraftId = (draftId) => {
-    const parts = draftId.split('-');
+    const parts = draftId.split('_');
 
     if (parts.length != 3) return undefined;
     if (isNaN(parseInt(parts[0]))) return undefined;
 
     return { 
         researchId: parseInt(parts[0]), 
-        link: `/${parts[0]}/${parts[1]}-${parts[2]}`
+        link: `/${parts[0]}/${parts[1]}_${parts[2]}`
     }
 }
 
