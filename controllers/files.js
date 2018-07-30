@@ -8,13 +8,13 @@ import sharp from 'sharp'
 import UserProfile from './../schemas/user'
 import ResearchContent from './../schemas/researchContent'
 
-const filesStoragePath = path.join(__dirname, './../files/');
-const researchStoragePath = (researchId) => { return filesStoragePath + researchId; }
-const researchContentPath = (researchId, filename) => { return researchStoragePath(researchId) + '/' + filename }
+const filesStoragePath = path.join(__dirname, './../files');
+const researchStoragePath = (researchId) => `${filesStoragePath}/${researchId}/files`
+const researchContentPath = (researchId, filename) => `${researchStoragePath(researchId)}/${filename}`
 
 const contentStorage = multer.diskStorage({
     destination: function(req, file, callback) {
-        const dest = researchStoragePath(req.headers['research-id'])
+        const dest = researchStoragePath(`${req.headers['research-id']}`)
         if (!fs.existsSync(dest)) {
             fs.mkdirSync(dest);
         }
@@ -54,7 +54,7 @@ const uploadContent = async(ctx) => {
             }
             // we should use composite key as several research 
             // may upload the same file - for example raw data set
-            const _id = `${researchId}_${md5Hash}`;
+            const _id = `${researchId}_file_${md5Hash}`;
 
             const content = await ResearchContent.findOne({_id: _id});
 
@@ -66,7 +66,10 @@ const uploadContent = async(ctx) => {
                 const rc = new ResearchContent({
                     "_id": _id,
                     "filename": ctx.req.file.filename,
-                    "research": researchId
+                    "research": researchId,
+                    "hash": md5Hash,
+                    "type": 'file',
+                    "status": 'finished'
                 });
                 const savedResearchContent = await rc.save();
                 resolve({ hash: md5Hash })
@@ -89,7 +92,7 @@ const getContent = async function(ctx) {
     const hash = ctx.params.hash;
     const isDownload = ctx.query.download;
 
-    const content = await ResearchContent.findOne({ '_id': `${researchId}_${hash}` });
+    const content = await ResearchContent.findOne({ '_id': `${researchId}_file_${hash}` });
 
     if (content == null) {
         ctx.status = 404;
@@ -101,12 +104,12 @@ const getContent = async function(ctx) {
         ctx.response.set('Content-disposition', 'attachment; filename="' + content.filename + '"');
         ctx.body = fs.createReadStream(researchContentPath(researchId, content.filename));
     } else {
-        await send(ctx, `/files/${researchId}/${content.filename}`);
+        await send(ctx, `/files/${researchId}/files/${content.filename}`);
     }
 }
 
-const avatarsStoragePath = () => { return filesStoragePath + 'avatars'; }
-const avatarPath = (username) => { return avatarsStoragePath() + '/' + username }
+const avatarsStoragePath = () => `${filesStoragePath}/avatars`
+const avatarPath = (username) => `${avatarsStoragePath()}/${username}`
 
 const allowedAvatarMimeTypes = ['image/png', 'image/jpeg']
 const avatarStorage = multer.diskStorage({

@@ -14,7 +14,7 @@ const JoinRequest = new Schema({
     },
     "created": { type: Date, default: Date.now, index: true },
     "updated": { type: Date, default: Date.now, index: true },
-});
+}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('join-requests', JoinRequest);
 

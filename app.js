@@ -61,8 +61,10 @@ app.on('error', function(err, ctx) {
 
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
-router.use('/dar', dar.routes())
-router.use('/api', jwt({ secret: config.jwtSecret }), api.routes())
+router.use('/dar', jwt({ secret: config.jwtSecret }).unless((req) => {
+    return req.method == 'GET';
+}), dar.routes());
+router.use('/api', jwt({ secret: config.jwtSecret }), api.routes());
 
 app.use(router.routes());
 

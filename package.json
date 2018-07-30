@@ -15,7 +15,9 @@
         "bcryptjs": "^2.4.0",
         "concurrently": "^3.5.1",
         "crypto-js": "^3.1.9-1",
+        "folder-hash": "^2.1.1",
         "fs": "0.0.1-security",
+        "fs-extra": "^7.0.0",
         "jwt-decode": "^2.2.0",
         "koa": "^2.5.1",
         "koa-bodyparser": "^4.2.0",
@@ -32,7 +34,8 @@
         "qs": "^6.5.2",
         "sharp": "^0.20.3",
         "substance": "^1.0.0-preview.53",
-        "web3": "^0.18.4"
+        "web3": "^0.18.4",
+        "xml2js": "^0.4.19"
     },
     "devDependencies": {
         "autoprefixer": "^6.7.2",
