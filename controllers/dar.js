@@ -206,6 +206,7 @@ const updateDraftMetaAsync = async (id, archive, link) => {
     if (title) {
         rc.title = title;
     }
+    console.log(hashObj)
     rc.hash = hashObj.hash;
 
     await rc.save()
