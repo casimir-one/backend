@@ -16,7 +16,7 @@ const ResearchContent = new Schema({
     },
     "status": {
         type: String,
-        enum : ['in-progress', 'finished'],
+        enum : ['in-progress', 'proposed', 'completed'],
         required: true
     }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

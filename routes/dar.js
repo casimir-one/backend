@@ -13,6 +13,7 @@ router.get('/drafts/meta/:hashOrId', dar.getDraftMeta)
 
 router.put('/:dar', dar.write)
 router.post('/create/:researchId', dar.create)
+router.post('/propose/:draftId', dar.createDarProposal)
 router.delete('/drafts/:draftId', dar.deleteDraft)
 
 export default router

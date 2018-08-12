@@ -12,7 +12,8 @@ import deipRpc from '@deip/deip-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
-import config from './../config'
+import config from './../config';
+import { sendTransaction } from './../utils/blockchain';
 
 const filesStoragePath = path.join(__dirname, './../files');
 const opts = {}
@@ -34,7 +35,7 @@ const drafts = async (ctx) => {
     const researchId = ctx.params.researchId;
 
     try {
-      const drafts = await ResearchContent.find({'research': researchId, 'status': { $in: ['in-progress'] }});
+      const drafts = await ResearchContent.find({'research': researchId, 'status': { $in: ['in-progress', 'proposed'] }});
       ctx.status = 200;
       ctx.body = drafts;
 
@@ -95,7 +96,6 @@ const readStatic = async (ctx) => {
     
     const { link } = parsed;
 
-
     const stat = util.promisify(fs.stat);
     const filePath = path.join(filesStoragePath, link);
     try {
@@ -125,6 +125,14 @@ const write = async (ctx) => {
     if (!isPermitted) {
         ctx.status = 401;
         ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
+        return;
+    }
+
+    const rc = await ResearchContent.findOne({'_id': draftId })
+
+    if (!rc || rc.status != 'in-progress') {
+        ctx.status = 400;
+        ctx.body = `Research "${draftId}" is locked for updates or does not exist`;
         return;
     }
 
@@ -180,6 +188,73 @@ const write = async (ctx) => {
 }
 
 
+const createDarProposal = async (ctx) => {
+    const jwtUsername = ctx.state.user.username;
+    const tx = ctx.request.body;
+
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    
+    const groupId = payload.research_group_id;
+    const proposal = JSON.parse(payload.data);
+    const hash = proposal.content.slice(4);
+
+    if (!hash || !groupId) {
+        ctx.status = 400;
+        ctx.body = `Bad request: "${tx}"`;
+        return;
+    }
+    
+    const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(jwtUsername);
+
+    if (!rgtList.some(rgt => rgt.research_group_id == groupId)) {
+        ctx.status = 401;
+        ctx.body = `"${jwtUsername}" is not a member of "${groupId}" group`
+        return;
+    }
+
+    try {
+
+        const rc = await ResearchContent.findOne({'hash': hash })
+
+        if (!rc) {
+            ctx.status = 500;
+            ctx.body = `Research content with hash "${hash}" does not exist`
+            return;
+        }
+
+        if (rc.status != 'in-progress') {
+            ctx.status = 409;
+            ctx.body = `Research content with "${rc.title}" is '${rc.status}'`
+            return;
+        }
+
+        rc.status = 'proposed';
+        const updatedRc = await rc.save()
+
+        const result = await sendTransaction(tx)
+        
+        if (result.isSuccess) {
+            ctx.status = 200;
+            ctx.body = updatedRc;
+        } else {
+            await rollback(rc);
+            throw new Error('Could not proceed the transaction');
+        }
+
+    } catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+
+    const rollback = async (rc) => {
+        rc.status = 'proposed';
+        await rc.save()
+    }
+}
+
+
 const updateDraftMetaAsync = async (id, archive, link) => {
 
     const parseTitleAsync = () => new Promise(resolve => {
@@ -211,7 +286,6 @@ const updateDraftMetaAsync = async (id, archive, link) => {
 
     await rc.save()
 }
-
 
 // const clone = async (ctx) => {
 //     const originalPath = path.join(filesStoragePath, ctx.params.dar);
@@ -372,5 +446,6 @@ export default {
     drafts,
     deleteDraft,
     calculateHash,
-    getDraftMeta
+    getDraftMeta,
+    createDarProposal
 }

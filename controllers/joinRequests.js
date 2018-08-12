@@ -57,7 +57,7 @@ const createJoinRequest = async (ctx) => {
 
     if (!isRequestEmitter) {
         ctx.status = 400;
-        ctx.body = `Join request should be sent by "${usename} account owner`
+        ctx.body = `Join request should be sent by "${username} account owner`
         return;
     }
     
