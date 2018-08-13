@@ -249,7 +249,7 @@ const createDarProposal = async (ctx) => {
     }
 
     const rollback = async (rc) => {
-        rc.status = 'proposed';
+        rc.status = 'in-progress';
         await rc.save()
     }
 }
