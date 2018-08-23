@@ -1,16 +1,35 @@
 version: "3.3"
 services:
+    nginx:
+        build: "./nginx/"
+        container_name: "nginx"
+        restart: always
+        volumes:
+            - '/etc/letsencrypt:/ssl:ro'
+        environment:
+            - NODE_ENV=production
+        ports:
+            - '80:80'
+            - '443:443'
+        links:
+            - mongodb
+            - deip-server
+        depends_on:
+            - mongodb
+            - deip-server
+
     deip-server:
         build: .
         container_name: "deip-server"
         restart: always
         environment:
             - NODE_ENV=production
+            - PORT=3000
         ports:
-            - "80:80"
+            - "127.0.0.1:3000:3000"
         links:
             - mongodb
-        volumes: 
+        volumes:
           - filestorage:/usr/src/app/files
         depends_on:
             - mongodb
@@ -25,7 +44,7 @@ services:
         volumes: 
           - mongostorage:/data/db
         ports:
-            - "27017:27017"
+            - "127.0.0.1:27017:27017"
 
 networks:  
   default:
