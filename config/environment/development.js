@@ -5,10 +5,10 @@ module.exports = {
         }
     },
     blockchain: {
-        rpcEndpoint: "http://206.189.175.10",
-        chainId: "9c90084a1527c5ca3e111213ff27a8e79fc7488052b5ce8d73a9a5cc2164081f"
+        rpcEndpoint: "http://127.0.0.1:11011",
+        chainId: "c086d6b8057cf60b01f5a77626ed4412ce960f48d71c1a43d4e6f525f0e01670"
     },
-    host: 'http://localhost:8081',
+    host: 'http://127.0.0.1:8081',
     sigSeed: "quickbrownfoxjumpsoverthelazydog",
     jwtSecret: 'shhhhhhhhhhh!!!'
 };

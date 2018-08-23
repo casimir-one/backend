@@ -18,7 +18,9 @@ import { sendTransaction } from './../utils/blockchain';
 const filesStoragePath = path.join(__dirname, './../files');
 const opts = {}
 
-const list = async (ctx) => {
+// ############ Read actions ############
+
+const listDarArchives = async (ctx) => {
     try {
         const records = await listArchives(filesStoragePath)
         ctx.status = 200;
@@ -31,14 +33,12 @@ const list = async (ctx) => {
 }
 
 
-const drafts = async (ctx) => {
+const listDarDrafts = async (ctx) => {
     const researchId = ctx.params.researchId;
-
     try {
       const drafts = await ResearchContent.find({'research': researchId, 'status': { $in: ['in-progress', 'proposed'] }});
       ctx.status = 200;
       ctx.body = drafts;
-
     } catch(err) {
         console.log(err);
         ctx.status = 500;
@@ -47,19 +47,18 @@ const drafts = async (ctx) => {
 }
 
 
-const read = async (ctx) => {
-    const draftId = ctx.params.dar || 'default'
-    const parsed = parseDraftId(draftId)
-    if (!parsed) {
-        ctx.status = 400;
-        ctx.body = `"Bad request for /${ctx.params.dar}"`;
-        return;
-    }
-    const { link } = parsed;
-    
+const readDarArchive = async (ctx) => {
+    const darId = ctx.params.dar;
+
     try {
- 
-        const archiveDir = path.join(filesStoragePath, link);
+        const rc = await findDarByHashOrId(darId);
+        if (!rc) {
+            ctx.status = 404;
+            ctx.body = `Dar for "${darId}" id is not found`;
+            return;
+        }
+
+        const archiveDir = path.join(filesStoragePath, rc.filename);
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
         const rawArchive = await readArchive(archiveDir, {
@@ -72,11 +71,11 @@ const read = async (ctx) => {
             if (record._binary) {
                 delete record._binary
                 record.encoding = 'url'
-                record.data = `${config['host']}/dar/${draftId}/assets/${record.path}`
+                record.data = `${config['host']}/dar/${darId}/assets/${record.path}`
             }
-      })
-      ctx.status = 200;
-      ctx.body = rawArchive;
+        })
+        ctx.status = 200;
+        ctx.body = rawArchive;
 
     } catch(err) {
         console.log(err);
@@ -85,57 +84,60 @@ const read = async (ctx) => {
     }
 }
 
-const readStatic = async (ctx) => {
-    const draftId = ctx.params.dar;
-    const parsed = parseDraftId(draftId)
-    if (!parsed) {
-        ctx.status = 400;
-        ctx.body = `"Bad request for /${ctx.params.dar}"`;
-        return;
-    }
-    
-    const { link } = parsed;
-
-    const stat = util.promisify(fs.stat);
-    const filePath = path.join(filesStoragePath, link);
+const readDarArchiveStaticFiles = async (ctx) => {
+    const darId = ctx.params.dar;
     try {
+        const rc = await findDarByHashOrId(darId);
+        const stat = util.promisify(fs.stat);
+        const filePath = path.join(filesStoragePath, rc.filename);
         const check = await stat(filePath);
-        await send(ctx, `/files` + `${link}/${ctx.params.file}`);
+        await send(ctx, `/files` + `${rc.filename}/${ctx.params.file}`);
     } catch(err) {
         console.log(err);
-        ctx.status = 404;
+        ctx.status = 500;
         ctx.body = err.message;
     }
 }
 
-const write = async (ctx) => {
+const getDarDraftMeta = async (ctx) => {
+    const hashOrId = ctx.params.hashOrId;
+    try {
+        const draft = await findDarByHashOrId(hashOrId);
+        ctx.status = 200;
+        ctx.body = draft;
+    } catch (err){
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+}
+
+const calculateHash = async (ctx) => {
+    const darId = ctx.params.draftId;
+
+    try {
+        const rc = await findDarByHashOrId(darId);
+        if (!rc) {
+            ctx.status = 404;
+            ctx.body = `Dar for "/${darId}" is not found `;
+            return;
+        }
+        const options = { algo: 'md5', encoding: 'hex' };
+        const hash = await hashElement(path.join(filesStoragePath, rc.filename), options);
+        ctx.status = 200;
+        ctx.body = hash;
+    } catch (err){
+        console.error(err);
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+}
+
+
+// ############ Write actions ############
+
+const updateDarArchive = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
-    const draftId = ctx.params.dar;
-    const parsed = parseDraftId(draftId)
-
-    if (!parsed) {
-        ctx.status = 400;
-        ctx.body = `"Bad request for /${ctx.params.dar}"`;
-        return;
-    }
-
-    const { link, researchId } = parsed;
-    const isPermitted = await authorizeResearchGroup(researchId, jwtUsername)
-
-    if (!isPermitted) {
-        ctx.status = 401;
-        ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
-        return;
-    }
-
-    const rc = await ResearchContent.findOne({'_id': draftId })
-
-    if (!rc || rc.status != 'in-progress') {
-        ctx.status = 400;
-        ctx.body = `Research "${draftId}" is locked for updates or does not exist`;
-        return;
-    }
-
+    const darId = ctx.params.dar;
     const formValidation = () => new Promise(resolve => {
         parseFormdata(ctx.req, (err, formData) => {
             if (err) {
@@ -144,10 +146,22 @@ const write = async (ctx) => {
                 resolve({isSuccess: true, formData: formData})
             }
         })
-    })
-
+    });
 
     try {
+        const rc = await findDarByHashOrId(darId);
+        if (!rc || rc.status != 'in-progress') {
+            ctx.status = 405;
+            ctx.body = `Research "${darId}" is locked for updates or does not exist`;
+            return;
+        }
+
+        const groupId = await authorizeResearchGroup(rc.research, jwtUsername)
+        if (groupId === null) {
+            ctx.status = 401;
+            ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.research}" research`;
+            return;
+        }
 
         const result = await formValidation();
         if (!result.isSuccess) {
@@ -156,10 +170,16 @@ const write = async (ctx) => {
             return;
         }
 
-        const archiveDir = path.join(filesStoragePath, link)
+        const proposal = await lookupProposal(groupId, rc.hash)
+        if (proposal) {
+            ctx.status = 409;
+            ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be modified`
+            return;
+        }
+
+        const archiveDir = path.join(filesStoragePath, rc.filename)
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
-
         const archive = JSON.parse(result.formData.fields._archive)
         
         result.formData.parts.forEach((part) => {
@@ -176,10 +196,10 @@ const write = async (ctx) => {
           versioning: opts.versioning
         })
 
-        await updateDraftMetaAsync(draftId, archive, link);
-
+        await updateDraftMetaAsync(darId, archive, rc.filename);
         ctx.status = 200;
         ctx.body = version;
+
     } catch (err) {
         console.log(err);
         ctx.status = 500;
@@ -194,97 +214,109 @@ const createDarProposal = async (ctx) => {
 
     const operation = tx['operations'][0];
     const payload = operation[1];
-    
-    const groupId = payload.research_group_id;
+    console.log(payload)
+
     const proposal = JSON.parse(payload.data);
     const hash = proposal.content.slice(4);
+    console.log(proposal)
+    const researchId = proposal.research_id;
+    const opGroupId = payload.research_group_id;
 
-    if (!hash || !groupId) {
+    if (!hash || !opGroupId) {
         ctx.status = 400;
-        ctx.body = `Bad request: "${tx}"`;
-        return;
-    }
-    
-    const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(jwtUsername);
-
-    if (!rgtList.some(rgt => rgt.research_group_id == groupId)) {
-        ctx.status = 401;
-        ctx.body = `"${jwtUsername}" is not a member of "${groupId}" group`
+        ctx.body = `Mallformed operation: "${operation}"`;
         return;
     }
 
     try {
-
-        const rc = await ResearchContent.findOne({'hash': hash })
-
-        if (!rc) {
-            ctx.status = 500;
-            ctx.body = `Research content with hash "${hash}" does not exist`
+        const groupId = await authorizeResearchGroup(researchId, jwtUsername);
+        if (groupId === null || groupId !== parseInt(opGroupId)) {
+            ctx.status = 401;
+            ctx.body = `"${jwtUsername}" is not a member of "${groupId}" group`
             return;
         }
 
+        const rc = await findDarByHashOrId(hash);
+        if (!rc) {
+            ctx.status = 404;
+            ctx.body = `Research content with hash "${hash}" does not exist`
+            return;
+        }
         if (rc.status != 'in-progress') {
+            ctx.status = 405;
+            ctx.body = `Research content "${rc.title}" has '${rc.status}' status`
+            return;
+        }
+
+        const proposal = await lookupProposal(groupId, hash)
+        if (proposal) {
             ctx.status = 409;
-            ctx.body = `Research content with "${rc.title}" is '${rc.status}'`
+            ctx.body = `Proposal for content with hash '${hash}' already exists`
             return;
         }
 
         rc.status = 'proposed';
         const updatedRc = await rc.save()
-
         const result = await sendTransaction(tx)
-        
         if (result.isSuccess) {
             ctx.status = 200;
             ctx.body = updatedRc;
         } else {
-            await rollback(rc);
-            throw new Error('Could not proceed the transaction');
+            throw new Error(`Could not proceed the transaction: ${tx}`);
         }
 
     } catch(err) {
         console.log(err);
+        await rollback(hash);
         ctx.status = 500;
         ctx.body = err.message;
     }
 
-    const rollback = async (rc) => {
+    const rollback = async (hash) => {
+        const rc = await findDarByHashOrId(hash)
         rc.status = 'in-progress';
         await rc.save()
     }
 }
 
 
-const updateDraftMetaAsync = async (id, archive, link) => {
+const unlockDarDraft = async (ctx) => {
+    const jwtUsername = ctx.state.user.username;
+    const darId = ctx.params.draftId;
+    
+    try {
+        const rc = await findDarByHashOrId(darId);
+        if (!rc || (rc.status != 'proposed' && rc.status != 'completed')) {
+            ctx.status = 405;
+            ctx.body = `Proposed "${darId}" content archive is not found`;
+            return;
+        }
 
-    const parseTitleAsync = () => new Promise(resolve => {
-        xml2js.parseString(archive.resources['manuscript.xml'].data, (err, result) => {
-            if (err) {
-                resolve(null)
-                return;
-            }
-            try {
-                const title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0]['_'];
-                resolve(title)
-            } catch(err) {
-                resolve(null)
-            }
-        })
-    })
+        const groupId = await authorizeResearchGroup(rc.research, jwtUsername)
+        if (groupId === null) {
+            ctx.status = 401;
+            ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.research}" research`;
+            return;
+        }
 
-    const title = await parseTitleAsync();
+        // if there is a proposal for this content (no matter it is approved or still in voting progress)
+        // we must respond with an error as blockchain hashed data should not be modified
+        const proposal = await lookupProposal(groupId, rc.hash)
+        if (proposal) {
+            ctx.status = 409;
+            ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be modified`;
+            return;
+        }
 
-    const options = { algo: 'md5', encoding: 'hex' };
-    const hashObj = await hashElement(path.join(filesStoragePath, link), options);
-    const rc = await ResearchContent.findOne({'_id': id})
-
-    if (title) {
-        rc.title = title;
+        rc.status = 'in-progress';
+        const updatedRc = rc.save();
+        ctx.status = 200;
+        ctx.body = updatedRc;
+    } catch(err) {
+        console.log(err)
+        ctx.status = 500;
+        ctx.body = err.message;
     }
-    console.log(hashObj)
-    rc.hash = hashObj.hash;
-
-    await rc.save()
 }
 
 // const clone = async (ctx) => {
@@ -301,42 +333,43 @@ const updateDraftMetaAsync = async (id, archive, link) => {
 //     }
 // }
 
-const create = async (ctx) => {
+const createDarArchive = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
     const researchId = parseInt(ctx.params.researchId);
 
     if (isNaN(researchId)) {
         ctx.status = 400;
-        ctx.body = `"${ctx.params.researchId}" is invalid research id`;
+        ctx.body = `"${researchId}" is invalid research id`;
         return;
     }
 
-    const isPermitted = await authorizeResearchGroup(researchId, jwtUsername)
-
-    if (!isPermitted) {
-        ctx.status = 401;
-        ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
-        return;
-    }
-
-    const blankPath = path.join(filesStoragePath, 'dar-blank');
-    const now = new Date().getTime();
     try {
-        await cloneArchive(blankPath, path.join(filesStoragePath, `/${researchId}/dar_${now}`));
+        const groupId = await authorizeResearchGroup(researchId, jwtUsername)
+        if (groupId === null) {
+            ctx.status = 401;
+            ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
+            return;
+        }
+    
+        const blankPath = path.join(filesStoragePath, 'dar-blank');
+        const now = new Date().getTime();
+    
+        const darPath = `/${researchId}/dar_${now}`;
+        await cloneArchive(blankPath, path.join(filesStoragePath, darPath));
         const rc = new ResearchContent({
             "_id": `${researchId}_dar_${now}`,
-            "filename": `dar_${now}/manifest.xml`,
+            "filename": darPath,
             "research": researchId,
             "type": "dar",
             "status": "in-progress"
         });
+    
         const savedDraft = await rc.save();
-
         ctx.status = 200;
         ctx.body = {
             draft: savedDraft
         };
-
+    
     } catch (err) {
         console.log(err);
         ctx.status = 500;
@@ -344,108 +377,107 @@ const create = async (ctx) => {
     }
 }
 
-const deleteDraft = async (ctx) => {
+const deleteDarDraft = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
-    const draftId = ctx.params.draftId;
-    const parsed = parseDraftId(draftId)
-
-    if (!parsed) {
-        ctx.status = 400;
-        ctx.body = `"Bad request for /${ctx.params.draftId}"`;
-        return;
-    }
-
-    const { link, researchId } = parsed;
-    const isPermitted = await authorizeResearchGroup(researchId, jwtUsername)
-
-    if (!isPermitted){
-        ctx.status = 401;
-        ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
-        return;
-    }
+    const darId = ctx.params.draftId;
 
     try {
+        const rc = await findDarByHashOrId(darId);
+        if (!rc) {
+            ctx.status = 404;
+            ctx.body = `Dar for "${darId}" id is not found`;
+            return;
+        }
 
-        await ResearchContent.remove({ _id: draftId });
-        await fsExtra.remove(path.join(filesStoragePath, link));
+        const groupId = await authorizeResearchGroup(rc.research, jwtUsername)
+        if (groupId === null) {
+            ctx.status = 401;
+            ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
+            return;
+        }
+
+        // if there is a proposal for this content (no matter is it approved or still in voting progress)
+        // we must respond with an error as blockchain hashed data should not be modified
+        const proposal = await lookupProposal(groupId, rc.hash)
+        if (proposal) {
+            ctx.status = 409;
+            ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be deleted`;
+            return;
+        }
+
+        await ResearchContent.remove({ _id: darId });
+        await fsExtra.remove(path.join(filesStoragePath, rc.filename));
         ctx.status = 201;
-
     } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
-}
-
-const calculateHash = async (ctx) => {
-    const draftId = ctx.params.draftId;
-    const parsed = parseDraftId(draftId)
-    if (!parsed) {
-        ctx.status = 400;
-        ctx.body = `"Bad request for /${ctx.params.draftId}"`;
-        return;
-    }
-    const { link } = parsed;
-
-    const options = { algo: 'md5', encoding: 'hex' };
-
-    try {
-        const hash = await hashElement(path.join(filesStoragePath, link), options);
-        ctx.status = 200;
-        ctx.body = hash;
-    } catch (err){
-        console.error('hashing failed:', error);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
-}
-
-const getDraftMeta = async (ctx) => {
-    const hashOrId = ctx.params.hashOrId;
-    try {
-        const draft = await ResearchContent.findOne({ $or: [ { _id: hashOrId }, { hash: hashOrId } ] });
-        ctx.status = 200;
-        ctx.body = draft;
-    } catch (err){
         ctx.status = 500;
         ctx.body = err.message;
     }
 }
 
 const authorizeResearchGroup = async (researchId, username) => {
-
     const research = await deipRpc.api.getResearchByIdAsync(researchId);
-    if (!research) return false;
-    
+    if (!research) return null;
     const groupId = research.research_group_id;
     const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(username);
-
-    if (!rgtList.some(rgt => rgt.research_group_id == groupId)) return false;
-
-    return true;
+    if (!rgtList.some(rgt => rgt.research_group_id == groupId)) return null;
+    return groupId;
 }
 
-const parseDraftId = (draftId) => {
-    const parts = draftId.split('_');
+const findDarByHashOrId = async (hashOrId) => {
+    const rc = await ResearchContent.findOne({ $or: [ { _id: hashOrId }, { hash: hashOrId } ] });
+    return rc;
+}
 
-    if (parts.length != 3) return undefined;
-    if (isNaN(parseInt(parts[0]))) return undefined;
+const lookupProposal = async (groupId, hash) => {
+    const proposals = await deipRpc.api.getProposalsByResearchGroupIdAsync(groupId);
+    const content = proposals.filter(p => p.action == 11).find(p => {
+        const data = JSON.parse(p.data);
+        return data.content == `dar:${hash}`;
+    });
+    return content;
+}
 
-    return { 
-        researchId: parseInt(parts[0]), 
-        link: `/${parts[0]}/${parts[1]}_${parts[2]}`
+const updateDraftMetaAsync = async (id, archive, link) => {
+    const parseTitleAsync = () => new Promise(resolve => {
+        xml2js.parseString(archive.resources['manuscript.xml'].data, (err, result) => {
+            if (err) {
+                resolve(null)
+                return;
+            }
+            try {
+                const title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0]['_'];
+                resolve(title)
+            } catch(err) {
+                resolve(null)
+            }
+        })
+    })
+
+    const title = await parseTitleAsync();
+    const options = { algo: 'md5', encoding: 'hex' };
+    const hashObj = await hashElement(path.join(filesStoragePath, link), options);
+    const rc = await ResearchContent.findOne({'_id': id})
+
+    if (title) {
+        rc.title = title;
     }
+    console.log(hashObj)
+    rc.hash = hashObj.hash;
+    await rc.save()
 }
 
 export default {
-    list,
-    read,
-    readStatic,
-    write,
-    create,
-    drafts,
-    deleteDraft,
+    listDarArchives,
+    readDarArchive,
+    readDarArchiveStaticFiles,
+    createDarArchive,
+    updateDarArchive,
+
+    listDarDrafts,
+    deleteDarDraft,
     calculateHash,
-    getDraftMeta,
-    createDarProposal
+    getDarDraftMeta,
+    createDarProposal,
+    unlockDarDraft
 }
