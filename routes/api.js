@@ -6,7 +6,6 @@ import joinRequests from '../controllers/joinRequests'
 
 const router = koa_router()
 
-router.post('/files/upload-content', files.uploadContent)
 router.post('/files/upload-avatar', files.uploadAvatar)
 
 router.get('/user/profile/:username', users.getUserProfile)

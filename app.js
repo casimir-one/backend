@@ -4,7 +4,7 @@ import logger from 'koa-logger';
 import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
-import dar from './routes/dar.js';
+import content from './routes/content.js';
 import jwt from 'koa-jwt';
 import path from 'path';
 import serve from 'koa-static';
@@ -61,9 +61,9 @@ app.on('error', function(err, ctx) {
 
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
-router.use('/dar', jwt({ secret: config.jwtSecret }).unless((req) => {
+router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
     return req.method == 'GET';
-}), dar.routes());
+}), content.routes());
 router.use('/api', jwt({ secret: config.jwtSecret }), api.routes());
 
 app.use(router.routes());

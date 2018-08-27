@@ -6,7 +6,8 @@ const Schema = mongoose.Schema;
 const ResearchContent = new Schema({
     "_id": { type: String },
     "filename": { type: String, required: true },
-    "research": { type: String, required: true },
+    "researchId": { type: Number, required: true },
+    "researchGroupId": { type: Number, required: true },
     "title": { type: String },
     "hash": {type: String, index: true },
     "type": {

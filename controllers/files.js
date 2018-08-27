@@ -1,113 +1,11 @@
 import multer from 'koa-multer';
-import md5File from 'md5-file';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import send from 'koa-send';
 import sharp from 'sharp'
 import UserProfile from './../schemas/user'
-import ResearchContent from './../schemas/researchContent'
 
 const filesStoragePath = path.join(__dirname, './../files');
-const researchStoragePath = (researchId) => `${filesStoragePath}/${researchId}/files`
-const researchContentPath = (researchId, filename) => `${researchStoragePath(researchId)}/${filename}`
-
-const contentStorage = multer.diskStorage({
-    destination: function(req, file, callback) {
-        const dest = researchStoragePath(`${req.headers['research-id']}`)
-        if (!fs.existsSync(dest)) {
-            fs.mkdirSync(dest);
-        }
-        callback(null, dest)
-    },
-    filename: function(req, file, callback) {
-        callback(null, (new Date).getTime() + '_' + file.originalname);
-    }
-})
-
-const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
-const contentUploader = multer({
-    storage: contentStorage,
-    fileFilter: function(req, file, callback) {
-        if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-            return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
-        }
-        callback(null, true);
-    }
-})
-
-const uploadContent = async(ctx) => {
-
-    const researchId = ctx.request.header['research-id'];
-    if (!researchId || isNaN(parseInt(researchId))) {
-        ctx.status = 400;
-        ctx.body = { error: `"Research-Id" header is required` };
-        return;
-    }
-
-    const researchContent = contentUploader.single('research-content');
-    const result = await researchContent(ctx, () => new Promise((resolve) => {
-
-        md5File(researchContentPath(researchId, ctx.req.file.filename), async(err, md5Hash) => {
-            if (err) {
-                resolve({ error: err.message })
-            }
-            // we should use composite key as several research 
-            // may upload the same file - for example raw data set
-            const _id = `${researchId}_file_${md5Hash}`;
-
-            const content = await ResearchContent.findOne({_id: _id});
-
-            if (content != null) {
-                console.log(`File with ${md5Hash} hash already exists! Removing uploaded file...`);
-                fs.unlinkSync(researchContentPath(researchId, ctx.req.file.filename));
-                resolve({ hash: md5Hash })
-            } else {
-                const rc = new ResearchContent({
-                    "_id": _id,
-                    "filename": ctx.req.file.filename,
-                    "research": researchId,
-                    "hash": md5Hash,
-                    "type": 'file',
-                    "status": 'finished'
-                });
-                const savedResearchContent = await rc.save();
-                resolve({ hash: md5Hash })
-            }
-        })
-    }));
-
-    if (result.hash) {
-        ctx.status = 200;
-    } else {
-        ctx.status = 500;
-    }
-
-    ctx.body = result;
-}
-
-
-const getContent = async function(ctx) {
-    const researchId = ctx.params.researchId;
-    const hash = ctx.params.hash;
-    const isDownload = ctx.query.download;
-
-    const content = await ResearchContent.findOne({ '_id': `${researchId}_file_${hash}` });
-
-    if (content == null) {
-        ctx.status = 404;
-        ctx.body = `Content "${hash}" is not found`
-        return;
-    }
-
-    if (isDownload) {
-        ctx.response.set('Content-disposition', 'attachment; filename="' + content.filename + '"');
-        ctx.body = fs.createReadStream(researchContentPath(researchId, content.filename));
-    } else {
-        await send(ctx, `/files/${researchId}/files/${content.filename}`);
-    }
-}
-
 const avatarsStoragePath = () => `${filesStoragePath}/avatars`
 const avatarPath = (username) => `${avatarsStoragePath()}/${username}`
 
@@ -213,8 +111,6 @@ const getAvatar = async (ctx) => {
 }
 
 export default {
-    uploadContent,
-    getContent,
     uploadAvatar,
     getAvatar
 }

@@ -6,7 +6,7 @@ module.exports = {
     },
     blockchain: {
         rpcEndpoint: "https://dev-full-node.deip.world",
-        chainId: "9c90084a1527c5ca3e111213ff27a8e79fc7488052b5ce8d73a9a5cc2164081f"
+        chainId: "51469c2613aecd065d28822862fa1bae2fe81bc029df884f98ccef6bbe36fea8"
     },
     host: 'https://dev-server.deip.world',
     sigSeed: "quickbrownfoxjumpsoverthelazydog",
