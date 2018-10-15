@@ -1,5 +1,12 @@
 import ExpertiseClaim from './../schemas/expertiseClaim';
 
+const getExpertiseClaims = async (ctx) => {
+    const status = ctx.query.status;
+    const expertises = await ExpertiseClaim.find(status ? {'status': status} : {})
+    ctx.status = 200;
+    ctx.body = expertises;
+}
+
 const getExpertiseClaimsByUser = async (ctx) => {
     const username = ctx.params.username;
     const expertises = await ExpertiseClaim.find({'username': username})
@@ -62,6 +69,7 @@ const createExpertiseClaim = async (ctx) => {
 }
 
 export default {
+    getExpertiseClaims,
     getExpertiseClaimsByUser,
     getExpertiseClaimsByDiscipline,
     getExpertiseClaimsByUserAndDiscipline,

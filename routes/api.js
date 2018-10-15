@@ -20,6 +20,7 @@ router.get('/join-requests/group/:groupId', joinRequests.getJoinRequestsByGroup)
 router.get('/join-requests/user/:username', joinRequests.getJoinRequestsByUser)
 
 router.post('/expertise-claims', expertiseClaims.createExpertiseClaim)
+router.get('/expertise-claims', expertiseClaims.getExpertiseClaims)
 router.get('/expertise-claims/user/:username', expertiseClaims.getExpertiseClaimsByUser)
 router.get('/expertise-claims/discipline/:disciplineId', expertiseClaims.getExpertiseClaimsByDiscipline)
 router.get('/expertise-claims/user/:username/discipline/:disciplineId', expertiseClaims.getExpertiseClaimsByUserAndDiscipline)
