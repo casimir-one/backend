@@ -1,4 +1,5 @@
 import ExpertiseClaim from './../schemas/expertiseClaim';
+import deipRpc from '@deip/deip-rpc-client';
 
 const getExpertiseClaims = async (ctx) => {
     const status = ctx.query.status;
@@ -44,10 +45,17 @@ const createExpertiseClaim = async (ctx) => {
     const coverLetter = data.coverLetter;
     if (!disciplineId || !coverLetter) {
         ctx.status = 404;
-        ctx.body = `You must specify discipline you want to claim and provide sgort cover letter`
+        ctx.body = `You must specify discipline you want to claim and provide short cover letter`
         return;
     }
-    
+
+    const userExpertise = await deipRpc.api.getExpertTokensByAccountNameAsync(username);
+    if (userExpertise.some(e => e.discipline_id == disciplineId)) {
+        ctx.status = 405;
+        ctx.body = `Expert token in ${disciplineId} discipline for "${username}" exists already`
+        return;
+    }
+
     const exists = await ExpertiseClaim.count({'username': username, 'disciplineId': disciplineId}) != 0;
     if (exists) {
         ctx.status = 409
