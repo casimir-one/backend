@@ -412,7 +412,7 @@ const updateDraftMetaAsync = async (id, archive, link) => {
                 return;
             }
             try {
-                const title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0]['_'];
+                const title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0];
                 resolve(title)
             } catch(err) {
                 resolve(null)
