@@ -19,7 +19,8 @@ const ResearchContent = new Schema({
         type: String,
         enum : ['in-progress', 'proposed', 'finished'],
         required: true
-    }
+    },
+    "authors": [{ type: String }],
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research-content', ResearchContent);

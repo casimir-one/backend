@@ -343,7 +343,8 @@ const createDarArchive = async (ctx) => {
             "researchId": researchId,
             "researchGroupId": research.research_group_id,
             "type": "dar",
-            "status": "in-progress"
+            "status": "in-progress",
+            "authors": []
         });
     
         const savedDraft = await rc.save();
@@ -411,23 +412,38 @@ const updateDraftMetaAsync = async (id, archive, link) => {
                 resolve(null)
                 return;
             }
+            let title = null;
+            let authors = [];
             try {
-                const title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0]['_'];
-                resolve(title)
-            } catch(err) {
-                resolve(null)
-            }
+                title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0];
+            } catch(err) {}
+            try {
+                authors = result['article']['front'][0]['article-meta'][0]['contrib-group'][0]['contrib']
+                    .filter(p => p['string-name']).map(p => p['string-name'][0]['_'])
+                    .filter(username => username != null && username != '');
+            } catch(err) {}
+
+            resolve({ title, authors })
         })
     })
 
-    const title = await parseTitleAsync();
+    const { title, authors } = await parseTitleAsync();
+    const rc = await ResearchContent.findOne({ '_id': id })
+
+    const accounts = [];
+    for (let i = 0; i < authors.length; i++) {
+        const username = authors[i];
+        const hasRgt = await authorizeResearchGroup(rc.researchGroupId, username)
+        if (hasRgt) {
+            accounts.push(username)
+        }
+    }
+
+    rc.title = title || '';
+    rc.authors = accounts;
+    
     const options = { algo: 'md5', encoding: 'hex' };
     const hashObj = await hashElement(path.join(filesStoragePath, link), options);
-    const rc = await ResearchContent.findOne({'_id': id})
-
-    if (title) {
-        rc.title = title;
-    }
     console.log(hashObj)
     rc.hash = hashObj.hash;
     await rc.save()
@@ -534,7 +550,8 @@ const uploadFileContent = async(ctx) => {
                     "researchGroupId": research.research_group_id,
                     "hash": hashObj.hash,
                     "type": 'file',
-                    "status": 'in-progress'
+                    "status": 'in-progress',
+                    "authors": [jwtUsername]
                 });
                 const savedRc = await rc.save();
                 ctx.status = 200;
