@@ -6,7 +6,7 @@ module.exports = {
     },
     blockchain: {
         rpcEndpoint: "http://127.0.0.1:8090",
-        chainId: "9c913028fef5d756112d2788b7eb019d0644ed3cb61ff113f393ee96b3d0a25f"
+        chainId: "04ac2e56f7d9738a6742eec9f7f014db30a61276cf1cf89add3fb4a140fba1d1"
     },
     host: 'http://127.0.0.1:8081',
     sigSeed: "quickbrownfoxjumpsoverthelazydog",
