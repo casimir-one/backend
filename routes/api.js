@@ -3,6 +3,7 @@ import files from '../controllers/files'
 import users from '../controllers/users'
 import joinRequests from '../controllers/joinRequests'
 import expertiseClaims from '../controllers/expertiseClaims'
+import search from '../controllers/search'
 
 
 const router = koa_router()
@@ -24,5 +25,7 @@ router.get('/expertise-claims', expertiseClaims.getExpertiseClaims)
 router.get('/expertise-claims/user/:username', expertiseClaims.getExpertiseClaimsByUser)
 router.get('/expertise-claims/discipline/:disciplineId', expertiseClaims.getExpertiseClaimsByDiscipline)
 router.get('/expertise-claims/user/:username/discipline/:disciplineId', expertiseClaims.getExpertiseClaimsByUserAndDiscipline)
+
+router.get('/search/contents/all', search.getAllResearchContents)
 
 export default router

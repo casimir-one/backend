@@ -17,6 +17,7 @@ import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
 import { findContentByHashOrId, lookupProposal, proposalIsNotExpired } from './../services/researchContent'
 import { authorizeResearchGroup } from './../services/auth'
+import url from 'url';
 
 const filesStoragePath = path.join(__dirname, './../files');
 const opts = {}
@@ -235,6 +236,8 @@ const createContentProposal = async (ctx) => {
         }
 
         rc.status = 'proposed';
+        rc.authors = proposal.authors;
+        rc.references = proposal.references;
         const updatedRc = await rc.save()
         const result = await sendTransaction(tx)
         if (result.isSuccess) {
@@ -344,7 +347,8 @@ const createDarArchive = async (ctx) => {
             "researchGroupId": research.research_group_id,
             "type": "dar",
             "status": "in-progress",
-            "authors": []
+            "authors": [],
+            "references": []
         });
     
         const savedDraft = await rc.save();
@@ -406,7 +410,7 @@ const deleteContentDraft = async (ctx) => {
 }
 
 const updateDraftMetaAsync = async (id, archive, link) => {
-    const parseTitleAsync = () => new Promise(resolve => {
+    const parseDraftMetaAsync = () => new Promise(resolve => {
         xml2js.parseString(archive.resources['manuscript.xml'].data, (err, result) => {
             if (err) {
                 resolve(null)
@@ -414,6 +418,7 @@ const updateDraftMetaAsync = async (id, archive, link) => {
             }
             let title = null;
             let authors = [];
+            let references = [];
             try {
                 title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0];
             } catch(err) {}
@@ -422,12 +427,15 @@ const updateDraftMetaAsync = async (id, archive, link) => {
                     .filter(p => p['string-name']).map(p => p['string-name'][0]['_'])
                     .filter(username => username != null && username != '');
             } catch(err) {}
+            try {
+                references = parseDeipReferences(result['article']['back'][0]['ref-list'][0]['ref'])
+            } catch(err) {}
 
-            resolve({ title, authors })
+            resolve({ title, authors, references })
         })
     })
 
-    const { title, authors } = await parseTitleAsync();
+    const { title, authors, references } = await parseDraftMetaAsync();
     const rc = await ResearchContent.findOne({ '_id': id })
 
     const accounts = [];
@@ -439,8 +447,18 @@ const updateDraftMetaAsync = async (id, archive, link) => {
         }
     }
 
+    const contentRefs = [];
+    for (let i = 0; i < references.length; i++) {
+        const ref = references[i];
+        const contentRef = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(ref.researchGroupPermlink, ref.researchPermlink, ref.researchContentPermlink);
+        if (contentRef.research_id != rc.researchId) {
+            contentRefs.push(contentRef.id);
+        }
+    }
+
     rc.title = title || '';
     rc.authors = accounts;
+    rc.references = contentRefs;
     
     const options = { algo: 'md5', encoding: 'hex' };
     const hashObj = await hashElement(path.join(filesStoragePath, link), options);
@@ -449,6 +467,35 @@ const updateDraftMetaAsync = async (id, archive, link) => {
     await rc.save()
 }
 
+const parseDeipReferences = (refList) => {
+    const webpageRefs = refList.filter(ref => {
+        try {
+            return ref['element-citation'][0]['$']['publication-type'] === 'webpage'
+        } catch(err) {
+            return false;
+        }
+    }).map(ref => {
+        return ref['element-citation'][0];
+    });
+    const deipRefs = webpageRefs.map(wref => {
+        try {
+          const parsedUrl = url.parse(wref.uri[0]);
+          if (parsedUrl.host === config.uiHost) {
+            const segments = parsedUrl.hash.split('/');
+            const researchGroupPermlink = segments[1];
+            const researchPermlink = segments[3];
+            const researchContentPermlink = segments[4];
+            return { researchGroupPermlink, researchPermlink, researchContentPermlink }
+          }
+        } catch(err) {
+            console.log(err)
+        }
+        return null;
+        })
+      .filter(r => r != null);
+
+    return deipRefs;
+};
 
 // ############# files ######################
 const researchStoragePath = (researchId) => `${filesStoragePath}/${researchId}/files`
@@ -551,7 +598,8 @@ const uploadFileContent = async(ctx) => {
                     "hash": hashObj.hash,
                     "type": 'file',
                     "status": 'in-progress',
-                    "authors": [jwtUsername]
+                    "authors": [jwtUsername],
+                    "references": []
                 });
                 const savedRc = await rc.save();
                 ctx.status = 200;

@@ -21,6 +21,7 @@ const ResearchContent = new Schema({
         required: true
     },
     "authors": [{ type: String }],
+    "references": [{ type: Number }],
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research-content', ResearchContent);

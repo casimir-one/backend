@@ -9,6 +9,7 @@ module.exports = {
         chainId: "04ac2e56f7d9738a6742eec9f7f014db30a61276cf1cf89add3fb4a140fba1d1"
     },
     host: 'http://127.0.0.1:8081',
+    uiHost: 'localhost:8080',
     sigSeed: "quickbrownfoxjumpsoverthelazydog",
     jwtSecret: 'shhhhhhhhhhh!!!'
 };

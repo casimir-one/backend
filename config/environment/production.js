@@ -9,6 +9,7 @@ module.exports = {
         chainId: "04ac2e56f7d9738a6742eec9f7f014db30a61276cf1cf89add3fb4a140fba1d1"
     },
     host: 'https://dev-server.deip.world',
+    uiHost: 'beta.deip.world',
     sigSeed: "quickbrownfoxjumpsoverthelazydog",
     jwtSecret: 'shhhhhhhhhhh!!!'
 };
