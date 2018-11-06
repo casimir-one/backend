@@ -1,9 +1,10 @@
-import jwt from 'jsonwebtoken'
-import bcrypt from 'bcryptjs'
-import config from './../config'
+import jwt from 'jsonwebtoken';
+import bcrypt from 'bcryptjs';
+import config from './../config';
 import deipRpc from '@deip/deip-rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
+import UserProfile from './../schemas/user';
 
 function Encodeuint8arr(seed) {
     return new TextEncoder("utf-8").encode(seed);
@@ -58,7 +59,98 @@ const signIn = async function(ctx) {
     }
 }
 
+const signUp = async function(ctx) {
+    const data = ctx.request.body;
+    const username = data.username;
+    const email = data.email;
+    const firstName = data.firstName;
+    const lastName = data.lastName;
+    const pubKey = data.pubKey;
+
+    if (!username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
+        ctx.status = 400;
+        ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required`;
+        return;
+    }
+
+    try {
+
+        const accounts = await deipRpc.api.getAccountsAsync([username])
+        if (accounts[0]) {
+            ctx.status = 409;
+            ctx.body = `Account '${username}' already exists`;
+            return;
+        }
+    
+        const owner = {
+            weight_threshold: 1,
+            account_auths: [],
+            key_auths: [[pubKey, 1]]
+        };
+    
+        const result = await createAccount(username, pubKey, owner);
+        if (!result.isSuccess) {
+            ctx.status = 500;
+            ctx.body = result.result;
+            return;
+        }
+    
+        const model = new UserProfile({
+            _id: username,
+            email: email,
+            firstName: firstName,
+            lastName: lastName,
+        });
+    
+        const profile = await model.save();
+        ctx.status = 200;
+        ctx.body = profile;
+
+    } catch (err) {
+        console.error(err);
+        ctx.status = 500;
+        ctx.body = err;
+    }
+}
+
+
+async function createAccount(username, pubKey, owner) {
+    const accountsCreator = config.blockchain.accountsCreator;
+
+    let promise = new Promise((resolve) => {
+        deipRpc.api.getConfig((err, config) => {
+            if (err) {
+                console.log(err, config);
+                resolve({isSuccess:false, result: err})
+            }
+
+            deipRpc.api.getChainProperties((err, chainProps) => {
+                if (err) {
+                    console.log(err, chainProps);
+                    resolve({isSuccess:false, result: err})
+                }
+
+                // const ratio = config['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
+                // var fee = Asset.from(chainProps.account_creation_fee).multiply(ratio);
+                const jsonMetadata = '';
+                deipRpc.broadcast.accountCreate(accountsCreator.wif, accountsCreator.fee, 
+                            accountsCreator.username, username, owner, owner, owner, 
+                            pubKey, jsonMetadata, (err, result) => {
+
+                    if (err) {
+                        console.log(err, chainProps);
+                        resolve({isSuccess:false, result: err})
+                    }
+                    resolve({isSuccess:true, result: result})
+                });
+            });
+        });
+    });
+    return await promise;
+}
+
 
 export default {
-    signIn
+    signIn,
+    signUp
 }
