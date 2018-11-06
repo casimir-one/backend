@@ -4,6 +4,7 @@ import users from '../controllers/users'
 import joinRequests from '../controllers/joinRequests'
 import expertiseClaims from '../controllers/expertiseClaims'
 import search from '../controllers/search'
+import notifications from '../controllers/notifications'
 
 
 const router = koa_router()
@@ -27,5 +28,10 @@ router.get('/expertise-claims/discipline/:disciplineId', expertiseClaims.getExpe
 router.get('/expertise-claims/user/:username/discipline/:disciplineId', expertiseClaims.getExpertiseClaimsByUserAndDiscipline)
 
 router.get('/search/contents/all', search.getAllResearchContents)
+
+router.post('/notifications/group/:groupId', notifications.createResearchGroupNotification)
+router.get('/notifications/user/:username', notifications.getNotificationsByUser)
+router.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
+router.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
 
 export default router
