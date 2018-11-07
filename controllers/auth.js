@@ -94,15 +94,18 @@ const signUp = async function(ctx) {
             ctx.body = result.result;
             return;
         }
-    
-        const model = new UserProfile({
-            _id: username,
-            email: email,
-            firstName: firstName,
-            lastName: lastName,
-        });
-    
-        const profile = await model.save();
+
+        let profile = await UserProfile.findOne({'_id': username});
+        if (!profile) {
+            const model = new UserProfile({
+                _id: username,
+                email: email,
+                firstName: firstName,
+                lastName: lastName,
+            });
+            profile = await model.save();
+        }
+        
         ctx.status = 200;
         ctx.body = profile;
 
