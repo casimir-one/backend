@@ -6,7 +6,7 @@ module.exports = {
     },
     blockchain: {
         rpcEndpoint: "http://127.0.0.1:8090",
-        chainId: "04ac2e56f7d9738a6742eec9f7f014db30a61276cf1cf89add3fb4a140fba1d1",
+        chainId: "02775d4d51472e637b1552939195fa713112da42e0f25c16974ffc63aa02457f",
         accountsCreator : {
             username: "alice",
             wif: "5JGoCjh27sfuCzp7kQme5yMipaQtgdVLPiZPr9zaCwJVrSrbGYx",
