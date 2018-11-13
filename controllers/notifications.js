@@ -2,66 +2,6 @@ import Notification from './../schemas/notification';
 import UserProfile from './../schemas/user';
 import deipRpc from '@deip/deip-rpc-client';
 
-const createResearchGroupNotification = async (ctx) => {
-    const groupId = parseInt(ctx.params.groupId);
-    const jwtUsername = ctx.state.user.username;
-    const body = ctx.request.body;
-    const type = body.type;
-    const meta = body.meta;
-
-    if (!isNotificationTypeValid(type) || !meta) {
-        ctx.status = 400;
-        ctx.body = `Provide a valid notification type and meta info`;
-        return;
-    }
-
-    try {
-
-        const group = await deipRpc.api.getResearchGroupByIdAsync(groupId);
-        if (!group || group.is_personal) {
-            ctx.status = 201;
-            return;
-        }
-
-        // const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(jwtUsername);
-        const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(groupId);
-        if (!rgtList.some(rgt => rgt.owner == jwtUsername)) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not a member of "${groupId}" group;`
-            return;
-        }
-
-        const notifications = [];
-        for (let i = 0; i < rgtList.length; i++) {
-            const rgt = rgtList[i];
-
-            if (type == 'proposal') {
-
-                const creatorProfile = await UserProfile.findOne({'_id': meta.creator});
-                meta.creatorProfile = creatorProfile;
-                meta.groupInfo = group;
-
-                const notification = new Notification({
-                    username: rgt.owner,
-                    status: 'unread',
-                    type: 'proposal',
-                    meta: meta
-                });
-                const savedNotification = await notification.save();
-                notifications.push(savedNotification);
-            }
-        }
-    
-        ctx.status = 200
-        ctx.body = notifications;
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
-    }
-}
-
 const getNotificationsByUser = async (ctx) => {
     const username = ctx.params.username;
     const jwtUsername = ctx.state.user.username;
@@ -156,7 +96,6 @@ const isNotificationTypeValid = (type) => {
 }
 
 export default {
-    createResearchGroupNotification,
     getNotificationsByUser,
     markUserNotificationAsRead,
     markAllUserNotificationAsRead

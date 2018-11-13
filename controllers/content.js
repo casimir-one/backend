@@ -190,78 +190,6 @@ const updateDarArchive = async (ctx) => {
 }
 
 
-const createContentProposal = async (ctx) => {
-    const jwtUsername = ctx.state.user.username;
-    const tx = ctx.request.body;
-    const type = ctx.params.type;
-
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-
-    const proposal = JSON.parse(payload.data);
-    const hash = type === 'dar' ? proposal.content.slice(4) : proposal.content.slice(5);
-    const opGroupId = parseInt(payload.research_group_id);
-
-    if (!hash || isNaN(opGroupId)) {
-        ctx.status = 400;
-        ctx.body = `Mallformed operation: "${operation}"`;
-        return;
-    }
-
-    try {
-        const authorized = await authorizeResearchGroup(opGroupId, jwtUsername);
-        if (!authorized) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not a member of "${opGroupId}" group`
-            return;
-        }
-
-        const rc = await findContentByHashOrId(hash);
-        if (!rc) {
-            ctx.status = 404;
-            ctx.body = `Research content with hash "${hash}" does not exist`
-            return;
-        }
-        if (rc.status != 'in-progress') {
-            ctx.status = 405;
-            ctx.body = `Research content "${rc.title}" has '${rc.status}' status`
-            return;
-        }
-
-        const existingProposal = await lookupProposal(opGroupId, hash, type)
-        if (existingProposal && proposalIsNotExpired(existingProposal)) {
-            ctx.status = 409;
-            ctx.body = `Proposal for content with hash '${hash}' already exists: ${existingProposal}`
-            return;
-        }
-
-        rc.status = 'proposed';
-        rc.authors = proposal.authors;
-        rc.references = proposal.references;
-        const updatedRc = await rc.save()
-        const result = await sendTransaction(tx)
-        if (result.isSuccess) {
-            ctx.status = 200;
-            ctx.body = updatedRc;
-        } else {
-            throw new Error(`Could not proceed the transaction: ${tx}`);
-        }
-
-    } catch(err) {
-        console.log(err);
-        const rollback = async (hash) => {
-            const rc = await findContentByHashOrId(hash)
-            rc.status = 'in-progress';
-            await rc.save()
-        }
-
-        await rollback(hash);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
-}
-
-
 const unlockContentDraft = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
     const darId = ctx.params.refId;
@@ -655,7 +583,4 @@ export default {
     // drafts
     deleteContentDraft,
     unlockContentDraft,
-
-    // blockchain
-    createContentProposal
 }

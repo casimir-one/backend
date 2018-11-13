@@ -5,6 +5,7 @@ import joinRequests from '../controllers/joinRequests'
 import expertiseClaims from '../controllers/expertiseClaims'
 import search from '../controllers/search'
 import notifications from '../controllers/notifications'
+import proposals from '../controllers/proposals'
 
 
 const router = koa_router()
@@ -29,9 +30,13 @@ router.get('/expertise-claims/user/:username/discipline/:disciplineId', expertis
 
 router.get('/search/contents/all', search.getAllResearchContents)
 
-router.post('/notifications/group/:groupId', notifications.createResearchGroupNotification)
 router.get('/notifications/user/:username', notifications.getNotificationsByUser)
 router.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
 router.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
+
+router.post('/propose/research', proposals.createResearchProposal)
+router.post('/propose/content/:type', proposals.createContentProposal)
+router.post('/propose/invite', proposals.createInviteProposal)
+router.post('/propose/token-sale', proposals.createTokenSaleProposal)
 
 export default router

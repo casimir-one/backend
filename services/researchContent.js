@@ -8,7 +8,7 @@ export async function findContentByHashOrId(hashOrId) {
 
 export async function lookupProposal(groupId, hash, type) {
     const proposals = await deipRpc.api.getProposalsByResearchGroupIdAsync(groupId);
-    const content = proposals.filter(p => p.action == 11).find(p => {
+    const content = proposals.filter(p => p.action == 10).find(p => {
         const data = JSON.parse(p.data);
         return data.content == `${type}:${hash}`;
     });

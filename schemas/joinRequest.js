@@ -9,7 +9,7 @@ const JoinRequest = new Schema({
     "coverLetter": { type: String, required: true, trim: true },
     "status": {
         type: String,
-        enum : ['Pending', 'Approved' ,'Denied', 'Expired'],
+        enum : ['pending', 'approved', 'denied', 'expired'],
         required: true
     },
     "created": { type: Date, default: Date.now, index: true },

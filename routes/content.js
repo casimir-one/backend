@@ -21,7 +21,4 @@ router.post('/upload-file', content.uploadFileContent)
 
 router.get('/files/:researchId/:hashOrId', content.getFileContent)
 
-router.post('/propose/:type', content.createContentProposal)
-
-
 export default router

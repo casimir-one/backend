@@ -70,7 +70,7 @@ const createJoinRequest = async (ctx) => {
     }
 
     try {
-        const exists = await JoinRequest.find({'groupId': groupId, 'username': username, 'status': { $in: ['Approved', 'Pending'] }}) != 0;
+        const exists = await JoinRequest.findOne({'groupId': groupId, 'username': username, 'status': { $in: ['approved', 'pending'] }});
         if (exists) {
             ctx.status = 409
             ctx.body = `"${username}" has active join request for "${groupId}" group already`
@@ -81,7 +81,7 @@ const createJoinRequest = async (ctx) => {
             username: username,
             groupId: groupId,
             coverLetter: coverLetter,
-            status: 'Pending'
+            status: 'pending'
         });
         const savedJoinRequest = await joinRequest.save()
     
@@ -119,7 +119,7 @@ const updateJoinRequest = async (ctx) => {
             return;
         }
 
-        if (tx && updatedJoinRequest.status == 'Approved') {
+        if (tx && updatedJoinRequest.status == 'approved') {
             async function sendTransaction() {
                 let promise = new Promise((resolve) => {
                     deipRpc.api.broadcastTransactionSynchronous(tx, function(err, result) {
@@ -145,7 +145,7 @@ const updateJoinRequest = async (ctx) => {
               }
         }
 
-        const joinRequest = await JoinRequest.findOne({'groupId': updatedJoinRequest.groupId, 'username': updatedJoinRequest.username, 'status': 'Pending'})
+        const joinRequest = await JoinRequest.findOne({'groupId': updatedJoinRequest.groupId, 'username': updatedJoinRequest.username, 'status': 'pending'})
         joinRequest.status = updatedJoinRequest.status;
 
         const updated = await joinRequest.save()
