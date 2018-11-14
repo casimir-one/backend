@@ -6,6 +6,7 @@ import expertiseClaims from '../controllers/expertiseClaims'
 import search from '../controllers/search'
 import notifications from '../controllers/notifications'
 import proposals from '../controllers/proposals'
+import groups from '../controllers/groups'
 
 
 const router = koa_router()
@@ -39,5 +40,7 @@ router.post('/proposals/research', proposals.createResearchProposal)
 router.post('/proposals/content/:type', proposals.createContentProposal)
 router.post('/proposals/invite', proposals.createInviteProposal)
 router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
+
+router.post('/groups', groups.createResearchGroup)
 
 export default router

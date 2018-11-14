@@ -1,23 +1,12 @@
 import { authorizeResearchGroup } from './../services/auth'
 import { findContentByHashOrId, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
-import { sendTransaction, getBlock, getTransaction } from './../utils/blockchain';
+import { sendProposalNotificationToGroup } from './../services/notifications'
+import { sendTransaction, getTransaction } from './../utils/blockchain';
 import deipRpc from '@deip/deip-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 import UserProfile from './../schemas/user';
 import Notification from './../schemas/notification';
 import JoinRequest from './../schemas/joinRequest'
-
-
-const START_RESEARCH = 1;
-const INVITE_MEMBER = 2;
-const DROPOUT_MEMBER = 3;
-const SEND_FUNDS = 4;
-const START_RESEARCH_TOKEN_SALE = 5;
-const REBALANCE_RESEARCH_GROUP_TOKENS = 6;
-const CHANGE_QUORUM = 7;
-const CHANGE_RESEARCH_REVIEW_SHARE_PERCENT = 8;
-const OFFER_RESEARCH_TOKENS = 9;
-const CREATE_RESEARCH_MATERIAL = 10;
 
 const voteForProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
@@ -52,6 +41,7 @@ const voteForProposal = async (ctx) => {
         }
 
     } catch (err) {
+        console.log(err);
         ctx.status = 500;
         ctx.body = err.message;
     }
@@ -163,6 +153,7 @@ const createResearchProposal = async (ctx) => {
         }
 
     } catch (err) {
+        console.log(err);
         ctx.status = 500;
         ctx.body = err.message;
     }
@@ -210,6 +201,7 @@ const createInviteProposal = async (ctx) => {
         }
 
     } catch (err) {
+        console.log(err);
         ctx.status = 500;
         ctx.body = err.message;
     }
@@ -247,50 +239,12 @@ const createTokenSaleProposal = async (ctx) => {
         }
 
     } catch (err) {
+        console.log(err);
         ctx.status = 500;
         ctx.body = err.message;
     }
 }
 
-
-async function sendProposalNotificationToGroup(type, proposal) {
-
-    const group = await deipRpc.api.getResearchGroupByIdAsync(proposal.research_group_id);
-    if (group.is_personal) return [];
-    proposal.groupInfo = group;
-    
-    if (proposal.action === CREATE_RESEARCH_MATERIAL || 
-        proposal.action === START_RESEARCH_TOKEN_SALE) {
-
-        const research = await deipRpc.api.getResearchByIdAsync(proposal.data.research_id);
-        proposal.researchInfo = research;
-    }
-
-    if (proposal.action === INVITE_MEMBER) {
-
-        const invitee = await UserProfile.findOne({ '_id': proposal.data.name });
-        proposal.inviteeInfo = invitee;
-    }
-
-    const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(proposal.research_group_id);
-    const notifications = [];
-    for (let i = 0; i < rgtList.length; i++) {
-        const rgt = rgtList[i];
-        const creatorProfile = await UserProfile.findOne({ '_id': proposal.creator });
-        proposal.creatorInfo = creatorProfile;
-
-        const notification = new Notification({
-            username: rgt.owner,
-            status: 'unread',
-            type: type,
-            meta: proposal
-        });
-        const savedNotification = await notification.save();
-        notifications.push(savedNotification);
-    }
-
-    return notifications;
-}
 
 async function processNewProposal(payload, txInfo) {
     const transaction = await getTransaction(txInfo.id);
@@ -308,7 +262,7 @@ async function processNewProposal(payload, txInfo) {
 
             if (proposal) {
                 proposal.data = JSON.parse(proposal.data);
-                await sendProposalNotificationToGroup('new-proposal', proposal);
+                await sendProposalNotificationToGroup(proposal);
             }
             break;
         }
@@ -323,9 +277,15 @@ async function processProposalVote(payload, txInfo) {
         const opPayload = op[1];
         if (opName === 'vote_proposal' && opPayload.proposal_id == payload.proposal_id) {
             const proposal = await deipRpc.api.getProposalAsync(opPayload.proposal_id);
+
+            // if proposal is completed - send notifications to all group members
             if (proposal && proposal.is_completed) {
                 proposal.data = JSON.parse(proposal.data);
-                await sendProposalNotificationToGroup('completed-proposal', proposal);
+                const count = await Notification.count({ 'type': 'completed-proposal', 'meta.id': proposal.id });
+                // in case user votes for approved proposal we shouldn't send notifications second time
+                if (!count) {
+                    await sendProposalNotificationToGroup(proposal);
+                }
                 break;
             }
         }
