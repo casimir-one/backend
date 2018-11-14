@@ -12,7 +12,7 @@ const Notification = new Schema({
     },
     "type": {
         type: String,
-        enum : ['proposal', 'invite'],
+        enum : ['new-proposal', 'completed-proposal', 'invitation'],
         required: true
     },
     "meta": { type: Object },

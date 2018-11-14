@@ -6,7 +6,7 @@ export async function findContentByHashOrId(hashOrId) {
     return rc;
 }
 
-export async function lookupProposal(groupId, hash, type) {
+export async function lookupContentProposal(groupId, hash, type) {
     const proposals = await deipRpc.api.getProposalsByResearchGroupIdAsync(groupId);
     const content = proposals.filter(p => p.action == 10).find(p => {
         const data = JSON.parse(p.data);

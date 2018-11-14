@@ -90,11 +90,6 @@ const markAllUserNotificationAsRead = async (ctx) => {
     }
 }
 
-
-const isNotificationTypeValid = (type) => {
-    return type == 'proposal';
-}
-
 export default {
     getNotificationsByUser,
     markUserNotificationAsRead,

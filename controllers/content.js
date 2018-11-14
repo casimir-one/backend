@@ -15,7 +15,7 @@ import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
 import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
-import { findContentByHashOrId, lookupProposal, proposalIsNotExpired } from './../services/researchContent'
+import { findContentByHashOrId, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
 import { authorizeResearchGroup } from './../services/auth'
 import url from 'url';
 
@@ -152,7 +152,7 @@ const updateDarArchive = async (ctx) => {
             return;
         }
 
-        const proposal = await lookupProposal(rc.researchGroupId, rc.hash, rc.type)
+        const proposal = await lookupContentProposal(rc.researchGroupId, rc.hash, rc.type)
         if (proposal && proposalIsNotExpired(proposal)) {
             ctx.status = 405;
             ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be modified`
@@ -211,7 +211,7 @@ const unlockContentDraft = async (ctx) => {
 
         // if there is a proposal for this content (no matter it is approved or still in voting progress)
         // we must respond with an error as blockchain hashed data should not be modified
-        const proposal = await lookupProposal(rc.researchGroupId, rc.hash, rc.type)
+        const proposal = await lookupContentProposal(rc.researchGroupId, rc.hash, rc.type)
         if (proposal && proposalIsNotExpired(proposal)) {
             console.log("whyyyyy????")
             ctx.status = 405;
@@ -313,7 +313,7 @@ const deleteContentDraft = async (ctx) => {
 
         // if there is a proposal for this content (no matter is it approved or still in voting progress)
         // we must respond with an error as blockchain hashed data should not be modified
-        const proposal = await lookupProposal(rc.researchGroupId, rc.hash, rc.type)
+        const proposal = await lookupContentProposal(rc.researchGroupId, rc.hash, rc.type)
         if (proposal && proposalIsNotExpired(proposal)) {
             ctx.status = 405;
             ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be deleted`;

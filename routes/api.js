@@ -34,9 +34,10 @@ router.get('/notifications/user/:username', notifications.getNotificationsByUser
 router.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
 router.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
 
-router.post('/propose/research', proposals.createResearchProposal)
-router.post('/propose/content/:type', proposals.createContentProposal)
-router.post('/propose/invite', proposals.createInviteProposal)
-router.post('/propose/token-sale', proposals.createTokenSaleProposal)
+router.post('/proposals/vote', proposals.voteForProposal)
+router.post('/proposals/research', proposals.createResearchProposal)
+router.post('/proposals/content/:type', proposals.createContentProposal)
+router.post('/proposals/invite', proposals.createInviteProposal)
+router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
 export default router

@@ -6,7 +6,7 @@ import deipRpc from '@deip/deip-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
-import { findContentByHashOrId, lookupProposal, proposalIsNotExpired } from './../services/researchContent'
+import { findContentByHashOrId, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
 import { authorizeResearchGroup } from './../services/auth'
 
 
