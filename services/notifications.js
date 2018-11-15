@@ -100,3 +100,32 @@ export async function sendProposalNotificationToGroup(proposal) {
 
     return notifications;
 }
+
+export async function sendReviewMadeNotificationToGroup(review) {
+    const reviewerInfo = await UserProfile.findOne({ '_id': review.author });
+    const content = await deipRpc.api.getResearchContentByIdAsync(review.research_content_id);
+    const research = await deipRpc.api.getResearchByIdAsync(content.research_id);
+    const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(research.research_group_id);
+    const groupInfo = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
+
+    const notifications = [];
+    for (let i = 0; i < rgtList.length; i++) {
+        const rgt = rgtList[i];
+        const notification = new Notification({
+            username: rgt.owner,
+            status: 'unread',
+            type: 'review',
+            meta: {
+                reviewInfo: review,
+                contentInfo: content,
+                researchInfo: research,
+                groupInfo: groupInfo,
+                reviewerInfo: reviewerInfo
+            }
+        });
+        const savedNotification = await notification.save();
+        notifications.push(savedNotification);
+    }
+
+    return notifications;
+}
