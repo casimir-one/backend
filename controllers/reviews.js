@@ -50,9 +50,12 @@ async function processPublishedReview(payload, txInfo) {
         if (opName === 'make_review' && 
             opPayload.author == payload.author && 
             opPayload.research_content_id == payload.research_content_id) {
-
-            const review = await deipRpc.api.getReviewByIdAsync(payload.research_content_id);
-            await sendReviewMadeNotificationToGroup(review);
+                
+            const reviews = await deipRpc.api.getReviewsByContentAsync(payload.research_content_id);
+            const review = reviews.find(r => r.author == opPayload.author && r.content == opPayload.content);
+            if (review) {
+                await sendReviewMadeNotificationToGroup(review);
+            }
             break;
         }
     }
