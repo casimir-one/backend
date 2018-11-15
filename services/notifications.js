@@ -13,7 +13,7 @@ const CHANGE_RESEARCH_REVIEW_SHARE_PERCENT = 8;
 const OFFER_RESEARCH_TOKENS = 9;
 const CREATE_RESEARCH_MATERIAL = 10;
 
-export async function sendInvitationNotificationToInvitee(groupId, invitee) {
+export async function sendInviteNotificationToInvitee(groupId, invitee) {
     const groupInfo = await deipRpc.api.getResearchGroupByIdAsync(groupId);
     const inviteeInfo = await UserProfile.findOne({ '_id': invitee });
 
@@ -28,6 +28,32 @@ export async function sendInvitationNotificationToInvitee(groupId, invitee) {
     });
     const savedInvitation = await notification.save();
     return savedInvitation;
+}
+
+export async function sendInviteResolvedNotificationToGroup(isApproved, invite) {
+    const groupInfo = await deipRpc.api.getResearchGroupByIdAsync(invite.research_group_id);
+    const inviteeInfo = await UserProfile.findOne({ '_id': invite.account_name });
+
+    const notifications = [];
+    const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(invite.research_group_id);
+    for (let i = 0; i < rgtList.length; i++) {
+        const rgt = rgtList[i];
+        if (rgt.owner != invite.account_name) {
+            const notification = new Notification({
+                username: rgt.owner,
+                status: 'unread',
+                type: isApproved ? 'approved-invitation' : 'rejected-invitation',
+                meta: {
+                    groupInfo: groupInfo,
+                    inviteeInfo: inviteeInfo
+                }
+            });
+            const savedNotification = await notification.save();
+            notifications.push(savedNotification);
+        }
+    }
+
+    return notifications;
 }
 
 export async function sendProposalNotificationToGroup(proposal) {
@@ -51,7 +77,7 @@ export async function sendProposalNotificationToGroup(proposal) {
         proposal.inviteeInfo = invitee;
 
         if (proposal.is_completed) {
-            const invitation = await sendInvitationNotificationToInvitee(proposal.research_group_id, proposal.data.name);
+            const invitation = await sendInviteNotificationToInvitee(proposal.research_group_id, proposal.data.name);
             notifications.push(invitation);
         }
     }

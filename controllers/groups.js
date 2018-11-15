@@ -1,6 +1,6 @@
 
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import { sendInvitationNotificationToInvitee } from './../services/notifications';
+import { sendInviteNotificationToInvitee } from './../services/notifications';
 import deipRpc from '@deip/deip-rpc-client';
 
 const createResearchGroup = async (ctx) => {
@@ -38,7 +38,7 @@ async function processNewGroup(payload, txInfo) {
             if (group) {
                 for (let i = 0; i < opPayload.invitees.length; i++) {
                     const invitee = opPayload.invitees[i];
-                    await sendInvitationNotificationToInvitee(group.id, invitee.account);
+                    await sendInviteNotificationToInvitee(group.id, invitee.account);
                 }
             }
             break;

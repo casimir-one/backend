@@ -7,6 +7,7 @@ import search from '../controllers/search'
 import notifications from '../controllers/notifications'
 import proposals from '../controllers/proposals'
 import groups from '../controllers/groups'
+import invites from '../controllers/invites'
 
 
 const router = koa_router()
@@ -42,5 +43,8 @@ router.post('/proposals/invite', proposals.createInviteProposal)
 router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
 router.post('/groups', groups.createResearchGroup)
+
+router.post('/invites/approve', invites.approveInvite)
+router.post('/invites/reject', invites.rejectInvite)
 
 export default router

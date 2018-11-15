@@ -18,7 +18,7 @@ const getNotificationsByUser = async (ctx) => {
         if (unreadOnly) {
             query.status = 'unread';
         }
-        const notifications = await Notification.find(query)
+        const notifications = await Notification.find(query).sort({ created_at: -1 })
         ctx.status = 200
         ctx.body = notifications;
 
