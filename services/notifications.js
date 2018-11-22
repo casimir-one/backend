@@ -129,3 +129,20 @@ export async function sendReviewMadeNotificationToGroup(review) {
 
     return notifications;
 }
+
+
+export async function sendExpertiseAllocatedNotificationToClaimer(expertiseProposal) {
+    const userInfo = await UserProfile.findOne({ '_id': expertiseProposal.claimer });
+
+    const notification = new Notification({
+        username: expertiseProposal.claimer,
+        status: 'unread',
+        type: 'allocated-expertise',
+        meta: {
+            userInfo: userInfo,
+            expertiseProposal: expertiseProposal
+        }
+    });
+    const savedNotification = await notification.save();
+    return savedNotification;
+}

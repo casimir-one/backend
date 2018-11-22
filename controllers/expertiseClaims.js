@@ -1,5 +1,7 @@
 import ExpertiseClaim from './../schemas/expertiseClaim';
 import deipRpc from '@deip/deip-rpc-client';
+import { getTransaction, sendTransaction } from './../utils/blockchain';
+import { sendExpertiseAllocatedNotificationToClaimer } from './../services/notifications';
 
 const getExpertiseClaims = async (ctx) => {
     const status = ctx.query.status;
@@ -32,48 +34,133 @@ const getExpertiseClaimsByDiscipline = async (ctx) => {
 
 const createExpertiseClaim = async (ctx) => {
     const data = ctx.request.body;
+    const tx = data.tx;
     const jwtUsername = ctx.state.user.username;
-    const username = data.username;
+    
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const username = payload.claimer;
+    const disciplineId = payload.discipline_id;
+    const coverLetter = payload.description;
 
     if (username != jwtUsername) { // revise this once we've got 'approve' operation working
         ctx.status = 403;
         ctx.body = `You have no permission to create '${username}' expertise claim application`
         return;
     }
-    
-    const disciplineId = data.disciplineId;
-    const coverLetter = data.coverLetter;
+
     if (!disciplineId || !coverLetter) {
         ctx.status = 404;
         ctx.body = `You must specify discipline you want to claim and provide short cover letter`
         return;
     }
 
-    const userExpertise = await deipRpc.api.getExpertTokensByAccountNameAsync(username);
-    if (userExpertise.some(e => e.discipline_id == disciplineId)) {
-        ctx.status = 405;
-        ctx.body = `Expert token in ${disciplineId} discipline for "${username}" exists already`
+    try {
+        const userExpertise = await deipRpc.api.getExpertTokensByAccountNameAsync(username);
+        if (userExpertise.some(e => e.discipline_id == disciplineId)) {
+            ctx.status = 405;
+            ctx.body = `Expert token in ${disciplineId} discipline for "${username}" exists already`
+            return;
+        }
+
+        const exists = await ExpertiseClaim.count({'username': username, 'disciplineId': disciplineId}) != 0;
+        if (exists) {
+            ctx.status = 409
+            ctx.body = `Expertise claim for "${username}" in discipline ${disciplineId} already exists!`
+            return;
+        }
+
+        const result = await sendTransaction(tx);
+        if (result.isSuccess) {
+            const expertiseClaim = new ExpertiseClaim({
+                "username": username,
+                "disciplineId": disciplineId,
+                "coverLetter": coverLetter,
+                "status": 'pending',
+                "publications": data.publications,
+            })
+            const savedExpertiseClaim = await expertiseClaim.save()
+            ctx.status = 200
+            ctx.body = savedExpertiseClaim
+
+        } else {
+            throw new Error(`Could not proceed the transaction: ${tx}`);
+        }
+
+    } catch(err) {
+        console.error(err);
+        // rollback
+        await ExpertiseClaim.remove({ username: username, disciplineId: disciplineId, status: 'pending' });
+        ctx.status = 500
+        ctx.body = `Internal server error, please try again later`;
+    }
+}
+
+
+const voteForExpertiseClaim = async (ctx) => {
+    const tx = ctx.request.body;
+    const jwtUsername = ctx.state.user.username;
+    
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const proposalId = payload.proposal_id;
+    const username = payload.voter;
+
+    if (username != jwtUsername) { // revise this once we've got 'approve' operation working
+        ctx.status = 403;
+        ctx.body = `You have no permission to vote for '${proposalId}' expertise claim application`
         return;
     }
+    
+    try {
+        const expertiseAllocationProposal = await deipRpc.api.getExpertiseAllocationProposalByIdAsync(proposalId);
+        if (!expertiseAllocationProposal) {
+            ctx.status = 404;
+            ctx.body = `Expertise allocation proposal ${proposalId} is not found`
+            return;
+        }
 
-    const exists = await ExpertiseClaim.count({'username': username, 'disciplineId': disciplineId}) != 0;
-    if (exists) {
-        ctx.status = 409
-        ctx.body = `Expertise claim for "${username}" in discipline ${disciplineId} already exists!`
-        return;
+        const result = await sendTransaction(tx);
+        if (result.isSuccess) {
+            setTimeout(() => {
+                // wait for next block
+                processAllocatedExpertise(payload, result.txInfo, expertiseAllocationProposal)
+            }, 4000);
+            ctx.status = 201;
+        } else {
+            throw new Error(`Could not proceed the transaction: ${tx}`);
+        }
+
+    } catch(err) {
+        console.error(err);
+        ctx.status = 500
+        ctx.body = `Internal server error, please try again later`;
     }
+}
 
-    const expertiseClaim = new ExpertiseClaim({
-        "username": username,
-        "disciplineId": disciplineId,
-        "coverLetter": coverLetter,
-        "status": 'pending',
-        "publications": data.publications,
-    })
-    const savedExpertiseClaim = await expertiseClaim.save()
+async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
+    const transaction = await getTransaction(txInfo.id);
+    for (let i = 0; i < transaction.operations.length; i++) {
+        const op = transaction.operations[i];
+        const opName = op[0];
+        const opPayload = op[1];
+        if (opName === 'vote_for_expertise_allocation_proposal' && 
+            opPayload.voter === payload.voter && 
+            opPayload.proposal_id == payload.proposal_id) {
 
-    ctx.status = 200
-    ctx.body = savedExpertiseClaim
+            const claimerExpertise = await deipRpc.api.getExpertTokensByAccountNameAsync(expertiseProposal.claimer);
+
+            if (claimerExpertise.some(e => e.discipline_id == expertiseProposal.discipline_id)) {
+                const wrapper = await ExpertiseClaim.findOne({ username: expertiseProposal.claimer, disciplineId: expertiseProposal.discipline_id, 'status': 'pending' });
+                if (wrapper) {
+                    wrapper.status = 'approved';
+                    await wrapper.save();
+                }
+                await sendExpertiseAllocatedNotificationToClaimer(expertiseProposal);
+            }
+            break;
+        }
+    }
 }
 
 export default {
@@ -81,5 +168,6 @@ export default {
     getExpertiseClaimsByUser,
     getExpertiseClaimsByDiscipline,
     getExpertiseClaimsByUserAndDiscipline,
-    createExpertiseClaim
+    createExpertiseClaim,
+    voteForExpertiseClaim
 }
