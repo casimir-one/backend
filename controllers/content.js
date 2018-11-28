@@ -19,14 +19,14 @@ import { findContentByHashOrId, lookupContentProposal, proposalIsNotExpired } fr
 import { authorizeResearchGroup } from './../services/auth'
 import url from 'url';
 
-const filesStoragePath = path.join(__dirname, './../files');
+const storagePath = path.join(__dirname, './../files');
 const opts = {}
 
 // ############ Read actions ############
 
 const listDarArchives = async (ctx) => {
     try {
-        const records = await listArchives(filesStoragePath)
+        const records = await listArchives(storagePath)
         ctx.status = 200;
         ctx.body = records;
     } catch (err) {
@@ -62,7 +62,7 @@ const readDarArchive = async (ctx) => {
             return;
         }
 
-        const archiveDir = path.join(filesStoragePath, rc.filename);
+        const archiveDir = path.join(storagePath, rc.filename);
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
         const rawArchive = await readArchive(archiveDir, {
@@ -93,7 +93,7 @@ const readDarArchiveStaticFiles = async (ctx) => {
     try {
         const rc = await findContentByHashOrId(darId);
         const stat = util.promisify(fs.stat);
-        const filePath = path.join(filesStoragePath, rc.filename);
+        const filePath = path.join(storagePath, rc.filename);
         const check = await stat(filePath);
         await send(ctx, `/files` + `${rc.filename}/${ctx.params.file}`);
     } catch(err) {
@@ -159,7 +159,7 @@ const updateDarArchive = async (ctx) => {
             return;
         }
 
-        const archiveDir = path.join(filesStoragePath, rc.filename)
+        const archiveDir = path.join(storagePath, rc.filename)
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
         const archive = JSON.parse(result.formData.fields._archive)
@@ -231,8 +231,8 @@ const unlockContentDraft = async (ctx) => {
 }
 
 // const clone = async (ctx) => {
-//     const originalPath = path.join(filesStoragePath, ctx.params.dar);
-//     const newPath = path.join(filesStoragePath, ctx.params.newdar);
+//     const originalPath = path.join(storagePath, ctx.params.dar);
+//     const newPath = path.join(storagePath, ctx.params.newdar);
 //     try {
 //         await cloneArchive(originalPath, newPath);
 //         ctx.status = 200;
@@ -263,11 +263,11 @@ const createDarArchive = async (ctx) => {
             return;
         }
     
-        const blankPath = path.join(filesStoragePath, 'dar-blank');
+        const blankPath = path.join(storagePath, 'dar-blank');
         const now = new Date().getTime();
     
         const darPath = `/${researchId}/dar_${now}`;
-        await cloneArchive(blankPath, path.join(filesStoragePath, darPath));
+        await cloneArchive(blankPath, path.join(storagePath, darPath));
         const rc = new ResearchContent({
             "_id": `${researchId}_dar_${now}`,
             "filename": darPath,
@@ -323,10 +323,10 @@ const deleteContentDraft = async (ctx) => {
         await ResearchContent.remove({ _id: refId });
 
         if (rc.type === 'dar') {
-            await fsExtra.remove(path.join(filesStoragePath, rc.filename));
+            await fsExtra.remove(path.join(storagePath, rc.filename));
         } else if (rc.type === 'file') {
             const unlink = util.promisify(fs.unlink);
-            await unlink(researchContentPath(rc.researchId, rc.filename));
+            await unlink(researchFileContentPath(rc.researchId, rc.filename));
         }
 
         ctx.status = 201;
@@ -389,7 +389,7 @@ const updateDraftMetaAsync = async (id, archive, link) => {
     rc.references = contentRefs;
     
     const options = { algo: 'md5', encoding: 'hex' };
-    const hashObj = await hashElement(path.join(filesStoragePath, link), options);
+    const hashObj = await hashElement(path.join(storagePath, link), options);
     console.log(hashObj)
     rc.hash = hashObj.hash;
     await rc.save()
@@ -426,16 +426,31 @@ const parseDeipReferences = (refList) => {
 };
 
 // ############# files ######################
-const researchStoragePath = (researchId) => `${filesStoragePath}/${researchId}/files`
-const researchContentPath = (researchId, filename) => `${researchStoragePath(researchId)}/${filename}`
+const researchStoragePath = (researchId) => `${storagePath}/${researchId}`
+const researchFileStoragePath = (researchId) => `${storagePath}/${researchId}/files`
+const researchFileContentPath = (researchId, filename) => `${researchFileStoragePath(researchId)}/${filename}`
 
 const contentStorage = multer.diskStorage({
-    destination: function(req, file, callback) {
-        const dest = researchStoragePath(`${req.headers['research-id']}`)
-        if (!fs.existsSync(dest)) {
-            fs.mkdirSync(dest);
+    destination: async function(req, file, callback) {
+
+        const stat = util.promisify(fs.stat);
+        const mkdir = util.promisify(fs.mkdir);
+
+        const researchStorage = researchStoragePath(req.headers['research-id']);
+        try {
+            const check = await stat(researchStorage);
+        } catch(err) {
+            await mkdir(researchStorage);
         }
-        callback(null, dest)
+
+        const researchFileStorage = researchFileStoragePath(req.headers['research-id'])
+        try {
+            const check = await stat(researchFileStorage);
+        } catch(err) {
+            await mkdir(researchFileStorage);
+        }
+
+        callback(null, researchFileStorage);
     },
     filename: function(req, file, callback) {
         callback(null, (new Date).getTime() + '_' + file.originalname);
@@ -475,13 +490,13 @@ const uploadFileContent = async(ctx) => {
 
         const researchContent = contentUploader.single('research-content');
         const filepath = await researchContent(ctx, () => new Promise((resolve, reject) => {
-            fs.stat(researchContentPath(researchId, ctx.req.file.filename), (err, stats) => {
+            fs.stat(researchFileContentPath(researchId, ctx.req.file.filename), (err, stats) => {
                 if (err || !stats.isFile()) {
                     console.error(err);
                     reject(err)
                 }
                 else {
-                    resolve(researchContentPath(researchId, ctx.req.file.filename));
+                    resolve(researchFileContentPath(researchId, ctx.req.file.filename));
                 }
             });
         }));
@@ -496,7 +511,7 @@ const uploadFileContent = async(ctx) => {
         if (rc) {
             const stat = util.promisify(fs.stat);
             try {
-                const check = await stat(researchContentPath(researchId, rc.filename));
+                const check = await stat(researchFileContentPath(researchId, rc.filename));
                 exists = true;
             } catch(err) {
                 exists = false;
@@ -557,7 +572,7 @@ const getFileContent = async function(ctx) {
 
     if (isDownload) {
         ctx.response.set('Content-disposition', 'attachment; filename="' + rc.filename + '"');
-        ctx.body = fs.createReadStream(researchContentPath(researchId, rc.filename));
+        ctx.body = fs.createReadStream(researchFileContentPath(researchId, rc.filename));
     } else {
         await send(ctx, `/files/${researchId}/files/${rc.filename}`);
     }
