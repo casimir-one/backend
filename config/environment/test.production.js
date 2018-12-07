@@ -6,7 +6,7 @@ module.exports = {
     },
     blockchain: {
         rpcEndpoint: "https://test-dev-full-node.deip.world",
-        chainId: "687d443b4cd4c1198b6f6a9bdfb29f7ca974695d69b515f24fc3db4fce5bebc9",
+        chainId: "2117b1fb8f3023d0f70dd5e12a675cd7fc042f4e179d0ce68a756ecf946e5095",
         accountsCreator : {
             username: "alice",
             wif: "5JGoCjh27sfuCzp7kQme5yMipaQtgdVLPiZPr9zaCwJVrSrbGYx",
