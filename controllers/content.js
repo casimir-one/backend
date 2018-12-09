@@ -75,7 +75,7 @@ const readDarArchive = async (ctx) => {
             if (record._binary) {
                 delete record._binary
                 record.encoding = 'url'
-                record.data = `${config['host']}/content/${darId}/assets/${record.path}`
+                record.data = `${config['serverHost']}/content/${darId}/assets/${record.path}`
             }
         })
         ctx.status = 200;
@@ -408,7 +408,7 @@ const parseDeipReferences = (refList) => {
     const deipRefs = webpageRefs.map(wref => {
         try {
           const parsedUrl = url.parse(wref.uri[0]);
-          if (parsedUrl.host === config.uiHost) {
+          if (parsedUrl.serverHost === config.uiHost) { // get rid of this
             const segments = parsedUrl.hash.split('/');
             const researchGroupPermlink = segments[1];
             const researchPermlink = segments[3];

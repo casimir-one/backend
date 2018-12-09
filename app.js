@@ -90,4 +90,5 @@ process.on('SIGINT', () => {
     });
 });
 
+console.log(config)
 export default app;
