@@ -24,8 +24,8 @@ config = _.merge(config, {
         chainId: process.env.CHAIN_ID,
         accountsCreator : process.env.FAUCET_ACCOUNT
     },
-    serverHost: process.env.SERVER_HOST,
-    uiHost: process.env.UI_HOST, // todo: get rid of this
+    serverHost: process.env.DEIP_SERVER_URL,
+    uiHost: process.env.DEIP_CLIENT_HOST, // todo: get rid of this
     sigSeed: process.env.SIG_SEED,
     jwtSecret: process.env.JWT_SECRET
 });
