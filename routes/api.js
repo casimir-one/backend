@@ -9,7 +9,7 @@ import proposals from '../controllers/proposals'
 import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import reviews from '../controllers/reviews'
-
+import agency from '../controllers/agency'
 
 const router = koa_router()
 
@@ -50,5 +50,7 @@ router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
 
 router.post('/reviews', reviews.makeReview)
+
+router.get('/agencies/profile/:agency', agency.getAgencyProfile)
 
 export default router
