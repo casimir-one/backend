@@ -7,8 +7,7 @@ import sharp from 'sharp'
 import deipRpc from '@deip/deip-rpc-client';
 
 const filesStoragePath = path.join(__dirname, './../files');
-const logosStoragePath = () => `${filesStoragePath}/logos`;
-const logoPath = (agency) => `${logosStoragePath()}/${agency}`;
+const logoPath = (agency) => `${filesStoragePath}/agencies/${agency}/logo.png`;
 
 const getAgencyProfile = async (ctx) => {
     const agency = ctx.params.agency;
@@ -36,7 +35,8 @@ const getAgencyLogo = async (ctx) => {
     try {
         const check = await stat(src);
     } catch(err) {
-        src = avatarPath("default_agency_logo.png");
+        ctx.status = 404;
+        return;
     }
 
     const resize = (w, h) => {

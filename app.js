@@ -5,6 +5,7 @@ import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
 import content from './routes/content.js';
+import application from './routes/application';
 import jwt from 'koa-jwt';
 import path from 'path';
 import serve from 'koa-static';
@@ -64,6 +65,9 @@ router.use('/public', pub.routes());
 router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
     return req.method == 'GET';
 }), content.routes());
+router.use('/applications', jwt({ secret: config.jwtSecret }).unless((req) => {
+    return req.method == 'GET';
+}), application.routes());
 router.use('/api', jwt({ secret: config.jwtSecret }), api.routes());
 
 app.use(router.routes());
