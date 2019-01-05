@@ -11,7 +11,7 @@ import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
 import { findApplicationByHashOrId } from './../services/applicationContent';
 import { authorizeResearchGroup } from './../services/auth'
-import url from 'url';
+
 
 const storagePath = path.join(__dirname, './../files');
 const opts = {}
@@ -45,10 +45,11 @@ const listApplicationsRefsByFoa = async (ctx) => {
 const getApplicationRef = async (ctx) => {
     const hashOrId = ctx.params.hashOrId;
     try {
-        const draft = await findContentByHashOrId(hashOrId);
+        const application = await findApplicationByHashOrId(hashOrId);
         ctx.status = 200;
-        ctx.body = draft;
+        ctx.body = application;
     } catch (err){
+        console.log(err);
         ctx.status = 500;
         ctx.body = err.message;
     }
