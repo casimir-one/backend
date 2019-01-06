@@ -23,6 +23,12 @@ const getAgencyProfile = async (ctx) => {
     ctx.body = profile;
 }
 
+const getAgenciesProfiles = async (ctx) => {
+    const profiles = await AgencyProfile.find();
+    ctx.status = 200;
+    ctx.body = profiles;
+}
+
 const getAgencyLogo = async (ctx) => {
     const agency = ctx.params.agency;
     const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
@@ -64,5 +70,6 @@ const getAgencyLogo = async (ctx) => {
 
 export default {
     getAgencyProfile,
+    getAgenciesProfiles,
     getAgencyLogo
 }

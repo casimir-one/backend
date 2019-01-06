@@ -52,5 +52,6 @@ router.post('/invites/reject', invites.rejectInvite)
 router.post('/reviews', reviews.makeReview)
 
 router.get('/agencies/profile/:agency', agency.getAgencyProfile)
+router.get('/agencies/profiles', agency.getAgenciesProfiles)
 
 export default router
