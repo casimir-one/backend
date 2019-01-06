@@ -14,9 +14,13 @@ const ApplicationContent = new Schema({
     "hash": {type: String, index: true },
     "type": {
         type: String,
-        enum : ['file'],
+        enum : ['file', 'package'],
         required: true
     },
+    "packageForms": [{
+        "filename": { type: String, required: true, default: null },
+        "hash": { type: String, required: true, default: null }
+    }],
     "authors": [{ type: String }]
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
