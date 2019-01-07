@@ -5,12 +5,10 @@ import config from './../config';
 
 const router = koa_router()
 
-router.get('/refs/:hashOrId', application.getApplicationRef)
+router.get('/refs/:agency/:foaId/:hash', application.getApplicationPackageRef)
 router.get('/refs/research/:researchId', application.listApplicationsRefsByResearch)
 router.get('/refs/foa/:foaId', application.listApplicationsRefsByFoa)
-router.post('/upload-file', application.uploadApplicationContent)
 router.post('/upload-files', application.uploadBulkApplicationContent)
-router.get('/files/:agency/:hashOrId', application.getApplicationContent)
-router.get('/files/:agency/:foaId/:hashOrId/:formHash', application.getApplicationPackageFormContent)
+router.get('/files/:agency/:foaId/:hash/:formHash', application.getApplicationPackageFormContent)
 
 export default router
