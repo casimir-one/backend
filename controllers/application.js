@@ -118,7 +118,8 @@ const uploadBulkApplicationContent = async(ctx) => {
 
         const options = { algo: 'md5', encoding: 'hex', files: { ignoreRootName: true }};
         const hashObj = await hashElement(tempDestinationPath, options);
-        const hashes = hashObj.children.map(f => f.name);
+        console.log(hashObj);
+        const hashes = hashObj.children.map(f => f.hash);
         hashes.sort();
         const hash = crypto.createHash('md5').update(hashes.join(",")).digest("hex");
 
