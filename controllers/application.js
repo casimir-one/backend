@@ -44,46 +44,6 @@ const listApplicationsRefsByFoa = async (ctx) => {
     }
 }
 
-const listApplicationsRefsByLetterHash = async (ctx) => {
-    const letterHash = ctx.params.letterHash;
-    try {
-        const applications = await ApplicationContent.find({ 'letterHash': letterHash });
-        ctx.status = 200;
-        ctx.body = applications;
-    } catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
-}
-
-const updateApplicationRefStatus = async (ctx) => {
-    const data = ctx.request.body;
-    const agency = data.agency;
-    const foaId = data.foaId;
-    const hash = data.hash;
-    const status = data.status;
-    
-    try {
-        const ac = await findApplicationPackageByHash(agency, foaId, hash);
-        if (!ac) {
-            ctx.status = 404;
-            ctx.body = null;
-            return;
-        }
-
-        ac.status = status;
-        const updatedAc = await ac.save();
-        ctx.status = 200;
-        ctx.body = updatedAc;
-
-    } catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
-}
-
 const getApplicationPackageRef = async (ctx) => {
     const agency = ctx.params.agency;
     const foaId = ctx.params.foaId;
@@ -254,7 +214,5 @@ export default {
     // refs
     getApplicationPackageRef,
     listApplicationsRefsByResearch,
-    listApplicationsRefsByFoa,
-    listApplicationsRefsByLetterHash,
-    updateApplicationRefStatus
+    listApplicationsRefsByFoa
 }
