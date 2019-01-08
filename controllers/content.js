@@ -220,7 +220,7 @@ const unlockContentDraft = async (ctx) => {
         }
 
         rc.status = 'in-progress';
-        const updatedRc = rc.save();
+        const updatedRc = await rc.save();
         ctx.status = 200;
         ctx.body = updatedRc;
     } catch(err) {

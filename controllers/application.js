@@ -34,9 +34,49 @@ const listApplicationsRefsByResearch = async (ctx) => {
 const listApplicationsRefsByFoa = async (ctx) => {
     const foaId = ctx.params.foaId;
     try {
-        const applications = await ApplicationContent.find({'foaId': foaId });
+        const applications = await ApplicationContent.find({ 'foaId': foaId });
         ctx.status = 200;
         ctx.body = applications;
+    } catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+}
+
+const listApplicationsRefsByLetterHash = async (ctx) => {
+    const letterHash = ctx.params.letterHash;
+    try {
+        const applications = await ApplicationContent.find({ 'letterHash': letterHash });
+        ctx.status = 200;
+        ctx.body = applications;
+    } catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+}
+
+const updateApplicationRefStatus = async (ctx) => {
+    const data = ctx.request.body;
+    const agency = data.agency;
+    const foaId = data.foaId;
+    const hash = data.hash;
+    const status = data.status;
+    
+    try {
+        const ac = await findApplicationPackageByHash(agency, foaId, hash);
+        if (!ac) {
+            ctx.status = 404;
+            ctx.body = null;
+            return;
+        }
+
+        ac.status = status;
+        const updatedAc = await ac.save();
+        ctx.status = 200;
+        ctx.body = updatedAc;
+
     } catch(err) {
         console.log(err);
         ctx.status = 500;
@@ -63,7 +103,6 @@ const getApplicationPackageRef = async (ctx) => {
 // ############# files ######################
 const agencyStoragePath = (agency) => `${storagePath}/agencies/${agency}`
 const agencyApplicationsStoragePath = (agency) => `${agencyStoragePath(agency)}/applications`
-const agencyApplicationSingleFileContentPath = (agency, packageHash) => `${agencyApplicationsStoragePath(agency)}/${packageHash}`
 const agencyFoaApplicationPackagePath = (agency, foaId, packageHash) => `${agencyApplicationsStoragePath(agency)}/foa-${foaId}/${packageHash}`
 const agencyFoaApplicationPackageFormPath = (agency, foaId, packageHash, formHash) => `${agencyFoaApplicationPackagePath(agency, foaId, packageHash)}/${formHash}`
 const agencyTempStoragePath = (agency, postfix) => `${storagePath}/agencies/${agency}/temp-${postfix}`
@@ -119,13 +158,14 @@ const uploadBulkApplicationContent = async(ctx) => {
         const options = { algo: 'md5', encoding: 'hex', files: { ignoreRootName: true }};
         const hashObj = await hashElement(tempDestinationPath, options);
         console.log(hashObj);
+        const letterHash = hashObj.children[0].hash;
         const hashes = hashObj.children.map(f => f.hash);
         hashes.sort();
-        const hash = crypto.createHash('md5').update(hashes.join(",")).digest("hex");
+        const packageHash = crypto.createHash('md5').update(hashes.join(",")).digest("hex");
 
         var exists = false;
-        const ac = await findApplicationPackageByHash(agency, foaId, hash);
-        const packagePath = agencyFoaApplicationPackagePath(agency, foaId, hash);
+        const ac = await findApplicationPackageByHash(agency, foaId, packageHash);
+        const packagePath = agencyFoaApplicationPackagePath(agency, foaId, packageHash);
 
         if (ac) {
             try {
@@ -137,30 +177,30 @@ const uploadBulkApplicationContent = async(ctx) => {
         }
         
         if (exists) {
-            console.log(`Folder with ${hash} hash already exists! Removing the uploaded files...`);
+            console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
             rimraf(tempDestinationPath, function () { console.log(`${tempDestinationPath} removed`); });
             ctx.status = 200;
             ctx.body = ac;
         } else {
 
-            await fsExtra.move(tempDestinationPath, packagePath);
+            await fsExtra.move(tempDestinationPath, packagePath, { overwrite: true });
             
             if (ac) {
-                ac.filename = `package ${hash}`
+                ac.filename = `Package: application [${letterHash}]; forms [${packageHash}];'`
                 const updatedAc = await ac.save();
                 ctx.status = 200;
                 ctx.body = updatedAc;
             } else {
-                const _id = `${agency}_${foaId}_${hash}`;
                 const ac = new ApplicationContent({
-                    "_id": _id,
-                    "filename": `package ${hash}`,
+                    "filename": `Package: application [${letterHash}]; forms [${packageHash}];'`,
                     "agency": agency,
-                    "title": `package ${hash}`,
+                    "title": `package ${packageHash}`,
                     "researchId": researchId,
                     "researchGroupId": research.research_group_id,
                     "foaId": foaId,
-                    "hash": hash,
+                    "letterHash": letterHash,
+                    "hash": packageHash,
+                    "status": "pending",
                     "type": 'package',
                     "authors": [jwtUsername],
                     "packageForms": hashObj.children.map((f) => {
@@ -214,5 +254,7 @@ export default {
     // refs
     getApplicationPackageRef,
     listApplicationsRefsByResearch,
-    listApplicationsRefsByFoa
+    listApplicationsRefsByFoa,
+    listApplicationsRefsByLetterHash,
+    updateApplicationRefStatus
 }
