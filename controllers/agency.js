@@ -7,7 +7,7 @@ import sharp from 'sharp'
 import deipRpc from '@deip/deip-rpc-client';
 
 const filesStoragePath = path.join(__dirname, './../files');
-const logoPath = (agency) => `${filesStoragePath}/agencies/${agency}/logo.png`;
+const logoPath = (agency, ext) => `${filesStoragePath}/agencies/${agency}/logo.${ext}`;
 
 const getAgencyProfile = async (ctx) => {
     const agency = ctx.params.agency;
@@ -34,8 +34,9 @@ const getAgencyLogo = async (ctx) => {
     const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
     const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
     const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
+    const ext = ctx.query.ext ? ctx.query.ext : 'png';
 
-    var src = logoPath(agency);
+    var src = logoPath(agency, ext);
     const stat = util.promisify(fs.stat);
 
     try {
@@ -51,7 +52,7 @@ const getAgencyLogo = async (ctx) => {
             sharp(src)
                 .rotate()
                 .resize(w, h)
-                .jpeg()
+                .png()
                 .toBuffer()
                 .then(data => {
                     resolve(data)
