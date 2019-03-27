@@ -10,7 +10,7 @@ const UserProfile = new Schema({
     "agencies": [{
         "role": {
             type: String,
-            enum : ['applicant', 'grantor', 'officer'],
+            enum : ['applicant', 'grantor', 'officer', 'treasury'],
             required: true
         },
         "name": { type: String, required: true, default: null },
