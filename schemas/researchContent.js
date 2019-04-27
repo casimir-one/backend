@@ -12,7 +12,7 @@ const ResearchContent = new Schema({
     "hash": {type: String, index: true },
     "type": {
         type: String,
-        enum : ['file', 'dar'],
+        enum : ['file', 'dar', 'package'],
         required: true
     },
     "status": {
@@ -20,6 +20,10 @@ const ResearchContent = new Schema({
         enum : ['in-progress', 'proposed', 'finished'],
         required: true
     },
+    "packageFiles": [{
+        "filename": { type: String, required: true },
+        "hash": { type: String, required: true }
+    }],
     "authors": [{ type: String }],
     "references": [{ type: Number }],
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

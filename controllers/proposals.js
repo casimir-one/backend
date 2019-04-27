@@ -7,6 +7,7 @@ import ResearchContent from './../schemas/researchContent';
 import UserProfile from './../schemas/user';
 import Notification from './../schemas/notification';
 import JoinRequest from './../schemas/joinRequest'
+import { fileURLToPath } from 'url';
 
 const voteForProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
@@ -56,7 +57,7 @@ const createContentProposal = async (ctx) => {
     const payload = operation[1];
 
     const proposal = JSON.parse(payload.data);
-    const hash = type === 'dar' ? proposal.content.slice(4) : proposal.content.slice(5);
+    const hash = type === 'dar' ? proposal.content.slice(4) : proposal.content.slice(8);
     const opGroupId = parseInt(payload.research_group_id);
 
     if (!hash || isNaN(opGroupId)) {
