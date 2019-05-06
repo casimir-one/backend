@@ -1,5 +1,5 @@
 import { authorizeResearchGroup } from './../services/auth'
-import { findContentByHashOrId, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
+import { findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
 import { sendProposalNotificationToGroup } from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import deipRpc from '@deip/deip-rpc-client';
@@ -57,7 +57,12 @@ const createContentProposal = async (ctx) => {
     const payload = operation[1];
 
     const proposal = JSON.parse(payload.data);
-    const hash = type === 'dar' ? proposal.content.slice(4) : proposal.content.slice(8);
+    const hash = type === 'dar' 
+        ? proposal.content.slice(4) : type === 'file' 
+        ? proposal.content.slice(5) : type === 'package' 
+        ? proposal.content.slice(8) : null;
+
+    const researchId = proposal.research_id;
     const opGroupId = parseInt(payload.research_group_id);
 
     if (!hash || isNaN(opGroupId)) {
@@ -75,8 +80,7 @@ const createContentProposal = async (ctx) => {
         }
 
         /* proposal specific action code */
-
-        const rc = await findContentByHashOrId(hash);
+        const rc = await findResearchContentByHash(researchId, hash);
         if (!rc) {
             ctx.status = 404;
             ctx.body = `Research content with hash "${hash}" does not exist`
@@ -98,7 +102,7 @@ const createContentProposal = async (ctx) => {
         rc.status = 'proposed';
         rc.authors = proposal.authors;
         rc.references = proposal.references;
-        const updatedRc = await rc.save()
+        const updatedRc = await rc.save();
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
             await processNewProposal(payload, result.txInfo);
@@ -110,9 +114,9 @@ const createContentProposal = async (ctx) => {
     } catch(err) {
         console.log(err);
         const rollback = async (hash) => {
-            const rc = await findContentByHashOrId(hash)
+            const rc = await findResearchContentByHash(researchId, hash);
             rc.status = 'in-progress';
-            await rc.save()
+            await rc.save();
         }
 
         await rollback(hash);

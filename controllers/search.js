@@ -1,21 +1,10 @@
-import fs from 'fs'
-import fsExtra from 'fs-extra'
-import path from 'path'
-import util from 'util';
 import deipRpc from '@deip/deip-rpc-client';
-import ResearchContent from './../schemas/researchContent';
-import config from './../config';
-import { sendTransaction } from './../utils/blockchain';
-import { findContentByHashOrId, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
-import { authorizeResearchGroup } from './../services/auth'
-
 
 const getAllResearchContents = async (ctx) => {
     const username = ctx.params.username;
     const jwtUsername = ctx.state.user.username;
 
     try {
-        
         const researchList = await deipRpc.api.getAllResearchesListingAsync(0, 0);
         const contentList = [];
 

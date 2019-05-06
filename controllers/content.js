@@ -15,7 +15,7 @@ import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
 import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
-import { findContentByHashOrId, findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
+import { findResearchContentById, findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
 import { bulkResearchContentUploader } from './../storages/bulkResearchContentUploader';
 import { authorizeResearchGroup } from './../services/auth'
 import url from 'url';
@@ -58,7 +58,7 @@ const readDarArchive = async (ctx) => {
     const darId = ctx.params.dar;
 
     try {
-        const rc = await findContentByHashOrId(darId);
+        const rc = await findResearchContentById(darId);
         if (!rc) {
             ctx.status = 404;
             ctx.body = `Dar for "${darId}" id is not found`;
@@ -94,7 +94,7 @@ const readDarArchive = async (ctx) => {
 const readDarArchiveStaticFiles = async (ctx) => {
     const darId = ctx.params.dar;
     try {
-        const rc = await findContentByHashOrId(darId);
+        const rc = await findResearchContentById(darId);
         const stat = util.promisify(fs.stat);
         const filePath = path.join(storagePath, rc.filename);
         const check = await stat(filePath);
@@ -106,11 +106,10 @@ const readDarArchiveStaticFiles = async (ctx) => {
     }
 }
 
-const getContentRef = async (ctx) => {
-    const hashOrId = ctx.params.hashOrId;
-    const researchId = ctx.params.researchId;
+const getContentRefById = async (ctx) => {
+    const refId = ctx.params.refId;
     try {
-        const ref = await findResearchContentByHash(researchId, hashOrId);
+        const ref = await findResearchContentById(refId);
         ctx.status = 200;
         ctx.body = ref;
     } catch (err){
@@ -119,6 +118,18 @@ const getContentRef = async (ctx) => {
     }
 }
 
+const getContentRefByHash = async (ctx) => {
+    const hash = ctx.params.hash;
+    const researchId = ctx.params.researchId;
+    try {
+        const ref = await findResearchContentByHash(researchId, hash);
+        ctx.status = 200;
+        ctx.body = ref;
+    } catch (err){
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+}
 
 // ############ Write actions ############
 
@@ -136,7 +147,7 @@ const updateDarArchive = async (ctx) => {
     });
 
     try {
-        const rc = await findContentByHashOrId(darId);
+        const rc = await findResearchContentById(darId);
         if (!rc || rc.status != 'in-progress') {
             ctx.status = 405;
             ctx.body = `Research "${darId}" is locked for updates or does not exist`;
@@ -196,13 +207,13 @@ const updateDarArchive = async (ctx) => {
 
 const unlockContentDraft = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
-    const darId = ctx.params.refId;
+    const refId = ctx.params.refId;
     
     try {
-        const rc = await findContentByHashOrId(darId);
+        const rc = await findResearchContentById(refId);
         if (!rc || (rc.status != 'proposed' && rc.status != 'completed')) {
             ctx.status = 405;
-            ctx.body = `Proposed "${darId}" content archive is not found`;
+            ctx.body = `Proposed "${refId}" content archive is not found`;
             return;
         }
 
@@ -301,7 +312,7 @@ const deleteContentDraft = async (ctx) => {
     const refId = ctx.params.refId;
 
     try {
-        const rc = await findContentByHashOrId(refId);
+        const rc = await findResearchContentById(refId);
         if (!rc) {
             ctx.status = 404;
             ctx.body = `Dar for "${refId}" id is not found`;
@@ -325,7 +336,7 @@ const deleteContentDraft = async (ctx) => {
         }
 
         const unlink = util.promisify(fs.unlink);
-        
+
         if (rc.type === 'dar') {
             await fsExtra.remove(path.join(storagePath, rc.filename));
         } else if (rc.type === 'file') {
@@ -517,7 +528,7 @@ const uploadFileContent = async(ctx) => {
 
         var exists = false;
         const _id = `${researchId}_file_${hashObj.hash}`;
-        const rc = await findContentByHashOrId(_id);
+        const rc = await findResearchContentById(_id);
 
         if (rc) {
             const stat = util.promisify(fs.stat);
@@ -716,7 +727,8 @@ export default {
     getResearchPackageFile,
 
     // refs
-    getContentRef,
+    getContentRefById,
+    getContentRefByHash,
     listContentRefs,
 
     // drafts

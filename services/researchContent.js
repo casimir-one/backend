@@ -1,13 +1,13 @@
 import deipRpc from '@deip/deip-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 
-export async function findContentByHashOrId(hashOrId) {
-    const rc = await ResearchContent.findOne({ $or: [ { _id: hashOrId }, { hash: hashOrId } ] });
+export async function findResearchContentById(_id) {
+    const rc = await ResearchContent.findOne({ _id });
     return rc;
 }
 
-export async function findResearchContentByHash(researchId, hashOrId) {
-    const rc = await ResearchContent.findOne({ researchId, $or: [ { _id: hashOrId }, { hash: hashOrId } ] });
+export async function findResearchContentByHash(researchId, hash) {
+    const rc = await ResearchContent.findOne({ researchId, hash });
     return rc;
 }
 
