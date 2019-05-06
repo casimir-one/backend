@@ -655,7 +655,7 @@ const uploadBulkResearchContent = async(ctx) => {
             await fsExtra.move(tempDestinationPath, packagePath, { overwrite: true });
             
             if (rc) {
-                rc.filename = `Package: content [${packageHash}];'`
+                rc.filename = `package: [${packageHash}]`
                 const updatedAc = await rc.save();
                 ctx.status = 200;
                 ctx.body = updatedAc;
@@ -664,8 +664,8 @@ const uploadBulkResearchContent = async(ctx) => {
                 const _id = `${researchId}_package_${packageHash}`;
                 const rc = new ResearchContent({
                     "_id": _id,
-                    "filename": `Package: content [${packageHash}];`,
-                    "title": `package ${packageHash}`,
+                    "filename": `package [${packageHash}]`,
+                    "title": `${packageHash}`,
                     "researchId": researchId,
                     "researchGroupId": research.research_group_id,
                     "hash": packageHash,

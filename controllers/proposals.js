@@ -102,6 +102,7 @@ const createContentProposal = async (ctx) => {
         rc.status = 'proposed';
         rc.authors = proposal.authors;
         rc.references = proposal.references;
+        rc.title = proposal.title;
         const updatedRc = await rc.save();
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
