@@ -324,16 +324,19 @@ const deleteContentDraft = async (ctx) => {
             return;
         }
 
-        await ResearchContent.remove({ _id: refId });
-
+        const unlink = util.promisify(fs.unlink);
+        
         if (rc.type === 'dar') {
             await fsExtra.remove(path.join(storagePath, rc.filename));
         } else if (rc.type === 'file') {
-            const unlink = util.promisify(fs.unlink);
             await unlink(researchFileContentPath(rc.researchId, rc.filename));
+        } else if (rc.type === 'package') {
+            await fsExtra.remove(researchFilesPackagePath(rc.researchId, rc.hash));
         }
 
+        await ResearchContent.remove({ _id: refId });
         ctx.status = 201;
+
     } catch (err) {
         console.log(err);
         ctx.status = 500;
