@@ -21,6 +21,7 @@ import { authorizeResearchGroup } from './../services/auth'
 import url from 'url';
 import crypto from 'crypto';
 import rimraf from "rimraf";
+import slug from 'limax';
 
 const storagePath = path.join(__dirname, './../files');
 const opts = {}
@@ -711,7 +712,7 @@ const getResearchPackageFile = async function(ctx) {
     }
 
     if (isDownload) {
-        ctx.response.set('Content-disposition', 'attachment; filename="' + file.filename + '"');
+        ctx.response.set('Content-disposition', 'attachment; filename="' + slug(file.filename) + '"');
         ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchId, rc.hash, file.filename));
     } else {
         await send(ctx, `/files/${rc.researchId}/${rc.hash}/${file.filename}`);
