@@ -477,13 +477,13 @@ const contentStorage = multer.diskStorage({
     }
 })
 
-const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
+// const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 const contentUploader = multer({
     storage: contentStorage,
     fileFilter: function(req, file, callback) {
-        if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-            return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
-        }
+        // if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
+        //     return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
+        // }
         callback(null, true);
     }
 })
@@ -673,7 +673,7 @@ const uploadBulkResearchContent = async(ctx) => {
                     "status": "in-progress",
                     "authors": [jwtUsername],
                     "packageFiles": hashObj.children.map((f) => {
-                        return { filename: f.name, hash: f.hash }
+                        return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
                     }),
                     "references": []
                 });
@@ -697,7 +697,6 @@ const getResearchPackageFile = async function(ctx) {
     const isDownload = ctx.query.download;
 
     const rc = await findResearchContentByHash(researchId, hash);
-
     if (rc == null) {
         ctx.status = 404;
         ctx.body = `Package "${hash}" is not found`
@@ -705,9 +704,15 @@ const getResearchPackageFile = async function(ctx) {
     }
 
     const file = rc.packageFiles.find(f => f.hash == fileHash);
+    if (!file) {
+        ctx.status = 404;
+        ctx.body = `File "${fileHash}" is not found`
+        return;
+    }
+
     if (isDownload) {
         ctx.response.set('Content-disposition', 'attachment; filename="' + file.filename + '"');
-        ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchId, rc.hash, rc.fileHash));
+        ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchId, rc.hash, file.filename));
     } else {
         await send(ctx, `/files/${rc.researchId}/${rc.hash}/${file.filename}`);
     }

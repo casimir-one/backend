@@ -5,7 +5,7 @@ import util from 'util';
 import multer from 'koa-multer';
 
 const storagePath = path.join(__dirname, './../files');
-const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
+// const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 
 const researchFilesTempStoragePath = (researchId, postfix) => `${storagePath}/${researchId}/temp-${postfix}`
 const bulkResearchContentStorage = multer.diskStorage({
@@ -21,9 +21,9 @@ const bulkResearchContentStorage = multer.diskStorage({
 export const bulkResearchContentUploader = multer({
     storage: bulkResearchContentStorage,
     fileFilter: function(req, file, callback) {
-        if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-            return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
-        }
+        // if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
+        //     return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
+        // }
         callback(null, true);
     }
 })

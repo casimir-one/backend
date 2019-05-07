@@ -22,7 +22,8 @@ const ResearchContent = new Schema({
     },
     "packageFiles": [{
         "filename": { type: String, required: true },
-        "hash": { type: String, required: true }
+        "hash": { type: String, required: true },
+        "ext": { type: String, required: true },
     }],
     "authors": [{ type: String }],
     "references": [{ type: Number }],
