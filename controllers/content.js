@@ -591,14 +591,14 @@ const uploadBulkResearchContent = async(ctx) => {
     }
 
     const stat = util.promisify(fs.stat);
-    const mkdir = util.promisify(fs.mkdir);
+    const mkdirRecursive = util.promisify(fsExtra.ensureDir);
 
     try {
         const researchFilesTempStorage = researchFilesTempStoragePath(ctx.request.header['research-id'], ctx.request.header['upload-session'])
         try {
             const check = await stat(researchFilesTempStorage);
         } catch(err) {
-            await mkdir(researchFilesTempStorage);
+            await mkdirRecursive(researchFilesTempStorage);
         }
 
         const research = await deipRpc.api.getResearchByIdAsync(researchId);
