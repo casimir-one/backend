@@ -1,5 +1,4 @@
 import koa_router from 'koa-router'
-import files from '../controllers/files'
 import users from '../controllers/users'
 import search from '../controllers/search'
 import notifications from '../controllers/notifications'
@@ -10,7 +9,7 @@ import agency from '../controllers/agency'
 
 const router = koa_router()
 
-router.post('/files/upload-avatar', files.uploadAvatar)
+router.post('/files/upload-avatar', users.uploadAvatar)
 
 router.get('/user/profile/:username', users.getUserProfile)
 router.get('/user/profiles', users.getUsersProfiles)
