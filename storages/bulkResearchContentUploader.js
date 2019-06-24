@@ -5,9 +5,14 @@ import util from 'util';
 import multer from 'koa-multer';
 
 const storagePath = path.join(__dirname, './../files');
+
+export const researchFileStoragePath = (researchId) => `${storagePath}/${researchId}`
+export const researchFilesTempStoragePath = (researchId, postfix) => `${researchFileStoragePath(researchId)}/temp-${postfix}`
+export const researchFilesPackagePath = (researchId, packageHash) => `${researchFileStoragePath(researchId)}/${packageHash}`
+export const researchFilesPackageFilePath = (researchId, packageHash, fileHash) => `${researchFilesPackagePath(researchId, packageHash)}/${fileHash}`
+
 // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 
-const researchFilesTempStoragePath = (researchId, postfix) => `${storagePath}/${researchId}/temp-${postfix}`
 const bulkResearchContentStorage = multer.diskStorage({
     destination: async function(req, file, callback) {
         const researchFilesTempStorage = researchFilesTempStoragePath(req.headers['research-id'], req.headers['upload-session'])

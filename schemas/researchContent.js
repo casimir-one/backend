@@ -12,7 +12,7 @@ const ResearchContent = new Schema({
     "hash": {type: String, index: true },
     "type": {
         type: String,
-        enum : ['file', 'dar', 'package'],
+        enum : ['package'],
         required: true
     },
     "status": {
