@@ -36,6 +36,7 @@
         "parse-formdata": "^1.0.2",
         "qs": "^6.5.2",
         "sharp": "^0.20.3",
+        "socket.io": "^2.2.0",
         "substance": "^1.0.0-preview.53",
         "web3": "^0.18.4",
         "xml2js": "^0.4.19"

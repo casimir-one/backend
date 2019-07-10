@@ -5,7 +5,8 @@ import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
 import content from './routes/content.js';
-import jwt from 'koa-jwt';
+import jwtKoa from 'koa-jwt';
+import jwt from 'jsonwebtoken';
 import path from 'path';
 import serve from 'koa-static';
 import koa_router from "koa-router";
@@ -30,14 +31,14 @@ app.use(koa_bodyparser());
 app.use(json());
 app.use(logger());
 
-app.use(async function(ctx, next) {
+app.use(async function (ctx, next) {
     let start = new Date;
     await next();
     let ms = new Date - start;
     console.log('%s %s - %s', ctx.method, ctx.url, ms);
 });
 
-app.use(async function(ctx, next) {
+app.use(async function (ctx, next) {
     try {
         await next();
     } catch (err) {
@@ -55,16 +56,16 @@ app.use(async function(ctx, next) {
 });
 
 
-app.on('error', function(err, ctx) {
+app.on('error', function (err, ctx) {
     console.log('server error', err);
 });
 
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
-router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
+router.use('/content', jwtKoa({ secret: config.jwtSecret }).unless((req) => {
     return req.method == 'GET';
 }), content.routes());
-router.use('/api', jwt({ secret: config.jwtSecret }), api.routes());
+router.use('/api', jwtKoa({ secret: config.jwtSecret }), api.routes());
 
 app.use(router.routes());
 
@@ -72,19 +73,55 @@ mongoose.connect(config.mongo['deip-server'].connection);
 mongoose.connection.on('connected', () => {
     console.log(`Mongoose default connection open to ${config.mongo['deip-server'].connection}`);
 });
-mongoose.connection.on('error',  (err) => {
+mongoose.connection.on('error', (err) => {
     console.log(`Mongoose default connection error: ${err}`);
 });
 mongoose.connection.on('disconnected', () => {
     console.log('Mongoose default connection disconnected');
 });
 
-app.listen(PORT, HOST, () => {
+// app.listen(PORT, HOST, () => {
+//     console.log(`Running on http://${HOST}:${PORT}`);
+// });
+
+const server = require('http').createServer(app.callback());
+const io = require('socket.io')(server);
+
+io.use(function (socket, next) {
+    let token = socket.handshake.query.token;
+    if (!token) {
+        next(new Error('ws_jwt_missed'));
+    }
+
+    jwt.verify(token, config.jwtSecret, (err, decoded) => {
+        if (err) {
+            next(new Error('ws_jwt_invalid'));
+        } else {
+            let user = decoded;
+            socket.user = user;
+            next();
+        }
+    })
+});
+
+
+io.on('connection', (socket) => {
+    console.log("Sockets connected");
+    console.log('from socket! ', socket.user);
+
+    socket.on('emit_method', (data) => {
+        console.log(data + " sent me a message !");
+        socket.emit('customEmit', "I got you, " + data)
+    }); // listen to the event
+});
+
+
+server.listen(PORT, HOST, () => {
     console.log(`Running on http://${HOST}:${PORT}`);
 });
 
 process.on('SIGINT', () => {
-    mongoose.connection.close( () => {
+    mongoose.connection.close(() => {
         console.log('Mongoose default connection closed through app termination');
         process.exit(0);
     });

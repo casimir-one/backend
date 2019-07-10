@@ -10,7 +10,7 @@ function Encodeuint8arr(seed) {
     return new TextEncoder("utf-8").encode(seed);
 }
 
-const signIn = async function(ctx) {
+const signIn = async function (ctx) {
     const data = ctx.request.body;
     const username = data.username;
     const secretSigHex = data.secretSigHex;
@@ -35,7 +35,7 @@ const signIn = async function(ctx) {
             const jwtToken = jwt.sign({
                 pubKey: pubWif,
                 username: username,
-                exp: Math.floor(Date.now() / 1000) + (180 * 60) // 3 hours
+                exp: Math.floor(Date.now() / 1000) + (1440 * 60) // 24 hours
             }, jwtSecret)
 
             ctx.body = {
@@ -59,7 +59,7 @@ const signIn = async function(ctx) {
     }
 }
 
-const signUp = async function(ctx) {
+const signUp = async function (ctx) {
     const data = ctx.request.body;
     const username = data.username;
     const email = data.email;
@@ -81,13 +81,13 @@ const signUp = async function(ctx) {
             ctx.body = `Account '${username}' already exists`;
             return;
         }
-    
+
         const owner = {
             weight_threshold: 1,
             account_auths: [],
             key_auths: [[pubKey, 1]]
         };
-    
+
         const result = await createAccount(username, pubKey, owner);
         if (!result.isSuccess) {
             ctx.status = 500;
@@ -95,7 +95,7 @@ const signUp = async function(ctx) {
             return;
         }
 
-        let profile = await UserProfile.findOne({'_id': username});
+        let profile = await UserProfile.findOne({ '_id': username });
         if (!profile) {
             const model = new UserProfile({
                 _id: username,
@@ -105,7 +105,7 @@ const signUp = async function(ctx) {
             });
             profile = await model.save();
         }
-        
+
         ctx.status = 200;
         ctx.body = profile;
 
@@ -124,28 +124,28 @@ async function createAccount(username, pubKey, owner) {
         deipRpc.api.getConfig((err, config) => {
             if (err) {
                 console.log(err, config);
-                resolve({isSuccess:false, result: err})
+                resolve({ isSuccess: false, result: err })
             }
 
             deipRpc.api.getChainProperties((err, chainProps) => {
                 if (err) {
                     console.log(err, chainProps);
-                    resolve({isSuccess:false, result: err})
+                    resolve({ isSuccess: false, result: err })
                 }
 
                 // const ratio = config['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
                 // var fee = Asset.from(chainProps.account_creation_fee).multiply(ratio);
                 const jsonMetadata = '';
-                deipRpc.broadcast.accountCreate(accountsCreator.wif, accountsCreator.fee, 
-                            accountsCreator.username, username, owner, owner, owner, 
-                            pubKey, jsonMetadata, (err, result) => {
+                deipRpc.broadcast.accountCreate(accountsCreator.wif, accountsCreator.fee,
+                    accountsCreator.username, username, owner, owner, owner,
+                    pubKey, jsonMetadata, (err, result) => {
 
-                    if (err) {
-                        console.log(err, chainProps);
-                        resolve({isSuccess:false, result: err})
-                    }
-                    resolve({isSuccess:true, result: result})
-                });
+                        if (err) {
+                            console.log(err, chainProps);
+                            resolve({ isSuccess: false, result: err })
+                        }
+                        resolve({ isSuccess: true, result: result })
+                    });
             });
         });
     });
