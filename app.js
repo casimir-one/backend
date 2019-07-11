@@ -127,7 +127,7 @@ io.on('connection', (socket) => {
         if (err) {
           console.log(err);
         } else {
-          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index });
+          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
         }
       });
     } else {
@@ -136,7 +136,7 @@ io.on('connection', (socket) => {
         if (err) {
           console.log(err);
         } else {
-          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index });
+          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
         }
       })
     }
