@@ -15,10 +15,18 @@ import cors from '@koa/cors';
 import config from './config';
 import mongoose from 'mongoose';
 import fs from "fs";
+import fsExtra from "fs-extra";
+import util from 'util';
 
 import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
 deipRpc.config.set('chain_id', config.blockchain.chainId);
+
+
+import { createFileRef } from './services/fileRef';
+import FileContent from './schemas/fileRef';
+
+
 
 const app = new Koa();
 const router = koa_router();
@@ -105,25 +113,79 @@ io.use(function (socket, next) {
   })
 });
 
-const uploadMap = {};
+const uploadSessions = {};
+
+function getSession(filename, uuid) {
+  return `${filename}-${uuid}`
+    .replace(/ /g, "-")
+    .replace(/\W+/g, "-")
+    .toLowerCase();;
+}
 
 io.on('connection', (socket) => {
 
-  socket.on('upload_encrypted_chunk', (msg) => {
+  socket.on('upload_encrypted_chunk', async (msg) => {
+    const session = getSession(msg.uuid, msg.filename);
 
-    if (!uploadMap[msg.uuid]) {
-      let ws = fs.createWriteStream(`${msg.uuid}-${msg.filename}`, { 'flags': 'a' });
-      uploadMap[msg.uuid] = { ws, isEnded: false };
+    if (!uploadSessions[session]) {
+      let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess } = msg;
 
-      ws.on('close', function (err) {
-        delete uploadMap[`${msg.uuid}-${msg.filename}`];
-        console.log('Writable Stream has been closed');
-      });
+      if (organizationId !== undefined &&
+        projectId !== undefined &&
+        filename !== undefined &&
+        hash !== undefined &&
+        size !== undefined &&
+        chunkSize !== undefined &&
+        iv !== undefined &&
+        filetype !== undefined &&
+        fileAccess !== undefined) {
+
+
+        let name = `${iv}_${chunkSize}_${session}`;
+        const filepath = `files/${projectId}/${name.length <= 250 ? name : name.substr(0, 250)}.aes`;
+        const stat = util.promisify(fs.stat);
+        try {
+          const check = await stat(filepath);
+          console.log(`Session ${session} has expired`);
+          return;
+
+        } catch (err) {
+
+          const ensureDir = util.promisify(fsExtra.ensureDir);
+          await ensureDir(`files/${projectId}`);
+
+          let ws = fs.createWriteStream(filepath, { 'flags': 'a' });
+          uploadSessions[session] = {
+            ws,
+            organizationId,
+            projectId,
+            filename,
+            filetype,
+            filepath,
+            size,
+            hash,
+            iv,
+            chunkSize,
+            fileAccess,
+            isEnded: false
+          };
+
+          ws.on('close', function (err) {
+            delete uploadSessions[session];
+            console.log('Writable Stream has been closed');
+          });
+        }
+
+      } else {
+        console.log("Message malformed");
+        console.log(msg);
+        return;
+      }
     }
 
     if (msg.index != msg.lastIndex) {
 
-      uploadMap[msg.uuid].ws.write(new Buffer(new Uint8Array(msg.data)), (err) => {
+      uploadSessions[session].ws.write(new Buffer(new Uint8Array(msg.data)), (err) => {
         if (err) {
           console.log(err);
         } else {
@@ -131,11 +193,13 @@ io.on('connection', (socket) => {
         }
       });
     } else {
-      uploadMap[msg.uuid].ws.end(new Buffer(new Uint8Array(msg.data)), (err) => {
-        uploadMap[msg.uuid].isEnded = true;
+      uploadSessions[session].ws.end(new Buffer(new Uint8Array(msg.data)), async (err) => {
+        uploadSessions[session].isEnded = true;
         if (err) {
           console.log(err);
         } else {
+          let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = uploadSessions[session];
+          await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess, "timestamped");
           socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
         }
       })
