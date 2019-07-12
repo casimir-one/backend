@@ -231,26 +231,45 @@ io.on('connection', (socket) => {
     const session = getSession(msg.uuid, msg.filename);
 
     if (!downloadSessions[session]) {
-      let { filepath } = msg;
+      let { filename, filepath, chunkSize } = msg;
 
-      let stats = fs.statSync(filepath);
-      let fileSizeInBytes = stats.size;
-      let index = -1;
-      let lastIndex = Math.ceil(fileSizeInBytes / (2 * 1024 * 1024)) - 1;
+      const stat = util.promisify(fs.stat);
 
-      let rs = fs.createReadStream(filepath, { highWaterMark: 2 * 1024 * 1024 });
-      downloadSessions[session] = { rs, isEnded: false, index, filepath, lastIndex };
+      try {
 
-      rs.on('end', function () {
-        downloadSessions[session].isEnded = true;
-      })
-        .on('close', function (err) {
-          delete downloadSessions[session];
-          console.log('Readable Stream has been closed');
-        });
+        if (filepath !== undefined &&
+          chunkSize !== undefined &&
+          filename !== undefined) {
+
+          const stats = await stat(filepath);
+          let fileSizeInBytes = stats.size;
+          let index = -1;
+          let lastIndex = Math.ceil(fileSizeInBytes / chunkSize) - 1;
+
+          let rs = fs.createReadStream(filepath, { highWaterMark: 2 * 1024 * 1024 });
+          downloadSessions[session] = { rs, isEnded: false, index, filepath, filename, lastIndex, chunkSize };
+
+          rs.on('end', function () {
+            downloadSessions[session].isEnded = true;
+          })
+            .on('close', function (err) {
+              delete downloadSessions[session];
+              console.log('Readable Stream has been closed');
+            });
+
+        } else {
+          console.log("Message malformed");
+          console.log(msg);
+          return;
+        }
+
+      } catch (err) {
+        console.log(err);
+        return;
+      }
     }
 
-    let data = await readBytes(downloadSessions[session].rs);
+    let data = await readBytes(downloadSessions[session].rs, downloadSessions[session].chunkSize);
     let lastIndex = downloadSessions[session].lastIndex;
     let index = ++downloadSessions[session].index;
 
