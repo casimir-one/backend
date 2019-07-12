@@ -119,7 +119,7 @@ function getSession(filename, uuid) {
   return `${filename}-${uuid}`
     .replace(/ /g, "-")
     .replace(/\W+/g, "-")
-    .toLowerCase();;
+    .toLowerCase();
 }
 
 io.on('connection', (socket) => {

@@ -12,7 +12,19 @@ export async function findFileRefByHash(projectId, hash) {
 }
 
 
-export async function createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, accessKeys, status) {
+export async function createFileRef(
+  organizationId,
+  projectId,
+  filename,
+  filetype,
+  filepath,
+  size,
+  hash,
+  iv,
+  chunkSize,
+  accessKeys,
+  status
+) {
   const fr = new FileRef({
     organizationId: organizationId,
     projectId: projectId,
