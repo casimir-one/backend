@@ -226,30 +226,33 @@ io.on('connection', (socket) => {
     }
   }
 
-  const downloadMap = {};
+  const downloadSessions = {};
   socket.on('download_encrypted_chunk', async (msg) => {
+    const session = getSession(msg.uuid, msg.filename);
 
-    if (!downloadMap[msg.uuid]) {
-      let stats = fs.statSync(`${msg.uuid}-${msg.filename}`);
+    if (!downloadSessions[session]) {
+      let { filepath } = msg;
+
+      let stats = fs.statSync(filepath);
       let fileSizeInBytes = stats.size;
       let index = -1;
       let lastIndex = Math.ceil(fileSizeInBytes / (2 * 1024 * 1024)) - 1;
 
-      let rs = fs.createReadStream(`${msg.uuid}-${msg.filename}`, { highWaterMark: 2 * 1024 * 1024 });
-      downloadMap[msg.uuid] = { rs, isEnded: false, index, lastIndex };
+      let rs = fs.createReadStream(filepath, { highWaterMark: 2 * 1024 * 1024 });
+      downloadSessions[session] = { rs, isEnded: false, index, filepath, lastIndex };
 
       rs.on('end', function () {
-        downloadMap[msg.uuid].isEnded = true;
+        downloadSessions[session].isEnded = true;
       })
         .on('close', function (err) {
-          delete downloadMap[`${msg.uuid}-${msg.filename}`];
+          delete downloadSessions[session];
           console.log('Readable Stream has been closed');
         });
     }
 
-    let data = await readBytes(downloadMap[msg.uuid].rs);
-    let lastIndex = downloadMap[msg.uuid].lastIndex;
-    let index = ++downloadMap[msg.uuid].index;
+    let data = await readBytes(downloadSessions[session].rs);
+    let lastIndex = downloadSessions[session].lastIndex;
+    let index = ++downloadSessions[session].index;
 
     socket.emit('downloaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, data: data, type: msg.type, index, lastIndex });
   });

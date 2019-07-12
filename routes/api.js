@@ -6,6 +6,7 @@ import proposals from '../controllers/proposals'
 import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import agency from '../controllers/agency'
+import files from '../controllers/files'
 
 const router = koa_router()
 
@@ -33,5 +34,10 @@ router.post('/invites/reject', invites.rejectInvite)
 
 router.get('/agencies/profile/:agency', agency.getAgencyProfile)
 router.get('/agencies/profiles', agency.getAgenciesProfiles)
+
+router.get('/refs/project/:projectId', files.listFileRefs)
+router.get('/refs/project/file-id/:refId', files.getFileRefById)
+router.get('/refs/project/:projectId/file-hash/:hash', files.getFileRefByHash)
+
 
 export default router
