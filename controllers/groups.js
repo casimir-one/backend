@@ -1,7 +1,9 @@
 
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import { sendInviteNotificationToInvitee } from './../services/notifications';
-import { createOrganizationProfile } from './../services/organization';
+import { createOrganizationProfile, findOrganizationByPermlink } from './../services/organization';
+import { authorizeResearchGroup } from './../services/auth'
+
 import deipRpc from '@deip/deip-rpc-client';
 
 const createResearchGroup = async (ctx) => {
@@ -62,6 +64,78 @@ const createResearchGroup = async (ctx) => {
 }
 
 
+const updateGroupProfile = async (ctx) => {
+
+  try {
+    const data = ctx.request.body;
+    const permlink = ctx.params.permlink;
+    const jwtUsername = ctx.state.user.username;
+
+    const profile = await findOrganizationByPermlink(permlink);
+    const group = await deipRpc.api.getResearchGroupByPermlinkAsync(permlink);
+
+    if (!profile || !group) {
+      ctx.status = 404;
+      ctx.body = `Profile for "${group.permlink}" does not exist!`
+      return;
+    }
+
+    const authorized = await authorizeResearchGroup(group.id, jwtUsername);
+    if (!authorized) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${group.permlink}" group.`
+      return;
+    }
+
+    for (let key in data) {
+      if (data.hasOwnProperty(key)) {
+        profile[key] = data[key]
+      }
+    }
+
+    const updatedProfile = await profile.save()
+    ctx.status = 200;
+    ctx.body = updatedProfile
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getGroupProfile = async (ctx) => {
+
+  try {
+    const permlink = ctx.params.permlink;
+    const jwtUsername = ctx.state.user.username;
+
+    const profile = await findOrganizationByPermlink(permlink);
+    const group = await deipRpc.api.getResearchGroupByPermlinkAsync(permlink);
+
+    if (!profile || !group) {
+      ctx.status = 404;
+      ctx.body = `Profile for "${group.permlink}" does not exist!`
+      return;
+    }
+
+    const authorized = await authorizeResearchGroup(group.id, jwtUsername);
+    if (!authorized) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${group.permlink}" group.`
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = profile;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 async function processNewGroup(payload, txInfo) {
   const transaction = await getTransaction(txInfo.id);
   for (let i = 0; i < transaction.operations.length; i++) {
@@ -84,5 +158,7 @@ async function processNewGroup(payload, txInfo) {
 
 
 export default {
-  createResearchGroup
+  createResearchGroup,
+  updateGroupProfile,
+  getGroupProfile
 }

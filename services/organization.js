@@ -2,12 +2,12 @@ import deipRpc from '@deip/deip-rpc-client';
 import OrganizationProfile from './../schemas/organization';
 
 export async function findOrganizationById(_id) {
-  const fr = await FileRef.findOne({ _id });
+  const fr = await OrganizationProfile.findOne({ _id });
   return fr;
 }
 
 export async function findOrganizationByPermlink(permlink) {
-  const fr = await FileRef.findOne({ permlink });
+  const fr = await OrganizationProfile.findOne({ permlink });
   return fr;
 }
 

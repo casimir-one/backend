@@ -28,6 +28,8 @@ router.post('/proposals/content/:type', proposals.createContentProposal)
 router.post('/proposals/invite', proposals.createInviteProposal)
 
 router.post('/groups', groups.createResearchGroup)
+router.get('/groups/profile/:permlink', groups.getGroupProfile)
+router.put('/groups/profile/:permlink', groups.updateGroupProfile)
 
 router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
