@@ -22,8 +22,10 @@ const createResearchGroup = async (ctx) => {
       addressLine2,
       zip,
       phoneNumber,
-      email,
-      members } = meta;
+      email
+    } = meta;
+
+    let members = [{ name: payload.creator }, ...payload.invitees.map(i => { return { name: i.account } })];
 
     if (!payload.name || !payload.permlink) {
       ctx.status = 400;
