@@ -3,6 +3,7 @@ import { sendTransaction, getTransaction } from './../utils/blockchain';
 import { sendInviteNotificationToInvitee } from './../services/notifications';
 import { createOrganizationProfile, findOrganizationByPermlink } from './../services/organization';
 import { authorizeResearchGroup } from './../services/auth'
+import UserProfile from './../schemas/user';
 
 import deipRpc from '@deip/deip-rpc-client';
 
@@ -48,6 +49,10 @@ const createResearchGroup = async (ctx) => {
       try {
         // do not fail if transaction is accepted in the chain
         await createOrganizationProfile(payload.permlink, payload.name, website, fullName, payload.description, country, city, addressLine1, addressLine2, zip, phoneNumber, email, members);
+
+        let userProfile = await UserProfile.findOne({ '_id': jwtUsername });
+        userProfile.activeOrgPermlink = payload.permlink;
+        await userProfile.save();
         await processNewGroup(payload, result.txInfo);
       } catch (err) { console.log(err) }
 

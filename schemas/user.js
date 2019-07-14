@@ -6,11 +6,12 @@ const Schema = mongoose.Schema;
 const UserProfile = new Schema({
     "_id": { type: String },
     "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
+    "activeOrgPermlink": { type: String, required: false, default: null },
     "avatar": { type: String, default: "default_avatar.png" },
     "agencies": [{
         "role": {
             type: String,
-            enum : ['applicant', 'grantor', 'officer', 'treasury'],
+            enum: ['applicant', 'grantor', 'officer', 'treasury'],
             required: true
         },
         "name": { type: String, required: true, default: null },
@@ -27,7 +28,7 @@ const UserProfile = new Schema({
     "socialNetworks": [{
         "kind": {
             type: String,
-            enum : ['Unknown', 'Facebook', 'LinkedIn', 'Twitter', 'VK', 'WeChat' ],
+            enum: ['Unknown', 'Facebook', 'LinkedIn', 'Twitter', 'VK', 'WeChat'],
             required: true
         },
         "link": { type: String, required: true, trim: true },
@@ -46,14 +47,14 @@ const UserProfile = new Schema({
         "degree": { type: String, required: true },
         "area": { type: String, required: true },
         "description": { type: String, default: null },
-        "isActive": {type: Boolean, required: true, default: false}
+        "isActive": { type: Boolean, required: true, default: false }
     }],
-    "employment":[{
+    "employment": [{
         "company": { type: String, required: true, trim: true },
         "location": {
             city: { type: String, trim: true, default: null },
             country: { type: String, trim: true, default: null }
-        }, 
+        },
         "period": {
             from: { type: Date, default: null },
             to: { type: Date, default: null }
