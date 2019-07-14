@@ -110,6 +110,13 @@ const getGroupProfile = async (ctx) => {
     const permlink = ctx.params.permlink;
     const jwtUsername = ctx.state.user.username;
 
+    if (jwtUsername == permlink) {
+      // personal group
+      ctx.status = 200;
+      ctx.body = getOrganizationMock(jwtUsername);
+      return;
+    }
+
     const profile = await findOrganizationByPermlink(permlink);
     const group = await deipRpc.api.getResearchGroupByPermlinkAsync(permlink);
 
@@ -152,6 +159,25 @@ async function processNewGroup(payload, txInfo) {
       }
       break;
     }
+  }
+}
+
+function getOrganizationMock(username) {
+  return {
+    "email": "",
+    "logo": "default_organization_logo.png",
+    "permlink": username,
+    "name": username,
+    "website": username,
+    "fullName": username,
+    "description": username,
+    "country": "",
+    "city": "",
+    "addressLine1": "",
+    "addressLine2": "",
+    "zip": "",
+    "phoneNumber": "",
+    "members": []
   }
 }
 
