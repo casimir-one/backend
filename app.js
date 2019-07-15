@@ -273,7 +273,7 @@ io.on('connection', (socket) => {
     let lastIndex = downloadSessions[session].lastIndex;
     let index = ++downloadSessions[session].index;
 
-    socket.emit('downloaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, data: data, type: msg.type, index, lastIndex });
+    socket.emit('downloaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, data: data, filetype: msg.filetype, index, lastIndex });
   });
 
 });
