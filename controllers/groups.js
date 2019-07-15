@@ -131,12 +131,12 @@ const getGroupProfile = async (ctx) => {
       return;
     }
 
-    const authorized = await authorizeResearchGroup(group.id, jwtUsername);
-    if (!authorized) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${group.permlink}" group.`
-      return;
-    }
+    // const authorized = await authorizeResearchGroup(group.id, jwtUsername);
+    // if (!authorized) {
+    //   ctx.status = 401;
+    //   ctx.body = `"${jwtUsername}" is not a member of "${group.permlink}" group.`
+    //   return;
+    // }
 
     ctx.status = 200;
     ctx.body = profile;
