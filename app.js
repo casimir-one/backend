@@ -47,22 +47,22 @@ app.use(async function (ctx, next) {
   console.log('%s %s - %s', ctx.method, ctx.url, ms);
 });
 
-app.use(async function (ctx, next) {
-  try {
-    await next();
-  } catch (err) {
-    if (401 === err.status) {
-      ctx.status = 401;
-      ctx.body = {
-        success: false,
-        token: null,
-        info: 'Protected resource, use "Authorization" header to get access'
-      };
-    } else {
-      throw err;
-    }
-  }
-});
+// app.use(async function (ctx, next) {
+//   try {
+//     await next();
+//   } catch (err) {
+//     if (401 === err.status) {
+//       ctx.status = 401;
+//       ctx.body = {
+//         success: false,
+//         token: null,
+//         info: 'Protected resource, use "Authorization" header to get access'
+//       };
+//     } else {
+//       throw err;
+//     }
+//   }
+// });
 
 
 app.on('error', function (err, ctx) {
@@ -124,11 +124,23 @@ function getSession(filename, uuid) {
 
 io.on('connection', (socket) => {
 
+  socket.on('pong', async (msg) => {
+    console.log(`------ ${msg}`);
+    socket.emit('ping', { ball: "server" })
+  });
+
   socket.on('upload_encrypted_chunk', async (msg) => {
     const session = getSession(msg.uuid, msg.filename);
 
+    console.log(uploadSessions)
+
+    console.log(session);
+
+
     if (!uploadSessions[session]) {
       let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess } = msg;
+
+      console.log("11111111");
 
       if (organizationId !== undefined &&
         projectId !== undefined &&
@@ -140,19 +152,30 @@ io.on('connection', (socket) => {
         filetype !== undefined &&
         fileAccess !== undefined) {
 
+        console.log("2222222");
 
         let name = `${iv}_${chunkSize}_${session}`;
         const filepath = `files/${projectId}/${name.length <= 250 ? name : name.substr(0, 250)}.aes`;
         const stat = util.promisify(fs.stat);
+
+        console.log("333333333333");
+
         try {
+          console.log("444444444");
+
           const check = await stat(filepath);
           console.log(`Session ${session} has expired`);
           return;
 
         } catch (err) {
+          console.log("555555555");
 
           const ensureDir = util.promisify(fsExtra.ensureDir);
+          console.log("66666666");
+
           await ensureDir(`files/${projectId}`);
+
+          console.log("77777777");
 
           let ws = fs.createWriteStream(filepath, { 'flags': 'a' });
           uploadSessions[session] = {
@@ -170,7 +193,12 @@ io.on('connection', (socket) => {
             isEnded: false
           };
 
+          console.log("88888");
+
           ws.on('close', function (err) {
+            console.log("999999");
+            console.log(uploadSessions);
+
             delete uploadSessions[session];
             console.log('Writable Stream has been closed');
           });
@@ -183,24 +211,48 @@ io.on('connection', (socket) => {
       }
     }
 
+    console.log("1010101010101");
+
     if (msg.index != msg.lastIndex) {
+      console.log("121212121212");
+
 
       uploadSessions[session].ws.write(new Buffer(new Uint8Array(msg.data)), (err) => {
         if (err) {
+          console.log("31313131313131");
+
           console.log(err);
         } else {
+          console.log("43434441414134343");
+
           socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
+          console.log("121515151515151");
+
         }
       });
     } else {
+      console.log("1161616161166161");
+
       uploadSessions[session].ws.end(new Buffer(new Uint8Array(msg.data)), async (err) => {
+        console.log("171717171171");
+
         uploadSessions[session].isEnded = true;
+        console.log(uploadSessions);
+
         if (err) {
+          console.log("181818188811");
+
           console.log(err);
         } else {
+          console.log("1119199191919191");
+
           let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = uploadSessions[session];
           await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess, "timestamped");
+          console.log("200 0 0 02020 0 ");
+
           socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
+          console.log("21 21 21 2 1 21 2 1 ");
+
         }
       })
     }
@@ -275,6 +327,8 @@ io.on('connection', (socket) => {
 
     socket.emit('downloaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, data: data, filetype: msg.filetype, index, lastIndex });
   });
+
+
 
 });
 
