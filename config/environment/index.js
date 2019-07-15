@@ -2,12 +2,14 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 
-const env = ( process.env.USE_LOCAL_CONFIG || process.env.NODE_ENV == 'local') 
-    ? 'local' 
+const env = (process.env.USE_LOCAL_CONFIG || process.env.NODE_ENV == 'local')
+    ? 'local'
     : process.env.NODE_ENV || 'development';
 
-require('dotenv').config({ path:  __dirname + '/' + 
-    (env == 'production' ? '.prod.env' : env == 'development' ? '.dev.env' : '.local.env') })
+require('dotenv').config({
+    path: __dirname + '/' +
+        (env == 'production' ? '.prod.env' : env == 'development' ? '.dev.env' : '.local.env')
+})
 
 let config = {
     environment: env
@@ -22,7 +24,7 @@ config = _.merge(config, {
     blockchain: {
         rpcEndpoint: process.env.DEIP_FULL_NODE_URL,
         chainId: process.env.CHAIN_ID,
-        accountsCreator : process.env.FAUCET_ACCOUNT
+        accountsCreator: JSON.parse(process.env.FAUCET_ACCOUNT)
     },
     serverHost: process.env.DEIP_SERVER_URL,
     uiHost: process.env.DEIP_CLIENT_HOST, // todo: get rid of this
