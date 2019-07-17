@@ -5,6 +5,7 @@ import util from 'util';
 import send from 'koa-send';
 import deipRpc from '@deip/deip-rpc-client';
 import FileRef from './../schemas/fileRef';
+import UserProfile from './../schemas/user';
 import { hashElement } from 'folder-hash';
 import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
@@ -14,6 +15,7 @@ import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
 import pdf from 'html-pdf';
+import moment from 'moment';
 
 const listFileRefs = async (ctx) => {
   const projectId = ctx.params.projectId;
@@ -54,26 +56,72 @@ const getFileRefByHash = async (ctx) => {
 }
 
 const getCertificate = async (ctx) => {
-  const hash = ctx.params.hash;
+  let hash = ctx.params.hash;
+  let projectId = ctx.params.projectId;
+  let jwtUsername = ctx.state.user.username;
+
   try {
 
-    let options = {
-      "format": "A4",        // allowed units: A3, A4, A5, Legal, Letter, Tabloid
+    let file = await findFileRefByHash(projectId, hash);
+    let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(file.organizationId);
+    let member = rgtList.find(rgt => rgt.owner === jwtUsername);
+
+    if (!member) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not permitted to get certificates for "${file.projectId}" project`;
+      return;
+    }
+
+    let maxRgt = rgtList.reduce(
+      (max, rgt) => (rgt.amount > max ? rgt.amount : max),
+      rgtList[0].amount
+    );
+
+    let owner = rgtList.find(rgt => rgt.amount === maxRgt);
+    let ownerUsername = owner.owner;
+    let ownerProfile = await UserProfile.findOne({ '_id': ownerUsername });
+    let ownerName = ownerProfile.firstName && ownerProfile.lastName ? `${ownerProfile.firstName} ${ownerProfile.lastName}` : ownerUsername;
+
+
+    let accounts = await deipRpc.api.getAccountsAsync([jwtUsername, ownerUsername]);
+    let jwtPubKey = accounts[0].owner.key_auths[0][0];
+    let ownerPubKey = accounts[1].owner.key_auths[0][0];
+
+    let hist = await deipRpc.api.getContentHistoryAsync(hash);
+    let fileHist = hist[0];
+
+    // let chainProject = await deipRpc.api.getResearchByIdAsync(file.projectId);
+
+    let readFileAsync = util.promisify(fs.readFile);
+    let rawHtml = await readFileAsync('./certificates/file/certificate.html', 'utf8');
+
+    var html = rawHtml.replace(/{{certificate_id}}/, file._id.toString());
+    html = html.replace(/{{project_id}}/, file.projectId);
+    html = html.replace(/{{owner_name}}/, ownerName);
+    html = html.replace(/{{registration_date}}/, moment(ownerProfile.created_at).format("MM/DD/YYYY"));
+    html = html.replace(/{{file_hash}}/, file.hash);
+    html = html.replace(/{{tx_hash}}/, fileHist.trx_id);
+    html = html.replace(/{{tx_timestamp}}/, moment(fileHist.timestamp).format("MM/DD/YYYY HH:mm:ss"));
+    html = html.replace(/{{block_number}}/, fileHist.block);
+    html = html.replace(/{{project_owner_public_key}}/, ownerPubKey);
+    html = html.replace(/{{file_uploader_public_key}}/, jwtPubKey);
+    html = html.replace(/{{chain_id}}/, process.env.CHAIN_ID);
+
+    const options = {
+      "format": "A4",
       "orientation": "landscape"
     }
 
-    var html = fs.readFileSync('./certificates/file/certificate.html', 'utf8');
-    let conv = () => new Promise((resolve, reject) => {
+    let pdfStreamAsync = () => new Promise((resolve, reject) => {
       pdf.create(html, options).toStream(function (err, stream) {
         if (err) reject(err);
         else resolve(stream);
       });
     });
 
-    let str = await conv();
-
+    let stream = await pdfStreamAsync();
     ctx.status = 200;
-    ctx.body = str;
+    ctx.body = stream;
 
   } catch (err) {
     console.log(err);

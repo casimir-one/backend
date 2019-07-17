@@ -75,8 +75,8 @@
       </div>
     </div>
 
-    <div style="clear: both; width: 100%; text-align: center;">
-      <div style="font-size: 30px; font-weight: 900; text-transform: uppercase; padding-top: 10px; padding-bottom: 10px;">
+    <div style="clear: both; width: 100%; text-align: center; padding-top: 10px; padding-bottom: 20px;">
+      <div style="font-size: 30px; font-weight: 900; text-transform: uppercase; ">
         Blockchain Certificate
       </div>
     </div>
@@ -104,15 +104,16 @@
     </div>
 
     <div style="clear: both; width: 100%; padding-top: 30px;">
-      <div style="float: left; width: 20%;">&nbsp;</div>
-      <div style="float: left; width: 60%; text-align: center; padding-top: 20px;">
+      <div style="float: left; width: 15%;">&nbsp;</div>
+      <div style="float: left; width: 70%; text-align: center; padding-top: 20px;">
         <div>
           <div><span style="font-weight:bold">File Hash:&nbsp;</span><span>{{file_hash}}</span></div>
           <div><span style="font-weight:bold">TX:&nbsp;</span><span>{{tx_hash}}</span></div>
+          <div><span style="font-weight:bold">Timestamp:&nbsp;</span><span>{{tx_timestamp}}</span></div>
           <div><span style="font-weight:bold">Block:&nbsp;</span><span>{{block_number}}</span></div>
         </div>
       </div>
-      <div style="float: left; width: 20%;"><div>&nbsp;</div></div>
+      <div style="float: left; width: 15%;"><div>&nbsp;</div></div>
     </div>
 
     <div style="clear: both; width: 100%; padding-top: 30px;"> 
@@ -123,19 +124,19 @@
       <div style="float: left; width: 33%;">
         <div style="padding-left: 30px; padding-right: 5px; text-align: left">
           <div style="font-weight:bold">Project Owner Public Key</div>
-          <div>{{project_owner_public_key}}</div>
+          <div style="word-break: break-all;">{{project_owner_public_key}}</div>
         </div>
       </div>
       <div style="float: left; width: 33%; text-align: center">
         <div style="padding-left: 5px; padding-right: 5px; text-align: left">
           <div style="font-weight:bold">Uploader Public Key</div>
-          <div>{{file_uploader_public_key}}</div>
+          <div style="word-break: break-all;">{{file_uploader_public_key}}</div>
         </div>
       </div>
       <div style="float: right; width: 33%; text-align: right">
         <div style="padding-left: 5px; padding-right: 30px; text-align: left">
-          <div style="font-weight:bold">DEIP Chain ID</div>
-          <div>{{chain_id}}</div>
+          <div style="font-weight:bold">Chain ID</div>
+          <div style="word-break: break-all;">{{chain_id}}</div>
         </div>
       </div>
 

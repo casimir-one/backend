@@ -33,6 +33,7 @@
         "koa-static": "^3.0.0",
         "limax": "^1.7.0",
         "md5-file": "^4.0.0",
+        "moment": "^2.24.0",
         "mongoose": "^5.1.5",
         "parse-formdata": "^1.0.2",
         "qs": "^6.5.2",
