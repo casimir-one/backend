@@ -127,6 +127,10 @@ io.on('connection', (socket) => {
   socket.on('upload_encrypted_chunk', async (msg) => {
     const session = getSession(msg.uuid, msg.filename);
 
+    console.log("<------------------------------->");
+    console.log(uploadSessions);
+    console.log("<------------------------------->");
+
     if (!uploadSessions[session]) {
       let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess } = msg;
 
@@ -155,6 +159,7 @@ io.on('connection', (socket) => {
           await ensureDir(`files/${projectId}`);
 
           let ws = fs.createWriteStream(filepath, { 'flags': 'a' });
+          console.log(`Writable Stream for ${session} session has been opened (${new Date()})`);
           uploadSessions[session] = {
             ws,
             organizationId,
@@ -171,8 +176,9 @@ io.on('connection', (socket) => {
           };
 
           ws.on('close', function (err) {
+            if (err) console.log(err);
             delete uploadSessions[session];
-            console.log('Writable Stream has been closed');
+            console.log(`Writable Stream for ${session} has been closed: (${new Date()})`);
           });
         }
 
@@ -230,6 +236,10 @@ io.on('connection', (socket) => {
   socket.on('download_encrypted_chunk', async (msg) => {
     const session = getSession(msg.uuid, msg.filename);
 
+    console.log("<===============================>");
+    console.log(downloadSessions);
+    console.log("<===============================>");
+
     if (!downloadSessions[session]) {
       let { filename, filepath, chunkSize } = msg;
 
@@ -247,14 +257,17 @@ io.on('connection', (socket) => {
           let lastIndex = Math.ceil(fileSizeInBytes / chunkSize) - 1;
 
           let rs = fs.createReadStream(filepath, { highWaterMark: 2 * 1024 * 1024 });
+          console.log(`Readable Stream for ${session} session has been opened (${new Date()})`);
+
           downloadSessions[session] = { rs, isEnded: false, index, filepath, filename, lastIndex, chunkSize };
 
           rs.on('end', function () {
             downloadSessions[session].isEnded = true;
           })
             .on('close', function (err) {
+              if (err) console.log(err);
               delete downloadSessions[session];
-              console.log('Readable Stream has been closed');
+              console.log(`Readable Stream for ${session} session has been closed (${new Date()})`);
             });
 
         } else {
