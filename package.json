@@ -9,7 +9,7 @@
         "debug": "nodemon --inspect --delay 2000ms -w app.js -w server server-entry.js"
     },
     "dependencies": {
-        "@deip/deip-rpc-client": "1.0.54",
+        "@deip/deip-rpc-client": "1.0.55",
         "@deip/lib-crypto": "^1.0.2",
         "@koa/cors": "^2.2.1",
         "axios": "^0.15.3",
@@ -20,6 +20,7 @@
         "folder-hash": "^2.1.1",
         "fs": "0.0.1-security",
         "fs-extra": "^7.0.0",
+        "html-pdf": "^2.2.0",
         "jwt-decode": "^2.2.0",
         "koa": "^2.5.1",
         "koa-bodyparser": "^4.2.0",

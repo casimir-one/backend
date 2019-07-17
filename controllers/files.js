@@ -13,6 +13,7 @@ import { authorizeResearchGroup } from './../services/auth';
 import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
+import pdf from 'html-pdf';
 
 const listFileRefs = async (ctx) => {
   const projectId = ctx.params.projectId;
@@ -52,9 +53,40 @@ const getFileRefByHash = async (ctx) => {
   }
 }
 
+const getCertificate = async (ctx) => {
+  const hash = ctx.params.hash;
+  try {
+
+    let options = {
+      "format": "A4",        // allowed units: A3, A4, A5, Legal, Letter, Tabloid
+      "orientation": "landscape"
+    }
+
+    var html = fs.readFileSync('./certificates/file/certificate.html', 'utf8');
+    let conv = () => new Promise((resolve, reject) => {
+      pdf.create(html, options).toStream(function (err, stream) {
+        if (err) reject(err);
+        else resolve(stream);
+      });
+    });
+
+    let str = await conv();
+
+    ctx.status = 200;
+    ctx.body = str;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 export default {
   // refs
   getFileRefById,
   getFileRefByHash,
-  listFileRefs
+  listFileRefs,
+
+  getCertificate
 }

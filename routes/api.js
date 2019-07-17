@@ -40,6 +40,7 @@ router.get('/agencies/profiles', agency.getAgenciesProfiles)
 router.get('/refs/project/:projectId', files.listFileRefs)
 router.get('/refs/project/file-id/:refId', files.getFileRefById)
 router.get('/refs/project/:projectId/file-hash/:hash', files.getFileRefByHash)
+router.get('/refs/certificate/:projectId/file-hash/:hash', files.getCertificate)
 
 
 export default router
