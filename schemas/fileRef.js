@@ -15,7 +15,7 @@ const FileRef = new Schema({
   "chunkSize": { type: Number, required: true },
   "status": {
     type: String,
-    enum: ['timestamped', 'uploaded'],
+    enum: ['timestamped', 'uploaded', 'uploaded_and_timestamped'],
     required: true
   },
   "accessKeys": [{

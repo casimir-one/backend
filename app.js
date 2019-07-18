@@ -4,7 +4,6 @@ import logger from 'koa-logger';
 import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
-import content from './routes/content.js';
 import jwtKoa from 'koa-jwt';
 import jwt from 'jsonwebtoken';
 import path from 'path';
@@ -17,14 +16,12 @@ import mongoose from 'mongoose';
 import fs from "fs";
 import fsExtra from "fs-extra";
 import util from 'util';
+import { createFileRef } from './services/fileRef';
 
 import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
 deipRpc.config.set('chain_id', config.blockchain.chainId);
 
-
-import { createFileRef } from './services/fileRef';
-import FileContent from './schemas/fileRef';
 
 
 
@@ -71,9 +68,6 @@ app.on('error', function (err, ctx) {
 
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
-router.use('/content', jwtKoa({ secret: config.jwtSecret }).unless((req) => {
-  return req.method == 'GET';
-}), content.routes());
 router.use('/api', jwtKoa({ secret: config.jwtSecret }), api.routes());
 
 app.use(router.routes());
@@ -88,10 +82,6 @@ mongoose.connection.on('error', (err) => {
 mongoose.connection.on('disconnected', () => {
   console.log('Mongoose default connection disconnected');
 });
-
-// app.listen(PORT, HOST, () => {
-//     console.log(`Running on http://${HOST}:${PORT}`);
-// });
 
 const server = require('http').createServer(app.callback());
 const io = require('socket.io')(server);
@@ -127,10 +117,6 @@ io.on('connection', (socket) => {
   socket.on('upload_encrypted_chunk', async (msg) => {
     const session = getSession(msg.uuid, msg.filename);
 
-    console.log("<------------------------------->");
-    console.log(uploadSessions);
-    console.log("<------------------------------->");
-
     if (!uploadSessions[session]) {
       let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess } = msg;
 
@@ -150,7 +136,7 @@ io.on('connection', (socket) => {
         const stat = util.promisify(fs.stat);
         try {
           const check = await stat(filepath);
-          console.log(`Session ${session} has expired`);
+          console.log(`File session ${session} has expired`);
           return;
 
         } catch (err) {
@@ -175,15 +161,17 @@ io.on('connection', (socket) => {
             isEnded: false
           };
 
+          clearSessionAfterTimeout(uploadSessions, session);
+
           ws.on('close', function (err) {
             if (err) console.log(err);
             delete uploadSessions[session];
-            console.log(`Writable Stream for ${session} has been closed: (${new Date()})`);
+            console.log(`Writable Stream for ${session} session has been closed: (${new Date()})`);
           });
         }
 
       } else {
-        console.log("Message malformed");
+        console.log(`Message malformed:`);
         console.log(msg);
         return;
       }
@@ -205,7 +193,7 @@ io.on('connection', (socket) => {
           console.log(err);
         } else {
           let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = uploadSessions[session];
-          await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess, "timestamped");
+          await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess, "uploaded_and_timestamped");
           socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
         }
       })
@@ -236,10 +224,6 @@ io.on('connection', (socket) => {
   socket.on('download_encrypted_chunk', async (msg) => {
     const session = getSession(msg.uuid, msg.filename);
 
-    console.log("<===============================>");
-    console.log(downloadSessions);
-    console.log("<===============================>");
-
     if (!downloadSessions[session]) {
       let { filename, filepath, chunkSize } = msg;
 
@@ -260,6 +244,7 @@ io.on('connection', (socket) => {
           console.log(`Readable Stream for ${session} session has been opened (${new Date()})`);
 
           downloadSessions[session] = { rs, isEnded: false, index, filepath, filename, lastIndex, chunkSize };
+          clearSessionAfterTimeout(downloadSessions, session);
 
           rs.on('end', function () {
             downloadSessions[session].isEnded = true;
@@ -271,7 +256,7 @@ io.on('connection', (socket) => {
             });
 
         } else {
-          console.log("Message malformed");
+          console.log(`Message malformed:`);
           console.log(msg);
           return;
         }
@@ -291,6 +276,32 @@ io.on('connection', (socket) => {
 
 });
 
+function clearSessionAfterTimeout(sessions, session, timeout = 900000) { // 15 min
+
+  setTimeout(() => {
+    try {
+      let expired = sessions[session];
+      if (expired !== undefined) {
+        if (expired.rs) {
+          expired.rs.close();
+        } else {
+          expired.ws.close();
+        }
+
+        console.log(`File session ${session} has expired and marked to be deleted`);
+        delete sessions[session];
+        console.log(sessions);
+      }
+    } catch (err) {
+      console.log(`File session ${session} has expired but an error occurred while closing the stream:`);
+      console.log(err);
+      delete sessions[session];
+      console.log(sessions);
+    }
+
+  }, timeout);
+
+}
 
 server.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);
@@ -304,17 +315,12 @@ process.on('SIGINT', () => {
 });
 
 
-process.on('unhandledRejection', (reason, promise) => {
-  console.log('Unhandled Rejection at:', reason.stack || reason)
-  // Recommended: send the information to sentry.io
-  // or whatever crash reporting service you use
-});
-
 process.on('exit', (code) => {
   server.close();
   console.log(`About to exit with code: ${code}`);
 });
 
 
-console.log(config)
+console.log(config);
+
 export default app;

@@ -60,10 +60,6 @@ const getCertificate = async (ctx) => {
   let projectId = ctx.params.projectId;
   let jwtUsername = ctx.state.user.username;
 
-  setTimeout(function () {
-    throw new Error('Async error')
-  }, 100)
-
   try {
 
     let file = await findFileRefByHash(projectId, hash);
