@@ -5,7 +5,7 @@
     "author": "Alex Shkor <alex.shkor@gmail.com>",
     "private": true,
     "scripts": {
-        "server": "nodemon --delay 2000ms -w app.js -w server server-entry.js",
+        "server": "nodemon --exitcrash --delay 2000ms -w app.js -w server server-entry.js",
         "debug": "nodemon --inspect --delay 2000ms -w app.js -w server server-entry.js"
     },
     "dependencies": {

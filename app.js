@@ -303,5 +303,18 @@ process.on('SIGINT', () => {
   });
 });
 
+
+process.on('unhandledRejection', (reason, promise) => {
+  console.log('Unhandled Rejection at:', reason.stack || reason)
+  // Recommended: send the information to sentry.io
+  // or whatever crash reporting service you use
+});
+
+process.on('exit', (code) => {
+  server.close();
+  console.log(`About to exit with code: ${code}`);
+});
+
+
 console.log(config)
 export default app;
