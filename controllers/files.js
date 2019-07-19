@@ -14,6 +14,7 @@ import { authorizeResearchGroup } from './../services/auth';
 import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
+import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
 import moment from 'moment';
 
@@ -62,13 +63,22 @@ const getCertificate = async (ctx) => {
 
   try {
 
-    let file = await findFileRefByHash(projectId, hash);
-    let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(file.organizationId);
+    let chainResearch = await deipRpc.api.getResearchByIdAsync(projectId);
+    let chainContents = await deipRpc.api.getAllResearchContentAsync(projectId);
+    let chainContent = chainContents.find(c => c.content == hash);
+
+    if (!chainResearch || !chainContent) {
+      ctx.status = 400;
+      ctx.body = `File with hash ${hash} is not found`;
+      return;
+    }
+
+    let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(chainResearch.research_group_id);
     let member = rgtList.find(rgt => rgt.owner === jwtUsername);
 
     if (!member) {
       ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to get certificates for "${file.projectId}" project`;
+      ctx.body = `"${jwtUsername}" is not permitted to get certificates for "${projectId}" project`;
       return;
     }
 
@@ -76,12 +86,10 @@ const getCertificate = async (ctx) => {
       (max, rgt) => (rgt.amount > max ? rgt.amount : max),
       rgtList[0].amount
     );
-
     let owner = rgtList.find(rgt => rgt.amount === maxRgt);
     let ownerUsername = owner.owner;
     let ownerProfile = await UserProfile.findOne({ '_id': ownerUsername });
     let ownerName = ownerProfile.firstName && ownerProfile.lastName ? `${ownerProfile.firstName} ${ownerProfile.lastName}` : ownerUsername;
-
 
     let accounts = await deipRpc.api.getAccountsAsync([jwtUsername, ownerUsername]);
     let jwtPubKey = accounts[0].owner.key_auths[0][0];
@@ -90,16 +98,16 @@ const getCertificate = async (ctx) => {
     let hist = await deipRpc.api.getContentHistoryAsync(hash);
     let fileHist = hist[0];
 
-    // let chainProject = await deipRpc.api.getResearchByIdAsync(file.projectId);
-
     let readFileAsync = util.promisify(fs.readFile);
     let rawHtml = await readFileAsync('./certificates/file/certificate.html', 'utf8');
 
-    var html = rawHtml.replace(/{{certificate_id}}/, file._id.toString());
-    html = html.replace(/{{project_id}}/, file.projectId);
+    let id = ripemd160(`${chainResearch.research_id}-${chainResearch.id}-${chainContent.id}-${chainContent.content}`).toString();
+
+    var html = rawHtml.replace(/{{certificate_id}}/, id);
+    html = html.replace(/{{project_id}}/, chainResearch.id);
     html = html.replace(/{{owner_name}}/, ownerName);
     html = html.replace(/{{registration_date}}/, moment(ownerProfile.created_at).format("MM/DD/YYYY"));
-    html = html.replace(/{{file_hash}}/, file.hash);
+    html = html.replace(/{{file_hash}}/, chainContent.content);
     html = html.replace(/{{tx_hash}}/, fileHist.trx_id);
     html = html.replace(/{{tx_timestamp}}/, moment(fileHist.timestamp).format("MM/DD/YYYY HH:mm:ss"));
     html = html.replace(/{{block_number}}/, fileHist.block);
@@ -129,6 +137,7 @@ const getCertificate = async (ctx) => {
     ctx.body = err.message;
   }
 }
+
 
 export default {
   // refs
