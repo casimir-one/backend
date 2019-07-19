@@ -9,7 +9,7 @@ import UserProfile from './../schemas/user';
 import { hashElement } from 'folder-hash';
 import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
-import { findFileRefById, findFileRefByHash } from './../services/fileRef';
+import { findFileRefById, findFileRefByHash, createFileRef } from './../services/fileRef';
 import { authorizeResearchGroup } from './../services/auth';
 import crypto from 'crypto';
 import rimraf from "rimraf";
@@ -25,6 +25,69 @@ const listFileRefs = async (ctx) => {
     ctx.body = refs;
   } catch (err) {
     console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const postFileRef = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const data = ctx.request.body;
+
+  try {
+    let {
+      organizationId,
+      projectId,
+      filename,
+      filetype,
+      size,
+      status
+    } = data;
+
+    const authorized = await authorizeResearchGroup(organizationId, jwtUsername);
+    if (!authorized) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${organizationId}" group.`
+      return;
+    }
+
+    let filepath = data.filepath || null;
+    let hash = data.hash || null;
+    let iv = data.iv || null;
+    let chunkSize = data.chunkSize || null;
+    let fileAccess = data.fileAccess || [];
+    let permlink = data.permlink || null;
+
+    if (organizationId == undefined || projectId == undefined || !filename || !filetype || !size || !status) {
+      ctx.status = 400;
+      console.log(data);
+      ctx.body = `Mandatory fields are not specified`;
+      return;
+    }
+
+    if (status == "timestamped" && (!hash || !permlink)) {
+      ctx.status = 400;
+      ctx.body = `For 'timestamped' status hash and permlink fields must be specified`;
+      return;
+    }
+
+    // if (status == "uploaded" && (!iv || !chunkSize || !filepath || !fileAccess)) {
+    //   ctx.status = 400;
+    //   ctx.body = `For 'uploaded' status iv, chunkSize, filepath, fileAccess fields must be specified`;
+    //   return;
+    // }
+
+    // if (status == "uploaded_and_timestamped" && (!hash || !iv || !chunkSize || !filepath || !fileAccess || !permlink)) {
+    //   ctx.status = 400;
+    //   ctx.body = `For 'uploaded_and_timestamped' status hash, iv, chunkSize, filepath, fileAccess fields must be specified`;
+    //   return;
+    // }
+
+    let ref = await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, permlink, fileAccess, status);
+    ctx.status = 200;
+    ctx.body = ref;
+  } catch (err) {
     ctx.status = 500;
     ctx.body = err.message;
   }
@@ -135,6 +198,7 @@ export default {
   getFileRefById,
   getFileRefByHash,
   listFileRefs,
+  postFileRef,
 
   getCertificate
 }

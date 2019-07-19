@@ -11,7 +11,6 @@ export async function findFileRefByHash(projectId, hash) {
   return fr;
 }
 
-
 export async function createFileRef(
   organizationId,
   projectId,
@@ -22,6 +21,7 @@ export async function createFileRef(
   hash,
   iv,
   chunkSize,
+  permlink,
   accessKeys,
   status
 ) {
@@ -35,9 +35,24 @@ export async function createFileRef(
     hash: hash,
     iv: iv,
     chunkSize: chunkSize,
+    permlink: permlink,
     accessKeys: accessKeys,
     status: status,
   });
   const savedRef = await fr.save();
   return savedRef;
+}
+
+export async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, accessKeys) {
+  if (!hash || !iv || !chunkSize || !filepath || !accessKeys) return;
+
+  let fileRef = await findFileRefByHash(projectId, hash);
+  fileRef.iv = iv;
+  fileRef.chunkSize = chunkSize;
+  fileRef.filepath = filepath;
+  fileRef.accessKeys = accessKeys;
+  fileRef.status = "uploaded_and_timestamped";
+
+  let updatedFileRef = await fileRef.save();
+  return updatedFileRef;
 }

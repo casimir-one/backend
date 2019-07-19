@@ -16,7 +16,7 @@ import mongoose from 'mongoose';
 import fs from "fs";
 import fsExtra from "fs-extra";
 import util from 'util';
-import { createFileRef } from './services/fileRef';
+import { setUploadedAndTimestampedStatus } from './services/fileRef';
 
 import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
@@ -120,15 +120,15 @@ io.on('connection', (socket) => {
     if (!uploadSessions[session]) {
       let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess } = msg;
 
-      if (organizationId !== undefined &&
-        projectId !== undefined &&
-        filename !== undefined &&
-        hash !== undefined &&
-        size !== undefined &&
-        chunkSize !== undefined &&
-        iv !== undefined &&
-        filetype !== undefined &&
-        fileAccess !== undefined) {
+      if (organizationId != undefined &&
+        projectId != undefined &&
+        filename != undefined &&
+        hash != undefined &&
+        size != undefined &&
+        chunkSize != undefined &&
+        iv != undefined &&
+        filetype != undefined &&
+        fileAccess != undefined) {
 
 
         let name = `${iv}_${chunkSize}_${session}`;
@@ -193,7 +193,7 @@ io.on('connection', (socket) => {
           console.log(err);
         } else {
           let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = uploadSessions[session];
-          await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess, "uploaded_and_timestamped");
+          await setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, fileAccess);
           socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
         }
       })

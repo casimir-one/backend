@@ -30,6 +30,7 @@ router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
 
 router.get('/refs/project/:projectId', files.listFileRefs)
+router.post('/refs', files.postFileRef)
 router.get('/refs/project/file-id/:refId', files.getFileRefById)
 router.get('/refs/project/:projectId/file-hash/:hash', files.getFileRefByHash)
 router.get('/refs/certificate/:projectId/file-hash/:hash', files.getCertificate)
