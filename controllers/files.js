@@ -30,69 +30,6 @@ const listFileRefs = async (ctx) => {
   }
 }
 
-
-const postFileRef = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const data = ctx.request.body;
-
-  try {
-    let {
-      organizationId,
-      projectId,
-      filename,
-      filetype,
-      size,
-      status
-    } = data;
-
-    const authorized = await authorizeResearchGroup(organizationId, jwtUsername);
-    if (!authorized) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${organizationId}" group.`
-      return;
-    }
-
-    let filepath = data.filepath || null;
-    let hash = data.hash || null;
-    let iv = data.iv || null;
-    let chunkSize = data.chunkSize || null;
-    let fileAccess = data.fileAccess || [];
-    let permlink = data.permlink || null;
-
-    if (organizationId == undefined || projectId == undefined || !filename || !filetype || !size || !status) {
-      ctx.status = 400;
-      console.log(data);
-      ctx.body = `Mandatory fields are not specified`;
-      return;
-    }
-
-    if (status == "timestamped" && (!hash || !permlink)) {
-      ctx.status = 400;
-      ctx.body = `For 'timestamped' status hash and permlink fields must be specified`;
-      return;
-    }
-
-    // if (status == "uploaded" && (!iv || !chunkSize || !filepath || !fileAccess)) {
-    //   ctx.status = 400;
-    //   ctx.body = `For 'uploaded' status iv, chunkSize, filepath, fileAccess fields must be specified`;
-    //   return;
-    // }
-
-    // if (status == "uploaded_and_timestamped" && (!hash || !iv || !chunkSize || !filepath || !fileAccess || !permlink)) {
-    //   ctx.status = 400;
-    //   ctx.body = `For 'uploaded_and_timestamped' status hash, iv, chunkSize, filepath, fileAccess fields must be specified`;
-    //   return;
-    // }
-
-    let ref = await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, permlink, fileAccess, status);
-    ctx.status = 200;
-    ctx.body = ref;
-  } catch (err) {
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-}
-
 const getFileRefById = async (ctx) => {
   const refId = ctx.params.refId;
   try {
@@ -198,7 +135,6 @@ export default {
   getFileRefById,
   getFileRefByHash,
   listFileRefs,
-  postFileRef,
 
   getCertificate
 }

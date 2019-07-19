@@ -16,7 +16,7 @@ import mongoose from 'mongoose';
 import fs from "fs";
 import fsExtra from "fs-extra";
 import util from 'util';
-import { setUploadedAndTimestampedStatus } from './services/fileRef';
+import { setUploadedAndTimestampedStatus, createFileRef } from './services/fileRef';
 
 import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
@@ -118,7 +118,7 @@ io.on('connection', (socket) => {
     const session = getSession(msg.uuid, msg.filename);
 
     if (!uploadSessions[session]) {
-      let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess } = msg;
+      let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess, permlink } = msg;
 
       if (organizationId != undefined &&
         projectId != undefined &&
@@ -128,7 +128,8 @@ io.on('connection', (socket) => {
         chunkSize != undefined &&
         iv != undefined &&
         filetype != undefined &&
-        fileAccess != undefined) {
+        fileAccess != undefined && 
+        permlink != undefined) {
 
 
         let name = `${iv}_${chunkSize}_${session}`;
@@ -168,6 +169,8 @@ io.on('connection', (socket) => {
             delete uploadSessions[session];
             console.log(`Writable Stream for ${session} session has been closed: (${new Date()})`);
           });
+
+          await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, permlink, fileAccess, "timestamped");
         }
 
       } else {
