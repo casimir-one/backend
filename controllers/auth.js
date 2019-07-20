@@ -104,6 +104,7 @@ const signUp = async function (ctx) {
         email: email,
         firstName: firstName,
         lastName: lastName,
+        activeOrgPermlink: username
       });
       profile = await model.save();
     }
