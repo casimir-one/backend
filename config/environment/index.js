@@ -29,7 +29,8 @@ config = _.merge(config, {
     serverHost: process.env.DEIP_SERVER_URL,
     uiHost: process.env.DEIP_CLIENT_HOST, // todo: get rid of this
     sigSeed: process.env.SIG_SEED,
-    jwtSecret: process.env.JWT_SECRET
+    jwtSecret: process.env.JWT_SECRET,
+    sudoUsers: (process.env.SUDO_USERS || "").split(",").filter(u => u != "")
 });
 
 module.exports = config;

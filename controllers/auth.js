@@ -6,6 +6,7 @@ import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
+import { findVerificationToken, removeVerificationToken } from './../services/verificationTokens';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -67,14 +68,29 @@ const signUp = async function (ctx) {
   const firstName = data.firstName;
   const lastName = data.lastName;
   const pubKey = data.pubKey;
+  const token = data.token;
 
-  if (!username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
+  if (!token || !username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
     ctx.status = 400;
-    ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required`;
+    ctx.body = `'token', 'username', 'pubKey', 'email', 'firstName' fields are required`;
     return;
   }
 
   try {
+
+    let verificationToken = await findVerificationToken(token);
+    if (!verificationToken) {
+      ctx.status = 404;
+      ctx.body = `Verification token ${token} is not found`;
+      return;
+    }
+
+    let isExpired = verificationToken.expirationTime.getTime() <= Date.now();
+    if (isExpired) {
+      ctx.status = 400;
+      ctx.body = `Verification token ${token} is expired`;
+      return;
+    }
 
     const accounts = await deipRpc.api.getAccountsAsync([username])
     if (accounts[0]) {
@@ -107,6 +123,8 @@ const signUp = async function (ctx) {
         activeOrgPermlink: username
       });
       profile = await model.save();
+
+      await removeVerificationToken(token);
     }
 
     ctx.status = 200;
@@ -150,7 +168,38 @@ async function createAccountAsync(username, pubKey, owner) {
 }
 
 
+const getVerificationToken = async function(ctx) {
+  const token = ctx.query.token;
+
+  try {
+
+    if (!token) {
+      ctx.status = 400;
+      ctx.body = `Verification token is not provided`;
+      return;
+    }
+
+    let verificationToken = await findVerificationToken(token);
+    if (!verificationToken) {
+      ctx.status = 404;
+      ctx.body = `Verification token ${token} is not found`;
+      return;
+    }
+
+    let isExpired = verificationToken.expirationTime.getTime() <= Date.now();
+
+    ctx.status = 200;
+    ctx.body = { isExpired, data: verificationToken };
+
+  } catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 export default {
   signIn,
-  signUp
+  signUp,
+  getVerificationToken
 }

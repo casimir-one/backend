@@ -4,5 +4,6 @@ const router = koa_router()
 
 router.post('/sign-in', auth.signIn)
 router.post('/sign-up', auth.signUp)
+router.get('/verification-token', auth.getVerificationToken)
 
 export default router

@@ -4,6 +4,7 @@ import logger from 'koa-logger';
 import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
+import sudo from './routes/sudo.js';
 import jwtKoa from 'koa-jwt';
 import jwt from 'jsonwebtoken';
 import path from 'path';
@@ -69,6 +70,7 @@ app.on('error', function (err, ctx) {
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
 router.use('/api', jwtKoa({ secret: config.jwtSecret }), api.routes());
+router.use('/sudo', /* todo: move sudo check here */ jwtKoa({ secret: config.jwtSecret }), sudo.routes());
 
 app.use(router.routes());
 
