@@ -116,6 +116,14 @@ function getSession(filename, uuid) {
 
 io.on('connection', (socket) => {
 
+  socket.on('upload_speed_probe', (msg, ack) => {
+    if (ack) ack();
+    let data = new Uint8Array(msg.data);
+    let text = "got " + (data.length / (1024 * 1024)).toFixed(3) + " MB";
+    socket.emit("upload_speed_probe", { text }, () => {});
+    console.log(text);
+  });
+
   socket.on('upload_encrypted_chunk', async (msg) => {
     const session = getSession(msg.uuid, msg.filename);
 
