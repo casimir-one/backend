@@ -211,7 +211,7 @@ io.on('connection', (socket) => {
     return new Promise(r => rs.on('readable', r));
   }
 
-  async function readBytes(rs, num = 2 * 1024 * 1024) {
+  async function readBytes(rs, num) {
     let buf = rs.read(num);
     if (buf) {
       return new Promise(r => r(buf));
@@ -245,7 +245,7 @@ io.on('connection', (socket) => {
           let index = -1;
           let lastIndex = Math.ceil(fileSizeInBytes / chunkSize) - 1;
 
-          let rs = fs.createReadStream(filepath, { highWaterMark: 2 * 1024 * 1024 });
+          let rs = fs.createReadStream(filepath, { highWaterMark: chunkSize });
           console.log(`Readable Stream for ${session} session has been opened (${new Date()})`);
 
           downloadSessions[session] = { rs, isEnded: false, index, filepath, filename, lastIndex, chunkSize };
