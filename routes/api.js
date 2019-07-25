@@ -33,7 +33,7 @@ router.post('/invites/reject', invites.rejectInvite)
 router.get('/refs/project/:projectId', files.listFileRefs)
 router.get('/refs/project/file-id/:refId', files.getFileRefById)
 router.get('/refs/project/:projectId/file-hash/:hash', files.getFileRefByHash)
-router.get('/refs/certificate/:projectId/file-hash/:hash', files.getCertificate)
+router.get('/refs/certificate/:projectId/file-hash/:hash', files.exportCertificate)
 
 router.get('/subscriptions/:username', subscriptions.getUserSubscription)
 

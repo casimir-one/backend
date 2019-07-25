@@ -53,7 +53,7 @@ const getFileRefByHash = async (ctx) => {
   }
 }
 
-const getCertificate = async (ctx) => {
+const exportCertificate = async (ctx) => {
   let hash = ctx.params.hash;
   let projectId = ctx.params.projectId;
   let jwtUsername = ctx.state.user.username;
@@ -175,5 +175,5 @@ export default {
   getFileRefByHash,
   listFileRefs,
 
-  getCertificate
+  exportCertificate
 }

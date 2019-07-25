@@ -4,12 +4,12 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const Subscription = new Schema({
-  "owner": { type: String, required: true, index: true },
+  "owner": { type: String, required: true, index: true, unique: true },
   "pricingPlan": {
     type: String,
-    enum: ["free" /* add more plans here */],
+    enum: ["standard" /* add more plans here */],
     required: true,
-    default: "free",
+    default: "standard",
     index: true
   },
   "limits": {

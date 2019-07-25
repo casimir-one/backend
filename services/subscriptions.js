@@ -6,10 +6,10 @@ async function findSubscriptionByOwner(owner) {
   return subscription;
 }
 
-async function createFreeSubscription(owner) {
+async function createStandardSubscription(owner) {
   const subscription = new Subscription({
     owner: owner,
-    pricingPlan: "free",
+    pricingPlan: "standard",
     limits: {
       certificateExport: {
         counter: 0,
@@ -37,7 +37,7 @@ async function increaseCertificateExportCounter(_id) {
 
 export {
   findSubscriptionByOwner,
-  createFreeSubscription,
+  createStandardSubscription,
   resetCertificateExportCounter,
   increaseCertificateExportCounter
 }
