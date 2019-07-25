@@ -6,14 +6,11 @@ import send from 'koa-send';
 import deipRpc from '@deip/deip-rpc-client';
 import FileRef from './../schemas/fileRef';
 import UserProfile from './../schemas/user';
-import { hashElement } from 'folder-hash';
 import config from './../config';
-import { sendTransaction } from './../utils/blockchain';
-import { findFileRefById, findFileRefByHash, createFileRef } from './../services/fileRef';
-import { authorizeResearchGroup } from './../services/auth';
+import { findFileRefById, findFileRefByHash } from './../services/fileRef';
+import { findSubscriptionByOwner, resetCertificateExportCounter, increaseCertificateExportCounter } from './../services/subscriptions';
+import { findPricingPlan } from './../services/pricingPlans';
 import crypto from 'crypto';
-import rimraf from "rimraf";
-import slug from 'limax';
 import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
 import moment from 'moment';
@@ -62,6 +59,39 @@ const getCertificate = async (ctx) => {
   let jwtUsername = ctx.state.user.username;
 
   try {
+
+    let subscription = await findSubscriptionByOwner(jwtUsername);
+    if (!subscription) {
+      ctx.status = 404;
+      ctx.body = `Subscription for ${jwtUsername} is not found`;
+      return;
+    }
+
+    let pricingPlan = await findPricingPlan(subscription.pricingPlan);
+    if (!pricingPlan) {
+      ctx.status = 404;
+      ctx.body = `Pricing plan "${subscription.pricingPlan}" is not found`;
+      return;
+    }
+
+    if (pricingPlan.terms != null && pricingPlan.terms.certificateExport) {
+      let limit = pricingPlan.terms.certificateExport.limit;
+
+      // move it to scheduler
+      // let resetTime = subscription.limits.certificateExport.resetTime;
+      // if (moment().isAfter(resetTime)) {
+      //   subscription = await resetCertificateExportCounter(subscription._id);
+      // }
+
+      let counter = subscription.limits.certificateExport.counter;
+      if (counter >= limit) {
+        ctx.status = 402;
+        ctx.body = `Subscription ${subscription._id} for ${jwtUsername} is under "${subscription.pricingPlan}" plan and has reached the limit. The limit will be reset on ${resetTime}`;
+        return;
+      }
+
+      subscription = await increaseCertificateExportCounter(subscription._id);
+    }
 
     let chainResearch = await deipRpc.api.getResearchByIdAsync(projectId);
     let chainContents = await deipRpc.api.getAllResearchContentAsync(projectId);

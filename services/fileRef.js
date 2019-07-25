@@ -1,17 +1,17 @@
 import deipRpc from '@deip/deip-rpc-client';
 import FileRef from './../schemas/fileRef';
 
-export async function findFileRefById(_id) {
+async function findFileRefById(_id) {
   const fr = await FileRef.findOne({ _id });
   return fr;
 }
 
-export async function findFileRefByHash(projectId, hash) {
+async function findFileRefByHash(projectId, hash) {
   const fr = await FileRef.findOne({ projectId, hash });
   return fr;
 }
 
-export async function createFileRef(
+async function createFileRef(
   organizationId,
   projectId,
   filename,
@@ -43,7 +43,7 @@ export async function createFileRef(
   return savedRef;
 }
 
-export async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, accessKeys) {
+async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, accessKeys) {
   if (!hash || !iv || !chunkSize || !filepath || !accessKeys) return;
 
   let fileRef = await findFileRefByHash(projectId, hash);
@@ -55,4 +55,11 @@ export async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunk
 
   let updatedFileRef = await fileRef.save();
   return updatedFileRef;
+}
+
+export {
+  findFileRefById,
+  findFileRefByHash,
+  createFileRef,
+  setUploadedAndTimestampedStatus
 }

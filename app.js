@@ -119,7 +119,7 @@ io.on('connection', (socket) => {
   socket.on('upload_speed_probe', (msg, ack) => {
     if (ack) ack();
     let data = new Uint8Array(msg.data);
-    let text = "got " + (data.length / (1024 * 1024)).toFixed(3) + " MB";
+    let text = `Got ${data.length} Bytes`;
     socket.emit("upload_speed_probe", { text }, () => {});
     console.log(text);
   });

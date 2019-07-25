@@ -1,17 +1,17 @@
 import deipRpc from '@deip/deip-rpc-client';
 import OrganizationProfile from './../schemas/organization';
 
-export async function findOrganizationById(_id) {
+async function findOrganizationById(_id) {
   const fr = await OrganizationProfile.findOne({ _id });
   return fr;
 }
 
-export async function findOrganizationByPermlink(permlink) {
+async function findOrganizationByPermlink(permlink) {
   const fr = await OrganizationProfile.findOne({ permlink });
   return fr;
 }
 
-export async function createOrganizationProfile(
+async function createOrganizationProfile(
   permlink,
   name,
   website,
@@ -44,8 +44,12 @@ export async function createOrganizationProfile(
     members: members,
     logo: logo
   });
-  const saveOrg = await org.save();
-  return saveOrg;
+  const savedOrg = await org.save();
+  return savedOrg;
 }
 
-
+export {
+  findOrganizationById,
+  findOrganizationByPermlink,
+  createOrganizationProfile
+}

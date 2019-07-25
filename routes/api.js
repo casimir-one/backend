@@ -5,6 +5,7 @@ import proposals from '../controllers/proposals'
 import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import files from '../controllers/files'
+import subscriptions from '../controllers/subscriptions'
 
 const router = koa_router()
 
@@ -34,5 +35,6 @@ router.get('/refs/project/file-id/:refId', files.getFileRefById)
 router.get('/refs/project/:projectId/file-hash/:hash', files.getFileRefByHash)
 router.get('/refs/certificate/:projectId/file-hash/:hash', files.getCertificate)
 
+router.get('/subscriptions/:username', subscriptions.getUserSubscription)
 
 export default router

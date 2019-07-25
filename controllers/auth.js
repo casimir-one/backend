@@ -7,6 +7,7 @@ import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
 import { findVerificationToken, removeVerificationToken } from './../services/verificationTokens';
+import { createFreeSubscription } from './../services/subscriptions';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -126,6 +127,8 @@ const signUp = async function (ctx) {
 
       await removeVerificationToken(token);
     }
+
+    await createFreeSubscription(username);
 
     ctx.status = 200;
     ctx.body = profile;
