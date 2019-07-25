@@ -7,17 +7,14 @@ import pub from './routes/public.js';
 import sudo from './routes/sudo.js';
 import jwtKoa from 'koa-jwt';
 import jwt from 'jsonwebtoken';
-import path from 'path';
 import serve from 'koa-static';
 import koa_router from "koa-router";
 import koa_bodyparser from "koa-bodyparser";
 import cors from '@koa/cors';
 import config from './config';
 import mongoose from 'mongoose';
-import fs from "fs";
-import fsExtra from "fs-extra";
-import util from 'util';
-import { setUploadedAndTimestampedStatus, createFileRef } from './services/fileRef';
+import filesWS from './sockets/files';
+import speedProbeWS from './sockets/speedProbe';
 
 import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
@@ -105,216 +102,13 @@ io.use(function (socket, next) {
   })
 });
 
-const uploadSessions = {};
-
-function getSession(filename, uuid) {
-  return `${filename}-${uuid}`
-    .replace(/ /g, "-")
-    .replace(/\W+/g, "-")
-    .toLowerCase();
-}
 
 io.on('connection', (socket) => {
-
-  socket.on('upload_speed_probe', (msg, ack) => {
-    if (ack) ack();
-    let data = new Uint8Array(msg.data);
-    let text = `Got ${data.length} Bytes`;
-    socket.emit("upload_speed_probe", { text }, () => {});
-    console.log(text);
-  });
-
-  socket.on('upload_encrypted_chunk', async (msg) => {
-    const session = getSession(msg.uuid, msg.filename);
-
-    if (!uploadSessions[session]) {
-      let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess, permlink } = msg;
-
-      if (organizationId != undefined &&
-        projectId != undefined &&
-        filename != undefined &&
-        hash != undefined &&
-        size != undefined &&
-        chunkSize != undefined &&
-        iv != undefined &&
-        filetype != undefined &&
-        fileAccess != undefined && 
-        permlink != undefined) {
-
-
-        let name = `${iv}_${chunkSize}_${session}`;
-        const filepath = `files/${projectId}/${name.length <= 250 ? name : name.substr(0, 250)}.aes`;
-        const stat = util.promisify(fs.stat);
-        try {
-          const check = await stat(filepath);
-          console.log(`File session ${session} has expired`);
-          return;
-
-        } catch (err) {
-
-          const ensureDir = util.promisify(fsExtra.ensureDir);
-          await ensureDir(`files/${projectId}`);
-
-          let ws = fs.createWriteStream(filepath, { 'flags': 'a' });
-          console.log(`Writable Stream for ${session} session has been opened (${new Date()})`);
-          uploadSessions[session] = {
-            ws,
-            organizationId,
-            projectId,
-            filename,
-            filetype,
-            filepath,
-            size,
-            hash,
-            iv,
-            chunkSize,
-            fileAccess,
-            isEnded: false
-          };
-
-          clearSessionAfterTimeout(uploadSessions, session);
-
-          ws.on('close', function (err) {
-            if (err) console.log(err);
-            delete uploadSessions[session];
-            console.log(`Writable Stream for ${session} session has been closed: (${new Date()})`);
-          });
-
-          await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, permlink, fileAccess, "timestamped");
-        }
-
-      } else {
-        console.log(`Message malformed:`);
-        console.log(msg);
-        return;
-      }
-    }
-
-    if (msg.index != msg.lastIndex) {
-
-      uploadSessions[session].ws.write(new Buffer(new Uint8Array(msg.data)), (err) => {
-        if (err) {
-          console.log(err);
-        } else {
-          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
-        }
-      });
-    } else {
-      uploadSessions[session].ws.end(new Buffer(new Uint8Array(msg.data)), async (err) => {
-        uploadSessions[session].isEnded = true;
-        if (err) {
-          console.log(err);
-        } else {
-          let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = uploadSessions[session];
-          await setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, fileAccess);
-          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
-        }
-      })
-    }
-
-  }); // listen to the event
-
-
-  async function readable(rs) {
-    return new Promise(r => rs.on('readable', r));
-  }
-
-  async function readBytes(rs, num) {
-    let buf = rs.read(num);
-    if (buf) {
-      return new Promise(r => r(buf));
-    }
-    else {
-      return new Promise(r => {
-        readable(rs).then(() => {
-          readBytes(rs, num).then(b => r(b));
-        });
-      });
-    }
-  }
-
-  const downloadSessions = {};
-  socket.on('download_encrypted_chunk', async (msg) => {
-    const session = getSession(msg.uuid, msg.filename);
-
-    if (!downloadSessions[session]) {
-      let { filename, filepath, chunkSize } = msg;
-
-      const stat = util.promisify(fs.stat);
-
-      try {
-
-        if (filepath !== undefined &&
-          chunkSize !== undefined &&
-          filename !== undefined) {
-
-          const stats = await stat(filepath);
-          let fileSizeInBytes = stats.size;
-          let index = -1;
-          let lastIndex = Math.ceil(fileSizeInBytes / chunkSize) - 1;
-
-          let rs = fs.createReadStream(filepath, { highWaterMark: chunkSize });
-          console.log(`Readable Stream for ${session} session has been opened (${new Date()})`);
-
-          downloadSessions[session] = { rs, isEnded: false, index, filepath, filename, lastIndex, chunkSize };
-          clearSessionAfterTimeout(downloadSessions, session);
-
-          rs.on('end', function () {
-            downloadSessions[session].isEnded = true;
-          })
-            .on('close', function (err) {
-              if (err) console.log(err);
-              delete downloadSessions[session];
-              console.log(`Readable Stream for ${session} session has been closed (${new Date()})`);
-            });
-
-        } else {
-          console.log(`Message malformed:`);
-          console.log(msg);
-          return;
-        }
-
-      } catch (err) {
-        console.log(err);
-        return;
-      }
-    }
-
-    let data = await readBytes(downloadSessions[session].rs, downloadSessions[session].chunkSize);
-    let lastIndex = downloadSessions[session].lastIndex;
-    let index = ++downloadSessions[session].index;
-
-    socket.emit('downloaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, data: data, filetype: msg.filetype, index, lastIndex });
-  });
-
+  socket.on('upload_speed_probe', speedProbeWS.uploadSpeedProbeHandler(socket));
+  socket.on('upload_encrypted_chunk', filesWS.uploadEncryptedChunkHandler(socket));
+  socket.on('download_encrypted_chunk', filesWS.downloadEncryptedChunkHandler(socket));
 });
 
-function clearSessionAfterTimeout(sessions, session, timeout = 900000) { // 15 min
-
-  setTimeout(() => {
-    try {
-      let expired = sessions[session];
-      if (expired !== undefined) {
-        if (expired.rs) {
-          expired.rs.close();
-        } else {
-          expired.ws.close();
-        }
-
-        console.log(`File session ${session} has expired and marked to be deleted`);
-        delete sessions[session];
-        console.log(sessions);
-      }
-    } catch (err) {
-      console.log(`File session ${session} has expired but an error occurred while closing the stream:`);
-      console.log(err);
-      delete sessions[session];
-      console.log(sessions);
-    }
-
-  }, timeout);
-
-}
 
 server.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);
