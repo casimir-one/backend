@@ -1,7 +1,7 @@
 import { authorizeResearchGroup } from './../services/auth'
 import { sendProposalNotificationToGroup } from './../services/notifications';
 import { findPricingPlan } from './../services/pricingPlans';
-import { increaseCertificateExportCounter, findSubscriptionByOwner } from './../services/subscriptions';
+import { increaseCertificateLimitCounter, findSubscriptionByOwner } from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import { createTimestampedFileRef } from './../services/fileRef';
 
@@ -135,11 +135,11 @@ const createContentProposal = async (ctx) => {
       return;
     }
 
-    const isLimitedPlan = pricingPlan.terms != null && pricingPlan.terms.certificateExport != null;
+    const isLimitedPlan = pricingPlan.terms != null && pricingPlan.terms.certificateLimit != null;
     if (isLimitedPlan) {
-      let limit = pricingPlan.terms.certificateExport.limit;
-      let counter = subscription.limits.certificateExport.counter;
-      let resetTime = subscription.limits.certificateExport.resetTime;
+      let limit = pricingPlan.terms.certificateLimit.limit;
+      let counter = subscription.limits.certificateLimit.counter;
+      let resetTime = subscription.limits.certificateLimit.resetTime;
       if (counter >= limit) {
         ctx.status = 402;
         ctx.body = `Subscription ${subscription._id} for ${jwtUsername} is under "${subscription.pricingPlan}" plan and has reached the limit. The limit will be reset on ${resetTime}`;
@@ -151,7 +151,7 @@ const createContentProposal = async (ctx) => {
     if (result.isSuccess) {
       const fileRef = await createTimestampedFileRef(organizationId, projectId, filename, filetype, size, hash, permlink);
       if (isLimitedPlan) {
-        await increaseCertificateExportCounter(subscription._id);
+        await increaseCertificateLimitCounter(subscription._id);
       }
 
       ctx.status = 200;

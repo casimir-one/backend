@@ -8,7 +8,7 @@ const PricingPlan = new Schema({
   "name": { type: String, required: true, trim: true },
   "terms": {
     type: {
-      "certificateExport": {
+      "certificateLimit": {
         type: {
           "limit": { type: Number, required: true },
           "period": {

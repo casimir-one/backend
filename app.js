@@ -112,7 +112,7 @@ io.on('connection', (socket) => {
 });
 
 // run every 12 hours
-schedule.scheduleJob('0 */12 * * *', subscriptionsJobs.processCertificateExportLimits);
+schedule.scheduleJob('0 */12 * * *', subscriptionsJobs.processCertificateLimits);
 
 server.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);

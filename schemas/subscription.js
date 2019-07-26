@@ -14,7 +14,7 @@ const Subscription = new Schema({
   },
   "limits": {
     type: {
-      "certificateExport": {
+      "certificateLimit": {
         type: {
           "counter": { type: Number, required: true, default: 0 },
           "resetTime": { type: Date, required: true },

@@ -11,7 +11,7 @@ async function createStandardSubscription(owner) {
     owner: owner,
     pricingPlan: "standard",
     limits: {
-      certificateExport: {
+      certificateLimit: {
         counter: 0,
         resetTime: moment().add(1, 'M').toDate()
       }
@@ -27,7 +27,7 @@ async function createWhiteLabelSubscription(owner) {
     owner: owner,
     pricingPlan: "white-label",
     limits: {
-      certificateExport: {
+      certificateLimit: {
         counter: 0,
         resetTime: moment().add(1, 'M').toDate()
       }
@@ -48,22 +48,22 @@ async function createUnlimitedSubscription(owner) {
   return savedSubscription;
 }
 
-async function increaseCertificateExportCounter(_id) {
-  const updatedSubscription = await Subscription.findOneAndUpdate({ _id }, { $inc: { "limits.certificateExport.counter": 1 } });
+async function increaseCertificateLimitCounter(_id) {
+  const updatedSubscription = await Subscription.findOneAndUpdate({ _id }, { $inc: { "limits.certificateLimit.counter": 1 } });
   return updatedSubscription;
 }
 
-async function resetCertificateExportLimits() {
+async function resetCertificateLimits() {
   const result = await Subscription.update(
     {
       $and: [
-        { "limits.certificateExport": { $exists: true } },
-        { "limits.certificateExport.resetTime": { $lt: moment().endOf('day').toDate() } }
+        { "limits.certificateLimit": { $exists: true } },
+        { "limits.certificateLimit.resetTime": { $lt: moment().endOf('day').toDate() } }
       ]
     },
     {
-      "limits.certificateExport.counter": 0,
-      "limits.certificateExport.resetTime": moment().add(1, 'M').toDate()
+      "limits.certificateLimit.counter": 0,
+      "limits.certificateLimit.resetTime": moment().add(1, 'M').toDate()
     },
     { multi: true });
   return result;
@@ -74,6 +74,6 @@ export {
   createStandardSubscription,
   createWhiteLabelSubscription,
   createUnlimitedSubscription,
-  resetCertificateExportLimits,
-  increaseCertificateExportCounter
+  resetCertificateLimits,
+  increaseCertificateLimitCounter
 }

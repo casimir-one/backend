@@ -1,13 +1,13 @@
 import config from './../config';
-import { resetCertificateExportLimits } from './../services/subscriptions';
+import { resetCertificateLimits } from './../services/subscriptions';
 
 
-async function processCertificateExportLimits(fireDate) {
-  let result = await resetCertificateExportLimits();
+async function processCertificateLimits(fireDate) {
+  let result = await resetCertificateLimits();
   console.log(`${fireDate} - subscriptions export limits processed:`, result);
 }
 
 
 export default {
-  processCertificateExportLimits
+  processCertificateLimits
 }
