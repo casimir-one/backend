@@ -1,4 +1,4 @@
-import { setUploadedAndTimestampedStatus, createFileRef } from './../services/fileRef';
+import { setUploadedAndTimestampedStatus } from './../services/fileRef';
 import fs from "fs";
 import fsExtra from "fs-extra";
 import util from 'util';
@@ -34,7 +34,6 @@ async function readBytes(rs, num) {
 }
 
 function clearSessionAfterTimeout(sessions, session, timeout = 900000) { // 15 min
-// function clearSessionAfterTimeout(sessions, session, timeout = 60000) { // 15 min
 
   setTimeout(() => {
     try {

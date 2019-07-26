@@ -73,15 +73,19 @@ async function createTimestampedFileRef(
 async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, accessKeys) {
   if (!hash || !iv || !chunkSize || !filepath || !accessKeys) return;
 
-  let fileRef = await findFileRefByHash(projectId, hash);
-  fileRef.iv = iv;
-  fileRef.chunkSize = chunkSize;
-  fileRef.filepath = filepath;
-  fileRef.accessKeys = accessKeys;
-  fileRef.status = "uploaded_and_timestamped";
-
-  let updatedFileRef = await fileRef.save();
-  return updatedFileRef;
+  const fileRef = await findFileRefByHash(projectId, hash);
+  if (fileRef.status != 'uploaded_and_timestamped') {
+    // do not allow to reset data, must be refactored after we'll have separated certifying process from storage upload
+    fileRef.iv = iv;
+    fileRef.chunkSize = chunkSize;
+    fileRef.filepath = filepath;
+    fileRef.accessKeys = accessKeys;
+    fileRef.status = "uploaded_and_timestamped";
+    let updatedFileRef = await fileRef.save();
+    return updatedFileRef;
+  }
+  
+  return fileRef;
 }
 
 export {
