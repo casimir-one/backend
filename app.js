@@ -15,6 +15,8 @@ import config from './config';
 import mongoose from 'mongoose';
 import filesWS from './sockets/files';
 import speedProbeWS from './sockets/speedProbe';
+import schedule from 'node-schedule';
+import subscriptionsJobs from './jobs/subscriptions';
 
 import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
@@ -109,6 +111,8 @@ io.on('connection', (socket) => {
   socket.on('download_encrypted_chunk', filesWS.downloadEncryptedChunkHandler(socket));
 });
 
+// run every 12 hours
+schedule.scheduleJob('0 */12 * * *', subscriptionsJobs.processCertificateExportLimits);
 
 server.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);
@@ -120,7 +124,6 @@ process.on('SIGINT', () => {
     process.exit(0);
   });
 });
-
 
 process.on('exit', (code) => {
   server.close();

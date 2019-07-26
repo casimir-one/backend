@@ -22,22 +22,30 @@ async function createStandardSubscription(owner) {
   return savedSubscription;
 }
 
-async function resetCertificateExportCounter(_id) {
-  const updatedSubscription = await Subscription.findOneAndUpdate({ _id }, { 
-    "limits.certificateExport.counter": 0, 
-    "limits.certificateExport.resetTime": moment().add(1, 'M').toDate()
-  });
-  return updatedSubscription;
-}
-
 async function increaseCertificateExportCounter(_id) {
   const updatedSubscription = await Subscription.findOneAndUpdate({ _id }, { $inc: { "limits.certificateExport.counter": 1 } });
   return updatedSubscription;
 }
 
+async function resetCertificateExportLimits() {
+  const result = await Subscription.update(
+    {
+      $and: [
+        { "limits.certificateExport": { $exists: true } },
+        { "limits.certificateExport.resetTime": { $lt: moment().endOf('day').toDate() } }
+      ]
+    },
+    {
+      "limits.certificateExport.counter": 0,
+      "limits.certificateExport.resetTime": moment().add(1, 'M').toDate()
+    },
+    { multi: true });
+  return result;
+}
+
 export {
   findSubscriptionByOwner,
   createStandardSubscription,
-  resetCertificateExportCounter,
+  resetCertificateExportLimits,
   increaseCertificateExportCounter
 }

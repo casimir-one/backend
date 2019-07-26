@@ -6,6 +6,13 @@ async function findPricingPlan(name) {
   return plan;
 }
 
+async function findAllPricingPlans() {
+  const plans = await PricingPlan.find({});
+  return plans;
+}
+
+
 export {
-  findPricingPlan
+  findPricingPlan,
+  findAllPricingPlans
 }
