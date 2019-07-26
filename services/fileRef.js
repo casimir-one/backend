@@ -43,6 +43,33 @@ async function createFileRef(
   return savedRef;
 }
 
+async function createTimestampedFileRef(
+  organizationId,
+  projectId,
+  filename,
+  filetype,
+  size,
+  hash,
+  permlink
+) {
+  const fr = new FileRef({
+    organizationId: organizationId,
+    projectId: projectId,
+    filename: filename,
+    filetype: filetype,
+    filepath: null,
+    size: size,
+    hash: hash,
+    iv: null,
+    chunkSize: null,
+    permlink: permlink,
+    accessKeys: [],
+    status: "timestamped",
+  });
+  const savedRef = await fr.save();
+  return savedRef;
+}
+
 async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, accessKeys) {
   if (!hash || !iv || !chunkSize || !filepath || !accessKeys) return;
 
@@ -61,5 +88,6 @@ export {
   findFileRefById,
   findFileRefByHash,
   createFileRef,
-  setUploadedAndTimestampedStatus
+  setUploadedAndTimestampedStatus,
+  createTimestampedFileRef
 }

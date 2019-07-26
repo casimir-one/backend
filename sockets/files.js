@@ -117,8 +117,6 @@ function uploadEncryptedChunkHandler(socket) {
             delete uploadSessions[session];
             console.log(`Writable Stream for ${session} session has been closed: (${new Date()})`);
           });
-
-          await createFileRef(organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, permlink, fileAccess, "timestamped");
         }
 
       } else {

@@ -22,6 +22,7 @@ router.put('/notifications/:username/mark-all-read', notifications.markAllUserNo
 
 router.post('/proposals/research', proposals.createResearchProposal)
 router.post('/proposals/invite', proposals.createInviteProposal)
+router.post('/proposals/content', proposals.createContentProposal)
 
 router.post('/groups', groups.createResearchGroup)
 router.get('/groups/profile/:permlink', groups.getGroupProfile)

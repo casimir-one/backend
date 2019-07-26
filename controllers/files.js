@@ -8,8 +8,6 @@ import FileRef from './../schemas/fileRef';
 import UserProfile from './../schemas/user';
 import config from './../config';
 import { findFileRefById, findFileRefByHash } from './../services/fileRef';
-import { findSubscriptionByOwner, resetCertificateExportCounter, increaseCertificateExportCounter } from './../services/subscriptions';
-import { findPricingPlan } from './../services/pricingPlans';
 import crypto from 'crypto';
 import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
@@ -60,39 +58,6 @@ const exportCertificate = async (ctx) => {
 
   try {
 
-    let subscription = await findSubscriptionByOwner(jwtUsername);
-    if (!subscription) {
-      ctx.status = 404;
-      ctx.body = `Subscription for ${jwtUsername} is not found`;
-      return;
-    }
-
-    let pricingPlan = await findPricingPlan(subscription.pricingPlan);
-    if (!pricingPlan) {
-      ctx.status = 404;
-      ctx.body = `Pricing plan "${subscription.pricingPlan}" is not found`;
-      return;
-    }
-
-    if (pricingPlan.terms != null && pricingPlan.terms.certificateExport) {
-      let limit = pricingPlan.terms.certificateExport.limit;
-
-      // move it to scheduler
-      // let resetTime = subscription.limits.certificateExport.resetTime;
-      // if (moment().isAfter(resetTime)) {
-      //   subscription = await resetCertificateExportCounter(subscription._id);
-      // }
-
-      let counter = subscription.limits.certificateExport.counter;
-      if (counter >= limit) {
-        ctx.status = 402;
-        ctx.body = `Subscription ${subscription._id} for ${jwtUsername} is under "${subscription.pricingPlan}" plan and has reached the limit. The limit will be reset on ${resetTime}`;
-        return;
-      }
-
-      subscription = await increaseCertificateExportCounter(subscription._id);
-    }
-
     let chainResearch = await deipRpc.api.getResearchByIdAsync(projectId);
     let chainContents = await deipRpc.api.getAllResearchContentAsync(projectId);
     let chainContent = chainContents.find(c => c.content == hash);
@@ -131,7 +96,7 @@ const exportCertificate = async (ctx) => {
     let readFileAsync = util.promisify(fs.readFile);
     let rawHtml = await readFileAsync('./certificates/file/certificate.html', 'utf8');
 
-    let id = ripemd160(`${chainResearch.research_id}-${chainResearch.id}-${chainContent.id}-${chainContent.content}`).toString();
+    let id = ripemd160(`${chainResearch.research_group_id}-${chainResearch.id}-${chainContent.id}-${chainContent.content}`).toString();
 
     var html = rawHtml.replace(/{{certificate_id}}/, id);
     html = html.replace(/{{project_id}}/, chainResearch.id);
