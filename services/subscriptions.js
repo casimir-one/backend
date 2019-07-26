@@ -22,6 +22,32 @@ async function createStandardSubscription(owner) {
   return savedSubscription;
 }
 
+async function createWhiteLabelSubscription(owner) {
+  const subscription = new Subscription({
+    owner: owner,
+    pricingPlan: "white-label",
+    limits: {
+      certificateExport: {
+        counter: 0,
+        resetTime: moment().add(1, 'M').toDate()
+      }
+    },
+    expirationTime: moment().add(100, 'Y').toDate()
+  });
+  const savedSubscription = await subscription.save();
+  return savedSubscription;
+}
+
+async function createUnlimitedSubscription(owner) {
+  const subscription = new Subscription({
+    owner: owner,
+    pricingPlan: "unlimited",
+    expirationTime: moment().add(100, 'Y').toDate()
+  });
+  const savedSubscription = await subscription.save();
+  return savedSubscription;
+}
+
 async function increaseCertificateExportCounter(_id) {
   const updatedSubscription = await Subscription.findOneAndUpdate({ _id }, { $inc: { "limits.certificateExport.counter": 1 } });
   return updatedSubscription;
@@ -46,6 +72,8 @@ async function resetCertificateExportLimits() {
 export {
   findSubscriptionByOwner,
   createStandardSubscription,
+  createWhiteLabelSubscription,
+  createUnlimitedSubscription,
   resetCertificateExportLimits,
   increaseCertificateExportCounter
 }

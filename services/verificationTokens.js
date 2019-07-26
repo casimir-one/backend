@@ -17,6 +17,7 @@ async function createVerificationToken(creator, token) {
     email: token.email,
     firstName: token.firstName,
     lastName: token.lastName,
+    pricingPlan: token.pricingPlan,
     token: hex,
     expirationTime: token.expirationTime,
     creator: creator

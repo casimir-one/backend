@@ -7,10 +7,27 @@ import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
 import { findVerificationToken, removeVerificationToken } from './../services/verificationTokens';
-import { createStandardSubscription } from './../services/subscriptions';
+import { createStandardSubscription, createWhiteLabelSubscription, createUnlimitedSubscription } from './../services/subscriptions';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
+}
+
+async function createSubscription(pricingPlan, username) {
+  let plan;
+  switch (pricingPlan) {
+    case "standard": 
+      plan = await createStandardSubscription(username);
+      return plan;
+    case "white-label":
+      plan = await createWhiteLabelSubscription(username);
+      return plan;
+    case "unlimited":
+      plan = await createUnlimitedSubscription(username);
+      return plan;
+    default:
+      return;
+  }
 }
 
 const signIn = async function (ctx) {
@@ -70,10 +87,11 @@ const signUp = async function (ctx) {
   const lastName = data.lastName;
   const pubKey = data.pubKey;
   const token = data.token;
+  const pricingPlan = data.pricingPlan;
 
-  if (!token || !username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
+  if (!token || !pricingPlan || !username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
     ctx.status = 400;
-    ctx.body = `'token', 'username', 'pubKey', 'email', 'firstName' fields are required`;
+    ctx.body = `'token', 'username', 'pubKey', 'email', 'firstName', 'pricingPlan' fields are required`;
     return;
   }
 
@@ -128,7 +146,7 @@ const signUp = async function (ctx) {
       await removeVerificationToken(token);
     }
 
-    await createStandardSubscription(username);
+    await createSubscription(pricingPlan, username);
 
     ctx.status = 200;
     ctx.body = profile;
