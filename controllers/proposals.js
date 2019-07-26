@@ -139,6 +139,7 @@ const createContentProposal = async (ctx) => {
     if (isLimitedPlan) {
       let limit = pricingPlan.terms.certificateExport.limit;
       let counter = subscription.limits.certificateExport.counter;
+      let resetTime = subscription.limits.certificateExport.resetTime;
       if (counter >= limit) {
         ctx.status = 402;
         ctx.body = `Subscription ${subscription._id} for ${jwtUsername} is under "${subscription.pricingPlan}" plan and has reached the limit. The limit will be reset on ${resetTime}`;
