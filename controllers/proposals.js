@@ -3,7 +3,7 @@ import { sendProposalNotificationToGroup } from './../services/notifications';
 import { findPricingPlan } from './../services/pricingPlans';
 import { increaseCertificateLimitCounter, findSubscriptionByOwner } from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import { createTimestampedFileRef } from './../services/fileRef';
+import { createTimestampedFileRef, createTimestampedFilesRefs } from './../services/fileRef';
 
 import deipRpc from '@deip/deip-rpc-client';
 
@@ -83,43 +83,13 @@ const createInviteProposal = async (ctx) => {
 }
 
 const createContentProposal = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const tx = ctx.request.body.tx;
-  const fileMeta = ctx.request.body.fileMeta;
-
-  const operation = tx['operations'][0];
-  const payload = operation[1];
-  const proposal = JSON.parse(payload.data);
-
-  const hash = proposal.content;
-  const projectId = proposal.research_id;
-  const permlink = proposal.permlink;
-  const organizationId = parseInt(payload.research_group_id);
-  const filename = fileMeta.filename;
-  const size = fileMeta.size;
-  const filetype = fileMeta.filetype;
 
   try {
 
-    if (organizationId == undefined ||
-      projectId == undefined ||
-      filename == undefined ||
-      hash == undefined ||
-      size == undefined ||
-      filetype == undefined ||
-      permlink == undefined) {
-
-      ctx.status = 400;
-      ctx.body = `Mallformed operation: "${operation}"`;
-      return;
-    }
-
-    const authorized = await authorizeResearchGroup(organizationId, jwtUsername);
-    if (!authorized) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${organizationId}" group`;
-      return;
-    }
+    const files = ctx.request.body.filesMeta;
+    const jwtUsername = ctx.state.user.username;
+    const tx = ctx.request.body.tx;
+    const operations = tx['operations'];
 
     const subscription = await findSubscriptionByOwner(jwtUsername);
     if (!subscription) {
@@ -140,25 +110,59 @@ const createContentProposal = async (ctx) => {
       let limit = pricingPlan.terms.certificateLimit.limit;
       let counter = subscription.limits.certificateLimit.counter;
       let resetTime = subscription.limits.certificateLimit.resetTime;
-      if (counter >= limit) {
+      if ((counter + operations.length) > limit) {
         ctx.status = 402;
         ctx.body = `Subscription ${subscription._id} for ${jwtUsername} is under "${subscription.pricingPlan}" plan and has reached the limit. The limit will be reset on ${resetTime}`;
         return;
       }
     }
 
+    const refs = [];
+    for (let i = 0; i < files.length; i++) {
+      let fileMeta = files[i];
+      let operation = operations[i];
+
+      let payload = operation[1];
+      let proposal = JSON.parse(payload.data);
+
+      let hash = proposal.content;
+      let projectId = proposal.research_id;
+      let permlink = proposal.permlink;
+      let organizationId = parseInt(payload.research_group_id);
+      let filename = fileMeta.filename;
+      let size = fileMeta.size;
+      let filetype = fileMeta.filetype;
+
+      if (
+        organizationId == undefined ||
+        projectId == undefined ||
+        filename == undefined ||
+        hash == undefined ||
+        size == undefined ||
+        filetype == undefined ||
+        permlink == undefined
+      ) {
+        ctx.status = 400;
+        ctx.body = `Mallformed operation: "${operation}"`;
+        return;
+      }
+
+      refs.push({ organizationId, projectId, filename, filetype, size, hash, permlink });
+    }
+
     const result = await sendTransaction(tx);
     if (result.isSuccess) {
-      const fileRef = await createTimestampedFileRef(organizationId, projectId, filename, filetype, size, hash, permlink);
+      const filesRefs = await createTimestampedFilesRefs(refs);
       if (isLimitedPlan) {
-        await increaseCertificateLimitCounter(subscription._id);
+        await increaseCertificateLimitCounter(subscription._id, files.length);
       }
 
       ctx.status = 200;
-      ctx.body = fileRef;
+      ctx.body = filesRefs;
     } else {
       throw new Error(`Could not proceed the transaction: ${tx}`);
     }
+    
   } catch (err) {
     console.log(err);
     ctx.status = 500;

@@ -70,6 +70,32 @@ async function createTimestampedFileRef(
   return savedRef;
 }
 
+async function createTimestampedFilesRefs(files) {
+  const refs = [];
+  for (let i = 0; i < files.length; i++) {
+    let file = files[i];
+    let { organizationId, projectId, filename, filetype, size, hash, permlink } = file;
+    let ref = {
+      organizationId: organizationId,
+      projectId: projectId,
+      filename: filename,
+      filetype: filetype,
+      filepath: null,
+      size: size,
+      hash: hash,
+      iv: null,
+      chunkSize: null,
+      permlink: permlink,
+      accessKeys: [],
+      status: "timestamped",
+    };
+    refs.push(ref);
+  }
+
+  let savedRefs = await FileRef.create(refs);
+  return savedRefs;
+}
+
 async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, accessKeys) {
   if (!hash || !iv || !chunkSize || !filepath || !accessKeys) return;
 
@@ -93,5 +119,6 @@ export {
   findFileRefByHash,
   createFileRef,
   setUploadedAndTimestampedStatus,
-  createTimestampedFileRef
+  createTimestampedFileRef,
+  createTimestampedFilesRefs
 }

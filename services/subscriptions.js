@@ -48,8 +48,8 @@ async function createUnlimitedSubscription(owner) {
   return savedSubscription;
 }
 
-async function increaseCertificateLimitCounter(_id) {
-  const updatedSubscription = await Subscription.findOneAndUpdate({ _id }, { $inc: { "limits.certificateLimit.counter": 1 } });
+async function increaseCertificateLimitCounter(_id, inc) {
+  const updatedSubscription = await Subscription.findOneAndUpdate({ _id }, { $inc: { "limits.certificateLimit.counter": inc } });
   return updatedSubscription;
 }
 
