@@ -62,12 +62,17 @@ async function getUploadSession({ organizationId, projectId, uuid, filename, siz
       await ensureDir(`files/${projectId}`);
 
       const ws = fs.createWriteStream(filepath, { 'flags': 'a' });
-      console.log(`Writable Stream for ${sessionKey} session has been opened (${new Date()})`);
+      console.log(`(${new Date()}) Writable Stream for ${sessionKey} session has been opened`);
 
       ws.on('close', function (err) {
         if (err) console.log(err);
         delete uploadSessions[sessionKey];
-        console.log(`Writable Stream for ${sessionKey} session has been closed: (${new Date()})`);
+        console.log(`(${new Date()}) Writable Stream for ${sessionKey} session has been closed`);
+      });
+
+      ws.on('error', function (err) {
+        delete uploadSessions[sessionKey];
+        console.log(`(${new Date()}) Writable Stream for ${sessionKey} session has ended with an error:`, err);
       });
 
       const session = {
@@ -87,35 +92,31 @@ async function getUploadSession({ organizationId, projectId, uuid, filename, siz
       uploadSessions[sessionKey] = session;
       closeUploadSessionOnExpire(sessionKey);
       return uploadSessions[sessionKey];
-    } else { 
+    } else {
       return null; 
     }
-
   } else {
     return uploadSessions[sessionKey];
   }
-
 }
 
 function closeUploadSessionOnExpire(sessionKey, timeout = 900000) {
   setTimeout(() => {
     try {
-      let expired = uploadSessions[sessionKey];
-      if (expired !== undefined) {
+      const expired = uploadSessions[sessionKey];
+      if (expired != undefined) {
         expired.ws.close();
-        console.log(`File session ${sessionKey} has expired and marked to be deleted`);
+        console.log(`(${new Date()}) File session ${sessionKey} has expired and marked to be deleted`);
         delete uploadSessions[sessionKey];
         console.log(uploadSessions);
       }
     } catch (err) {
-      console.log(`File session ${sessionKey} has expired but an error occurred while closing the stream:`, err);
+      console.log(`(${new Date()}) File session ${sessionKey} has expired but an error occurred while closing the stream:`, err);
       delete uploadSessions[sessionKey];
       console.log(uploadSessions);
     }
-
   }, timeout);
 }
-
 
 function uploadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
@@ -126,28 +127,31 @@ function uploadEncryptedChunkHandler(socket) {
 
     if (index != lastIndex) {
       ws.write(new Buffer(new Uint8Array(data)), (err) => {
-        if (err) {
-          console.log(err);
-          ack(err);
-        } else {
-          ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
-        }
+        try {
+          if (err) {
+            console.log(err);
+            ack(err);
+          } else {
+            ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
+          }
+        } catch (err) { console.log(err); }
       });
     } else {
       ws.end(new Buffer(new Uint8Array(data)), async (err) => {
-        if (err) {
-          console.log(err);
-          ack(err);
-        } else {
-          let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
-          await setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, fileAccess);
-          ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
-        }
-      })
+        try {
+          if (err) {
+            console.log(err);
+            ack(err);
+          } else {
+            let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
+            await setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, fileAccess);
+            ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
+          }
+        } catch (err) { console.log(err); }
+      });
     }
   }
 }
-
 
 async function getDownloadSession({ organizationId, projectId, uuid, filename, filepath, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
 
@@ -157,7 +161,6 @@ async function getDownloadSession({ organizationId, projectId, uuid, filename, f
     .toLowerCase();
 
   if (!downloadSessions[sessionKey]) {
-
     if (
       filepath !== undefined &&
       chunkSize !== undefined &&
@@ -178,12 +181,17 @@ async function getDownloadSession({ organizationId, projectId, uuid, filename, f
       const lastIndex = Math.ceil(fileSize / chunkSize) - 1;
 
       const rs = fs.createReadStream(filepath, { highWaterMark: chunkSize });
-      console.log(`Readable Stream for ${sessionKey} session has been opened (${new Date()})`);
+      console.log(`(${new Date()}) Readable Stream for ${sessionKey} session has been opened`);
 
       rs.on('close', function (err) {
         if (err) console.log(err);
         delete downloadSessions[sessionKey];
-        console.log(`Readable Stream for ${sessionKey} session has been closed (${new Date()})`);
+        console.log(`(${new Date()}) Readable Stream for ${sessionKey} session has been closed`);
+      });
+
+      rs.on('error', function (err) {
+        delete downloadSessions[sessionKey];
+        console.log(`(${new Date()}) Readable Stream for ${sessionKey} session has ended with an error:`, err);
       });
 
       const session = { rs, filepath, filename, fileSize, chunkSize, index, lastIndex };
@@ -191,23 +199,19 @@ async function getDownloadSession({ organizationId, projectId, uuid, filename, f
       downloadSessions[sessionKey] = session;
       closeDownloadSessionOnExpire(sessionKey);
       return downloadSessions[sessionKey];
-
     } else {
       return null;
     }
-    
   } else {
     return downloadSessions[sessionKey];
   }
-
 }
-
 
 function closeDownloadSessionOnExpire(sessionKey, timeout = 900000) {
   setTimeout(() => {
     try {
-      let expired = downloadSessions[sessionKey];
-      if (expired !== undefined) {
+      const expired = downloadSessions[sessionKey];
+      if (expired != undefined) {
         expired.rs.close();
         console.log(`File session ${sessionKey} has expired and marked to be deleted`);
         delete downloadSessions[sessionKey];
@@ -218,11 +222,8 @@ function closeDownloadSessionOnExpire(sessionKey, timeout = 900000) {
       delete downloadSessions[sessionKey];
       console.log(downloadSessions);
     }
-
   }, timeout);
 }
-
-
 
 function downloadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
@@ -230,9 +231,11 @@ function downloadEncryptedChunkHandler(socket) {
     const session = await getDownloadSession(msg);
     const { rs, lastIndex } = session;
     const { uuid, chunkSize, filename, filetype } = msg;
-    let data = await readBytes(rs, chunkSize);
+    const data = await readBytes(rs, chunkSize);
 
-    ack(null, { filename: filename, uuid: uuid, data: data, filetype: filetype, index: ++session.index, lastIndex })
+    try {
+      ack(null, { filename: filename, uuid: uuid, data: data, filetype: filetype, index: ++session.index, lastIndex });
+    } catch (err) { console.log(err); }
   }
 }
 

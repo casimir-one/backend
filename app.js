@@ -106,9 +106,14 @@ io.use(function (socket, next) {
 
 
 io.on('connection', (socket) => {
+  console.log(`(${new Date()}) Socket ${socket.id} is connected`)
   socket.on('upload_speed_probe', speedProbeWS.uploadSpeedProbeHandler(socket));
   socket.on('upload_encrypted_chunk', filesWS.uploadEncryptedChunkHandler(socket));
   socket.on('download_encrypted_chunk', filesWS.downloadEncryptedChunkHandler(socket));
+
+  socket.on("disconnect", function () {
+    console.log(`(${new Date()}) Socket ${socket.id} is disconnected`);
+  });
 });
 
 // run every 12 hours
