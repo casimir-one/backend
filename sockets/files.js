@@ -8,12 +8,6 @@ import path from 'path';
 const uploadSessions = {};
 const downloadSessions = {};
 
-function getSession(filename, uuid) {
-  return `${filename}-${uuid}`
-    .replace(/ /g, "-")
-    .replace(/\W+/g, "-")
-    .toLowerCase();
-}
 
 async function readable(rs) {
   return new Promise(r => rs.on('readable', r));
@@ -33,27 +27,90 @@ async function readBytes(rs, num) {
   }
 }
 
-function clearSessionAfterTimeout(sessions, session, timeout = 900000) { // 15 min
+async function getUploadSession({ organizationId, projectId, uuid, filename, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
+  
+  const sessionKey = `${filename}-${uuid}`
+    .replace(/ /g, "-")
+    .replace(/\W+/g, "-")
+    .toLowerCase();
 
+  if (!uploadSessions[sessionKey]) {
+    if (
+      organizationId != undefined &&
+      projectId != undefined &&
+      filename != undefined &&
+      hash != undefined &&
+      size != undefined &&
+      chunkSize != undefined &&
+      iv != undefined &&
+      filetype != undefined &&
+      fileAccess != undefined &&
+      permlink != undefined
+    ) {
+
+      const name = `${iv}_${chunkSize}_${sessionKey}`;
+      const filepath = `files/${projectId}/${name.length <= 250 ? name : name.substr(0, 250)}.aes`;
+
+      const stat = util.promisify(fs.stat);
+      try {
+        const check = await stat(filepath);
+        console.log(`File session ${sessionKey} has expired`);
+        return null;
+      } catch(err) {}
+
+      const ensureDir = util.promisify(fsExtra.ensureDir);
+      await ensureDir(`files/${projectId}`);
+
+      const ws = fs.createWriteStream(filepath, { 'flags': 'a' });
+      console.log(`Writable Stream for ${sessionKey} session has been opened (${new Date()})`);
+
+      ws.on('close', function (err) {
+        if (err) console.log(err);
+        delete uploadSessions[sessionKey];
+        console.log(`Writable Stream for ${sessionKey} session has been closed: (${new Date()})`);
+      });
+
+      const session = {
+        ws,
+        organizationId,
+        projectId,
+        filename,
+        filetype,
+        filepath,
+        size,
+        hash,
+        iv,
+        chunkSize,
+        fileAccess
+      }
+
+      uploadSessions[sessionKey] = session;
+      closeUploadSessionOnExpire(sessionKey);
+      return uploadSessions[sessionKey];
+    } else { 
+      return null; 
+    }
+
+  } else {
+    return uploadSessions[sessionKey];
+  }
+
+}
+
+function closeUploadSessionOnExpire(sessionKey, timeout = 900000) {
   setTimeout(() => {
     try {
-      let expired = sessions[session];
+      let expired = uploadSessions[sessionKey];
       if (expired !== undefined) {
-        if (expired.rs) {
-          expired.rs.close();
-        } else {
-          expired.ws.close();
-        }
-        
-        console.log(`File session ${session} has expired and marked to be deleted`);
-        delete sessions[session];
-        console.log(sessions);
+        expired.ws.close();
+        console.log(`File session ${sessionKey} has expired and marked to be deleted`);
+        delete uploadSessions[sessionKey];
+        console.log(uploadSessions);
       }
     } catch (err) {
-      console.log(`File session ${session} has expired but an error occurred while closing the stream:`);
-      console.log(err);
-      delete sessions[session];
-      console.log(sessions);
+      console.log(`File session ${sessionKey} has expired but an error occurred while closing the stream:`, err);
+      delete uploadSessions[sessionKey];
+      console.log(uploadSessions);
     }
 
   }, timeout);
@@ -63,144 +120,119 @@ function clearSessionAfterTimeout(sessions, session, timeout = 900000) { // 15 m
 function uploadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
-    const session = getSession(msg.uuid, msg.filename);
-    if (!uploadSessions[session]) {
-      let { organizationId, projectId, filename, size, hash, chunkSize, iv, filetype, fileAccess, permlink } = msg;
+    const session = await getUploadSession(msg);
+    const { ws } = session;
+    const { index, lastIndex, uuid, data, filename } = msg;
 
-      if (organizationId != undefined &&
-        projectId != undefined &&
-        filename != undefined &&
-        hash != undefined &&
-        size != undefined &&
-        chunkSize != undefined &&
-        iv != undefined &&
-        filetype != undefined &&
-        fileAccess != undefined &&
-        permlink != undefined) {
-
-
-        let name = `${iv}_${chunkSize}_${session}`;
-        const filepath = `files/${projectId}/${name.length <= 250 ? name : name.substr(0, 250)}.aes`;
-        const stat = util.promisify(fs.stat);
-        try {
-          const check = await stat(filepath);
-          console.log(`File session ${session} has expired`);
-          return;
-
-        } catch (err) {
-
-          const ensureDir = util.promisify(fsExtra.ensureDir);
-          await ensureDir(`files/${projectId}`);
-
-          let ws = fs.createWriteStream(filepath, { 'flags': 'a' });
-          console.log(`Writable Stream for ${session} session has been opened (${new Date()})`);
-          uploadSessions[session] = {
-            ws,
-            organizationId,
-            projectId,
-            filename,
-            filetype,
-            filepath,
-            size,
-            hash,
-            iv,
-            chunkSize,
-            fileAccess,
-            isEnded: false
-          };
-
-          clearSessionAfterTimeout(uploadSessions, session);
-
-          ws.on('close', function (err) {
-            if (err) console.log(err);
-            delete uploadSessions[session];
-            console.log(`Writable Stream for ${session} session has been closed: (${new Date()})`);
-          });
-        }
-
-      } else {
-        console.log(`Message malformed:`, msg);
-        return;
-      }
-    }
-
-    if (msg.index != msg.lastIndex) {
-
-      uploadSessions[session].ws.write(new Buffer(new Uint8Array(msg.data)), (err) => {
+    if (index != lastIndex) {
+      ws.write(new Buffer(new Uint8Array(data)), (err) => {
         if (err) {
           console.log(err);
+          ack(err);
         } else {
-          ack({ filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
+          ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
         }
       });
     } else {
-      uploadSessions[session].ws.end(new Buffer(new Uint8Array(msg.data)), async (err) => {
-        uploadSessions[session].isEnded = true;
+      ws.end(new Buffer(new Uint8Array(data)), async (err) => {
         if (err) {
           console.log(err);
+          ack(err);
         } else {
-          let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = uploadSessions[session];
+          let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
           await setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, fileAccess);
-          ack({ filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
+          ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
         }
       })
     }
-
   }
 }
+
+
+async function getDownloadSession({ organizationId, projectId, uuid, filename, filepath, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
+
+  const sessionKey = `${filename}-${uuid}`
+    .replace(/ /g, "-")
+    .replace(/\W+/g, "-")
+    .toLowerCase();
+
+  if (!downloadSessions[sessionKey]) {
+
+    if (
+      filepath !== undefined &&
+      chunkSize !== undefined &&
+      filename !== undefined
+    ) {
+
+      let fileSize;
+      try {
+        const stat = util.promisify(fs.stat);
+        const stats = await stat(filepath);
+        fileSize = stats.size;
+      } catch (err) {
+        console.log(err);
+        return null; 
+      }
+
+      const index = -1;
+      const lastIndex = Math.ceil(fileSize / chunkSize) - 1;
+
+      const rs = fs.createReadStream(filepath, { highWaterMark: chunkSize });
+      console.log(`Readable Stream for ${sessionKey} session has been opened (${new Date()})`);
+
+      rs.on('close', function (err) {
+        if (err) console.log(err);
+        delete downloadSessions[sessionKey];
+        console.log(`Readable Stream for ${sessionKey} session has been closed (${new Date()})`);
+      });
+
+      const session = { rs, filepath, filename, fileSize, chunkSize, index, lastIndex };
+
+      downloadSessions[sessionKey] = session;
+      closeDownloadSessionOnExpire(sessionKey);
+      return downloadSessions[sessionKey];
+
+    } else {
+      return null;
+    }
+    
+  } else {
+    return downloadSessions[sessionKey];
+  }
+
+}
+
+
+function closeDownloadSessionOnExpire(sessionKey, timeout = 900000) {
+  setTimeout(() => {
+    try {
+      let expired = downloadSessions[sessionKey];
+      if (expired !== undefined) {
+        expired.rs.close();
+        console.log(`File session ${sessionKey} has expired and marked to be deleted`);
+        delete downloadSessions[sessionKey];
+        console.log(downloadSessions);
+      }
+    } catch (err) {
+      console.log(`File session ${sessionKey} has expired but an error occurred while closing the stream:`, err);
+      delete downloadSessions[sessionKey];
+      console.log(downloadSessions);
+    }
+
+  }, timeout);
+}
+
 
 
 function downloadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
-    const session = getSession(msg.uuid, msg.filename);
-    if (!downloadSessions[session]) {
-      let { filename, filepath, chunkSize } = msg;
+    const session = await getDownloadSession(msg);
+    const { rs, lastIndex } = session;
+    const { uuid, chunkSize, filename, filetype } = msg;
+    let data = await readBytes(rs, chunkSize);
 
-      const stat = util.promisify(fs.stat);
-
-      try {
-
-        if (filepath !== undefined &&
-          chunkSize !== undefined &&
-          filename !== undefined) {
-
-          const stats = await stat(filepath);
-          let fileSizeInBytes = stats.size;
-          let index = -1;
-          let lastIndex = Math.ceil(fileSizeInBytes / chunkSize) - 1;
-
-          let rs = fs.createReadStream(filepath, { highWaterMark: chunkSize });
-          console.log(`Readable Stream for ${session} session has been opened (${new Date()})`);
-
-          downloadSessions[session] = { rs, isEnded: false, index, filepath, filename, lastIndex, chunkSize };
-          clearSessionAfterTimeout(downloadSessions, session);
-
-          rs.on('end', function () {
-            downloadSessions[session].isEnded = true;
-          })
-            .on('close', function (err) {
-              if (err) console.log(err);
-              delete downloadSessions[session];
-              console.log(`Readable Stream for ${session} session has been closed (${new Date()})`);
-            });
-
-        } else {
-          console.log(`Message malformed:`, msg);
-          return;
-        }
-
-      } catch (err) {
-        console.log(err);
-        return;
-      }
-    }
-
-    let data = await readBytes(downloadSessions[session].rs, downloadSessions[session].chunkSize);
-    let lastIndex = downloadSessions[session].lastIndex;
-    let index = ++downloadSessions[session].index;
-
-    ack({ filename: msg.filename, uuid: msg.uuid, data: data, filetype: msg.filetype, index, lastIndex })
+    ack(null, { filename: filename, uuid: uuid, data: data, filetype: filetype, index: ++session.index, lastIndex })
   }
 }
 
