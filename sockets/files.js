@@ -61,7 +61,7 @@ function clearSessionAfterTimeout(sessions, session, timeout = 900000) { // 15 m
 
 
 function uploadEncryptedChunkHandler(socket) {
-  return async function (msg) {
+  return async function (msg, ack) {
 
     const session = getSession(msg.uuid, msg.filename);
     if (!uploadSessions[session]) {
@@ -119,8 +119,7 @@ function uploadEncryptedChunkHandler(socket) {
         }
 
       } else {
-        console.log(`Message malformed:`);
-        console.log(msg);
+        console.log(`Message malformed:`, msg);
         return;
       }
     }
@@ -131,7 +130,7 @@ function uploadEncryptedChunkHandler(socket) {
         if (err) {
           console.log(err);
         } else {
-          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
+          ack({ filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
         }
       });
     } else {
@@ -142,7 +141,7 @@ function uploadEncryptedChunkHandler(socket) {
         } else {
           let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = uploadSessions[session];
           await setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, fileAccess);
-          socket.emit('uploaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
+          ack({ filename: msg.filename, uuid: msg.uuid, index: msg.index, lastIndex: msg.lastIndex });
         }
       })
     }
@@ -152,7 +151,7 @@ function uploadEncryptedChunkHandler(socket) {
 
 
 function downloadEncryptedChunkHandler(socket) {
-  return async function (msg) {
+  return async function (msg, ack) {
 
     const session = getSession(msg.uuid, msg.filename);
     if (!downloadSessions[session]) {
@@ -187,8 +186,7 @@ function downloadEncryptedChunkHandler(socket) {
             });
 
         } else {
-          console.log(`Message malformed:`);
-          console.log(msg);
+          console.log(`Message malformed:`, msg);
           return;
         }
 
@@ -202,7 +200,7 @@ function downloadEncryptedChunkHandler(socket) {
     let lastIndex = downloadSessions[session].lastIndex;
     let index = ++downloadSessions[session].index;
 
-    socket.emit('downloaded_encrypted_chunk', { filename: msg.filename, uuid: msg.uuid, data: data, filetype: msg.filetype, index, lastIndex });
+    ack({ filename: msg.filename, uuid: msg.uuid, data: data, filetype: msg.filetype, index, lastIndex })
   }
 }
 
