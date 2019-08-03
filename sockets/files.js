@@ -1,8 +1,9 @@
-import { setUploadedAndTimestampedStatus } from './../services/fileRef';
+import filesService from './../services/fileRef';
 import fs from "fs";
 import fsExtra from "fs-extra";
 import util from 'util';
 import path from 'path';
+import deipRpc from '@deip/deip-rpc-client';
 
 
 const uploadSessions = {};
@@ -27,12 +28,16 @@ async function readBytes(rs, num) {
   }
 }
 
-async function getUploadSession({ organizationId, projectId, uuid, filename, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
-  
-  const sessionKey = `${filename}-${uuid}`
+function getSessionKey(filename, uuid) {
+  return `${filename}-${uuid}`
     .replace(/ /g, "-")
     .replace(/\W+/g, "-")
     .toLowerCase();
+} 
+
+async function getUploadSession({ organizationId, projectId, uuid, filename, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
+
+  const sessionKey = getSessionKey(filename, uuid);
 
   if (!uploadSessions[sessionKey]) {
     if (
@@ -122,6 +127,13 @@ function uploadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
     const session = await getUploadSession(msg);
+    if (!session) {
+      try {
+        let err = new Error("Upload session could not be established");
+        return ack(err);
+      } catch (err) { console.log(err); }
+    }
+
     const { ws } = session;
     const { index, lastIndex, uuid, data, filename } = msg;
 
@@ -143,8 +155,8 @@ function uploadEncryptedChunkHandler(socket) {
             console.log(err);
             ack(err);
           } else {
-            let { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
-            await setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, fileAccess);
+            const { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
+            await filesService.upsertUploadedFileRef({ organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, accessKeys: fileAccess });            
             ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
           }
         } catch (err) { console.log(err); }
@@ -155,11 +167,8 @@ function uploadEncryptedChunkHandler(socket) {
 
 async function getDownloadSession({ organizationId, projectId, uuid, filename, filepath, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
 
-  const sessionKey = `${filename}-${uuid}`
-    .replace(/ /g, "-")
-    .replace(/\W+/g, "-")
-    .toLowerCase();
-
+  const sessionKey = getSessionKey(filename, uuid);
+  
   if (!downloadSessions[sessionKey]) {
     if (
       filepath !== undefined &&
@@ -173,7 +182,6 @@ async function getDownloadSession({ organizationId, projectId, uuid, filename, f
         const stats = await stat(filepath);
         fileSize = stats.size;
       } catch (err) {
-        console.log(err);
         return null; 
       }
 
@@ -229,6 +237,13 @@ function downloadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
     const session = await getDownloadSession(msg);
+    if (!session) {
+      try {
+        let err = new Error("Download session could not be established");
+        return ack(err);
+      } catch (err) { console.log(err); }
+    }
+
     const { rs, lastIndex } = session;
     const { uuid, chunkSize, filename, filetype } = msg;
     const data = await readBytes(rs, chunkSize);

@@ -2,16 +2,16 @@ import deipRpc from '@deip/deip-rpc-client';
 import FileRef from './../schemas/fileRef';
 
 async function findFileRefById(_id) {
-  const fr = await FileRef.findOne({ _id });
-  return fr;
+  const fileRef = await FileRef.findOne({ _id });
+  return fileRef;
 }
 
 async function findFileRefByHash(projectId, hash) {
-  const fr = await FileRef.findOne({ projectId, hash });
-  return fr;
+  const fileRef = await FileRef.findOne({ projectId, hash });
+  return fileRef;
 }
 
-async function createFileRef(
+async function createFileRef({
   organizationId,
   projectId,
   filename,
@@ -23,9 +23,10 @@ async function createFileRef(
   chunkSize,
   permlink,
   accessKeys,
-  status
-) {
-  const fr = new FileRef({
+  status 
+}) {
+
+  const fileRef = new FileRef({
     organizationId: organizationId,
     projectId: projectId,
     filename: filename,
@@ -39,43 +40,20 @@ async function createFileRef(
     accessKeys: accessKeys,
     status: status,
   });
-  const savedRef = await fr.save();
+  const savedRef = await fileRef.save();
   return savedRef;
 }
 
-async function createTimestampedFileRef(
-  organizationId,
-  projectId,
-  filename,
-  filetype,
-  size,
-  hash,
-  permlink
-) {
-  const fr = new FileRef({
-    organizationId: organizationId,
-    projectId: projectId,
-    filename: filename,
-    filetype: filetype,
-    filepath: null,
-    size: size,
-    hash: hash,
-    iv: null,
-    chunkSize: null,
-    permlink: permlink,
-    accessKeys: [],
-    status: "timestamped",
-  });
-  const savedRef = await fr.save();
-  return savedRef;
-}
+async function upsertTimestampedFilesRefs(files) {
+  if (!files || !files.length || files.some(f => !f.hash))
+    throw Error("Required fields are not provided for 'timestamped' status");
 
-async function createTimestampedFilesRefs(files) {
-  const refs = [];
+  const promises = [];
   for (let i = 0; i < files.length; i++) {
     let file = files[i];
     let { organizationId, projectId, filename, filetype, size, hash, permlink } = file;
-    let ref = {
+
+    let promise = await upsertTimestampedFileRef({
       organizationId: organizationId,
       projectId: projectId,
       filename: filename,
@@ -88,37 +66,111 @@ async function createTimestampedFilesRefs(files) {
       permlink: permlink,
       accessKeys: [],
       status: "timestamped",
-    };
-    refs.push(ref);
+    });
+    promises.push(promise);
   }
 
-  let savedRefs = await FileRef.create(refs);
+  let savedRefs = await Promise.all(promises);
   return savedRefs;
 }
 
-async function setUploadedAndTimestampedStatus(projectId, hash, iv, chunkSize, filepath, accessKeys) {
-  if (!hash || !iv || !chunkSize || !filepath || !accessKeys) return;
+async function upsertTimestampedFileRef({
+  organizationId,
+  projectId,
+  filename,
+  filetype,
+  size,
+  hash,
+  permlink 
+}) {
+
+  if (!hash)
+    throw Error("Required fields are not provided for 'timestamped' status");
 
   const fileRef = await findFileRefByHash(projectId, hash);
-  if (fileRef.status != 'uploaded_and_timestamped') {
-    // do not allow to reset data, must be refactored after we'll have separated certifying process from storage upload
-    fileRef.iv = iv;
-    fileRef.chunkSize = chunkSize;
-    fileRef.filepath = filepath;
-    fileRef.accessKeys = accessKeys;
-    fileRef.status = "uploaded_and_timestamped";
-    let updatedFileRef = await fileRef.save();
-    return updatedFileRef;
+
+  if (fileRef) {
+    if (fileRef.status == "uploaded") {
+      fileRef.status = "uploaded_and_timestamped";
+      let timestampedFileRef = await fileRef.save();
+      return timestampedFileRef;
+    } else {
+      return fileRef;
+    }
   }
-  
-  return fileRef;
+
+  let timestampedFileRef = await createFileRef({
+    organizationId,
+    projectId,
+    filename,
+    filetype,
+    filepath: null,
+    size,
+    hash,
+    iv: null,
+    chunkSize: null,
+    permlink,
+    accessKeys: [],
+    status: "timestamped"
+  });
+
+  return timestampedFileRef;
 }
 
-export {
+async function upsertUploadedFileRef({
+  organizationId,
+  projectId,
+  filename,
+  filetype,
+  filepath,
+  size,
+  hash,
+  iv,
+  chunkSize,
+  permlink,
+  accessKeys 
+}) {
+
+  if (!hash || !iv || !chunkSize || !filepath || !accessKeys || !accessKeys.length) 
+    throw Error("Required fields are not provided for 'uploaded' status");
+
+  const fileRef = await findFileRefByHash(projectId, hash);
+
+  if (fileRef) {
+    if (fileRef.status == "timestamped") {
+      fileRef.iv = iv;
+      fileRef.chunkSize = chunkSize;
+      fileRef.filepath = filepath;
+      fileRef.accessKeys = accessKeys;
+      fileRef.status = "uploaded_and_timestamped";
+      let uploadedFileRef = await fileRef.save();
+      return uploadedFileRef;
+    } else {
+      return fileRef;
+    }
+  }
+
+  let uploadedFileRef = await createFileRef({
+    organizationId,
+    projectId,
+    filename,
+    filetype,
+    filepath,
+    size,
+    hash,
+    iv,
+    chunkSize,
+    permlink,
+    accessKeys,
+    status: "uploaded" });
+
+  return uploadedFileRef;
+}
+
+export default {
   findFileRefById,
   findFileRefByHash,
-  createFileRef,
-  setUploadedAndTimestampedStatus,
-  createTimestampedFileRef,
-  createTimestampedFilesRefs
+  upsertTimestampedFileRef,
+  upsertUploadedFileRef,
+  upsertTimestampedFilesRefs
 }

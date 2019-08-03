@@ -7,7 +7,7 @@ import deipRpc from '@deip/deip-rpc-client';
 import FileRef from './../schemas/fileRef';
 import UserProfile from './../schemas/user';
 import config from './../config';
-import { findFileRefById, findFileRefByHash } from './../services/fileRef';
+import filesService from './../services/fileRef';
 import crypto from 'crypto';
 import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
@@ -29,7 +29,7 @@ const listFileRefs = async (ctx) => {
 const getFileRefById = async (ctx) => {
   const refId = ctx.params.refId;
   try {
-    const ref = await findFileRefById(refId);
+    const ref = await filesService.findFileRefById(refId);
     ctx.status = 200;
     ctx.body = ref;
   } catch (err) {
@@ -42,7 +42,7 @@ const getFileRefByHash = async (ctx) => {
   const hash = ctx.params.hash;
   const projectId = ctx.params.projectId;
   try {
-    const ref = await findFileRefByHash(projectId, hash);
+    const ref = await filesService.findFileRefByHash(projectId, hash);
     ctx.status = 200;
     ctx.body = ref;
   } catch (err) {

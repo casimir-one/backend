@@ -3,7 +3,7 @@ import { sendProposalNotificationToGroup } from './../services/notifications';
 import { findPricingPlan } from './../services/pricingPlans';
 import { increaseCertificateLimitCounter, findSubscriptionByOwner } from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import { createTimestampedFileRef, createTimestampedFilesRefs } from './../services/fileRef';
+import filesService from './../services/fileRef';
 
 import deipRpc from '@deip/deip-rpc-client';
 
@@ -152,7 +152,7 @@ const createContentProposal = async (ctx) => {
 
     const result = await sendTransaction(tx);
     if (result.isSuccess) {
-      const filesRefs = await createTimestampedFilesRefs(refs);
+      const filesRefs = await filesService.upsertTimestampedFilesRefs(refs);
       if (isLimitedPlan) {
         await increaseCertificateLimitCounter(subscription._id, files.length);
       }
