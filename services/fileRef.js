@@ -11,6 +11,11 @@ async function findFileRefByHash(projectId, hash) {
   return fileRef;
 }
 
+async function findFileRefByProject(projectId) {
+  const fileRefs = await FileRef.find({ projectId });
+  return fileRefs;
+}
+
 async function createFileRef({
   organizationId,
   projectId,
@@ -23,6 +28,9 @@ async function createFileRef({
   chunkSize,
   permlink,
   accessKeys,
+  creator,
+  uploader,
+  certifier,
   status 
 }) {
 
@@ -38,13 +46,16 @@ async function createFileRef({
     chunkSize: chunkSize,
     permlink: permlink,
     accessKeys: accessKeys,
+    creator: creator,
+    uploader: uploader,
+    certifier: certifier,
     status: status,
   });
   const savedRef = await fileRef.save();
   return savedRef;
 }
 
-async function upsertTimestampedFilesRefs(files) {
+async function upsertTimestampedFilesRefs(files, username) {
   if (!files || !files.length || files.some(f => !f.hash))
     throw Error("Required fields are not provided for 'timestamped' status");
 
@@ -65,6 +76,9 @@ async function upsertTimestampedFilesRefs(files) {
       chunkSize: null,
       permlink: permlink,
       accessKeys: [],
+      creator: username,
+      uploader: null,
+      certifier: username,
       status: "timestamped",
     });
     promises.push(promise);
@@ -81,7 +95,9 @@ async function upsertTimestampedFileRef({
   filetype,
   size,
   hash,
-  permlink 
+  permlink,
+  creator,
+  certifier
 }) {
 
   if (!hash)
@@ -91,6 +107,7 @@ async function upsertTimestampedFileRef({
 
   if (fileRef) {
     if (fileRef.status == "uploaded") {
+      fileRef.certifier = certifier;
       fileRef.status = "uploaded_and_timestamped";
       let timestampedFileRef = await fileRef.save();
       return timestampedFileRef;
@@ -111,6 +128,9 @@ async function upsertTimestampedFileRef({
     chunkSize: null,
     permlink,
     accessKeys: [],
+    creator: creator,
+    uploader: null,
+    certifier: certifier,
     status: "timestamped"
   });
 
@@ -128,7 +148,9 @@ async function upsertUploadedFileRef({
   iv,
   chunkSize,
   permlink,
-  accessKeys 
+  accessKeys,
+  creator,
+  uploader
 }) {
 
   if (!hash || !iv || !chunkSize || !filepath || !accessKeys || !accessKeys.length) 
@@ -142,6 +164,7 @@ async function upsertUploadedFileRef({
       fileRef.chunkSize = chunkSize;
       fileRef.filepath = filepath;
       fileRef.accessKeys = accessKeys;
+      fileRef.uploader = uploader;
       fileRef.status = "uploaded_and_timestamped";
       let uploadedFileRef = await fileRef.save();
       return uploadedFileRef;
@@ -162,6 +185,9 @@ async function upsertUploadedFileRef({
     chunkSize,
     permlink,
     accessKeys,
+    creator: creator,
+    uploader: uploader,
+    certifier: null,
     status: "uploaded" });
 
   return uploadedFileRef;
@@ -170,6 +196,7 @@ async function upsertUploadedFileRef({
 export default {
   findFileRefById,
   findFileRefByHash,
+  findFileRefByProject,
   upsertTimestampedFileRef,
   upsertUploadedFileRef,
   upsertTimestampedFilesRefs

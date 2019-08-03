@@ -126,6 +126,7 @@ function closeUploadSessionOnExpire(sessionKey, timeout = 900000) {
 function uploadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
+    const username = socket.user.username;
     const session = await getUploadSession(msg);
     if (!session) {
       try {
@@ -156,7 +157,7 @@ function uploadEncryptedChunkHandler(socket) {
             ack(err);
           } else {
             const { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
-            await filesService.upsertUploadedFileRef({ organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, accessKeys: fileAccess });            
+            await filesService.upsertUploadedFileRef({ organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, accessKeys: fileAccess, creator: username, uploader: username });            
             ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
           }
         } catch (err) { console.log(err); }
@@ -236,6 +237,7 @@ function closeDownloadSessionOnExpire(sessionKey, timeout = 900000) {
 function downloadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
+    const username = socket.user.username;
     const session = await getDownloadSession(msg);
     if (!session) {
       try {

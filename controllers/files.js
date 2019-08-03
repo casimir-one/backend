@@ -16,7 +16,7 @@ import moment from 'moment';
 const listFileRefs = async (ctx) => {
   const projectId = ctx.params.projectId;
   try {
-    const refs = await FileRef.find({ 'projectId': projectId });
+    const refs = await filesService.findFileRefByProject(projectId);
     ctx.status = 200;
     ctx.body = refs;
   } catch (err) {

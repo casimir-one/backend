@@ -152,7 +152,7 @@ const createContentProposal = async (ctx) => {
 
     const result = await sendTransaction(tx);
     if (result.isSuccess) {
-      const filesRefs = await filesService.upsertTimestampedFilesRefs(refs);
+      const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
       if (isLimitedPlan) {
         await increaseCertificateLimitCounter(subscription._id, files.length);
       }
