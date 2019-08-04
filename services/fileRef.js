@@ -108,6 +108,7 @@ async function upsertTimestampedFileRef({
   if (fileRef) {
     if (fileRef.status == "uploaded") {
       fileRef.certifier = certifier;
+      fileRef.permlink = permlink;
       fileRef.status = "uploaded_and_timestamped";
       let timestampedFileRef = await fileRef.save();
       return timestampedFileRef;
