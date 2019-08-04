@@ -5,8 +5,8 @@ const Schema = mongoose.Schema;
 
 const VerificationToken = new Schema({
   "email": { type: String, required: true, index: true, trim: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
-  "firstName": { type: String, trim: true },
-  "lastName": { type: String, trim: true },
+  "firstName": { type: String, required: true, trim: true },
+  "lastName": { type: String, required: true, trim: true, },
   "pricingPlan": {
     type: String,
     enum: ["standard", "white-label", "unlimited" /* add more plans here */],

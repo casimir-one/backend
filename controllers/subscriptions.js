@@ -1,5 +1,5 @@
 import config from './../config';
-import { findSubscriptionByOwner } from './../services/subscriptions';
+import subscriptionsService from './../services/subscriptions';
 import { findPricingPlan } from './../services/pricingPlans';
 
 const getUserSubscription = async function (ctx) {
@@ -14,7 +14,7 @@ const getUserSubscription = async function (ctx) {
       return;
     }
 
-    let subscription = await findSubscriptionByOwner(username);
+    let subscription = await subscriptionsService.findSubscriptionByOwner(username);
     if (!subscription) {
       ctx.status = 404;
       ctx.body = `Subscription for ${username} is not found`;

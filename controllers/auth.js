@@ -7,7 +7,7 @@ import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
 import { findVerificationToken, removeVerificationToken } from './../services/verificationTokens';
-import { createStandardSubscription, createWhiteLabelSubscription, createUnlimitedSubscription } from './../services/subscriptions';
+import subscriptionsService from './../services/subscriptions';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -16,14 +16,17 @@ function Encodeuint8arr(seed) {
 async function createSubscription(pricingPlan, username) {
   let plan;
   switch (pricingPlan) {
+    case "free":
+      plan = await subscriptionsService.createFreeSubscription(username);
+      return plan;
     case "standard": 
-      plan = await createStandardSubscription(username);
+      plan = await subscriptionsService.createStandardSubscription(username);
       return plan;
     case "white-label":
-      plan = await createWhiteLabelSubscription(username);
+      plan = await subscriptionsService.createWhiteLabelSubscription(username);
       return plan;
     case "unlimited":
-      plan = await createUnlimitedSubscription(username);
+      plan = await subscriptionsService.createUnlimitedSubscription(username);
       return plan;
     default:
       return;
@@ -37,7 +40,7 @@ const signIn = async function (ctx) {
   let accounts = await deipRpc.api.getAccountsAsync([username])
 
   if (accounts[0]) {
-    const pubWif = accounts[0].owner.key_auths[0][0]
+    const pubWif = accounts[0].owner.key_auths[0][0];
     const publicKey = crypto.PublicKey.from(pubWif);
 
     var isValid;
@@ -82,33 +85,46 @@ const signIn = async function (ctx) {
 const signUp = async function (ctx) {
   const data = ctx.request.body;
   const username = data.username;
-  const email = data.email;
-  const firstName = data.firstName;
-  const lastName = data.lastName;
   const pubKey = data.pubKey;
   const token = data.token;
-  const pricingPlan = data.pricingPlan;
 
-  if (!token || !pricingPlan || !username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
+  let email = data.email;
+  let firstName = data.firstName;
+  let lastName = data.lastName;
+
+  if (!username || !pubKey || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
     ctx.status = 400;
-    ctx.body = `'token', 'username', 'pubKey', 'email', 'firstName', 'pricingPlan' fields are required`;
+    ctx.body = `'username', 'pubKey', fields are required`;
+    return;
+  }
+
+  if (!token && (!email || !firstName || !lastName)) {
+    ctx.status = 400;
+    ctx.body = `'email', 'firstName', 'lastName' fields are required`;
     return;
   }
 
   try {
+    
+    var verificationToken;
+    if (token) {
+      verificationToken = await findVerificationToken(token);
+      if (!verificationToken) {
+        ctx.status = 404;
+        ctx.body = `Verification token ${token} is not found`;
+        return;
+      }
 
-    let verificationToken = await findVerificationToken(token);
-    if (!verificationToken) {
-      ctx.status = 404;
-      ctx.body = `Verification token ${token} is not found`;
-      return;
-    }
+      let isExpired = verificationToken.expirationTime.getTime() <= Date.now();
+      if (isExpired) {
+        ctx.status = 400;
+        ctx.body = `Verification token ${token} is expired`;
+        return;
+      }
 
-    let isExpired = verificationToken.expirationTime.getTime() <= Date.now();
-    if (isExpired) {
-      ctx.status = 400;
-      ctx.body = `Verification token ${token} is expired`;
-      return;
+      email = verificationToken.email;
+      firstName = verificationToken.firstName;
+      lastName = verificationToken.lastName;
     }
 
     const accounts = await deipRpc.api.getAccountsAsync([username])
@@ -146,6 +162,7 @@ const signUp = async function (ctx) {
       await removeVerificationToken(token);
     }
 
+    const pricingPlan = verificationToken ? verificationToken.pricingPlan : "free";
     await createSubscription(pricingPlan, username);
 
     ctx.status = 200;

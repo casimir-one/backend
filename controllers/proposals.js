@@ -1,7 +1,7 @@
 import { authorizeResearchGroup } from './../services/auth'
 import { sendProposalNotificationToGroup } from './../services/notifications';
 import { findPricingPlan } from './../services/pricingPlans';
-import { increaseCertificateLimitCounter, findSubscriptionByOwner } from './../services/subscriptions';
+import subscriptionsService from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import filesService from './../services/fileRef';
 
@@ -91,7 +91,7 @@ const createContentProposal = async (ctx) => {
     const tx = ctx.request.body.tx;
     const operations = tx['operations'];
 
-    const subscription = await findSubscriptionByOwner(jwtUsername);
+    const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
     if (!subscription) {
       ctx.status = 404;
       ctx.body = `Subscription for ${jwtUsername} is not found`;
@@ -154,7 +154,7 @@ const createContentProposal = async (ctx) => {
     if (result.isSuccess) {
       const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
       if (isLimitedPlan) {
-        await increaseCertificateLimitCounter(subscription._id, files.length);
+        await subscriptionsService.increaseCertificateLimitCounter(subscription._id, files.length);
       }
 
       ctx.status = 200;

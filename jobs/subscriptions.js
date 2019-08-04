@@ -1,9 +1,9 @@
 import config from './../config';
-import { resetCertificateLimits } from './../services/subscriptions';
+import subscriptionsService from './../services/subscriptions';
 
 
 async function processCertificateLimits(fireDate) {
-  let result = await resetCertificateLimits();
+  let result = await subscriptionsService.resetCertificateLimits();
   console.log(`${fireDate} - subscriptions export limits processed:`, result);
 }
 

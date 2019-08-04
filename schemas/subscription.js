@@ -7,9 +7,9 @@ const Subscription = new Schema({
   "owner": { type: String, required: true, index: true, unique: true },
   "pricingPlan": {
     type: String,
-    enum: ["standard", "white-label", "unlimited" /* add more plans here */],
+    enum: ["free", "standard", "white-label", "unlimited" /* add more plans here */],
     required: true,
-    default: "standard",
+    default: "free",
     index: true
   },
   "limits": {

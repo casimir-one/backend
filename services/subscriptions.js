@@ -6,6 +6,22 @@ async function findSubscriptionByOwner(owner) {
   return subscription;
 }
 
+async function createFreeSubscription(owner) {
+  const subscription = new Subscription({
+    owner: owner,
+    pricingPlan: "free",
+    limits: {
+      certificateLimit: {
+        counter: 0,
+        resetTime: moment().add(1, 'M').toDate()
+      }
+    },
+    expirationTime: moment().add(100, 'Y').toDate()
+  });
+  const savedSubscription = await subscription.save();
+  return savedSubscription;
+}
+
 async function createStandardSubscription(owner) {
   const subscription = new Subscription({
     owner: owner,
@@ -69,8 +85,9 @@ async function resetCertificateLimits() {
   return result;
 }
 
-export {
+export default {
   findSubscriptionByOwner,
+  createFreeSubscription,
   createStandardSubscription,
   createWhiteLabelSubscription,
   createUnlimitedSubscription,
