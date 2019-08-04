@@ -4,6 +4,8 @@ import fsExtra from "fs-extra";
 import util from 'util';
 import path from 'path';
 import deipRpc from '@deip/deip-rpc-client';
+import { authorizeResearchGroup } from './../services/auth'
+import uuidv4 from "uuid/v4";
 
 
 const uploadSessions = {};
@@ -28,16 +30,14 @@ async function readBytes(rs, num) {
   }
 }
 
-function getSessionKey(filename, uuid) {
-  return `${filename}-${uuid}`
-    .replace(/ /g, "-")
-    .replace(/\W+/g, "-")
-    .toLowerCase();
+function getSessionKey(username, uuid) {
+  return `${username}_${uuid}`;
 } 
 
-async function getUploadSession({ organizationId, projectId, uuid, filename, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
+async function getUploadSession(username, { organizationId, projectId, uuid, filename, size, hash, chunkSize, iv, filetype, fileAccess }) {
 
-  const sessionKey = getSessionKey(filename, uuid);
+  if (!uuid) uuid = uuidv4();
+  const sessionKey = getSessionKey(username, uuid);
 
   if (!uploadSessions[sessionKey]) {
     if (
@@ -49,9 +49,11 @@ async function getUploadSession({ organizationId, projectId, uuid, filename, siz
       chunkSize != undefined &&
       iv != undefined &&
       filetype != undefined &&
-      fileAccess != undefined &&
-      permlink != undefined
+      fileAccess != undefined
     ) {
+
+      const authorized = await authorizeResearchGroup(organizationId, username);
+      if (!authorized) return null;
 
       const name = `${iv}_${chunkSize}_${sessionKey}`;
       const filepath = `files/${projectId}/${name.length <= 250 ? name : name.substr(0, 250)}.aes`;
@@ -82,6 +84,7 @@ async function getUploadSession({ organizationId, projectId, uuid, filename, siz
 
       const session = {
         ws,
+        uuid,
         organizationId,
         projectId,
         filename,
@@ -127,7 +130,7 @@ function uploadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
     const username = socket.user.username;
-    const session = await getUploadSession(msg);
+    const session = await getUploadSession(username, msg);
     if (!session) {
       try {
         let err = new Error("Upload session could not be established");
@@ -135,8 +138,8 @@ function uploadEncryptedChunkHandler(socket) {
       } catch (err) { console.log(err); }
     }
 
-    const { ws } = session;
-    const { index, lastIndex, uuid, data, filename } = msg;
+    const { ws, uuid } = session;
+    const { index, lastIndex, data } = msg;
 
     if (index != lastIndex) {
       ws.write(new Buffer(new Uint8Array(data)), (err) => {
@@ -145,7 +148,7 @@ function uploadEncryptedChunkHandler(socket) {
             console.log(err);
             ack(err);
           } else {
-            ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
+            ack(null, { uuid, index, lastIndex });
           }
         } catch (err) { console.log(err); }
       });
@@ -158,7 +161,7 @@ function uploadEncryptedChunkHandler(socket) {
           } else {
             const { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
             await filesService.upsertUploadedFileRef({ organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, accessKeys: fileAccess, creator: username, uploader: username });            
-            ack(null, { filename: filename, uuid: uuid, index: index, lastIndex: lastIndex });
+            ack(null, { uuid, index, lastIndex });
           }
         } catch (err) { console.log(err); }
       });
@@ -166,22 +169,28 @@ function uploadEncryptedChunkHandler(socket) {
   }
 }
 
-async function getDownloadSession({ organizationId, projectId, uuid, filename, filepath, size, hash, chunkSize, iv, filetype, fileAccess, permlink }) {
+async function getDownloadSession(username, { fileId, uuid }) {
 
-  const sessionKey = getSessionKey(filename, uuid);
+  if (!uuid) uuid = uuidv4();
+  const sessionKey = getSessionKey(username, uuid);
   
   if (!downloadSessions[sessionKey]) {
-    if (
-      filepath !== undefined &&
-      chunkSize !== undefined &&
-      filename !== undefined
-    ) {
+    if (fileId != undefined) {
 
-      let fileSize;
+      const fileRef = await filesService.findFileRefById(fileId);
+      if (!fileRef) return null;
+
+      const authorized = await authorizeResearchGroup(fileRef.organizationId, username);
+      if (!authorized) return null;
+
+      const fileSize = fileRef.size;
+      const filepath = fileRef.filepath;
+      const chunkSize = fileRef.chunkSize;
+      const filename = fileRef.filename;
+
       try {
         const stat = util.promisify(fs.stat);
         const stats = await stat(filepath);
-        fileSize = stats.size;
       } catch (err) {
         return null; 
       }
@@ -203,7 +212,7 @@ async function getDownloadSession({ organizationId, projectId, uuid, filename, f
         console.log(`(${new Date()}) Readable Stream for ${sessionKey} session has ended with an error:`, err);
       });
 
-      const session = { rs, filepath, filename, fileSize, chunkSize, index, lastIndex };
+      const session = { rs, uuid, filepath, filename, fileSize, chunkSize, index, lastIndex };
 
       downloadSessions[sessionKey] = session;
       closeDownloadSessionOnExpire(sessionKey);
@@ -238,7 +247,7 @@ function downloadEncryptedChunkHandler(socket) {
   return async function (msg, ack) {
 
     const username = socket.user.username;
-    const session = await getDownloadSession(msg);
+    const session = await getDownloadSession(username, msg);
     if (!session) {
       try {
         let err = new Error("Download session could not be established");
@@ -246,12 +255,12 @@ function downloadEncryptedChunkHandler(socket) {
       } catch (err) { console.log(err); }
     }
 
-    const { rs, lastIndex } = session;
-    const { uuid, chunkSize, filename, filetype } = msg;
+    const { rs, lastIndex, uuid, chunkSize } = session;
+    const { fileId } = msg;
     const data = await readBytes(rs, chunkSize);
 
     try {
-      ack(null, { filename: filename, uuid: uuid, data: data, filetype: filetype, index: ++session.index, lastIndex });
+      ack(null, { fileId, uuid, data, index: ++session.index, lastIndex });
     } catch (err) { console.log(err); }
   }
 }
