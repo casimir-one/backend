@@ -49,14 +49,14 @@ async function createFileRef({
     creator: creator,
     uploader: uploader,
     certifier: certifier,
-    status: status,
+    status: status
   });
   const savedRef = await fileRef.save();
   return savedRef;
 }
 
 async function upsertTimestampedFilesRefs(files, username) {
-  if (!files || !files.length || files.some(f => !f.hash))
+  if (!files || !files.length || files.some(f => !f.hash) || files.some(f => !f.permlink) || !username)
     throw Error("Required fields are not provided for 'timestamped' status");
 
   const promises = [];
@@ -69,17 +69,11 @@ async function upsertTimestampedFilesRefs(files, username) {
       projectId: projectId,
       filename: filename,
       filetype: filetype,
-      filepath: null,
       size: size,
       hash: hash,
-      iv: null,
-      chunkSize: null,
       permlink: permlink,
-      accessKeys: [],
       creator: username,
-      uploader: null,
-      certifier: username,
-      status: "timestamped",
+      certifier: username
     });
     promises.push(promise);
   }
@@ -100,7 +94,7 @@ async function upsertTimestampedFileRef({
   certifier
 }) {
 
-  if (!hash)
+  if (!hash || !permlink || !certifier)
     throw Error("Required fields are not provided for 'timestamped' status");
 
   const fileRef = await findFileRefByHash(projectId, hash);
@@ -148,13 +142,12 @@ async function upsertUploadedFileRef({
   hash,
   iv,
   chunkSize,
-  permlink,
   accessKeys,
   creator,
   uploader
 }) {
 
-  if (!hash || !iv || !chunkSize || !filepath || !accessKeys || !accessKeys.length) 
+  if (!hash || !iv || !chunkSize || !filepath || !uploader || !accessKeys || !accessKeys.length) 
     throw Error("Required fields are not provided for 'uploaded' status");
 
   const fileRef = await findFileRefByHash(projectId, hash);
@@ -184,7 +177,7 @@ async function upsertUploadedFileRef({
     hash,
     iv,
     chunkSize,
-    permlink,
+    permlink: null,
     accessKeys,
     creator: creator,
     uploader: uploader,
