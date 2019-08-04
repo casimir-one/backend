@@ -9,7 +9,7 @@ const VerificationToken = new Schema({
   "lastName": { type: String, required: true, trim: true, },
   "pricingPlan": {
     type: String,
-    enum: ["standard", "white-label", "unlimited" /* add more plans here */],
+    enum: ["free", "standard", "white-label", "unlimited" /* add more plans here */],
     required: true,
     default: "standard",
     index: true
