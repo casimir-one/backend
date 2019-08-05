@@ -12,6 +12,7 @@
         "@deip/deip-rpc-client": "1.0.55",
         "@deip/lib-crypto": "^1.0.2",
         "@koa/cors": "^2.2.1",
+        "archiver": "^3.1.1",
         "axios": "^0.15.3",
         "bcryptjs": "^2.4.0",
         "concurrently": "^3.5.1",

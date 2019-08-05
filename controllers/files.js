@@ -12,6 +12,8 @@ import crypto from 'crypto';
 import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
 import moment from 'moment';
+import archiver from 'archiver';
+import { authorizeResearchGroup } from './../services/auth'
 
 const listFileRefs = async (ctx) => {
   const projectId = ctx.params.projectId;
@@ -134,11 +136,70 @@ const exportCertificate = async (ctx) => {
 }
 
 
+const exportCypheredData = async (ctx) => {
+  let hash = ctx.params.hash;
+  let projectId = ctx.params.projectId;
+  let jwtUsername = ctx.state.user.username;
+
+  try {
+
+    const fileRef = await filesService.findFileRefByHash(projectId, hash);
+    if (!fileRef) {
+      ctx.status = 404;
+      ctx.body = `File with hash ${hash} is not found in ${projectId} project`;
+      return;
+    }
+
+    const authorized = await authorizeResearchGroup(fileRef.organizationId, jwtUsername);
+    if (!authorized) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not permitted to get data for "${projectId}" project`;
+      return;
+    }
+
+    const accessItem = fileRef.accessKeys.find(k => k.name == jwtUsername);
+    if (!accessItem) {
+      ctx.status = 404;
+      ctx.body = `Access for file ${fileRef.filename} is not allowed for ${jwtUsername}`;
+      return;
+    }
+
+    let key = {
+      "pubKey": accessItem.pubKey,
+      "name": accessItem.name,
+      "key": accessItem.key,
+      "iv": fileRef.iv,
+      "chunkSize": fileRef.chunkSize,
+      "size": fileRef.size,
+      "filename": fileRef.filename,
+      "filetype": fileRef.filetype,
+      "hash": fileRef.hash
+    };
+
+    const archive = archiver('zip');
+
+    ctx.response.set('Content-disposition', `attachment; filename="${fileRef.hash}.zip"`);
+    ctx.type = 'application/zip';
+    ctx.body = archive;
+
+    archive
+      .append(JSON.stringify(key), { name: 'key.json' })
+      .file(fileRef.filepath, { name: `${fileRef.filename}.aes` })
+      .finalize();
+
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
 export default {
   // refs
   getFileRefById,
   getFileRefByHash,
   listFileRefs,
 
-  exportCertificate
+  exportCertificate,
+  exportCypheredData
 }

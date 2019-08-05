@@ -1,6 +1,6 @@
 import { authorizeResearchGroup } from './../services/auth'
 import { sendProposalNotificationToGroup } from './../services/notifications';
-import { findPricingPlan } from './../services/pricingPlans';
+import pricingPlansService from './../services/pricingPlans';
 import subscriptionsService from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import filesService from './../services/fileRef';
@@ -98,7 +98,7 @@ const createContentProposal = async (ctx) => {
       return;
     }
 
-    const pricingPlan = await findPricingPlan(subscription.pricingPlan);
+    const pricingPlan = await pricingPlansService.findPricingPlan(subscription.pricingPlan);
     if (!pricingPlan) {
       ctx.status = 404;
       ctx.body = `Pricing plan "${subscription.pricingPlan}" is not found`;

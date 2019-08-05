@@ -68,7 +68,14 @@ app.on('error', function (err, ctx) {
 
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
-router.use('/api', jwtKoa({ secret: config.jwtSecret }), api.routes());
+router.use('/api', jwtKoa({ secret: config.jwtSecret, 
+  getToken: function (opts) { 
+    if (opts.request.query && opts.request.query.authorization) {
+      return opts.request.query.authorization;
+    }
+    return null;
+  } 
+}), api.routes());
 router.use('/sudo', /* todo: move sudo check here */ jwtKoa({ secret: config.jwtSecret }), sudo.routes());
 
 app.use(router.routes());

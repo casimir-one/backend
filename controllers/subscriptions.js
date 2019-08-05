@@ -1,6 +1,6 @@
 import config from './../config';
 import subscriptionsService from './../services/subscriptions';
-import { findPricingPlan } from './../services/pricingPlans';
+import pricingPlansService from './../services/pricingPlans';
 
 const getUserSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
@@ -21,7 +21,7 @@ const getUserSubscription = async function (ctx) {
       return;
     }
 
-    let pricingPlan = await findPricingPlan(subscription.pricingPlan);
+    let pricingPlan = await pricingPlansService.findPricingPlan(subscription.pricingPlan);
 
     ctx.status = 200;
     ctx.body = { subscription, pricingPlan };

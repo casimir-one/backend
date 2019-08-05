@@ -35,6 +35,7 @@ router.get('/refs/project/:projectId', files.listFileRefs)
 router.get('/refs/project/file-id/:refId', files.getFileRefById)
 router.get('/refs/project/:projectId/file-hash/:hash', files.getFileRefByHash)
 router.get('/refs/certificate/:projectId/file-hash/:hash', files.exportCertificate)
+router.get('/refs/cyphered-data/:projectId/file-hash/:hash', files.exportCypheredData)
 
 router.get('/subscriptions/:username', subscriptions.getUserSubscription)
 
