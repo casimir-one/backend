@@ -92,8 +92,7 @@ const exportCertificate = async (ctx) => {
     let jwtPubKey = accounts[0].owner.key_auths[0][0];
     let ownerPubKey = accounts[1].owner.key_auths[0][0];
 
-    let hist = await deipRpc.api.getContentHistoryAsync(hash);
-    let fileHist = hist[0];
+    let fileHist = await deipRpc.api.getContentHistoryByResearchAndHashAsync(chainResearch.id, hash);
 
     let readFileAsync = util.promisify(fs.readFile);
     let rawHtml = await readFileAsync('./certificates/file/certificate.html', 'utf8');
