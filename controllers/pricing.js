@@ -33,6 +33,25 @@ const getUserSubscription = async function (ctx) {
   }
 }
 
+
+const getRegularPricingPlans = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+
+    let regularPricingPlans = await pricingPlansService.findRegularPricingPlans();
+    ctx.status = 200;
+    ctx.body = regularPricingPlans;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
 export default {
-  getUserSubscription
+  getUserSubscription,
+  getRegularPricingPlans
 }

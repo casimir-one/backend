@@ -13,8 +13,8 @@ async function findPricingPlan(id) {
   return { ...appPlan };
 }
 
-async function findAllRegularPricingPlans() {
-  let docs = await PricingPlan.findOne({ _id: id });
+async function findRegularPricingPlans() {
+  let docs = await PricingPlan.find({});
   let appPlans = docs.map(d => d._doc);
 
   let { product, plans: stripePlans } = await stripeService.ipProtectionProduct();
@@ -33,5 +33,5 @@ async function findAllRegularPricingPlans() {
 
 export default {
   findPricingPlan,
-  findAllRegularPricingPlans
+  findRegularPricingPlans
 }
