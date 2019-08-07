@@ -1,5 +1,6 @@
 const nodemailer = require('nodemailer');
 const config = require('./../config');
+const renderService = require('./render');
 
 class EmailsService {
   constructor() {
@@ -35,13 +36,11 @@ class EmailsService {
   }
 
   async sendRegistrationUrl(to, token) {
+    const htmlToSend = await renderService.registrationEmail(`${config.uiHost}/#/sign-up?token=${token}`);
     await this.sendMessage({
       to,
       subject: 'IP Protection Platform Registration',
-      html: `
-        Hi there!
-        Here is your invitation link: ${config.uiHost}/#/sign-up?token=${token}
-      `
+      html: htmlToSend
     });
   }
 }
