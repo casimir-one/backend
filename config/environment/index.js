@@ -37,6 +37,11 @@ config = _.merge(config, {
       gmailRefreshToken: process.env.GMAIL_REFRESH_TOKEN,
       gmailUser: process.env.GMAIL_USER,
     },
+    stripe: {
+      ipProtectionProductId: process.env.STRIPE_IP_PROTECTION_PRODUCT_ID,
+      publicKey: process.env.STRIPE_PUBLIC_KEY,
+      secretKey: process.env.STRIPE_SECRET_KEY,
+    }
   });
 
 module.exports = config;

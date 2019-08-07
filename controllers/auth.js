@@ -20,11 +20,11 @@ async function createSubscription(pricingPlan, username) {
     case "free":
       plan = await subscriptionsService.createFreeSubscription(username);
       return plan;
-    case "standard": 
+    case "standard-monthly": 
       plan = await subscriptionsService.createStandardSubscription(username);
       return plan;
-    case "white-label":
-      plan = await subscriptionsService.createWhiteLabelSubscription(username);
+    case "premium-monthly":
+      plan = await subscriptionsService.createPremiumSubscription(username);
       return plan;
     case "unlimited":
       plan = await subscriptionsService.createUnlimitedSubscription(username);

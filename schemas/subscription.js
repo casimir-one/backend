@@ -5,9 +5,10 @@ const Schema = mongoose.Schema;
 
 const Subscription = new Schema({
   "owner": { type: String, required: true, index: true, unique: true },
+  "stripeId": { type: String, required: false, index: true, default: null },
   "pricingPlan": {
     type: String,
-    enum: ["free", "standard", "white-label", "unlimited" /* add more plans here */],
+    enum: ["free", "standard-monthly", "premium-monthly", "unlimited" /* add more plans here */],
     required: true,
     default: "free",
     index: true

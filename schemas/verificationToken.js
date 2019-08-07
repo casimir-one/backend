@@ -9,9 +9,9 @@ const VerificationToken = new Schema({
   "lastName": { type: String, required: true, trim: true, },
   "pricingPlan": {
     type: String,
-    enum: ["free", "standard", "white-label", "unlimited" /* add more plans here */],
+    enum: ["free", "standard-monthly", "premium-monthly", "unlimited" /* add more plans here */],
     required: true,
-    default: "standard",
+    default: "standard-monthly",
     index: true
   },
   "token": { type: String, required: true, index: true, trim: true, },

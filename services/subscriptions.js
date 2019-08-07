@@ -25,7 +25,7 @@ async function createFreeSubscription(owner) {
 async function createStandardSubscription(owner) {
   const subscription = new Subscription({
     owner: owner,
-    pricingPlan: "standard",
+    pricingPlan: "standard-monthly",
     limits: {
       certificateLimit: {
         counter: 0,
@@ -38,10 +38,10 @@ async function createStandardSubscription(owner) {
   return savedSubscription;
 }
 
-async function createWhiteLabelSubscription(owner) {
+async function createPremiumSubscription(owner) {
   const subscription = new Subscription({
     owner: owner,
-    pricingPlan: "white-label",
+    pricingPlan: "premium-monthly",
     limits: {
       certificateLimit: {
         counter: 0,
@@ -89,7 +89,7 @@ export default {
   findSubscriptionByOwner,
   createFreeSubscription,
   createStandardSubscription,
-  createWhiteLabelSubscription,
+  createPremiumSubscription,
   createUnlimitedSubscription,
   resetCertificateLimits,
   increaseCertificateLimitCounter

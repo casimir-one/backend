@@ -23,7 +23,7 @@ class EmailsService {
     };
 
     if (config.environment === 'local') {
-      console.log(`Message: ${JSON.stringify(message, null, 2)}`);
+      // console.log(`Message: ${JSON.stringify(message, null, 2)}`);
       return;
     }
 
@@ -36,7 +36,9 @@ class EmailsService {
   }
 
   async sendRegistrationUrl(to, token) {
-    const htmlToSend = await renderService.registrationEmail(`${config.uiHost}/#/sign-up?token=${token}`);
+    const confirmationUrl = `${config.uiHost}/#/sign-up?token=${token}`;
+    const htmlToSend = await renderService.registrationEmail(confirmationUrl);
+    console.log(confirmationUrl);
     await this.sendMessage({
       to,
       subject: 'IP Protection Platform Registration',

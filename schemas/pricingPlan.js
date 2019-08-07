@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const PricingPlan = new Schema({
   "_id": { type: String },
   "name": { type: String, required: true, trim: true },
+  "stripeId": { type: String, required: false, index: true, default: null },
   "terms": {
     type: {
       "certificateLimit": {
