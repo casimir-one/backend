@@ -6,6 +6,11 @@ async function findVerificationToken(token) {
   return tkn;
 }
 
+async function findVerificationTokenByEmail(email) {
+  const tkn = await VerificationToken.findOne({ email });
+  return tkn;
+}
+
 async function removeVerificationToken(token) {
   const tkn = await VerificationToken.deleteOne({ token });
   return tkn;
@@ -29,6 +34,7 @@ async function createVerificationToken(creator, token) {
 
 export {
   findVerificationToken,
+  findVerificationTokenByEmail,
   createVerificationToken,
   removeVerificationToken
 }

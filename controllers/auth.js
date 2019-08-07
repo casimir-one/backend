@@ -6,8 +6,9 @@ import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
-import { findVerificationToken, removeVerificationToken } from './../services/verificationTokens';
+import * as vtService from './../services/verificationTokens';
 import subscriptionsService from './../services/subscriptions';
+import mailer from './../services/emails';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -82,6 +83,35 @@ const signIn = async function (ctx) {
   }
 }
 
+const createVerificationToken = async function (ctx) {
+  const { email, firstName, lastName } = ctx.request.body;
+
+  const expires = new Date();
+  expires.setDate(expires.getDate() + 1); // 1 day expiration
+
+  try {
+    const existingToken = await vtService.findVerificationTokenByEmail(email);
+    if (existingToken) {
+      ctx.status = 400;
+      ctx.body = 'Provided email has already started the registration'
+      return;
+    }
+
+    const savedToken = await vtService.createVerificationToken('public', {
+      email, firstName, lastName,
+      expirationTime: expires,
+      pricingPlan: 'free'
+    });
+    await mailer.sendRegistrationUrl(email, savedToken.token);
+
+    ctx.status = 200;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 const signUp = async function (ctx) {
   const data = ctx.request.body;
   const username = data.username;
@@ -108,7 +138,7 @@ const signUp = async function (ctx) {
     
     var verificationToken;
     if (token) {
-      verificationToken = await findVerificationToken(token);
+      verificationToken = await vtService.findVerificationToken(token);
       if (!verificationToken) {
         ctx.status = 404;
         ctx.body = `Verification token ${token} is not found`;
@@ -159,7 +189,7 @@ const signUp = async function (ctx) {
       });
       profile = await model.save();
 
-      await removeVerificationToken(token);
+      await vtService.removeVerificationToken(token);
     }
 
     const pricingPlan = verificationToken ? verificationToken.pricingPlan : "free";
@@ -217,7 +247,7 @@ const getVerificationToken = async function(ctx) {
       return;
     }
 
-    let verificationToken = await findVerificationToken(token);
+    let verificationToken = await vtService.findVerificationToken(token);
     if (!verificationToken) {
       ctx.status = 404;
       ctx.body = `Verification token ${token} is not found`;
@@ -239,5 +269,6 @@ const getVerificationToken = async function(ctx) {
 export default {
   signIn,
   signUp,
-  getVerificationToken
+  getVerificationToken,
+  createVerificationToken
 }
