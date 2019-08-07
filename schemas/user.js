@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const UserProfile = new Schema({
     "_id": { type: String },
-    "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
+    "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'], required: true },
     "activeOrgPermlink": { type: String, required: false, default: null },
     "avatar": { type: String, default: "default_avatar.png" },
     "agencies": [{
