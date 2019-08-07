@@ -27,7 +27,7 @@ config = _.merge(config, {
         accountsCreator: JSON.parse(process.env.FAUCET_ACCOUNT)
     },
     serverHost: process.env.DEIP_SERVER_URL,
-    uiHost: process.env.DEIP_CLIENT_HOST,
+    uiHost: process.env.DEIP_CLIENT_URL,
     sigSeed: process.env.SIG_SEED,
     jwtSecret: process.env.JWT_SECRET,
     sudoUsers: (process.env.SUDO_USERS || "").split(",").filter(u => u != ""),

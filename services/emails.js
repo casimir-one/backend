@@ -21,6 +21,11 @@ class EmailsService {
       to, subject, text, html,
     };
 
+    if (config.environment === 'local') {
+      console.log(`Message: ${JSON.stringify(message, null, 2)}`);
+      return;
+    }
+
     try {
       await this.transporter.sendMail(message);
     } catch (err) {
