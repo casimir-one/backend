@@ -41,6 +41,7 @@ config = _.merge(config, {
       ipProtectionProductId: process.env.STRIPE_IP_PROTECTION_PRODUCT_ID,
       publicKey: process.env.STRIPE_PUBLIC_KEY,
       secretKey: process.env.STRIPE_SECRET_KEY,
+      customerSubscriptionCreatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_CREATED_WEBHOOK_SIGNING_KEY,
       customerSubscriptionUpdatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED_WEBHOOK_SIGNING_KEY
     }
   });

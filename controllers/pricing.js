@@ -115,11 +115,42 @@ const reactivateSubscription = async function (ctx) {
 const customerSubscriptionUpdatedWebhook = async function (ctx) {
   try {
     console.log(ctx.request);
-    console.log("-------TEST--------")
+    console.log("-------TEST UPDATED EVENT--------")
     console.log(ctx.request.body);
 
     const sig = ctx.request.headers['stripe-signature'];
     const endpointSecret = config.stripe.customerSubscriptionUpdatedWebhookSigningKey;
+
+    let event;
+    try {
+      event = stripeService.constructEventFromWebhook({ body: ctx.request.body, sig, endpointSecret });
+    }
+    catch (err) {
+      console.log(err);
+      ctx.status = 400
+      ctx.body = `Webhook Error: ${err.message}`;
+      return;
+    }
+
+    console.log("EVENT");
+    console.log(event);
+
+    ctx.status = 200;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+const customerSubscriptionCreatedWebhook = async function (ctx) {
+  try {
+    console.log(ctx.request);
+    console.log("-------TEST CREATED EVENT--------")
+    console.log(ctx.request.body);
+
+    const sig = ctx.request.headers['stripe-signature'];
+    const endpointSecret = config.stripe.customerSubscriptionCreatedWebhookSigningKey;
 
     let event;
     try {
@@ -150,5 +181,6 @@ export default {
   cancelStripeSubscription,
   reactivateSubscription,
 
+  customerSubscriptionCreatedWebhook,
   customerSubscriptionUpdatedWebhook
 }

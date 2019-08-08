@@ -44,7 +44,7 @@ async function getSubscriptions() {
 }
 
 async function constructEventFromWebhook({ body, sig, endpointSecret }) {
-  return stripeService.webhooks.constructEvent(body, sig, endpointSecret);
+  return stripe.webhooks.constructEvent(body, sig, endpointSecret);
 }
 
 export default {
