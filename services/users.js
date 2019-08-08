@@ -26,8 +26,14 @@ async function updateStripeInfo(username, stripeCustomerId, stripeSubscriptionId
   return updatedProfile;
 }
 
+async function findUserByCustomerId(customerId) {
+  const profile = await UserProfile.findOne({ 'stripeCustomerId': customerId });
+  return profile;
+}
+
 export default {
   findUserById,
+  findUserByCustomerId,
   createUser,
   updateStripeInfo
 }

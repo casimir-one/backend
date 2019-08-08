@@ -2,6 +2,8 @@ import config from './../config';
 import subscriptionsService from './../services/subscriptions';
 import pricingPlansService from './../services/pricingPlans';
 import stripeService from './../services/stripe';
+import usersService from './../services/users';
+import util from 'util';
 
 const getUserSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
@@ -130,6 +132,7 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
     let event;
     try {
       event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
+      console.log(util.inspect(event, { depth: null }))
     } catch (err) {
       console.log(err);
       ctx.status = 400
@@ -138,16 +141,14 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
     }
 
     let { data: { object: { id, customer, status } } } = event;
-
-    console.log(status);
-
     if (status == incomplete) {
       // this can be related to 3D Secure or insufficient balance
     } else if (status == active) {
-      // TODO: Send email to info@deip.world to notify DEIP team about newcomer
+      // TODO: Send email to info@deip.world to notify DEIP team about new account
       let stripeCustomer = await stripeService.findCustomer(customer);
-      console.log(stripeCustomer);
-      console.log("8888888********4444");
+      let to = stripeCustomer.email;
+      console.log(to);
+      // TODO: Send product/pricing plan greeting mail
     }
 
     ctx.status = 200;
@@ -168,24 +169,33 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     let event;
     try {
       event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
-    }
-    catch (err) {
+      console.log(util.inspect(event, {depth: null}))
+    } catch (err) {
       console.log(err);
       ctx.status = 400
       ctx.body = `Webhook Error: ${err.message}`;
       return;
     }
 
-    let { object, previous_attributes } = event.data;
+    let { object: { id, customer, status: currentStatus }, previous_attributes: { status: previousStatus } } = event.data;
 
-    console.log(object);
-    console.log(previous_attributes);
+    let stripeCustomer = await stripeService.findCustomer(customer);
+    let stripeSubsctiption = await stripeService.findSubscription(id);
 
-    console.log("---------------------------------");
+    console.log(util.inspect(stripeSubsctiption, { depth: null }));
 
-    let currentStatus = object.status;
-    let previousStatus = previous_attributes.status;
+    // usersService.updateStripeInfo(username, stripeCustomer.id, stripeSubsctiption.id, null);
 
+
+    if (previousStatus != active && currentStatus == active) {
+      // let stripeCustomer = await stripeService.findCustomer(customer);
+      // let stripeSubsctiption = await stripeService.findSubscription(customer);
+
+      // usersService.updateStripeInfo(username, stripeCustomer.id, stripeSubsctiption.id, stripePricingPlanId);
+
+      // subscription is activated after 3D Secure or other delays
+
+    }
     console.log(currentStatus);
     console.log(previousStatus);
 
