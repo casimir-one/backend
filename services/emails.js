@@ -18,7 +18,10 @@ class EmailsService {
 
   async sendMessage({ to, subject, text, html }) {
     const message = {
-      from: config.mailer.gmailUser,
+      from: {
+        name: 'DEIP IP Protection Platform',
+        address: config.mailer.gmailUser,
+      },
       to, subject, text, html,
     };
 
@@ -41,7 +44,7 @@ class EmailsService {
     console.log(confirmationUrl);
     await this.sendMessage({
       to,
-      subject: 'IP Protection Platform Registration',
+      subject: 'Activate your account',
       html: htmlToSend
     });
   }
