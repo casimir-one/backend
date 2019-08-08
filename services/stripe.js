@@ -28,6 +28,16 @@ async function updateSubscription(id, update) {
   return updatedSubscription;
 }
 
+async function cancelSubscriptionAtEndOfCurrentBillingPeriod(id) {
+  let updatedSubscription = await stripe.subscriptions.update(id, { cancel_at_period_end: true });
+  return updatedSubscription;
+}
+
+async function reactivateSubscriptionBeforeEndOfCurrentBillingPeriod(id) {
+  let updatedSubscription = await stripe.subscriptions.update(id, { cancel_at_period_end: false });
+  return updatedSubscription;
+}
+
 async function getSubscriptions() {
   let subscriptions = await stripe.subscriptions.list({});
   return subscriptions.data;
@@ -38,5 +48,7 @@ export default {
   createCustomerAndSubscription,
   findSubscription,
   updateSubscription,
-  getSubscriptions
+  getSubscriptions,
+  cancelSubscriptionAtEndOfCurrentBillingPeriod,
+  reactivateSubscriptionBeforeEndOfCurrentBillingPeriod
 }

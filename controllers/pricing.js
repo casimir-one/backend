@@ -16,6 +16,12 @@ const getUserSubscription = async function (ctx) {
 
     let subscription = await subscriptionsService.findSubscriptionByOwner(username);
     let pricingPlan = await pricingPlansService.findPricingPlan(subscription ? subscription.plan.nickname : "free");
+    
+    if (subscription && subscription.status == 'canceled') {
+      ctx.status = 200;
+      ctx.body = { subscription: null, pricingPlan }
+      return;
+    }
 
     ctx.status = 200;
     ctx.body = { subscription, pricingPlan };
@@ -36,7 +42,7 @@ const getRegularPricingPlans = async function (ctx) {
     let regularPricingPlans = await pricingPlansService.findRegularPricingPlans();
     ctx.status = 200;
     ctx.body = regularPricingPlans;
-    
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -72,8 +78,41 @@ const processStripePayment = async function (ctx) {
   }
 }
 
+const cancelStripeSubscription = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+    let result = await subscriptionsService.cancelSubscription(jwtUsername);
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+const reactivateSubscription = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+    let result = await subscriptionsService.reactivateSubscription(jwtUsername);
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
 export default {
   getUserSubscription,
   getRegularPricingPlans,
-  processStripePayment
+  processStripePayment,
+  cancelStripeSubscription,
+  reactivateSubscription
 }

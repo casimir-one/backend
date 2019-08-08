@@ -49,9 +49,23 @@ async function resetCertificatesLimitCounter() {
   return promises.length;
 }
 
+async function cancelSubscription(owner) {
+  let user = await usersService.findUserById(owner);
+  let updatedSubscription = await stripeService.cancelSubscriptionAtEndOfCurrentBillingPeriod(user.stripeSubscriptionId);
+  return updatedSubscription;
+}
+
+async function reactivateSubscription(owner) {
+  let user = await usersService.findUserById(owner);
+  let updatedSubscription = await stripeService.reactivateSubscriptionBeforeEndOfCurrentBillingPeriod(user.stripeSubscriptionId);
+  return updatedSubscription;
+}
+
 export default {
   findSubscriptionByOwner,
   processStripeSubscription,
   resetCertificatesLimitCounter,
   setCertificateLimitCounter,
+  cancelSubscription,
+  reactivateSubscription
 }
