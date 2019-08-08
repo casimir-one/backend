@@ -5,6 +5,7 @@ import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
 import sudo from './routes/sudo.js';
+import webhooks from './routes/webhooks.js';
 import jwtKoa from 'koa-jwt';
 import jwt from 'jsonwebtoken';
 import serve from 'koa-static';
@@ -68,6 +69,8 @@ app.on('error', function (err, ctx) {
 
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
+router.use('/webhooks', webhooks.routes());
+
 router.use('/api', jwtKoa({ secret: config.jwtSecret, 
   getToken: function (opts) { 
     if (opts.request.query && opts.request.query.authorization) {

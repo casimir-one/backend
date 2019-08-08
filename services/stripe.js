@@ -43,6 +43,10 @@ async function getSubscriptions() {
   return subscriptions.data;
 }
 
+async function constructEventFromWebhook({ body, sig, endpointSecret }) {
+  return stripeService.webhooks.constructEvent(body, sig, endpointSecret);
+}
+
 export default {
   getIPprotectionProduct,
   createCustomerAndSubscription,
@@ -50,5 +54,6 @@ export default {
   updateSubscription,
   getSubscriptions,
   cancelSubscriptionAtEndOfCurrentBillingPeriod,
-  reactivateSubscriptionBeforeEndOfCurrentBillingPeriod
+  reactivateSubscriptionBeforeEndOfCurrentBillingPeriod,
+  constructEventFromWebhook
 }
