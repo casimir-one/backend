@@ -43,7 +43,7 @@ async function getSubscriptions() {
   return subscriptions.data;
 }
 
-async function constructEventFromWebhook({ body, sig, endpointSecret }) {
+function constructEventFromWebhook({ body, sig, endpointSecret }) {
   return stripe.webhooks.constructEvent(body, sig, endpointSecret);
 }
 
