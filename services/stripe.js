@@ -47,6 +47,11 @@ function constructEventFromWebhook({ body, sig, endpointSecret }) {
   return stripe.webhooks.constructEvent(body, sig, endpointSecret);
 }
 
+async function findCustomer(customerId) {
+  let customer = await stripe.customers.retrieve(customerId);
+  return customer;
+}
+
 export default {
   getIPprotectionProduct,
   createCustomerAndSubscription,
@@ -55,5 +60,6 @@ export default {
   getSubscriptions,
   cancelSubscriptionAtEndOfCurrentBillingPeriod,
   reactivateSubscriptionBeforeEndOfCurrentBillingPeriod,
-  constructEventFromWebhook
+  constructEventFromWebhook,
+  findCustomer
 }
