@@ -21,8 +21,12 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
 
   let { customer, subscription } = await stripeService.createCustomerAndSubscription({ stripeToken, customerEmail, planId, metadata });
   let { stripePlan: plan } = pricingPlan;
-  let user = await usersService.updateStripeInfo(owner, customer.id, subscription.id, plan.id);
-  let result = { user, customer, plan, subscription };
+
+  if (subscription.latest_invoice.payment_intent.status == "succeeded") {
+    await usersService.updateStripeInfo(owner, customer.id, subscription.id, plan.id);
+  }
+
+  let result = { customer, plan, subscription };
   return result;
 }
 
