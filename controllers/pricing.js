@@ -144,11 +144,10 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
     if (status == incomplete) {
       // this can be related to 3D Secure or insufficient balance
     } else if (status == active) {
-      // TODO: Send email to info@deip.world to notify DEIP team about new account
+      console.log(`TODO: Send email to info@deip.world to notify DEIP team about new account`);
       let stripeCustomer = await stripeService.findCustomer(customer);
       let to = stripeCustomer.email;
-      console.log(to);
-      // TODO: Send product/pricing plan greeting mail
+      console.log(`TODO: Send product Greeting letter`);
     }
 
     ctx.status = 200;
@@ -172,32 +171,48 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       console.log(util.inspect(event, {depth: null}))
     } catch (err) {
       console.log(err);
-      ctx.status = 400
+      ctx.status = 400;
       ctx.body = `Webhook Error: ${err.message}`;
       return;
     }
 
-    let { object: { id, customer, status: currentStatus }, previous_attributes: { status: previousStatus } } = event.data;
+    let { 
+      object: { id, customer, cancel_at_period_end: currentCancelAtPeriodEnd, status: currentStatus }, 
+      previous_attributes: { status: previousStatus, cancel_at_period_end: previousCancelAtPeriodEnd } 
+    } = event.data;
 
 
-    if (true/*previousStatus != active && currentStatus == active */) {
+    if (previousStatus != active && currentStatus == active) {
       // subscription is activated after 3D Secure confirmation or other delays
-
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubsctiption = await stripeService.findSubscription(id);
       // TODO: we need to be sure UserProfile email is consistent with Stripe customer email, 
-      // we need to add a check in users controller to update stripe cusomer email if profile email changes
+      // we need to add a check in user controller to update stripe cusomer email if profile email changes
       let userProfile = await usersService.findUserByEmail(stripeCustomer.email);
       await usersService.updateStripeInfo(userProfile._id, customer, stripeSubsctiption.id, stripeSubsctiption.plan.id);
+      let to = stripeCustomer.email;
+      console.log(`TODO: Send product Greeting letter`);
+    } else if (previousStatus == active && currentStatus == past_due) {
+      //  Payment for this subscription has failed first time
+      let stripeCustomer = await stripeService.findCustomer(customer);
+      let stripeSubsctiption = await stripeService.findSubscription(id);
+      let to = stripeCustomer.email;
+      console.log(`TODO: Send letter with notification of payment failure (first attempt)`);
+    } else if (previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === true) {
+      // subscription is canceled
+      let stripeCustomer = await stripeService.findCustomer(customer);
+      let stripeSubsctiption = await stripeService.findSubscription(id);
+      let to = stripeCustomer.email;
+      console.log(`TODO: Send letter with notification of subscription cancelation date`);
+    } else if (previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === false) {
+      // subscription is reactivated
+      let stripeCustomer = await stripeService.findCustomer(customer);
+      let stripeSubsctiption = await stripeService.findSubscription(id);
+      let to = stripeCustomer.email;
+      console.log(`TODO: Send letter with notification of subscription reactivation`);
     }
-    console.log(currentStatus);
-    console.log(previousStatus);
-
-    console.log("---------------------------------");
-
 
     ctx.status = 200;
-
 
   } catch (err) {
     console.log(err);
