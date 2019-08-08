@@ -8,30 +8,11 @@ import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
 import * as vtService from './../services/verificationTokens';
 import subscriptionsService from './../services/subscriptions';
+import usersService from './../services/users';
 import mailer from './../services/emails';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
-}
-
-async function createSubscription(pricingPlan, username) {
-  let plan;
-  switch (pricingPlan) {
-    case "free":
-      plan = await subscriptionsService.createFreeSubscription(username);
-      return plan;
-    case "standard-monthly": 
-      plan = await subscriptionsService.createStandardSubscription(username);
-      return plan;
-    case "premium-monthly":
-      plan = await subscriptionsService.createPremiumSubscription(username);
-      return plan;
-    case "unlimited":
-      plan = await subscriptionsService.createUnlimitedSubscription(username);
-      return plan;
-    default:
-      return;
-  }
 }
 
 const signIn = async function (ctx) {
@@ -171,29 +152,20 @@ const signUp = async function (ctx) {
     };
 
     const result = await createAccountAsync(username, pubKey, owner);
-    console.log("dd");
     if (!result.isSuccess) {
       ctx.status = 500;
       ctx.body = result.result;
       return;
     }
 
-    let profile = await UserProfile.findOne({ '_id': username });
+    let profile = await usersService.findUserById(username);
     if (!profile) {
-      const model = new UserProfile({
-        _id: username,
-        email: email,
-        firstName: firstName,
-        lastName: lastName,
-        activeOrgPermlink: username
-      });
-      profile = await model.save();
-
+      profile = await usersService.createUser({ username, email, firstName, lastName });
       await vtService.removeVerificationToken(token);
     }
 
     const pricingPlan = verificationToken ? verificationToken.pricingPlan : "free";
-    await createSubscription(pricingPlan, username);
+    await subscriptionsService.createSubscription(pricingPlan, username);
 
     ctx.status = 200;
     ctx.body = profile;

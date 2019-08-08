@@ -51,7 +51,35 @@ const getRegularPricingPlans = async function (ctx) {
 }
 
 
+const processStripePayment = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+    let { 
+      stripeToken, 
+      customerEmail, 
+      productName,
+      planId, 
+      planName, 
+      planAmount, 
+      planInterval, 
+      planIntervalCount 
+    } = ctx.request.body;
+    
+    let result = await subscriptionsService.processStripeSubscription(jwtUsername, { stripeToken, customerEmail, planId, planName });
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 export default {
   getUserSubscription,
-  getRegularPricingPlans
+  getRegularPricingPlans,
+  processStripePayment
 }

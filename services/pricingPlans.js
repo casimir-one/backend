@@ -6,7 +6,7 @@ async function findPricingPlan(id) {
   let doc = await PricingPlan.findOne({ _id: id });
   let appPlan = doc._doc;
   if (appPlan.stripeId != null) {
-    let { product, plans: stripePlans } = await stripeService.ipProtectionProduct();
+    let { product, plans: stripePlans } = await stripeService.getIPprotectionProduct();
     let stripePlan = stripePlans.find(stripePlan => stripePlan.id == appPlan.stripeId);
     return { ...appPlan, stripePlan, stripeProduct: product };
   }
@@ -17,7 +17,7 @@ async function findRegularPricingPlans() {
   let docs = await PricingPlan.find({});
   let appPlans = docs.map(d => d._doc);
 
-  let { product, plans: stripePlans } = await stripeService.ipProtectionProduct();
+  let { product, plans: stripePlans } = await stripeService.getIPprotectionProduct();
   let regularStripePlans = stripePlans.filter(p => p.metadata.type == "regular");
 
   let regularPlans = [];

@@ -1,4 +1,6 @@
 import Subscription from './../schemas/subscription';
+import stripeService from './../services/stripe';
+import usersService from './../services/users';
 import moment from 'moment';
 
 async function findSubscriptionByOwner(owner) {
@@ -6,9 +8,17 @@ async function findSubscriptionByOwner(owner) {
   return subscription;
 }
 
+async function processStripeSubscription(owner, { stripeToken, customerEmail, planId, planName }) {
+  let { customer, subscription } = await stripeService.createCustomerAndSubscription({ stripeToken, customerEmail, planId });
+  let appSubsription = await createSubscription(planName, owner, subscription.id);
+  let appCustomer = await usersService.updateStripeCustomerId(owner, customer.id);
+  return { appSubsription, appCustomer };
+}
+
 async function createFreeSubscription(owner) {
   const subscription = new Subscription({
     owner: owner,
+    stripeId: null,
     pricingPlan: "free",
     limits: {
       certificateLimit: {
@@ -22,9 +32,11 @@ async function createFreeSubscription(owner) {
   return savedSubscription;
 }
 
-async function createStandardSubscription(owner) {
+async function createStandardSubscription(owner, stripeId) {
+  if (!stripeId) throw Error("Stripe subscription id must be provided");
   const subscription = new Subscription({
     owner: owner,
+    stripeId: stripeId,
     pricingPlan: "standard-monthly",
     limits: {
       certificateLimit: {
@@ -38,9 +50,12 @@ async function createStandardSubscription(owner) {
   return savedSubscription;
 }
 
-async function createPremiumSubscription(owner) {
+async function createPremiumSubscription(owner, stripeId) {
+  if (!stripeId) throw Error("Stripe subscription id must be provided");
+
   const subscription = new Subscription({
     owner: owner,
+    stripeId: stripeId,
     pricingPlan: "premium-monthly",
     limits: {
       certificateLimit: {
@@ -57,6 +72,7 @@ async function createPremiumSubscription(owner) {
 async function createUnlimitedSubscription(owner) {
   const subscription = new Subscription({
     owner: owner,
+    stripeId: null,
     pricingPlan: "unlimited",
     expirationTime: moment().add(100, 'Y').toDate()
   });
@@ -85,12 +101,31 @@ async function resetCertificateLimits() {
   return result;
 }
 
+
+async function createSubscription(pricingPlan, username, stripeId = null) {
+  let subscription;
+  switch (pricingPlan) {
+    case "free":
+      subscription = await createFreeSubscription(username);
+      return subscription;
+    case "standard-monthly":
+      subscription = await createStandardSubscription(username, stripeId);
+      return subscription;
+    case "premium-monthly":
+      subscription = await createPremiumSubscription(username, stripeId);
+      return subscription;
+    case "unlimited":
+      subscription = await createUnlimitedSubscription(username);
+      return subscription;
+    default:
+      return;
+  }
+}
+
 export default {
   findSubscriptionByOwner,
-  createFreeSubscription,
-  createStandardSubscription,
-  createPremiumSubscription,
-  createUnlimitedSubscription,
+  createSubscription,
+  processStripeSubscription,
   resetCertificateLimits,
-  increaseCertificateLimitCounter
+  increaseCertificateLimitCounter,
 }

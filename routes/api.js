@@ -39,6 +39,7 @@ router.get('/refs/cyphered-data/:projectId/file-hash/:hash', files.exportCyphere
 
 router.get('/pricing/subscription/:username', pricing.getUserSubscription)
 router.get('/pricing/regular-plans', pricing.getRegularPricingPlans)
+router.post('/pricing/subscription', pricing.processStripePayment)
 
 
 export default router
