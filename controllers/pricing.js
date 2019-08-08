@@ -116,14 +116,14 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
   try {
     console.log(ctx.request);
     console.log("-------TEST UPDATED EVENT--------")
-    console.log(ctx.request.body);
+    console.log(ctx.request.rawBody);
 
     const sig = ctx.request.headers['stripe-signature'];
     const endpointSecret = config.stripe.customerSubscriptionUpdatedWebhookSigningKey;
 
     let event;
     try {
-      event = stripeService.constructEventFromWebhook({ body: ctx.request.body, sig, endpointSecret });
+      event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
     }
     catch (err) {
       console.log(err);
@@ -154,7 +154,7 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
 
     let event;
     try {
-      event = stripeService.constructEventFromWebhook({ body: ctx.request.body, sig, endpointSecret });
+      event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
     }
     catch (err) {
       console.log(err);
