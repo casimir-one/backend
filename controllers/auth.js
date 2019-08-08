@@ -164,9 +164,6 @@ const signUp = async function (ctx) {
       await vtService.removeVerificationToken(token);
     }
 
-    const pricingPlan = verificationToken ? verificationToken.pricingPlan : "free";
-    await subscriptionsService.createSubscription(pricingPlan, username);
-
     ctx.status = 200;
     ctx.body = profile;
 

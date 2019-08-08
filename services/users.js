@@ -17,16 +17,17 @@ async function createUser({ username, email, firstName, lastName }) {
   return profile;
 }
 
-async function updateStripeCustomerId(username, stripeCustomerId) {
+async function updateStripeInfo(username, stripeCustomerId, stripeSubscriptionId, stripePricingPlanId) {
   const profile = await findUserById(username);
   profile.stripeCustomerId = stripeCustomerId;
+  profile.stripeSubscriptionId = stripeSubscriptionId;
+  profile.stripePricingPlanId = stripePricingPlanId;
   const updatedProfile = await profile.save()
   return updatedProfile;
 }
 
-
 export default {
   findUserById,
   createUser,
-  updateStripeCustomerId
+  updateStripeInfo
 }

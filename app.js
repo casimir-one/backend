@@ -123,8 +123,8 @@ io.on('connection', (socket) => {
   });
 });
 
-// run every 12 hours
-schedule.scheduleJob('0 */12 * * *', subscriptionsJobs.processCertificateLimits);
+// run every 6 hours
+schedule.scheduleJob('0 */6 * * *', subscriptionsJobs.processCertificateLimits);
 
 server.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);

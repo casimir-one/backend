@@ -97,22 +97,21 @@ const createContentProposal = async (ctx) => {
       ctx.body = `Subscription for ${jwtUsername} is not found`;
       return;
     }
-
-    const pricingPlan = await pricingPlansService.findPricingPlan(subscription.pricingPlan);
+    
+    const pricingPlan = await pricingPlansService.findPricingPlan(subscription.plan.nickname);
     if (!pricingPlan) {
       ctx.status = 404;
-      ctx.body = `Pricing plan "${subscription.pricingPlan}" is not found`;
+      ctx.body = `Pricing plan "${subscription.plan.nickname}" is not found`;
       return;
     }
-
-    const isLimitedPlan = pricingPlan.terms != null && pricingPlan.terms.certificateLimit != null;
+    
+    const isLimitedPlan = subscription.plan.nickname != "unlimited"; // todo handle with metadata
     if (isLimitedPlan) {
       let limit = pricingPlan.terms.certificateLimit.limit;
-      let counter = subscription.limits.certificateLimit.counter;
-      let resetTime = subscription.limits.certificateLimit.resetTime;
+      let counter = parseInt(subscription.metadata.certificateLimitCounter);
       if ((counter + operations.length) > limit) {
         ctx.status = 402;
-        ctx.body = `Subscription ${subscription._id} for ${jwtUsername} is under "${subscription.pricingPlan}" plan and has reached the limit. The limit will be reset on ${resetTime}`;
+        ctx.body = `Subscription ${subscription.id} for ${jwtUsername} is under "${subscription.plan.nickname}" plan and has reached the limit.`;
         return;
       }
     }
@@ -154,7 +153,8 @@ const createContentProposal = async (ctx) => {
     if (result.isSuccess) {
       const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
       if (isLimitedPlan) {
-        await subscriptionsService.increaseCertificateLimitCounter(subscription._id, files.length);
+        let current = parseInt(subscription.metadata.certificateLimitCounter);
+        await subscriptionsService.setCertificateLimitCounter(subscription.id, current + files.length);
       }
 
       ctx.status = 200;

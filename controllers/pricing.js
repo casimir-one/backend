@@ -15,13 +15,7 @@ const getUserSubscription = async function (ctx) {
     }
 
     let subscription = await subscriptionsService.findSubscriptionByOwner(username);
-    if (!subscription) {
-      ctx.status = 404;
-      ctx.body = `Subscription for ${username} is not found`;
-      return;
-    }
-
-    let pricingPlan = await pricingPlansService.findPricingPlan(subscription.pricingPlan);
+    let pricingPlan = await pricingPlansService.findPricingPlan(subscription ? subscription.plan.nickname : "free");
 
     ctx.status = 200;
     ctx.body = { subscription, pricingPlan };
@@ -42,7 +36,7 @@ const getRegularPricingPlans = async function (ctx) {
     let regularPricingPlans = await pricingPlansService.findRegularPricingPlans();
     ctx.status = 200;
     ctx.body = regularPricingPlans;
-
+    
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -65,7 +59,7 @@ const processStripePayment = async function (ctx) {
       planInterval, 
       planIntervalCount 
     } = ctx.request.body;
-    
+
     let result = await subscriptionsService.processStripeSubscription(jwtUsername, { stripeToken, customerEmail, planId, planName });
 
     ctx.status = 200;
