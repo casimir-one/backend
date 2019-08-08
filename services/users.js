@@ -31,9 +31,16 @@ async function findUserByCustomerId(customerId) {
   return profile;
 }
 
+async function findUserByEmail(email) {
+  const profile = await UserProfile.findOne({ 'email': email });
+  return profile;
+}
+
+
 export default {
   findUserById,
   findUserByCustomerId,
+  findUserByEmail,
   createUser,
   updateStripeInfo
 }

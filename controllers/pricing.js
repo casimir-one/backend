@@ -179,22 +179,16 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
 
     let { object: { id, customer, status: currentStatus }, previous_attributes: { status: previousStatus } } = event.data;
 
-    let stripeCustomer = await stripeService.findCustomer(customer);
-    let stripeSubsctiption = await stripeService.findSubscription(id);
 
-    console.log(util.inspect(stripeSubsctiption, { depth: null }));
+    if (true/*previousStatus != active && currentStatus == active */) {
+      // subscription is activated after 3D Secure confirmation or other delays
 
-    // usersService.updateStripeInfo(username, stripeCustomer.id, stripeSubsctiption.id, null);
-
-
-    if (previousStatus != active && currentStatus == active) {
-      // let stripeCustomer = await stripeService.findCustomer(customer);
-      // let stripeSubsctiption = await stripeService.findSubscription(customer);
-
-      // usersService.updateStripeInfo(username, stripeCustomer.id, stripeSubsctiption.id, stripePricingPlanId);
-
-      // subscription is activated after 3D Secure or other delays
-
+      let stripeCustomer = await stripeService.findCustomer(customer);
+      let stripeSubsctiption = await stripeService.findSubscription(id);
+      // TODO: we need to be sure UserProfile email is consistent with Stripe customer email, 
+      // we need to add a check in users controller to update stripe cusomer email if profile email changes
+      let userProfile = await usersService.findUserByEmail(stripeCustomer.email);
+      await usersService.updateStripeInfo(userProfile._id, customer, stripeSubsctiption.id, stripeSubsctiption.plan.id);
     }
     console.log(currentStatus);
     console.log(previousStatus);
