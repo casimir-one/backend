@@ -183,15 +183,19 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
 
 
     if (previousStatus != active && currentStatus == active) {
-      // subscription is activated after 3D Secure confirmation or other delays
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubsctiption = await stripeService.findSubscription(id);
       // TODO: we need to be sure UserProfile email is consistent with Stripe customer email, 
       // we need to add a check in user controller to update stripe cusomer email if profile email changes
       let userProfile = await usersService.findUserByEmail(stripeCustomer.email);
       await usersService.updateStripeInfo(userProfile._id, customer, stripeSubsctiption.id, stripeSubsctiption.plan.id);
-      let to = stripeCustomer.email;
-      console.log(`TODO: Send product Greeting letter`);
+
+      if (previousStatus == incomplete) {
+        // subscription is activated after 3D Secure confirmation or other delays
+        let to = stripeCustomer.email;
+        console.log(`TODO: Send product Greeting letter`);
+      }
+
     } else if (previousStatus == active && currentStatus == past_due) {
       //  Payment for this subscription has failed first time
       let stripeCustomer = await stripeService.findCustomer(customer);

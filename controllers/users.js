@@ -83,6 +83,7 @@ const updateUserProfile = async (ctx) => {
         return;
     }
 
+    // TODO: update Stripe customer email
     for (let key in data) {
         if (data.hasOwnProperty(key)) {
             profile[key] = data[key] 
