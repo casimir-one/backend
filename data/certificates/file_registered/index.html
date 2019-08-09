@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link rel="stylesheet" href="styles/style.css">
+    <link rel="stylesheet" href="styles/fonts.css">
+  </head>
+  <body>
+    <div id="certificate">
+      <img src="images/top-right-waves.svg" id="top-right-waves" />
+      <img src="images/bottom-left-waves.svg" id="bottom-left-waves" />
+      <img src="images/logo.svg" id="logo" />
+      <img src="images/frame.svg" id="frame" />
+      <p id="blockchain-certificate" class="bold">BLOCKCHAIN CERTIFICATE</p>
+      <p id="to-certify">This is to certify that</p>
+      <p id="username" class="black">{{owner_name}}</p>
+      <p id="registered">
+        registered the file referred hereunder in the DEIP blockchain
+        at the given date and time
+      </p>
+      <img src="images/separator.svg" id="separator-1"/>
+      <p id="file-hash">
+        <span class="black">File hash</span><br />
+        {{file_hash}}
+      </p>
+      <p id="uploader-public-key">
+        <span class="black">Uploader public key</span><br />
+        {{file_uploader_public_key}}
+      </p>
+      <p id="date">
+        <span class="black">Date</span><br />
+        {{registration_date}}
+      </p>
+      <p id="time">
+        <span class="black">Time</span><br />
+        {{registration_time}} UTC
+      </p>
+      <img src="images/separator.svg" id="separator-2"/>
+      <p id="transaction-hash">
+        <span class="black">Transaction Hash</span><br />
+        {{tx_hash}}
+      </p>
+      <p id="block-hash">
+        <span class="black">Block Hash</span><br />
+        {{block_hash}}
+      </p>
+      <p id="block-number">
+        <span class="black">Block Number</span><br />
+        {{block_number}}
+      </p>
+      <p id="chain-id">
+        <span class="black">Chain ID</span><br />
+        {{chain_id}}
+      </p>
+      <p id="certificate-id">
+        <span class="bold">Certificate ID:</span> {{certificate_id}}
+      </p>
+      <p id="project-id">
+        <span class="bold">Project ID:</span> {{project_id}}
+      </p>
+    </div>
+  </body>
+</html>

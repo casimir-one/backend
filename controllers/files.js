@@ -93,27 +93,32 @@ const exportCertificate = async (ctx) => {
     let ownerPubKey = accounts[1].owner.key_auths[0][0];
 
     let fileHist = await deipRpc.api.getContentHistoryByResearchAndHashAsync(chainResearch.id, hash);
+    const headBlock = await deipRpc.api.getBlockAsync(fileHist.block);
 
+    const certificateBasePath = './data/certificates/file_registered';
     let readFileAsync = util.promisify(fs.readFile);
-    let rawHtml = await readFileAsync('./certificates/file/certificate.html', 'utf8');
+    let rawHtml = await readFileAsync(`${certificateBasePath}/index.html`, 'utf8');
 
     let id = ripemd160(`${chainResearch.research_group_id}-${chainResearch.id}-${chainContent.id}-${chainContent.content}`).toString();
 
     var html = rawHtml.replace(/{{certificate_id}}/, id);
     html = html.replace(/{{project_id}}/, chainResearch.id);
     html = html.replace(/{{owner_name}}/, ownerName);
-    html = html.replace(/{{registration_date}}/, moment(ownerProfile.created_at).format("MM/DD/YYYY"));
+    html = html.replace(/{{registration_date}}/, moment(fileHist.timestamp).format("MMM DD, YYYY"));
+    html = html.replace(/{{registration_time}}/, moment(fileHist.timestamp).format("HH:mm:ss"));
     html = html.replace(/{{file_hash}}/, chainContent.content);
     html = html.replace(/{{tx_hash}}/, fileHist.trx_id);
-    html = html.replace(/{{tx_timestamp}}/, moment(fileHist.timestamp).format("MM/DD/YYYY HH:mm:ss"));
     html = html.replace(/{{block_number}}/, fileHist.block);
+    html = html.replace(/{{block_hash}}/, headBlock.block_id);
     html = html.replace(/{{project_owner_public_key}}/, ownerPubKey);
     html = html.replace(/{{file_uploader_public_key}}/, jwtPubKey);
     html = html.replace(/{{chain_id}}/, process.env.CHAIN_ID);
 
+    const base = path.resolve(certificateBasePath);
     const options = {
-      "format": "A4",
-      "orientation": "landscape"
+      width: '1440px',
+      height: '900px',
+      base: `file://${base}/`
     }
 
     let pdfStreamAsync = () => new Promise((resolve, reject) => {

@@ -1,0 +1,320 @@
+/* http://meyerweb.com/eric/tools/css/reset/ 
+   v2.0 | 20110126
+   License: none (public domain)
+*/
+
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed, 
+figure, figcaption, footer, header, hgroup, 
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+	margin: 0;
+	padding: 0;
+	border: 0;
+	font-size: 100%;
+	font: inherit;
+	vertical-align: baseline;
+}
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure, 
+footer, header, hgroup, menu, nav, section {
+	display: block;
+}
+body {
+	line-height: 1;
+}
+ol, ul {
+	list-style: none;
+}
+blockquote, q {
+	quotes: none;
+}
+blockquote:before, blockquote:after,
+q:before, q:after {
+	content: '';
+	content: none;
+}
+table {
+	border-collapse: collapse;
+	border-spacing: 0;
+}
+
+p {
+  word-wrap: break-word;
+}
+
+#certificate {
+  position: relative;
+  width: 1440px;
+  height: 900px;
+
+  background: #FFFFFF;
+}
+
+#frame {
+  position: absolute;
+  width: 1401px;
+  height: 876px;
+  left: 18px;
+  top: 11px;
+}
+
+#top-right-waves {
+  position: absolute;
+  right: 0;
+  top: 0;
+}
+
+#bottom-left-waves {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+}
+
+#logo {
+  position: absolute;
+  width: 227px;
+  height: 57.61px;
+  left: 607px;
+  top: 40.39px;
+}
+
+#blockchain-certificate {
+  position: absolute;
+  width: 666px;
+  height: 63px;
+  left: 392px;
+  top: 172px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 50px;
+  line-height: 63px;
+
+  color: #000000;
+}
+
+#to-certify {
+  position: absolute;
+  width: 227px;
+  height: 27px;
+  left: 607px;
+  top: 269px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 23px;
+  line-height: 29px;
+  text-align: center;
+
+  color: #000000;
+}
+
+#username {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 320px;
+  margin-left: auto;
+  margin-right: auto;
+  width: 90%;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 32px;
+  line-height: 40px;
+  text-align: center;
+
+  color: #000000;
+}
+
+#registered {
+  position: absolute;
+  width: 526px;
+  height: 58px;
+  left: 457px;
+  top: 380px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 23px;
+  line-height: 29px;
+  text-align: center;
+
+  color: #000000;
+}
+
+#separator-1 {
+  position: absolute;
+  width: 1017px;
+  height: 0px;
+  left: 209px;
+  top: 494px;
+  
+  border: 1px solid #000000;
+}
+
+#separator-2 {
+  position: absolute;
+  width: 1017px;
+  height: 0px;
+  left: 213px;
+  top: 675px;
+  
+  border: 1px solid #000000;
+}
+
+#file-hash {
+  position: absolute;
+  width: 676px;
+  height: 109px;
+  left: 212px;
+  top: 517px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 23px;
+
+  color: #000000;
+}
+
+#uploader-public-key {
+  position: absolute;
+  width: 605px;
+  height: 64px;
+  left: 212px;
+  top: 590px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 23px;
+
+  color: #000000;
+}
+
+#date {
+  position: absolute;
+  width: 140.2px;
+  height: 41px;
+  left: 942px;
+  top: 507px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 23px;
+
+  color: #000000;
+}
+
+#time {
+  position: absolute;
+  width: 123px;
+  height: 50px;
+  left: 1103px;
+  top: 507px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 18px;
+  line-height: 23px;
+
+  color: #000000;
+}
+
+#transaction-hash {
+  position: absolute;
+  width: 246px;
+  height: 69px;
+  left: 212px;
+  top: 698px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+#block-hash {
+  position: absolute;
+  width: 246px;
+  height: 79px;
+  left: 510px;
+  top: 698px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+#block-number {
+  position: absolute;
+  width: 220px;
+  height: 79px;
+  left: 784px;
+  top: 698px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+#chain-id {
+  position: absolute;
+  width: 288px;
+  height: 69px;
+  left: 942px;
+  top: 698px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 15px;
+  line-height: 19px;
+}
+
+#certificate-id {
+  position: absolute;
+  width: 514px;
+  height: 25px;
+  left: 212px;
+  top: 849px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 12px;
+  line-height: 15px;
+}
+
+#project-id {
+  position: absolute;
+  width: 351px;
+  height: 25px;
+  left: 879px;
+  top: 849px;
+
+  font-family: Muli;
+  font-style: normal;
+  font-size: 12px;
+  line-height: 15px;
+  text-align: right;
+}
+
+.bold {
+  font-weight: bold;
+}
+
+.black {
+  font-weight: 900;
+}
