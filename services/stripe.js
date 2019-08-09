@@ -12,10 +12,24 @@ async function getIPprotectionProduct() {
   return { product, plans: productPlans };
 }
 
-async function createCustomerAndSubscription({ stripeToken, customerEmail, planId, metadata }) {
-  let customer = await stripe.customers.create({ source: stripeToken, email: customerEmail });
-  let subscription = await stripe.subscriptions.create({ customer: customer.id, metadata, items: [{ plan: planId }], expand: ['latest_invoice.payment_intent'] });
-  return { customer, subscription };
+async function createCustomer({
+  stripeToken, customerEmail
+}) {
+  return stripe.customers.create({
+    source: stripeToken,
+    email: customerEmail
+  });
+}
+
+async function createSubscription(customerId, {
+  planId, metadata
+}) {
+  return stripe.subscriptions.create({
+    customer: customerId,
+    metadata,
+    items: [{ plan: planId }],
+    expand: ['latest_invoice.payment_intent']
+  });
 }
 
 async function findSubscription(subscriptionId) {
@@ -54,7 +68,8 @@ async function findCustomer(customerId) {
 
 export default {
   getIPprotectionProduct,
-  createCustomerAndSubscription,
+  createCustomer,
+  createSubscription,
   findSubscription,
   updateSubscription,
   getSubscriptions,

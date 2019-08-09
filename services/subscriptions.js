@@ -13,21 +13,29 @@ async function findSubscriptionByOwner(owner) {
   return subscription;
 }
 
-async function processStripeSubscription(owner, { stripeToken, customerEmail, planId, planName }) {
-  let pricingPlan = await pricingPlansService.findPricingPlan(planName);
-  let metadata = {
-    certificateLimitCounter: 0
+async function processStripeSubscription(owner, { stripeToken, customerEmail, planId }) {
+  const user = await usersService.findUserById(owner);
+  let customerId = user.stripeCustomerId
+  if (!customerId) {
+    const customer = await stripeService.createCustomer({
+      stripeToken, customerEmail
+    });
+    customerId = customer.id;
+    await usersService.updateStripeInfo(owner, customerId, null, null);
   }
 
-  let { customer, subscription } = await stripeService.createCustomerAndSubscription({ stripeToken, customerEmail, planId, metadata });
-  let { stripePlan: plan } = pricingPlan;
+  const subscription = await stripeService.createSubscription(customerId, {
+    planId,
+    metadata: {
+      certificateLimitCounter: 0
+    }
+  });
 
   if (subscription.latest_invoice.payment_intent.status == "succeeded") {
-    await usersService.updateStripeInfo(owner, customer.id, subscription.id, plan.id);
+    await usersService.updateStripeInfo(owner, customerId, subscription.id, planId);
   }
 
-  let result = { customer, plan, subscription };
-  return result;
+  return subscription.latest_invoice.payment_intent.status;
 }
 
 async function setCertificateLimitCounter(id, incremented) {

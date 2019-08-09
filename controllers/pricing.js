@@ -59,20 +59,13 @@ const processStripePayment = async function (ctx) {
 
   try {
     let { 
-      stripeToken, 
-      customerEmail, 
-      productName,
-      planId, 
-      planName, 
-      planAmount, 
-      planInterval, 
-      planIntervalCount 
+      stripeToken,
+      customerEmail,
+      planId,
     } = ctx.request.body;
 
-    let result = await subscriptionsService.processStripeSubscription(jwtUsername, { stripeToken, customerEmail, planId, planName });
-
     ctx.status = 200;
-    ctx.body = result;
+    ctx.body = await subscriptionsService.processStripeSubscription(jwtUsername, { stripeToken, customerEmail, planId });
 
   } catch (err) {
     console.log(err);
