@@ -71,10 +71,13 @@ const createVerificationToken = async function (ctx) {
   expires.setDate(expires.getDate() + 1); // 1 day expiration
 
   try {
-    const existingToken = await vtService.findVerificationTokenByEmail(email);
-    if (existingToken) {
+    const [existingToken, existingUser] = await Promise.all([
+      vtService.findVerificationTokenByEmail(email),
+      usersService.findUserByEmail(email)
+    ]);
+    if (existingToken || existingUser) {
       ctx.status = 400;
-      ctx.body = 'Provided email has already started the registration'
+      ctx.body = 'Provided email has already started or completed the registration'
       return;
     }
 

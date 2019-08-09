@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const UserProfile = new Schema({
     "_id": { type: String },
-    "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'], required: true },
+    "email": { type: String, default: null, trim: true, index: true, unique: true, match: [/\S+@\S+\.\S+/, 'email is invalid'], required: true },
     "stripeCustomerId": { type: String, required: false, default: null },
     "stripeSubscriptionId": { type: String, required: false, default: null },
     "stripePricingPlanId": { type: String, required: false, default: null },
