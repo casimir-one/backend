@@ -21,6 +21,12 @@ async function createCustomer({
   });
 }
 
+async function updateCustomerEmail(customerId, email) {
+  return stripe.customers.update(customerId, {
+    email
+  });
+}
+
 async function createSubscription(customerId, {
   planId, metadata
 }) {
@@ -76,5 +82,6 @@ export default {
   cancelSubscriptionAtEndOfCurrentBillingPeriod,
   reactivateSubscriptionBeforeEndOfCurrentBillingPeriod,
   constructEventFromWebhook,
-  findCustomer
+  findCustomer,
+  updateCustomerEmail
 }

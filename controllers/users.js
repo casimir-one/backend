@@ -4,6 +4,7 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp';
 import UserProfile from './../schemas/user';
+import usersService from './../services/users';
 import qs from 'qs';
 
 const getUserProfile = async (ctx) => {
@@ -64,6 +65,10 @@ const createUserProfile = async (ctx) => {
     ctx.body = savedProfile
 }
 
+const ALLOWED_TO_UPDATE = [
+  'email', 'activeOrgPermlink', 'avatar', 'firstName', 'lastName',
+  'bio', 'birthday', 'location'
+];
 const updateUserProfile = async (ctx) => {
     const data = ctx.request.body;
     const username = ctx.params.username;
@@ -75,22 +80,19 @@ const updateUserProfile = async (ctx) => {
         return;
     }
 
-    const profile = await UserProfile.findOne({'_id': username})
-
-    if (!profile) {
-        ctx.status = 404;
-        ctx.body = `Profile for "${username}" does not exist!`
-        return;
-    }
-
-    // TODO: update Stripe customer email
+    const dataToUpdate = {};
     for (let key in data) {
-        if (data.hasOwnProperty(key)) {
-            profile[key] = data[key] 
-        }
+      if (ALLOWED_TO_UPDATE.includes(key)) {
+        dataToUpdate[key] = data[key];
+      }
     }
- 
-    const updatedProfile = await profile.save()
+    const updatedProfile = await usersService.updateProfile(username, dataToUpdate);
+    if (!updatedProfile) {
+      ctx.status = 404;
+      ctx.body = `Profile for "${username}" does not exist!`
+      return;
+    }
+
     ctx.status = 200;
     ctx.body = updatedProfile
 }

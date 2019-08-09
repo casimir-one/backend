@@ -1,4 +1,5 @@
 import UserProfile from './../schemas/user';
+import stripeService from './stripe';
 
 async function findUserById(username) {
   const profile = await UserProfile.findOne({ '_id': username });
@@ -36,11 +37,33 @@ async function findUserByEmail(email) {
   return profile;
 }
 
+async function updateProfile(username, profileToUpdate = {}) {
+  const profile = await UserProfile.findOne({ '_id': username })
+  if (!profile) {
+    return null;
+  }
+
+  const prevEmail = profile.email;
+  for (let key in profileToUpdate) {
+    if (profileToUpdate.hasOwnProperty(key)) {
+      profile[key] = profileToUpdate[key];
+    }
+  }
+
+  const updatedProfile = await profile.save();
+  if (updatedProfile.email !== prevEmail) {
+    stripeService.updateCustomerEmail(updatedProfile.stripeCustomerId, updatedProfile.email).catch(console.error)
+  }
+
+  return updatedProfile;
+}
+
 
 export default {
   findUserById,
   findUserByCustomerId,
   findUserByEmail,
   createUser,
-  updateStripeInfo
+  updateStripeInfo,
+  updateProfile
 }
