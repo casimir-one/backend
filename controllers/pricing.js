@@ -176,6 +176,13 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       previous_attributes: { status: previousStatus, cancel_at_period_end: previousCancelAtPeriodEnd } 
     } = event.data;
 
+    console.log("=================start");
+
+    console.log(previousStatus);
+    console.log(currentStatus);
+    console.log("=================end");
+
+
 
     if (previousStatus != active && currentStatus == active) {
       let stripeCustomer = await stripeService.findCustomer(customer);
