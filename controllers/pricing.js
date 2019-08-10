@@ -5,6 +5,16 @@ import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import util from 'util';
 
+// See https://stripe.com/docs/api/subscriptions/object#subscription_object-status
+const incomplete = "incomplete";
+const incomplete_expired = "incomplete_expired"
+const trialing = "trialing";
+const active = "active";
+const past_due = "past_due"
+const canceled = "canceled";
+const unpaid = "unpaid";
+
+
 const getUserSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
   const username = ctx.params.username;
@@ -20,7 +30,7 @@ const getUserSubscription = async function (ctx) {
     let subscription = await subscriptionsService.findSubscriptionByOwner(username);
     let pricingPlan = await pricingPlansService.findPricingPlan(subscription ? subscription.plan.nickname : "free");
     
-    if (subscription && subscription.status == 'canceled') {
+    if (!subscription || subscription.status != active) {
       ctx.status = 200;
       ctx.body = { subscription: null, pricingPlan }
       return;
@@ -107,14 +117,6 @@ const reactivateSubscription = async function (ctx) {
 
 // Stripe Webhooks
 
-// See https://stripe.com/docs/api/subscriptions/object#subscription_object-status
-const incomplete = "incomplete";
-const incomplete_expired = "incomplete_expired"
-const trialing = "trialing";
-const active = "active";
-const past_due = "past_due"
-const canceled = "canceled";
-const unpaid = "unpaid";
 
 const customerSubscriptionCreatedWebhook = async function (ctx) {
 
