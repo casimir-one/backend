@@ -178,13 +178,16 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
 
     console.log("=================start");
 
-    console.log(previousStatus);
-    console.log(currentStatus);
+    console.log(`customer: ${customer}`);
+    console.log(`currentStatus: ${currentStatus}`);
+    console.log(`previousStatus: ${previousStatus}`);
+
+    console.log(`currentCancelAtPeriodEnd: ${currentCancelAtPeriodEnd}`);
+    console.log(`previousCancelAtPeriodEnd: ${previousCancelAtPeriodEnd}`);
     console.log("=================end");
 
 
-
-    if (previousStatus != active && currentStatus == active) {
+    if (previousStatus !== undefined && previousStatus != active && currentStatus == active) {
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
       let userProfile = await usersService.findUserByCustomerId(customer);
@@ -198,19 +201,19 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
         console.log(`TODO: Send product Greeting letter`);
       }
 
-    } else if (previousStatus == active && currentStatus == past_due) {
+    } else if (previousStatus !== undefined && previousStatus == active && currentStatus == past_due) {
       //  Payment for this subscription has failed first time
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
       let to = stripeCustomer.email;
       console.log(`TODO: Send letter with notification of payment failure (first attempt)`);
-    } else if (previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === true) {
+    } else if (previousCancelAtPeriodEnd !== undefined && previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === true) {
       // subscription is canceled
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
       let to = stripeCustomer.email;
       console.log(`TODO: Send letter with notification of subscription cancelation date`);
-    } else if (previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === false) {
+    } else if (previousCancelAtPeriodEnd !== undefined && previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === false) {
       // subscription is reactivated
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
