@@ -15,7 +15,7 @@ async function findSubscriptionByOwner(owner) {
 
 async function processStripeSubscription(owner, { stripeToken, customerEmail, planId }) {
   const user = await usersService.findUserById(owner);
-  let customerId = user.stripeCustomerId
+  let customerId = user.stripeCustomerId;
   if (!customerId) {
     const customer = await stripeService.createCustomer({
       stripeToken, customerEmail
@@ -24,10 +24,11 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
     await usersService.updateStripeInfo(owner, customerId, null, null);
   }
 
+  const pricingPlan = await pricingPlansService.findPricingPlanByStripeId(planId);
   const subscription = await stripeService.createSubscription(customerId, {
     planId,
     metadata: {
-      certificateLimitCounter: 0
+      availableCertificatesBySubscription: pricingPlan.terms.certificateLimit.limit
     }
   });
 
@@ -38,13 +39,16 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
   return subscription.latest_invoice.payment_intent.status;
 }
 
-async function setCertificateLimitCounter(id, incremented) {
-  let updatedSubscription = await stripeService.updateSubscription(id, { metadata: { certificateLimitCounter: incremented } });
+async function setCertificateLimitCounter(id, value) {
+  let updatedSubscription = await stripeService.updateSubscription(id, { metadata: { availableCertificatesBySubscription: value } });
   return updatedSubscription;
 }
 
 async function resetCertificatesLimitCounter() {
   let subscriptions = await stripeService.getSubscriptions();
+  // TODO: check pricing plan limit for subscription
+  let pricingPlan = await pricingPlansService.findPricingPlan("standard-monthly");
+
   // TODO: Move this to stripe Webhook asap
   const promises = [];
   let endOfDay = moment().utc().endOf('day').toDate().toString();
@@ -53,7 +57,7 @@ async function resetCertificatesLimitCounter() {
     let subscription = subscriptions[i];
     let end = moment(subscription.current_period_end * 1000).utc().endOf('day').toDate().toString()
     if (endOfDay == end) {
-      promises.push(stripeService.updateSubscription(subscription.id, { metadata: { certificateLimitCounter: 0 } }));
+      promises.push(stripeService.updateSubscription(subscription.id, { metadata: { availableCertificatesBySubscription: pricingPlan.terms.certificateLimit.limit } }));
     }
   }
 

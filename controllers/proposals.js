@@ -1,6 +1,5 @@
 import { authorizeResearchGroup } from './../services/auth'
 import { sendProposalNotificationToGroup } from './../services/notifications';
-import pricingPlansService from './../services/pricingPlans';
 import subscriptionsService from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import filesService from './../services/fileRef';
@@ -97,19 +96,11 @@ const createContentProposal = async (ctx) => {
       ctx.body = `Subscription for ${jwtUsername} is not found`;
       return;
     }
-    
-    const pricingPlan = await pricingPlansService.findPricingPlan(subscription.plan.nickname);
-    if (!pricingPlan) {
-      ctx.status = 404;
-      ctx.body = `Pricing plan "${subscription.plan.nickname}" is not found`;
-      return;
-    }
-    
+        
     const isLimitedPlan = subscription.plan.nickname != "unlimited"; // todo handle with metadata
     if (isLimitedPlan) {
-      let limit = pricingPlan.terms.certificateLimit.limit;
-      let counter = parseInt(subscription.metadata.certificateLimitCounter);
-      if ((counter + operations.length) > limit) {
+      let limit = parseInt(subscription.metadata.availableCertificatesBySubscription);
+      if (operations.length > limit) {
         ctx.status = 402;
         ctx.body = `Subscription ${subscription.id} for ${jwtUsername} is under "${subscription.plan.nickname}" plan and has reached the limit.`;
         return;
@@ -153,8 +144,8 @@ const createContentProposal = async (ctx) => {
     if (result.isSuccess) {
       const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
       if (isLimitedPlan) {
-        let current = parseInt(subscription.metadata.certificateLimitCounter);
-        await subscriptionsService.setCertificateLimitCounter(subscription.id, current + files.length);
+        let current = parseInt(subscription.metadata.availableCertificatesBySubscription);
+        await subscriptionsService.setCertificateLimitCounter(subscription.id, current - files.length);
       }
 
       ctx.status = 200;

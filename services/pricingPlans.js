@@ -6,11 +6,17 @@ async function findPricingPlan(id) {
   let doc = await PricingPlan.findOne({ _id: id });
   let appPlan = doc._doc;
   if (appPlan.stripeId != null) {
-    let { product, plans: stripePlans } = await stripeService.getIPprotectionProduct();
-    let stripePlan = stripePlans.find(stripePlan => stripePlan.id == appPlan.stripeId);
-    return { ...appPlan, stripePlan, stripeProduct: product };
+    let stripePlan = await stripeService.findPricingPlan(appPlan.stripeId);
+    return { ...appPlan, stripePlan };
   }
   return { ...appPlan };
+}
+
+async function findPricingPlanByStripeId(stripeId) {
+  let stripePlan = await stripeService.findPricingPlan(stripeId);
+  let doc = await PricingPlan.findOne({ _id: stripePlan.nickname });
+  let appPlan = doc._doc;
+  return { ...appPlan, stripePlan };
 }
 
 async function findRegularPricingPlans() {
@@ -33,5 +39,6 @@ async function findRegularPricingPlans() {
 
 export default {
   findPricingPlan,
-  findRegularPricingPlans
+  findPricingPlanByStripeId,
+  findRegularPricingPlans,
 }

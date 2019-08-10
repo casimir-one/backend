@@ -72,6 +72,11 @@ async function findCustomer(customerId) {
   return customer;
 }
 
+async function findPricingPlan(planId) {
+  let plan = await stripe.plans.retrieve(planId);
+  return plan;
+}
+
 export default {
   getIPprotectionProduct,
   createCustomer,
@@ -83,5 +88,6 @@ export default {
   reactivateSubscriptionBeforeEndOfCurrentBillingPeriod,
   constructEventFromWebhook,
   findCustomer,
-  updateCustomerEmail
+  updateCustomerEmail,
+  findPricingPlan
 }
