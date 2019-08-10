@@ -32,12 +32,12 @@ const getUserSubscription = async function (ctx) {
     
     if (!subscription || subscription.status != active) {
       ctx.status = 200;
-      ctx.body = { subscription: null, pricingPlan }
+      ctx.body = { subscription: null, pricingPlan, nonactiveSubscription: subscription }
       return;
     }
 
     ctx.status = 200;
-    ctx.body = { subscription, pricingPlan };
+    ctx.body = { subscription, pricingPlan, nonactiveSubscription: null };
 
   } catch (err) {
     console.log(err);
