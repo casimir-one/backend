@@ -145,7 +145,7 @@ const createContentProposal = async (ctx) => {
       const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
       if (isLimitedPlan) {
         let current = parseInt(subscription.metadata.availableCertificatesBySubscription);
-        await subscriptionsService.setCertificateLimitCounter(subscription.id, current - files.length);
+        await subscriptionsService.setAvailableCertificatesCounter(subscription.id, current - files.length);
       }
 
       ctx.status = 200;

@@ -1,4 +1,5 @@
 import pricingPlansService from './../services/pricingPlans';
+import subscriptionsService from './../services/subscriptions';
 import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import moment from 'moment';
@@ -28,18 +29,19 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
   const subscription = await stripeService.createSubscription(customerId, {
     planId,
     metadata: {
-      availableCertificatesBySubscription: pricingPlan.terms.certificateLimit.limit
+      availableCertificatesBySubscription: 0
     }
   });
 
   if (subscription.latest_invoice.payment_intent.status == "succeeded") {
+    await subscriptionsService.setAvailableCertificatesCounter(subscription.id, pricingPlan.terms.certificateLimit.limit);
     await usersService.updateStripeInfo(owner, customerId, subscription.id, planId);
   }
 
   return subscription.latest_invoice.payment_intent.status;
 }
 
-async function setCertificateLimitCounter(id, value) {
+async function setAvailableCertificatesCounter(id, value) {
   let updatedSubscription = await stripeService.updateSubscription(id, { metadata: { availableCertificatesBySubscription: value } });
   return updatedSubscription;
 }
@@ -81,7 +83,7 @@ export default {
   findSubscriptionByOwner,
   processStripeSubscription,
   resetCertificatesLimitCounter,
-  setCertificateLimitCounter,
+  setAvailableCertificatesCounter,
   cancelSubscription,
   reactivateSubscription
 }
