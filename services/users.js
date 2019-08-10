@@ -51,7 +51,7 @@ async function updateProfile(username, profileToUpdate = {}) {
   }
 
   const updatedProfile = await profile.save();
-  if (updatedProfile.email !== prevEmail) {
+  if (updatedProfile.stripeCustomerId && updatedProfile.email !== prevEmail) {
     stripeService.updateCustomerEmail(updatedProfile.stripeCustomerId, updatedProfile.email).catch(console.error)
   }
 
