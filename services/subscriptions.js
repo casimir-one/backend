@@ -33,9 +33,9 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
     }
   });
 
+  await usersService.updateStripeInfo(owner, customerId, subscription.id, planId);
   if (subscription.latest_invoice.payment_intent.status == "succeeded") {
     await subscriptionsService.setAvailableCertificatesCounter(subscription.id, pricingPlan.terms.certificateLimit.limit);
-    await usersService.updateStripeInfo(owner, customerId, subscription.id, planId);
   }
 
   return subscription.latest_invoice.payment_intent.status;
