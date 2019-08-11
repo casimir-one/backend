@@ -1,5 +1,4 @@
 import pricingPlansService from './../services/pricingPlans';
-import subscriptionsService from './../services/subscriptions';
 import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import moment from 'moment';
@@ -35,7 +34,7 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
 
   await usersService.updateStripeInfo(owner, customerId, subscription.id, planId);
   if (subscription.latest_invoice.payment_intent.status == "succeeded") {
-    await subscriptionsService.setAvailableCertificatesCounter(subscription.id, pricingPlan.terms.certificateLimit.limit);
+    await setAvailableCertificatesCounter(subscription.id, pricingPlan.terms.certificateLimit.limit);
   }
 
   return subscription.latest_invoice.payment_intent.status;

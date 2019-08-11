@@ -131,7 +131,7 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
 
     let { data: { object: { id, customer, status } } } = event;
     if (status == incomplete) {
-      // this can be related to 3D Secure or insufficient balance
+      // this is usually related to 3D Secure
     } else if (status == active) {
       console.log(`TODO: Send email to info@deip.world to notify DEIP team about new account`);
       let stripeCustomer = await stripeService.findCustomer(customer);
