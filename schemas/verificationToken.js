@@ -11,7 +11,7 @@ const VerificationToken = new Schema({
     type: String,
     enum: ["free", "standard-monthly", "premium-monthly", "unlimited" /* add more plans here */],
     required: true,
-    default: "standard-monthly",
+    default: "free",
     index: true
   },
   "token": { type: String, required: true, index: true, trim: true, },
