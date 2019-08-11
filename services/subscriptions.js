@@ -46,27 +46,6 @@ async function setAvailableCertificatesCounter(id, value) {
   return updatedSubscription;
 }
 
-async function resetCertificatesLimitCounter() {
-  let subscriptions = await stripeService.getSubscriptions();
-  // TODO: check pricing plan limit for subscription
-  let pricingPlan = await pricingPlansService.findPricingPlan("standard-monthly");
-
-  // TODO: Move this to stripe Webhook asap
-  const promises = [];
-  let endOfDay = moment().utc().endOf('day').toDate().toString();
-
-  for (let i = 0; i < subscriptions.length; i++) {
-    let subscription = subscriptions[i];
-    let end = moment(subscription.current_period_end * 1000).utc().endOf('day').toDate().toString()
-    if (endOfDay == end) {
-      promises.push(stripeService.updateSubscription(subscription.id, { metadata: { availableCertificatesBySubscription: pricingPlan.terms.certificateLimit.limit } }));
-    }
-  }
-
-  await Promise.all(promises);
-  return promises.length;
-}
-
 async function cancelSubscription(owner) {
   let user = await usersService.findUserById(owner);
   let updatedSubscription = await stripeService.cancelSubscriptionAtEndOfCurrentBillingPeriod(user.stripeSubscriptionId);
@@ -82,7 +61,6 @@ async function reactivateSubscription(owner) {
 export default {
   findSubscriptionByOwner,
   processStripeSubscription,
-  resetCertificatesLimitCounter,
   setAvailableCertificatesCounter,
   cancelSubscription,
   reactivateSubscription

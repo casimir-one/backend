@@ -166,42 +166,42 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     }
 
     let { 
-      object: { id, customer, cancel_at_period_end: currentCancelAtPeriodEnd, status: currentStatus }, 
-      previous_attributes: { status: previousStatus, cancel_at_period_end: previousCancelAtPeriodEnd } 
+      object: { id, customer, status: currentStatus, cancel_at_period_end: currentCancelAtPeriodEnd, current_period_end: currentCurrentAtPeriodEnd}, 
+      previous_attributes: { status: previousStatus, cancel_at_period_end: previousCancelAtPeriodEnd, current_period_end: previousCurrentAtPeriodEnd} 
     } = event.data;
 
     console.log("=================start");
-
     console.log(`customer: ${customer}`);
     console.log(`currentStatus: ${currentStatus}`);
     console.log(`previousStatus: ${previousStatus}`);
 
     console.log(`currentCancelAtPeriodEnd: ${currentCancelAtPeriodEnd}`);
     console.log(`previousCancelAtPeriodEnd: ${previousCancelAtPeriodEnd}`);
+
+    console.log(`currentCurrentAtPeriodEnd: ${currentCurrentAtPeriodEnd}`);
+    console.log(`previousCurrentAtPeriodEnd: ${previousCurrentAtPeriodEnd}`);
     console.log("=================end");
 
 
-    if (previousStatus !== undefined && previousStatus != active && currentStatus == active) {
-      let stripeCustomer = await stripeService.findCustomer(customer);
+    if (previousStatus !== undefined && previousStatus == incomplete && currentStatus == active) {
+      // subscription is activated after 3D Secure confirmation
       let stripeSubscription = await stripeService.findSubscription(id);
-      let userProfile = await usersService.findUserByCustomerId(customer);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
       await subscriptionsService.setAvailableCertificatesCounter(stripeSubscription.id, pricingPlan.terms.certificateLimit.limit);
-      await usersService.updateStripeInfo(userProfile._id, customer, stripeSubscription.id, stripeSubscription.plan.id);
-
-      if (previousStatus == incomplete) {
-        // subscription is activated after 3D Secure confirmation or other delays
-        let to = stripeCustomer.email;
-        console.log(`TODO: Send product Greeting letter`);
-      }
-
+      
+      let stripeCustomer = await stripeService.findCustomer(customer);
+      let to = stripeCustomer.email;
+      console.log(`TODO: Send product Greeting letter`);
     } else if (previousStatus !== undefined && previousStatus == active && currentStatus == past_due) {
       //  Payment for this subscription has failed first time
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
       let to = stripeCustomer.email;
       console.log(`TODO: Send letter with notification of payment failure (first attempt)`);
-    } else if (previousCancelAtPeriodEnd !== undefined && previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === true) {
+    }
+
+    
+    if (previousCancelAtPeriodEnd !== undefined && previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === true) {
       // subscription is canceled
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
@@ -213,6 +213,14 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       let stripeSubscription = await stripeService.findSubscription(id);
       let to = stripeCustomer.email;
       console.log(`TODO: Send letter with notification of subscription reactivation`);
+    }
+
+
+    if (previousCurrentAtPeriodEnd !== undefined && previousCurrentAtPeriodEnd != currentCurrentAtPeriodEnd) {
+      // subscription renewal
+      let stripeSubscription = await stripeService.findSubscription(id);
+      let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
+      await subscriptionsService.setAvailableCertificatesCounter(stripeSubscription.id, pricingPlan.terms.certificateLimit.limit);
     }
 
     ctx.status = 200;

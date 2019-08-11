@@ -16,8 +16,6 @@ import config from './config';
 import mongoose from 'mongoose';
 import filesWS from './sockets/files';
 import speedProbeWS from './sockets/speedProbe';
-import schedule from 'node-schedule';
-import subscriptionsJobs from './jobs/subscriptions';
 
 import deipRpc from '@deip/deip-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
@@ -126,8 +124,6 @@ io.on('connection', (socket) => {
   });
 });
 
-// run every 6 hours
-schedule.scheduleJob('0 */6 * * *', subscriptionsJobs.processCertificateLimits);
 
 server.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);
