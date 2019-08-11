@@ -96,7 +96,14 @@ const createContentProposal = async (ctx) => {
       ctx.body = `Subscription for ${jwtUsername} is not found`;
       return;
     }
-        
+
+    if (subscription.status != "active" && subscription.status != "past_due") {
+      // subscription becomes past_due when the first attempt to renew it fails
+      ctx.status = 402;
+      ctx.body = `Subscription for ${jwtUsername} has expired`;
+      return;
+    }
+
     const isLimitedPlan = subscription.plan.nickname != "unlimited"; // todo handle with metadata
     if (isLimitedPlan) {
       let limit = parseInt(subscription.metadata.availableCertificatesBySubscription);
