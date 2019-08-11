@@ -30,14 +30,8 @@ const getUserSubscription = async function (ctx) {
     let subscription = await subscriptionsService.findSubscriptionByOwner(username);
     let pricingPlan = await pricingPlansService.findPricingPlan(subscription ? subscription.plan.nickname : "free");
     
-    if (!subscription || subscription.status != active) {
-      ctx.status = 200;
-      ctx.body = { subscription: null, pricingPlan, nonactiveSubscription: subscription }
-      return;
-    }
-
     ctx.status = 200;
-    ctx.body = { subscription, pricingPlan, nonactiveSubscription: null };
+    ctx.body = { subscription, pricingPlan };
 
   } catch (err) {
     console.log(err);
