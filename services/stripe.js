@@ -77,6 +77,11 @@ async function findPricingPlan(planId) {
   return plan;
 }
 
+async function findInvoice(invoiceId) {
+  let invoice = await stripe.invoices.retrieve(invoiceId);
+  return invoice;
+}
+
 export default {
   getIPprotectionProduct,
   createCustomer,
@@ -89,5 +94,6 @@ export default {
   constructEventFromWebhook,
   findCustomer,
   updateCustomerEmail,
-  findPricingPlan
+  findPricingPlan,
+  findInvoice
 }

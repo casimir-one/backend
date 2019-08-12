@@ -10,7 +10,12 @@ async function findSubscriptionByOwner(owner) {
   }
 
   let subscription = await stripeService.findSubscription(user.stripeSubscriptionId);
-  return subscription;
+  let latestInvoice = null;
+  if (subscription.latest_invoice) {
+    latestInvoice = await stripeService.findInvoice(subscription.latest_invoice);
+  }
+
+  return { ...subscription, latestInvoice };
 }
 
 async function processStripeSubscription(owner, { stripeToken, customerEmail, planId }) {
