@@ -68,6 +68,13 @@ const processStripePayment = async function (ctx) {
       planId,
     } = ctx.request.body;
 
+    let regularPricingPlans = await pricingPlansService.findRegularPricingPlans();
+    if (!regularPricingPlans.some(p => p.stripePlan.id == planId)) {
+      ctx.status = 400;
+      ctx.body = `Plan ${planId} is not a regular one`;
+      return;
+    }
+
     ctx.status = 200;
     ctx.body = await subscriptionsService.processStripeSubscription(jwtUsername, { stripeToken, customerEmail, planId });
 
