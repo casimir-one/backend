@@ -97,7 +97,7 @@ const createContentProposal = async (ctx) => {
       return;
     }
 
-    if (subscription.status != "active" && subscription.status != "past_due") {
+    if (subscription.status != "active" && subscription.status != "past_due" && subscription.status != "trialing") {
       // subscription becomes past_due when the first attempt to renew it fails
       ctx.status = 402;
       ctx.body = `Subscription for ${jwtUsername} has expired`;
