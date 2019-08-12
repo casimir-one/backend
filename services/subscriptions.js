@@ -13,7 +13,7 @@ async function findSubscriptionByOwner(owner) {
   if (subscription.latest_invoice) {
     subscription.latestInvoice = await stripeService.findInvoice(subscription.latest_invoice);
     if (subscription.latestInvoice.payment_intent) {
-      subscription.latestInvoice.paymentIntent = stripeService.findPaymentIntent(subscription.latestInvoice.payment_intent);
+      subscription.latestInvoice.paymentIntent = await stripeService.findPaymentIntent(subscription.latestInvoice.payment_intent);
     }
   }
 
