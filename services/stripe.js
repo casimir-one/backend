@@ -21,9 +21,10 @@ async function createCustomer({
   });
 }
 
-async function updateCustomerEmail(customerId, email) {
+async function updateCustomer(customerId, { email, sourceCardToken }) {
   return stripe.customers.update(customerId, {
-    email
+    email,
+    source: sourceCardToken
   });
 }
 
@@ -98,7 +99,7 @@ export default {
   reactivateSubscriptionBeforeEndOfCurrentBillingPeriod,
   constructEventFromWebhook,
   findCustomer,
-  updateCustomerEmail,
+  updateCustomer,
   findPricingPlan,
   findInvoice,
   findPaymentIntent

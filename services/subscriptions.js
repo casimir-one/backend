@@ -29,6 +29,10 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
     });
     customerId = customer.id;
     await usersService.updateStripeInfo(owner, customerId, null, null);
+  } else {
+    await stripeService.updateCustomer(customerId, {
+      sourceCardToken: stripeToken
+    })
   }
 
   const pricingPlan = await pricingPlansService.findPricingPlanByStripeId(planId);
