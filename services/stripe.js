@@ -82,6 +82,11 @@ async function findInvoice(invoiceId) {
   return invoice;
 }
 
+async function findPaymentIntent(paymentIntentId) {
+  let paymentIntent = await stripe.paymentIntents.retrieve(paymentIntentId);
+  return paymentIntent;
+}
+
 export default {
   getIPprotectionProduct,
   createCustomer,
@@ -95,5 +100,6 @@ export default {
   findCustomer,
   updateCustomerEmail,
   findPricingPlan,
-  findInvoice
+  findInvoice,
+  findPaymentIntent
 }

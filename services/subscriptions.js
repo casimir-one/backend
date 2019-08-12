@@ -10,12 +10,14 @@ async function findSubscriptionByOwner(owner) {
   }
 
   let subscription = await stripeService.findSubscription(user.stripeSubscriptionId);
-  let latestInvoice = null;
   if (subscription.latest_invoice) {
-    latestInvoice = await stripeService.findInvoice(subscription.latest_invoice);
+    subscription.latestInvoice = await stripeService.findInvoice(subscription.latest_invoice);
+    if (subscription.latestInvoice.payment_intent) {
+      subscription.latestInvoice.paymentIntent = stripeService.findPaymentIntent(subscription.latestInvoice.payment_intent);
+    }
   }
 
-  return { ...subscription, latestInvoice };
+  return subscription;
 }
 
 async function processStripeSubscription(owner, { stripeToken, customerEmail, planId }) {
