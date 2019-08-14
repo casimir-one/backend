@@ -9,6 +9,7 @@ const UserProfile = new Schema({
     "stripeCustomerId": { type: String, required: false, default: null },
     "stripeSubscriptionId": { type: String, required: false, default: null },
     "stripePricingPlanId": { type: String, required: false, default: null },
+    "appPricingPlanId": { type: String, required: false, default: "free" },
     "activeOrgPermlink": { type: String, required: false, default: null },
     "avatar": { type: String, default: "default_avatar.png" },
     "agencies": [{

@@ -27,8 +27,16 @@ const getUserSubscription = async function (ctx) {
       return;
     }
 
+    let pricingPlanId = "free";
     let subscription = await subscriptionsService.findSubscriptionByOwner(username);
-    let pricingPlan = await pricingPlansService.findPricingPlan(subscription ? subscription.plan.nickname : "free");
+    if (subscription) {
+      pricingPlanId = subscription.plan.nickname;
+    } else {
+      let user = await usersService.findUserById(jwtUsername);
+      pricingPlanId = user.appPricingPlanId || pricingPlanId;
+    }
+
+    let pricingPlan = await pricingPlansService.findPricingPlan(pricingPlanId);
     
     ctx.status = 200;
     ctx.body = { subscription, pricingPlan };

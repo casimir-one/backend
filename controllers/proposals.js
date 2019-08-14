@@ -3,6 +3,7 @@ import { sendProposalNotificationToGroup } from './../services/notifications';
 import subscriptionsService from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import filesService from './../services/fileRef';
+import usersService from './../services/users';
 
 import deipRpc from '@deip/deip-rpc-client';
 
@@ -89,22 +90,26 @@ const createContentProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
     const tx = ctx.request.body.tx;
     const operations = tx['operations'];
+    let isLimitedPlan = true;
 
     const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
     if (!subscription) {
-      ctx.status = 404;
-      ctx.body = `Subscription for ${jwtUsername} is not found`;
-      return;
+      let user = await usersService.findUserById(jwtUsername);
+      isLimitedPlan = user.appPricingPlanId !== "unlimited";
+      if (isLimitedPlan) {
+        ctx.status = 404;
+        ctx.body = `Subscription for ${jwtUsername} is not found`;
+        return;
+      }
     }
 
-    if (subscription.status != "active" && subscription.status != "past_due" && subscription.status != "trialing") {
+    if (isLimitedPlan && subscription.status != "active" && subscription.status != "past_due" && subscription.status != "trialing") {
       // subscription becomes past_due when the first attempt to renew it fails
       ctx.status = 402;
       ctx.body = `Subscription for ${jwtUsername} has expired`;
       return;
     }
 
-    const isLimitedPlan = subscription.plan.nickname != "unlimited"; // todo handle with metadata
     if (isLimitedPlan) {
       let limit = parseInt(subscription.metadata.availableCertificatesBySubscription);
       if (operations.length > limit) {
