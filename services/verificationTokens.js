@@ -20,8 +20,6 @@ async function createVerificationToken(creator, token) {
   let hex = CryptoJS.lib.WordArray.random(16).toString(CryptoJS.enc.Hex);
   const tkn = new VerificationToken({
     email: token.email,
-    firstName: token.firstName,
-    lastName: token.lastName,
     pricingPlan: token.pricingPlan,
     token: hex,
     expirationTime: token.expirationTime,

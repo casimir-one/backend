@@ -65,7 +65,7 @@ const signIn = async function (ctx) {
 }
 
 const createVerificationToken = async function (ctx) {
-  const { email, firstName, lastName } = ctx.request.body;
+  const { email, pricingPlan } = ctx.request.body;
 
   const expires = new Date();
   expires.setDate(expires.getDate() + 1); // 1 day expiration
@@ -82,7 +82,7 @@ const createVerificationToken = async function (ctx) {
     }
 
     const savedToken = await vtService.createVerificationToken('public', {
-      email, firstName, lastName,
+      email,
       expirationTime: expires,
       pricingPlan: 'free'
     });
