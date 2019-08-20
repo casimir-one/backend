@@ -4,6 +4,7 @@ import pricingPlansService from './../services/pricingPlans';
 import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import util from 'util';
+import bluebird from 'bluebird';
 
 // See https://stripe.com/docs/api/subscriptions/object#subscription_object-status
 const incomplete = "incomplete";
@@ -48,7 +49,6 @@ const getUserSubscription = async function (ctx) {
   }
 }
 
-
 const getRegularPricingPlans = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
 
@@ -64,7 +64,6 @@ const getRegularPricingPlans = async function (ctx) {
     ctx.body = err.message;
   }
 }
-
 
 const processStripePayment = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
@@ -123,6 +122,47 @@ const reactivateSubscription = async function (ctx) {
   }
 }
 
+const getBillingSettings = async function (ctx) {
+  const username = ctx.state.user.username;
+
+  try {
+    const user = await usersService.findUserById(username);
+
+    const customerInfo = await stripeService.findCustomer(user.stripeCustomerId);
+
+    ctx.status = 200;
+    ctx.body = {
+      defaultCard: {
+        brand: customerInfo.default_source.brand,
+        expMonth: customerInfo.default_source.exp_month,
+        expYear: customerInfo.default_source.exp_year,
+        last4: customerInfo.default_source.last4,
+      }
+    };
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+const updateBillingCard = async function (ctx) {
+  const username = ctx.state.user.username;
+
+  const sourceCardToken = ctx.request.body;
+  try {
+    const user = await usersService.findUserById(username);
+    await stripeService.updateCustomer(user.stripeCustomerId, {
+      sourceCardToken: sourceCardToken.id
+    });
+
+    ctx.status = 204;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
 
 // Stripe Webhooks
 
@@ -236,11 +276,11 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
   }
 }
 
-
-
 export default {
   getUserSubscription,
   getRegularPricingPlans,
+  getBillingSettings,
+  updateBillingCard,
   processStripePayment,
   cancelStripeSubscription,
   reactivateSubscription,

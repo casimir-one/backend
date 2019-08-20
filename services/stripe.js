@@ -22,10 +22,14 @@ async function createCustomer({
 }
 
 async function updateCustomer(customerId, { email, sourceCardToken }) {
-  return stripe.customers.update(customerId, {
-    email,
-    source: sourceCardToken
-  });
+  const updateData = {}
+  if (email) {
+    updateData.email = email;
+  }
+  if (sourceCardToken) {
+    updateData.source = sourceCardToken;
+  }
+  return stripe.customers.update(customerId, updateData);
 }
 
 async function createSubscription(customerId, {
@@ -69,7 +73,9 @@ function constructEventFromWebhook({ body, sig, endpointSecret }) {
 }
 
 async function findCustomer(customerId) {
-  let customer = await stripe.customers.retrieve(customerId);
+  let customer = await stripe.customers.retrieve(customerId, {
+    expand: ['default_source']
+  });
   return customer;
 }
 
