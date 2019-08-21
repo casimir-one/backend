@@ -1,6 +1,7 @@
 import config from './../config';
 import subscriptionsService from './../services/subscriptions';
 import pricingPlansService from './../services/pricingPlans';
+import certificatesPackagesService from './../services/certificatesPackages';
 import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import util from 'util';
@@ -14,6 +15,10 @@ const active = "active";
 const past_due = "past_due"
 const canceled = "canceled";
 const unpaid = "unpaid";
+
+const PAYMENT_INTENTS = {
+  ADDITIONAL_CERTIFICATES: 'additional_certificates',
+};
 
 
 const getUserSubscription = async function (ctx) {
@@ -164,6 +169,50 @@ const updateBillingCard = async function (ctx) {
   }
 };
 
+const buyCertificatesPackage = async function (ctx) {
+  const username = ctx.state.user.username;
+
+  const packageId = ctx.params.id;
+  try {
+    const [user, certificatesPackage] = await Promise.all([
+      usersService.findUserById(username),
+      certificatesPackagesService.findCertificatesPackageById(packageId)
+    ]);
+    const customerInfo = await stripeService.findCustomer(user.stripeCustomerId);
+    const intent = await stripeService.createPaymentIntent({
+      amount: certificatesPackage.price,
+      customerId: user.stripeCustomerId,
+      paymentMethod: customerInfo.default_source.id,
+      metadata: {
+        username,
+        numberOfCertificates: certificatesPackage.numberOfCertificates,
+        intentType: PAYMENT_INTENTS.ADDITIONAL_CERTIFICATES
+      },
+    })
+
+    ctx.status = 200;
+    ctx.body = {
+      clientSecret: intent.client_secret,
+    };
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+const getCertificatesPackages = async function (ctx) {
+  try {
+    ctx.status = 200;
+    ctx.body = await certificatesPackagesService.findCertificatesPackages();
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+
 // Stripe Webhooks
 
 
@@ -276,6 +325,39 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
   }
 }
 
+const customerPaymentIntentSucceededWebhook = async function (ctx) {
+  try {
+    const sig = ctx.request.headers['stripe-signature'];
+    const endpointSecret = config.stripe.customerPaymentIntentSucceededWebhookSigningKey;
+
+    let event;
+    try {
+      event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
+      const { intentType } = event.data.object.metadata;
+      switch (intentType) {
+        case PAYMENT_INTENTS.ADDITIONAL_CERTIFICATES:
+          const { username, numberOfCertificates } = event.data.object.metadata;
+          const subscription = await subscriptionsService.findSubscriptionByOwner(username);
+          const current = parseInt(subscription.metadata.availableAdditionalCertificates) || 0;
+          const toAdd = parseInt(numberOfCertificates) || 0;
+          await subscriptionsService.setAvailableAdditionalCertificatesCounter(subscription.id, current + toAdd);
+          break;
+      }
+    } catch (err) {
+      console.log(err);
+      ctx.status = 400;
+      ctx.body = `Webhook Error: ${err.message}`;
+      return;
+    }
+
+    ctx.status = 200;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
 export default {
   getUserSubscription,
   getRegularPricingPlans,
@@ -284,7 +366,10 @@ export default {
   processStripePayment,
   cancelStripeSubscription,
   reactivateSubscription,
+  getCertificatesPackages,
+  buyCertificatesPackage,
 
   customerSubscriptionCreatedWebhook,
-  customerSubscriptionUpdatedWebhook
+  customerSubscriptionUpdatedWebhook,
+  customerPaymentIntentSucceededWebhook
 }

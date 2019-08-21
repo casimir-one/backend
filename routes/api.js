@@ -44,5 +44,7 @@ router.put('/pricing/billing-settings/card', pricing.updateBillingCard)
 router.post('/pricing/subscription', pricing.processStripePayment)
 router.put('/pricing/cancel/subscription', pricing.cancelStripeSubscription)
 router.put('/pricing/reactivate/subscription', pricing.reactivateSubscription)
+router.get('/pricing/certificates-packages', pricing.getCertificatesPackages)
+router.post('/pricing/certificates-packages/:id/buy', pricing.buyCertificatesPackage)
 
 export default router
