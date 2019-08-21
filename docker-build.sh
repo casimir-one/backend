@@ -20,3 +20,5 @@ docker build -t=${IMAGE_NAME} .
 docker tag ${IMAGE_NAME} ${LATEST_IMAGE_NAME}
 docker push ${IMAGE_NAME}
 docker push ${LATEST_IMAGE_NAME}
+docker rmi ${IMAGE_NAME}
+docker rmi ${LATEST_IMAGE_NAME}
