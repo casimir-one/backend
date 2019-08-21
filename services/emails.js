@@ -39,7 +39,7 @@ class EmailsService {
   }
 
   async sendRegistrationUrl(to, token) {
-    const confirmationUrl = `${config.uiHost}/#/sign-up?token=${token}`;
+    const confirmationUrl = `${config.uiHost}/sign-up?token=${token}`;
     const htmlToSend = await renderService.registrationEmail(confirmationUrl);
     console.log(confirmationUrl);
     await this.sendMessage({

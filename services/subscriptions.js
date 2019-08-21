@@ -56,6 +56,11 @@ async function setAvailableCertificatesCounter(id, value) {
   return updatedSubscription;
 }
 
+async function setAvailableAdditionalCertificatesCounter(id, value) {
+  let updatedSubscription = await stripeService.updateSubscription(id, { metadata: { availableAdditionalCertificates: value } });
+  return updatedSubscription;
+}
+
 async function cancelSubscription(owner) {
   let user = await usersService.findUserById(owner);
   let updatedSubscription = await stripeService.cancelSubscriptionAtEndOfCurrentBillingPeriod(user.stripeSubscriptionId);
@@ -72,6 +77,7 @@ export default {
   findSubscriptionByOwner,
   processStripeSubscription,
   setAvailableCertificatesCounter,
+  setAvailableAdditionalCertificatesCounter,
   cancelSubscription,
   reactivateSubscription
 }

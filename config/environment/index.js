@@ -42,7 +42,8 @@ config = _.merge(config, {
       publicKey: process.env.STRIPE_PUBLIC_KEY,
       secretKey: process.env.STRIPE_SECRET_KEY,
       customerSubscriptionCreatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_CREATED_WEBHOOK_SIGNING_KEY,
-      customerSubscriptionUpdatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED_WEBHOOK_SIGNING_KEY
+      customerSubscriptionUpdatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED_WEBHOOK_SIGNING_KEY,
+      customerPaymentIntentSucceededWebhookSigningKey: process.env.STRIPE_CUSTOMER_PAYMENT_INTENT_SUCCEEDED_WEBHOOK_SIGNING_KEY
     }
   });
 

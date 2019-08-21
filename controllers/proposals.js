@@ -111,7 +111,9 @@ const createContentProposal = async (ctx) => {
     }
 
     if (isLimitedPlan) {
-      let limit = parseInt(subscription.metadata.availableCertificatesBySubscription);
+      const availableCertificatesBySubscription = parseInt(subscription.metadata.availableCertificatesBySubscription) || 0;
+      const availableAdditionalCertificates = parseInt(subscription.metadata.availableAdditionalCertificates) || 0;
+      const limit = availableCertificatesBySubscription + availableAdditionalCertificates;
       if (operations.length > limit) {
         ctx.status = 402;
         ctx.body = `Subscription ${subscription.id} for ${jwtUsername} is under "${subscription.plan.nickname}" plan and has reached the limit.`;
@@ -156,8 +158,22 @@ const createContentProposal = async (ctx) => {
     if (result.isSuccess) {
       const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
       if (isLimitedPlan) {
-        let current = parseInt(subscription.metadata.availableCertificatesBySubscription);
-        await subscriptionsService.setAvailableCertificatesCounter(subscription.id, current - files.length);
+        const currentBySubscription = parseInt(subscription.metadata.availableCertificatesBySubscription);
+        const currentAdditional = parseInt(subscription.metadata.availableAdditionalCertificates);
+
+        const subtractFromSubscription = Math.min(files.length, currentBySubscription);
+        let subtractFromAdditional = 0;
+        if (subtractFromSubscription < files.length) {
+          subtractFromAdditional = files.length - subtractFromSubscription;
+        }
+        const updatePromises = [];
+        if (subtractFromSubscription) {
+          updatePromises.push(subscriptionsService.setAvailableCertificatesCounter(subscription.id, currentBySubscription - subtractFromSubscription));
+        }
+        if (subtractFromAdditional) {
+          updatePromises.push(subscriptionsService.setAvailableAdditionalCertificatesCounter(subscription.id, currentAdditional - subtractFromAdditional));
+        }
+        await Promise.all(updatePromises);
       }
 
       ctx.status = 200;

@@ -137,8 +137,6 @@ const signUp = async function (ctx) {
       }
 
       email = verificationToken.email;
-      firstName = verificationToken.firstName;
-      lastName = verificationToken.lastName;
     }
 
     const accounts = await deipRpc.api.getAccountsAsync([username])
