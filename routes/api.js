@@ -50,6 +50,7 @@ router.post('/pricing/certificates-packages/:id/buy', pricing.buyCertificatesPac
 
 router.get('/templates/refs/:refId', templates.getDocumentTemplateRef)
 router.get('/templates/refs/organization/:organizationId', templates.getDocumentTemplatesRefsByOrganization)
+router.get('/templates/refs/file/:refId', templates.getDocumentTemplateFile)
 router.post('/templates', templates.uploadTemplate)
 router.delete('/templates/refs/:refId', templates.removeTemplate)
 

@@ -2,11 +2,11 @@ import multer from 'koa-multer';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import sharp from 'sharp';
 import * as authService from './../services/auth';
 import templatesService from './../services/templateRef';
 import fsExtra from "fs-extra";
 import uuidv4 from "uuid/v4";
+import send from 'koa-send';
 
 const MAX_FILENAME_LENGTH = 200;
 
@@ -14,22 +14,22 @@ const getDocumentTemplateRef = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const refId = ctx.params.refId;
 
-  const template = await templatesService.findTemplateRefById(refId);
-  if (!template) {
+  const templateRef = await templatesService.findTemplateRefById(refId);
+  if (!templateRef) {
     ctx.status = 404;
     ctx.body = `Template ${refId} is not found`;
     return;
   }
 
-  const authorized = await authService.authorizeResearchGroup(template.organizationId, jwtUsername);
+  const authorized = await authService.authorizeResearchGroup(templateRef.organizationId, jwtUsername);
   if (!authorized) {
     ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not a member of "${template.organizationId}" group`;
+    ctx.body = `"${jwtUsername}" is not a member of "${templateRef.organizationId}" group`;
     return;
   }
 
   ctx.status = 200;
-  ctx.body = template;
+  ctx.body = templateRef;
 }
 
 const getDocumentTemplatesRefsByOrganization = async (ctx) => {
@@ -43,10 +43,10 @@ const getDocumentTemplatesRefsByOrganization = async (ctx) => {
     return;
   }
 
-  const templates = await templatesService.findTemplateRefByOrganizationId(organizationId);
+  const templatesRefs = await templatesService.findTemplateRefByOrganizationId(organizationId);
 
   ctx.status = 200;
-  ctx.body = templates;
+  ctx.body = templatesRefs;
 }
 
 const filesStoragePath = path.join(__dirname, './../files');
@@ -175,9 +175,37 @@ const removeTemplate = async (ctx) => {
   }
 }
 
+const getDocumentTemplateFile = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+  const refId = ctx.params.refId;
+  const isDownload = ctx.query.download;
+
+  const templateRef = await templatesService.findTemplateRefById(refId);
+  if (!templateRef) {
+    ctx.status = 404;
+    ctx.body = `Template ${refId} is not found`;
+    return;
+  }
+
+  const authorized = await authService.authorizeResearchGroup(templateRef.organizationId, jwtUsername);
+  if (!authorized) {
+    ctx.status = 401;
+    ctx.body = `"${jwtUsername}" is not a member of "${templateRef.organizationId}" group`;
+    return;
+  }
+
+  if (isDownload) {
+    ctx.response.set('Content-disposition', 'attachment; filename="' + templateRef.originalname + '"');
+    ctx.body = fs.createReadStream(templateRef.filepath);
+  } else {
+    await send(ctx, templateRef.filepath);
+  }
+}
+
 export default {
   getDocumentTemplateRef,
   getDocumentTemplatesRefsByOrganization,
   uploadTemplate,
-  removeTemplate
+  removeTemplate,
+  getDocumentTemplateFile
 }
