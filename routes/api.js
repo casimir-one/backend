@@ -6,6 +6,7 @@ import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import files from '../controllers/files'
 import pricing from '../controllers/pricing'
+import templates from '../controllers/templates'
 
 const router = koa_router()
 
@@ -46,5 +47,10 @@ router.put('/pricing/cancel/subscription', pricing.cancelStripeSubscription)
 router.put('/pricing/reactivate/subscription', pricing.reactivateSubscription)
 router.get('/pricing/certificates-packages', pricing.getCertificatesPackages)
 router.post('/pricing/certificates-packages/:id/buy', pricing.buyCertificatesPackage)
+
+router.get('/templates/refs/:refId', templates.getDocumentTemplateRef)
+router.get('/templates/refs/organization/:organizationId', templates.getDocumentTemplatesRefsByOrganization)
+router.post('/templates', templates.uploadTemplate)
+router.delete('/templates/refs/:refId', templates.removeTemplate)
 
 export default router
