@@ -10,6 +10,7 @@ const TemplateRef = new Schema({
   "filename": { type: String, required: true },
   "filetype": { type: String, required: true },
   "filepath": { type: String, required: true },
+  "previewFilepath": { type: String, required: true },
   "size": { type: Number, required: true },
   "uploader": { type: String, required: true }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

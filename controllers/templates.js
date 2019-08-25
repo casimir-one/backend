@@ -7,6 +7,7 @@ import templatesService from './../services/templateRef';
 import fsExtra from "fs-extra";
 import uuidv4 from "uuid/v4";
 import send from 'koa-send';
+import libre from 'libreoffice-convert';
 
 const MAX_FILENAME_LENGTH = 200;
 
@@ -117,13 +118,23 @@ const uploadTemplate = async (ctx) => {
       });
     }));
 
+    const filepath = path.relative(process.cwd(), result.path);
+    let previewFilepath = filepath;
+
+    if (result.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
+        result.mimetype == 'application/msword') {
+
+      previewFilepath = await docxToPdf(filepath);;
+    }
+
     const templateRef = await templatesService.createTemplateRef({
       title: templateTitle,
       organizationId: organizationId,
       originalname: result.filename.substring(result.filename.indexOf('_') + 1, result.filename.length),
       filename: result.filename,
       filetype: result.mimetype,
-      filepath: path.relative(process.cwd(), result.path),
+      filepath: filepath,
+      previewFilepath: previewFilepath,
       size: result.size,
       uploader: jwtUsername
     });
@@ -163,6 +174,9 @@ const removeTemplate = async (ctx) => {
       const unlinkAsync = util.promisify(fs.unlink);
       // consider to not remove the template if there is existing NDA
       await unlinkAsync(templateRef.filepath);
+      if (templateRef.filepath != templateRef.previewFilepath) {
+        await unlinkAsync(templateRef.previewFilepath);
+      }
     } catch (err) { console.log(err); }
 
     ctx.status = 201;
@@ -198,8 +212,26 @@ const getDocumentTemplateFile = async function (ctx) {
     ctx.response.set('Content-disposition', 'attachment; filename="' + templateRef.originalname + '"');
     ctx.body = fs.createReadStream(templateRef.filepath);
   } else {
-    await send(ctx, templateRef.filepath);
+    await send(ctx, templateRef.previewFilepath);
   }
+}
+
+async function docxToPdf(filepath) {
+  return new Promise(async function(resolve, reject) {
+    const readFile = util.promisify(fs.readFile);
+    const writeFile = util.promisify(fs.writeFile);
+    const outputPath = `${filepath}.pdf`;
+    const input = await readFile(filepath);
+
+    // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
+    libre.convert(input, '.pdf', undefined, async function (err, buf) {
+      if (err) {
+        reject(err);
+      }
+      await writeFile(outputPath, buf);
+      resolve(outputPath);
+    });
+  });
 }
 
 export default {

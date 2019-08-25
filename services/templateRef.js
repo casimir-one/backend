@@ -18,6 +18,7 @@ async function createTemplateRef({
   filename,
   filetype,
   filepath,
+  previewFilepath,
   size,
   uploader
 }) {
@@ -29,6 +30,7 @@ async function createTemplateRef({
     filename: filename,
     filetype: filetype,
     filepath: filepath,
+    previewFilepath: previewFilepath,
     size: size,
     uploader: uploader
   });
