@@ -20,6 +20,7 @@ async function createTemplateRef({
   filepath,
   previewFilepath,
   size,
+  hash,
   uploader
 }) {
 
@@ -32,6 +33,7 @@ async function createTemplateRef({
     filepath: filepath,
     previewFilepath: previewFilepath,
     size: size,
+    hash: hash,
     uploader: uploader
   });
   const savedRef = await templateRef.save();

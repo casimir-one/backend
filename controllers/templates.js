@@ -4,10 +4,10 @@ import util from 'util';
 import path from 'path';
 import * as authService from './../services/auth';
 import templatesService from './../services/templateRef';
+import filesUtil from './../utils/files';
 import fsExtra from "fs-extra";
 import uuidv4 from "uuid/v4";
 import send from 'koa-send';
-import libre from 'libreoffice-convert';
 
 const MAX_FILENAME_LENGTH = 200;
 
@@ -124,8 +124,9 @@ const uploadTemplate = async (ctx) => {
     if (result.mimetype == 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' ||
         result.mimetype == 'application/msword') {
 
-      previewFilepath = await docxToPdf(filepath);;
+      previewFilepath = await filesUtil.docxToPdf(filepath);;
     }
+    const hash = await filesUtil.sha256(filepath);
 
     const templateRef = await templatesService.createTemplateRef({
       title: templateTitle,
@@ -136,6 +137,7 @@ const uploadTemplate = async (ctx) => {
       filepath: filepath,
       previewFilepath: previewFilepath,
       size: result.size,
+      hash: hash,
       uploader: jwtUsername
     });
 
@@ -216,23 +218,7 @@ const getDocumentTemplateFile = async function (ctx) {
   }
 }
 
-async function docxToPdf(filepath) {
-  return new Promise(async function(resolve, reject) {
-    const readFile = util.promisify(fs.readFile);
-    const writeFile = util.promisify(fs.writeFile);
-    const outputPath = `${filepath}.pdf`;
-    const input = await readFile(filepath);
 
-    // Convert it to pdf format with undefined filter (see Libreoffice doc about filter)
-    libre.convert(input, '.pdf', undefined, async function (err, buf) {
-      if (err) {
-        reject(err);
-      }
-      await writeFile(outputPath, buf);
-      resolve(outputPath);
-    });
-  });
-}
 
 export default {
   getDocumentTemplateRef,
