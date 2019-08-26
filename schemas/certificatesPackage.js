@@ -4,7 +4,6 @@ const Schema = mongoose.Schema;
 
 const CertificatesPackages = new Schema({
   "_id": { type: String },
-  "name": { type: String, required: true, trim: true },
   "price": { type: Number, required: true },
   "numberOfCertificates": { type: Number, required: true },
   
