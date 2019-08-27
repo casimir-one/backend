@@ -15,39 +15,54 @@ const getDocumentTemplateRef = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const refId = ctx.params.refId;
 
-  const templateRef = await templatesService.findTemplateRefById(refId);
-  if (!templateRef) {
-    ctx.status = 404;
-    ctx.body = `Template ${refId} is not found`;
-    return;
-  }
+  try {
 
-  const authorized = await authService.authorizeResearchGroup(templateRef.organizationId, jwtUsername);
-  if (!authorized) {
-    ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not a member of "${templateRef.organizationId}" group`;
-    return;
-  }
+    const templateRef = await templatesService.findTemplateRefById(refId);
+    if (!templateRef) {
+      ctx.status = 404;
+      ctx.body = `Template ${refId} is not found`;
+      return;
+    }
 
-  ctx.status = 200;
-  ctx.body = templateRef;
+    const authorized = await authService.authorizeResearchGroup(templateRef.organizationId, jwtUsername);
+    if (!authorized) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${templateRef.organizationId}" group`;
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = templateRef;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500
+    ctx.body = `Internal server error, please try again later`;
+  }
 }
 
 const getDocumentTemplatesRefsByOrganization = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const organizationId = ctx.params.organizationId;
 
-  const authorized = await authService.authorizeResearchGroup(organizationId, jwtUsername);
-  if (!authorized) {
-    ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not a member of "${organizationId}" group`
-    return;
+  try {
+    
+    const authorized = await authService.authorizeResearchGroup(organizationId, jwtUsername);
+    if (!authorized) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${organizationId}" group`
+      return;
+    }
+
+    const templatesRefs = await templatesService.findTemplateRefByOrganizationId(organizationId);
+    ctx.status = 200;
+    ctx.body = templatesRefs;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500
+    ctx.body = `Internal server error, please try again later`;
   }
-
-  const templatesRefs = await templatesService.findTemplateRefByOrganizationId(organizationId);
-
-  ctx.status = 200;
-  ctx.body = templatesRefs;
 }
 
 const filesStoragePath = path.join(__dirname, './../files');
@@ -170,11 +185,16 @@ const removeTemplate = async (ctx) => {
       ctx.body = `"${jwtUsername}" is not a member of "${templateRef.organizationId}" group`;
       return;
     }
+
+    if (templateRef.contracts.length) {
+      ctx.status = 400;
+      ctx.body = `Template ${refId} is linked to existing contract and cannot be removed`;
+      return;
+    }
     
     await templatesService.removeTemplateRef(refId);
     try {
       const unlinkAsync = util.promisify(fs.unlink);
-      // consider to not remove the template if there is existing NDA
       await unlinkAsync(templateRef.filepath);
       if (templateRef.filepath != templateRef.previewFilepath) {
         await unlinkAsync(templateRef.previewFilepath);

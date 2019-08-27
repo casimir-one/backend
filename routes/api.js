@@ -7,6 +7,7 @@ import invites from '../controllers/invites'
 import files from '../controllers/files'
 import pricing from '../controllers/pricing'
 import templates from '../controllers/templates'
+import contracts from '../controllers/contracts'
 
 const router = koa_router()
 
@@ -53,5 +54,9 @@ router.get('/templates/refs/organization/:organizationId', templates.getDocument
 router.get('/templates/refs/file/:refId', templates.getDocumentTemplateFile)
 router.post('/templates', templates.uploadTemplate)
 router.delete('/templates/refs/:refId', templates.removeTemplate)
+
+router.get('/contracts/refs/:refId', contracts.getContractRef)
+router.get('/contracts/refs/party/:usernameOrEmail', contracts.getContractsRefsByUsernameOrEmail)
+router.post('/contracts', contracts.createContract)
 
 export default router

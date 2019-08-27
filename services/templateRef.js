@@ -11,6 +11,13 @@ async function findTemplateRefByOrganizationId(organizationId) {
   return templateRefs;
 }
 
+async function linkContractRefToTemplateRef(templateRefId, contractRefId) {
+  const templateRef = await findTemplateRefById(templateRefId);
+  templateRef.contracts.push({ _id: contractRefId});
+  const updatedRef = await templateRef.save();
+  return updatedRef;
+}
+
 async function createTemplateRef({
   title,
   organizationId,
@@ -48,6 +55,7 @@ async function removeTemplateRef(_id) {
 export default {
   findTemplateRefById,
   findTemplateRefByOrganizationId,
+  linkContractRefToTemplateRef,
   createTemplateRef,
   removeTemplateRef
 }

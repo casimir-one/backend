@@ -13,7 +13,10 @@ const TemplateRef = new Schema({
   "previewFilepath": { type: String, required: true },
   "hash": { type: String, required: true },
   "size": { type: Number, required: true },
-  "uploader": { type: String, required: true }
+  "uploader": { type: String, required: true },
+  "contracts": [{
+    _id: { type: mongoose.Schema.Types.ObjectId, required: true }
+  }]
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('templates-references', TemplateRef);
