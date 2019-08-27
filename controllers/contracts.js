@@ -43,13 +43,35 @@ const getContractRef = async (ctx) => {
   }
 }
 
-const getContractsRefsByUsernameOrEmail = async (ctx) => {
+const getContractsRefsByParty = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const value = ctx.params.usernameOrEmail;
 
   try {
 
-    const contractsRefs = await contractsService.findContractRefsByUsernameOrEmail(value);
+    const contractsRefs = await contractsService.findContractRefsByParty(value);
+    if (contractsRefs.some(contractRef => contractRef.sender.username != jwtUsername && contractRef.receiver.username != jwtUsername)) {
+      ctx.status = 401;
+      ctx.body = `You have no permissions to view ${value}'s contracts`;
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = contractsRefs;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500
+    ctx.body = `Internal server error, please try again later`;
+  }
+}
+
+const getContractsRefsBySender = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const value = ctx.params.usernameOrEmail;
+
+  try {
+
+    const contractsRefs = await contractsService.findContractRefsBySender(value);
     if (contractsRefs.some(contractRef => contractRef.sender.username != jwtUsername && contractRef.receiver.username != jwtUsername)) {
       ctx.status = 401;
       ctx.body = `You have no permissions to view ${value}'s contracts`;
@@ -74,9 +96,14 @@ const createContract = async (ctx) => {
       templateRefId,
       senderEmail,
       receiverEmail,
-      files,
       expirationDate
     } = ctx.request.body.contract;
+
+    if (!senderEmail || !receiverEmail || senderEmail == receiverEmail) {
+      ctx.status = 400;
+      ctx.body = `Sender and receiver emails are required and must be not be equal`;
+      return;
+    }
 
     const templateRef = await templatesService.findTemplateRefById(templateRefId);
     if (!templateRef) {
@@ -98,66 +125,81 @@ const createContract = async (ctx) => {
       return;
     }
 
-    const receiver = await usersService.findUserByEmail(receiverEmail);
-    if (!receiver) {
-      ctx.status = 400;
-      ctx.body = `User ${receiverEmail} is not found`;
-      return;
-    }
-
-    const [senderAccount, receiverAccount] = await deipRpc.api.getAccountsAsync([sender._id, receiver._id]);
-    if (!senderAccount || !receiverAccount) {
-      ctx.status = 400;
-      ctx.body = `User account is not found`;
-      return;
-    }
-
-    const filesRefs = await Promise.all(files.map(fileRefId => filesService.findFileRefById(fileRefId)));
-    if (filesRefs.some(fileRef => !fileRef)) {
-      ctx.status = 400;
-      ctx.body = `File ${filesRefs.find(fileRef => !fileRef)} is not found`;
-      return;
-    }
-
-    const authorizations = await Promise.all(filesRefs.map(fileRef => authService.authorizeResearchGroup(fileRef.organizationId, senderAccount.name)));
-    if (authorizations.some(auth => !auth)) {
-      ctx.status = 401;
-      ctx.body = `"${senderAccount.name}" is not a member of organization which a file belongs to`;
-      return;
-    }
-
     if (!expirationDate || moment.utc(expirationDate).toDate().getTime() <= moment.utc().toDate().getTime()) {
       ctx.status = 400;
       ctx.body = `Expiration date ${expirationDate} is invalid`;
       return;
     }
 
-    const senderPubKey = senderAccount.owner.key_auths[0][0];
-    const receiverPubKey = receiverAccount.owner.key_auths[0][0];
-    const hash = CryptoJS.SHA256(`${senderPubKey},${receiverPubKey},${templateRef.hash}`);
+    const receiver = await usersService.findUserByEmail(receiverEmail);
+    if (receiver) {
+      const [senderAccount, receiverAccount] = await deipRpc.api.getAccountsAsync([sender._id, receiver._id]);
+      if (!senderAccount || !receiverAccount) {
+        ctx.status = 400;
+        ctx.body = `User account is not found`;
+        return;
+      }
 
-    let contractRef = await contractsService.createContractRef({
-      templateRef: templateRef._id,
-      sender: {
-        email: senderEmail,
-        pubKey: senderPubKey,
-        username: senderAccount.name
-      },
-      receiver: {
-        email: receiverEmail,
-        pubKey: receiverPubKey,
-        username: receiverAccount.name
-      },
-      status: 'pending-receiver-signature',
-      hash: hash.toString(CryptoJS.enc.Hex),
-      files: filesRefs.map(fileRef => { return { _id: fileRef._id }}),
-      expirationDate: moment.utc(expirationDate).toDate()
-    });
+      const senderPubKey = senderAccount.owner.key_auths[0][0];
+      const receiverPubKey = receiverAccount.owner.key_auths[0][0];
+      const hash = CryptoJS.SHA256(`${senderPubKey},${receiverPubKey},${templateRef.hash}`).toString(CryptoJS.enc.Hex);
 
-    await templatesService.linkContractRefToTemplateRef(templateRef._id, contractRef._id);
+      // todo: send create_contract_operation to the chain
+
+      const contractRef = await contractsService.createContractRef({
+        templateRef: templateRef._id,
+        sender: {
+          email: senderEmail,
+          pubKey: senderPubKey,
+          username: senderAccount.name
+        },
+        receiver: {
+          email: receiverEmail,
+          pubKey: receiverPubKey,
+          username: receiverAccount.name
+        },
+        status: 'pending-receiver-signature',
+        hash: hash,
+        expirationDate: moment.utc(expirationDate).toDate()
+      });
+
+      await templatesService.linkContractRefToTemplateRef(templateRef._id, contractRef._id);
+
+      ctx.status = 200;
+      ctx.body = contractRef;
     
-    ctx.status = 200;
-    ctx.body = contractRef;
+    } else {
+
+      const [senderAccount] = await deipRpc.api.getAccountsAsync([sender._id]);
+      if (!senderAccount) {
+        ctx.status = 400;
+        ctx.body = `Sender account is not found`;
+        return;
+      }
+
+      const senderPubKey = senderAccount.owner.key_auths[0][0];
+      const contractRef = await contractsService.createContractRef({
+        templateRef: templateRef._id,
+        sender: {
+          email: senderEmail,
+          pubKey: senderPubKey,
+          username: senderAccount.name
+        },
+        receiver: {
+          email: receiverEmail,
+          pubKey: null,
+          username: null
+        },
+        status: 'pending-sender-signature',
+        hash: null,
+        expirationDate: moment.utc(expirationDate).toDate()
+      });
+
+      await templatesService.linkContractRefToTemplateRef(templateRef._id, contractRef._id);
+
+      ctx.status = 200;
+      ctx.body = contractRef;
+    }
 
   } catch (err) {
     console.log(err);
@@ -169,6 +211,7 @@ const createContract = async (ctx) => {
 
 export default {
   getContractRef,
-  getContractsRefsByUsernameOrEmail,
+  getContractsRefsByParty,
+  getContractsRefsBySender,
   createContract
 }

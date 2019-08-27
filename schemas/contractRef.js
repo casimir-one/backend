@@ -16,9 +16,6 @@ const ContractRef = new Schema({
     "pubKey": { type: String, required: false, default: null },
   },
   "hash": { type: String, required: false, default: null },
-  "files": [{
-    "_id": { type: mongoose.Schema.Types.ObjectId, required: true }
-  }],
   "expirationDate": { type: Date, required: true },
   "status": {
     type: String,

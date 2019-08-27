@@ -6,12 +6,28 @@ async function findContractRefById(_id) {
   return contractRef;
 }
 
-async function findContractRefsByUsernameOrEmail(value) {
-  const contractsRefs = await ContractRef.find({ $or: [
-    { 'sender.email': value }, { 'sender.username': value }, 
-    { 'receiver.email': value }, { 'receiver.username': value }
-  ]
-});
+async function findContractRefsByParty(value) {
+  const contractsRefs = await ContractRef.find({
+    $or: [
+      { 'sender.email': value }, { 'sender.username': value },
+      { 'receiver.email': value }, { 'receiver.username': value }]
+  });
+  return contractsRefs;
+}
+
+async function findContractRefsBySender(value) {
+  const contractsRefs = await ContractRef.find({
+    $or: [
+      { 'sender.email': value }, { 'sender.username': value }]
+  });
+  return contractsRefs;
+}
+
+async function findContractRefsByReceiver(value) {
+  const contractsRefs = await ContractRef.find({
+    $or: [
+      { 'receiver.email': value }, { 'receiver.username': value }]
+  });
   return contractsRefs;
 }
 
@@ -29,7 +45,6 @@ async function createContractRef({
   },
   status,
   hash,
-  files,
   expirationDate
 }) {
 
@@ -47,7 +62,6 @@ async function createContractRef({
     },
     status: status,
     hash: hash,
-    files: files,
     expirationDate: expirationDate
   });
   const savedRef = await contractRef.save();
@@ -57,6 +71,8 @@ async function createContractRef({
 
 export default {
   findContractRefById,
-  findContractRefsByUsernameOrEmail,
+  findContractRefsByParty,
+  findContractRefsBySender,
+  findContractRefsByReceiver,
   createContractRef
 }
