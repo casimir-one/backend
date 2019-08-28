@@ -66,7 +66,7 @@ const createUserProfile = async (ctx) => {
 }
 
 const ALLOWED_TO_UPDATE = [
-  'email', 'activeOrgPermlink', 'avatar', 'firstName', 'lastName',
+  'activeOrgPermlink', 'avatar', 'firstName', 'lastName',
   'bio', 'birthday', 'location'
 ];
 const updateUserProfile = async (ctx) => {
