@@ -143,11 +143,11 @@ const createContract = async (ctx) => {
       const senderPubKey = senderAccount.owner.key_auths[0][0];
       const receiverPubKey = receiverAccount.owner.key_auths[0][0];
       const hash = CryptoJS.SHA256(`${senderPubKey},${receiverPubKey},${templateRef.hash}`).toString(CryptoJS.enc.Hex);
-
+      
       // todo: send create_contract_operation to the chain
-
+      const { filepath, previewFilepath } = await moveTemplateToContract(templateRef, senderAccount.name);
       const contractRef = await contractsService.createContractRef({
-        templateRef: templateRef._id,
+        templateRef: Object.assign({}, JSON.parse(JSON.stringify(templateRef)), { filepath, previewFilepath }),
         sender: {
           email: senderEmail,
           pubKey: senderPubKey,
@@ -163,8 +163,6 @@ const createContract = async (ctx) => {
         expirationDate: moment.utc(expirationDate).toDate()
       });
 
-      await templatesService.linkContractRefToTemplateRef(templateRef._id, contractRef._id);
-
       ctx.status = 200;
       ctx.body = contractRef;
     
@@ -178,8 +176,9 @@ const createContract = async (ctx) => {
       }
 
       const senderPubKey = senderAccount.owner.key_auths[0][0];
+      const { filepath, previewFilepath } = await moveTemplateToContract(templateRef, senderAccount.name);
       const contractRef = await contractsService.createContractRef({
-        templateRef: templateRef._id,
+        templateRef: Object.assign({}, JSON.parse(JSON.stringify(templateRef)), { filepath, previewFilepath }),
         sender: {
           email: senderEmail,
           pubKey: senderPubKey,
@@ -195,8 +194,6 @@ const createContract = async (ctx) => {
         expirationDate: moment.utc(expirationDate).toDate()
       });
 
-      await templatesService.linkContractRefToTemplateRef(templateRef._id, contractRef._id);
-
       ctx.status = 200;
       ctx.body = contractRef;
     }
@@ -208,6 +205,22 @@ const createContract = async (ctx) => {
   }
 }
 
+async function moveTemplateToContract(templateRef, sender) {
+  const copyFileAsync = util.promisify(fs.copyFile);
+  const ensureDir = util.promisify(fsExtra.ensureDir);
+  const dest = `files/contracts/${sender}`;
+  await ensureDir(dest);
+
+  const filepath = `${dest}/${uuidv4()}_${templateRef.originalname}`;
+  await copyFileAsync(templateRef.filepath, filepath);
+  let previewFilepath = filepath;
+  if (templateRef.filepath != templateRef.previewFilepath) {
+    let previewFilepath = `${filepath}.pdf`;
+    await copyFileAsync(templateRef.previewFilepath, previewFilepath);
+  }
+
+  return { filepath, previewFilepath };
+}
 
 export default {
   getContractRef,
