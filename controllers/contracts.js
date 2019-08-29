@@ -34,7 +34,7 @@ const getContractRef = async (ctx) => {
     }
 
     ctx.status = 200;
-    ctx.body = templateRef;
+    ctx.body = contractRef;
 
   } catch (err) {
     console.log(err);
@@ -205,6 +205,33 @@ const createContract = async (ctx) => {
   }
 }
 
+const getContractFile = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const refId = ctx.params.refId;
+  const isDownload = ctx.query.download;
+
+  const contractRef = await contractsService.findContractRefById(refId);
+  if (!contractRef) {
+    ctx.status = 404;
+    ctx.body = `Template ${refId} is not found`;
+    return;
+  }
+
+  if (contractRef.sender.username != jwtUsername && contractRef.receiver.username != jwtUsername) {
+    ctx.status = 401;
+    ctx.body = `You have no permissions to view ${refId}' contract`;
+    return;
+  }
+
+  if (isDownload) {
+    ctx.response.set('Content-disposition', 'attachment; filename="' + contractRef.templateRef.originalname + '"');
+    ctx.body = fs.createReadStream(contractRef.templateRef.filepath);
+  } else {
+    await send(ctx, contractRef.templateRef.previewFilepath);
+  }
+}
+
+
 async function moveTemplateToContract(templateRef, sender) {
   const copyFileAsync = util.promisify(fs.copyFile);
   const ensureDir = util.promisify(fsExtra.ensureDir);
@@ -215,7 +242,7 @@ async function moveTemplateToContract(templateRef, sender) {
   await copyFileAsync(templateRef.filepath, filepath);
   let previewFilepath = filepath;
   if (templateRef.filepath != templateRef.previewFilepath) {
-    let previewFilepath = `${filepath}.pdf`;
+    previewFilepath = `${filepath}.pdf`;
     await copyFileAsync(templateRef.previewFilepath, previewFilepath);
   }
 
@@ -226,5 +253,6 @@ export default {
   getContractRef,
   getContractsRefsByParty,
   getContractsRefsBySender,
-  createContract
+  createContract,
+  getContractFile
 }

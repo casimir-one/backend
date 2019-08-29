@@ -185,12 +185,6 @@ const removeTemplate = async (ctx) => {
       ctx.body = `"${jwtUsername}" is not a member of "${templateRef.organizationId}" group`;
       return;
     }
-
-    if (templateRef.contracts.length) {
-      ctx.status = 400;
-      ctx.body = `Template ${refId} is linked to existing contract and cannot be removed`;
-      return;
-    }
     
     await templatesService.removeTemplateRef(refId);
     try {

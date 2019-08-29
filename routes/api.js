@@ -55,9 +55,10 @@ router.get('/templates/refs/file/:refId', templates.getDocumentTemplateFile)
 router.post('/templates', templates.uploadTemplate)
 router.delete('/templates/refs/:refId', templates.removeTemplate)
 
-router.get('/contracts/refs/:refId', contracts.getContractRef)
-router.get('/contracts/refs/party/:usernameOrEmail', contracts.getContractsRefsByParty)
-router.get('/contracts/refs/sender/:usernameOrEmail', contracts.getContractsRefsBySender)
-router.post('/contracts', contracts.createContract)
+router.get('/contracts/nda/refs/:refId', contracts.getContractRef)
+router.get('/contracts/nda/refs/party/:usernameOrEmail', contracts.getContractsRefsByParty)
+router.get('/contracts/nda/refs/sender/:usernameOrEmail', contracts.getContractsRefsBySender)
+router.get('/contracts/nda/refs/file/:refId', contracts.getContractFile)
+router.post('/contracts/nda', contracts.createContract)
 
 export default router
