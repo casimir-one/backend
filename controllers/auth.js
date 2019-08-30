@@ -8,6 +8,7 @@ import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
 import * as vtService from './../services/verificationTokens';
 import subscriptionsService from './../services/subscriptions';
+import contractsService from './../services/contractRef';
 import usersService from './../services/users';
 import mailer from './../services/emails';
 
@@ -164,6 +165,9 @@ const signUp = async function (ctx) {
       profile = await usersService.createUser({ username, email, firstName, lastName });
       await vtService.removeVerificationToken(token);
     }
+    await contractsService.updateContractsRefsForRegisteredReceiver(email, {
+      pubKey, username
+    })
 
     ctx.status = 200;
     ctx.body = profile;

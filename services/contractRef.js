@@ -31,6 +31,18 @@ async function findContractRefsByReceiver(value) {
   return contractsRefs;
 }
 
+async function updateContractsRefsForRegisteredReceiver(email, {
+  pubKey, username
+}) {
+  return ContractRef.update({ 'receiver.email': email }, {
+    $set: {
+      'receiver.pubKey': pubKey,
+      'receiver.username': username,
+      status: 'pending-sender-signature'
+    }
+  }, { multi: true })
+}
+
 async function createContractRef({
   templateRef,
   sender: {
@@ -74,5 +86,6 @@ export default {
   findContractRefsByParty,
   findContractRefsBySender,
   findContractRefsByReceiver,
+  updateContractsRefsForRegisteredReceiver,
   createContractRef
 }

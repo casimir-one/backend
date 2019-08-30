@@ -21,7 +21,8 @@ const ContractRef = new Schema({
   "status": {
     type: String,
     enum: [
-      'pending-sender-signature', // this status is being used for 2 cases - when a receiver is not registered yet or right after the receiver has registered but the contract is not signed by the sender yet 
+      'pending-receiver-registration',
+      'pending-sender-signature',
       'pending-receiver-signature', 
       'signed',
       'declined', 

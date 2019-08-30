@@ -48,6 +48,25 @@ class EmailsService {
       html: htmlToSend
     });
   }
+
+  async sendNDASignRequest(to, contractId, isForNewUser = false) {
+    let contractUrl;
+    if (isForNewUser) {
+      contractUrl = `${config.uiHost}/sign-up`;
+    } else {
+      contractUrl = `${config.uiHost}/contract/${contractId}`;
+    }
+    console.log(contractUrl);
+    await this.sendMessage({
+      to,
+      subject: 'New NDA Contract',
+      html: `
+        <p>
+          Hi! There is new NDA contract for you. Follow link to see:<br />
+          <a href="${contractUrl}" traget="_blank">${contractUrl}</a>
+        </p>`
+    })
+  }
 }
 
 module.exports = new EmailsService();

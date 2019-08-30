@@ -9,6 +9,7 @@ import templatesService from './../services/templateRef';
 import contractsService from './../services/contractRef';
 import usersService from './../services/users';
 import filesService from './../services/fileRef';
+import mailer from './../services/emails';
 import uuidv4 from "uuid/v4";
 import send from 'koa-send';
 import deipRpc from '@deip/deip-rpc-client';
@@ -162,6 +163,7 @@ const createContract = async (ctx) => {
         hash: hash,
         expirationDate: moment.utc(expirationDate).toDate()
       });
+      await mailer.sendNDASignRequest(receiverEmail, contractRef._id, false);
 
       ctx.status = 200;
       ctx.body = contractRef;
@@ -189,10 +191,11 @@ const createContract = async (ctx) => {
           pubKey: null,
           username: null
         },
-        status: 'pending-sender-signature',
+        status: 'pending-receiver-registration',
         hash: null,
         expirationDate: moment.utc(expirationDate).toDate()
       });
+      await mailer.sendNDASignRequest(receiverEmail, contractRef._id, true);
 
       ctx.status = 200;
       ctx.body = contractRef;
