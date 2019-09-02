@@ -9,7 +9,7 @@
         "debug": "nodemon --inspect --delay 2000ms -w app.js -w server server-entry.js"
     },
     "dependencies": {
-        "@deip/deip-rpc-client": "1.0.57",
+        "@deip/deip-rpc-client": "1.0.62",
         "@deip/lib-crypto": "^1.0.2",
         "@koa/cors": "^2.2.1",
         "archiver": "^3.1.1",
@@ -47,7 +47,6 @@
         "stripe": "^7.6.0",
         "substance": "^1.0.0-preview.53",
         "uuid": "^3.3.2",
-        "web3": "^0.18.4",
         "xml2js": "^0.4.19"
     },
     "devDependencies": {
