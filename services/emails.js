@@ -49,13 +49,8 @@ class EmailsService {
     });
   }
 
-  async sendNDASignRequest(to, contractId, isForNewUser = false) {
-    let contractUrl;
-    if (isForNewUser) {
-      contractUrl = `${config.uiHost}/sign-up`;
-    } else {
-      contractUrl = `${config.uiHost}/contract/${contractId}`;
-    }
+  async sendNDASignRequest(to, contractId) {
+    const contractUrl = `${config.uiHost}/contract/${contractId}`;
     console.log(contractUrl);
     await this.sendMessage({
       to,

@@ -57,11 +57,6 @@ router.delete('/templates/refs/:refId', templates.removeTemplate)
 
 router.get('/contracts/nda/refs/:refId', contracts.getContractRef)
 router.post('/contracts/nda/refs', contracts.createContractRef)
-router.get('/contracts/nda/refs/party/:usernameOrEmail', contracts.getContractsRefsByParty)
-router.get('/contracts/nda/refs/sender/:usernameOrEmail', contracts.getContractsRefsBySender)
-router.get('/contracts/nda/refs/file/:refId', contracts.getContractFile)
-router.post('/contracts/nda/refs/:refId/create-contract', contracts.createContract)
-router.post('/contracts/nda/refs/:refId/sign-contract', contracts.signContract)
-router.post('/contracts/nda/refs/:refId/decline-contract', contracts.declineContract)
+router.get('/contracts/nda/refs/:refId/file', contracts.getContractFile)
 
 export default router
