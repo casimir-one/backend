@@ -1,18 +1,14 @@
 import fs from 'fs'
-import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util';
-import send from 'koa-send';
 import deipRpc from '@deip/deip-rpc-client';
-import FileRef from './../schemas/fileRef';
-import UserProfile from './../schemas/user';
-import config from './../config';
 import filesService from './../services/fileRef';
-import crypto from 'crypto';
 import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
 import moment from 'moment';
 import archiver from 'archiver';
+import mailer from './../services/emails';
+import usersService from './../services/users';
 import { authorizeResearchGroup } from './../services/auth'
 
 const listFileRefs = async (ctx) => {
@@ -85,7 +81,7 @@ const exportCertificate = async (ctx) => {
     );
     let owner = rgtList.find(rgt => rgt.amount === maxRgt);
     let ownerUsername = owner.owner;
-    let ownerProfile = await UserProfile.findOne({ '_id': ownerUsername });
+    let ownerProfile = await usersService.findUserById(ownerUsername);
     let ownerName = ownerProfile.firstName && ownerProfile.lastName ? `${ownerProfile.firstName} ${ownerProfile.lastName}` : ownerUsername;
 
     let accounts = await deipRpc.api.getAccountsAsync([jwtUsername, ownerUsername]);
@@ -197,12 +193,66 @@ const exportCypheredData = async (ctx) => {
   }
 }
 
+const shareFile = async (ctx) => {
+  const refId = ctx.params.refId;
+
+  try {
+    const {
+      contractId,
+      receiver
+    } = ctx.request.body;
+
+    const [
+      fileRef,
+      contract,
+      userProfile
+    ] = await Promise.all([
+      filesService.findFileRefById(refId),
+      deipRpc.api.getContractAsync(`${contractId}`),
+      usersService.findUserById(receiver)
+    ]);
+
+    if (!fileRef || !fileRef.filepath) {
+      ctx.status = 400;
+      ctx.body = `Invalid file state`;
+      return;
+    }
+
+    if (!contract || contract.status !== 2) { // contract should have 'signed' status
+      ctx.status = 400;
+      ctx.body = 'Invalid contract state';
+      return;
+    }
+
+    if (!userProfile) {
+      ctx.status = 400;
+      ctx.body = 'Receiver not found';
+      return;
+    }
+
+    if (fileRef.accessKeys.some((ak) => ak.name === receiver)) {
+      ctx.status = 400;
+      ctx.body = 'File is already shared';
+      return;
+    }
+
+    await filesService.shareFile(refId, { receiver, contractId });
+    await mailer.sendFileSharedNotification(userProfile.email, fileRef._id);
+
+    ctx.status = 200;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
 
 export default {
   // refs
   getFileRefById,
   getFileRefByHash,
   listFileRefs,
+  shareFile,
 
   exportCertificate,
   exportCypheredData

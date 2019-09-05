@@ -62,6 +62,20 @@ class EmailsService {
         </p>`
     })
   }
+
+  async sendFileSharedNotification(to, fileRefId) {
+    const fileUrl = `${config.uiHost}/files/${fileRefId}`;
+    console.log(fileUrl);
+    await this.sendMessage({
+      to,
+      subject: 'New Shared File',
+      html: `
+        <p>
+          Hi! There is new shared file with you. Follow link to see:<br />
+          <a href="${fileUrl}" traget="_blank">${fileUrl}</a>
+        </p>`
+    })
+  }
 }
 
 module.exports = new EmailsService();
