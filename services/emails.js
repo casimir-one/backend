@@ -63,8 +63,8 @@ class EmailsService {
     })
   }
 
-  async sendFileSharedNotification(to, fileRefId) {
-    const fileUrl = `${config.uiHost}/files/${fileRefId}`;
+  async sendFileSharedNotification(to, sharedFileId) {
+    const fileUrl = `${config.uiHost}/shared-files/${sharedFileId}`;
     console.log(fileUrl);
     await this.sendMessage({
       to,

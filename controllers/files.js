@@ -3,6 +3,7 @@ import path from 'path'
 import util from 'util';
 import deipRpc from '@deip/deip-rpc-client';
 import filesService from './../services/fileRef';
+import sharedFilesService from '../services/sharedFiles';
 import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
 import moment from 'moment';
@@ -195,6 +196,7 @@ const exportCypheredData = async (ctx) => {
 
 const shareFile = async (ctx) => {
   const refId = ctx.params.refId;
+  const jwtUsername = ctx.state.user.username;
 
   try {
     const {
@@ -205,12 +207,24 @@ const shareFile = async (ctx) => {
     const [
       fileRef,
       contract,
-      userProfile
+      userProfile,
+      isFileAlreadyShared,
     ] = await Promise.all([
       filesService.findFileRefById(refId),
       deipRpc.api.getContractAsync(`${contractId}`),
-      usersService.findUserById(receiver)
+      usersService.findUserById(receiver),
+      sharedFilesService.checkFileAlreadyShared({
+        fileRefId: refId,
+        receiver,
+        sender: jwtUsername
+      })
     ]);
+
+    if (isFileAlreadyShared) {
+      ctx.status = 400;
+      ctx.body = 'File is already shared';
+      return;
+    }
 
     if (!fileRef || !fileRef.filepath) {
       ctx.status = 400;
@@ -230,14 +244,15 @@ const shareFile = async (ctx) => {
       return;
     }
 
-    if (fileRef.accessKeys.some((ak) => ak.name === receiver)) {
-      ctx.status = 400;
-      ctx.body = 'File is already shared';
-      return;
-    }
-
-    await filesService.shareFile(refId, { receiver, contractId });
-    await mailer.sendFileSharedNotification(userProfile.email, fileRef._id);
+    const sharedFile = await sharedFilesService.createSharedFile({
+      fileRefId: fileRef._id,
+      filename: fileRef.filename,
+      sender: jwtUsername,
+      receiver,
+      contractId: contract.id,
+      contractTitle: contract.title,
+    });
+    await mailer.sendFileSharedNotification(userProfile.email, sharedFile._id);
 
     ctx.status = 200;
   } catch (err) {

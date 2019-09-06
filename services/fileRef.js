@@ -187,26 +187,11 @@ async function upsertUploadedFileRef({
   return uploadedFileRef;
 }
 
-async function shareFile(_id, { receiver, contractId }) {
-  await FileRef.updateOne({
-    _id,
-    'accessKeys.name': { $ne: receiver }
-  }, {
-    $push: {
-      accessKeys: {
-        name: receiver,
-        contractId
-      }
-    }
-  });
-} 
-
 export default {
   findFileRefById,
   findFileRefByHash,
   findFileRefByProject,
   upsertTimestampedFileRef,
   upsertUploadedFileRef,
-  upsertTimestampedFilesRefs,
-  shareFile
+  upsertTimestampedFilesRefs
 }

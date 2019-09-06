@@ -5,6 +5,7 @@ import proposals from '../controllers/proposals'
 import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import files from '../controllers/files'
+import sharedFiles from '../controllers/sharedFiles'
 import pricing from '../controllers/pricing'
 import templates from '../controllers/templates'
 import contracts from '../controllers/contracts'
@@ -59,5 +60,10 @@ router.delete('/templates/refs/:refId', templates.removeTemplate)
 router.get('/contracts/nda/refs/:refId', contracts.getContractRef)
 router.post('/contracts/nda/refs', contracts.createContractRef)
 router.get('/contracts/nda/refs/:refId/file', contracts.getContractFile)
+
+router.get(`/shared-files`, sharedFiles.getSharedFiles)
+router.get(`/shared-files/:id`, sharedFiles.getSharedFile)
+router.post(`/shared-files/:id/ask-permission`, sharedFiles.askPermission)
+router.post(`/shared-files/:id/unlock`, sharedFiles.unlockFile)
 
 export default router
