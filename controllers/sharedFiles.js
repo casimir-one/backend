@@ -1,12 +1,21 @@
+import fs from 'fs';
 import sharedFilesService from './../services/sharedFiles';
+import filesService from './../services/fileRef';
 
 const getSharedFile = async (ctx) => {
   const sharedFileId = ctx.params.id;
+  const isDownload = ctx.query.download === 'true';
 
   try {
     const sharedFile = await sharedFilesService.getSharedFileById(sharedFileId);
-    ctx.status = 200;
-    ctx.body = sharedFile;
+    if (isDownload) {
+      const fileRef = await filesService.findFileRefById(sharedFile.fileRefId);
+      ctx.response.set('Content-disposition', `attachment; filename="${fileRef.filename}.aes"`);
+      ctx.body = fs.createReadStream(fileRef.filepath);
+    } else {
+      ctx.status = 200;
+      ctx.body = sharedFile;
+    }
   } catch (err) {
     console.log(err);
     ctx.status = 500;

@@ -15,7 +15,7 @@ async function createSharedFile ({
 }
 
 async function getSharedFileById (_id) {
-  return SharedFile.find({ _id });
+  return SharedFile.findOne({ _id });
 }
 
 async function checkFileAlreadyShared ({
