@@ -16,6 +16,12 @@ async function findFileRefByProject(projectId) {
   return fileRefs;
 }
 
+async function addAccessKeyToFileRef(_id, accessKey) {
+  await FileRef.updateOne({ _id }, {
+    $addToSet: { accessKeys: accessKey }
+  })
+}
+
 async function createFileRef({
   organizationId,
   projectId,
@@ -193,5 +199,6 @@ export default {
   findFileRefByProject,
   upsertTimestampedFileRef,
   upsertUploadedFileRef,
-  upsertTimestampedFilesRefs
+  upsertTimestampedFilesRefs,
+  addAccessKeyToFileRef
 }

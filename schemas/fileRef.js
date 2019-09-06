@@ -23,10 +23,10 @@ const FileRef = new Schema({
     required: true
   },
   "accessKeys": [{
+    "_id": false,
     "name": { type: String, required: true },
     "pubKey": { type: String, required: false },
     "key": { type: String, required: false },
-    "contractId": { type: String, required: false, default: null },
   }],
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
