@@ -18,8 +18,11 @@ async function findFileRefByProject(projectId) {
 
 async function addAccessKeyToFileRef(_id, accessKey) {
   await FileRef.updateOne({ _id }, {
-    $addToSet: { accessKeys: accessKey }
-  })
+    $pull: { accessKeys: { name: accessKey.name } },
+  });
+  await FileRef.updateOne({ _id }, {
+    $push: { accessKeys: accessKey }
+  });
 }
 
 async function createFileRef({

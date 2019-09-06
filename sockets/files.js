@@ -1,4 +1,5 @@
 import filesService from './../services/fileRef';
+import sharedFilesService from './../services/sharedFiles';
 import fs from "fs";
 import fsExtra from "fs-extra";
 import util from 'util';
@@ -180,8 +181,13 @@ async function getDownloadSession(username, { fileId, uuid }) {
       const fileRef = await filesService.findFileRefById(fileId);
       if (!fileRef) return null;
 
-      const authorized = await authorizeResearchGroup(fileRef.organizationId, username);
-      if (!authorized) return null;
+      const hasFileShared = await sharedFilesService.checkUserHasSharedFile({
+        receiver: username,
+        fileRefId: fileId
+      });
+
+      const authorizedInGroup = await authorizeResearchGroup(fileRef.organizationId, username);
+      if (!authorizedInGroup && !hasFileShared) return null;
 
       const fileSize = fileRef.size;
       const filepath = fileRef.filepath;

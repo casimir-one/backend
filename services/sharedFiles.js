@@ -18,6 +18,16 @@ async function getSharedFileById (_id) {
   return SharedFile.findOne({ _id });
 }
 
+async function checkUserHasSharedFile ({
+  fileRefId, receiver
+}) {
+  const existingShare = await SharedFile.findOne({
+    fileRefId, receiver
+  });
+
+  return !!existingShare;
+}
+
 async function checkFileAlreadyShared ({
   fileRefId, receiver, sender
 }) {
@@ -56,5 +66,6 @@ export default {
   getAllSharedFilesByUsername,
   checkFileAlreadyShared,
   askPermissionToSharedFile,
-  unlockSharedFile
+  unlockSharedFile,
+  checkUserHasSharedFile
 }
