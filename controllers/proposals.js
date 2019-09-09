@@ -83,40 +83,24 @@ const createInviteProposal = async (ctx) => {
 }
 
 const createContentProposal = async (ctx) => {
-
   try {
-
     const files = ctx.request.body.filesMeta;
     const jwtUsername = ctx.state.user.username;
     const tx = ctx.request.body.tx;
     const operations = tx['operations'];
-    let isLimitedPlan = true;
 
     const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
-    if (!subscription) {
-      let user = await usersService.findUserById(jwtUsername);
-      isLimitedPlan = user.appPricingPlanId !== "unlimited";
-      if (isLimitedPlan) {
-        ctx.status = 404;
-        ctx.body = `Subscription for ${jwtUsername} is not found`;
-        return;
-      }
-    }
-
-    if (isLimitedPlan && subscription.status != "active" && subscription.status != "past_due" && subscription.status != "trialing") {
-      // subscription becomes past_due when the first attempt to renew it fails
+    if (!subscription.isActive) {
       ctx.status = 402;
       ctx.body = `Subscription for ${jwtUsername} has expired`;
       return;
     }
 
-    if (isLimitedPlan) {
-      const availableCertificatesBySubscription = parseInt(subscription.metadata.availableCertificatesBySubscription) || 0;
-      const availableAdditionalCertificates = parseInt(subscription.metadata.availableAdditionalCertificates) || 0;
-      const limit = availableCertificatesBySubscription + availableAdditionalCertificates;
+    if (subscription.isLimitedPlan) {
+      const limit = subscription.availableCertificatesBySubscription + subscription.availableAdditionalCertificates;
       if (operations.length > limit) {
         ctx.status = 402;
-        ctx.body = `Subscription ${subscription.id} for ${jwtUsername} is under "${subscription.plan.nickname}" plan and has reached the limit.`;
+        ctx.body = `Subscription ${subscription.id} for ${jwtUsername} is under "${subscription.pricingPlanId}" plan and has reached the limit.`;
         return;
       }
     }
@@ -157,21 +141,22 @@ const createContentProposal = async (ctx) => {
     const result = await sendTransaction(tx);
     if (result.isSuccess) {
       const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
-      if (isLimitedPlan) {
-        const currentBySubscription = parseInt(subscription.metadata.availableCertificatesBySubscription);
-        const currentAdditional = parseInt(subscription.metadata.availableAdditionalCertificates);
-
-        const subtractFromSubscription = Math.min(files.length, currentBySubscription);
+      if (subscription.isLimitedPlan) {
+        const subtractFromSubscription = Math.min(files.length, subscription.availableCertificatesBySubscription);
         let subtractFromAdditional = 0;
         if (subtractFromSubscription < files.length) {
           subtractFromAdditional = files.length - subtractFromSubscription;
         }
         const updatePromises = [];
         if (subtractFromSubscription) {
-          updatePromises.push(subscriptionsService.setAvailableCertificatesCounter(subscription.id, currentBySubscription - subtractFromSubscription));
+          updatePromises.push(subscriptionsService.setSubscriptionCounters(subscription.id, {
+            certificates: subscription.availableCertificatesBySubscription - subtractFromSubscription,
+          }));
         }
         if (subtractFromAdditional) {
-          updatePromises.push(subscriptionsService.setAvailableAdditionalCertificatesCounter(subscription.id, currentAdditional - subtractFromAdditional));
+          updatePromises.push(subscriptionsService.setSubscriptionCounters(subscription.id, {
+            additionalCertificates: subscription.availableAdditionalCertificates - subtractFromAdditional,
+          }));
         }
         await Promise.all(updatePromises);
       }

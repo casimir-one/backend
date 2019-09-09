@@ -1,13 +1,13 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import config from './../config';
+import { FREE_PRICING_PLAN_ID } from './../common/constants';
 import deipRpc from '@deip/deip-rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
 import * as vtService from './../services/verificationTokens';
-import subscriptionsService from './../services/subscriptions';
 import usersService from './../services/users';
 import mailer from './../services/emails';
 
@@ -84,7 +84,7 @@ const createVerificationToken = async function (ctx) {
     const savedToken = await vtService.createVerificationToken('public', {
       email,
       expirationTime: expires,
-      pricingPlan: 'free'
+      pricingPlan: FREE_PRICING_PLAN_ID
     });
     await mailer.sendRegistrationUrl(email, savedToken.token);
 

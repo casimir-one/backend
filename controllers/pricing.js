@@ -33,16 +33,8 @@ const getUserSubscription = async function (ctx) {
       return;
     }
 
-    let pricingPlanId = "free";
-    let subscription = await subscriptionsService.findSubscriptionByOwner(username);
-    if (subscription) {
-      pricingPlanId = subscription.plan.nickname;
-    } else {
-      let user = await usersService.findUserById(jwtUsername);
-      pricingPlanId = user.appPricingPlanId || pricingPlanId;
-    }
-
-    let pricingPlan = await pricingPlansService.findPricingPlan(pricingPlanId);
+    const subscription = await subscriptionsService.findSubscriptionByOwner(username);
+    let pricingPlan = await pricingPlansService.findPricingPlan(subscription.pricingPlanId);
     
     ctx.status = 200;
     ctx.body = { subscription, pricingPlan };
@@ -279,7 +271,11 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       // subscription is activated after 3D Secure confirmation
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
-      await subscriptionsService.setAvailableCertificatesCounter(stripeSubscription.id, pricingPlan.terms.certificateLimit.limit);
+      await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
+        certificates: pricingPlan.terms.certificateLimit.limit,
+        contracts: pricingPlan.terms.contractLimit.limit,
+        filesShares: pricingPlan.terms.fileShareLimit.limit,
+      });
       
       let stripeCustomer = await stripeService.findCustomer(customer);
       let to = stripeCustomer.email;
@@ -312,7 +308,11 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       // subscription renewal
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
-      await subscriptionsService.setAvailableCertificatesCounter(stripeSubscription.id, pricingPlan.terms.certificateLimit.limit);
+      await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
+        certificates: pricingPlan.terms.certificateLimit.limit,
+        contracts: pricingPlan.terms.contractLimit.limit,
+        filesShares: pricingPlan.terms.fileShareLimit.limit,
+      });
       console.log(`TODO: Send letter with notification about subscription info`);
     }
 
@@ -338,9 +338,10 @@ const customerPaymentIntentSucceededWebhook = async function (ctx) {
         case PAYMENT_INTENTS.ADDITIONAL_CERTIFICATES:
           const { username, numberOfCertificates } = event.data.object.metadata;
           const subscription = await subscriptionsService.findSubscriptionByOwner(username);
-          const current = parseInt(subscription.metadata.availableAdditionalCertificates) || 0;
           const toAdd = parseInt(numberOfCertificates) || 0;
-          await subscriptionsService.setAvailableAdditionalCertificatesCounter(subscription.id, current + toAdd);
+          await subscriptionsService.setSubscriptionCounters(subscription.id, {
+            additionalCertificates: subscription.availableAdditionalCertificates + toAdd,
+          });
           break;
       }
     } catch (err) {
