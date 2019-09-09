@@ -34,9 +34,15 @@ const getSharedFile = async (ctx) => {
 
 const getSharedFiles = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const filter = {
+    contractId: +ctx.query.contractId,
+  };
 
   try {
-    const sharedFiles = await sharedFilesService.getAllSharedFilesByUsername(jwtUsername);
+    const sharedFiles = await sharedFilesService.getSharedFiles({
+      username: jwtUsername,
+      ...filter,
+    });
     ctx.status = 200;
     ctx.body = sharedFiles;
   } catch (err) {

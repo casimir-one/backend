@@ -38,10 +38,37 @@ async function checkFileAlreadyShared ({
   return !!existingShare;
 }
 
-async function getAllSharedFilesByUsername (username) {
-  return SharedFile.find({
-    $or: [{ sender: username }, { receiver: username }]
-  });
+async function getSharedFiles ({
+  username, contractId,
+  type = 'all'
+}) {
+  const query = {};
+
+  switch (type) {
+    case 'incoming':
+      query.receiver = username;
+      break;
+    case 'outcoming':
+      query.sender = username;
+      break;
+    case 'all':
+    default:
+      if (!query.$or) {
+        query.$or = [];
+      }
+      query.$or.push({
+        sender: username
+      }, {
+        receiver: username
+      });
+      break;
+  }
+
+  if (contractId || contractId === 0) {
+    query.contractId = `${contractId}`;
+  }
+
+  return SharedFile.find(query);
 }
 
 async function askPermissionToSharedFile (_id) {
@@ -63,7 +90,7 @@ async function unlockSharedFile (_id) {
 export default {
   createSharedFile,
   getSharedFileById,
-  getAllSharedFilesByUsername,
+  getSharedFiles,
   checkFileAlreadyShared,
   askPermissionToSharedFile,
   unlockSharedFile,
