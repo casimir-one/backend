@@ -19,13 +19,16 @@ async function getSharedFileById (_id) {
 }
 
 async function checkUserHasSharedFile ({
-  fileRefId, receiver, status
+  fileRefId, receiver, status, contractId
 }) {
   const query = {
     fileRefId, receiver
   };
   if (status) {
     query.status = status;
+  }
+  if (contractId) {
+    query.contractId = contractId;
   }
   const existingShare = await SharedFile.findOne(query);
 

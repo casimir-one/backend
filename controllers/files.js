@@ -234,7 +234,8 @@ const shareFile = async (ctx) => {
       usersService.findUserById(receiver),
       sharedFilesService.checkUserHasSharedFile({
         fileRefId: refId,
-        receiver
+        receiver,
+        contractId
       })
     ]);
 
