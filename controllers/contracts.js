@@ -5,6 +5,7 @@ import moment from 'moment';
 import templatesService from './../services/templateRef';
 import contractsService from './../services/contractRef';
 import usersService from './../services/users';
+import subscriptionsService from './../services/subscriptions';
 import mailer from './../services/emails';
 import { sendTransaction } from './../utils/blockchain';
 import uuidv4 from "uuid/v4";
@@ -45,6 +46,18 @@ const createContractRef = async (ctx) => {
       contract_hash: contractHash,
       end_date: expirationDate
     } = signedTx['operations'][0][1];
+
+    const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
+    if (!subscription.isActive) {
+      ctx.status = 402;
+      ctx.body = `Subscription for ${jwtUsername} has expired`;
+      return;
+    }
+    if (subscription.isLimitedPlan && subscription.availableContractsBySubscription === 0) {
+      ctx.status = 402;
+      ctx.body = `Subscription for ${jwtUsername} has reached the contracts limit`;
+      return;
+    }
   
     const templateRef = await templatesService.findTemplateRefById(templateRefId);
     if (!templateRef) {
@@ -90,6 +103,11 @@ const createContractRef = async (ctx) => {
       }),
       usersService.findUserById(receiverUsername)
     ]);
+    if (subscription.isLimitedPlan) {
+      await subscriptionsService.setSubscriptionCounters(subscription.id, {
+        contracts: subscription.availableContractsBySubscription - 1,
+      })
+    }
     if (receiverProfile && receiverProfile.email) {
       // await mailer.sendNDASignRequest(receiverProfile.email, contractRef._id);
     }

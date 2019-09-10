@@ -4,6 +4,7 @@ import util from 'util';
 import deipRpc from '@deip/deip-rpc-client';
 import filesService from './../services/fileRef';
 import sharedFilesService from '../services/sharedFiles';
+import subscriptionsService from './../services/subscriptions';
 import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
 import moment from 'moment';
@@ -204,6 +205,18 @@ const shareFile = async (ctx) => {
       receiver
     } = ctx.request.body;
 
+    const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
+    if (!subscription.isActive) {
+      ctx.status = 402;
+      ctx.body = `Subscription for ${jwtUsername} has expired`;
+      return;
+    }
+    if (subscription.isLimitedPlan && subscription.availableFilesSharesBySubscription === 0) {
+      ctx.status = 402;
+      ctx.body = `Subscription for ${jwtUsername} has reached the files share limit`;
+      return;
+    }
+
     const [
       fileRef,
       contract,
@@ -252,6 +265,11 @@ const shareFile = async (ctx) => {
       contractId: contract.id,
       contractTitle: contract.title,
     });
+    if (subscription.isLimitedPlan) {
+      await subscriptionsService.setSubscriptionCounters(subscription.id, {
+        filesShares: subscription.availableFilesSharesBySubscription - 1,
+      })
+    }
     // await mailer.sendFileSharedNotification(userProfile.email, sharedFile._id);
 
     ctx.status = 200;
