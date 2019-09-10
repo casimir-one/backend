@@ -252,7 +252,7 @@ const shareFile = async (ctx) => {
       contractId: contract.id,
       contractTitle: contract.title,
     });
-    await mailer.sendFileSharedNotification(userProfile.email, sharedFile._id);
+    // await mailer.sendFileSharedNotification(userProfile.email, sharedFile._id);
 
     ctx.status = 200;
   } catch (err) {

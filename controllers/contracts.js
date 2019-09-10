@@ -91,7 +91,7 @@ const createContractRef = async (ctx) => {
       usersService.findUserById(receiverUsername)
     ]);
     if (receiverProfile && receiverProfile.email) {
-      await mailer.sendNDASignRequest(receiverProfile.email, contractRef._id);
+      // await mailer.sendNDASignRequest(receiverProfile.email, contractRef._id);
     }
 
     ctx.status = 201;
