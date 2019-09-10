@@ -36,7 +36,7 @@ async function checkUserHasSharedFile ({
 }
 
 async function getSharedFiles ({
-  username, contractId,
+  username, contractId, fileRefId,
   type = 'all'
 }) {
   const query = {};
@@ -63,6 +63,9 @@ async function getSharedFiles ({
 
   if (contractId || contractId === 0) {
     query.contractId = `${contractId}`;
+  }
+  if (fileRefId) {
+    query.fileRefId = fileRefId;
   }
 
   return SharedFile.find(query);

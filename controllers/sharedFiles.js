@@ -36,6 +36,7 @@ const getSharedFiles = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const filter = {
     contractId: +ctx.query.contractId,
+    fileRefId: ctx.query.fileRefId || '',
   };
 
   try {
