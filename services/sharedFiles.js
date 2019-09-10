@@ -19,21 +19,15 @@ async function getSharedFileById (_id) {
 }
 
 async function checkUserHasSharedFile ({
-  fileRefId, receiver
+  fileRefId, receiver, status
 }) {
-  const existingShare = await SharedFile.findOne({
+  const query = {
     fileRefId, receiver
-  });
-
-  return !!existingShare;
-}
-
-async function checkFileAlreadyShared ({
-  fileRefId, receiver, sender
-}) {
-  const existingShare = await SharedFile.findOne({
-    fileRefId, receiver, sender
-  });
+  };
+  if (status) {
+    query.status = status;
+  }
+  const existingShare = await SharedFile.findOne(query);
 
   return !!existingShare;
 }
@@ -91,7 +85,6 @@ export default {
   createSharedFile,
   getSharedFileById,
   getSharedFiles,
-  checkFileAlreadyShared,
   askPermissionToSharedFile,
   unlockSharedFile,
   checkUserHasSharedFile

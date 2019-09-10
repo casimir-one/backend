@@ -152,10 +152,16 @@ const exportCypheredData = async (ctx) => {
       return;
     }
 
+    const hasFileShared = await sharedFilesService.checkUserHasSharedFile({
+      receiver: jwtUsername,
+      fileRefId: fileRef._id,
+      status: 'unlocked'
+    });
+
     const authorized = await authorizeResearchGroup(fileRef.organizationId, jwtUsername);
-    if (!authorized) {
+    if (!authorized && !hasFileShared) {
       ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to get data for "${projectId}" project`;
+      ctx.body = `"${jwtUsername}" is not permitted to get data for "${fileRef._id}" file`;
       return;
     }
 
@@ -226,10 +232,9 @@ const shareFile = async (ctx) => {
       filesService.findFileRefById(refId),
       deipRpc.api.getContractAsync(`${contractId}`),
       usersService.findUserById(receiver),
-      sharedFilesService.checkFileAlreadyShared({
+      sharedFilesService.checkUserHasSharedFile({
         fileRefId: refId,
-        receiver,
-        sender: jwtUsername
+        receiver
       })
     ]);
 

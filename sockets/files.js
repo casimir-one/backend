@@ -183,7 +183,8 @@ async function getDownloadSession(username, { fileId, uuid }) {
 
       const hasFileShared = await sharedFilesService.checkUserHasSharedFile({
         receiver: username,
-        fileRefId: fileId
+        fileRefId: fileId,
+        status: 'unlocked'
       });
 
       const authorizedInGroup = await authorizeResearchGroup(fileRef.organizationId, username);
