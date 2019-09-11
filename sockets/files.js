@@ -2,6 +2,7 @@ import filesService from './../services/fileRef';
 import sharedFilesService from './../services/sharedFiles';
 import fs from "fs";
 import fsExtra from "fs-extra";
+import filesUtil from './../utils/files';
 import util from 'util';
 import path from 'path';
 import deipRpc from '@deip/deip-rpc-client';
@@ -161,7 +162,8 @@ function uploadEncryptedChunkHandler(socket) {
             ack(err);
           } else {
             const { organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, fileAccess } = session;
-            await filesService.upsertUploadedFileRef({ organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, accessKeys: fileAccess, creator: username, uploader: username });            
+            const encryptedFileHash = await filesUtil.sha256(filepath)
+            await filesService.upsertUploadedFileRef({ organizationId, projectId, filename, filetype, filepath, size, hash, iv, chunkSize, accessKeys: fileAccess, creator: username, uploader: username, encryptedFileHash });
             ack(null, { uuid, index, lastIndex });
           }
         } catch (err) { console.log(err); }

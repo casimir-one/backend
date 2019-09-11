@@ -14,6 +14,7 @@ const FileRef = new Schema({
   "iv": { type: String },
   "permlink": { type: String },
   "chunkSize": { type: Number },
+  "encryptedFileHash": { type: String },
   "creator": { type: String, required: true },
   "uploader": { type: String },
   "certifier": { type: String },

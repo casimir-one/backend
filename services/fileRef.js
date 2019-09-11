@@ -35,6 +35,7 @@ async function createFileRef({
   hash,
   iv,
   chunkSize,
+  encryptedFileHash,
   permlink,
   accessKeys,
   creator,
@@ -53,6 +54,7 @@ async function createFileRef({
     hash: hash,
     iv: iv,
     chunkSize: chunkSize,
+    encryptedFileHash: encryptedFileHash,
     permlink: permlink,
     accessKeys: accessKeys,
     creator: creator,
@@ -151,12 +153,13 @@ async function upsertUploadedFileRef({
   hash,
   iv,
   chunkSize,
+  encryptedFileHash,
   accessKeys,
   creator,
   uploader
 }) {
 
-  if (!hash || !iv || !chunkSize || !filepath || !uploader || !accessKeys || !accessKeys.length) 
+  if (!hash || !iv || !chunkSize || !filepath || !uploader || !accessKeys || !accessKeys.length || !encryptedFileHash)
     throw Error("Required fields are not provided for 'uploaded' status");
 
   const fileRef = await findFileRefByHash(projectId, hash);
@@ -168,6 +171,7 @@ async function upsertUploadedFileRef({
       fileRef.filepath = filepath;
       fileRef.accessKeys = accessKeys;
       fileRef.uploader = uploader;
+      fileRef.encryptedFileHash = encryptedFileHash;
       fileRef.status = "uploaded_and_timestamped";
       let uploadedFileRef = await fileRef.save();
       return uploadedFileRef;
@@ -186,6 +190,7 @@ async function upsertUploadedFileRef({
     hash,
     iv,
     chunkSize,
+    encryptedFileHash,
     permlink: null,
     accessKeys,
     creator: creator,
