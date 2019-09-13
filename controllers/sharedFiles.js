@@ -1,6 +1,8 @@
 import fs from 'fs';
+import deipRpc from '@deip/deip-rpc-client';
 import sharedFilesService from './../services/sharedFiles';
 import filesService from './../services/fileRef';
+import { sendTransaction } from './../utils/blockchain';
 
 const getSharedFile = async (ctx) => {
   const sharedFileId = ctx.params.id;
@@ -56,6 +58,7 @@ const getSharedFiles = async (ctx) => {
 const askPermission = async (ctx) => {
   const sharedFileId = ctx.params.id;
   const jwtUsername = ctx.state.user.username;
+  const signedTx = ctx.request.body;
 
   try {
     const sharedFile = await sharedFilesService.getSharedFileById(sharedFileId);
@@ -63,9 +66,25 @@ const askPermission = async (ctx) => {
       ctx.status = 403;
       return;
     }
-    console.log(JSON.stringify(ctx.request.body, null, 2));
-    // sign tx; if success - go next
-    const updatedSharedFile = await sharedFilesService.askPermissionToSharedFile(sharedFileId);
+    const {
+      contract_id: contratId,
+      encrypted_payload_hash: encryptedPayloadHash,
+    } = signedTx['operations'][0][1];
+    if (sharedFile.contractId !== contratId) {
+      ctx.status = 400;
+      return;
+    }
+    const result = await sendTransaction(signedTx);
+    if (!result.isSuccess) {
+      ctx.status = 400;
+      ctx.body = 'Error while create permission request';
+      return;
+    }
+    // todo: replace with better rpc method
+    const permissionRequest = await deipRpc.api.getNdaContractRequestsByContractIdAsync(contratId)
+      .then((requests) => requests.filter(r => r.encrypted_payload_hash === encryptedPayloadHash)[0]);
+
+    const updatedSharedFile = await sharedFilesService.askPermissionToSharedFile(sharedFileId, permissionRequest.id);
     ctx.status = 200;
     ctx.body = updatedSharedFile;
   } catch (err) {
@@ -84,11 +103,22 @@ const unlockFile = async (ctx) => {
       signedTx,
       accessKey,
     } = ctx.request.body;
-    console.log(JSON.stringify(signedTx, null, 2));
-    // sign tx; if success - go next
     const sharedFile = await sharedFilesService.getSharedFileById(sharedFileId);
     if (sharedFile.sender !== jwtUsername) {
       ctx.status = 403;
+      return;
+    }
+    const {
+      request_id: permissionRequestId,
+    } = signedTx['operations'][0][1];
+    if (sharedFile.permissionRequestId !== permissionRequestId) {
+      ctx.status = 400;
+      return;
+    }
+    const result = await sendTransaction(signedTx);
+    if (!result.isSuccess) {
+      ctx.status = 400;
+      ctx.body = 'Error while create permission request';
       return;
     }
     await filesService.addAccessKeyToFileRef(sharedFile.fileRefId, accessKey);

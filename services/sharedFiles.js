@@ -2,11 +2,10 @@ import SharedFile from '../schemas/sharedFile';
 
 async function createSharedFile ({
   fileRefId, filename, sender, receiver,
-  contractId, contractTitle, status = 'locked',
+  contractId, status = 'locked',
 }) {
   const newSharedFile = new SharedFile({
-    fileRefId, filename, sender, receiver,
-    contractTitle, status
+    fileRefId, filename, sender, receiver, status
   });
   if (contractId || contractId === 0) {
     newSharedFile.contractId = `${contractId}`;
@@ -68,10 +67,11 @@ async function getSharedFiles ({
   return SharedFile.find(query);
 }
 
-async function askPermissionToSharedFile (_id) {
+async function askPermissionToSharedFile (_id, permissionRequestId) {
   return SharedFile.findOneAndUpdate({ _id }, {
     $set: {
-      status: 'access_requested'
+      status: 'access_requested',
+      permissionRequestId: `${permissionRequestId}`,
     }
   }, { new: true });
 }

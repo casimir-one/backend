@@ -230,7 +230,7 @@ const shareFile = async (ctx) => {
       isFileAlreadyShared,
     ] = await Promise.all([
       filesService.findFileRefById(refId),
-      deipRpc.api.getContractAsync(`${contractId}`),
+      deipRpc.api.getNdaContractAsync(contractId),
       usersService.findUserById(receiver),
       sharedFilesService.checkUserHasSharedFile({
         fileRefId: refId,
