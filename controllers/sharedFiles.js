@@ -80,10 +80,8 @@ const askPermission = async (ctx) => {
       ctx.body = 'Error while create permission request';
       return;
     }
-    // todo: replace with better rpc method
-    const permissionRequest = await deipRpc.api.getNdaContractRequestsByContractIdAsync(contratId)
-      .then((requests) => requests.filter(r => r.encrypted_payload_hash === encryptedPayloadHash)[0]);
 
+    const permissionRequest = await deipRpc.api.getNdaContractRequestByContractIdAndHashAsync(contratId, encryptedPayloadHash);
     const updatedSharedFile = await sharedFilesService.askPermissionToSharedFile(sharedFileId, permissionRequest.id);
     ctx.status = 200;
     ctx.body = updatedSharedFile;
