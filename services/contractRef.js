@@ -7,11 +7,11 @@ async function findContractRefById(_id) {
 
 async function createContractRef({
   templateRef,
-  contractHash,
+  contractId,
 }) {
 
   const contractRef = new ContractRef({
-    _id: contractHash,
+    _id: `${contractId}`,
     templateRef,
   });
   const savedRef = await contractRef.save();

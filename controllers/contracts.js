@@ -42,7 +42,7 @@ const createContractRef = async (ctx) => {
     } = ctx.request.body;
     const {
       creator: creatorUsername,
-      receiver: receiverUsername,
+      signee: receiverUsername,
       contract_hash: contractHash,
       end_date: expirationDate
     } = signedTx['operations'][0][1];
@@ -91,6 +91,8 @@ const createContractRef = async (ctx) => {
       ctx.body = 'Error while contract creation';
       return;
     }
+    const activeContract = await deipRpc.api.getNdaContractsByHashAsync(contractHash)
+      .then((contracts) => contracts.filter(c => c.status === 1)[0]);
 
     const { filepath, previewFilepath } = await moveTemplateToContract(templateRef, creatorUsername);
     const [
@@ -98,7 +100,7 @@ const createContractRef = async (ctx) => {
       receiverProfile
     ] = await Promise.all([
       contractsService.createContractRef({
-        contractHash,
+        contractId: activeContract.id,
         templateRef: { ...templateRef, filepath, previewFilepath },
       }),
       usersService.findUserById(receiverUsername)
