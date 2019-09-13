@@ -25,7 +25,11 @@ const run = async () => {
 
   await bluebird.map(users, async ({ stripeSubscriptionId }) => {
     const stripeSubscription = await stripeService.findSubscription(stripeSubscriptionId);
-    if (!stripeSubscription.metadata.availableContractsBySubscription) {
+    if (
+      stripeSubscription
+      && ['active', 'past_due', 'trialing'].includes(stripeSubscription.status)
+      && !stripeSubscription.metadata.availableContractsBySubscription
+    ) {
       await subscriptionsService.setSubscriptionCounters(stripeSubscriptionId, {
         contracts: 50,
         filesShares: 100,
