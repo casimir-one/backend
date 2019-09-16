@@ -31,7 +31,7 @@ const run = async () => {
       && !stripeSubscription.metadata.availableContractsBySubscription
     ) {
       await subscriptionsService.setSubscriptionCounters(stripeSubscriptionId, {
-        contracts: 50,
+        contracts: 10,
         filesShares: 100,
       })
     }
