@@ -1,5 +1,5 @@
 import { authorizeResearchGroup } from './../services/auth'
-import { sendProposalNotificationToGroup } from './../services/notifications';
+import notifier from './../services/notifications';
 import subscriptionsService from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import filesService from './../services/fileRef';
@@ -191,7 +191,7 @@ async function processNewProposal(payload, txInfo) {
 
       if (proposal) {
         proposal.data = JSON.parse(proposal.data);
-        await sendProposalNotificationToGroup(proposal);
+        await notifier.sendProposalNotificationToGroup(proposal);
       }
       break;
     }

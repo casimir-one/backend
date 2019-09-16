@@ -49,7 +49,7 @@ class EmailsService {
     });
   }
 
-  async sendNDASignRequest(to, contractId) {
+  async sendNewNDAContractEmail(to, contractId) {
     const contractUrl = `${config.uiHost}/contract/${contractId}`;
     console.log(contractUrl);
     await this.sendMessage({
@@ -63,7 +63,7 @@ class EmailsService {
     })
   }
 
-  async sendFileSharedNotification(to, sharedFileId) {
+  async sendNewFileSharedEmail(to, sharedFileId) {
     const fileUrl = `${config.uiHost}/shared-files/${sharedFileId}`;
     console.log(fileUrl);
     await this.sendMessage({

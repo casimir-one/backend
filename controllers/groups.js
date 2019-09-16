@@ -1,6 +1,6 @@
 
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import { sendInviteNotificationToInvitee } from './../services/notifications';
+import notifier from './../services/notifications';
 import { createOrganizationProfile, findOrganizationByPermlink } from './../services/organization';
 import { authorizeResearchGroup } from './../services/auth'
 import UserProfile from './../schemas/user';
@@ -159,7 +159,7 @@ async function processNewGroup(payload, txInfo) {
       if (group) {
         for (let i = 0; i < opPayload.invitees.length; i++) {
           const invitee = opPayload.invitees[i];
-          await sendInviteNotificationToInvitee(group.id, invitee.account);
+          await notifier.sendInviteNotificationToInvitee(group.id, invitee.account);
         }
       }
       break;

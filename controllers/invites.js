@@ -1,4 +1,4 @@
-import { sendInviteResolvedNotificationToGroup } from './../services/notifications'
+import notifier from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import deipRpc from '@deip/deip-rpc-client';
 
@@ -70,7 +70,7 @@ async function processResolvedInvite(isApproved, invite, txInfo) {
         const opName = op[0];
         const opPayload = op[1];
         if (opName === payloadOpName && opPayload.research_group_invite_id == invite.id) {
-            await sendInviteResolvedNotificationToGroup(isApproved, invite)
+            await notifier.sendInviteResolvedNotificationToGroup(isApproved, invite)
             break;
         }
     }

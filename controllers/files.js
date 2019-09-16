@@ -9,7 +9,7 @@ import ripemd160 from 'crypto-js/ripemd160';
 import pdf from 'html-pdf';
 import moment from 'moment';
 import archiver from 'archiver';
-import mailer from './../services/emails';
+import notifier from './../services/notifications';
 import usersService from './../services/users';
 import { authorizeResearchGroup } from './../services/auth'
 
@@ -275,7 +275,7 @@ const shareFile = async (ctx) => {
         filesShares: subscription.availableFilesSharesBySubscription - 1,
       })
     }
-    // await mailer.sendFileSharedNotification(userProfile.email, sharedFile._id);
+    notifier.sendFileSharedNotificationToUser(userProfile._id, sharedFile._id);
 
     ctx.status = 200;
   } catch (err) {

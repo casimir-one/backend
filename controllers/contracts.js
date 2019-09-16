@@ -6,7 +6,7 @@ import templatesService from './../services/templateRef';
 import contractsService from './../services/contractRef';
 import usersService from './../services/users';
 import subscriptionsService from './../services/subscriptions';
-import mailer from './../services/emails';
+import notifier from './../services/notifications';
 import { sendTransaction } from './../utils/blockchain';
 import uuidv4 from "uuid/v4";
 import send from 'koa-send';
@@ -110,9 +110,7 @@ const createContractRef = async (ctx) => {
         contracts: subscription.availableContractsBySubscription - 1,
       })
     }
-    if (receiverProfile && receiverProfile.email) {
-      // await mailer.sendNDASignRequest(receiverProfile.email, contractRef._id);
-    }
+    notifier.sendNDAContractReceivedNotificationToUser(receiverProfile._id, contractRef._id);
 
     ctx.status = 201;
     ctx.body = contractRef;

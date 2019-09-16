@@ -1,5 +1,5 @@
-
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+const { notificationTypeValues } = require('./../common/enums');
 
 const Schema = mongoose.Schema;
 
@@ -67,6 +67,15 @@ const UserProfile = new Schema({
         "description": { type: String, default: null },
         "isActive": { type: Boolean, required: true, default: false }
     }],
+    "notifications": {
+      email: {
+        type: [{
+          type: String,
+          enum: notificationTypeValues
+        }],
+        default: notificationTypeValues
+      },
+    },
     "created": { type: Date, default: Date.now, index: true },
     "updated": { type: Date, default: Date.now, index: true },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

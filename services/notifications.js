@@ -1,6 +1,9 @@
-import deipRpc from '@deip/deip-rpc-client';
-import UserProfile from './../schemas/user';
-import Notification from './../schemas/notification';
+const bluebird = require('bluebird');
+const deipRpc = require('@deip/deip-rpc-client');
+const usersService = require('./users').default;
+const mailer = require('./emails');
+const Notification = require('./../schemas/notification');
+const { notificationType } = require('./../common/enums');
 
 const START_RESEARCH = 1;
 const INVITE_MEMBER = 2;
@@ -13,90 +16,124 @@ const CHANGE_RESEARCH_REVIEW_SHARE_PERCENT = 8;
 const OFFER_RESEARCH_TOKENS = 9;
 const CREATE_RESEARCH_MATERIAL = 10;
 
-export async function sendInviteNotificationToInvitee(groupId, invitee) {
-    const groupInfo = await deipRpc.api.getResearchGroupByIdAsync(groupId);
-    const inviteeInfo = await UserProfile.findOne({ '_id': invitee });
+const shouldSendEmailNotification = (user, type) => {
+  return !!user.email && user.notifications.email.includes(type);
+}
+
+class NotificationsService {
+  constructor() {}
+
+  async sendInviteNotificationToInvitee(groupId, invitee) {
+    const [groupInfo, inviteeInfo] = await Promise.all([
+      deipRpc.api.getResearchGroupByIdAsync(groupId),
+      usersService.findUserById(invitee)
+    ]);
 
     const notification = new Notification({
-        username: invitee,
-        status: 'unread',
-        type: 'invitation',
-        meta: {
-            groupInfo: groupInfo,
-            inviteeInfo: inviteeInfo
-        }
+      username: invitee,
+      status: 'unread',
+      type: 'invitation',
+      meta: {
+        groupInfo: groupInfo,
+        inviteeInfo: inviteeInfo
+      }
     });
     const savedInvitation = await notification.save();
     return savedInvitation;
-}
+  }
 
-export async function sendInviteResolvedNotificationToGroup(isApproved, invite) {
-    const groupInfo = await deipRpc.api.getResearchGroupByIdAsync(invite.research_group_id);
-    const inviteeInfo = await UserProfile.findOne({ '_id': invite.account_name });
+  async sendInviteResolvedNotificationToGroup(isApproved, invite) {
+    const [groupInfo, inviteeInfo, rgtList] = await Promise.all([
+      deipRpc.api.getResearchGroupByIdAsync(invite.research_group_id),
+      usersService.findUserById(invite.account_name),
+      deipRpc.api.getResearchGroupTokensByResearchGroupAsync(invite.research_group_id)
+    ]);
 
     const notifications = [];
-    const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(invite.research_group_id);
-    for (let i = 0; i < rgtList.length; i++) {
-        const rgt = rgtList[i];
-        if (rgt.owner != invite.account_name) {
-            const notification = new Notification({
-                username: rgt.owner,
-                status: 'unread',
-                type: isApproved ? 'approved-invitation' : 'rejected-invitation',
-                meta: {
-                    groupInfo: groupInfo,
-                    inviteeInfo: inviteeInfo
-                }
-            });
-            const savedNotification = await notification.save();
-            notifications.push(savedNotification);
+    await bluebird.map(rgtList, async (rgt) => {
+      if (rgt.owner === invite.account_name) return;
+
+      const notification = new Notification({
+        username: rgt.owner,
+        status: 'unread',
+        type: isApproved ? 'approved-invitation' : 'rejected-invitation',
+        meta: {
+          groupInfo: groupInfo,
+          inviteeInfo: inviteeInfo
         }
-    }
+      });
+      const savedNotification = await notification.save();
+      notifications.push(savedNotification);
+    }, { concurrency: 20 })
 
     return notifications;
-}
+  }
 
-export async function sendProposalNotificationToGroup(proposal) {
-    const notifications = [];
-
+  async sendProposalNotificationToGroup(proposal) {
     const group = await deipRpc.api.getResearchGroupByIdAsync(proposal.research_group_id);
     proposal.groupInfo = group;
 
-    if (group.is_personal) return notifications;
-    
-    if (proposal.action === CREATE_RESEARCH_MATERIAL || 
-        proposal.action === START_RESEARCH_TOKEN_SALE) {
+    if (group.is_personal) return [];
 
-        const research = await deipRpc.api.getResearchByIdAsync(proposal.data.research_id);
-        proposal.researchInfo = research;
+    if (
+      proposal.action === CREATE_RESEARCH_MATERIAL
+      || proposal.action === START_RESEARCH_TOKEN_SALE
+    ) {
+      const research = await deipRpc.api.getResearchByIdAsync(proposal.data.research_id);
+      proposal.researchInfo = research;
     }
 
+    const notifications = [];
     if (proposal.action === INVITE_MEMBER) {
+      const invitee = await usersService.findUserById(proposal.data.name);
+      proposal.inviteeInfo = invitee;
 
-        const invitee = await UserProfile.findOne({ '_id': proposal.data.name });
-        proposal.inviteeInfo = invitee;
-
-        if (proposal.is_completed) {
-            const invitation = await sendInviteNotificationToInvitee(proposal.research_group_id, proposal.data.name);
-            notifications.push(invitation);
-        }
+      if (proposal.is_completed) {
+        const invitation = await this.sendInviteNotificationToInvitee(proposal.research_group_id, proposal.data.name);
+        notifications.push(invitation);
+      }
     }
 
     const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(proposal.research_group_id);
-    for (let i = 0; i < rgtList.length; i++) {
-        const rgt = rgtList[i];
-        const creatorProfile = await UserProfile.findOne({ '_id': proposal.creator });
-        proposal.creatorInfo = creatorProfile;
 
-        const notification = new Notification({
-            username: rgt.owner,
-            status: 'unread',
-            type: proposal.is_completed ? 'completed-proposal' : 'new-proposal',
-            meta: proposal
-        });
-        const savedNotification = await notification.save();
-        notifications.push(savedNotification);
-    }
+    await bluebird.map(rgtList, async (rgt) => {
+      const creatorProfile = await usersService.findUserById(proposal.creator);
+      proposal.creatorInfo = creatorProfile;
+
+      const notification = new Notification({
+        username: rgt.owner,
+        status: 'unread',
+        type: proposal.is_completed ? 'completed-proposal' : 'new-proposal',
+        meta: proposal
+      });
+      const savedNotification = await notification.save();
+      notifications.push(savedNotification);
+    }, { concurrency: 20 })
 
     return notifications;
+  }
+
+  async sendNDAContractReceivedNotificationToUser(userId, contractId) {
+    try {
+      const user = await usersService.findUserById(userId);
+      if (shouldSendEmailNotification(user, notificationType.NDA_CONTRACT_RECEIVED)) {
+        await mailer.sendNewNDAContractEmail(user.email, contractId);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async sendFileSharedNotificationToUser(userId, sharedFileId) {
+    try {
+      const user = await usersService.findUserById(userId);
+      if (shouldSendEmailNotification(user, notificationType.FILE_SHARED)) {
+        await mailer.sendNewFileSharedEmail(user.email, sharedFileId);
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
 }
+
+module.exports = new NotificationsService();
