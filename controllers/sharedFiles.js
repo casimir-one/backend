@@ -72,6 +72,7 @@ const askPermission = async (ctx) => {
     } = signedTx['operations'][0][1];
     if (sharedFile.contractId !== contratId) {
       ctx.status = 400;
+      ctx.body = 'Invalid contractId value: file is shared under another contract';
       return;
     }
     const result = await sendTransaction(signedTx);
@@ -111,6 +112,7 @@ const unlockFile = async (ctx) => {
     } = signedTx['operations'][0][1];
     if (sharedFile.permissionRequestId !== permissionRequestId) {
       ctx.status = 400;
+      ctx.body = 'Invalid request_id value';
       return;
     }
     const result = await sendTransaction(signedTx);
