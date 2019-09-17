@@ -58,6 +58,8 @@ router.post('/templates', templates.uploadTemplate)
 router.delete('/templates/refs/:refId', templates.removeTemplate)
 
 router.get('/contracts/nda/refs/:refId', contracts.getContractRef)
+router.post('/contracts/nda/refs/:refId/sign', contracts.signContract)
+router.post('/contracts/nda/refs/:refId/decline', contracts.declineContract)
 router.post('/contracts/nda/refs', contracts.createContractRef)
 router.get('/contracts/nda/refs/:refId/file', contracts.getContractFile)
 

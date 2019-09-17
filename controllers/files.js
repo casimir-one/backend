@@ -275,7 +275,7 @@ const shareFile = async (ctx) => {
         filesShares: subscription.availableFilesSharesBySubscription - 1,
       })
     }
-    notifier.sendFileSharedNotificationToUser(userProfile._id, sharedFile._id);
+    notifier.sendFileSharedNotifications(sharedFile._id);
 
     ctx.status = 200;
   } catch (err) {

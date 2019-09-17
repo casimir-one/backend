@@ -15,7 +15,7 @@ const postVerificationToken = async function (ctx) {
     }
 
     let savedToken = await createVerificationToken(jwtUsername, data);
-    await mailer.sendRegistrationUrl(data.email, savedToken.token);
+    await mailer.sendRegistrationEmail(data.email, savedToken.token);
     ctx.status = 200;
     ctx.body = savedToken;
  

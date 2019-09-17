@@ -2,6 +2,7 @@ import fs from 'fs';
 import deipRpc from '@deip/deip-rpc-client';
 import sharedFilesService from './../services/sharedFiles';
 import filesService from './../services/fileRef';
+import notifier from './../services/notifications';
 import { sendTransaction } from './../utils/blockchain';
 
 const getSharedFile = async (ctx) => {
@@ -84,6 +85,8 @@ const askPermission = async (ctx) => {
 
     const permissionRequest = await deipRpc.api.getNdaContractRequestByContractIdAndHashAsync(contratId, encryptedPayloadHash);
     const updatedSharedFile = await sharedFilesService.askPermissionToSharedFile(sharedFileId, permissionRequest.id);
+    notifier.sendFileSharingRequestForAccessNotifications(updatedSharedFile._id);
+
     ctx.status = 200;
     ctx.body = updatedSharedFile;
   } catch (err) {
@@ -123,6 +126,8 @@ const unlockFile = async (ctx) => {
     }
     await filesService.addAccessKeyToFileRef(sharedFile.fileRefId, accessKey);
     const updatedSharedFile = await sharedFilesService.unlockSharedFile(sharedFileId);
+    notifier.sendFileSharingAccessGrantedNotifications(updatedSharedFile._id);
+
     ctx.status = 200;
     ctx.body = updatedSharedFile;
   } catch (err) {

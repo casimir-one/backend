@@ -86,7 +86,7 @@ const createVerificationToken = async function (ctx) {
       expirationTime: expires,
       pricingPlan: FREE_PRICING_PLAN_ID
     });
-    await mailer.sendRegistrationUrl(email, savedToken.token);
+    await mailer.sendRegistrationEmail(email, savedToken.token);
 
     ctx.status = 200;
   } catch (err) {

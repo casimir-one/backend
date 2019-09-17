@@ -95,22 +95,16 @@ const createContractRef = async (ctx) => {
       .then((contracts) => contracts.filter(c => c.status === 1)[0]);
 
     const { filepath, previewFilepath } = await moveTemplateToContract(templateRef, creatorUsername);
-    const [
-      contractRef,
-      receiverProfile
-    ] = await Promise.all([
-      contractsService.createContractRef({
-        contractId: activeContract.id,
-        templateRef: { ...templateRef, filepath, previewFilepath },
-      }),
-      usersService.findUserById(receiverUsername)
-    ]);
+    const contractRef = await contractsService.createContractRef({
+      contractId: activeContract.id,
+      templateRef: { ...templateRef, filepath, previewFilepath },
+    });
     if (subscription.isLimitedPlan) {
       await subscriptionsService.setSubscriptionCounters(subscription.id, {
         contracts: subscription.availableContractsBySubscription - 1,
       })
     }
-    notifier.sendNDAContractReceivedNotificationToUser(receiverProfile._id, contractRef._id);
+    notifier.sendNDAContractReceivedNotifications(contractRef._id);
 
     ctx.status = 201;
     ctx.body = contractRef;
@@ -157,8 +151,72 @@ async function moveTemplateToContract(templateRef, sender) {
   return { filepath, previewFilepath };
 }
 
+const signContract = async (ctx) => {
+  const refId = ctx.params.refId;
+
+  try {
+    const signedTx = ctx.request.body;
+    const {
+      contract_id: contractId,
+      contract_signer: signee
+    } = signedTx['operations'][0][1];
+
+    if (contractId !== refId) {
+      ctx.status = 400;
+      ctx.body = 'Invalid contract id';
+      return;
+    }
+    const result = await sendTransaction(signedTx);
+    if (!result.isSuccess) {
+      ctx.status = 400;
+      ctx.body = 'Error while sign nda';
+      return;
+    }
+    const contract = await deipRpc.api.getNdaContractAsync(contractId);
+    if (contract.status === 2 && contract.signee === signee) {
+      notifier.sendNDASignedNotifications(contractId);
+    }
+    ctx.status = 204;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500
+    ctx.body = `Internal server error, please try again later`;
+  }
+};
+
+const declineContract = async (ctx) => {
+  const refId = ctx.params.refId;
+
+  try {
+    const signedTx = ctx.request.body;
+    const {
+      contract_id: contractId,
+    } = signedTx['operations'][0][1];
+
+    if (contractId !== refId) {
+      ctx.status = 400;
+      ctx.body = 'Invalid contract id';
+      return;
+    }
+    const result = await sendTransaction(signedTx);
+    if (!result.isSuccess) {
+      ctx.status = 400;
+      ctx.body = 'Error while decline nda';
+      return;
+    }
+    notifier.sendNDADeclinedNotifications(contractId);
+    ctx.status = 204;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500
+    ctx.body = `Internal server error, please try again later`;
+  }
+};
+
 export default {
   getContractRef,
   createContractRef,
   getContractFile,
+  signContract,
+  declineContract,
 }

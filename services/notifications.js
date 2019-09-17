@@ -2,6 +2,7 @@ const bluebird = require('bluebird');
 const deipRpc = require('@deip/deip-rpc-client');
 const usersService = require('./users').default;
 const mailer = require('./emails');
+const sharedFilesService = require('./sharedFiles').default;
 const Notification = require('./../schemas/notification');
 const { notificationType } = require('./../common/enums');
 
@@ -113,22 +114,115 @@ class NotificationsService {
     return notifications;
   }
 
-  async sendNDAContractReceivedNotificationToUser(userId, contractId) {
+  async sendNDAContractReceivedNotifications(contractId) {
     try {
-      const user = await usersService.findUserById(userId);
-      if (shouldSendEmailNotification(user, notificationType.NDA_CONTRACT_RECEIVED)) {
-        await mailer.sendNewNDAContractEmail(user.email, contractId);
+      const contract = await deipRpc.api.getNdaContractAsync(contractId);
+      const [creator, signee] = await Promise.all([
+        usersService.findUserById(contract.creator),
+        usersService.findUserById(contract.signee)
+      ]);
+      if (shouldSendEmailNotification(signee, notificationType.NDA_CONTRACT_RECEIVED)) {
+        await mailer.sendNewNDAContractEmail(signee.email, {
+          contractId,
+          senderName: `${creator.firstName} ${creator.lastName}`.trim() || creator._id,
+          receiverName: signee.firstName.trim() || signee._id,
+        });
       }
     } catch (err) {
       console.error(err);
     }
   }
 
-  async sendFileSharedNotificationToUser(userId, sharedFileId) {
+  async sendNDASignedNotifications(contractId) {
     try {
-      const user = await usersService.findUserById(userId);
-      if (shouldSendEmailNotification(user, notificationType.FILE_SHARED)) {
-        await mailer.sendNewFileSharedEmail(user.email, sharedFileId);
+      const contract = await deipRpc.api.getNdaContractAsync(contractId);
+      const [creator, signee] = await Promise.all([
+        usersService.findUserById(contract.creator),
+        usersService.findUserById(contract.signee)
+      ]);
+      if (shouldSendEmailNotification(creator, notificationType.NDA_CONTRACT_SIGNED)) {
+        await mailer.sendNDASignedEmail(creator.email, {
+          signeeName: `${signee.firstName} ${signee.lastName}`.trim() || signee._id,
+          receiverName: creator.firstName.trim() || creator._id,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async sendNDADeclinedNotifications(contractId) {
+    try {
+      const contract = await deipRpc.api.getNdaContractAsync(contractId);
+      const [creator, signee] = await Promise.all([
+        usersService.findUserById(contract.creator),
+        usersService.findUserById(contract.signee)
+      ]);
+      if (shouldSendEmailNotification(creator, notificationType.NDA_CONTRACT_DECLINED)) {
+        await mailer.sendNDADeclinedEmail(creator.email, {
+          signeeName: `${signee.firstName} ${signee.lastName}`.trim() || signee._id,
+          receiverName: creator.firstName.trim() || creator._id,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async sendFileSharedNotifications(sharedFileId) {
+    try {
+      const sharedFile = await sharedFilesService.getSharedFileById(sharedFileId);
+      const [sender, receiver] = await Promise.all([
+        usersService.findUserById(sharedFile.sender),
+        usersService.findUserById(sharedFile.receiver)
+      ]);
+      if (shouldSendEmailNotification(receiver, notificationType.FILE_SHARED)) {
+        await mailer.sendNewFileSharedEmail(receiver.email, {
+          sharedFileId,
+          receiverName: receiver.firstName.trim() || receiver._id,
+          senderName: `${sender.firstName} ${sender.lastName}`.trim() || sender._id,
+          fileName: sharedFile.filename,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async sendFileSharingRequestForAccessNotifications(sharedFileId) {
+    try {
+      const sharedFile = await sharedFilesService.getSharedFileById(sharedFileId);
+      const [sender, receiver] = await Promise.all([
+        usersService.findUserById(sharedFile.sender),
+        usersService.findUserById(sharedFile.receiver)
+      ]);
+      if (shouldSendEmailNotification(sender, notificationType.FILE_ACCESS_REQUESTED)) {
+        await mailer.sendFileSharingRequestForAccessEmail(sender.email, {
+          sharedFileId,
+          receiverName: sender.firstName.trim() || sender._id,
+          requesterName: `${receiver.firstName} ${receiver.lastName}`.trim() || receiver._id,
+          fileName: sharedFile.filename,
+        });
+      }
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async sendFileSharingAccessGrantedNotifications(sharedFileId) {
+    try {
+      const sharedFile = await sharedFilesService.getSharedFileById(sharedFileId);
+      const [sender, receiver] = await Promise.all([
+        usersService.findUserById(sharedFile.sender),
+        usersService.findUserById(sharedFile.receiver)
+      ]);
+      if (shouldSendEmailNotification(receiver, notificationType.FILE_ACCESS_GRANTED)) {
+        await mailer.sendFileSharingAccessGrantedEmail(receiver.email, {
+          sharedFileId,
+          receiverName: receiver.firstName.trim() || receiver._id,
+          grantorName: `${sender.firstName} ${sender.lastName}`.trim() || sender._id,
+          fileName: sharedFile.filename,
+        });
       }
     } catch (err) {
       console.error(err);

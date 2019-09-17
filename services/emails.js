@@ -2,6 +2,8 @@ const nodemailer = require('nodemailer');
 const config = require('./../config');
 const renderService = require('./render');
 
+const getShareFileUrl = (sharedFileId) => `${config.uiHost}/shared-files/${sharedFileId}`;
+
 class EmailsService {
   constructor() {
     this.transporter = nodemailer.createTransport({
@@ -38,7 +40,7 @@ class EmailsService {
     }
   }
 
-  async sendRegistrationUrl(to, token) {
+  async sendRegistrationEmail(to, token) {
     const confirmationUrl = `${config.uiHost}/sign-up?token=${token}`;
     const htmlToSend = await renderService.registrationEmail(confirmationUrl);
     console.log(confirmationUrl);
@@ -49,31 +51,85 @@ class EmailsService {
     });
   }
 
-  async sendNewNDAContractEmail(to, contractId) {
-    const contractUrl = `${config.uiHost}/contract/${contractId}`;
-    console.log(contractUrl);
+  async sendNewNDAContractEmail(to, {
+    contractId, senderName, receiverName
+  }) {
+    const contractUrl = `${config.uiHost}/contracts/${contractId}`;
+    const htmlToSend = await renderService.ndaInvitationEmail({
+      contractUrl, senderName, receiverName
+    });
     await this.sendMessage({
       to,
-      subject: 'New NDA Contract',
-      html: `
-        <p>
-          Hi! There is new NDA contract for you. Follow link to see:<br />
-          <a href="${contractUrl}" traget="_blank">${contractUrl}</a>
-        </p>`
+      subject: 'NDA Invitation',
+      html: htmlToSend
     })
   }
 
-  async sendNewFileSharedEmail(to, sharedFileId) {
-    const fileUrl = `${config.uiHost}/shared-files/${sharedFileId}`;
-    console.log(fileUrl);
+  async sendNDASignedEmail(to, {
+    receiverName, signeeName
+  }) {
+    const htmlToSend = await renderService.ndaSignedEmail({
+      receiverName, signeeName
+    });
     await this.sendMessage({
       to,
-      subject: 'New Shared File',
-      html: `
-        <p>
-          Hi! There is new shared file with you. Follow link to see:<br />
-          <a href="${fileUrl}" traget="_blank">${fileUrl}</a>
-        </p>`
+      subject: 'NDA Signed',
+      html: htmlToSend
+    })
+  }
+
+  async sendNDADeclinedEmail(to, {
+    receiverName, signeeName
+  }) {
+    const htmlToSend = await renderService.ndaDeclinedEmail({
+      receiverName, signeeName
+    });
+    await this.sendMessage({
+      to,
+      subject: 'NDA Declined',
+      html: htmlToSend
+    })
+  }
+
+  async sendNewFileSharedEmail(to, {
+    sharedFileId, receiverName, senderName, fileName
+  }) {
+    const htmlToSend = await renderService.fileSharingInvitationEmail({
+      sharedFileUrl: getShareFileUrl(sharedFileId),
+      receiverName, senderName, fileName
+    });
+    await this.sendMessage({
+      to,
+      subject: 'File Sharing Invitation',
+      html: htmlToSend
+    })
+  }
+
+  async sendFileSharingRequestForAccessEmail(to, {
+    sharedFileId, receiverName, requesterName, fileName
+  }) {
+    const htmlToSend = await renderService.fileSharingRequestForAccessEmail({
+      sharedFileUrl: getShareFileUrl(sharedFileId),
+      receiverName, requesterName, fileName
+    });
+    await this.sendMessage({
+      to,
+      subject: 'File Sharing Request For Access',
+      html: htmlToSend
+    })
+  }
+
+  async sendFileSharingAccessGrantedEmail(to, {
+    sharedFileId, receiverName, grantorName, fileName
+  }) {
+    const htmlToSend = await renderService.fileSharingAccessGrantedEmail({
+      sharedFileUrl: getShareFileUrl(sharedFileId),
+      receiverName, grantorName, fileName
+    });
+    await this.sendMessage({
+      to,
+      subject: 'File Sharing Request For Access',
+      html: htmlToSend
     })
   }
 }
