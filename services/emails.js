@@ -128,7 +128,7 @@ class EmailsService {
     });
     await this.sendMessage({
       to,
-      subject: 'File Sharing Request For Access',
+      subject: 'File Sharing Access Granted',
       html: htmlToSend
     })
   }
