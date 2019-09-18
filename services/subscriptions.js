@@ -125,24 +125,6 @@ async function setSubscriptionCounters(id, {
   return updatedSubscription;
 }
 
-async function setAvailableContractsCounter(id, value) {
-  let updatedSubscription = await stripeService.updateSubscription(id, {
-    metadata: {
-      availableContractsBySubscription: value
-    }
-  });
-  return updatedSubscription;
-}
-
-async function setAvailableFilesSharesCounter(id, value) {
-  let updatedSubscription = await stripeService.updateSubscription(id, {
-    metadata: {
-      availableFilesSharesBySubscription: value
-    }
-  });
-  return updatedSubscription;
-}
-
 async function cancelSubscription(owner) {
   let user = await usersService.findUserById(owner);
   let updatedSubscription = await stripeService.cancelSubscriptionAtEndOfCurrentBillingPeriod(user.stripeSubscriptionId);
@@ -161,6 +143,4 @@ export default {
   cancelSubscription,
   reactivateSubscription,
   setSubscriptionCounters,
-  setAvailableContractsCounter,
-  setAvailableFilesSharesCounter
 }

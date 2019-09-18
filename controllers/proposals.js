@@ -147,18 +147,14 @@ const createContentProposal = async (ctx) => {
         if (subtractFromSubscription < files.length) {
           subtractFromAdditional = files.length - subtractFromSubscription;
         }
-        const updatePromises = [];
+        const updatedCounters = {};
         if (subtractFromSubscription) {
-          updatePromises.push(subscriptionsService.setSubscriptionCounters(subscription.id, {
-            certificates: subscription.availableCertificatesBySubscription - subtractFromSubscription,
-          }));
+          updatedCounters.certificates = subscription.availableCertificatesBySubscription - subtractFromSubscription;
         }
         if (subtractFromAdditional) {
-          updatePromises.push(subscriptionsService.setSubscriptionCounters(subscription.id, {
-            additionalCertificates: subscription.availableAdditionalCertificates - subtractFromAdditional,
-          }));
+          updatedCounters.additionalCertificates = subscription.availableAdditionalCertificates - subtractFromAdditional;
         }
-        await Promise.all(updatePromises);
+        await subscriptionsService.setSubscriptionCounters(subscription.id, updatedCounters);
       }
 
       ctx.status = 200;
