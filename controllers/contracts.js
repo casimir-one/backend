@@ -53,10 +53,13 @@ const createContractRef = async (ctx) => {
       ctx.body = `Subscription for ${jwtUsername} has expired`;
       return;
     }
-    if (subscription.isLimitedPlan && subscription.availableContractsBySubscription === 0) {
-      ctx.status = 402;
-      ctx.body = `Subscription for ${jwtUsername} has reached the contracts limit`;
-      return;
+    if (subscription.isLimitedPlan) {
+      const limit = subscription.availableContractsBySubscription + subscription.availableAdditionalContracts;
+      if (limit === 0) {
+        ctx.status = 402;
+        ctx.body = `Subscription for ${jwtUsername} has reached the contracts limit`;
+        return;
+      }
     }
   
     const templateRef = await templatesService.findTemplateRefById(templateRefId);
@@ -100,9 +103,15 @@ const createContractRef = async (ctx) => {
       templateRef: { ...templateRef, filepath, previewFilepath },
     });
     if (subscription.isLimitedPlan) {
-      await subscriptionsService.setSubscriptionCounters(subscription.id, {
-        contracts: subscription.availableContractsBySubscription - 1,
-      })
+      if (subscription.availableContractsBySubscription) {
+        await subscriptionsService.setSubscriptionCounters(subscription.id, {
+          contracts: subscription.availableContractsBySubscription - 1,
+        })
+      } else if (subscription.availableAdditionalContracts) {
+        await subscriptionsService.setSubscriptionCounters(subscription.id, {
+          additionalContracts: subscription.availableAdditionalContracts - 1,
+        })
+      }
     }
     notifier.sendNDAContractReceivedNotifications(contractRef._id);
 

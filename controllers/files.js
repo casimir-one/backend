@@ -13,6 +13,8 @@ import notifier from './../services/notifications';
 import usersService from './../services/users';
 import { authorizeResearchGroup } from './../services/auth'
 
+const { sharedFileStatus } = require('./../common/enums');
+
 const listFileRefs = async (ctx) => {
   const projectId = ctx.params.projectId;
   try {
@@ -155,7 +157,7 @@ const exportCypheredData = async (ctx) => {
     const hasFileShared = await sharedFilesService.checkUserHasSharedFile({
       receiver: jwtUsername,
       fileRefId: fileRef._id,
-      status: 'unlocked'
+      status: sharedFileStatus.UNLOCKED,
     });
 
     const authorized = await authorizeResearchGroup(fileRef.organizationId, jwtUsername);
@@ -217,10 +219,14 @@ const shareFile = async (ctx) => {
       ctx.body = `Subscription for ${jwtUsername} has expired`;
       return;
     }
-    if (subscription.isLimitedPlan && subscription.availableFilesSharesBySubscription === 0) {
-      ctx.status = 402;
-      ctx.body = `Subscription for ${jwtUsername} has reached the files share limit`;
-      return;
+
+    if (subscription.isLimitedPlan) {
+      const limit = subscription.availableFilesSharesBySubscription + subscription.availableAdditionalFilesShares;
+      if (limit === 0) {
+        ctx.status = 402;
+        ctx.body = `Subscription for ${jwtUsername} has reached the files share limit`;
+        return;
+      }
     }
 
     const [
@@ -271,9 +277,15 @@ const shareFile = async (ctx) => {
       contractTitle: contract.title,
     });
     if (subscription.isLimitedPlan) {
-      await subscriptionsService.setSubscriptionCounters(subscription.id, {
-        filesShares: subscription.availableFilesSharesBySubscription - 1,
-      })
+      if (subscription.availableFilesSharesBySubscription) {
+        await subscriptionsService.setSubscriptionCounters(subscription.id, {
+          filesShares: subscription.availableFilesSharesBySubscription - 1,
+        })
+      } else if (subscription.availableAdditionalFilesShares) {
+        await subscriptionsService.setSubscriptionCounters(subscription.id, {
+          additionalFilesShares: subscription.availableAdditionalFilesShares - 1,
+        })
+      }
     }
     notifier.sendFileSharedNotifications(sharedFile._id);
 

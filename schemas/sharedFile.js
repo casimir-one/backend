@@ -1,4 +1,6 @@
-import mongoose from 'mongoose';
+const mongoose = require('mongoose');
+
+const { sharedFileStatusValues } = require('./../common/enums');
 
 const Schema = mongoose.Schema;
 
@@ -11,7 +13,7 @@ const SharedFile = new Schema({
   "permissionRequestId": { type: String, required: false, default: null },
   "status": {
     type: String,
-    enum: ['locked', 'access_requested', 'unlocked'],
+    enum: sharedFileStatusValues,
     required: true,
   },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

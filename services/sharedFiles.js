@@ -1,8 +1,9 @@
-import SharedFile from '../schemas/sharedFile';
+const SharedFile = require('../schemas/sharedFile');
+const { sharedFileStatus } = require('./../common/enums');
 
 async function createSharedFile ({
   fileRefId, filename, sender, receiver,
-  contractId, status = 'locked',
+  contractId, status = sharedFileStatus.LOCKED,
 }) {
   const newSharedFile = new SharedFile({
     fileRefId, filename, sender, receiver, status
@@ -70,7 +71,7 @@ async function getSharedFiles ({
 async function askPermissionToSharedFile (_id, permissionRequestId) {
   return SharedFile.findOneAndUpdate({ _id }, {
     $set: {
-      status: 'access_requested',
+      status: sharedFileStatus.ACCESS_REQUESTED,
       permissionRequestId: `${permissionRequestId}`,
     }
   }, { new: true });
@@ -79,7 +80,7 @@ async function askPermissionToSharedFile (_id, permissionRequestId) {
 async function unlockSharedFile (_id) {
   return SharedFile.findOneAndUpdate({ _id }, {
     $set: {
-      status: 'unlocked'
+      status: sharedFileStatus.UNLOCKED,
     }
   }, { new: true });
 }

@@ -1,11 +1,15 @@
 import config from './../config';
 import subscriptionsService from './../services/subscriptions';
 import pricingPlansService from './../services/pricingPlans';
-import certificatesPackagesService from './../services/certificatesPackages';
+import additionalPackagesService from './../services/additionalPackages';
 import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import util from 'util';
+import _ from 'lodash';
 import bluebird from 'bluebird';
+import subscriptions from './../services/subscriptions';
+
+const { additionalPackageType } = require('./../common/enums');
 
 // See https://stripe.com/docs/api/subscriptions/object#subscription_object-status
 const incomplete = "incomplete";
@@ -15,11 +19,6 @@ const active = "active";
 const past_due = "past_due"
 const canceled = "canceled";
 const unpaid = "unpaid";
-
-const PAYMENT_INTENTS = {
-  ADDITIONAL_CERTIFICATES: 'additional_certificates',
-};
-
 
 const getUserSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
@@ -161,26 +160,32 @@ const updateBillingCard = async function (ctx) {
   }
 };
 
-const buyCertificatesPackage = async function (ctx) {
-  const username = ctx.state.user.username;
-
+const buyAdditionalPackage = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
   const packageId = ctx.params.id;
+
   try {
-    const [user, certificatesPackage] = await Promise.all([
-      usersService.findUserById(username),
-      certificatesPackagesService.findCertificatesPackageById(packageId)
+    const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
+    if (!subscription.isActive) {
+      ctx.status = 402;
+      ctx.body = `Subscription for ${jwtUsername} has expired`;
+      return;
+    }
+    const [user, additionalPackage] = await Promise.all([
+      usersService.findUserById(jwtUsername),
+      additionalPackagesService.findAdditionalPackageById(packageId)
     ]);
     const customerInfo = await stripeService.findCustomer(user.stripeCustomerId);
     const intent = await stripeService.createPaymentIntent({
-      amount: certificatesPackage.price,
+      amount: additionalPackage.price,
       customerId: user.stripeCustomerId,
       paymentMethod: customerInfo.default_source.id,
       metadata: {
-        username,
-        numberOfCertificates: certificatesPackage.numberOfCertificates,
-        intentType: PAYMENT_INTENTS.ADDITIONAL_CERTIFICATES
+        object: additionalPackage.type,
+        username: jwtUsername,
+        numberOfUnits: additionalPackage.numberOfUnits,
       },
-    })
+    });
 
     ctx.status = 200;
     ctx.body = {
@@ -193,10 +198,10 @@ const buyCertificatesPackage = async function (ctx) {
   }
 };
 
-const getCertificatesPackages = async function (ctx) {
+const getAdditionalPackages = async function (ctx) {
   try {
     ctx.status = 200;
-    ctx.body = await certificatesPackagesService.findCertificatesPackages();
+    ctx.body = await additionalPackagesService.findAdditionalPackages({ active: true });
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -333,16 +338,29 @@ const customerPaymentIntentSucceededWebhook = async function (ctx) {
     let event;
     try {
       event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
-      const { intentType } = event.data.object.metadata;
-      switch (intentType) {
-        case PAYMENT_INTENTS.ADDITIONAL_CERTIFICATES:
-          const { username, numberOfCertificates } = event.data.object.metadata;
-          const subscription = await subscriptionsService.findSubscriptionByOwner(username);
-          const toAdd = parseInt(numberOfCertificates) || 0;
-          await subscriptionsService.setSubscriptionCounters(subscription.id, {
-            additionalCertificates: subscription.availableAdditionalCertificates + toAdd,
-          });
+      const { object, username, numberOfUnits } = event.data.object.metadata;
+      const subscription = await subscriptionsService.findSubscriptionByOwner(username);
+      const numberOfUnitsToAdd = parseInt(numberOfUnits) || 0;
+      let updatedSubscriptionCounters = {};
+      switch (object) {
+        case additionalPackageType.CERTIFICATES:
+          updatedSubscriptionCounters = {
+            additionalCertificates: subscription.availableAdditionalCertificates + numberOfUnitsToAdd,
+          };
           break;
+        case additionalPackageType.CONTRACTS:
+          updatedSubscriptionCounters = {
+            additionalContracts: subscription.availableAdditionalContracts + numberOfUnitsToAdd,
+          };
+          break;
+        case additionalPackageType.FILES_SHARES:
+          updatedSubscriptionCounters = {
+            additionalFilesShares: subscription.availableAdditionalFilesShares + numberOfUnitsToAdd,
+          };
+          break;
+      }
+      if (!_.isEmpty(updatedSubscriptionCounters)) {
+        await subscriptionsService.setSubscriptionCounters(subscription.id, updatedSubscriptionCounters);
       }
     } catch (err) {
       console.log(err);
@@ -367,8 +385,8 @@ export default {
   processStripePayment,
   cancelStripeSubscription,
   reactivateSubscription,
-  getCertificatesPackages,
-  buyCertificatesPackage,
+  getAdditionalPackages,
+  buyAdditionalPackage,
 
   customerSubscriptionCreatedWebhook,
   customerSubscriptionUpdatedWebhook,

@@ -100,7 +100,7 @@ const createContentProposal = async (ctx) => {
       const limit = subscription.availableCertificatesBySubscription + subscription.availableAdditionalCertificates;
       if (operations.length > limit) {
         ctx.status = 402;
-        ctx.body = `Subscription ${subscription.id} for ${jwtUsername} is under "${subscription.pricingPlanId}" plan and has reached the limit.`;
+        ctx.body = `Subscription for ${jwtUsername} has reached the certificates limit`;
         return;
       }
     }

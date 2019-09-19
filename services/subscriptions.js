@@ -13,6 +13,8 @@ async function findSubscriptionByOwner(owner) {
     availableContractsBySubscription: 0,
     availableFilesSharesBySubscription: 0,
     availableAdditionalCertificates: 0,
+    availableAdditionalContracts: 0,
+    availableAdditionalFilesShares: 0,
     isWaitingFor3DSecure: null,
     isPaymentFailed: null,
     isCanceling: null,
@@ -47,6 +49,8 @@ async function findSubscriptionByOwner(owner) {
     subscription.availableContractsBySubscription = parseInt(stripeSubscription.metadata.availableContractsBySubscription) || 0;
     subscription.availableFilesSharesBySubscription = parseInt(stripeSubscription.metadata.availableFilesSharesBySubscription) || 0;
     subscription.availableAdditionalCertificates = parseInt(stripeSubscription.metadata.availableAdditionalCertificates) || 0;
+    subscription.availableAdditionalContracts = parseInt(stripeSubscription.metadata.availableAdditionalContracts) || 0;
+    subscription.availableAdditionalFilesShares = parseInt(stripeSubscription.metadata.availableAdditionalFilesShares) || 0;
     subscription.isWaitingFor3DSecure = (
       stripeSubscription.status === 'incomplete'
       && stripeSubscription.latestInvoice && stripeSubscription.latestInvoice.status === 'open'
@@ -105,7 +109,8 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
 }
 
 async function setSubscriptionCounters(id, {
-  certificates, contracts, filesShares, additionalCertificates,
+  certificates, contracts, filesShares,
+  additionalCertificates, additionalContracts, additionalFilesShares,
 }) {
   const metadataToUpdate = {};
   if (certificates !== undefined) {
@@ -119,6 +124,12 @@ async function setSubscriptionCounters(id, {
   }
   if (additionalCertificates !== undefined) {
     metadataToUpdate.availableAdditionalCertificates = additionalCertificates;
+  }
+  if (additionalContracts !== undefined) {
+    metadataToUpdate.availableAdditionalContracts = additionalContracts;
+  }
+  if (additionalFilesShares !== undefined) {
+    metadataToUpdate.availableAdditionalFilesShares = additionalFilesShares;
   }
 
   let updatedSubscription = await stripeService.updateSubscription(id, { metadata: metadataToUpdate });

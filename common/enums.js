@@ -10,3 +10,20 @@ const notificationType = {
 };
 module.exports.notificationType = notificationType;
 module.exports.notificationTypeValues = _.values(notificationType);
+
+const additionalPackageType = {
+  CERTIFICATES: 'certificates',
+  CONTRACTS: 'contracts',
+  FILES_SHARES: 'files_shares',
+};
+const additionalPackageTypeValues = _.values(additionalPackageType);
+module.exports.additionalPackageType = additionalPackageType;
+module.exports.additionalPackageTypeValues = additionalPackageTypeValues;
+
+const sharedFileStatus = {
+  LOCKED: 'locked',
+  ACCESS_REQUESTED: 'access_requested',
+  UNLOCKED: 'unlocked',
+};
+module.exports.sharedFileStatus = sharedFileStatus;
+module.exports.sharedFileStatusValues = _.values(sharedFileStatus);

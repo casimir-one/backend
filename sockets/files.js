@@ -9,6 +9,7 @@ import deipRpc from '@deip/deip-rpc-client';
 import { authorizeResearchGroup } from './../services/auth'
 import uuidv4 from "uuid/v4";
 
+const { sharedFileStatus } = require('./../common/enums');
 
 const uploadSessions = {};
 const downloadSessions = {};
@@ -186,7 +187,7 @@ async function getDownloadSession(username, { fileId, uuid }) {
       const hasFileShared = await sharedFilesService.checkUserHasSharedFile({
         receiver: username,
         fileRefId: fileId,
-        status: 'unlocked'
+        status: sharedFileStatus.UNLOCKED,
       });
 
       const authorizedInGroup = await authorizeResearchGroup(fileRef.organizationId, username);
