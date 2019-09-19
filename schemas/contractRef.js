@@ -5,7 +5,7 @@ import TemplateRef from './templateRef';
 const Schema = mongoose.Schema;
 
 const ContractRef = new Schema({
-  "_id": { type: String },
+  "_id": { type: Number },
   "templateRef": TemplateRef.schema,
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 

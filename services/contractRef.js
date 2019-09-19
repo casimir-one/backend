@@ -11,7 +11,7 @@ async function createContractRef({
 }) {
 
   const contractRef = new ContractRef({
-    _id: `${contractId}`,
+    _id: contractId,
     templateRef,
   });
   const savedRef = await contractRef.save();

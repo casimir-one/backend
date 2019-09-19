@@ -9,8 +9,8 @@ const SharedFile = new Schema({
   "filename": { type: String, required: true },
   "sender": { type: String, required: true },
   "receiver": { type: String, required: true },
-  "contractId": { type: String, required: false, default: null },
-  "permissionRequestId": { type: String, required: false, default: null },
+  "contractId": { type: Number, required: false, default: null },
+  "permissionRequestId": { type: Number, required: false, default: null },
   "status": {
     type: String,
     enum: sharedFileStatusValues,

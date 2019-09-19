@@ -9,7 +9,7 @@ async function createSharedFile ({
     fileRefId, filename, sender, receiver, status
   });
   if (contractId || contractId === 0) {
-    newSharedFile.contractId = `${contractId}`;
+    newSharedFile.contractId = contractId;
   }
   return newSharedFile.save();
 }
@@ -59,7 +59,7 @@ async function getSharedFiles ({
   }
 
   if (contractId || contractId === 0) {
-    query.contractId = `${contractId}`;
+    query.contractId = contractId;
   }
   if (fileRefId) {
     query.fileRefId = fileRefId;
@@ -72,7 +72,7 @@ async function askPermissionToSharedFile (_id, permissionRequestId) {
   return SharedFile.findOneAndUpdate({ _id }, {
     $set: {
       status: sharedFileStatus.ACCESS_REQUESTED,
-      permissionRequestId: `${permissionRequestId}`,
+      permissionRequestId,
     }
   }, { new: true });
 }
