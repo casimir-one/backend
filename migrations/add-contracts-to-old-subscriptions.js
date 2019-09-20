@@ -32,7 +32,7 @@ const run = async () => {
     ) {
       await subscriptionsService.setSubscriptionCounters(stripeSubscriptionId, {
         contracts: 10,
-        filesShares: 100,
+        filesShares: 50,
       })
     }
   }, { concurrency: 50 })
