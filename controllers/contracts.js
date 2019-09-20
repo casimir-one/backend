@@ -41,8 +41,8 @@ const createContractRef = async (ctx) => {
       signedTx
     } = ctx.request.body;
     const {
-      creator: creatorUsername,
-      signee: receiverUsername,
+      party_a: creatorUsername,
+      party_b: receiverUsername,
       contract_hash: contractHash,
       end_date: expirationDate
     } = signedTx['operations'][0][1];
@@ -182,7 +182,7 @@ const signContract = async (ctx) => {
       return;
     }
     const contract = await deipRpc.api.getNdaContractAsync(contractId);
-    if (contract.status === 2 && contract.signee === signee) {
+    if (contract.status === 2 && contract.party_b === signee) {
       notifier.sendNDASignedNotifications(contractId);
     }
     ctx.status = 204;

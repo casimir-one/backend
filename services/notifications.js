@@ -118,8 +118,8 @@ class NotificationsService {
     try {
       const contract = await deipRpc.api.getNdaContractAsync(contractId);
       const [creator, signee] = await Promise.all([
-        usersService.findUserById(contract.creator),
-        usersService.findUserById(contract.signee)
+        usersService.findUserById(contract.party_a),
+        usersService.findUserById(contract.party_b)
       ]);
       if (shouldSendEmailNotification(signee, notificationType.NDA_CONTRACT_RECEIVED)) {
         await mailer.sendNewNDAContractEmail(signee.email, {
@@ -137,8 +137,8 @@ class NotificationsService {
     try {
       const contract = await deipRpc.api.getNdaContractAsync(contractId);
       const [creator, signee] = await Promise.all([
-        usersService.findUserById(contract.creator),
-        usersService.findUserById(contract.signee)
+        usersService.findUserById(contract.party_a),
+        usersService.findUserById(contract.party_b)
       ]);
       if (shouldSendEmailNotification(creator, notificationType.NDA_CONTRACT_SIGNED)) {
         await mailer.sendNDASignedEmail(creator.email, {
@@ -155,8 +155,8 @@ class NotificationsService {
     try {
       const contract = await deipRpc.api.getNdaContractAsync(contractId);
       const [creator, signee] = await Promise.all([
-        usersService.findUserById(contract.creator),
-        usersService.findUserById(contract.signee)
+        usersService.findUserById(contract.party_a),
+        usersService.findUserById(contract.party_b)
       ]);
       if (shouldSendEmailNotification(creator, notificationType.NDA_CONTRACT_DECLINED)) {
         await mailer.sendNDADeclinedEmail(creator.email, {
