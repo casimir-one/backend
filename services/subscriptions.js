@@ -105,7 +105,10 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
     });
   }
 
-  return subscription.latest_invoice.payment_intent.status;
+  return {
+    status: subscription.latest_invoice.payment_intent.status,
+    clientSecret: subscription.latest_invoice.payment_intent.client_secret
+  };
 }
 
 async function setSubscriptionCounters(id, {
