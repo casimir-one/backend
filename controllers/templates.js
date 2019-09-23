@@ -106,7 +106,7 @@ const templatesUploader = multer({
 const uploadTemplate = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const organizationId = ctx.request.header['organization-id'];
-  const templateTitle = ctx.request.header['template-title'];
+  const templateTitle = decodeURIComponent(ctx.request.header['template-title']);
 
   try {
 
