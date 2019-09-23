@@ -106,13 +106,12 @@ const templatesUploader = multer({
 const uploadTemplate = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const organizationId = ctx.request.header['organization-id'];
-  const templateTitle = decodeURIComponent(ctx.request.header['template-title']);
 
   try {
 
-    if (organizationId == null || templateTitle == null) {
+    if (organizationId === null) {
       ctx.status = 404;
-      ctx.body = `"Organization-Id", "Template-Title" headers are required`;
+      ctx.body = `"Organization-Id" header is required`;
       return;
     }
 
@@ -132,6 +131,7 @@ const uploadTemplate = async (ctx) => {
         'size': ctx.req.file.size
       });
     }));
+    const { templateTitle } = ctx.req.body; // use ctx.req, not ctx.request because of koa-multer
 
     const filepath = path.relative(process.cwd(), result.path);
     let previewFilepath = filepath;
@@ -144,7 +144,7 @@ const uploadTemplate = async (ctx) => {
     const hash = await filesUtil.sha256(filepath);
 
     const templateRef = await templatesService.createTemplateRef({
-      title: templateTitle,
+      title: templateTitle || result.filename,
       organizationId: organizationId,
       originalname: result.filename.substring(result.filename.indexOf('_') + 1, result.filename.length),
       filename: result.filename,
