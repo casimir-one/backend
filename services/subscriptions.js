@@ -2,6 +2,7 @@ import pricingPlansService from './../services/pricingPlans';
 import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import { FREE_PRICING_PLAN_ID, UNLIMITED_PRICING_PLAN_ID } from './../common/constants';
+import { stripeSubscriptionStatus } from './../common/enums';
 
 async function findSubscriptionByOwner(owner) {
   const subscription = {
@@ -9,6 +10,7 @@ async function findSubscriptionByOwner(owner) {
     pricingPlanId: null,
     isLimitedPlan: true,
     isActive: false,
+    isTrialing: false,
     availableCertificatesBySubscription: 0,
     availableContractsBySubscription: 0,
     availableFilesSharesBySubscription: 0,
@@ -44,7 +46,8 @@ async function findSubscriptionByOwner(owner) {
     subscription.id = stripeSubscription.id;
     subscription.pricingPlanId = stripeSubscription.plan.nickname;
     subscription.isLimitedPlan = true;
-    subscription.isActive = ['active', 'trialing'].includes(stripeSubscription.status);
+    subscription.isActive = [stripeSubscriptionStatus.ACTIVE, stripeSubscriptionStatus.TRIALING].includes(stripeSubscription.status);
+    subscription.isTrialing = stripeSubscription.status === stripeSubscriptionStatus.TRIALING;
     subscription.availableCertificatesBySubscription = parseInt(stripeSubscription.metadata.availableCertificatesBySubscription) || 0;
     subscription.availableContractsBySubscription = parseInt(stripeSubscription.metadata.availableContractsBySubscription) || 0;
     subscription.availableFilesSharesBySubscription = parseInt(stripeSubscription.metadata.availableFilesSharesBySubscription) || 0;
@@ -52,14 +55,14 @@ async function findSubscriptionByOwner(owner) {
     subscription.availableAdditionalContracts = parseInt(stripeSubscription.metadata.availableAdditionalContracts) || 0;
     subscription.availableAdditionalFilesShares = parseInt(stripeSubscription.metadata.availableAdditionalFilesShares) || 0;
     subscription.isWaitingFor3DSecure = (
-      stripeSubscription.status === 'incomplete'
+      stripeSubscription.status === stripeSubscriptionStatus.INCOMPLETE
       && stripeSubscription.latestInvoice && stripeSubscription.latestInvoice.status === 'open'
       && stripeSubscription.latestInvoice.paymentIntent && stripeSubscription.latestInvoice.paymentIntent.status === 'requires_action'
     );
     subscription.isPaymentFailed = (
-      (stripeSubscription.status === 'incomplete_expired')
+      (stripeSubscription.status === stripeSubscriptionStatus.INCOMPLETE_EXPIRED)
       || (
-        stripeSubscription.status === 'incomplete' && 
+        stripeSubscription.status === stripeSubscriptionStatus.INCOMPLETE &&
         stripeSubscription.latestInvoice && stripeSubscription.latestInvoice.status === 'open' &&
         stripeSubscription.latestInvoice.paymentIntent && stripeSubscription.latestInvoice.paymentIntent.status === 'requires_payment_method'
       )
@@ -87,28 +90,42 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
   }
 
   const pricingPlan = await pricingPlansService.findPricingPlanByStripeId(planId);
-  const subscription = await stripeService.createSubscription(customerId, {
+  const subscriptionData = {
     planId,
     metadata: {
       availableCertificatesBySubscription: 0,
       availableContractsBySubscription: 0,
       availableFilesSharesBySubscription: 0,
     }
-  });
+  };
+  if (pricingPlan.trialTerms && pricingPlan.trialTerms.periodDays > 0) {
+    subscriptionData.trialPeriodDays = pricingPlan.trialTerms.periodDays;
+    subscriptionData.metadata.availableCertificatesBySubscription = pricingPlan.trialTerms.certificateLimit;
+    subscriptionData.metadata.availableContractsBySubscription = pricingPlan.trialTerms.contractLimit;
+    subscriptionData.metadata.availableFilesSharesBySubscription = pricingPlan.trialTerms.fileShareLimit;
+  }
+  const subscription = await stripeService.createSubscription(customerId, subscriptionData);
 
   await usersService.updateStripeInfo(owner, customerId, subscription.id, planId);
-  if (subscription.latest_invoice.payment_intent.status == "succeeded") {
-    await setSubscriptionCounters(subscription.id, {
-      certificates: pricingPlan.terms.certificateLimit.limit,
-      contracts: pricingPlan.terms.contractLimit.limit,
-      filesShares: pricingPlan.terms.fileShareLimit.limit,
-    });
+
+  let status;
+  let clientSecret = null;
+  if (subscription.status === stripeSubscriptionStatus.TRIALING) {
+    status = stripeSubscriptionStatus.TRIALING;
+  } else {
+    status = subscription.latest_invoice.payment_intent.status;
+    if (subscription.latest_invoice.payment_intent.status === "succeeded") {
+      await setSubscriptionCounters(subscription.id, {
+        certificates: pricingPlan.terms.certificateLimit.limit,
+        contracts: pricingPlan.terms.contractLimit.limit,
+        filesShares: pricingPlan.terms.fileShareLimit.limit,
+      });
+    } else {
+      clientSecret = subscription.latest_invoice.payment_intent.client_secret;
+    }
   }
 
-  return {
-    status: subscription.latest_invoice.payment_intent.status,
-    clientSecret: subscription.latest_invoice.payment_intent.client_secret
-  };
+  return { status, clientSecret };
 }
 
 async function setSubscriptionCounters(id, {
@@ -165,6 +182,7 @@ async function changeSubscription(owner, newPlanId) {
     }],
     prorate: false,
     billing_cycle_anchor: 'now',
+    trial_end: 'now', // if subscription is in trial mode
   })
   await usersService.updateStripeInfo(
     user._id,

@@ -9,16 +9,10 @@ import _ from 'lodash';
 import bluebird from 'bluebird';
 import subscriptions from './../services/subscriptions';
 
-const { additionalPackageType } = require('./../common/enums');
-
-// See https://stripe.com/docs/api/subscriptions/object#subscription_object-status
-const incomplete = "incomplete";
-const incomplete_expired = "incomplete_expired"
-const trialing = "trialing";
-const active = "active";
-const past_due = "past_due"
-const canceled = "canceled";
-const unpaid = "unpaid";
+const {
+  additionalPackageType,
+  stripeSubscriptionStatus
+} = require('./../common/enums');
 
 const getUserSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
@@ -244,9 +238,9 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
     }
 
     let { data: { object: { id, customer, status } } } = event;
-    if (status == incomplete) {
+    if (status === stripeSubscriptionStatus.INCOMPLETE) {
       // this is usually related to 3D Secure
-    } else if (status == active) {
+    } else if (status === stripeSubscriptionStatus.ACTIVE) {
       console.log(`TODO: Send email to info@deip.world to notify DEIP team about new account`);
       let stripeCustomer = await stripeService.findCustomer(customer);
       let to = stripeCustomer.email;
@@ -296,13 +290,13 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
 
     if (
       previousStatus !== undefined
-      && [past_due, incomplete].includes(previousStatus)
-      && currentStatus === active
+      && [stripeSubscriptionStatus.PAST_DUE, stripeSubscriptionStatus.INCOMPLETE].includes(previousStatus)
+      && currentStatus === stripeSubscriptionStatus.ACTIVE
     ) {
       /**
        * in cases when:
        * - created subscription is activated after successful payment
-       * - existing subscription is activated after paid debt
+       * - existing subscription is activated after paid debt (regular of trial)
        */
       //
       let stripeSubscription = await stripeService.findSubscription(id);
@@ -316,7 +310,7 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       let stripeCustomer = await stripeService.findCustomer(customer);
       let to = stripeCustomer.email;
       console.log(`TODO: Send product Greeting letter`);
-    } else if (previousStatus !== undefined && previousStatus == active && currentStatus == past_due) {
+    } else if (previousStatus !== undefined && previousStatus === stripeSubscriptionStatus.ACTIVE && currentStatus === stripeSubscriptionStatus.PAST_DUE) {
       //  Payment for this subscription has failed first time
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
@@ -343,12 +337,13 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     if (
       previousCurrentPeriodEnd !== undefined
       && previousCurrentPeriodEnd !== currentCurrentPeriodEnd
-      && currentStatus === active
+      && currentStatus === stripeSubscriptionStatus.ACTIVE
     ) {
       /**
        * in cases when:
        * - subscription is renewed
        * - subscription is updated
+       * - subscription is now active after trial and payment was succeeded
        */
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);

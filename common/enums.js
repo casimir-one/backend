@@ -27,3 +27,15 @@ const sharedFileStatus = {
 };
 module.exports.sharedFileStatus = sharedFileStatus;
 module.exports.sharedFileStatusValues = _.values(sharedFileStatus);
+
+// https://stripe.com/docs/api/subscriptions/object#subscription_object-status
+const stripeSubscriptionStatus = {
+  INCOMPLETE: 'incomplete',
+  INCOMPLETE_EXPIRED: 'incomplete_expired',
+  TRIALING: 'trialing',
+  ACTIVE: 'active',
+  PAST_DUE: 'past_due',
+  CANCELED: 'canceled',
+  UNPAID: 'unpaid',
+};
+module.exports.stripeSubscriptionStatus = stripeSubscriptionStatus;
