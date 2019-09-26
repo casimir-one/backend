@@ -20,7 +20,40 @@ const PricingPlan = new Schema({
           }
         },
         required: false
+      },
+      "contractLimit": {
+        type: {
+          "limit": { type: Number, required: true },
+          "period": {
+            type: String,
+            enum: ["month", "year"],
+            required: true,
+            default: "month"
+          }
+        },
+        required: false
+      },
+      "fileShareLimit": {
+        type: {
+          "limit": { type: Number, required: true },
+          "period": {
+            type: String,
+            enum: ["month", "year"],
+            required: true,
+            default: "month"
+          }
+        },
+        required: false
       }
+    },
+    required: false
+  },
+  "trialTerms": {
+    type: {
+      "periodDays": { type: Number, required: true },
+      "certificateLimit": { type: Number },
+      "contractLimit": { type: Number },
+      "fileShareLimit": { type: Number },
     },
     required: false
   },

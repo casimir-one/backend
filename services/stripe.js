@@ -33,14 +33,18 @@ async function updateCustomer(customerId, { email, sourceCardToken }) {
 }
 
 async function createSubscription(customerId, {
-  planId, metadata
+  planId, trialPeriodDays, metadata
 }) {
-  return stripe.subscriptions.create({
+  const subscriptionData = {
     customer: customerId,
     metadata,
     items: [{ plan: planId }],
     expand: ['latest_invoice.payment_intent']
-  });
+  };
+  if (trialPeriodDays !== undefined && trialPeriodDays > 0) {
+    subscriptionData.trial_period_days = trialPeriodDays;
+  }
+  return stripe.subscriptions.create(subscriptionData);
 }
 
 async function findSubscription(subscriptionId) {

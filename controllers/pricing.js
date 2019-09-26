@@ -6,19 +6,14 @@ import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import util from 'util';
 import _ from 'lodash';
+import { FREE_PRICING_PLAN_ID } from './../common/constants';
 import bluebird from 'bluebird';
 import subscriptions from './../services/subscriptions';
 
-const { additionalPackageType } = require('./../common/enums');
-
-// See https://stripe.com/docs/api/subscriptions/object#subscription_object-status
-const incomplete = "incomplete";
-const incomplete_expired = "incomplete_expired"
-const trialing = "trialing";
-const active = "active";
-const past_due = "past_due"
-const canceled = "canceled";
-const unpaid = "unpaid";
+const {
+  additionalPackageType,
+  stripeSubscriptionStatus
+} = require('./../common/enums');
 
 const getUserSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
@@ -65,7 +60,7 @@ const processStripePayment = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
 
   try {
-    let { 
+    let {
       stripeToken,
       customerEmail,
       planId,
@@ -107,10 +102,23 @@ const reactivateSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
 
   try {
-    let result = await subscriptionsService.reactivateSubscription(jwtUsername);
-    ctx.status = 200;
-    ctx.body = result;
+    await subscriptionsService.reactivateSubscription(jwtUsername);
+    ctx.status = 204;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
 
+const changeSubscription = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+    const { planId } = ctx.request.body;
+
+    await subscriptionsService.changeSubscription(jwtUsername, planId);
+    ctx.status = 204;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -166,7 +174,7 @@ const buyAdditionalPackage = async function (ctx) {
 
   try {
     const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
-    if (!subscription.isActive) {
+    if (!subscription.isActive || subscription.pricingPlanId === FREE_PRICING_PLAN_ID) {
       ctx.status = 402;
       ctx.body = `Subscription for ${jwtUsername} has expired`;
       return;
@@ -231,9 +239,9 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
     }
 
     let { data: { object: { id, customer, status } } } = event;
-    if (status == incomplete) {
+    if (status === stripeSubscriptionStatus.INCOMPLETE) {
       // this is usually related to 3D Secure
-    } else if (status == active) {
+    } else if (status === stripeSubscriptionStatus.ACTIVE) {
       console.log(`TODO: Send email to info@deip.world to notify DEIP team about new account`);
       let stripeCustomer = await stripeService.findCustomer(customer);
       let to = stripeCustomer.email;
@@ -247,7 +255,6 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
     ctx.body = err.message;
   }
 }
-
 
 const customerSubscriptionUpdatedWebhook = async function (ctx) {
   
@@ -267,13 +274,32 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     }
 
     let { 
-      object: { id, customer, status: currentStatus, cancel_at_period_end: currentCancelAtPeriodEnd, current_period_end: currentCurrentPeriodEnd }, 
-      previous_attributes: { status: previousStatus, cancel_at_period_end: previousCancelAtPeriodEnd, current_period_end: previousCurrentPeriodEnd } 
+      object: {
+        id,
+        customer,
+        status: currentStatus,
+        cancel_at_period_end: currentCancelAtPeriodEnd,
+        current_period_end: currentCurrentPeriodEnd
+      },
+      previous_attributes: {
+        status: previousStatus,
+        cancel_at_period_end: previousCancelAtPeriodEnd,
+        current_period_end: previousCurrentPeriodEnd
+      }
     } = event.data;
 
 
-    if (previousStatus !== undefined && previousStatus == incomplete && currentStatus == active) {
-      // subscription is activated after 3D Secure confirmation
+    if (
+      previousStatus !== undefined
+      && [stripeSubscriptionStatus.PAST_DUE, stripeSubscriptionStatus.INCOMPLETE].includes(previousStatus)
+      && currentStatus === stripeSubscriptionStatus.ACTIVE
+    ) {
+      /**
+       * in cases when:
+       * - created subscription is activated after successful payment
+       * - existing subscription is activated after paid debt (regular of trial)
+       */
+      //
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
       await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
@@ -285,7 +311,7 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       let stripeCustomer = await stripeService.findCustomer(customer);
       let to = stripeCustomer.email;
       console.log(`TODO: Send product Greeting letter`);
-    } else if (previousStatus !== undefined && previousStatus == active && currentStatus == past_due) {
+    } else if (previousStatus !== undefined && previousStatus === stripeSubscriptionStatus.ACTIVE && currentStatus === stripeSubscriptionStatus.PAST_DUE) {
       //  Payment for this subscription has failed first time
       let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
@@ -309,8 +335,17 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     }
 
 
-    if (previousCurrentPeriodEnd !== undefined && previousCurrentPeriodEnd != currentCurrentPeriodEnd) {
-      // subscription renewal
+    if (
+      previousCurrentPeriodEnd !== undefined
+      && previousCurrentPeriodEnd !== currentCurrentPeriodEnd
+      && currentStatus === stripeSubscriptionStatus.ACTIVE
+    ) {
+      /**
+       * in cases when:
+       * - subscription is renewed
+       * - subscription is updated
+       * - subscription is now active after trial and payment was succeeded
+       */
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
       await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
@@ -385,6 +420,7 @@ export default {
   processStripePayment,
   cancelStripeSubscription,
   reactivateSubscription,
+  changeSubscription,
   getAdditionalPackages,
   buyAdditionalPackage,
 

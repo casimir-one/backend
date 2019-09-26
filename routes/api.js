@@ -48,6 +48,7 @@ router.put('/pricing/billing-settings/card', pricing.updateBillingCard)
 router.post('/pricing/subscription', pricing.processStripePayment)
 router.put('/pricing/cancel/subscription', pricing.cancelStripeSubscription)
 router.put('/pricing/reactivate/subscription', pricing.reactivateSubscription)
+router.put('/pricing/change/subscription', pricing.changeSubscription)
 router.get('/pricing/additional-packages', pricing.getAdditionalPackages)
 router.post('/pricing/additional-packages/:id/buy', pricing.buyAdditionalPackage)
 
