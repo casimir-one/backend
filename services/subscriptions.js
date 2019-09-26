@@ -32,7 +32,8 @@ async function findSubscriptionByOwner(owner) {
     } else if (user.appPricingPlanId === FREE_PRICING_PLAN_ID) {
       subscription.pricingPlanId = FREE_PRICING_PLAN_ID;
       subscription.isLimitedPlan = true;
-      subscription.isActive = false;
+      subscription.isActive = true;
+      subscription.availableCertificatesBySubscription = user.freeUnits.certificates;
     }
   } else {
     const stripeSubscription = await stripeService.findSubscription(user.stripeSubscriptionId);

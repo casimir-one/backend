@@ -6,6 +6,7 @@ import stripeService from './../services/stripe';
 import usersService from './../services/users';
 import util from 'util';
 import _ from 'lodash';
+import { FREE_PRICING_PLAN_ID } from './../common/constants';
 import bluebird from 'bluebird';
 import subscriptions from './../services/subscriptions';
 
@@ -173,7 +174,7 @@ const buyAdditionalPackage = async function (ctx) {
 
   try {
     const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
-    if (!subscription.isActive) {
+    if (!subscription.isActive || subscription.pricingPlanId === FREE_PRICING_PLAN_ID) {
       ctx.status = 402;
       ctx.body = `Subscription for ${jwtUsername} has expired`;
       return;

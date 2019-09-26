@@ -76,6 +76,9 @@ const UserProfile = new Schema({
         default: notificationTypeValues
       },
     },
+    "freeUnits": {
+      certificates: { type: Number, required: false, default: 1 }
+    },
     "created": { type: Date, default: Date.now, index: true },
     "updated": { type: Date, default: Date.now, index: true },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

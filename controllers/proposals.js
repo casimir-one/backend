@@ -3,6 +3,7 @@ import notifier from './../services/notifications';
 import subscriptionsService from './../services/subscriptions';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import filesService from './../services/fileRef';
+import { FREE_PRICING_PLAN_ID } from './../common/constants';
 import usersService from './../services/users';
 
 import deipRpc from '@deip/deip-rpc-client';
@@ -141,7 +142,7 @@ const createContentProposal = async (ctx) => {
     const result = await sendTransaction(tx);
     if (result.isSuccess) {
       const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
-      if (subscription.isLimitedPlan) {
+      if (subscription.isLimitedPlan && subscription.pricingPlanId !== FREE_PRICING_PLAN_ID) {
         const subtractFromSubscription = Math.min(files.length, subscription.availableCertificatesBySubscription);
         let subtractFromAdditional = 0;
         if (subtractFromSubscription < files.length) {
@@ -155,6 +156,11 @@ const createContentProposal = async (ctx) => {
           updatedCounters.additionalCertificates = subscription.availableAdditionalCertificates - subtractFromAdditional;
         }
         await subscriptionsService.setSubscriptionCounters(subscription.id, updatedCounters);
+      } else if (subscription.pricingPlanId === FREE_PRICING_PLAN_ID) {
+        const user = await usersService.findUserById(jwtUsername);
+        await usersService.updateFreeUnits(jwtUsername, {
+          certificates: user.freeUnits.certificates - files.length
+        });
       }
 
       ctx.status = 200;

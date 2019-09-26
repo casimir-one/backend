@@ -60,6 +60,18 @@ async function updateProfile(username, profileToUpdate = {}) {
   return updatedProfile;
 }
 
+async function updateFreeUnits(username, {
+  certificates
+}) {
+  const toSet = {};
+
+  if (certificates !== undefined) {
+    toSet['freeUnits.certificates'] = certificates;
+  }
+  await UserProfile.updateOne({ _id: username }, {
+    $set: toSet
+  });
+}
 
 export default {
   findUserById,
@@ -67,5 +79,6 @@ export default {
   findUserByEmail,
   createUser,
   updateStripeInfo,
-  updateProfile
+  updateProfile,
+  updateFreeUnits
 }
