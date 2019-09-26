@@ -65,7 +65,7 @@ const processStripePayment = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
 
   try {
-    let { 
+    let {
       stripeToken,
       customerEmail,
       planId,
@@ -107,10 +107,23 @@ const reactivateSubscription = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
 
   try {
-    let result = await subscriptionsService.reactivateSubscription(jwtUsername);
-    ctx.status = 200;
-    ctx.body = result;
+    await subscriptionsService.reactivateSubscription(jwtUsername);
+    ctx.status = 204;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
 
+const changeSubscription = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+    const { planId } = ctx.request.body;
+
+    await subscriptionsService.changeSubscription(jwtUsername, planId);
+    ctx.status = 204;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -248,7 +261,6 @@ const customerSubscriptionCreatedWebhook = async function (ctx) {
   }
 }
 
-
 const customerSubscriptionUpdatedWebhook = async function (ctx) {
   
   try {
@@ -267,13 +279,32 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     }
 
     let { 
-      object: { id, customer, status: currentStatus, cancel_at_period_end: currentCancelAtPeriodEnd, current_period_end: currentCurrentPeriodEnd }, 
-      previous_attributes: { status: previousStatus, cancel_at_period_end: previousCancelAtPeriodEnd, current_period_end: previousCurrentPeriodEnd } 
+      object: {
+        id,
+        customer,
+        status: currentStatus,
+        cancel_at_period_end: currentCancelAtPeriodEnd,
+        current_period_end: currentCurrentPeriodEnd
+      },
+      previous_attributes: {
+        status: previousStatus,
+        cancel_at_period_end: previousCancelAtPeriodEnd,
+        current_period_end: previousCurrentPeriodEnd
+      }
     } = event.data;
 
 
-    if (previousStatus !== undefined && previousStatus == incomplete && currentStatus == active) {
-      // subscription is activated after 3D Secure confirmation
+    if (
+      previousStatus !== undefined
+      && [past_due, incomplete].includes(previousStatus)
+      && currentStatus === active
+    ) {
+      /**
+       * in cases when:
+       * - created subscription is activated after successful payment
+       * - existing subscription is activated after paid debt
+       */
+      //
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
       await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
@@ -309,8 +340,16 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     }
 
 
-    if (previousCurrentPeriodEnd !== undefined && previousCurrentPeriodEnd != currentCurrentPeriodEnd) {
-      // subscription renewal
+    if (
+      previousCurrentPeriodEnd !== undefined
+      && previousCurrentPeriodEnd !== currentCurrentPeriodEnd
+      && currentStatus === active
+    ) {
+      /**
+       * in cases when:
+       * - subscription is renewed
+       * - subscription is updated
+       */
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
       await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
@@ -385,6 +424,7 @@ export default {
   processStripePayment,
   cancelStripeSubscription,
   reactivateSubscription,
+  changeSubscription,
   getAdditionalPackages,
   buyAdditionalPackage,
 

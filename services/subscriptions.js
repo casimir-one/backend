@@ -44,7 +44,7 @@ async function findSubscriptionByOwner(owner) {
     subscription.id = stripeSubscription.id;
     subscription.pricingPlanId = stripeSubscription.plan.nickname;
     subscription.isLimitedPlan = true;
-    subscription.isActive = ['active', 'past_due', 'trialing'].includes(stripeSubscription.status); // subscription becomes past_due when the first attempt to renew it fails
+    subscription.isActive = ['active', 'trialing'].includes(stripeSubscription.status);
     subscription.availableCertificatesBySubscription = parseInt(stripeSubscription.metadata.availableCertificatesBySubscription) || 0;
     subscription.availableContractsBySubscription = parseInt(stripeSubscription.metadata.availableContractsBySubscription) || 0;
     subscription.availableFilesSharesBySubscription = parseInt(stripeSubscription.metadata.availableFilesSharesBySubscription) || 0;
@@ -151,10 +151,34 @@ async function reactivateSubscription(owner) {
   return updatedSubscription;
 }
 
+async function changeSubscription(owner, newPlanId) {
+  const [user, newPricingPlan] = await Promise.all([
+    usersService.findUserById(owner),
+    pricingPlansService.findPricingPlan(newPlanId),
+  ]);
+  let stripeSubscription = await stripeService.findSubscription(user.stripeSubscriptionId);
+  const planItem = stripeSubscription.items.data.find(d => d.plan && d.plan.id === user.stripePricingPlanId);
+  stripeSubscription = await stripeService.updateSubscription(user.stripeSubscriptionId, {
+    items: [{
+      id: planItem.id,
+      plan: newPricingPlan.stripeId,
+    }],
+    prorate: false,
+    billing_cycle_anchor: 'now',
+  })
+  await usersService.updateStripeInfo(
+    user._id,
+    user.stripeCustomerId,
+    user.stripeSubscriptionId,
+    newPricingPlan.stripeId
+  );
+}
+
 export default {
   findSubscriptionByOwner,
   processStripeSubscription,
   cancelSubscription,
   reactivateSubscription,
   setSubscriptionCounters,
+  changeSubscription
 }
