@@ -291,15 +291,12 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
 
     if (
       previousStatus !== undefined
-      && [stripeSubscriptionStatus.PAST_DUE, stripeSubscriptionStatus.INCOMPLETE].includes(previousStatus)
+      && [stripeSubscriptionStatus.INCOMPLETE].includes(previousStatus)
       && currentStatus === stripeSubscriptionStatus.ACTIVE
     ) {
       /**
-       * in cases when:
-       * - created subscription is activated after successful payment
-       * - existing subscription is activated after paid debt (regular of trial)
+       * subscription is activated after creation and user action required
        */
-      //
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
       await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
@@ -338,13 +335,12 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     if (
       previousCurrentPeriodEnd !== undefined
       && previousCurrentPeriodEnd !== currentCurrentPeriodEnd
-      && currentStatus === stripeSubscriptionStatus.ACTIVE
     ) {
       /**
        * in cases when:
        * - subscription is renewed
        * - subscription is updated
-       * - subscription is now active after trial and payment was succeeded
+       * - after trial is ended
        */
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
