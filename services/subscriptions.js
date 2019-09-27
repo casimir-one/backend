@@ -99,12 +99,12 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
       availableFilesSharesBySubscription: 0,
     }
   };
-  if (pricingPlan.trialTerms && pricingPlan.trialTerms.periodDays > 0) {
-    subscriptionData.trialPeriodDays = pricingPlan.trialTerms.periodDays;
-    subscriptionData.metadata.availableCertificatesBySubscription = pricingPlan.trialTerms.certificateLimit;
-    subscriptionData.metadata.availableContractsBySubscription = pricingPlan.trialTerms.contractLimit;
-    subscriptionData.metadata.availableFilesSharesBySubscription = pricingPlan.trialTerms.fileShareLimit;
-  }
+  // if (pricingPlan.trialTerms && pricingPlan.trialTerms.periodDays > 0) {
+  //   subscriptionData.trialPeriodDays = pricingPlan.trialTerms.periodDays;
+  //   subscriptionData.metadata.availableCertificatesBySubscription = pricingPlan.trialTerms.certificateLimit;
+  //   subscriptionData.metadata.availableContractsBySubscription = pricingPlan.trialTerms.contractLimit;
+  //   subscriptionData.metadata.availableFilesSharesBySubscription = pricingPlan.trialTerms.fileShareLimit;
+  // }
   const subscription = await stripeService.createSubscription(customerId, subscriptionData);
 
   await usersService.updateStripeInfo(owner, customerId, subscription.id, planId);
