@@ -77,7 +77,9 @@ const UserProfile = new Schema({
       },
     },
     "freeUnits": {
-      certificates: { type: Number, required: false, default: 1 }
+      certificates: { type: Number, required: false, default: 1 },
+      contracts: { type: Number, required: false, default: 1 },
+      fileShares: { type: Number, required: false, default: 1 },
     },
     "created": { type: Date, default: Date.now, index: true },
     "updated": { type: Date, default: Date.now, index: true },

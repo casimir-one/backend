@@ -34,6 +34,8 @@ async function findSubscriptionByOwner(owner) {
       subscription.isLimitedPlan = true;
       subscription.isActive = true;
       subscription.availableCertificatesBySubscription = user.freeUnits.certificates;
+      subscription.availableContractsBySubscription = user.freeUnits.contracts;
+      subscription.availableFilesSharesBySubscription = user.freeUnits.fileShares;
     }
   } else {
     const stripeSubscription = await stripeService.findSubscription(user.stripeSubscriptionId);
