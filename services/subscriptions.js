@@ -21,6 +21,7 @@ async function findSubscriptionByOwner(owner) {
     isPaymentFailed: null,
     isCanceling: null,
     currentPeriodEnd: null,
+    discount: null,
   };
 
   const user = await usersService.findUserById(owner);
@@ -72,6 +73,12 @@ async function findSubscriptionByOwner(owner) {
     );
     subscription.isCanceling = stripeSubscription.cancel_at_period_end;
     subscription.currentPeriodEnd = stripeSubscription.current_period_end;
+    if (stripeSubscription.discount) {
+      subscription.discount = {
+        amountOff: stripeSubscription.discount.coupon.amount_off,
+        percentOff: stripeSubscription.discount.coupon.percent_off,
+      };
+    }
   }
 
   return subscription;
