@@ -183,6 +183,7 @@ async function changeSubscription(owner, newPlanId) {
       id: planItem.id,
       plan: newPricingPlan.stripeId,
     }],
+    coupon: '', // remove any discount if exists
     prorate: false,
     billing_cycle_anchor: 'now',
     trial_end: 'now', // if subscription is in trial mode
