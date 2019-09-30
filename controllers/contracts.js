@@ -11,6 +11,7 @@ import { sendTransaction } from './../utils/blockchain';
 import uuidv4 from "uuid/v4";
 import send from 'koa-send';
 import deipRpc from '@deip/deip-rpc-client';
+import { FREE_PRICING_PLAN_ID } from './../common/constants';
 
 const getContractRef = async (ctx) => {
   const refId = ctx.params.refId;
@@ -102,7 +103,7 @@ const createContractRef = async (ctx) => {
       contractId: activeContract.id,
       templateRef: { ...templateRef, filepath, previewFilepath },
     });
-    if (subscription.isLimitedPlan) {
+    if (subscription.isLimitedPlan && subscription.pricingPlanId !== FREE_PRICING_PLAN_ID) {
       if (subscription.availableContractsBySubscription) {
         await subscriptionsService.setSubscriptionCounters(subscription.id, {
           contracts: subscription.availableContractsBySubscription - 1,
@@ -112,6 +113,11 @@ const createContractRef = async (ctx) => {
           additionalContracts: subscription.availableAdditionalContracts - 1,
         })
       }
+    } else if (subscription.pricingPlanId === FREE_PRICING_PLAN_ID) {
+      const user = await usersService.findUserById(jwtUsername);
+      await usersService.updateFreeUnits(jwtUsername, {
+        contracts: user.freeUnits.contracts - 1
+      });
     }
     notifier.sendNDAContractReceivedNotifications(contractRef._id);
 

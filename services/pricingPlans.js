@@ -1,6 +1,6 @@
 import PricingPlan from './../schemas/pricingPlan';
 import stripeService from './../services/stripe';
-import moment from 'moment';
+import config from './../config';
 
 async function findPricingPlan(id) {
   let doc = await PricingPlan.findOne({ _id: id });
@@ -24,7 +24,14 @@ async function findRegularPricingPlans() {
   let appPlans = docs.map(d => d._doc);
 
   let { product, plans: stripePlans } = await stripeService.getIPprotectionProduct();
-  let regularStripePlans = stripePlans.filter(p => p.metadata.type == "regular");
+  let regularPlanTypes = ['regular'];
+  if (config.environment === 'local') {
+    regularPlanTypes = [
+      ...regularPlanTypes,
+      ...regularPlanTypes.map(t => `${t}-local`)
+    ];
+  }
+  let regularStripePlans = stripePlans.filter(p => regularPlanTypes.includes(p.metadata.type));
 
   let regularPlans = [];
   for (let i = 0; i < regularStripePlans.length; i++) {
