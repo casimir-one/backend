@@ -31,6 +31,8 @@ router.post('/groups', groups.createResearchGroup)
 router.get('/groups/profile/:permlink', groups.getGroupProfile)
 router.put('/groups/profile/:permlink', groups.updateGroupProfile)
 
+router.get('/invites', invites.getInvites);
+router.post('/invites/send', invites.sendInvite);
 router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
 
