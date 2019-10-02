@@ -48,6 +48,7 @@
         "stripe": "^7.6.0",
         "substance": "^1.0.0-preview.53",
         "uuid": "^3.3.2",
+        "validator": "^11.1.0",
         "xml2js": "^0.4.19"
     },
     "devDependencies": {

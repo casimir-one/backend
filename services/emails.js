@@ -43,11 +43,24 @@ class EmailsService {
   async sendRegistrationEmail(to, token) {
     const confirmationUrl = `${config.uiHost}/sign-up?token=${token}`;
     const htmlToSend = await renderService.registrationEmail(confirmationUrl);
-    console.log(confirmationUrl);
+    console.log(`Email confirmation url: ${confirmationUrl}`);
     await this.sendMessage({
       to,
       subject: 'Activate your account',
       html: htmlToSend
+    });
+  }
+
+  async sendInviteEmail(to, { senderName, inviteCode }) {
+    const inviteUrl = `${config.serverHost}/public/invites/${inviteCode}`;
+    console.log(`Invite url: ${inviteUrl}`);
+    await this.sendMessage({
+      to,
+      subject: 'Invitation to wonderful DEIP world',
+      html: `<p>
+        Hi! ${senderName} invites you to join wonderful DEIP world <br />
+        <a href="${inviteUrl}" target="_blank">Accept invite</a>
+      </p>`
     });
   }
 
