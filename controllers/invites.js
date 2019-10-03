@@ -1,6 +1,7 @@
 import notifier from './../services/notifications'
 import Invite from './../schemas/invite'
 import invitesService from './../services/invites'
+import usersService from './../services/users'
 import { inviteStatus } from './../common/enums';
 import config from './../config';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
@@ -81,12 +82,18 @@ async function processResolvedInvite(isApproved, invite, txInfo) {
     }
 }
 
-const validateInviteEmail = async (email) => {
+const validateInviteEmail = async (sender, email) => {
   if (!validator.isEmail(email)) {
     return `Invalid email: ${email}`;
   }
 
+  const existingUser = await usersService.findUserByEmail(email);
+  if (existingUser) {
+    return `User with email ${email} already exists`;
+  }
+
   const isInviteSent = await Invite.exists({
+    sender,
     'invitee.email': email,
     status: { $ne: inviteStatus.UNSENT },
   });
@@ -113,7 +120,7 @@ const sendInvite = async (ctx) => {
   
     const errors = [];
     await Promise.all(inviteeEmails.map(async (email) => {
-      const validationError = await validateInviteEmail(email);
+      const validationError = await validateInviteEmail(jwtUsername, email);
       if (validationError) {
         errors.push(validationError);
       }
