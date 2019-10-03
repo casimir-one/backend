@@ -8,7 +8,6 @@ const readFileAsync = Promise.promisify(fs.readFile);
 const DEFAULTS = {
   updatePreferencesUrl: `${config.uiHost}/account-settings/notifications`,
   unsubscribeUrl: `${config.uiHost}/account-settings/notifications?unsubscribe=true`,
-  mainPageUrl: config.uiHost,
 };
 
 class RenderService {
@@ -18,7 +17,25 @@ class RenderService {
       return mustache.render(contents, { registrationUrl });
     } catch (err) {
       console.error(err);
-      return `<p>Welcome!\nPlease follow this link to complete your registration: <a href="${registrationUrl}" traget="_blank">${registrationUrl}</a></p>`;
+      return `<p>Welcome!\nPlease follow this link to complete your registration: <a href="${registrationUrl}" traget="_blank">Confirm Email</a></p>`;
+    }
+  }
+
+  async invitationEmail({ senderName, inviteUrl }) {
+    try {
+      const contents = await readFileAsync(`${__dirname}/../data/emails/user_invitation.html`, 'utf8');
+      return mustache.render(contents, {
+        ...DEFAULTS,
+        inviteUrl,
+        senderName
+      });
+    } catch (err) {
+      console.error(err);
+      return `<p>
+        Hello! <br/>
+        ${senderName} invites you to IP Ledger – a platform that helps protect your digital assets: <br/>
+        <a href="${inviteUrl}" traget="_blank">Go to IP Ledger</a>
+      </p>`;
     }
   }
 

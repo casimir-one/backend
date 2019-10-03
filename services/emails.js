@@ -54,13 +54,13 @@ class EmailsService {
   async sendInviteEmail(to, { senderName, inviteCode }) {
     const inviteUrl = `${config.serverHost}/public/invites/${inviteCode}`;
     console.log(`Invite url: ${inviteUrl}`);
+    const htmlToSend = await renderService.invitationEmail({
+      inviteUrl, senderName
+    });
     await this.sendMessage({
       to,
-      subject: 'Invitation to wonderful DEIP world',
-      html: `<p>
-        Hi! ${senderName} invites you to join wonderful DEIP world <br />
-        <a href="${inviteUrl}" target="_blank">Accept invite</a>
-      </p>`
+      subject: 'Invitation to IP Ledger',
+      html: htmlToSend
     });
   }
 
