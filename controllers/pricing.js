@@ -12,6 +12,7 @@ import subscriptions from './../services/subscriptions';
 
 const {
   additionalPackageType,
+  additionalPackageTypeValues,
   stripeSubscriptionStatus
 } = require('./../common/enums');
 
@@ -370,6 +371,10 @@ const customerPaymentIntentSucceededWebhook = async function (ctx) {
     try {
       event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
       const { object, username, numberOfUnits } = event.data.object.metadata;
+      if (!additionalPackageTypeValues.includes(object)) {
+        ctx.status = 200;
+        return;
+      }
       const subscription = await subscriptionsService.findSubscriptionByOwner(username);
       const numberOfUnitsToAdd = parseInt(numberOfUnits) || 0;
       let updatedSubscriptionCounters = {};
