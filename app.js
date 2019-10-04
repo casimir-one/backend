@@ -6,6 +6,7 @@ import api from './routes/api.js';
 import pub from './routes/public.js';
 import sudo from './routes/sudo.js';
 import webhooks from './routes/webhooks.js';
+import usersService from './services/users.js';
 import jwtKoa from 'koa-jwt';
 import jwt from 'jsonwebtoken';
 import serve from 'koa-static';
@@ -69,6 +70,16 @@ router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
 router.use('/webhooks', webhooks.routes());
 
+const checkUserExists = async (ctx, next) => {
+  const user = await usersService.findUserById(ctx.state.user.username);
+  if (!user) {
+    ctx.status = 401;
+    return;
+  } else {
+    await next();
+  }
+};
+
 router.use('/api', jwtKoa({ secret: config.jwtSecret, 
   getToken: function (opts) { 
     if (opts.request.query && opts.request.query.authorization) {
@@ -76,8 +87,8 @@ router.use('/api', jwtKoa({ secret: config.jwtSecret,
     }
     return null;
   } 
-}), api.routes());
-router.use('/sudo', /* todo: move sudo check here */ jwtKoa({ secret: config.jwtSecret }), sudo.routes());
+}), checkUserExists, api.routes());
+router.use('/sudo', /* todo: move sudo check here */ jwtKoa({ secret: config.jwtSecret }), checkUserExists, sudo.routes());
 
 app.use(router.routes());
 
