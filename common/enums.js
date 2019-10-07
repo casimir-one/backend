@@ -39,3 +39,12 @@ const stripeSubscriptionStatus = {
   UNPAID: 'unpaid',
 };
 module.exports.stripeSubscriptionStatus = stripeSubscriptionStatus;
+
+const inviteStatus = {
+  UNSENT: 'unsent',
+  PENDING: 'pending',
+  CLAIMED: 'claimed',
+  ACCEPTED: 'accepted'
+};
+module.exports.inviteStatus = inviteStatus;
+module.exports.inviteStatusValues = _.values(inviteStatus);

@@ -8,6 +8,7 @@ import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
 import UserProfile from './../schemas/user';
 import * as vtService from './../services/verificationTokens';
+import invitesService from './../services/invites'
 import usersService from './../services/users';
 import mailer from './../services/emails';
 
@@ -65,7 +66,7 @@ const signIn = async function (ctx) {
 }
 
 const createVerificationToken = async function (ctx) {
-  const { email, pricingPlan } = ctx.request.body;
+  const { email, pricingPlan, inviteCode } = ctx.request.body;
 
   const expires = new Date();
   expires.setDate(expires.getDate() + 1); // 1 day expiration
@@ -84,7 +85,8 @@ const createVerificationToken = async function (ctx) {
     const savedToken = await vtService.createVerificationToken('public', {
       email,
       expirationTime: expires,
-      pricingPlan: FREE_PRICING_PLAN_ID
+      pricingPlan: FREE_PRICING_PLAN_ID,
+      inviteCode,
     });
     await mailer.sendRegistrationEmail(email, savedToken.token);
 
@@ -162,6 +164,7 @@ const signUp = async function (ctx) {
     let profile = await usersService.findUserById(username);
     if (!profile) {
       profile = await usersService.createUser({ username, email, firstName, lastName });
+      await invitesService.acceptInvite(verificationToken.inviteCode, username);
       await vtService.removeVerificationToken(token);
     }
 

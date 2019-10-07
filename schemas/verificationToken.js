@@ -15,6 +15,7 @@ const VerificationToken = new Schema({
   "token": { type: String, required: true, index: true, trim: true, },
   "expirationTime": { type: Date, default: new Date(Date.now() + 604800000 /* 1 week */), required: true, index: true },
   "creator": { type: String, trim: true, required: true },
+  "inviteCode": { type: String, required: false, default: null },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('verification-tokens', VerificationToken);

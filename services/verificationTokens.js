@@ -23,7 +23,8 @@ async function createVerificationToken(creator, token) {
     pricingPlan: token.pricingPlan,
     token: hex,
     expirationTime: token.expirationTime,
-    creator: creator
+    creator: creator,
+    inviteCode: token.inviteCode,
   });
   const savedToken = await tkn.save();
   return savedToken;
