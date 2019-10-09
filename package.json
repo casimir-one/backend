@@ -9,7 +9,7 @@
         "debug": "nodemon --inspect --delay 2000ms -w app.js -w server server-entry.js"
     },
     "dependencies": {
-        "@deip/deip-rpc-client": "1.0.76",
+        "@deip/deip-rpc-client": "1.0.79",
         "@deip/lib-crypto": "^1.0.2",
         "@koa/cors": "^2.2.1",
         "archiver": "^3.1.1",

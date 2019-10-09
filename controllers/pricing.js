@@ -289,7 +289,11 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       }
     } = event.data;
 
-
+    const user = await usersService.findUserByCustomerId(customer);
+    if (!user) {
+      ctx.status = 400;
+      return;
+    }
     if (
       previousStatus !== undefined
       && [stripeSubscriptionStatus.INCOMPLETE].includes(previousStatus)
@@ -298,9 +302,8 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       /**
        * subscription is activated after creation and user action required
        */
-      let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
-      await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
+      await subscriptionsService.setSubscriptionQuota(user._id, {
         certificates: pricingPlan.terms.certificateLimit.limit,
         contracts: pricingPlan.terms.contractLimit.limit,
         filesShares: pricingPlan.terms.fileShareLimit.limit,
@@ -345,7 +348,7 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
        */
       let stripeSubscription = await stripeService.findSubscription(id);
       let pricingPlan = await pricingPlansService.findPricingPlanByStripeId(stripeSubscription.plan.id);
-      await subscriptionsService.setSubscriptionCounters(stripeSubscription.id, {
+      await subscriptionsService.setSubscriptionQuota(user._id, {
         certificates: pricingPlan.terms.certificateLimit.limit,
         contracts: pricingPlan.terms.contractLimit.limit,
         filesShares: pricingPlan.terms.fileShareLimit.limit,
@@ -375,28 +378,27 @@ const customerPaymentIntentSucceededWebhook = async function (ctx) {
         ctx.status = 200;
         return;
       }
-      const subscription = await subscriptionsService.findSubscriptionByOwner(username);
       const numberOfUnitsToAdd = parseInt(numberOfUnits) || 0;
       let updatedSubscriptionCounters = {};
       switch (object) {
         case additionalPackageType.CERTIFICATES:
           updatedSubscriptionCounters = {
-            additionalCertificates: subscription.availableAdditionalCertificates + numberOfUnitsToAdd,
+            additionalCertificates: numberOfUnitsToAdd,
           };
           break;
         case additionalPackageType.CONTRACTS:
           updatedSubscriptionCounters = {
-            additionalContracts: subscription.availableAdditionalContracts + numberOfUnitsToAdd,
+            additionalContracts: numberOfUnitsToAdd,
           };
           break;
         case additionalPackageType.FILES_SHARES:
           updatedSubscriptionCounters = {
-            additionalFilesShares: subscription.availableAdditionalFilesShares + numberOfUnitsToAdd,
+            additionalFilesShares: numberOfUnitsToAdd,
           };
           break;
       }
       if (!_.isEmpty(updatedSubscriptionCounters)) {
-        await subscriptionsService.setSubscriptionCounters(subscription.id, updatedSubscriptionCounters);
+        await subscriptionsService.adjustSubscriptionExtraQuota(username, updatedSubscriptionCounters);
       }
     } catch (err) {
       console.log(err);

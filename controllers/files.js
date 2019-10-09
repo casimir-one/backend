@@ -12,7 +12,6 @@ import archiver from 'archiver';
 import notifier from './../services/notifications';
 import usersService from './../services/users';
 import { authorizeResearchGroup } from './../services/auth'
-import { FREE_PRICING_PLAN_ID } from './../common/constants';
 
 const { sharedFileStatus } = require('./../common/enums');
 
@@ -277,22 +276,6 @@ const shareFile = async (ctx) => {
       contractId: contract.id,
       contractTitle: contract.title,
     });
-    if (subscription.isLimitedPlan && subscription.pricingPlanId !== FREE_PRICING_PLAN_ID) {
-      if (subscription.availableFilesSharesBySubscription) {
-        await subscriptionsService.setSubscriptionCounters(subscription.id, {
-          filesShares: subscription.availableFilesSharesBySubscription - 1,
-        })
-      } else if (subscription.availableAdditionalFilesShares) {
-        await subscriptionsService.setSubscriptionCounters(subscription.id, {
-          additionalFilesShares: subscription.availableAdditionalFilesShares - 1,
-        })
-      }
-    } else if (subscription.pricingPlanId === FREE_PRICING_PLAN_ID) {
-      const user = await usersService.findUserById(jwtUsername);
-      await usersService.updateFreeUnits(jwtUsername, {
-        fileShares: user.freeUnits.fileShares - 1
-      });
-    }
     notifier.sendFileSharedNotifications(sharedFile._id);
 
     ctx.status = 200;

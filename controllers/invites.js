@@ -23,13 +23,9 @@ const approveInvite = async (ctx) => {
 
     try {
         const invite = await deipRpc.api.getResearchGroupInviteByIdAsync(payload.research_group_invite_id);
-        const result = await sendTransaction(tx);
-        if (result.isSuccess) {
-            await processResolvedInvite(true, invite, result.txInfo);
-            ctx.status = 201;
-        } else {
-            throw new Error(`Could not proceed the transaction: ${tx}`);
-        }
+        const txInfo = await sendTransaction(tx);
+        await processResolvedInvite(true, invite, txInfo);
+        ctx.status = 201;
     } catch(err) {
         console.log(err);
         ctx.status = 500;
@@ -53,13 +49,10 @@ const rejectInvite = async (ctx) => {
 
     try {
         const invite = await deipRpc.api.getResearchGroupInviteByIdAsync(payload.research_group_invite_id);
-        const result = await sendTransaction(tx);
-        if (result.isSuccess) {
-            await processResolvedInvite(false, invite, result.txInfo);
-            ctx.status = 201;
-        } else {
-            throw new Error(`Could not proceed the transaction: ${tx}`);
-        }
+        const txInfo = await sendTransaction(tx);
+        await processResolvedInvite(false, invite, txInfo);
+        ctx.status = 201;
+
     } catch(err) {
         console.log(err);
         ctx.status = 500;

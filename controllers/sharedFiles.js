@@ -76,12 +76,8 @@ const askPermission = async (ctx) => {
       ctx.body = 'Invalid contractId value: file is shared under another contract';
       return;
     }
-    const result = await sendTransaction(signedTx);
-    if (!result.isSuccess) {
-      ctx.status = 400;
-      ctx.body = 'Error while create permission request';
-      return;
-    }
+
+    await sendTransaction(signedTx);
 
     const permissionRequest = await deipRpc.api.getNdaContractRequestByContractIdAndHashAsync(contratId, encryptedPayloadHash);
     const updatedSharedFile = await sharedFilesService.askPermissionToSharedFile(sharedFileId, permissionRequest.id);
@@ -118,12 +114,8 @@ const unlockFile = async (ctx) => {
       ctx.body = 'Invalid request_id value';
       return;
     }
-    const result = await sendTransaction(signedTx);
-    if (!result.isSuccess) {
-      ctx.status = 400;
-      ctx.body = 'Error while create permission request';
-      return;
-    }
+
+    await sendTransaction(signedTx);
     await filesService.addAccessKeyToFileRef(sharedFile.fileRefId, accessKey);
     const updatedSharedFile = await sharedFilesService.unlockSharedFile(sharedFileId);
     notifier.sendFileSharingAccessGrantedNotifications(updatedSharedFile._id);

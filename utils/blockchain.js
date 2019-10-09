@@ -2,18 +2,8 @@
 import deipRpc from '@deip/deip-rpc-client';
 
 export async function sendTransaction(tx) {
-    const promise = new Promise((resolve) => {
-        deipRpc.api.broadcastTransactionSynchronous(tx, function(err, result) {
-            if (err) {
-                console.log(err);
-                resolve({ isSuccess: false, txInfo: null })
-            } else {
-                console.log(result);
-                resolve({ isSuccess: true, txInfo: result })
-            }
-        });
-    });
-    return promise;
+    const txInfo = await deipRpc.api.broadcastTransactionSynchronousAsync(tx);
+    return txInfo;
 }
 
 export async function getBlock(blockNum) {
@@ -38,7 +28,7 @@ export async function getTransaction(trxId) {
     })
 }
 
-export function signOperation(operation, ownerKey) {
+export function signOperation(operations, ownerKey) {
     return new Promise((resolve, reject) => {
         deipRpc.api.getDynamicGlobalProperties(function(err, result) {
             if (!err) {
@@ -51,7 +41,7 @@ export function signOperation(operation, ownerKey) {
                     const unsignedTX = {
                         'expiration': expire,
                         'extensions': [],
-                        'operations': [operation],
+                        'operations': operations,
                         'ref_block_num': BlockNum,
                         'ref_block_prefix': BlockPrefix
                     };

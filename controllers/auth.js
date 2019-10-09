@@ -11,6 +11,7 @@ import * as vtService from './../services/verificationTokens';
 import invitesService from './../services/invites'
 import usersService from './../services/users';
 import mailer from './../services/emails';
+import moment from 'moment';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -154,12 +155,7 @@ const signUp = async function (ctx) {
       key_auths: [[pubKey, 1]]
     };
 
-    const result = await createAccountAsync(username, pubKey, owner);
-    if (!result.isSuccess) {
-      ctx.status = 500;
-      ctx.body = result.result;
-      return;
-    }
+    await createAccountAsync(username, pubKey, owner);
 
     let profile = await usersService.findUserById(username);
     if (!profile) {
@@ -180,32 +176,44 @@ const signUp = async function (ctx) {
 
 
 async function createAccountAsync(username, pubKey, owner) {
-  try {
-    let accountsCreator = config.blockchain.accountsCreator;
-    let cfg = await deipRpc.api.getConfigAsync();
-    let chainProps = await deipRpc.api.getChainPropertiesAsync();
+  let accountsCreator = config.blockchain.accountsCreator;
+  let cfg = await deipRpc.api.getConfigAsync();
+  let chainProps = await deipRpc.api.getChainPropertiesAsync();
 
-    const account_create_op = {
-      fee: accountsCreator.fee,
-      creator: accountsCreator.username,
-      new_account_name: username,
-      owner: owner,
-      active: owner,
-      posting: owner,
-      memo_key: pubKey,
-      json_metadata: ""
-    };
+  const account_create_op = {
+    fee: accountsCreator.fee,
+    creator: accountsCreator.username,
+    new_account_name: username,
+    owner: owner,
+    active: owner,
+    posting: owner,
+    memo_key: pubKey,
+    json_metadata: ""
+  };
 
-    const operation = ["account_create", account_create_op];
-    const signedTx = await signOperation(operation, accountsCreator.wif);
-    const result = await sendTransaction(signedTx);
+  const create_subscription_op = {
+    owner: username,
+    agent: accountsCreator.username,
+    research_group_id: undefined, // personal
+    json_data: JSON.stringify({
+      "external_id": "",
+      "external_plan_id": "",
+      "file_certificate_quota": 1, // free
+      "nda_contract_quota": 1, // free
+      "nda_protected_file_quota": 1, // free
+      "period": 1, // month
+      "billing_date": moment.utc().toDate().toISOString().split('.')[0]
+    })
+  };
 
-    return { isSuccess: true, result: result };
-  } catch (err) {
-    console.log(err);
-    return { isSuccess: false, result: err }
-  }
-  
+  const operations = [
+    ["account_create", account_create_op], 
+    ["create_subscription", create_subscription_op]
+  ];
+
+  const signedTx = await signOperation(operations, accountsCreator.wif);
+  const txInfo = await sendTransaction(signedTx);
+  return txInfo;
 }
 
 
