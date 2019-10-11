@@ -102,6 +102,12 @@ const exportCertificates = async (ctx) => {
       deipRpc.api.getAllResearchContentAsync(researchId),
     ]);
 
+    if (!contentHashes.length) {
+      ctx.status = 400;
+      ctx.body = 'Content hashes are required';
+      return;
+    }
+
     const certificatesData = [];
     for (const contentHash of contentHashes) {
       const content = researchContents.find(c => c.content === contentHash);
@@ -131,11 +137,6 @@ const exportCertificates = async (ctx) => {
       });
     }
 
-    const archive = archiver('zip');
-    ctx.response.set('Content-disposition', `attachment; filename="deip-certs-${Date.now()}.zip"`);
-    ctx.type = 'application/zip';
-    ctx.body = archive;
-  
     const getPdfStream = (html) => new Promise((resolve, reject) => {
       pdf.create(html, {
         width: '1440px',
@@ -146,12 +147,26 @@ const exportCertificates = async (ctx) => {
         else resolve(stream);
       });
     });
-    await Promise.all(certificatesData.map(async (cData) => {
+
+    if (certificatesData.length === 1) {
+      const cData = certificatesData[0];
       const cHtml = await getContentCertificateHtml(cData);
-      const pdfStream = await getPdfStream(cHtml);
-      archive.append(pdfStream, { name: `deip-cert-${cData.contentHash}.pdf` });
-    }))
-    archive.finalize();
+      ctx.response.set('Content-disposition', `attachment; filename="deip-cert-${cData.contentHash}.pdf"`);
+      ctx.type = 'application/pdf';
+      ctx.body = await getPdfStream(cHtml);
+    } else {
+      const archive = archiver('zip');
+      ctx.response.set('Content-disposition', `attachment; filename="deip-certs-${Date.now()}.zip"`);
+      ctx.type = 'application/zip';
+      ctx.body = archive;
+
+      await Promise.all(certificatesData.map(async (cData) => {
+        const cHtml = await getContentCertificateHtml(cData);
+        const pdfStream = await getPdfStream(cHtml);
+        archive.append(pdfStream, { name: `deip-cert-${cData.contentHash}.pdf` });
+      }))
+      archive.finalize();
+    }
   } catch (err) {
     console.log(err);
     ctx.status = 500;
