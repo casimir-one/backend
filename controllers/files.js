@@ -12,6 +12,7 @@ import archiver from 'archiver';
 import notifier from './../services/notifications';
 import usersService from './../services/users';
 import { authorizeResearchGroup } from './../services/auth'
+import config from './../config';
 
 const { sharedFileStatus } = require('./../common/enums');
 
@@ -53,92 +54,110 @@ const getFileRefByHash = async (ctx) => {
   }
 }
 
-const exportCertificate = async (ctx) => {
-  let hash = ctx.params.hash;
-  let projectId = ctx.params.projectId;
-  let jwtUsername = ctx.state.user.username;
 
+const CERTIFICATE_BASE_PATH = './data/certificates/file_registered';
+const getContentCertificateHtml = async ({
+  researchId, ownerUsername, researchGroupId,
+  contentId, contentHash
+}) => {
+  const [ownerProfile, [ownerAccount]] = await Promise.all([
+    usersService.findUserById(ownerUsername),
+    deipRpc.api.getAccountsAsync([ownerUsername])
+  ]);
+  const ownerName = ownerProfile.firstName && ownerProfile.lastName ? `${ownerProfile.firstName} ${ownerProfile.lastName}` : ownerUsername;
+  const ownerPubKey = ownerAccount.owner.key_auths[0][0];
+
+  const fileHist = await deipRpc.api.getContentHistoryByResearchAndHashAsync(researchId, contentHash);
+  const headBlock = await deipRpc.api.getBlockAsync(fileHist.block);
+
+  const readFileAsync = util.promisify(fs.readFile);
+  const rawHtml = await readFileAsync(`${CERTIFICATE_BASE_PATH}/index.html`, 'utf8');
+
+  const certificateId = ripemd160(`${researchGroupId}-${researchId}-${contentId}-${contentHash}`).toString();
+
+  return rawHtml
+    .replace(/{{certificate_id}}/, certificateId)
+    .replace(/{{project_id}}/, researchId)
+    .replace(/{{owner_name}}/, ownerName)
+    .replace(/{{registration_date}}/, moment(fileHist.timestamp).format("MMM DD, YYYY"))
+    .replace(/{{registration_time}}/, moment(fileHist.timestamp).format("HH:mm:ss"))
+    .replace(/{{file_hash}}/, contentHash)
+    .replace(/{{tx_hash}}/, fileHist.trx_id)
+    .replace(/{{block_number}}/, fileHist.block)
+    .replace(/{{block_hash}}/, headBlock.block_id)
+    .replace(/{{ip_owner_public_key}}/, ownerPubKey)
+    .replace(/{{chain_id}}/, config.blockchain.chainId)
+};
+
+const exportCertificates = async (ctx) => {
   try {
+    const jwtUsername = ctx.state.user.username;
+    const researchId = ctx.params.projectId;
+    const contentHashes = Array.isArray(ctx.request.query.contentHashes)
+      ? ctx.request.query.contentHashes
+      : [ctx.request.query.contentHashes]
 
-    let chainResearch = await deipRpc.api.getResearchByIdAsync(projectId);
-    let chainContents = await deipRpc.api.getAllResearchContentAsync(projectId);
-    let chainContent = chainContents.find(c => c.content == hash);
+    const [research, researchContents] = await Promise.all([
+      deipRpc.api.getResearchByIdAsync(researchId),
+      deipRpc.api.getAllResearchContentAsync(researchId),
+    ]);
 
-    if (!chainResearch || !chainContent) {
-      ctx.status = 400;
-      ctx.body = `File with hash ${hash} is not found`;
-      return;
+    const certificatesData = [];
+    for (const contentHash of contentHashes) {
+      const content = researchContents.find(c => c.content === contentHash);
+      if (!content) {
+        ctx.status = 400;
+        ctx.body = `File with hash ${contentHash} is not found`;
+        return;
+      }
+      const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(research.research_group_id);
+      const userRgt = rgtList.find(rgt => rgt.owner === jwtUsername);
+      if (!userRgt) {
+        ctx.status = 403;
+        ctx.body = `"${jwtUsername}" is not permitted to get certificates for "${research.id}" project`;
+        return;
+      }
+      const maxRgt = rgtList.reduce(
+        (max, rgt) => (rgt.amount > max ? rgt.amount : max),
+        rgtList[0].amount
+      );
+      const contentOwnerRgt = rgtList.find(rgt => rgt.amount === maxRgt);
+      certificatesData.push({
+        ownerUsername: contentOwnerRgt.owner,
+        researchId: research.id,
+        researchGroupId: research.research_group_id,
+        content: content.id,
+        contentHash: content.content
+      });
     }
 
-    let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(chainResearch.research_group_id);
-    let member = rgtList.find(rgt => rgt.owner === jwtUsername);
-
-    if (!member) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to get certificates for "${projectId}" project`;
-      return;
-    }
-
-    let maxRgt = rgtList.reduce(
-      (max, rgt) => (rgt.amount > max ? rgt.amount : max),
-      rgtList[0].amount
-    );
-    let owner = rgtList.find(rgt => rgt.amount === maxRgt);
-    let ownerUsername = owner.owner;
-    let ownerProfile = await usersService.findUserById(ownerUsername);
-    let ownerName = ownerProfile.firstName && ownerProfile.lastName ? `${ownerProfile.firstName} ${ownerProfile.lastName}` : ownerUsername;
-
-    let accounts = await deipRpc.api.getAccountsAsync([jwtUsername, ownerUsername]);
-    let jwtPubKey = accounts[0].owner.key_auths[0][0];
-    let ownerPubKey = accounts[1].owner.key_auths[0][0];
-
-    let fileHist = await deipRpc.api.getContentHistoryByResearchAndHashAsync(chainResearch.id, hash);
-    const headBlock = await deipRpc.api.getBlockAsync(fileHist.block);
-
-    const certificateBasePath = './data/certificates/file_registered';
-    let readFileAsync = util.promisify(fs.readFile);
-    let rawHtml = await readFileAsync(`${certificateBasePath}/index.html`, 'utf8');
-
-    let id = ripemd160(`${chainResearch.research_group_id}-${chainResearch.id}-${chainContent.id}-${chainContent.content}`).toString();
-
-    var html = rawHtml.replace(/{{certificate_id}}/, id);
-    html = html.replace(/{{project_id}}/, chainResearch.id);
-    html = html.replace(/{{owner_name}}/, ownerName);
-    html = html.replace(/{{registration_date}}/, moment(fileHist.timestamp).format("MMM DD, YYYY"));
-    html = html.replace(/{{registration_time}}/, moment(fileHist.timestamp).format("HH:mm:ss"));
-    html = html.replace(/{{file_hash}}/, chainContent.content);
-    html = html.replace(/{{tx_hash}}/, fileHist.trx_id);
-    html = html.replace(/{{block_number}}/, fileHist.block);
-    html = html.replace(/{{block_hash}}/, headBlock.block_id);
-    html = html.replace(/{{project_owner_public_key}}/, ownerPubKey);
-    html = html.replace(/{{file_uploader_public_key}}/, jwtPubKey);
-    html = html.replace(/{{chain_id}}/, process.env.CHAIN_ID);
-
-    const base = path.resolve(certificateBasePath);
-    const options = {
-      width: '1440px',
-      height: '900px',
-      base: `file://${base}/`
-    }
-
-    let pdfStreamAsync = () => new Promise((resolve, reject) => {
-      pdf.create(html, options).toStream(function (err, stream) {
+    const archive = archiver('zip');
+    ctx.response.set('Content-disposition', `attachment; filename="deip-certs-${Date.now()}.zip"`);
+    ctx.type = 'application/zip';
+    ctx.body = archive;
+  
+    const getPdfStream = (html) => new Promise((resolve, reject) => {
+      pdf.create(html, {
+        width: '1440px',
+        height: '900px',
+        base: `file://${path.resolve(CERTIFICATE_BASE_PATH)}/`
+      }).toStream(function (err, stream) {
         if (err) reject(err);
         else resolve(stream);
       });
     });
-
-    let stream = await pdfStreamAsync();
-    ctx.status = 200;
-    ctx.body = stream;
-
+    await Promise.all(certificatesData.map(async (cData) => {
+      const cHtml = await getContentCertificateHtml(cData);
+      const pdfStream = await getPdfStream(cHtml);
+      archive.append(pdfStream, { name: `deip-cert-${cData.contentHash}.pdf` });
+    }))
+    archive.finalize();
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err.message;
   }
-}
-
+};
 
 const exportCypheredData = async (ctx) => {
   let hash = ctx.params.hash;
@@ -293,6 +312,6 @@ export default {
   listFileRefs,
   shareFile,
 
-  exportCertificate,
+  exportCertificates,
   exportCypheredData
 }
