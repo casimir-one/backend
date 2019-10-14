@@ -43,23 +43,18 @@ const createResearchGroup = async (ctx) => {
       return;
     }
 
-    const result = await sendTransaction(tx);
-    if (result.isSuccess) {
+    const txInfo = await sendTransaction(tx);
+    try {
+      // do not fail if transaction is accepted in the chain
+      await createOrganizationProfile(payload.permlink, payload.name, website, fullName, payload.description, country, city, addressLine1, addressLine2, zip, phoneNumber, email, members);
 
-      try {
-        // do not fail if transaction is accepted in the chain
-        await createOrganizationProfile(payload.permlink, payload.name, website, fullName, payload.description, country, city, addressLine1, addressLine2, zip, phoneNumber, email, members);
+      let userProfile = await UserProfile.findOne({ '_id': jwtUsername });
+      userProfile.activeOrgPermlink = payload.permlink;
+      await userProfile.save();
+      await processNewGroup(payload, txInfo);
+    } catch (err) { console.log(err) }
 
-        let userProfile = await UserProfile.findOne({ '_id': jwtUsername });
-        userProfile.activeOrgPermlink = payload.permlink;
-        await userProfile.save();
-        await processNewGroup(payload, result.txInfo);
-      } catch (err) { console.log(err) }
-
-      ctx.status = 201;
-    } else {
-      throw new Error(`Could not proceed the transaction: ${tx}`);
-    }
+    ctx.status = 201;
 
   } catch (err) {
     console.log(err);

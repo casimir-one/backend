@@ -4,14 +4,12 @@ import util from 'util';
 import moment from 'moment';
 import templatesService from './../services/templateRef';
 import contractsService from './../services/contractRef';
-import usersService from './../services/users';
 import subscriptionsService from './../services/subscriptions';
 import notifier from './../services/notifications';
 import { sendTransaction } from './../utils/blockchain';
 import uuidv4 from "uuid/v4";
 import send from 'koa-send';
 import deipRpc from '@deip/deip-rpc-client';
-import { FREE_PRICING_PLAN_ID } from './../common/constants';
 
 const getContractRef = async (ctx) => {
   const refId = ctx.params.refId;
@@ -89,12 +87,7 @@ const createContractRef = async (ctx) => {
       return;
     }
 
-    const result = await sendTransaction(signedTx);
-    if (!result.isSuccess) {
-      ctx.status = 400;
-      ctx.body = 'Error while contract creation';
-      return;
-    }
+    await sendTransaction(signedTx);
     const activeContract = await deipRpc.api.getNdaContractsByHashAsync(contractHash)
       .then((contracts) => contracts.filter(c => c.status === 1)[0]);
 
@@ -103,22 +96,6 @@ const createContractRef = async (ctx) => {
       contractId: activeContract.id,
       templateRef: { ...templateRef, filepath, previewFilepath },
     });
-    if (subscription.isLimitedPlan && subscription.pricingPlanId !== FREE_PRICING_PLAN_ID) {
-      if (subscription.availableContractsBySubscription) {
-        await subscriptionsService.setSubscriptionCounters(subscription.id, {
-          contracts: subscription.availableContractsBySubscription - 1,
-        })
-      } else if (subscription.availableAdditionalContracts) {
-        await subscriptionsService.setSubscriptionCounters(subscription.id, {
-          additionalContracts: subscription.availableAdditionalContracts - 1,
-        })
-      }
-    } else if (subscription.pricingPlanId === FREE_PRICING_PLAN_ID) {
-      const user = await usersService.findUserById(jwtUsername);
-      await usersService.updateFreeUnits(jwtUsername, {
-        contracts: user.freeUnits.contracts - 1
-      });
-    }
     notifier.sendNDAContractReceivedNotifications(contractRef._id);
 
     ctx.status = 201;
@@ -181,12 +158,8 @@ const signContract = async (ctx) => {
       ctx.body = 'Invalid contract id';
       return;
     }
-    const result = await sendTransaction(signedTx);
-    if (!result.isSuccess) {
-      ctx.status = 400;
-      ctx.body = 'Error while sign nda';
-      return;
-    }
+    
+    await sendTransaction(signedTx);
     const contract = await deipRpc.api.getNdaContractAsync(contractId);
     if (contract.status === 2 && contract.party_b === signee) {
       notifier.sendNDASignedNotifications(contractId);
@@ -213,12 +186,8 @@ const declineContract = async (ctx) => {
       ctx.body = 'Invalid contract id';
       return;
     }
-    const result = await sendTransaction(signedTx);
-    if (!result.isSuccess) {
-      ctx.status = 400;
-      ctx.body = 'Error while decline nda';
-      return;
-    }
+
+    await sendTransaction(signedTx);
     notifier.sendNDADeclinedNotifications(contractId);
     ctx.status = 204;
   } catch (err) {

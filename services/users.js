@@ -60,25 +60,6 @@ async function updateProfile(username, profileToUpdate = {}) {
   return updatedProfile;
 }
 
-async function updateFreeUnits(username, {
-  certificates, contracts, fileShares,
-}) {
-  const toSet = {};
-
-  if (certificates !== undefined) {
-    toSet['freeUnits.certificates'] = certificates;
-  }
-  if (contracts !== undefined) {
-    toSet['freeUnits.contracts'] = contracts;
-  }
-  if (fileShares !== undefined) {
-    toSet['freeUnits.fileShares'] = fileShares;
-  }
-  await UserProfile.updateOne({ _id: username }, {
-    $set: toSet
-  });
-}
-
 export default {
   findUserById,
   findUserByCustomerId,
@@ -86,5 +67,4 @@ export default {
   createUser,
   updateStripeInfo,
   updateProfile,
-  updateFreeUnits
 }

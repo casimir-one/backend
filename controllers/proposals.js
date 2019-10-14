@@ -31,13 +31,8 @@ const createResearchProposal = async (ctx) => {
     }
 
     /* proposal specific action code */
-    const result = await sendTransaction(tx);
-    if (result.isSuccess) {
-      ctx.status = 201;
-    } else {
-      throw new Error(`Could not proceed the transaction: ${tx}`);
-    }
-
+    await sendTransaction(tx);
+    ctx.status = 201;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -68,14 +63,8 @@ const createInviteProposal = async (ctx) => {
     }
 
     /* proposal specific action code */
-
-    const result = await sendTransaction(tx);
-    if (result.isSuccess) {
-      ctx.status = 201;
-    } else {
-      throw new Error(`Could not proceed the transaction: ${tx}`);
-    }
-
+    await sendTransaction(tx);
+    ctx.status = 201;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -139,35 +128,11 @@ const createContentProposal = async (ctx) => {
       refs.push({ organizationId, projectId, filename, filetype, size, hash, permlink });
     }
 
-    const result = await sendTransaction(tx);
-    if (result.isSuccess) {
-      const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
-      if (subscription.isLimitedPlan && subscription.pricingPlanId !== FREE_PRICING_PLAN_ID) {
-        const subtractFromSubscription = Math.min(files.length, subscription.availableCertificatesBySubscription);
-        let subtractFromAdditional = 0;
-        if (subtractFromSubscription < files.length) {
-          subtractFromAdditional = files.length - subtractFromSubscription;
-        }
-        const updatedCounters = {};
-        if (subtractFromSubscription) {
-          updatedCounters.certificates = subscription.availableCertificatesBySubscription - subtractFromSubscription;
-        }
-        if (subtractFromAdditional) {
-          updatedCounters.additionalCertificates = subscription.availableAdditionalCertificates - subtractFromAdditional;
-        }
-        await subscriptionsService.setSubscriptionCounters(subscription.id, updatedCounters);
-      } else if (subscription.pricingPlanId === FREE_PRICING_PLAN_ID) {
-        const user = await usersService.findUserById(jwtUsername);
-        await usersService.updateFreeUnits(jwtUsername, {
-          certificates: user.freeUnits.certificates - files.length
-        });
-      }
+    await sendTransaction(tx);
+    const filesRefs = await filesService.upsertTimestampedFilesRefs(refs, jwtUsername);
 
-      ctx.status = 200;
-      ctx.body = filesRefs;
-    } else {
-      throw new Error(`Could not proceed the transaction: ${tx}`);
-    }
+    ctx.status = 200;
+    ctx.body = filesRefs;
     
   } catch (err) {
     console.log(err);
