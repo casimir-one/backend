@@ -15,10 +15,15 @@ async function getIPprotectionProduct() {
 async function createCustomer({
   stripeToken, customerEmail
 }) {
-  return stripe.customers.create({
+  const customerData = {
     source: stripeToken,
     email: customerEmail
-  });
+  };
+  if (config.environment === 'local') {
+    customerData.description = 'Local development customer';
+    customerData.metadata = { type: 'local' };
+  }
+  return stripe.customers.create(customerData);
 }
 
 async function updateCustomer(customerId, { email, sourceCardToken }) {
