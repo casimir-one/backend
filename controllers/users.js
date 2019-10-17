@@ -38,6 +38,22 @@ const getUsersProfiles = async (ctx) => {
     ctx.body = profiles;
 }
 
+const searchUsersProfiles = async (ctx) => {
+  let {
+    usernamePart,
+    limit
+  } = ctx.request.body;
+
+  const query = {};
+  if (usernamePart) {
+    const pattern = `${usernamePart}`.toLowerCase();
+    query._id = { $regex: new RegExp(pattern, 'g') };
+  }
+
+  ctx.status = 200;
+  ctx.body = await UserProfile.find(query).limit(limit || 50);
+}
+
 const createUserProfile = async (ctx) => {
     const data = ctx.request.body;
     const username = ctx.params.username;
@@ -209,5 +225,6 @@ export default {
     createUserProfile,
     updateUserProfile,
     uploadAvatar,
-    getAvatar
+    getAvatar,
+    searchUsersProfiles
 }
