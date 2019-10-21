@@ -151,7 +151,10 @@ const exportCertificates = async (ctx) => {
     if (certificatesData.length === 1) {
       const cData = certificatesData[0];
       const cHtml = await getContentCertificateHtml(cData);
-      ctx.response.set('Content-disposition', `attachment; filename="deip-cert-${cData.contentHash}.pdf"`);
+      const despositionType = ctx.request.query.preview === 'true'
+        ? 'inline'
+        : 'attachment';
+      ctx.response.set('Content-disposition', `${despositionType}; filename="deip-cert-${cData.contentHash}.pdf"`);
       ctx.type = 'application/pdf';
       ctx.body = await getPdfStream(cHtml);
     } else {
