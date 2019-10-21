@@ -21,7 +21,7 @@ class EmailsService {
   async sendMessage({ to, subject, text, html }) {
     const message = {
       from: {
-        name: 'DEIP IP Protection Platform',
+        name: 'IP Ledger',
         address: config.mailer.gmailUser,
       },
       to, subject, text, html,

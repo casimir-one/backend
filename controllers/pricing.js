@@ -289,6 +289,11 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
       }
     } = event.data;
 
+    const stripeCustomer = await stripeService.findCustomer(customer);
+    if (config.environment !== 'local' && stripeCustomer.metadata.type === 'local') {
+      ctx.status = 200;
+      return;
+    }
     const user = await usersService.findUserByCustomerId(customer);
     if (!user) {
       ctx.status = 400;
@@ -309,12 +314,10 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
         filesShares: pricingPlan.terms.fileShareLimit.limit,
       });
       
-      let stripeCustomer = await stripeService.findCustomer(customer);
       let to = stripeCustomer.email;
       console.log(`TODO: Send product Greeting letter`);
     } else if (previousStatus !== undefined && previousStatus === stripeSubscriptionStatus.ACTIVE && currentStatus === stripeSubscriptionStatus.PAST_DUE) {
       //  Payment for this subscription has failed first time
-      let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
       let to = stripeCustomer.email;
       console.log(`TODO: Send letter with notification about payment failure (first attempt)`);
@@ -323,13 +326,11 @@ const customerSubscriptionUpdatedWebhook = async function (ctx) {
     
     if (previousCancelAtPeriodEnd !== undefined && previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === true) {
       // subscription is canceled
-      let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
       let to = stripeCustomer.email;
       console.log(`TODO: Send letter with notification about subscription cancelation date`);
     } else if (previousCancelAtPeriodEnd !== undefined && previousCancelAtPeriodEnd != currentCancelAtPeriodEnd && currentCancelAtPeriodEnd === false) {
       // subscription is reactivated
-      let stripeCustomer = await stripeService.findCustomer(customer);
       let stripeSubscription = await stripeService.findSubscription(id);
       let to = stripeCustomer.email;
       console.log(`TODO: Send letter with notification about subscription reactivation`);
@@ -370,9 +371,13 @@ const customerPaymentIntentSucceededWebhook = async function (ctx) {
     const sig = ctx.request.headers['stripe-signature'];
     const endpointSecret = config.stripe.customerPaymentIntentSucceededWebhookSigningKey;
 
-    let event;
     try {
-      event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
+      const event = stripeService.constructEventFromWebhook({ body: ctx.request.rawBody, sig, endpointSecret });
+      const stripeCustomer = await stripeService.findCustomer(event.data.object.customer);
+      if (config.environment !== 'local' && stripeCustomer.metadata.type === 'local') {
+        ctx.status = 200;
+        return;
+      }
       const { object, username, numberOfUnits } = event.data.object.metadata;
       if (!additionalPackageTypeValues.includes(object)) {
         ctx.status = 200;

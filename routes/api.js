@@ -16,6 +16,7 @@ router.post('/files/upload-avatar', users.uploadAvatar)
 
 router.get('/user/profile/:username', users.getUserProfile)
 router.get('/user/profiles', users.getUsersProfiles)
+router.post('/user/profiles/search', users.searchUsersProfiles)
 router.post('/user/profile/:username', users.createUserProfile)
 router.put('/user/profile/:username', users.updateUserProfile)
 

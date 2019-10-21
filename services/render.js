@@ -6,6 +6,7 @@ const config = require('./../config');
 const readFileAsync = Promise.promisify(fs.readFile);
 
 const DEFAULTS = {
+  mainPageUrl: config.uiHost,
   updatePreferencesUrl: `${config.uiHost}/account-settings/notifications`,
   unsubscribeUrl: `${config.uiHost}/account-settings/notifications?unsubscribe=true`,
 };
