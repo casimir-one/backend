@@ -6,4 +6,7 @@ yarn-debug.log*
 yarn-error.log*
 test/unit/coverage
 files/*
+local-oa-files/*
+local-dev-oa-files/*
+local-ipl-files/*
 /config/environment/.local.env
