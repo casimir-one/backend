@@ -3,8 +3,10 @@ import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util';
 import multer from 'koa-multer';
+import config from './../config';
 
-const storagePath = path.join(__dirname, './../files');
+
+const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 
 const agencyTempStoragePath = (agency, postfix) => `${storagePath}/agencies/${agency}/temp-${postfix}`

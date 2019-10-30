@@ -15,7 +15,7 @@ import { bulkApplicationContentUploader } from './../storages/bulkApplicationCon
 import crypto from 'crypto';
 import rimraf from "rimraf";
 
-const storagePath = path.join(__dirname, './../files');
+const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const opts = {}
 
 const listApplicationsRefsByResearch = async (ctx) => {
@@ -200,7 +200,7 @@ const getApplicationPackageFormContent = async function(ctx) {
         ctx.response.set('Content-disposition', 'attachment; filename="' + form.filename + '"');
         ctx.body = fs.createReadStream(agencyFoaApplicationPackageFormPath(ac.agency, ac.foaId, ac.hash, form.filename));
     } else {
-        await send(ctx, `/files/agencies/${ac.agency}/applications/foa-${ac.foaId}/${ac.hash}/${form.filename}`);
+        await send(ctx, `/${config.fileStorageDir}/agencies/${ac.agency}/applications/foa-${ac.foaId}/${ac.hash}/${form.filename}`);
     }
 }
 

@@ -5,8 +5,9 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
 import deipRpc from '@deip/deip-rpc-client';
+import config from './../config';
 
-const filesStoragePath = path.join(__dirname, './../files');
+const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const logoPath = (agency, ext) => `${filesStoragePath}/agencies/${agency}/logo.${ext}`;
 
 const getAgencyProfile = async (ctx) => {

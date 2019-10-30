@@ -23,7 +23,7 @@ import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
 
-const storagePath = path.join(__dirname, './../files');
+const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const opts = {}
 
 // ############ Read actions ############
@@ -99,7 +99,7 @@ const readDarArchiveStaticFiles = async (ctx) => {
         const stat = util.promisify(fs.stat);
         const filePath = path.join(storagePath, rc.filename);
         const check = await stat(filePath);
-        await send(ctx, `/files` + `${rc.filename}/${ctx.params.file}`);
+        await send(ctx, `/${config.fileStorageDir}/${rc.filename}/${ctx.params.file}`);
     } catch(err) {
         console.log(err);
         ctx.status = 500;
@@ -715,7 +715,7 @@ const getResearchPackageFile = async function(ctx) {
         ctx.response.set('Content-disposition', 'attachment; filename="' + slug(file.filename) + '"');
         ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchId, rc.hash, file.filename));
     } else {
-        await send(ctx, `/files/${rc.researchId}/${rc.hash}/${file.filename}`);
+        await send(ctx, `/${config.fileStorageDir}/${rc.researchId}/${rc.hash}/${file.filename}`);
     }
 }
 
