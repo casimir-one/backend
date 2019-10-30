@@ -4,7 +4,7 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
 import UserProfile from './../schemas/user'
-import UserProfile from './../config'
+import config from './../config'
 
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const avatarsStoragePath = () => `${filesStoragePath}/avatars`
