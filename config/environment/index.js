@@ -22,7 +22,7 @@ config = _.merge(config, {
     blockchain: {
         rpcEndpoint: process.env.DEIP_FULL_NODE_URL,
         chainId: process.env.CHAIN_ID,
-        accountsCreator : process.env.FAUCET_ACCOUNT
+        accountsCreator : JSON.parse(process.env.FAUCET_ACCOUNT)
     },
     serverHost: process.env.DEIP_SERVER_URL,
     uiHost: process.env.DEIP_CLIENT_HOST, // todo: get rid of this

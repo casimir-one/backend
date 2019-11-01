@@ -121,9 +121,9 @@ async function createAccount(username, pubKey, owner) {
     const accountsCreator = config.blockchain.accountsCreator;
 
     let promise = new Promise((resolve) => {
-        deipRpc.api.getConfig((err, config) => {
+        deipRpc.api.getConfig((err, chainConfig) => {
             if (err) {
-                console.log(err, config);
+                console.log(err, chainConfig);
                 resolve({isSuccess:false, result: err})
             }
 
@@ -133,7 +133,7 @@ async function createAccount(username, pubKey, owner) {
                     resolve({isSuccess:false, result: err})
                 }
 
-                // const ratio = config['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
+                // const ratio = chainConfig['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
                 // var fee = Asset.from(chainProps.account_creation_fee).multiply(ratio);
                 const jsonMetadata = '';
                 deipRpc.broadcast.accountCreate(accountsCreator.wif, accountsCreator.fee, 
