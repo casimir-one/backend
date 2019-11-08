@@ -4,7 +4,7 @@ import config from './../config';
 import deipRpc from '@deip/deip-rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import UserProfile from './../schemas/user';
+import usersService from './../services/users';
 
 function Encodeuint8arr(seed) {
     return new TextEncoder("utf-8").encode(seed);
@@ -95,15 +95,9 @@ const signUp = async function(ctx) {
             return;
         }
 
-        let profile = await UserProfile.findOne({'_id': username});
+        let profile = await usersService.findUserProfileByOwner(username);
         if (!profile) {
-            const model = new UserProfile({
-                _id: username,
-                email: email,
-                firstName: firstName,
-                lastName: lastName,
-            });
-            profile = await model.save();
+            profile = await usersService.createUserProfile({ username, email, firstName, lastName});
         }
         
         ctx.status = 200;
