@@ -24,7 +24,8 @@ async function createInvestmentPortfolio({
     members: members || [],
     researches: researches || [],
     lists: lists || [{
-      "name": "all",
+      "id": "all",
+      "name": "All",
       "color": "#757575",
       "researches": []
     }],
@@ -118,7 +119,7 @@ async function getSynchronizeInvestorPortfolio(username) {
         }
       }
 
-      if (list.name == "all") {
+      if (list.id == "all") {
         if (!list.researches.length == 0) {
           let toAdd = list.researches.filter(rId => !actualResearches.some(r => r.id == rId));
           list.researches.push(...toAdd);

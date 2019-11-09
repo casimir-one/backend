@@ -20,6 +20,7 @@ const InvestmentPortfolio = new Schema({
         _id: false,
         "id": { type: Number, required: true },
         "tags": [{
+            _id: false,
             "name": { type: String, required: true },
             "list": { type: String, required: true }
         }],
@@ -28,6 +29,7 @@ const InvestmentPortfolio = new Schema({
     }],
     "lists": [{
         _id: false,
+        "id": { type: String, required: true },
         "name": { type: String, required: true },
         "color": { type: String, required: true },
         "researches": { type: [Number], required: true }
