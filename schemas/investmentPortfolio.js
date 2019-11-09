@@ -25,21 +25,20 @@ const InvestmentPortfolio = new Schema({
             "list": { type: String, required: true }
         }],
         "memo": { type: String, required: false },
+        "comments": [{
+            _id: false,
+            "id": { type: String, required: true },
+            "username": { type: String, required: true },
+            "text": { type: String, required: true },
+            "timestamp": { type: Date, default: Date.now },
+        }],
         "metadata": { type: Object, default: null }
     }],
     "lists": [{
         _id: false,
         "id": { type: String, required: true },
         "name": { type: String, required: true },
-        "color": { type: String, required: true },
-        "researches": { type: [Number], required: true }
-    }],
-    "comments": [{
-        _id: false,
-        "id": { type: String, required: true },
-        "username": { type: String, required: true },
-        "text": { type: String, required: true },
-        "timestamp": { type: Date, default: Date.now },
+        "color": { type: String, required: true }
     }],
     "metadata": { _id: false, type: Object, default: null } // saved searches
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

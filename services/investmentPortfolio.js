@@ -26,8 +26,7 @@ async function createInvestmentPortfolio({
     lists: lists || [{
       "id": "all",
       "name": "All",
-      "color": "#757575",
-      "researches": []
+      "color": "#757575"
     }],
     comments: comments || [],
     metadata: metadata || {}
@@ -105,31 +104,6 @@ async function getSynchronizeInvestorPortfolio(username) {
     }
 
     investorPortfolio.researches = actualResearches;
-
-    // clear lists from old investments in case chain data is dropped 
-    // or all research tokens have been sold (transfered) 
-    // and add new investment to default list
-    for (let i = 0; i < investorPortfolio.lists.length; i++) {
-      let list = investorPortfolio.lists[i];
-
-      for (let j = list.researches.length - 1; j >= 0; j--) {
-        let rId = list.researches[j];
-        if (!actualResearches.some(r => r.id == rId)) {
-          list.researches.splice(j, 1);
-        }
-      }
-
-      if (list.id == "all") {
-        if (!list.researches.length == 0) {
-          let toAdd = list.researches.filter(rId => !actualResearches.some(r => r.id == rId));
-          list.researches.push(...toAdd);
-        } else {
-          let toAdd = actualResearches.map(r => r.id);
-          list.researches.push(...toAdd);
-        }
-      }
-    }
-
     investorPortfolio = await updateInvestmentPortfolio(username, investorPortfolio);
     console.log("Investor Portfolio Updated", JSON.stringify(investorPortfolio, null, 2));
   }
