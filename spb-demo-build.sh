@@ -4,7 +4,7 @@ set -e
 TAG=$(git log -1 --pretty=%h)
 LATEST="latest"
 
-echo "Building deipworld/web-server image..."
+echo "Building deipworld/spb-demo-web-server image..."
 export IMAGE_NAME="deipworld/spb-demo-web-server:$TAG"
 export LATEST_IMAGE_NAME="deipworld/spb-demo-web-server:$LATEST"
 export NODE_ENV="development"
