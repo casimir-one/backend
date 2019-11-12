@@ -1,4 +1,4 @@
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 
 export async function findResearchContentById(_id) {

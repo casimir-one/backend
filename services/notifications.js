@@ -1,4 +1,4 @@
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import UserProfile from './../schemas/user';
 import Notification from './../schemas/notification';
 

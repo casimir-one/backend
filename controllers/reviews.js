@@ -1,6 +1,6 @@
 import { sendReviewMadeNotificationToGroup } from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 
 const makeReview = async (ctx) => {
     const jwtUsername = ctx.state.user.username;

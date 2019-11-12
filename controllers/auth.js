@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import config from './../config';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import usersService from './../services/users';

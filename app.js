@@ -15,7 +15,7 @@ import cors from '@koa/cors';
 import config from './config';
 import mongoose from 'mongoose';
 
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
 deipRpc.config.set('chain_id', config.blockchain.chainId);
 

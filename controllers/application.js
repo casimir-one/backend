@@ -4,7 +4,7 @@ import path from 'path'
 import util from 'util';
 import send from 'koa-send';
 import multer from 'koa-multer';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import ApplicationContent from './../schemas/applicationContent';
 import { hashElement } from 'folder-hash';
 import config from './../config';

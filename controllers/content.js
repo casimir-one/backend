@@ -9,7 +9,7 @@ import readArchive from './../dar/readArchive'
 import writeArchive from './../dar/writeArchive'
 import cloneArchive from './../dar/cloneArchive'
 import listArchives from './../dar/listArchives'
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';

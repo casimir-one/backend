@@ -1,6 +1,6 @@
 import Notification from './../schemas/notification';
 import UserProfile from './../schemas/user';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 
 const getNotificationsByUser = async (ctx) => {
     const username = ctx.params.username;

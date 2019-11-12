@@ -1,7 +1,7 @@
 
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import { sendInviteNotificationToInvitee } from './../services/notifications';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 
 const createResearchGroup = async (ctx) => {
     const jwtUsername = ctx.state.user.username;

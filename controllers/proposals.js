@@ -2,7 +2,7 @@ import { authorizeResearchGroup } from './../services/auth'
 import { findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
 import { sendProposalNotificationToGroup } from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 import UserProfile from './../schemas/user';
 import Notification from './../schemas/notification';
