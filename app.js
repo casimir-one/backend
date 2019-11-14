@@ -60,6 +60,7 @@ app.on('error', function(err, ctx) {
     console.log('server error', err);
 });
 
+app.use(serve('files/static'));
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
 router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
