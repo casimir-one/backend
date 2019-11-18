@@ -21,6 +21,10 @@ router.get('/user/profiles', users.getUsersProfiles)
 router.post('/user/profile/:username', users.createUserProfile)
 router.put('/user/profile/:username', users.updateUserProfile)
 
+router.get('/bookmarks/user/:username', users.getUserBookmarks)
+router.post('/bookmarks/user/:username', users.addUserBookmark)
+router.delete('/bookmarks/user/:username/remove/:bookmarkId', users.removeUserBookmark)
+
 router.post('/join-requests', joinRequests.createJoinRequest)
 router.put('/join-requests', joinRequests.updateJoinRequest)
 router.get('/join-requests/group/:groupId', joinRequests.getJoinRequestsByGroup)
