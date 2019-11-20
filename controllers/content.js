@@ -407,10 +407,17 @@ const updateDraftMetaAsync = async (id, archive, link) => {
     rc.authors = accounts;
     rc.references = contentRefs;
     
-    const options = { algo: 'md5', encoding: 'hex' };
+    const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
     const hashObj = await hashElement(path.join(storagePath, link), options);
-    console.log(hashObj)
-    rc.hash = hashObj.hash;
+    console.log(hashObj);
+    const hashes = hashObj.children.map(f => f.hash);
+    hashes.sort();
+    const hash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
+    rc.hash = hash;
+    rc.algo = "sha256";
+    rc.packageFiles = hashObj.children.map((f) => {
+        return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
+    });
     await rc.save()
 }
 
@@ -524,7 +531,7 @@ const uploadFileContent = async(ctx) => {
             });
         }));
 
-        const options = { algo: 'md5', encoding: 'hex', files: { ignoreRootName: true }};
+        const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
         const hashObj = await hashElement(filepath, options);
 
         var exists = false;
@@ -562,6 +569,7 @@ const uploadFileContent = async(ctx) => {
                     "researchId": researchId,
                     "researchGroupId": research.research_group_id,
                     "hash": hashObj.hash,
+                    "algo": "sha256",
                     "type": 'file',
                     "status": 'in-progress',
                     "authors": [jwtUsername],
@@ -626,12 +634,12 @@ const uploadBulkResearchContent = async(ctx) => {
             });
         }));
 
-        const options = { algo: 'md5', encoding: 'hex', files: { ignoreRootName: true }};
+        const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
         const hashObj = await hashElement(tempDestinationPath, options);
         console.log(hashObj);
         const hashes = hashObj.children.map(f => f.hash);
         hashes.sort();
-        const packageHash = crypto.createHash('md5').update(hashes.join(",")).digest("hex");
+        const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
 
         var exists = false;
         const rc = await findResearchContentByHash(researchId, packageHash);
@@ -670,6 +678,7 @@ const uploadBulkResearchContent = async(ctx) => {
                     "researchId": researchId,
                     "researchGroupId": research.research_group_id,
                     "hash": packageHash,
+                    "algo": "sha256",
                     "type": 'package',
                     "status": "in-progress",
                     "authors": [jwtUsername],

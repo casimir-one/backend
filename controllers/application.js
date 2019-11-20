@@ -115,13 +115,13 @@ const uploadBulkApplicationContent = async(ctx) => {
             });
         }));
 
-        const options = { algo: 'md5', encoding: 'hex', files: { ignoreRootName: true }};
+        const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
         const hashObj = await hashElement(tempDestinationPath, options);
         console.log(hashObj);
         const letterHash = hashObj.children[0].hash;
         const hashes = hashObj.children.map(f => f.hash);
         hashes.sort();
-        const packageHash = crypto.createHash('md5').update(hashes.join(",")).digest("hex");
+        const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
 
         var exists = false;
         const ac = await findApplicationPackageByHash(agency, foaId, packageHash);
