@@ -2,6 +2,7 @@ import koa_router from 'koa-router'
 import files from '../controllers/files'
 import users from '../controllers/users'
 import joinRequests from '../controllers/joinRequests'
+import reviewRequests from '../controllers/reviewRequests'
 import expertiseClaims from '../controllers/expertiseClaims'
 import search from '../controllers/search'
 import notifications from '../controllers/notifications'
@@ -29,6 +30,10 @@ router.post('/join-requests', joinRequests.createJoinRequest)
 router.put('/join-requests', joinRequests.updateJoinRequest)
 router.get('/join-requests/group/:groupId', joinRequests.getJoinRequestsByGroup)
 router.get('/join-requests/user/:username', joinRequests.getJoinRequestsByUser)
+
+router.post('/review-requests', reviewRequests.createReviewRequest);
+router.post('/review-requests/:id/deny', reviewRequests.denyReviewRequest);
+router.get('/review-requests/expert/:username', reviewRequests.getReviewRequestsByExpert);
 
 router.post('/expertise-claims', expertiseClaims.createExpertiseClaim)
 router.post('/expertise-claims/vote', expertiseClaims.voteForExpertiseClaim)
