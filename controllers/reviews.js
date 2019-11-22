@@ -1,5 +1,6 @@
 import { sendReviewMadeNotificationToGroup } from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
+import ReviewRequest from './../schemas/reviewRequest'
 import deipRpc from '@deip/deip-oa-rpc-client';
 
 const makeReview = async (ctx) => {
@@ -55,6 +56,10 @@ async function processPublishedReview(payload, txInfo) {
             const review = reviews.find(r => r.author == opPayload.author && r.content == opPayload.content);
             if (review) {
                 await sendReviewMadeNotificationToGroup(review);
+                await ReviewRequest.update({
+                  expert: payload.author,
+                  contentId: payload.research_content_id,
+                }, { $set: { status: 'approved' } });
             }
             break;
         }
