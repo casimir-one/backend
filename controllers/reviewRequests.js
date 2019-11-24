@@ -1,5 +1,6 @@
 import deipRpc from '@deip/deip-oa-rpc-client';
-import ReviewRequest from './../schemas/reviewRequest'
+import ReviewRequest from './../schemas/reviewRequest';
+import * as notificationsService from './../services/notifications';
 
 const getReviewRequestsByExpert = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -28,6 +29,7 @@ const createReviewRequest = async (ctx) => {
   const {
     contentId, expert,
   } = ctx.request.body;
+  const requestor = jwtUsername;
 
   if (jwtUsername === expert) {
     ctx.status = 400;
@@ -52,10 +54,12 @@ const createReviewRequest = async (ctx) => {
 
   const reviewRequest = new ReviewRequest({
     expert, contentId,
-    requestor: jwtUsername,
+    requestor: requestor,
     status: 'pending'
   });
   const savedReviewRequest = await reviewRequest.save();
+
+  notificationsService.sendReviewRequestNotificationToExpert(requestor, expert, contentId)
 
   ctx.status = 201;
   ctx.body = savedReviewRequest;

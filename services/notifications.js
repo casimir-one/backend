@@ -30,6 +30,25 @@ export async function sendInviteNotificationToInvitee(groupId, invitee) {
     return savedInvitation;
 }
 
+export async function sendReviewRequestNotificationToExpert(requestor, expert, contentId) {
+    const requestorInfo = await UserProfile.findOne({ '_id': requestor });
+    const expertInfo = await UserProfile.findOne({ '_id': expert });
+    const contentInfo = await deipRpc.api.getResearchContentByIdAsync(contentId);
+
+    const notification = new Notification({
+        username: expert,
+        status: 'unread',
+        type: 'review-request',
+        meta: {
+            requestorInfo,
+            expertInfo,
+            contentInfo
+        }
+    });
+    const savedInvitation = await notification.save();
+    return savedInvitation;
+}
+
 export async function sendInviteResolvedNotificationToGroup(isApproved, invite) {
     const groupInfo = await deipRpc.api.getResearchGroupByIdAsync(invite.research_group_id);
     const inviteeInfo = await UserProfile.findOne({ '_id': invite.account_name });
