@@ -229,7 +229,6 @@ const unlockContentDraft = async (ctx) => {
         // we must respond with an error as blockchain hashed data should not be modified
         const proposal = await lookupContentProposal(rc.researchGroupId, rc.hash, rc.type)
         if (proposal && proposalIsNotExpired(proposal)) {
-            console.log("whyyyyy????")
             ctx.status = 405;
             ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be modified`;
             return;

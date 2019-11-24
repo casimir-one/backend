@@ -87,7 +87,7 @@ const createContentProposal = async (ctx) => {
             return;
         }
         if (rc.status != 'in-progress') {
-            ctx.status = 405;
+            ctx.status = 409;
             ctx.body = `Research content "${rc.title}" has '${rc.status}' status`
             return;
         }
