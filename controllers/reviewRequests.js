@@ -7,8 +7,11 @@ const getReviewRequestsByExpert = async (ctx) => {
   const username = ctx.params.username;
 
   if (username !== jwtUsername) {
-    ctx.status = 403;
-    ctx.body = `You have no permission to get '${username}' review requests`;
+    // ctx.status = 403;
+    // ctx.body = `You have no permission to get '${username}' review requests`;
+    // return;
+    ctx.status = 200;
+    ctx.body = [];
     return;
   }
 
@@ -29,8 +32,11 @@ const getReviewRequestsByRequestor = async (ctx) => {
   const username = ctx.params.username;
 
   if (username !== jwtUsername) {
-    ctx.status = 403;
-    ctx.body = `You have no permission to get '${username}' review requests`;
+    // ctx.status = 403;
+    // ctx.body = `You have no permission to get '${username}' review requests`;
+    // return;
+    ctx.status = 200;
+    ctx.body = [];
     return;
   }
 

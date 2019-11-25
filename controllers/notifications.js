@@ -11,7 +11,7 @@ const getNotificationsByUser = async (ctx) => {
         // ctx.status = 403;
         // ctx.body = `You have no permission to make this action`
         // return;
-        ctx.status = 201;
+        ctx.status = 200;
         ctx.body = [];
         return;
     }
@@ -41,7 +41,7 @@ const markUserNotificationAsRead = async (ctx) => {
         // ctx.status = 403;
         // ctx.body = `You have no permission to make this action`
         // return;
-        ctx.status = 201;
+        ctx.status = 200;
         ctx.body = [];
         return;
     }
@@ -74,7 +74,7 @@ const markAllUserNotificationAsRead = async (ctx) => {
         // ctx.status = 403;
         // ctx.body = `You have no permission to make this action`
         // return;
-        ctx.status = 201;
+        ctx.status = 200;
         ctx.body = [];
         return;
     }
