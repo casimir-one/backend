@@ -34,6 +34,7 @@ router.get('/join-requests/user/:username', joinRequests.getJoinRequestsByUser)
 router.post('/review-requests', reviewRequests.createReviewRequest);
 router.post('/review-requests/:id/deny', reviewRequests.denyReviewRequest);
 router.get('/review-requests/expert/:username', reviewRequests.getReviewRequestsByExpert);
+router.get('/review-requests/requestor/:username', reviewRequests.getReviewRequestsByRequestor);
 
 router.post('/expertise-claims', expertiseClaims.createExpertiseClaim)
 router.post('/expertise-claims/vote', expertiseClaims.voteForExpertiseClaim)

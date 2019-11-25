@@ -24,6 +24,31 @@ const getReviewRequestsByExpert = async (ctx) => {
   ctx.body = reviewRequests;
 };
 
+const getReviewRequestsByRequestor = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const username = ctx.params.username;
+
+  if (username !== jwtUsername) {
+    ctx.status = 403;
+    ctx.body = `You have no permission to get '${username}' review requests`;
+    return;
+  }
+
+  const query = {
+    requestor: username,
+  };
+
+  if (ctx.query.status) {
+    console.log(ctx.query.status)
+    console.log("3fhuefnu3unr")
+    query.status = ctx.query.status;
+  }
+  const reviewRequests = await ReviewRequest.find(query);
+
+  ctx.status = 200;
+  ctx.body = reviewRequests;
+};
+
 const createReviewRequest = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const {
@@ -79,6 +104,7 @@ const denyReviewRequest = async (ctx) => {
 
 export default {
   getReviewRequestsByExpert,
+  getReviewRequestsByRequestor,
   createReviewRequest,
-  denyReviewRequest,
+  denyReviewRequest
 }
