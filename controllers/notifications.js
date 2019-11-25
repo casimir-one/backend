@@ -8,8 +8,11 @@ const getNotificationsByUser = async (ctx) => {
     const unreadOnly = ctx.query.unreadOnly === undefined ? true : ctx.query.unreadOnly;
 
     if (username != jwtUsername) {
-        ctx.status = 403;
-        ctx.body = `You have no permission to make this action`
+        // ctx.status = 403;
+        // ctx.body = `You have no permission to make this action`
+        // return;
+        ctx.status = 201;
+        ctx.body = [];
         return;
     }
 
@@ -35,8 +38,11 @@ const markUserNotificationAsRead = async (ctx) => {
     const notificationId = ctx.params.notificationId;
 
     if (username != jwtUsername) {
-        ctx.status = 403;
-        ctx.body = `You have no permission to make this action`
+        // ctx.status = 403;
+        // ctx.body = `You have no permission to make this action`
+        // return;
+        ctx.status = 201;
+        ctx.body = [];
         return;
     }
 
@@ -65,8 +71,11 @@ const markAllUserNotificationAsRead = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
 
     if (username != jwtUsername) {
-        ctx.status = 403;
-        ctx.body = `You have no permission to make this action`
+        // ctx.status = 403;
+        // ctx.body = `You have no permission to make this action`
+        // return;
+        ctx.status = 201;
+        ctx.body = [];
         return;
     }
 
