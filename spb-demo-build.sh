@@ -14,5 +14,5 @@ docker build -t=${IMAGE_NAME} .
 docker tag ${IMAGE_NAME} ${LATEST_IMAGE_NAME}
 docker push ${IMAGE_NAME}
 docker push ${LATEST_IMAGE_NAME}
-docker rmi "$ORG/$IMAGE_PREFIX-$NODE_PREFIX:$TAG"
-docker rmi "$ORG/$IMAGE_PREFIX-$NODE_PREFIX:$LATEST"
+docker rmi "$ORG/$IMAGE_NAME:$TAG"
+docker rmi "$ORG/$LATEST_IMAGE_NAME:$LATEST"
