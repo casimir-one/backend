@@ -4,7 +4,7 @@ set -e
 TAG=$(git log -1 --pretty=%h)
 LATEST="latest"
 ORG="deipworld"
-IMAGE_PREFIX="oa-develop"
+IMAGE_PREFIX="$1"
 
 echo "Building $ORG/$IMAGE_PREFIX-web-server image..."
 export IMAGE_NAME="$ORG/$IMAGE_PREFIX-web-server:$TAG"
