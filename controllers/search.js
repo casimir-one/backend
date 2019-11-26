@@ -1,4 +1,4 @@
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 
 const getAllResearchContents = async (ctx) => {
     const username = ctx.params.username;

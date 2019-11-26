@@ -19,7 +19,8 @@ const Notification = new Schema({
             'approved-invitation', 
             'rejected-invitation',
             'review',
-            'allocated-expertise'
+            'allocated-expertise',
+            'review-request'
         ],
         required: true
     },

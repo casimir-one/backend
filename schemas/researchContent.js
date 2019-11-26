@@ -10,6 +10,7 @@ const ResearchContent = new Schema({
     "researchGroupId": { type: Number, required: true },
     "title": { type: String },
     "hash": {type: String, index: true },
+    "algo": { type: String },
     "type": {
         type: String,
         enum : ['file', 'dar', 'package'],

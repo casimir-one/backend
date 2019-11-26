@@ -1,3 +1,4 @@
+import UserBookmark from './../schemas/userBookmark'
 import UserProfile from './../schemas/user'
 import qs from 'qs'
 
@@ -91,9 +92,92 @@ const updateUserProfile = async (ctx) => {
     ctx.body = updatedProfile
 }
 
+const getUserBookmarks = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const username = ctx.params.username;
+
+  if (username !== jwtUsername) {
+    ctx.status = 403;
+    ctx.body = `You have no permission to get '${username}' bookmarks`;
+    return;
+  }
+
+  const query = {
+    username,
+  };
+  if (ctx.query.type) {
+    query.type = ctx.query.type;
+  }
+  if (ctx.query.ref) {
+    query.ref = ctx.query.ref;
+  }
+  const bookmarks = await UserBookmark.find(query);
+
+  ctx.status = 200;
+  ctx.body = bookmarks;
+}
+
+const addUserBookmark = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const username = ctx.params.username;
+
+  if (username !== jwtUsername) {
+    ctx.status = 403;
+    ctx.body = `You have no permission to create '${username}' bookmarks`;
+    return;
+  }
+
+  const data = ctx.request.body;
+
+  const bookmarkType = data.type;
+  let ref
+  switch (bookmarkType) {
+    case 'research':
+      const researchId = +data.researchId;
+      if (!Number.isInteger(researchId) || researchId < 0) {
+        ctx.status = 400;
+        ctx.body = 'Invalid researchId value';
+        return;
+      }
+      ref = data.researchId;
+      break;
+  }
+
+  const bookmark = new UserBookmark({
+    username,
+    type: data.type,
+    ref,
+  });
+  const savedBookmark = await bookmark.save();
+
+  ctx.status = 201;
+  ctx.body = savedBookmark;
+}
+
+const removeUserBookmark = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const username = ctx.params.username;
+
+  if (username !== jwtUsername) {
+    ctx.status = 403;
+    ctx.body = `You have no permission to remove '${username}' bookmarks`;
+    return;
+  }
+
+  await UserBookmark.remove({
+    _id: ctx.params.bookmarkId,
+    username,
+  });
+  ctx.status = 204;
+}
+
 export default {
     getUserProfile,
     getUsersProfiles,
     createUserProfile,
-    updateUserProfile
+    updateUserProfile,
+
+    getUserBookmarks,
+    addUserBookmark,
+    removeUserBookmark
 }

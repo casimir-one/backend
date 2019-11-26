@@ -1,5 +1,5 @@
 
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 
 export async function sendTransaction(tx) {
     const promise = new Promise((resolve) => {

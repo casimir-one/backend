@@ -1,4 +1,4 @@
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import UserProfile from './../schemas/user';
 import Notification from './../schemas/notification';
 
@@ -24,6 +24,25 @@ export async function sendInviteNotificationToInvitee(groupId, invitee) {
         meta: {
             groupInfo: groupInfo,
             inviteeInfo: inviteeInfo
+        }
+    });
+    const savedInvitation = await notification.save();
+    return savedInvitation;
+}
+
+export async function sendReviewRequestNotificationToExpert(requestor, expert, contentId) {
+    const requestorInfo = await UserProfile.findOne({ '_id': requestor });
+    const expertInfo = await UserProfile.findOne({ '_id': expert });
+    const contentInfo = await deipRpc.api.getResearchContentByIdAsync(contentId);
+
+    const notification = new Notification({
+        username: expert,
+        status: 'unread',
+        type: 'review-request',
+        meta: {
+            requestorInfo,
+            expertInfo,
+            contentInfo
         }
     });
     const savedInvitation = await notification.save();

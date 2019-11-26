@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import config from './../config';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
@@ -35,7 +35,7 @@ const signIn = async function(ctx) {
             const jwtToken = jwt.sign({
                 pubKey: pubWif,
                 username: username,
-                exp: Math.floor(Date.now() / 1000) + (180 * 60) // 3 hours
+                exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60) // 3 hours
             }, jwtSecret)
 
             ctx.body = {

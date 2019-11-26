@@ -4,7 +4,7 @@ import fs from 'fs';
 import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import config from './../config';
 
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);

@@ -2,7 +2,7 @@ import { authorizeResearchGroup } from './../services/auth'
 import { findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
 import { sendProposalNotificationToGroup } from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 import ResearchContent from './../schemas/researchContent';
 import UserProfile from './../schemas/user';
 import Notification from './../schemas/notification';
@@ -87,7 +87,7 @@ const createContentProposal = async (ctx) => {
             return;
         }
         if (rc.status != 'in-progress') {
-            ctx.status = 405;
+            ctx.status = 409;
             ctx.body = `Research content "${rc.title}" has '${rc.status}' status`
             return;
         }

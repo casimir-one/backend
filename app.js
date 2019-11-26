@@ -15,7 +15,7 @@ import cors from '@koa/cors';
 import config from './config';
 import mongoose from 'mongoose';
 
-import deipRpc from '@deip/deip-rpc-client';
+import deipRpc from '@deip/deip-oa-rpc-client';
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
 deipRpc.config.set('chain_id', config.blockchain.chainId);
 
@@ -60,6 +60,7 @@ app.on('error', function(err, ctx) {
     console.log('server error', err);
 });
 
+app.use(serve('files/static'));
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
 router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
