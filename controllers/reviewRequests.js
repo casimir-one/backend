@@ -1,6 +1,9 @@
 import deipRpc from '@deip/deip-oa-rpc-client';
 import ReviewRequest from './../schemas/reviewRequest';
-import * as notificationsService from './../services/notifications';
+import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
+import userNotificationHandler from './../event-handlers/userNotification';
 
 const getReviewRequestsByExpert = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -84,13 +87,15 @@ const createReviewRequest = async (ctx) => {
   }
 
   const reviewRequest = new ReviewRequest({
-    expert, contentId,
+    expert, 
+    contentId,
     requestor: requestor,
     status: 'pending'
   });
   const savedReviewRequest = await reviewRequest.save();
-
-  notificationsService.sendReviewRequestNotificationToExpert(requestor, expert, contentId)
+  
+  userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, reviewRequest);
+  researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, reviewRequest);
 
   ctx.status = 201;
   ctx.body = savedReviewRequest;

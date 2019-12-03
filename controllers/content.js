@@ -40,18 +40,17 @@ const listDarArchives = async (ctx) => {
     }
 }
 
-
 const listContentRefs = async (ctx) => {
-    const researchId = ctx.params.researchId;
-    try {
-        const drafts = await ResearchContent.find({'researchId': researchId });
-        ctx.status = 200;
-        ctx.body = drafts;
-    } catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
+  const researchId = ctx.params.researchId;
+  try {
+    let drafts = await ResearchContent.find({'researchId': researchId });
+    ctx.status = 200;
+    ctx.body = drafts;
+  } catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
 }
 
 
@@ -703,7 +702,7 @@ const getResearchPackageFile = async function(ctx) {
     const hash = ctx.params.hash;
     const researchId = ctx.params.researchId;
     const fileHash = ctx.params.fileHash;
-    const isDownload = ctx.query.download;
+    const isDownload = ctx.query.download === 'true';
 
     const rc = await findResearchContentByHash(researchId, hash);
     if (rc == null) {

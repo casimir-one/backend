@@ -1,7 +1,10 @@
-import { sendReviewMadeNotificationToGroup } from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import ReviewRequest from './../schemas/reviewRequest'
+import ReviewRequest from './../schemas/reviewRequest';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
+import userNotificationHandler from './../event-handlers/userNotification';
+import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import deipRpc from '@deip/deip-oa-rpc-client';
+import USER_NOTIFICATION_TYPE from '../constants/userNotificationType';
 
 const makeReview = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
@@ -29,7 +32,7 @@ const makeReview = async (ctx) => {
 
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-             await processPublishedReview(payload, result.txInfo);
+            processPublishedReviewTx(payload, result.txInfo);
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -41,8 +44,8 @@ const makeReview = async (ctx) => {
     }
 }
 
-
-async function processPublishedReview(payload, txInfo) {
+// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
+async function processPublishedReviewTx(payload, txInfo) {
     const transaction = await getTransaction(txInfo.id);
     for (let i = 0; i < transaction.operations.length; i++) {
         const op = transaction.operations[i];
@@ -52,15 +55,14 @@ async function processPublishedReview(payload, txInfo) {
             opPayload.author == payload.author && 
             opPayload.research_content_id == payload.research_content_id) {
                 
-            const reviews = await deipRpc.api.getReviewsByContentAsync(payload.research_content_id);
-            const review = reviews.find(r => r.author == opPayload.author && r.content == opPayload.content);
-            if (review) {
-                await sendReviewMadeNotificationToGroup(review);
-                await ReviewRequest.update({
-                  expert: payload.author,
-                  contentId: payload.research_content_id,
-                }, { $set: { status: 'approved' } });
-            }
+            let reviews = await deipRpc.api.getReviewsByContentAsync(payload.research_content_id);
+            let review = reviews.find(r => r.author == opPayload.author && r.content == opPayload.content);
+            
+            // todo move to event handler
+            ReviewRequest.update({ expert: payload.author, contentId: payload.research_content_id }, { $set: { status: 'approved' } });
+            
+            userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, review);
+            researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, review);
             break;
         }
     }

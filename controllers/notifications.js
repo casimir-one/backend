@@ -1,4 +1,4 @@
-import Notification from './../schemas/notification';
+import UserNotification from './../schemas/userNotification';
 import UserProfile from './../schemas/user';
 import deipRpc from '@deip/deip-oa-rpc-client';
 
@@ -21,7 +21,7 @@ const getNotificationsByUser = async (ctx) => {
         if (unreadOnly) {
             query.status = 'unread';
         }
-        const notifications = await Notification.find(query).sort({ created_at: -1 })
+        const notifications = await UserNotification.find(query).sort({ created_at: -1 })
         ctx.status = 200
         ctx.body = notifications;
 
@@ -47,10 +47,10 @@ const markUserNotificationAsRead = async (ctx) => {
     }
 
     try {
-        const notification = await Notification.findOne({'_id': notificationId});
+        const notification = await UserNotification.findOne({'_id': notificationId});
         if (!notification) {
             ctx.status = 404;
-            ctx.body = `Notification is not found`
+            ctx.body = `UserNotification is not found`
             return;
         }
 
@@ -81,7 +81,7 @@ const markAllUserNotificationAsRead = async (ctx) => {
 
     try {
         const updatedNotifications = [];
-        const notifications = await Notification.find({'username': jwtUsername});
+        const notifications = await UserNotification.find({'username': jwtUsername});
         for (let i = 0; i < notifications.length; i++) {
             const notification = notifications[i];
             notification.status = 'read';

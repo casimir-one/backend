@@ -10,9 +10,9 @@ import config from './../config';
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const logoPath = (agency, ext) => `${filesStoragePath}/agencies/${agency}/logo.${ext}`;
 
-const getAgencyProfile = async (ctx) => {
-    const agency = ctx.params.agency;
-    const profile = await AgencyProfile.findOne({'_id': agency});
+const getTenantProfile = async (ctx) => {
+    const tenant = ctx.params.tenant;
+    const profile = await AgencyProfile.findOne({ '_id': tenant});
 
     if (!profile) {
         ctx.status = 204;
@@ -24,20 +24,20 @@ const getAgencyProfile = async (ctx) => {
     ctx.body = profile;
 }
 
-const getAgenciesProfiles = async (ctx) => {
+const getTenantsProfiles = async (ctx) => {
     const profiles = await AgencyProfile.find();
     ctx.status = 200;
     ctx.body = profiles;
 }
 
-const getAgencyLogo = async (ctx) => {
-    const agency = ctx.params.agency;
+const getTenantLogo = async (ctx) => {
+    const tenant = ctx.params.tenant;
     const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
     const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
     const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
     const ext = ctx.query.ext ? ctx.query.ext : 'png';
 
-    var src = logoPath(agency, ext);
+    var src = logoPath(tenant, ext);
     const stat = util.promisify(fs.stat);
 
     try {
@@ -71,7 +71,7 @@ const getAgencyLogo = async (ctx) => {
 
 
 export default {
-    getAgencyProfile,
-    getAgenciesProfiles,
-    getAgencyLogo
+    getTenantProfile,
+    getTenantsProfiles,
+    getTenantLogo
 }

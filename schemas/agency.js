@@ -13,12 +13,13 @@ const AgencyProfile = new Schema({
     "researchAreas": [{
         "title": { type: String, required: true },
         "disciplines": [{ type: Number }],
-        
         "subAreas": [{
             "title": { type: String, required: true },
             "disciplines": [{ type: Number }]
         }]
     }],
+    "researchGroupId": { type: Number, default: undefined },
+    "observingResearchGroupsIds": [{ type: Number }],
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('agencies', AgencyProfile);

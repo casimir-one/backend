@@ -185,7 +185,7 @@ const getApplicationPackageFormContent = async function(ctx) {
     const hash = ctx.params.hash;
     const foaId = ctx.params.foaId;
     const formHash = ctx.params.formHash;
-    const isDownload = ctx.query.download;
+    const isDownload = ctx.query.download === 'true';
 
     const ac = await findApplicationPackageByHash(agency, foaId, hash);
 

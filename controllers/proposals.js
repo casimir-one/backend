@@ -1,13 +1,14 @@
 import { authorizeResearchGroup } from './../services/auth'
 import { findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
-import { sendProposalNotificationToGroup } from './../services/notifications'
+import * as usersNotificationsService from './../services/userNotification'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import deipRpc from '@deip/deip-oa-rpc-client';
-import ResearchContent from './../schemas/researchContent';
-import UserProfile from './../schemas/user';
-import Notification from './../schemas/notification';
+import UserNotification from './../schemas/userNotification';
 import JoinRequest from './../schemas/joinRequest'
-import { fileURLToPath } from 'url';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
+import userNotificationHandler from './../event-handlers/userNotification';
+import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 
 const voteForProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
@@ -35,7 +36,7 @@ const voteForProposal = async (ctx) => {
 
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processProposalVote(payload, result.txInfo);
+            processProposalVoteTx(payload, result.txInfo);
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -106,7 +107,7 @@ const createContentProposal = async (ctx) => {
         const updatedRc = await rc.save();
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processNewProposal(payload, result.txInfo);
+            processNewProposalTx(payload, result.txInfo);
             ctx.status = 200;
             ctx.body = updatedRc;
         } else {
@@ -152,7 +153,7 @@ const createResearchProposal = async (ctx) => {
         /* proposal specific action code */
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processNewProposal(payload, result.txInfo);
+            processNewProposalTx(payload, result.txInfo);
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -200,7 +201,7 @@ const createInviteProposal = async (ctx) => {
 
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processNewProposal(payload, result.txInfo);
+            processNewProposalTx(payload, result.txInfo);
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -238,7 +239,7 @@ const createTokenSaleProposal = async (ctx) => {
         /* proposal specific action code */
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processNewProposal(payload, result.txInfo);
+            processNewProposalTx(payload, result.txInfo);
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -251,46 +252,50 @@ const createTokenSaleProposal = async (ctx) => {
     }
 }
 
-
-async function processNewProposal(payload, txInfo) {
+// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
+async function processNewProposalTx(payload, txInfo) {
     const transaction = await getTransaction(txInfo.id);
     for (let i = 0; i < transaction.operations.length; i++) {
         const op = transaction.operations[i];
         const opName = op[0];
         const opPayload = op[1];
         if (opName === 'create_proposal' && opPayload.data === payload.data) {
-            const proposals = await deipRpc.api.getProposalsByResearchGroupIdAsync(opPayload.research_group_id);
-            const proposal = proposals.find(p => 
+            let proposals = await deipRpc.api.getProposalsByResearchGroupIdAsync(opPayload.research_group_id);
+            let proposal = proposals.find(p => 
                     p.data === payload.data && 
                     p.creator === payload.creator && 
                     p.action === payload.action &&
                     p.expiration_time === payload.expiration_time);
 
-            if (proposal) {
-                proposal.data = JSON.parse(proposal.data);
-                await sendProposalNotificationToGroup(proposal);
-            }
+            let parsedProposal = { ...proposal, data: JSON.parse(proposal.data) };
+            
+            userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+            researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
             break;
         }
     }
 }
 
-async function processProposalVote(payload, txInfo) {
+// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
+async function processProposalVoteTx(payload, txInfo) {
     const transaction = await getTransaction(txInfo.id);
     for (let i = 0; i < transaction.operations.length; i++) {
         const op = transaction.operations[i];
         const opName = op[0];
         const opPayload = op[1];
         if (opName === 'vote_proposal' && opPayload.proposal_id == payload.proposal_id) {
-            const proposal = await deipRpc.api.getProposalAsync(opPayload.proposal_id);
+            let proposal = await deipRpc.api.getProposalAsync(opPayload.proposal_id); 
+            let parsedProposal = { ...proposal, data: JSON.parse(proposal.data) };
+            
+            researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL_VOTE, { voter: opPayload.voter, proposal: parsedProposal });
 
             // if proposal is completed - send notifications to all group members
             if (proposal && proposal.is_completed) {
-                proposal.data = JSON.parse(proposal.data);
-                const count = await Notification.count({ 'type': 'completed-proposal', 'meta.id': proposal.id });
+                let count = await UserNotification.count({ 'type': USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, 'meta.id': proposal.id });
                 // in case user votes for approved proposal we shouldn't send notifications second time
                 if (!count) {
-                    await sendProposalNotificationToGroup(proposal);
+                    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, parsedProposal);
+                    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, parsedProposal);
                 }
                 break;
             }
