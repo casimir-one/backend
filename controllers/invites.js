@@ -1,5 +1,9 @@
-import { sendInviteResolvedNotificationToGroup } from './../services/notifications'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
+import userNotificationHandler from './../event-handlers/userNotification';
+import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+
 import deipRpc from '@deip/deip-oa-rpc-client';
 
 const approveInvite = async (ctx) => {
@@ -19,7 +23,7 @@ const approveInvite = async (ctx) => {
         const invite = await deipRpc.api.getResearchGroupInviteByIdAsync(payload.research_group_invite_id);
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processResolvedInvite(true, invite, result.txInfo);
+            processResolvedInviteTx(true, invite, result.txInfo);
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -49,7 +53,7 @@ const rejectInvite = async (ctx) => {
         const invite = await deipRpc.api.getResearchGroupInviteByIdAsync(payload.research_group_invite_id);
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processResolvedInvite(false, invite, result.txInfo);
+            processResolvedInviteTx(false, invite, result.txInfo);
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -61,8 +65,8 @@ const rejectInvite = async (ctx) => {
     }
 }
 
-
-async function processResolvedInvite(isApproved, invite, txInfo) {
+// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
+async function processResolvedInviteTx(isApproved, invite, txInfo) {
     const transaction = await getTransaction(txInfo.id);
     const payloadOpName = isApproved ? 'approve_research_group_invite' : 'reject_research_group_invite';
     for (let i = 0; i < transaction.operations.length; i++) {
@@ -70,7 +74,8 @@ async function processResolvedInvite(isApproved, invite, txInfo) {
         const opName = op[0];
         const opPayload = op[1];
         if (opName === payloadOpName && opPayload.research_group_invite_id == invite.id) {
-            await sendInviteResolvedNotificationToGroup(isApproved, invite)
+            userNotificationHandler.emit(isApproved ? USER_NOTIFICATION_TYPE.INVITATION_APPROVED : USER_NOTIFICATION_TYPE.INVITATION_REJECTED, invite);
+            researchGroupActivityLogHandler.emit(isApproved ? ACTIVITY_LOG_TYPE.INVITATION_APPROVED : ACTIVITY_LOG_TYPE.INVITATION_REJECTED, invite);
             break;
         }
     }

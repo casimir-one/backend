@@ -4,6 +4,7 @@ import logger from 'koa-logger';
 import auth from './routes/auth.js';
 import api from './routes/api.js';
 import pub from './routes/public.js';
+import tenant from './routes/tenant.js';
 import content from './routes/content.js';
 import application from './routes/application';
 import jwt from 'koa-jwt';
@@ -63,6 +64,7 @@ app.on('error', function(err, ctx) {
 app.use(serve('files/static'));
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/public', pub.routes());
+router.use('/tenants', tenant.routes());
 router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
     return req.method == 'GET';
 }), content.routes());

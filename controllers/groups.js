@@ -1,6 +1,9 @@
 
 import { sendTransaction, getTransaction } from './../utils/blockchain';
-import { sendInviteNotificationToInvitee } from './../services/notifications';
+import activityLogEntriesService from './../services/activityLogEntry';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import userNotificationHandler from './../event-handlers/userNotification';
+
 import deipRpc from '@deip/deip-oa-rpc-client';
 
 const createResearchGroup = async (ctx) => {
@@ -13,7 +16,7 @@ const createResearchGroup = async (ctx) => {
 
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
-            await processNewGroup(payload, result.txInfo)
+            processNewGroupTx(payload, result.txInfo)
             ctx.status = 201;
         } else {
             throw new Error(`Could not proceed the transaction: ${tx}`);
@@ -26,20 +29,33 @@ const createResearchGroup = async (ctx) => {
     }
 }
 
+const getResearchGroupActivityLogs = async (ctx) => {
+    let jwtUsername = ctx.state.user.username;
+    let researchGroupId = ctx.params.researchGroupId;
+    // todo: add access validation
+    try {
+        let result = await activityLogEntriesService.findActivityLogsEntriesByResearchGroup(researchGroupId)
+        ctx.status = 201;
+        ctx.body = result;
+    } catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+}
 
-async function processNewGroup(payload, txInfo) {
+// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
+async function processNewGroupTx(payload, txInfo) {
     const transaction = await getTransaction(txInfo.id);
     for (let i = 0; i < transaction.operations.length; i++) {
         const op = transaction.operations[i];
         const opName = op[0];
         const opPayload = op[1];
         if (opName === 'create_research_group' && opPayload.permlink === payload.permlink) {
-            const group = await deipRpc.api.getResearchGroupByPermlinkAsync(opPayload.permlink);
-            if (group) {
-                for (let i = 0; i < opPayload.invitees.length; i++) {
-                    const invitee = opPayload.invitees[i];
-                    await sendInviteNotificationToInvitee(group.id, invitee.account);
-                }
+            const researchGroup = await deipRpc.api.getResearchGroupByPermlinkAsync(opPayload.permlink);
+            for (let i = 0; i < opPayload.invitees.length; i++) {
+                let invitee = opPayload.invitees[i];
+                userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { researchGroupId: researchGroup.id, invitee: invitee.account });
             }
             break;
         }
@@ -49,5 +65,6 @@ async function processNewGroup(payload, txInfo) {
 
 
 export default {
-    createResearchGroup
+    createResearchGroup,
+    getResearchGroupActivityLogs
 }

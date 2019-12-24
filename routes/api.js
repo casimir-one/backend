@@ -10,7 +10,6 @@ import proposals from '../controllers/proposals'
 import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import reviews from '../controllers/reviews'
-import agency from '../controllers/agency'
 import investmentPortfolio from '../controllers/investmentPortfolio'
 
 const router = koa_router()
@@ -56,14 +55,12 @@ router.post('/proposals/invite', proposals.createInviteProposal)
 router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
 router.post('/groups', groups.createResearchGroup)
+router.get('/groups/activity-log/:researchGroupId', groups.getResearchGroupActivityLogs)
 
 router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
 
 router.post('/reviews', reviews.makeReview)
-
-router.get('/agencies/profile/:agency', agency.getAgencyProfile)
-router.get('/agencies/profiles', agency.getAgenciesProfiles)
 
 router.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 router.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

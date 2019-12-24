@@ -1,7 +1,8 @@
 import ExpertiseClaim from './../schemas/expertiseClaim';
 import deipRpc from '@deip/deip-oa-rpc-client';
 import { getTransaction, sendTransaction } from './../utils/blockchain';
-import { sendExpertiseAllocatedNotificationToClaimer } from './../services/notifications';
+import userNotificationHandler from './../event-handlers/userNotification';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 
 const getExpertiseClaims = async (ctx) => {
     const status = ctx.query.status;
@@ -138,6 +139,7 @@ const voteForExpertiseClaim = async (ctx) => {
     }
 }
 
+// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
 async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
     const transaction = await getTransaction(txInfo.id);
     for (let i = 0; i < transaction.operations.length; i++) {
@@ -156,7 +158,8 @@ async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
                     wrapper.status = 'approved';
                     await wrapper.save();
                 }
-                await sendExpertiseAllocatedNotificationToClaimer(expertiseProposal);
+
+                userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXPERTISE_ALLOCATED, expertiseProposal);
             }
             break;
         }
