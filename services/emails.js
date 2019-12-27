@@ -40,8 +40,11 @@ class EmailsService {
     }
   }
 
-  async sendRegistrationEmail(to, token) {
-    const confirmationUrl = `${config.uiHost}/sign-up?token=${token}`;
+  async sendRegistrationEmail(to, token, registrationPromoCode) {
+    let confirmationUrl = `${config.uiHost}/sign-up?token=${token}`;
+    if (registrationPromoCode) {
+      confirmationUrl = `${confirmationUrl}&registration_promo_code=${registrationPromoCode}`;
+    }
     const htmlToSend = await renderService.registrationEmail(confirmationUrl);
     console.log(`Email confirmation url: ${confirmationUrl}`);
     await this.sendMessage({

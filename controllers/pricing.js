@@ -63,7 +63,6 @@ const processStripePayment = async function (ctx) {
   try {
     let {
       stripeToken,
-      customerEmail,
       planId,
     } = ctx.request.body;
 
@@ -75,8 +74,7 @@ const processStripePayment = async function (ctx) {
     }
 
     ctx.status = 200;
-    ctx.body = await subscriptionsService.processStripeSubscription(jwtUsername, { stripeToken, customerEmail, planId });
-
+    ctx.body = await subscriptionsService.processStripeSubscription(jwtUsername, { stripeToken, planId });
   } catch (err) {
     console.log(err);
     ctx.status = 500;

@@ -93,12 +93,13 @@ async function findSubscriptionByOwner(owner) {
   return subscription;
 }
 
-async function processStripeSubscription(owner, { stripeToken, customerEmail, planId }) {
+async function processStripeSubscription(owner, { stripeToken, planId, coupon }) {
   const user = await usersService.findUserById(owner);
   let customerId = user.stripeCustomerId;
   if (!customerId) {
     const customer = await stripeService.createCustomer({
-      stripeToken, customerEmail
+      stripeToken,
+      customerEmail: user.email,
     });
     customerId = customer.id;
     await usersService.updateStripeInfo(owner, customerId, null, null);
@@ -115,8 +116,10 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
       availableCertificatesBySubscription: 0,
       availableContractsBySubscription: 0,
       availableFilesSharesBySubscription: 0,
-    }
+    },
+    coupon,
   };
+
   // if (pricingPlan.trialTerms && pricingPlan.trialTerms.periodDays > 0) {
   //   subscriptionData.trialPeriodDays = pricingPlan.trialTerms.periodDays;
   //   subscriptionData.metadata.availableCertificatesBySubscription = pricingPlan.trialTerms.certificateLimit;

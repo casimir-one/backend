@@ -6,11 +6,13 @@ import deipRpc from '@deip/deip-rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import { signOperation, sendTransaction } from './../utils/blockchain';
-import UserProfile from './../schemas/user';
+import RegistrationPromoCode from './../schemas/registrationPromoCode';
 import * as vtService from './../services/verificationTokens';
 import invitesService from './../services/invites'
 import usersService from './../services/users';
 import mailer from './../services/emails';
+import pricingPlansService from './../services/pricingPlans';
+import subscriptionsService from './../services/subscriptions';
 import moment from 'moment';
 
 function Encodeuint8arr(seed) {
@@ -67,29 +69,43 @@ const signIn = async function (ctx) {
 }
 
 const createVerificationToken = async function (ctx) {
-  const { email, pricingPlan, inviteCode } = ctx.request.body;
+  const {
+    email,
+    pricingPlan,
+    inviteCode,
+    registrationPromoCode,
+  } = ctx.request.body;
 
   const expires = new Date();
   expires.setDate(expires.getDate() + 1); // 1 day expiration
 
   try {
-    const [existingToken, existingUser] = await Promise.all([
+    const [
+      existingToken,
+      existingUser,
+    ] = await Promise.all([
       vtService.findVerificationTokenByEmail(email),
-      usersService.findUserByEmail(email)
+      usersService.findUserByEmail(email),
     ]);
     if (existingToken || existingUser) {
       ctx.status = 400;
       ctx.body = 'Provided email has already started or completed the registration'
       return;
     }
+    const appPricingPlan = await pricingPlansService.findPricingPlan(pricingPlan || FREE_PRICING_PLAN_ID);
+    if (!appPricingPlan) {
+      ctx.status = 400;
+      ctx.body = 'Invalid pricing plan';
+      return;
+    }
 
     const savedToken = await vtService.createVerificationToken('public', {
       email,
       expirationTime: expires,
-      pricingPlan: FREE_PRICING_PLAN_ID,
+      pricingPlan: appPricingPlan._id,
       inviteCode,
     });
-    await mailer.sendRegistrationEmail(email, savedToken.token);
+    await mailer.sendRegistrationEmail(email, savedToken.token, registrationPromoCode);
 
     ctx.status = 200;
   } catch (err) {
@@ -100,46 +116,60 @@ const createVerificationToken = async function (ctx) {
 }
 
 const signUp = async function (ctx) {
-  const data = ctx.request.body;
-  const username = data.username;
-  const pubKey = data.pubKey;
-  const token = data.token;
-
-  let email = data.email;
-  let firstName = data.firstName;
-  let lastName = data.lastName;
-
+  const {
+    username, pubKey, token,
+    firstName, lastName,
+    registrationPromoCode, stripeToken,
+  } = ctx.request.body;
   if (!username || !pubKey || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
     ctx.status = 400;
     ctx.body = `'username', 'pubKey', fields are required`;
     return;
   }
 
-  if (!token && (!email || !firstName || !lastName)) {
+  if (!token || !firstName || !lastName) {
     ctx.status = 400;
-    ctx.body = `'email', 'firstName', 'lastName' fields are required`;
+    ctx.body = `'token', 'firstName', 'lastName' fields are required`;
     return;
   }
 
   try {
-    
-    var verificationToken;
-    if (token) {
-      verificationToken = await vtService.findVerificationToken(token);
-      if (!verificationToken) {
-        ctx.status = 404;
-        ctx.body = `Verification token ${token} is not found`;
-        return;
-      }
+    const verificationToken = await vtService.findVerificationToken(token);
+    if (!verificationToken) {
+      ctx.status = 404;
+      ctx.body = `Verification token ${token} is not found`;
+      return;
+    }
 
-      let isExpired = verificationToken.expirationTime.getTime() <= Date.now();
-      if (isExpired) {
+    let isExpired = verificationToken.expirationTime.getTime() <= Date.now();
+    if (isExpired) {
+      ctx.status = 400;
+      ctx.body = `Verification token ${token} is expired`;
+      return;
+    }
+
+    let stripeCoupon
+    if (registrationPromoCode) {
+      if (!stripeToken) {
         ctx.status = 400;
-        ctx.body = `Verification token ${token} is expired`;
+        ctx.body = 'Credit card is required';
         return;
       }
-
-      email = verificationToken.email;
+      if (verificationToken.pricingPlan === FREE_PRICING_PLAN_ID) {
+        ctx.status = 400;
+        ctx.body = 'Promo is available only for paid subscription plans';
+        return;
+      }
+      const activeRegistrationPromoCode = await RegistrationPromoCode.findOne({
+        code: registrationPromoCode,
+        active: true
+      });
+      if (!activeRegistrationPromoCode) {
+        ctx.status = 400;
+        ctx.body = 'Promo code is not active';
+        return;
+      }
+      stripeCoupon = activeRegistrationPromoCode.stripeId;
     }
 
     const accounts = await deipRpc.api.getAccountsAsync([username])
@@ -159,13 +189,40 @@ const signUp = async function (ctx) {
 
     let profile = await usersService.findUserById(username);
     if (!profile) {
-      profile = await usersService.createUser({ username, email, firstName, lastName });
+      profile = await usersService.createUser({
+        username, firstName, lastName,
+        email: verificationToken.email,
+      });
       await invitesService.acceptInvite(verificationToken.inviteCode, username);
       await vtService.removeVerificationToken(token);
     }
 
+    let subscriptionStatus = 'succeeded';
+    let subscriptionClientSecret;
+    if (stripeCoupon) {
+      try {
+        const pricingPlan = await pricingPlansService.findPricingPlan(verificationToken.pricingPlan);
+        const result = await subscriptionsService.processStripeSubscription(username, {
+          stripeToken,
+          planId: pricingPlan.stripeId,
+          coupon: stripeCoupon,
+        });
+        await RegistrationPromoCode.updateOne({
+          code: registrationPromoCode,
+        }, { $set: { active: false } });
+        subscriptionStatus = result.status;
+        subscriptionClientSecret = result.clientSecret;
+      } catch (err) {
+        subscriptionStatus = 'failed';
+        console.error(err);
+      }
+    }
+
     ctx.status = 200;
-    ctx.body = profile;
+    ctx.body = {
+      subscriptionStatus,
+      subscriptionClientSecret
+    };
 
   } catch (err) {
     console.error(err);
@@ -177,8 +234,6 @@ const signUp = async function (ctx) {
 
 async function createAccountAsync(username, pubKey, owner) {
   let accountsCreator = config.blockchain.accountsCreator;
-  let cfg = await deipRpc.api.getConfigAsync();
-  let chainProps = await deipRpc.api.getChainPropertiesAsync();
 
   const account_create_op = {
     fee: accountsCreator.fee,
