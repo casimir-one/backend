@@ -28,7 +28,7 @@ const signIn = async function (ctx) {
   if (accounts[0]) {
     const pubWif = accounts[0].owner.key_auths[0][0];
     const publicKey = crypto.PublicKey.from(pubWif);
-
+    console.log(publicKey, accounts[0])
     var isValid;
     try {
       // sigSeed should be uint8 array with length = 32
@@ -40,12 +40,11 @@ const signIn = async function (ctx) {
     }
 
     if (isValid) {
-      const jwtSecret = config.jwtSecret;
       const jwtToken = jwt.sign({
         pubKey: pubWif,
         username: username,
         exp: Math.floor(Date.now() / 1000) + (1440 * 60) // 24 hours
-      }, jwtSecret)
+      }, config.jwtSecret)
 
       ctx.body = {
         success: true,
@@ -217,11 +216,14 @@ const signUp = async function (ctx) {
         console.error(err);
       }
     }
-
     ctx.status = 200;
     ctx.body = {
       subscriptionStatus,
-      subscriptionClientSecret
+      subscriptionClientSecret,
+      jwtToken: jwt.sign({
+        pubKey, username,
+        exp: Math.floor(Date.now() / 1000) + (1440 * 60) // 24 hours
+      }, config.jwtSecret)
     };
 
   } catch (err) {
