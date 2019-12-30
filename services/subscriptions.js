@@ -112,11 +112,6 @@ async function processStripeSubscription(owner, { stripeToken, planId, coupon })
   const pricingPlan = await pricingPlansService.findPricingPlanByStripeId(planId);
   const subscriptionData = {
     planId,
-    metadata: {
-      availableCertificatesBySubscription: 0,
-      availableContractsBySubscription: 0,
-      availableFilesSharesBySubscription: 0,
-    },
     coupon,
   };
 
@@ -135,8 +130,10 @@ async function processStripeSubscription(owner, { stripeToken, planId, coupon })
   if (subscription.status === stripeSubscriptionStatus.TRIALING) {
     status = stripeSubscriptionStatus.TRIALING;
   } else {
-    status = subscription.latest_invoice.payment_intent.status;
-    if (subscription.latest_invoice.payment_intent.status === "succeeded") {
+    status = (subscription.latest_invoice.paid && !subscription.latest_invoice.payment_intent) // 100% discount is applied
+      ? 'succeeded'
+      : subscription.latest_invoice.payment_intent.status;
+    if (status === "succeeded") {
       await setSubscriptionQuota(owner, {
         certificates: pricingPlan.terms.certificateLimit.limit,
         contracts: pricingPlan.terms.contractLimit.limit,
