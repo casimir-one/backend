@@ -28,7 +28,6 @@ const signIn = async function (ctx) {
   if (accounts[0]) {
     const pubWif = accounts[0].owner.key_auths[0][0];
     const publicKey = crypto.PublicKey.from(pubWif);
-    console.log(publicKey, accounts[0])
     var isValid;
     try {
       // sigSeed should be uint8 array with length = 32
@@ -96,6 +95,17 @@ const createVerificationToken = async function (ctx) {
       ctx.status = 400;
       ctx.body = 'Invalid pricing plan';
       return;
+    }
+    if (registrationPromoCode) {
+      const activeRegistrationPromoCode = await RegistrationPromoCode.findOne({
+        code: registrationPromoCode,
+        active: true
+      });
+      if (!activeRegistrationPromoCode) {
+        ctx.status = 400;
+        ctx.body = 'Promo code is redeemed';
+        return;
+      }
     }
 
     const savedToken = await vtService.createVerificationToken('public', {
