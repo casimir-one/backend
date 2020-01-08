@@ -1,6 +1,7 @@
 import fs from 'fs';
 import deipRpc from '@deip/deip-rpc-client';
 import sharedFilesService from './../services/sharedFiles';
+import subscriptionsService from './../services/subscriptions';
 import filesService from './../services/fileRef';
 import notifier from './../services/notifications';
 import { sendTransaction } from './../utils/blockchain';
@@ -113,6 +114,22 @@ const unlockFile = async (ctx) => {
       ctx.status = 400;
       ctx.body = 'Invalid request_id value';
       return;
+    }
+
+    const subscription = await subscriptionsService.findSubscriptionByOwner(jwtUsername);
+    if (!subscription.isActive) {
+      ctx.status = 402;
+      ctx.body = `Subscription for ${jwtUsername} has expired`;
+      return;
+    }
+
+    if (subscription.isLimitedPlan) {
+      const limit = subscription.availableFilesSharesBySubscription + subscription.availableAdditionalFilesShares;
+      if (limit === 0) {
+        ctx.status = 402;
+        ctx.body = `Subscription for ${jwtUsername} has reached the files share limit`;
+        return;
+      }
     }
 
     await sendTransaction(signedTx);
