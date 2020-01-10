@@ -27,6 +27,7 @@ async function findSubscriptionByOwner(owner) {
     currentPeriodStart: null,
     currentPeriodEnd: null,
     discount: null,
+    isFirstMonthFree: false,
   };
 
   const group = await deipRpc.api.getResearchGroupByPermlinkAsync(owner);
@@ -56,6 +57,12 @@ async function findSubscriptionByOwner(owner) {
       stripeSubscription.latestInvoice = await stripeService.findInvoice(stripeSubscription.latest_invoice);
       if (stripeSubscription.latestInvoice.payment_intent) {
         stripeSubscription.latestInvoice.paymentIntent = await stripeService.findPaymentIntent(stripeSubscription.latestInvoice.payment_intent);
+      }
+      if (
+        stripeSubscription.latestInvoice.billing_reason === 'subscription_create'
+        && stripeSubscription.latestInvoice.amount_due === 0
+      ) {
+        subscription.isFirstMonthFree = true;
       }
     }
 
