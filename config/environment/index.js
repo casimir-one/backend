@@ -36,6 +36,7 @@ config = _.merge(config, {
       gmailClientSecret: process.env.GMAIL_CLIENT_SECRET,
       gmailRefreshToken: process.env.GMAIL_REFRESH_TOKEN,
       gmailUser: process.env.GMAIL_USER,
+      salesEmail: process.env.SALES_EMAIL,
     },
     stripe: {
       ipProtectionProductId: process.env.STRIPE_IP_PROTECTION_PRODUCT_ID,

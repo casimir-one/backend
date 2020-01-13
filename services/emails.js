@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const moment = require('moment');
 const config = require('./../config');
 const renderService = require('./render');
 
@@ -147,6 +148,30 @@ class EmailsService {
       subject: 'File Sharing Access Granted',
       html: htmlToSend
     })
+  }
+
+  async sendNewUserRegisteredEmail({
+    username, firstName, lastName,
+    registrationPromoCode,
+    pricingPlan,
+  }) {
+    try {
+      await this.sendMessage({
+        to: config.mailer.salesEmail,
+        subject: 'New registration',
+        html: `
+          <p>
+            <b>username</b>: ${username}<br/>
+            <b>First Name</b>: ${firstName}<br/>
+            <b>Last Name</b>: ${lastName}<br/>
+            <b>Pricing Plan</b>: ${pricingPlan}<br/>
+            <b>Promo Code</b>: ${registrationPromoCode || 'None'} <br/>
+            <b>Date</b>: ${moment().toISOString()}<br/>
+          </p>
+        `
+      })
+    } catch (err) {
+    }
   }
 }
 

@@ -210,9 +210,9 @@ const signUp = async function (ctx) {
 
     let subscriptionStatus = 'succeeded';
     let subscriptionClientSecret;
+    const pricingPlan = await pricingPlansService.findPricingPlan(verificationToken.pricingPlan);
     if (stripeCoupon) {
       try {
-        const pricingPlan = await pricingPlansService.findPricingPlan(verificationToken.pricingPlan);
         const result = await subscriptionsService.processStripeSubscription(username, {
           stripeToken,
           planId: pricingPlan.stripeId,
@@ -237,7 +237,12 @@ const signUp = async function (ctx) {
         exp: Math.floor(Date.now() / 1000) + (1440 * 60) // 24 hours
       }, config.jwtSecret)
     };
-
+    mailer.sendNewUserRegisteredEmail({
+      username, firstName, lastName,
+      email: profile.email,
+      pricingPlan: pricingPlan.name,
+      registrationPromoCode
+    });
   } catch (err) {
     console.error(err);
     ctx.status = 500;
