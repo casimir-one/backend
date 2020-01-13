@@ -10,6 +10,14 @@ const RegistrationPromoCode = new Schema({
     required: true,
     default: true
   },
+  validPricingPlans: {
+    type: [{
+      type: String,
+      enum: ['basic-monthly', 'standard-monthly'],
+    }],
+    required: true,
+    default: undefined
+  }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('registration-promo-codes', RegistrationPromoCode);

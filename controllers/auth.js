@@ -99,11 +99,12 @@ const createVerificationToken = async function (ctx) {
     if (registrationPromoCode) {
       const activeRegistrationPromoCode = await RegistrationPromoCode.findOne({
         code: registrationPromoCode,
-        active: true
+        active: true,
+        validPricingPlans: pricingPlan,
       });
       if (!activeRegistrationPromoCode) {
         ctx.status = 400;
-        ctx.body = 'Promo code is redeemed';
+        ctx.body = 'Promo code is invalid or already redeemed';
         return;
       }
     }
@@ -171,7 +172,8 @@ const signUp = async function (ctx) {
       }
       const activeRegistrationPromoCode = await RegistrationPromoCode.findOne({
         code: registrationPromoCode,
-        active: true
+        active: true,
+        validPricingPlans: verificationToken.pricingPlan,
       });
       if (!activeRegistrationPromoCode) {
         ctx.status = 400;
