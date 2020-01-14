@@ -161,6 +161,7 @@ class EmailsService {
         subject: 'New registration',
         html: `
           <p>
+            <b>App</b>: ${config.uiHost}<br/>
             <b>username</b>: ${username}<br/>
             <b>First Name</b>: ${firstName}<br/>
             <b>Last Name</b>: ${lastName}<br/>
