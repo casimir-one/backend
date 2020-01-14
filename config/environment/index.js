@@ -45,6 +45,10 @@ config = _.merge(config, {
       customerSubscriptionCreatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_CREATED_WEBHOOK_SIGNING_KEY,
       customerSubscriptionUpdatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED_WEBHOOK_SIGNING_KEY,
       customerPaymentIntentSucceededWebhookSigningKey: process.env.STRIPE_CUSTOMER_PAYMENT_INTENT_SUCCEEDED_WEBHOOK_SIGNING_KEY
+    },
+    mailchimp: {
+      apiKey: process.env.MAILCHIMP_API_KEY,
+      baseUrl: process.env.MAILCHIMP_BASE_URL,
     }
   });
 
