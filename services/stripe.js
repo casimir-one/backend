@@ -38,12 +38,13 @@ async function updateCustomer(customerId, { email, sourceCardToken }) {
 }
 
 async function createSubscription(customerId, {
-  planId, trialPeriodDays, metadata
+  planId, trialPeriodDays, metadata, coupon,
 }) {
   const subscriptionData = {
     customer: customerId,
     metadata,
     items: [{ plan: planId }],
+    coupon,
     expand: ['latest_invoice.payment_intent']
   };
   if (trialPeriodDays !== undefined && trialPeriodDays > 0) {

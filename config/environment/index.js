@@ -36,6 +36,7 @@ config = _.merge(config, {
       gmailClientSecret: process.env.GMAIL_CLIENT_SECRET,
       gmailRefreshToken: process.env.GMAIL_REFRESH_TOKEN,
       gmailUser: process.env.GMAIL_USER,
+      salesEmail: process.env.SALES_EMAIL,
     },
     stripe: {
       ipProtectionProductId: process.env.STRIPE_IP_PROTECTION_PRODUCT_ID,
@@ -44,6 +45,10 @@ config = _.merge(config, {
       customerSubscriptionCreatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_CREATED_WEBHOOK_SIGNING_KEY,
       customerSubscriptionUpdatedWebhookSigningKey: process.env.STRIPE_CUSTOMER_SUBSCRIPTION_UPDATED_WEBHOOK_SIGNING_KEY,
       customerPaymentIntentSucceededWebhookSigningKey: process.env.STRIPE_CUSTOMER_PAYMENT_INTENT_SUCCEEDED_WEBHOOK_SIGNING_KEY
+    },
+    mailchimp: {
+      apiKey: process.env.MAILCHIMP_API_KEY,
+      baseUrl: process.env.MAILCHIMP_BASE_URL,
     }
   });
 

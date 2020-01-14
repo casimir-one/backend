@@ -27,6 +27,7 @@ async function findSubscriptionByOwner(owner) {
     currentPeriodStart: null,
     currentPeriodEnd: null,
     discount: null,
+    isFirstMonthFree: false,
   };
 
   const group = await deipRpc.api.getResearchGroupByPermlinkAsync(owner);
@@ -56,6 +57,12 @@ async function findSubscriptionByOwner(owner) {
       stripeSubscription.latestInvoice = await stripeService.findInvoice(stripeSubscription.latest_invoice);
       if (stripeSubscription.latestInvoice.payment_intent) {
         stripeSubscription.latestInvoice.paymentIntent = await stripeService.findPaymentIntent(stripeSubscription.latestInvoice.payment_intent);
+      }
+      if (
+        stripeSubscription.latestInvoice.billing_reason === 'subscription_create'
+        && stripeSubscription.latestInvoice.amount_due === 0
+      ) {
+        subscription.isFirstMonthFree = true;
       }
     }
 
@@ -93,12 +100,13 @@ async function findSubscriptionByOwner(owner) {
   return subscription;
 }
 
-async function processStripeSubscription(owner, { stripeToken, customerEmail, planId }) {
+async function processStripeSubscription(owner, { stripeToken, planId, coupon }) {
   const user = await usersService.findUserById(owner);
   let customerId = user.stripeCustomerId;
   if (!customerId) {
     const customer = await stripeService.createCustomer({
-      stripeToken, customerEmail
+      stripeToken,
+      customerEmail: user.email,
     });
     customerId = customer.id;
     await usersService.updateStripeInfo(owner, customerId, null, null);
@@ -111,12 +119,9 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
   const pricingPlan = await pricingPlansService.findPricingPlanByStripeId(planId);
   const subscriptionData = {
     planId,
-    metadata: {
-      availableCertificatesBySubscription: 0,
-      availableContractsBySubscription: 0,
-      availableFilesSharesBySubscription: 0,
-    }
+    coupon,
   };
+
   // if (pricingPlan.trialTerms && pricingPlan.trialTerms.periodDays > 0) {
   //   subscriptionData.trialPeriodDays = pricingPlan.trialTerms.periodDays;
   //   subscriptionData.metadata.availableCertificatesBySubscription = pricingPlan.trialTerms.certificateLimit;
@@ -132,8 +137,10 @@ async function processStripeSubscription(owner, { stripeToken, customerEmail, pl
   if (subscription.status === stripeSubscriptionStatus.TRIALING) {
     status = stripeSubscriptionStatus.TRIALING;
   } else {
-    status = subscription.latest_invoice.payment_intent.status;
-    if (subscription.latest_invoice.payment_intent.status === "succeeded") {
+    status = (subscription.latest_invoice.paid && !subscription.latest_invoice.payment_intent) // 100% discount is applied
+      ? 'succeeded'
+      : subscription.latest_invoice.payment_intent.status;
+    if (status === "succeeded") {
       await setSubscriptionQuota(owner, {
         certificates: pricingPlan.terms.certificateLimit.limit,
         contracts: pricingPlan.terms.contractLimit.limit,

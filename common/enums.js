@@ -48,3 +48,14 @@ const inviteStatus = {
 };
 module.exports.inviteStatus = inviteStatus;
 module.exports.inviteStatusValues = _.values(inviteStatus);
+
+const mailchimpEvents = {
+  REACH_REGISTRATION_PAGE: 'reached_registration_step_1',
+  CREATED_VERIFICATION_TOKEN: 'initiated_registration',
+  VERIFIED_EMAIL: 'reached_registration_step_2',
+  FILLED_USERNAME_FORM: 'filled_registration_form',
+  REACH_CARD_FORM: 'reached_card_form',
+  REGISTERED: 'registered'
+};
+module.exports.mailchimpEvents = mailchimpEvents;
+module.exports.mailchimpEventsValues = _.values(mailchimpEvents);

@@ -7,7 +7,7 @@ const VerificationToken = new Schema({
   "email": { type: String, required: true, index: true, unique: true, trim: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "pricingPlan": {
     type: String,
-    enum: ["free", "standard-monthly", "premium-monthly", "unlimited" /* add more plans here */],
+    enum: ["free", "basic-monthly", "standard-monthly"],
     required: true,
     default: "free",
     index: true

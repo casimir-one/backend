@@ -1,4 +1,5 @@
 const nodemailer = require('nodemailer');
+const moment = require('moment');
 const config = require('./../config');
 const renderService = require('./render');
 
@@ -40,8 +41,11 @@ class EmailsService {
     }
   }
 
-  async sendRegistrationEmail(to, token) {
-    const confirmationUrl = `${config.uiHost}/sign-up?token=${token}`;
+  async sendRegistrationEmail(to, token, registrationPromoCode) {
+    let confirmationUrl = `${config.uiHost}/sign-up?token=${token}`;
+    if (registrationPromoCode) {
+      confirmationUrl = `${confirmationUrl}&registration_promo_code=${registrationPromoCode}`;
+    }
     const htmlToSend = await renderService.registrationEmail(confirmationUrl);
     console.log(`Email confirmation url: ${confirmationUrl}`);
     await this.sendMessage({
@@ -144,6 +148,31 @@ class EmailsService {
       subject: 'File Sharing Access Granted',
       html: htmlToSend
     })
+  }
+
+  async sendNewUserRegisteredEmail({
+    username, firstName, lastName,
+    registrationPromoCode,
+    pricingPlan,
+  }) {
+    try {
+      await this.sendMessage({
+        to: config.mailer.salesEmail,
+        subject: 'New registration',
+        html: `
+          <p>
+            <b>App</b>: ${config.uiHost}<br/>
+            <b>username</b>: ${username}<br/>
+            <b>First Name</b>: ${firstName}<br/>
+            <b>Last Name</b>: ${lastName}<br/>
+            <b>Pricing Plan</b>: ${pricingPlan}<br/>
+            <b>Promo Code</b>: ${registrationPromoCode || 'None'} <br/>
+            <b>Date</b>: ${moment().toISOString()}<br/>
+          </p>
+        `
+      })
+    } catch (err) {
+    }
   }
 }
 
