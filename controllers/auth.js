@@ -85,7 +85,8 @@ const createVerificationToken = async function (ctx) {
       vtService.findVerificationTokenByEmail(email),
       usersService.findUserByEmail(email),
     ]);
-    if (existingToken || existingUser) {
+    const emailHasActiveToken = existingToken !== null && existingToken.expirationTime.getTime() > Date.now();
+    if (emailHasActiveToken || existingUser) {
       ctx.status = 400;
       ctx.body = 'Provided email has already started or completed the registration'
       return;
