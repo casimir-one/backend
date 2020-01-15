@@ -85,10 +85,16 @@ const createVerificationToken = async function (ctx) {
       vtService.findVerificationTokenByEmail(email),
       usersService.findUserByEmail(email),
     ]);
-    const emailHasActiveToken = existingToken !== null && existingToken.expirationTime.getTime() > Date.now();
-    if (emailHasActiveToken || existingUser) {
+    if (existingToken && existingToken.expirationTime.getTime() > Date.now()) {
       ctx.status = 400;
-      ctx.body = 'Provided email has already started or completed the registration'
+      ctx.body = 'Provided email has already started the registration';
+      return;
+    } else if (existingToken) {
+      await vtService.removeVerificationToken(existingToken.token);
+    }
+    if (existingUser) {
+      ctx.status = 400;
+      ctx.body = 'Provided email has already completed the registration';
       return;
     }
     const appPricingPlan = await pricingPlansService.findPricingPlan(pricingPlan || FREE_PRICING_PLAN_ID);
