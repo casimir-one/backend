@@ -151,7 +151,7 @@ class EmailsService {
   }
 
   async sendNewUserRegisteredEmail({
-    username, firstName, lastName,
+    username, firstName, lastName, email,
     registrationPromoCode,
     pricingPlan,
   }) {
@@ -163,6 +163,7 @@ class EmailsService {
           <p>
             <b>App</b>: ${config.uiHost}<br/>
             <b>username</b>: ${username}<br/>
+            <b>Email</b>: ${email}<br/>
             <b>First Name</b>: ${firstName}<br/>
             <b>Last Name</b>: ${lastName}<br/>
             <b>Pricing Plan</b>: ${pricingPlan}<br/>
