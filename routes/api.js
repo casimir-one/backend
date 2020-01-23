@@ -11,6 +11,7 @@ import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import reviews from '../controllers/reviews'
 import research from '../controllers/research'
+import researchGroup from '../controllers/researchGroup'
 import investmentPortfolio from '../controllers/investmentPortfolio'
 
 const router = koa_router()
@@ -65,6 +66,9 @@ router.post('/reviews', reviews.makeReview)
 
 router.get('/research/background/:researchId', research.getBackground)
 router.post('/research/background', research.uploadBackground)
+
+router.get('/research-groups/logo/:researchGroupId', researchGroup.getLogo)
+router.post('/research-groups/logo', researchGroup.uploadLogo)
 
 router.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 router.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

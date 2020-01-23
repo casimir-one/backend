@@ -9,40 +9,39 @@ import deipRpc from '@deip/deip-oa-rpc-client';
 import { authorizeResearchGroup } from './../services/auth';
 
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
-const researchStoragePath = (researchId) => `${filesStoragePath}/${researchId}`;
-const backgroundImagePath = (researchId, ext = 'png') => `${researchStoragePath(researchId)}/background.${ext}`;
-const defaultBackgroundImagePath = () => `${filesStoragePath}/default/default_research_background.png`;
+const researchGroupStoragePath = (researchGroupId) => `${filesStoragePath}/research-groups/${researchGroupId}`;
+const researchGroupLogoImagePath = (researchGroupId, ext = 'png') => `${researchGroupStoragePath(researchGroupId)}/logo.${ext}`;
+const defaultresearchGroupLogoPath = () => `${filesStoragePath}/default/default_research_group_logo.png`;
 
-const allowedBackgroundMimeTypes = ['image/png'];
-const researchStorage = multer.diskStorage({
+const allowedLogoMimeTypes = ['image/png'];
+const researchGroupStorage = multer.diskStorage({
   destination: function (req, file, callback) {
-    const dest = researchStoragePath(`${req.headers['research-id']}`)
+    const dest = researchGroupStoragePath(`${req.headers['research-group-id']}`)
     callback(null, dest)
   },
   filename: function (req, file, callback) {
-    callback(null, `background.png`);
+    callback(null, `logo.png`);
   }
 })
 
-const backgroundImageUploader = multer({
-  storage: researchStorage,
+const researchGroupLogoUploader = multer({
+  storage: researchGroupStorage,
   fileFilter: function (req, file, callback) {
-    if (allowedBackgroundMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-      return callback(new Error('Only the following mime types are allowed: ' + allowedBackgroundMimeTypes.join(', ')), false);
+    if (allowedLogoMimeTypes.find(mime => mime === file.mimetype) === undefined) {
+      return callback(new Error('Only the following mime types are allowed: ' + allowedLogoMimeTypes.join(', ')), false);
     }
     callback(null, true);
   }
 })
 
-const uploadBackground = async (ctx) => {
+const uploadLogo = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const researchId = ctx.request.headers['research-id'];
-  const research = await deipRpc.api.getResearchByIdAsync(researchId);
-  const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername);
+  const researchGroupId = ctx.request.headers['research-group-id'];
+  const authorized = await authorizeResearchGroup(researchGroupId, jwtUsername);
 
   if (!authorized) {
     ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
+    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupId}" research`;
     return;
   }
 
@@ -51,16 +50,16 @@ const uploadBackground = async (ctx) => {
   const ensureDir = util.promisify(fsExtra.ensureDir);
 
   try {
-    const filepath = backgroundImagePath(researchId);
+    const filepath = researchGroupLogoImagePath(researchGroupId);
 
     await stat(filepath);
     await unlink(filepath);
-  } catch (err) { 
-    await ensureDir(researchStoragePath(researchId))
+  } catch (err) {
+    await ensureDir(researchGroupStoragePath(researchGroupId))
   }
 
-  const backgroundImage = backgroundImageUploader.single('research-background');
-  const result = await backgroundImage(ctx, () => new Promise((resolve, reject) => {
+  const logoImage = researchGroupLogoUploader.single('research-background');
+  const result = await logoImage(ctx, () => new Promise((resolve, reject) => {
     resolve({ 'filename': ctx.req.file.filename });
   }));
 
@@ -68,19 +67,19 @@ const uploadBackground = async (ctx) => {
   ctx.body = result;
 }
 
-const getBackground = async (ctx) => {
-  const researchId = ctx.params.researchId;
+const getLogo = async (ctx) => {
+  const researchGroupId = ctx.params.researchGroupId;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
 
-  let src = backgroundImagePath(researchId);
+  let src = researchGroupLogoImagePath(researchGroupId);
   const stat = util.promisify(fs.stat);
 
   try {
     const check = await stat(src);
   } catch (err) {
-    src = defaultBackgroundImagePath();
+    src = defaultresearchGroupLogoPath();
   }
 
   const resize = (w, h) => {
@@ -106,6 +105,6 @@ const getBackground = async (ctx) => {
 }
 
 export default {
-  getBackground,
-  uploadBackground
+  getLogo,
+  uploadLogo
 }
