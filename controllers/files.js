@@ -95,7 +95,7 @@ const getAvatar = async (ctx) => {
             sharp(src)
                 .rotate()
                 .resize(w, h)
-                .jpeg()
+                .png()
                 .toBuffer()
                 .then(data => {
                     resolve(data)
@@ -107,7 +107,7 @@ const getAvatar = async (ctx) => {
     }
 
     const avatar = await resize(width, height);
-    ctx.type = 'image/jpeg';
+    ctx.type = 'image/png';
     ctx.body = avatar;
 }
 

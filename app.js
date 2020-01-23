@@ -71,7 +71,16 @@ router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
 router.use('/applications', jwt({ secret: config.jwtSecret }).unless((req) => {
     return req.method == 'GET';
 }), application.routes());
-router.use('/api', jwt({ secret: config.jwtSecret }), api.routes());
+
+router.use('/api', jwt({
+    secret: config.jwtSecret,
+    getToken: function (opts) {
+        if (opts.request.query && opts.request.query.authorization) {
+            return opts.request.query.authorization;
+        }
+        return null;
+    }
+}), api.routes());
 
 app.use(router.routes());
 
