@@ -1,5 +1,4 @@
 import koa_router from 'koa-router'
-import files from '../controllers/files'
 import users from '../controllers/users'
 import joinRequests from '../controllers/joinRequests'
 import reviewRequests from '../controllers/reviewRequests'
@@ -11,17 +10,16 @@ import groups from '../controllers/groups'
 import invites from '../controllers/invites'
 import reviews from '../controllers/reviews'
 import research from '../controllers/research'
-import researchGroup from '../controllers/researchGroup'
 import investmentPortfolio from '../controllers/investmentPortfolio'
 
 const router = koa_router()
 
-router.post('/files/upload-avatar', files.uploadAvatar)
-
+router.post('/user/upload-avatar', users.uploadAvatar)
 router.get('/user/profile/:username', users.getUserProfile)
 router.get('/user/profiles', users.getUsersProfiles)
 router.post('/user/profile/:username', users.createUserProfile)
 router.put('/user/profile/:username', users.updateUserProfile)
+router.get('/user/avatar/:picture', users.getAvatar);
 
 router.get('/bookmarks/user/:username', users.getUserBookmarks)
 router.post('/bookmarks/user/:username', users.addUserBookmark)
@@ -58,6 +56,8 @@ router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
 router.post('/groups', groups.createResearchGroup)
 router.get('/groups/activity-log/:researchGroupId', groups.getResearchGroupActivityLogs)
+router.get('/groups/logo/:researchGroupId', groups.getLogo)
+router.post('/groups/logo', groups.uploadLogo)
 
 router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
@@ -66,9 +66,6 @@ router.post('/reviews', reviews.makeReview)
 
 router.get('/research/background/:researchId', research.getBackground)
 router.post('/research/background', research.uploadBackground)
-
-router.get('/research-groups/logo/:researchGroupId', researchGroup.getLogo)
-router.post('/research-groups/logo', researchGroup.uploadLogo)
 
 router.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 router.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

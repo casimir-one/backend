@@ -73,6 +73,7 @@ const getBackground = async (ctx) => {
   const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
+  const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
 
   let src = backgroundImagePath(researchId);
   const stat = util.promisify(fs.stat);
@@ -100,7 +101,29 @@ const getBackground = async (ctx) => {
     })
   }
 
-  const background = await resize(width, height);
+  let background = await resize(width, height);
+
+  if (isRound) {
+    let round = (w) => {
+      let r = w / 2;
+      let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
+      return new Promise((resolve, reject) => {
+        avatar = sharp(avatar)
+          .overlayWith(circleShape, { cutout: true })
+          .png()
+          .toBuffer()
+          .then(data => {
+            resolve(data)
+          })
+          .catch(err => {
+            reject(err)
+          });
+      });
+    }
+
+    background = await round(width);
+  }
+
   ctx.type = 'image/png';
   ctx.body = background;
 }
