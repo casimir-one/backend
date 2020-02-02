@@ -108,7 +108,7 @@ const getBackground = async (ctx) => {
       let r = w / 2;
       let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
       return new Promise((resolve, reject) => {
-        avatar = sharp(avatar)
+        background = sharp(background)
           .overlayWith(circleShape, { cutout: true })
           .png()
           .toBuffer()

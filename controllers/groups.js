@@ -149,7 +149,7 @@ const getLogo = async (ctx) => {
       let r = w / 2;
       let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
       return new Promise((resolve, reject) => {
-        avatar = sharp(avatar)
+        logo = sharp(logo)
           .overlayWith(circleShape, { cutout: true })
           .png()
           .toBuffer()
