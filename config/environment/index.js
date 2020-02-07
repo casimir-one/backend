@@ -25,7 +25,7 @@ config = _.merge(config, {
         accountsCreator : JSON.parse(process.env.FAUCET_ACCOUNT)
     },
     serverHost: process.env.DEIP_SERVER_URL,
-    uiHost: process.env.DEIP_CLIENT_HOST, // todo: get rid of this
+    clientHost: process.env.DEIP_CLIENT_URL, // todo: get rid of this
     sigSeed: process.env.SIG_SEED,
     jwtSecret: process.env.JWT_SECRET,
     fileStorageDir: process.env.FILE_STORAGE_DIR || 'files'

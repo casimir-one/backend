@@ -8,7 +8,7 @@ import config from './../config';
 const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 
-const researchFilesTempStoragePath = (researchId, postfix) => `${storagePath}/${researchId}/temp-${postfix}`
+const researchFilesTempStoragePath = (researchId, postfix) => `${storagePath}/research-projects/${researchId}/temp-${postfix}`
 const bulkResearchContentStorage = multer.diskStorage({
     destination: async function(req, file, callback) {
         const researchFilesTempStorage = researchFilesTempStoragePath(req.headers['research-id'], req.headers['upload-session'])

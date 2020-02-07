@@ -24,6 +24,18 @@ import rimraf from "rimraf";
 import slug from 'limax';
 
 const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const blankDarPath = path.join(__dirname, `./../default/dar-blank`);
+
+const researchStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}`
+const researchFileStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}`
+const researchFilesTempStoragePath = (researchId, postfix) => `${researchFileStoragePath(researchId)}/temp-${postfix}`
+const researchFilesPackagePath = (researchId, packageHash) => `${researchFileStoragePath(researchId)}/${packageHash}`
+const researchFilesPackageFilePath = (researchId, packageHash, fileHash) => `${researchFilesPackagePath(researchId, packageHash)}/${fileHash}`
+const researchFileContentPath = (researchId, filename) => `${researchFileStoragePath(researchId)}/${filename}`
+const researchDarArchivePath = (researchId, archiveName) => `${researchFileStoragePath(researchId)}/${archiveName}`
+const researchDarArchiveFilePath = (researchId, archiveName, filename) => `${researchDarArchivePath(researchId, archiveName)}/${filename}`
+
+
 const opts = {}
 
 // ############ Read actions ############
@@ -56,6 +68,8 @@ const listContentRefs = async (ctx) => {
 
 const readDarArchive = async (ctx) => {
     const darId = ctx.params.dar;
+    const authorization = ctx.request.header['authorization'];
+    const jwt = authorization.substring(authorization.indexOf("Bearer ") + "Bearer ".length, authorization.length);
 
     try {
         const rc = await findResearchContentById(darId);
@@ -65,9 +79,10 @@ const readDarArchive = async (ctx) => {
             return;
         }
 
-        const archiveDir = path.join(storagePath, rc.filename);
+        const archiveDir = researchDarArchivePath(rc.researchId, rc.folder);
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
+
         const rawArchive = await readArchive(archiveDir, {
             noBinaryContent: true,
             ignoreDotFiles: true,
@@ -78,7 +93,7 @@ const readDarArchive = async (ctx) => {
             if (record._binary) {
                 delete record._binary
                 record.encoding = 'url'
-                record.data = `${config['serverHost']}/content/${darId}/assets/${record.path}`
+                record.data = `${config['serverHost']}/content/${darId}/assets/${record.path}?authorization=${jwt}`;
             }
         })
         ctx.status = 200;
@@ -95,10 +110,11 @@ const readDarArchiveStaticFiles = async (ctx) => {
     const darId = ctx.params.dar;
     try {
         const rc = await findResearchContentById(darId);
+        const archivePath = researchDarArchivePath(rc.researchId, rc.folder);
+
         const stat = util.promisify(fs.stat);
-        const filePath = path.join(storagePath, rc.filename);
-        const check = await stat(filePath);
-        await send(ctx, `/${config.fileStorageDir}/${rc.filename}/${ctx.params.file}`);
+        const check = await stat(archivePath);
+        await send(ctx, researchDarArchiveFilePath(rc.researchId, rc.folder, ctx.params.file), { root: '/' });        
     } catch(err) {
         console.log(err);
         ctx.status = 500;
@@ -174,7 +190,7 @@ const updateDarArchive = async (ctx) => {
             return;
         }
 
-        const archiveDir = path.join(storagePath, rc.filename)
+        const archiveDir = researchDarArchivePath(rc.researchId, rc.folder);
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
         const archive = JSON.parse(result.formData.fields._archive)
@@ -193,7 +209,7 @@ const updateDarArchive = async (ctx) => {
           versioning: opts.versioning
         })
 
-        await updateDraftMetaAsync(darId, archive, rc.filename);
+        await updateDraftMetaAsync(darId, archive, rc.folder);
         ctx.status = 200;
         ctx.body = version;
 
@@ -276,21 +292,20 @@ const createDarArchive = async (ctx) => {
             ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
             return;
         }
-    
-        const blankPath = path.join(storagePath, 'dar-blank');
+
         const now = new Date().getTime();
-    
-        const darPath = `/${researchId}/dar_${now}`;
-        await cloneArchive(blankPath, path.join(storagePath, darPath));
+        const darPath = researchDarArchivePath(researchId, `dar_${now}`);
+        await cloneArchive(blankDarPath, darPath);
         const rc = new ResearchContent({
             "_id": `${researchId}_dar_${now}`,
-            "filename": darPath,
+            "folder": `dar_${now}`,
             "researchId": researchId,
             "researchGroupId": research.research_group_id,
             "type": "dar",
             "status": "in-progress",
             "authors": [],
-            "references": []
+            "references": [],
+            "externalReferences": []
         });
     
         const savedDraft = await rc.save();
@@ -337,9 +352,9 @@ const deleteContentDraft = async (ctx) => {
         const unlink = util.promisify(fs.unlink);
 
         if (rc.type === 'dar') {
-            await fsExtra.remove(path.join(storagePath, rc.filename));
+            await fsExtra.remove(path.join(storagePath, rc.folder));
         } else if (rc.type === 'file') {
-            await unlink(researchFileContentPath(rc.researchId, rc.filename));
+            await unlink(researchFileContentPath(rc.researchId, rc.folder));
         } else if (rc.type === 'package') {
             await fsExtra.remove(researchFilesPackagePath(rc.researchId, rc.hash));
         }
@@ -354,14 +369,14 @@ const deleteContentDraft = async (ctx) => {
     }
 }
 
-const updateDraftMetaAsync = async (id, archive, link) => {
+const updateDraftMetaAsync = async (researchContentId, archive) => {
     const parseDraftMetaAsync = () => new Promise(resolve => {
         xml2js.parseString(archive.resources['manuscript.xml'].data, (err, result) => {
             if (err) {
                 resolve(null)
                 return;
             }
-            let title = null;
+            let title = "";
             let authors = [];
             let references = [];
             try {
@@ -373,15 +388,15 @@ const updateDraftMetaAsync = async (id, archive, link) => {
                     .filter(username => username != null && username != '');
             } catch(err) {}
             try {
-                references = parseDeipReferences(result['article']['back'][0]['ref-list'][0]['ref'])
+                references = parseInternalReferences(result['article']['back'][0]['ref-list'][0]['ref']);
             } catch(err) {}
 
-            resolve({ title, authors, references })
+            resolve({ title, authors, references });
         })
     })
 
     const { title, authors, references } = await parseDraftMetaAsync();
-    const rc = await ResearchContent.findOne({ '_id': id })
+    const rc = await ResearchContent.findOne({ '_id': researchContentId })
 
     const accounts = [];
     for (let i = 0; i < authors.length; i++) {
@@ -406,7 +421,9 @@ const updateDraftMetaAsync = async (id, archive, link) => {
     rc.references = contentRefs;
     
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
-    const hashObj = await hashElement(path.join(storagePath, link), options);
+
+    const archiveDir = researchDarArchivePath(rc.researchId, rc.folder);
+    const hashObj = await hashElement(archiveDir, options);
     console.log(hashObj);
     const hashes = hashObj.children.map(f => f.hash);
     hashes.sort();
@@ -419,30 +436,32 @@ const updateDraftMetaAsync = async (id, archive, link) => {
     await rc.save()
 }
 
-const parseDeipReferences = (refList) => {
+const parseInternalReferences = (refList) => {
     const webpageRefs = refList.filter(ref => {
         try {
-            return ref['element-citation'][0]['$']['publication-type'] === 'webpage'
+            return ref['element-citation'][0]['$']['publication-type'] === 'webpage';
         } catch(err) {
             return false;
         }
     }).map(ref => {
         return ref['element-citation'][0];
     });
-    const deipRefs = webpageRefs.map(wref => {
-        try {
-          const parsedUrl = url.parse(wref.uri[0]);
-          if (parsedUrl.serverHost === config.uiHost) { // get rid of this
-            const segments = parsedUrl.hash.split('/');
-            const researchGroupPermlink = segments[1];
-            const researchPermlink = segments[3];
-            const researchContentPermlink = segments[4];
-            return { researchGroupPermlink, researchPermlink, researchContentPermlink }
-          }
-        } catch(err) {
-            console.log(err)
-        }
-        return null;
+    const deipRefs = webpageRefs
+        .filter(wref => wref.uri && wref.uri[0])
+        .map(wref => {
+            try {
+                const parsedUrl = url.parse(wref.uri[0]);
+                if (parsedUrl.href.indexOf(config.clientHost) === 0) {
+                    const segments = parsedUrl.hash.split('/');
+                    const researchGroupPermlink = decodeURIComponent(segments[1]);
+                    const researchPermlink = decodeURIComponent(segments[3]);
+                    const researchContentPermlink = decodeURIComponent(segments[4]);
+                    return { researchGroupPermlink, researchPermlink, researchContentPermlink };
+                }
+            } catch(err) {
+                console.log(err);
+            }
+            return null;
         })
       .filter(r => r != null);
 
@@ -450,145 +469,11 @@ const parseDeipReferences = (refList) => {
 };
 
 // ############# files ######################
-const researchStoragePath = (researchId) => `${storagePath}/${researchId}`
-const researchFileStoragePath = (researchId) => `${storagePath}/${researchId}`
-const researchFilesTempStoragePath = (researchId, postfix) => `${researchFileStoragePath(researchId)}/temp-${postfix}`
-const researchFilesPackagePath = (researchId, packageHash) => `${researchFileStoragePath(researchId)}/${packageHash}`
-const researchFilesPackageFilePath = (researchId, packageHash, fileHash) => `${researchFilesPackagePath(researchId, packageHash)}/${fileHash}`
-
-const contentStorage = multer.diskStorage({
-    destination: async function(req, file, callback) {
-
-        const stat = util.promisify(fs.stat);
-        const mkdir = util.promisify(fs.mkdir);
-
-        const researchStorage = researchStoragePath(req.headers['research-id']);
-        try {
-            const check = await stat(researchStorage);
-        } catch(err) {
-            await mkdir(researchStorage);
-        }
-
-        const researchFileStorage = researchFileStoragePath(req.headers['research-id'])
-        try {
-            const check = await stat(researchFileStorage);
-        } catch(err) {
-            await mkdir(researchFileStorage);
-        }
-
-        callback(null, researchFileStorage);
-    },
-    filename: function(req, file, callback) {
-        callback(null, (new Date).getTime() + '_' + file.originalname);
-    }
-})
-
-// const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
-const contentUploader = multer({
-    storage: contentStorage,
-    fileFilter: function(req, file, callback) {
-        // if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-        //     return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
-        // }
-        callback(null, true);
-    }
-})
-
-
-const researchFileContentPath = (researchId, filename) => `${researchFileStoragePath(researchId)}/${filename}`
-const uploadFileContent = async(ctx) => {
-    const jwtUsername = ctx.state.user.username;
-
-    const researchId = ctx.request.header['research-id'];
-    if (!researchId || isNaN(parseInt(researchId))) {
-        ctx.status = 400;
-        ctx.body = { error: `"Research-Id" header is required` };
-        return;
-    }
-
-    try {
-
-        const research = await deipRpc.api.getResearchByIdAsync(researchId);
-        const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername)
-        if (!authorized) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
-            return;
-        }
-
-        const researchContent = contentUploader.single('research-content');
-        const filepath = await researchContent(ctx, () => new Promise((resolve, reject) => {
-            fs.stat(researchFileContentPath(researchId, ctx.req.file.filename), (err, stats) => {
-                if (err || !stats.isFile()) {
-                    console.error(err);
-                    reject(err)
-                }
-                else {
-                    resolve(researchFileContentPath(researchId, ctx.req.file.filename));
-                }
-            });
-        }));
-
-        const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
-        const hashObj = await hashElement(filepath, options);
-
-        var exists = false;
-        const _id = `${researchId}_file_${hashObj.hash}`;
-        const rc = await findResearchContentById(_id);
-
-        if (rc) {
-            const stat = util.promisify(fs.stat);
-            try {
-                const check = await stat(researchFileContentPath(researchId, rc.filename));
-                exists = true;
-            } catch(err) {
-                exists = false;
-            }
-        }
-
-        if (exists) {
-            console.log(`File with ${hashObj.hash} hash already exists! Removing the uploaded file...`);
-            const unlink = util.promisify(fs.unlink);
-            await unlink(filepath);
-            ctx.status = 200;
-            ctx.body = rc;
-        } else {
-
-            if (rc) {
-                rc.filename = hashObj.name
-                const updatedRc = await rc.save();
-                ctx.status = 200;
-                ctx.body = updatedRc;
-            } else {
-                const rc = new ResearchContent({
-                    "_id": _id,
-                    "filename": hashObj.name,
-                    title: hashObj.name,
-                    "researchId": researchId,
-                    "researchGroupId": research.research_group_id,
-                    "hash": hashObj.hash,
-                    "algo": "sha256",
-                    "type": 'file',
-                    "status": 'in-progress',
-                    "authors": [jwtUsername],
-                    "references": []
-                });
-                const savedRc = await rc.save();
-                ctx.status = 200;
-                ctx.body = savedRc;
-            }
-        }
-
-    } catch(err) {
-        console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
-    }
-}
 
 const uploadBulkResearchContent = async(ctx) => {
     const jwtUsername = ctx.state.user.username;
     const researchId = ctx.request.header['research-id'];
+    const internalReferencesStr = ctx.request.header['internal-refs'];
 
     if (!researchId || isNaN(parseInt(researchId))) {
         ctx.status = 400;
@@ -597,16 +482,12 @@ const uploadBulkResearchContent = async(ctx) => {
     }
 
     const stat = util.promisify(fs.stat);
-    const mkdirRecursive = util.promisify(fsExtra.ensureDir);
+    const ensureDir = util.promisify(fsExtra.ensureDir);
 
     try {
         const researchFilesTempStorage = researchFilesTempStoragePath(ctx.request.header['research-id'], ctx.request.header['upload-session'])
-        try {
-            const check = await stat(researchFilesTempStorage);
-        } catch(err) {
-            await mkdirRecursive(researchFilesTempStorage);
-        }
-
+        await ensureDir(researchFilesTempStorage);
+        
         const research = await deipRpc.api.getResearchByIdAsync(researchId);
         const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername)
         if (!authorized) {
@@ -662,16 +543,16 @@ const uploadBulkResearchContent = async(ctx) => {
             await fsExtra.move(tempDestinationPath, packagePath, { overwrite: true });
             
             if (rc) {
-                rc.filename = `package: [${packageHash}]`
-                const updatedAc = await rc.save();
+                rc.folder = packageHash;
+                const updatedRc = await rc.save();
                 ctx.status = 200;
-                ctx.body = updatedAc;
+                ctx.body = updatedRc;
             } else {
 
                 const _id = `${researchId}_package_${packageHash}`;
                 const rc = new ResearchContent({
                     "_id": _id,
-                    "filename": `package [${packageHash}]`,
+                    "folder": packageHash,
                     "title": `${packageHash}`,
                     "researchId": researchId,
                     "researchGroupId": research.research_group_id,
@@ -683,7 +564,8 @@ const uploadBulkResearchContent = async(ctx) => {
                     "packageFiles": hashObj.children.map((f) => {
                         return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
                     }),
-                    "references": []
+                    "references": internalReferencesStr ? internalReferencesStr.split(",").map(refId => parseInt(refId)) : [],
+                    "externalReferences": []
                 });
                 const savedRc = await rc.save();
                 ctx.status = 200;
@@ -719,10 +601,12 @@ const getResearchPackageFile = async function(ctx) {
     }
 
     if (isDownload) {
-        ctx.response.set('Content-disposition', 'attachment; filename="' + slug(file.filename) + '"');
+        let ext = file.filename.substr(file.filename.lastIndexOf('.') + 1);
+        let name = file.filename.substr(0, file.filename.lastIndexOf('.'));
+        ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
         ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchId, rc.hash, file.filename));
     } else {
-        await send(ctx, `/${config.fileStorageDir}/${rc.researchId}/${rc.hash}/${file.filename}`);
+        await send(ctx, researchFilesPackageFilePath(rc.researchId, rc.hash, file.filename), { root: '/' });
     }
 }
 
@@ -735,7 +619,6 @@ export default {
     updateDarArchive,
 
     // files
-    uploadFileContent,
     uploadBulkResearchContent,
     getResearchPackageFile,
 
