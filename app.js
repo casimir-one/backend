@@ -4,7 +4,7 @@ import logger from 'koa-logger';
 import auth from './routes/auth.js';
 import api from './routes/api.js';
 import tenant from './routes/tenant.js';
-import content from './routes/content.js';
+import researchContent from './routes/researchContent.js';
 import application from './routes/application';
 import jwt from 'koa-jwt';
 import path from 'path';
@@ -63,12 +63,6 @@ app.on('error', function(err, ctx) {
 app.use(serve('files/static'));
 router.use('/auth', auth.routes()); // authentication actions
 router.use('/tenants', tenant.routes());
-router.use('/content', jwt({ secret: config.jwtSecret }).unless((req) => {
-    return req.method == 'GET';
-}), content.routes());
-router.use('/applications', jwt({ secret: config.jwtSecret }).unless((req) => {
-    return req.method == 'GET';
-}), application.routes());
 
 router.use('/api', jwt({
     secret: config.jwtSecret,
@@ -79,6 +73,26 @@ router.use('/api', jwt({
         return null;
     }
 }), api.routes());
+
+router.use('/content', jwt({
+    secret: config.jwtSecret,
+    getToken: function (opts) {
+        if (opts.request.query && opts.request.query.authorization) {
+            return opts.request.query.authorization;
+        }
+        return null;
+    }
+}), researchContent.routes());
+
+router.use('/applications', jwt({
+    secret: config.jwtSecret,
+    getToken: function (opts) {
+        if (opts.request.query && opts.request.query.authorization) {
+            return opts.request.query.authorization;
+        }
+        return null;
+    }
+}), application.routes());
 
 app.use(router.routes());
 

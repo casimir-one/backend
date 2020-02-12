@@ -53,7 +53,7 @@ const getResearchGroupActivityLogs = async (ctx) => {
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const researchGroupStoragePath = (researchGroupId) => `${filesStoragePath}/research-groups/${researchGroupId}`;
 const researchGroupLogoImagePath = (researchGroupId, ext = 'png') => `${researchGroupStoragePath(researchGroupId)}/logo.${ext}`;
-const defaultresearchGroupLogoPath = () => `${filesStoragePath}/default/default_research_group_logo.png`;
+const defaultResearchGroupLogoPath = () => path.join(__dirname, `./../default/default-research-group-logo.png`);
 
 const allowedLogoMimeTypes = ['image/png'];
 const researchGroupStorage = multer.diskStorage({
@@ -122,7 +122,7 @@ const getLogo = async (ctx) => {
   try {
     const check = await stat(src);
   } catch (err) {
-    src = defaultresearchGroupLogoPath();
+    src = defaultResearchGroupLogoPath();
   }
 
   const resize = (w, h) => {

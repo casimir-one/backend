@@ -9,9 +9,9 @@ import deipRpc from '@deip/deip-oa-rpc-client';
 import { authorizeResearchGroup } from './../services/auth';
 
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
-const researchStoragePath = (researchId) => `${filesStoragePath}/${researchId}`;
+const researchStoragePath = (researchId) => `${filesStoragePath}/research-projects/${researchId}`;
 const backgroundImagePath = (researchId, ext = 'png') => `${researchStoragePath(researchId)}/background.${ext}`;
-const defaultBackgroundImagePath = () => `${filesStoragePath}/default/default_research_background.png`;
+const defaultBackgroundImagePath = () => path.join(__dirname, `./../default/default-research-background.png`);
 
 const allowedBackgroundMimeTypes = ['image/png'];
 const researchStorage = multer.diskStorage({

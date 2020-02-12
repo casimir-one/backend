@@ -6,7 +6,7 @@ import expertiseClaims from '../controllers/expertiseClaims'
 import search from '../controllers/search'
 import notifications from '../controllers/notifications'
 import proposals from '../controllers/proposals'
-import groups from '../controllers/groups'
+import researchGroups from '../controllers/researchGroups'
 import invites from '../controllers/invites'
 import reviews from '../controllers/reviews'
 import research from '../controllers/research'
@@ -19,7 +19,7 @@ router.get('/user/profile/:username', users.getUserProfile)
 router.get('/user/profiles', users.getUsersProfiles)
 router.post('/user/profile/:username', users.createUserProfile)
 router.put('/user/profile/:username', users.updateUserProfile)
-router.get('/user/avatar/:picture', users.getAvatar);
+router.get('/user/avatar/:username', users.getAvatar);
 
 router.get('/bookmarks/user/:username', users.getUserBookmarks)
 router.post('/bookmarks/user/:username', users.addUserBookmark)
@@ -54,10 +54,10 @@ router.post('/proposals/content/:type', proposals.createContentProposal)
 router.post('/proposals/invite', proposals.createInviteProposal)
 router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
-router.post('/groups', groups.createResearchGroup)
-router.get('/groups/activity-log/:researchGroupId', groups.getResearchGroupActivityLogs)
-router.get('/groups/logo/:researchGroupId', groups.getLogo)
-router.post('/groups/logo', groups.uploadLogo)
+router.post('/groups', researchGroups.createResearchGroup)
+router.get('/groups/activity-log/:researchGroupId', researchGroups.getResearchGroupActivityLogs)
+router.get('/groups/logo/:researchGroupId', researchGroups.getLogo)
+router.post('/groups/logo', researchGroups.uploadLogo)
 
 router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
