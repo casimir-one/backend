@@ -46,7 +46,6 @@ const signIn = async function (ctx) {
   }
 
   const jwtToken = jwt.sign({
-    pubKey: pubWif,
     username,
     exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60), // 3 hours
   }, config.jwtSecret)
