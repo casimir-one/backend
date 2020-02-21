@@ -66,6 +66,7 @@ router.post('/reviews', reviews.makeReview)
 
 router.get('/research/background/:researchId', research.getBackground)
 router.post('/research/background', research.uploadBackground)
+router.put('/research/:researchId', research.updateResearch)
 
 router.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 router.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

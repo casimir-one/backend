@@ -5,6 +5,7 @@ import { sendTransaction, getTransaction } from './../utils/blockchain';
 import deipRpc from '@deip/deip-oa-rpc-client';
 import UserNotification from './../schemas/userNotification';
 import JoinRequest from './../schemas/joinRequest'
+import * as researchSerivce from './../services/research'
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
@@ -130,9 +131,10 @@ const createContentProposal = async (ctx) => {
 
 const createResearchProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
-    const tx = ctx.request.body;
+    const { tx, researchMeta } = ctx.request.body;
     const operation = tx['operations'][0];
     const payload = operation[1];
+
 
     const opGroupId = parseInt(payload.research_group_id);
 
@@ -150,7 +152,29 @@ const createResearchProposal = async (ctx) => {
             return;
         }
 
-        /* proposal specific action code */
+        const { permlink } = JSON.parse(payload.data);
+        const existingProposal = await researchSerivce.lookupResearchProposal(opGroupId, permlink);
+        if (existingProposal) {
+          ctx.status = 400;
+          ctx.body = `Proposal already exists`;
+          return;
+        }
+        /**
+         *  check is temporarly disabled because of blockchain api asserts when research not found
+            const existingResearch = await deipRpc.api.getResearchByPermlinkAsync(opGroupId, permlink);
+            if (existingResearch) {
+              ctx.status = 400;
+              ctx.body = `Research with title "${existingResearch.title}" already exists`;
+              return;
+            }
+         */
+
+        await researchSerivce.upsertResearch({
+          researchGroupId: opGroupId,
+          permlink,
+          ...researchMeta,
+        });
+
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
             processNewProposalTx(payload, result.txInfo);

@@ -6,6 +6,7 @@ import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
 import deipRpc from '@deip/deip-oa-rpc-client';
+import Research from './../schemas/research'
 import { authorizeResearchGroup } from './../services/auth';
 
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
@@ -128,7 +129,47 @@ const getBackground = async (ctx) => {
   ctx.body = background;
 }
 
+const updateResearch = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const researchId = ctx.params.researchId;
+
+  const research = await deipRpc.api.getResearchByIdAsync(researchId);
+  const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername);
+
+  if (!authorized) {
+    ctx.status = 401;
+    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
+    return;
+  }
+  const researchRm = await Research.findOne({
+    researchGroupId: research.research_group_id,
+    permlink: research.permlink
+  });
+
+  if (!researchRm) {
+    ctx.status = 400;
+    ctx.body = 'Read model not found';
+    return;
+  }
+
+  try {
+    const { milestones, videoSrc, partners, trl } = ctx.request.body;
+    researchRm.milestones = milestones || researchRm.milestones;
+    researchRm.videoSrc = videoSrc || researchRm.videoSrc;
+    researchRm.partners = partners || researchRm.partners;
+    researchRm.trl = trl || researchRm.trl;
+
+    ctx.status = 200;
+    ctx.body = await researchRm.save();
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
 export default {
   getBackground,
-  uploadBackground
+  uploadBackground,
+  updateResearch
 }
