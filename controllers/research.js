@@ -168,8 +168,26 @@ const updateResearch = async (ctx) => {
   }
 };
 
+const getResearch = async (ctx) => {
+  try {
+    const researchId = ctx.params.researchId;
+
+    const research = await deipRpc.api.getResearchByIdAsync(researchId);
+    ctx.status = 200;
+    ctx.body = await Research.findOne({
+      researchGroupId: research.research_group_id,
+      permlink: research.permlink
+    })
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
 export default {
   getBackground,
   uploadBackground,
+  getResearch,
   updateResearch
 }
