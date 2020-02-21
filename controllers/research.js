@@ -177,7 +177,7 @@ const getResearch = async (ctx) => {
     ctx.body = await Research.findOne({
       researchGroupId: research.research_group_id,
       permlink: research.permlink
-    })
+    });
   } catch (err) {
     console.log(err);
     ctx.status = 500;

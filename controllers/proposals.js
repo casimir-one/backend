@@ -155,19 +155,11 @@ const createResearchProposal = async (ctx) => {
         const { permlink } = JSON.parse(payload.data);
         const existingProposal = await researchSerivce.lookupResearchProposal(opGroupId, permlink);
         if (existingProposal) {
+          console.log(existingProposal)
           ctx.status = 400;
-          ctx.body = `Proposal already exists`;
+          ctx.body = `Proposal or research already exists`;
           return;
         }
-        /**
-         *  check is temporarly disabled because of blockchain api asserts when research not found
-            const existingResearch = await deipRpc.api.getResearchByPermlinkAsync(opGroupId, permlink);
-            if (existingResearch) {
-              ctx.status = 400;
-              ctx.body = `Research with title "${existingResearch.title}" already exists`;
-              return;
-            }
-         */
 
         await researchSerivce.upsertResearch({
           researchGroupId: opGroupId,
