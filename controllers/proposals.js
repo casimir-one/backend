@@ -1,11 +1,10 @@
 import { authorizeResearchGroup } from './../services/auth'
 import { findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
-import * as usersNotificationsService from './../services/userNotification'
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import deipRpc from '@deip/deip-oa-rpc-client';
 import UserNotification from './../schemas/userNotification';
 import JoinRequest from './../schemas/joinRequest'
-import * as researchSerivce from './../services/research'
+import researchService from './../services/research'
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
@@ -153,7 +152,7 @@ const createResearchProposal = async (ctx) => {
         }
 
         const { permlink } = JSON.parse(payload.data);
-        const existingProposal = await researchSerivce.lookupResearchProposal(opGroupId, permlink);
+        const existingProposal = await researchService.lookupResearchProposal(opGroupId, permlink);
         if (existingProposal) {
           console.log(existingProposal)
           ctx.status = 400;
@@ -161,7 +160,7 @@ const createResearchProposal = async (ctx) => {
           return;
         }
 
-        await researchSerivce.upsertResearch({
+        await researchService.upsertResearch({
           researchGroupId: opGroupId,
           permlink,
           ...researchMeta,
