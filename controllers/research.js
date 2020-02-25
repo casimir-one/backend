@@ -6,7 +6,8 @@ import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
 import deipRpc from '@deip/deip-oa-rpc-client';
-import Research from './../schemas/research'
+import researchService from './../services/research';
+
 import { authorizeResearchGroup } from './../services/auth';
 
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
@@ -141,7 +142,8 @@ const updateResearch = async (ctx) => {
     ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
     return;
   }
-  const researchRm = await Research.findOne({
+
+  const researchRm = await researchService.findResearchByPermlink({
     researchGroupId: research.research_group_id,
     permlink: research.permlink
   });
@@ -171,13 +173,14 @@ const updateResearch = async (ctx) => {
 const getResearch = async (ctx) => {
   try {
     const researchId = ctx.params.researchId;
-
     const research = await deipRpc.api.getResearchByIdAsync(researchId);
-    ctx.status = 200;
-    ctx.body = await Research.findOne({
+    const researcRm = await researchService.findResearchByPermlink({
       researchGroupId: research.research_group_id,
       permlink: research.permlink
     });
+
+    ctx.status = 200;
+    ctx.body = researcRm;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
