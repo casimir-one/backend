@@ -19,15 +19,19 @@ deipRpc.config.set('chain_id', config.blockchain.chainId);
 mongoose.connect(config.mongo['deip-server'].connection);
 
 const run = async () => {
-
   let list = await deipRpc.api.getAllResearchesListingAsync(0,0);
-
-  let promises = list.map(research => {
+  let researches = await Promise.all(list.map(research => deipRpc.api.getResearchByIdAsync(research.research_id)));
+  let promises = researches.map(research => {
+    let info = JSON.parse(research.abstract);
+    let milestones = info.milestones.map(m => {
+      return { ...m, budget: "", purpose: "" };
+    })
+    
     return researchService.upsertResearch({
-      researchGroupId: research.group_id,
+      researchGroupId: research.research_group_id,
       permlink: research.permlink,
-      milestones: [],
-      videoSrc: "",
+      milestones: milestones,
+      videoSrc: info.videoSrc || "",
       partners: [],
       trl: "basic_principles_of_concept_are_observed_and_reported"
     })
