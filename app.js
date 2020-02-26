@@ -72,6 +72,11 @@ router.use('/api', jwt({
         }
         return null;
     }
+}).unless(function (ctx) {
+  return (
+    ctx.method === 'GET'
+    && /^\/api\/user|research|groups/.test(ctx.path)
+  );
 }), api.routes());
 
 router.use('/content', jwt({
@@ -82,6 +87,11 @@ router.use('/content', jwt({
         }
         return null;
     }
+}).unless(function (ctx) {
+  return (
+    ctx.method === 'GET'
+    && /^\/content\/refs\/research\/(?!package)/.test(ctx.path)
+  );
 }), researchContent.routes());
 
 router.use('/applications', jwt({
@@ -92,6 +102,11 @@ router.use('/applications', jwt({
         }
         return null;
     }
+}).unless(function (ctx) {
+  return (
+    ctx.method === 'GET'
+    && /^\/applications\/refs/.test(ctx.path)
+  );
 }), application.routes());
 
 app.use(router.routes());
