@@ -585,6 +585,17 @@ const getResearchPackageFile = async function(ctx) {
     const researchId = ctx.params.researchId;
     const fileHash = ctx.params.fileHash;
     const isDownload = ctx.query.download === 'true';
+    const jwtUsername = ctx.state.user.username;
+
+    const research = await deipRpc.api.getResearchByIdAsync(researchId);
+    if (research.is_private) {
+      const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername)
+      if (!authorized) {
+        ctx.status = 401;
+        ctx.body = `"${jwtUsername}" is not permitted to get "${researchId}" research content`;
+        return;
+      }
+    }
 
     const rc = await findResearchContentByHash(researchId, hash);
     if (rc == null) {
