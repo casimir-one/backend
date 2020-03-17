@@ -282,7 +282,7 @@ async function processNewProposalTx(payload, txInfo) {
                     p.action === payload.action &&
                     p.expiration_time === payload.expiration_time);
 
-            let parsedProposal = { ...proposal, data: JSON.parse(proposal.data) };
+            let parsedProposal = { ...proposal, data: JSON.parse(proposal.data), research_group_id: opPayload.research_group_id };
             
             userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
             researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
@@ -300,7 +300,7 @@ async function processProposalVoteTx(payload, txInfo) {
         const opPayload = op[1];
         if (opName === 'vote_proposal' && opPayload.proposal_id == payload.proposal_id) {
             let proposal = await deipRpc.api.getProposalAsync(opPayload.proposal_id); 
-            let parsedProposal = { ...proposal, data: JSON.parse(proposal.data) };
+            let parsedProposal = { ...proposal, data: JSON.parse(proposal.data), research_group_id: opPayload.research_group_id };
             
             researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL_VOTE, { voter: opPayload.voter, proposal: parsedProposal });
 
