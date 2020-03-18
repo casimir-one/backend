@@ -229,6 +229,54 @@ const createInviteProposal = async (ctx) => {
     }
 }
 
+const createDropoutProposal = async (ctx) => {
+    const jwtUsername = ctx.state.user.username;
+    const tx = ctx.request.body;
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+
+    const opGroupId = parseInt(payload.research_group_id);
+
+    if (isNaN(opGroupId)) {
+        ctx.status = 400;
+        ctx.body = `Mallformed operation: "${operation}"`;
+        return;
+    }
+
+    try {
+        const authorized = await authorizeResearchGroup(opGroupId, jwtUsername);
+        if (!authorized) {
+            ctx.status = 401;
+            ctx.body = `"${jwtUsername}" is not a member of "${opGroupId}" group`
+            return;
+        }
+
+        /* proposal specific action code */
+
+        const proposal = JSON.parse(payload.data);
+        const joinRequests = await JoinRequest.find({ 'groupId': opGroupId, username: proposal.name, 'status': { $in: ['approved', 'pending'] } });
+
+        for (let i = 0; i < joinRequests.length; i++) {
+            const joinRequest = joinRequests[i];
+            joinRequest.status = 'approved';
+            await joinRequest.save();
+        }
+
+        const result = await sendTransaction(tx);
+        if (result.isSuccess) {
+            processNewProposalTx(payload, result.txInfo);
+            ctx.status = 201;
+        } else {
+            throw new Error(`Could not proceed the transaction: ${tx}`);
+        }
+
+    } catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err.message;
+    }
+}
+
 const createTokenSaleProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
     const tx = ctx.request.body;
@@ -324,5 +372,6 @@ export default {
     createResearchProposal,
     createContentProposal,
     createInviteProposal,
+    createDropoutProposal,
     createTokenSaleProposal
 }

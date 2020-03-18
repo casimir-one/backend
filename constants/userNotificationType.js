@@ -3,6 +3,7 @@ const PROPOSAL_ACCEPTED = "proposal-accepted";
 const INVITATION = "invitation";
 const INVITATION_APPROVED = 'invitation-approved';
 const INVITATION_REJECTED = 'invitation-rejected';
+const EXCLUSION = "exclusion";
 const RESEARCH_CONTENT_EXPERT_REVIEW = "research-content-expert-review";
 const RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST = "research-content-expert-review-request";
 const EXPERTISE_ALLOCATED = "expertise-allocated";
@@ -13,6 +14,7 @@ const USER_NOTIFICATION_TYPE = {
   INVITATION,
   INVITATION_APPROVED,
   INVITATION_REJECTED,
+  EXCLUSION,
   RESEARCH_CONTENT_EXPERT_REVIEW,
   RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST,
   EXPERTISE_ALLOCATED
