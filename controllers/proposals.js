@@ -229,7 +229,7 @@ const createInviteProposal = async (ctx) => {
     }
 }
 
-const createDropoutProposal = async (ctx) => {
+const createExcludeProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
     const tx = ctx.request.body;
     const operation = tx['operations'][0];
@@ -252,15 +252,6 @@ const createDropoutProposal = async (ctx) => {
         }
 
         /* proposal specific action code */
-
-        const proposal = JSON.parse(payload.data);
-        const joinRequests = await JoinRequest.find({ 'groupId': opGroupId, username: proposal.name, 'status': { $in: ['approved', 'pending'] } });
-
-        for (let i = 0; i < joinRequests.length; i++) {
-            const joinRequest = joinRequests[i];
-            joinRequest.status = 'approved';
-            await joinRequest.save();
-        }
 
         const result = await sendTransaction(tx);
         if (result.isSuccess) {
@@ -372,6 +363,6 @@ export default {
     createResearchProposal,
     createContentProposal,
     createInviteProposal,
-    createDropoutProposal,
+    createExcludeProposal,
     createTokenSaleProposal
 }

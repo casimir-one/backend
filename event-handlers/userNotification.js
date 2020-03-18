@@ -167,7 +167,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
 
       if (isProposalAutoAccepted) {
         // TODO: this event should be fired by chain event emmiter
-        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION, { excluded: name, researchGroupId: researchGroup.id });
+        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, { excluded: name, researchGroupId: researchGroup.id });
       }
 
       break;
@@ -326,6 +326,32 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
       break;
     }
 
+    case PROPOSAL_TYPE.DROPOUT_MEMBER: {
+      let { name } = payload;
+      let excludedProfile = await usersService.findUserProfileByOwner(name);
+
+      for (let i = 0; i < rgtList.length; i++) {
+        let rgt = rgtList[i];
+        let promise = usersNotificationService.createUserNotification({
+          username: rgt.owner,
+          status: 'unread',
+          type,
+          metadata: {
+            proposal,
+            researchGroup,
+            excludedProfile,
+            creatorProfile
+          }
+        });
+        notificationsPromises.push(promise);
+      }
+
+      // TODO: this event should be fired by chain event emmiter
+      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, { excluded: name, researchGroupId: researchGroup.id });
+
+      break;
+    }
+
     default: {
       break;
     }
@@ -353,8 +379,8 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION, async ({ invitee, 
   });
 });
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXCLUSION, async ({ excluded, researchGroupId }) => {
-  const type = USER_NOTIFICATION_TYPE.EXCLUSION;
+userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, async ({ excluded, researchGroupId }) => {
+  const type = USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED;
 
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let excludedProfile = await usersService.findUserProfileByOwner(excluded);
