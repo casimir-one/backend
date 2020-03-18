@@ -144,6 +144,65 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
       break;
     }
 
+    case PROPOSAL_TYPE.DROPOUT_MEMBER: {
+      let { name } = payload;
+      let excludedProfile = await usersService.findUserProfileByOwner(name);
+
+      for (let i = 0; i < rgtList.length; i++) {
+        let rgt = rgtList[i];
+        let promise = usersNotificationService.createUserNotification({
+          username: rgt.owner,
+          status: 'unread',
+          type,
+          metadata: {
+            isProposalAutoAccepted,
+            proposal,
+            researchGroup,
+            excludedProfile,
+            creatorProfile
+          }
+        });
+        notificationsPromises.push(promise);
+      }
+
+      if (isProposalAutoAccepted) {
+        // TODO: this event should be fired by chain event emmiter
+        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, { excluded: name, researchGroupId: researchGroup.id });
+      }
+
+      break;
+    }
+
+    case PROPOSAL_TYPE.CHANGE_RESEARCH_META_DATA_TYPE: {
+      let { permlink, research_id } = payload;
+      let research = await deipRpc.api.getResearchByIdAsync(research_id);
+      let researchContent = null;
+
+      if (isProposalAutoAccepted) {
+        researchContent = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(researchGroup.permlink, research.permlink, permlink);
+      }
+
+      for (let i = 0; i < rgtList.length; i++) {
+        let rgt = rgtList[i];
+        let promise = usersNotificationService.createUserNotification({
+          username: rgt.owner,
+          status: 'unread',
+          type,
+          metadata: {
+            isProposalAutoAccepted,
+            proposal,
+            researchGroup,
+            research,
+            researchContent,
+            creatorProfile
+          }
+        });
+        notificationsPromises.push(promise);
+      }
+
+      break;
+    }
+
     default: {
       break;
     }
@@ -267,6 +326,32 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
       break;
     }
 
+    case PROPOSAL_TYPE.DROPOUT_MEMBER: {
+      let { name } = payload;
+      let excludedProfile = await usersService.findUserProfileByOwner(name);
+
+      for (let i = 0; i < rgtList.length; i++) {
+        let rgt = rgtList[i];
+        let promise = usersNotificationService.createUserNotification({
+          username: rgt.owner,
+          status: 'unread',
+          type,
+          metadata: {
+            proposal,
+            researchGroup,
+            excludedProfile,
+            creatorProfile
+          }
+        });
+        notificationsPromises.push(promise);
+      }
+
+      // TODO: this event should be fired by chain event emmiter
+      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, { excluded: name, researchGroupId: researchGroup.id });
+
+      break;
+    }
+
     default: {
       break;
     }
@@ -290,6 +375,23 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION, async ({ invitee, 
     metadata: {
       researchGroup,
       inviteeProfile
+    }
+  });
+});
+
+userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, async ({ excluded, researchGroupId }) => {
+  const type = USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED;
+
+  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
+  let excludedProfile = await usersService.findUserProfileByOwner(excluded);
+
+  usersNotificationService.createUserNotification({
+    username: excluded,
+    status: 'unread',
+    type,
+    metadata: {
+      researchGroup,
+      excludedProfile
     }
   });
 });
@@ -446,12 +548,12 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW
 });
 
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, async ({ requestor, expert, researchContentId }) => {
+userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, async ({ requestor, expert, contentId }) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST;
 
   let requestorProfile = await usersService.findUserProfileByOwner(requestor);
   let expertProfile = await usersService.findUserProfileByOwner(expert);
-  let researchContent = await deipRpc.api.getResearchContentByIdAsync(researchContentId);
+  let researchContent = await deipRpc.api.getResearchContentByIdAsync(contentId);
   let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
 

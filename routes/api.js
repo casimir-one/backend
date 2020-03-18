@@ -52,6 +52,7 @@ router.post('/proposals/vote', proposals.voteForProposal)
 router.post('/proposals/research', proposals.createResearchProposal)
 router.post('/proposals/content/:type', proposals.createContentProposal)
 router.post('/proposals/invite', proposals.createInviteProposal)
+router.post('/proposals/exclude', proposals.createExcludeProposal)
 router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
 router.post('/groups', researchGroups.createResearchGroup)
