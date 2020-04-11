@@ -29,6 +29,6 @@ const ApplicationContent = new Schema({
     "authors": [{ type: String }]
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
-const model = mongoose.model('application-content', ApplicationContent);
+const model = mongoose.model('award-application-content', ApplicationContent);
 
 module.exports = model;

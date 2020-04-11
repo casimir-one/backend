@@ -7,13 +7,13 @@ const UserProfile = new Schema({
     "_id": { type: String },
     "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
     "avatar": { type: String, default: "default-avatar.png" },
-    "agencies": [{
+    "roles": [{
         "role": {
             type: String,
-            enum: ['applicant', 'grantor', 'officer', 'treasury'],
+            enum: ['grant-program-officer', 'grant-finance-officer', 'university-certifier', 'treasury-certifier'],
             required: true
         },
-        "name": { type: String, required: true, default: null },
+        "researchGroupId": { type: Number, required: true },
         "metadata": { type: Object, default: null }
     }],
     "firstName": { type: String, default: null, trim: true },

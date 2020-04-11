@@ -11,6 +11,7 @@ import invites from '../controllers/invites'
 import reviews from '../controllers/reviews'
 import research from '../controllers/research'
 import investmentPortfolio from '../controllers/investmentPortfolio'
+import grants from '../controllers/grants'
 
 const router = koa_router()
 
@@ -72,5 +73,9 @@ router.put('/research/:researchId', research.updateResearch)
 
 router.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 router.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)
+
+router.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
+router.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', grants.getAwardWithdrawalRequestAttachmentFile)
+router.post('/award-withdrawal-requests/upload-attachments', grants.uploadAwardWithdrawalRequestBulkAttachments)
 
 export default router

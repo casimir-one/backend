@@ -102,11 +102,6 @@ router.use('/applications', jwt({
         }
         return null;
     }
-}).unless(function (ctx) {
-  return (
-    ctx.method === 'GET'
-    && /^\/applications\/refs/.test(ctx.path)
-  );
 }), application.routes());
 
 app.use(router.routes());
