@@ -276,6 +276,18 @@ const uploadAvatar = async (ctx) => {
       return;
     }
 
+    const stat = util.promisify(fs.stat);
+    const unlink = util.promisify(fs.unlink);
+    const ensureDir = util.promisify(fsExtra.ensureDir);
+
+    try {
+      const filepath = accountsStoragePath(username);
+      await stat(filepath);
+      await unlink(filepath);
+    } catch (err) {
+      await ensureDir(accountsStoragePath(username))
+    }
+
     const oldFilename = profile.avatar;
     const userAvatar = avatarUploader.single('user-avatar');
     const { filename } = await userAvatar(ctx, () => new Promise((resolve, reject) => {
@@ -286,8 +298,9 @@ const uploadAvatar = async (ctx) => {
     const updatedProfile = await profile.save();
 
     if (oldFilename != filename) {
-      const unlink = util.promisify(fs.unlink);
-      await unlink(avatarPath(username, oldFilename));
+      try {
+        await unlink(avatarPath(username, oldFilename));
+      } catch(err) {}
     }
 
     ctx.status = 200;
