@@ -9,19 +9,24 @@ import readArchive from './../dar/readArchive'
 import writeArchive from './../dar/writeArchive'
 import cloneArchive from './../dar/cloneArchive'
 import listArchives from './../dar/listArchives'
-import deipRpc from '@deip/deip-oa-rpc-client';
-import ResearchContent from './../schemas/researchContent';
+import deipRpc from '@deip/rpc-client';
 import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
 import config from './../config';
-import { sendTransaction } from './../utils/blockchain';
-import { findResearchContentById, findResearchContentByHash, lookupContentProposal, proposalIsNotExpired } from './../services/researchContent'
 import { bulkResearchContentUploader } from './../storages/bulkResearchContentUploader';
 import { authorizeResearchGroup } from './../services/auth'
 import url from 'url';
 import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
+import * as blockchainService from './../utils/blockchain';
+import * as authService from './../services/auth';
+import * as researchContentService from './../services/researchContent';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
+import userNotificationHandler from './../event-handlers/userNotification';
+import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+
 
 const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const blankDarPath = path.join(__dirname, `./../default/dar-blank`);
@@ -53,9 +58,10 @@ const listDarArchives = async (ctx) => {
 }
 
 const listContentRefs = async (ctx) => {
-  const researchId = ctx.params.researchId;
+  const researchExternalId = ctx.params.researchExternalId;
+
   try {
-    let drafts = await ResearchContent.find({'researchId': researchId });
+    let drafts = await researchContentService.findResearchContentByResearchId(researchExternalId);
     ctx.status = 200;
     ctx.body = drafts;
   } catch(err) {
@@ -72,14 +78,14 @@ const readDarArchive = async (ctx) => {
     const jwt = authorization.substring(authorization.indexOf("Bearer ") + "Bearer ".length, authorization.length);
 
     try {
-        const rc = await findResearchContentById(darId);
+      const rc = await researchContentService.findResearchContentById(darId);
         if (!rc) {
             ctx.status = 404;
             ctx.body = `Dar for "${darId}" id is not found`;
             return;
         }
 
-        const archiveDir = researchDarArchivePath(rc.researchId, rc.folder);
+        const archiveDir = researchDarArchivePath(rc.researchExternalId, rc.folder);
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
 
@@ -109,12 +115,12 @@ const readDarArchive = async (ctx) => {
 const readDarArchiveStaticFiles = async (ctx) => {
     const darId = ctx.params.dar;
     try {
-        const rc = await findResearchContentById(darId);
-        const archivePath = researchDarArchivePath(rc.researchId, rc.folder);
+      const rc = await researchContentService.findResearchContentById(darId);
+        const archivePath = researchDarArchivePath(rc.researchExternalId, rc.folder);
 
         const stat = util.promisify(fs.stat);
         const check = await stat(archivePath);
-        await send(ctx, researchDarArchiveFilePath(rc.researchId, rc.folder, ctx.params.file), { root: '/' });        
+        await send(ctx, researchDarArchiveFilePath(rc.researchExternalId, rc.folder, ctx.params.file), { root: '/' });        
     } catch(err) {
         console.log(err);
         ctx.status = 500;
@@ -125,7 +131,7 @@ const readDarArchiveStaticFiles = async (ctx) => {
 const getContentRefById = async (ctx) => {
     const refId = ctx.params.refId;
     try {
-        const ref = await findResearchContentById(refId);
+      const ref = await researchContentService.findResearchContentById(refId);
         ctx.status = 200;
         ctx.body = ref;
     } catch (err){
@@ -135,16 +141,16 @@ const getContentRefById = async (ctx) => {
 }
 
 const getContentRefByHash = async (ctx) => {
-    const hash = ctx.params.hash;
-    const researchId = ctx.params.researchId;
-    try {
-        const ref = await findResearchContentByHash(researchId, hash);
-        ctx.status = 200;
-        ctx.body = ref;
-    } catch (err){
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
+  const hash = ctx.params.hash;
+  const researchExternalId = ctx.params.researchExternalId;
+  try {
+    const ref = await researchContentService.findResearchContentByHash(researchExternalId, hash);
+    ctx.status = 200;
+    ctx.body = ref;
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
 }
 
 // ############ Write actions ############
@@ -163,7 +169,7 @@ const updateDarArchive = async (ctx) => {
     });
 
     try {
-        const rc = await findResearchContentById(darId);
+      const rc = await researchContentService.findResearchContentById(darId);
         if (!rc || rc.status != 'in-progress') {
             ctx.status = 405;
             ctx.body = `Research "${darId}" is locked for updates or does not exist`;
@@ -183,14 +189,14 @@ const updateDarArchive = async (ctx) => {
             return;
         }
 
-        const proposal = await lookupContentProposal(rc.researchGroupId, rc.hash, rc.type)
-        if (proposal && proposalIsNotExpired(proposal)) {
+        const proposal = await researchContentService.lookupContentProposal(rc.researchGroupExternalId, rc.hash)
+        if (proposal && researchContentService.proposalIsNotExpired(proposal)) {
             ctx.status = 405;
             ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be modified`
             return;
         }
 
-        const archiveDir = researchDarArchivePath(rc.researchId, rc.folder);
+        const archiveDir = researchDarArchivePath(rc.researchExternalId, rc.folder);
         const stat = util.promisify(fs.stat);
         const check = await stat(archiveDir);
         const archive = JSON.parse(result.formData.fields._archive)
@@ -209,7 +215,7 @@ const updateDarArchive = async (ctx) => {
           versioning: opts.versioning
         })
 
-        await updateDraftMetaAsync(darId, archive, rc.folder);
+        await updateDraftMetaAsync(darId, archive);
         ctx.status = 200;
         ctx.body = version;
 
@@ -226,7 +232,7 @@ const unlockContentDraft = async (ctx) => {
     const refId = ctx.params.refId;
     
     try {
-        const rc = await findResearchContentById(refId);
+      const rc = await researchContentService.findResearchContentById(refId);
         if (!rc || (rc.status != 'proposed' && rc.status != 'completed')) {
             ctx.status = 405;
             ctx.body = `Proposed "${refId}" content archive is not found`;
@@ -242,8 +248,8 @@ const unlockContentDraft = async (ctx) => {
 
         // if there is a proposal for this content (no matter it is approved or still in voting progress)
         // we must respond with an error as blockchain hashed data should not be modified
-        const proposal = await lookupContentProposal(rc.researchGroupId, rc.hash, rc.type)
-        if (proposal && proposalIsNotExpired(proposal)) {
+        const proposal = await researchContentService.lookupContentProposal(rc.researchGroupExternalId, rc.hash)
+        if (proposal && researchContentService.proposalIsNotExpired(proposal)) {
             ctx.status = 405;
             ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be modified`;
             return;
@@ -276,48 +282,62 @@ const unlockContentDraft = async (ctx) => {
 
 const createDarArchive = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
-    const researchId = parseInt(ctx.params.researchId);
+    const researchExternalId = ctx.params.researchExternalId;
 
-    if (isNaN(researchId)) {
+    if (!researchExternalId) {
         ctx.status = 400;
-        ctx.body = `"${researchId}" is invalid research id`;
+        ctx.body = `"${researchExternalId}" is invalid research id`;
         return;
     }
 
     try {
-        const research = await deipRpc.api.getResearchByIdAsync(researchId);
-        const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername)
-        if (!authorized) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
-            return;
-        }
+      const research = await deipRpc.api.getResearchAsync(researchExternalId);
+      const researchInternalId = research.id;
 
-        const now = new Date().getTime();
-        const darPath = researchDarArchivePath(researchId, `dar_${now}`);
-        await cloneArchive(blankDarPath, darPath);
-        const rc = new ResearchContent({
-            "_id": `${researchId}_dar_${now}`,
-            "folder": `dar_${now}`,
-            "researchId": researchId,
-            "researchGroupId": research.research_group_id,
-            "type": "dar",
-            "status": "in-progress",
-            "authors": [],
-            "references": [],
-            "externalReferences": []
-        });
-    
-        const savedDraft = await rc.save();
-        ctx.status = 200;
-        ctx.body = {
-            draft: savedDraft
-        };
+      const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
+      const researchGroupInternalId = authorizedGroup.id;
+      const researchGroupExternalId = authorizedGroup.external_id;
+
+      if (!authorizedGroup) {
+          ctx.status = 401;
+          ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupInternalId}" research`;
+          return;
+      }
+      // const externalId = `draft-${researchExternalId}-${now}`;
+      const now = new Date().getTime();
+      const externalId = `draft-${researchExternalId}-${now}`;
+      const darPath = researchDarArchivePath(researchExternalId, externalId);
+      await cloneArchive(blankDarPath, darPath);
+
+      const folder = externalId;
+      const researchContentRm = await researchContentService.upsertResearchContent({
+        externalId,
+        researchExternalId,
+        researchGroupExternalId,
+        folder: folder,
+        researchId: researchInternalId, // legacy internal id
+        researchGroupId: researchGroupInternalId, // legacy internal id
+        title: folder,
+        permlink: "",
+        hash: "",
+        algo: "",
+        type: "dar",
+        status: "in-progress",
+        packageFiles: [],
+        authors: [],
+        references: [],
+        foreignReferences: []
+      });
+        
+      ctx.status = 200;
+      ctx.body = {
+        draft: researchContentRm
+      };
     
     } catch (err) {
         console.log(err);
         ctx.status = 500;
-        ctx.body = err.message;
+        ctx.body = err;
     }
 }
 
@@ -326,7 +346,7 @@ const deleteContentDraft = async (ctx) => {
     const refId = ctx.params.refId;
 
     try {
-        const rc = await findResearchContentById(refId);
+      const rc = await researchContentService.findResearchContentById(refId);
         if (!rc) {
             ctx.status = 404;
             ctx.body = `Dar for "${refId}" id is not found`;
@@ -342,8 +362,8 @@ const deleteContentDraft = async (ctx) => {
 
         // if there is a proposal for this content (no matter is it approved or still in voting progress)
         // we must respond with an error as blockchain hashed data should not be modified
-        const proposal = await lookupContentProposal(rc.researchGroupId, rc.hash, rc.type)
-        if (proposal && proposalIsNotExpired(proposal)) {
+        const proposal = await researchContentService.lookupContentProposal(rc.researchGroupExternalId, rc.hash)
+        if (proposal && researchContentService.proposalIsNotExpired(proposal)) {
             ctx.status = 405;
             ctx.body = `Content with hash ${rc.hash} has been proposed already and cannot be deleted`;
             return;
@@ -354,18 +374,19 @@ const deleteContentDraft = async (ctx) => {
         if (rc.type === 'dar') {
             await fsExtra.remove(path.join(storagePath, rc.folder));
         } else if (rc.type === 'file') {
-            await unlink(researchFileContentPath(rc.researchId, rc.folder));
+            await unlink(researchFileContentPath(rc.researchExternalId, rc.folder));
         } else if (rc.type === 'package') {
-            await fsExtra.remove(researchFilesPackagePath(rc.researchId, rc.hash));
+            await fsExtra.remove(researchFilesPackagePath(rc.researchExternalId, rc.hash));
         }
 
-        await ResearchContent.remove({ _id: refId });
+        await researchContentService.removeResearchContentById(refId);
         ctx.status = 201;
+        ctx.body = "";
 
     } catch (err) {
         console.log(err);
         ctx.status = 500;
-        ctx.body = err.message;
+        ctx.body = err;
     }
 }
 
@@ -396,7 +417,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
     })
 
     const { title, authors, references } = await parseDraftMetaAsync();
-    const rc = await ResearchContent.findOne({ '_id': researchContentId })
+    const rc = await researchContentService.findResearchContentById(researchContentId);
 
     const accounts = [];
     for (let i = 0; i < authors.length; i++) {
@@ -410,9 +431,10 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
     const contentRefs = [];
     for (let i = 0; i < references.length; i++) {
         const ref = references[i];
-        const contentRef = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(ref.researchGroupPermlink, ref.researchPermlink, ref.researchContentPermlink);
-        if (contentRef.research_id != rc.researchId) {
-            contentRefs.push(contentRef.id);
+        const content = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(ref.researchGroupPermlink, ref.researchPermlink, ref.researchContentPermlink);
+        if (content.research_external_id != rc.researchExternalId) {
+            // exclude references to the same research
+            contentRefs.push(content.external_id);
         }
     }
 
@@ -422,7 +444,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
     
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
 
-    const archiveDir = researchDarArchivePath(rc.researchId, rc.folder);
+    const archiveDir = researchDarArchivePath(rc.researchExternalId, rc.folder);
     const hashObj = await hashElement(archiveDir, options);
     console.log(hashObj);
     const hashes = hashObj.children.map(f => f.hash);
@@ -472,30 +494,37 @@ const parseInternalReferences = (refList) => {
 
 const uploadBulkResearchContent = async(ctx) => {
     const jwtUsername = ctx.state.user.username;
-    const researchId = ctx.request.header['research-id'];
-    const internalReferencesStr = ctx.request.header['internal-refs'];
-
-    if (!researchId || isNaN(parseInt(researchId))) {
-        ctx.status = 400;
-        ctx.body = { error: `"Research-Id" header is required` };
-        return;
-    }
-
-    const stat = util.promisify(fs.stat);
-    const ensureDir = util.promisify(fsExtra.ensureDir);
+    const researchExternalId = ctx.request.header['research-external-id'];
+    const referencesStr = ctx.request.header['research-content-references'];
+    const uploadSession = ctx.request.header['upload-session'];
 
     try {
-        const researchFilesTempStorage = researchFilesTempStoragePath(ctx.request.header['research-id'], ctx.request.header['upload-session'])
-        await ensureDir(researchFilesTempStorage);
-        
-        const research = await deipRpc.api.getResearchByIdAsync(researchId);
-        const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername)
-        if (!authorized) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
+
+        if (!researchExternalId) {
+            ctx.status = 400;
+            ctx.body = { error: `"research-external-id" header is required` };
             return;
         }
-    
+
+        const stat = util.promisify(fs.stat);
+        const ensureDir = util.promisify(fsExtra.ensureDir);
+
+        const research = await deipRpc.api.getResearchAsync(researchExternalId);
+        const researchInternalId = research.id;
+
+        const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
+        if (!authorizedGroup) {
+          ctx.status = 401;
+          ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
+          return;
+        }
+
+        const researchGroupInternalId = authorizedGroup.id;
+        const researchGroupExternalId = authorizedGroup.external_id;
+
+        const researchFilesTempStorage = researchFilesTempStoragePath(researchExternalId, uploadSession)
+        await ensureDir(researchFilesTempStorage);
+        
         const researchContent = bulkResearchContentUploader.any();
         const tempDestinationPath = await researchContent(ctx, () => new Promise((resolve, reject) => {
             if (!ctx.req.files[0] || !ctx.req.files[0].destination) {
@@ -521,8 +550,8 @@ const uploadBulkResearchContent = async(ctx) => {
         const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
 
         var exists = false;
-        const rc = await findResearchContentByHash(researchId, packageHash);
-        const packagePath = researchFilesPackagePath(researchId, packageHash);
+        const rc = await researchContentService.findResearchContentByHash(researchExternalId, packageHash);
+        const packagePath = researchFilesPackagePath(researchExternalId, packageHash);
 
         if (rc) {
             try {
@@ -534,10 +563,12 @@ const uploadBulkResearchContent = async(ctx) => {
         }
         
         if (exists) {
+
             console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
             rimraf(tempDestinationPath, function () { console.log(`${tempDestinationPath} removed`); });
             ctx.status = 200;
-            ctx.body = rc;
+            ctx.body = { rm: rc };
+
         } else {
 
             await fsExtra.move(tempDestinationPath, packagePath, { overwrite: true });
@@ -546,30 +577,33 @@ const uploadBulkResearchContent = async(ctx) => {
                 rc.folder = packageHash;
                 const updatedRc = await rc.save();
                 ctx.status = 200;
-                ctx.body = updatedRc;
+                ctx.body = { rm: updatedRc };
             } else {
 
-                const _id = `${researchId}_package_${packageHash}`;
-                const rc = new ResearchContent({
-                    "_id": _id,
-                    "folder": packageHash,
-                    "title": `${packageHash}`,
-                    "researchId": researchId,
-                    "researchGroupId": research.research_group_id,
-                    "hash": packageHash,
-                    "algo": "sha256",
-                    "type": 'package',
-                    "status": "in-progress",
-                    "authors": [jwtUsername],
-                    "packageFiles": hashObj.children.map((f) => {
-                        return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
-                    }),
-                    "references": internalReferencesStr ? internalReferencesStr.split(",").map(refId => parseInt(refId)) : [],
-                    "externalReferences": []
+                const externalId = `draft-${researchExternalId}-${packageHash}`;
+                const researchContentRm = await researchContentService.upsertResearchContent({
+                  externalId,
+                  researchExternalId,
+                  researchGroupExternalId: researchGroupExternalId,
+                  folder: packageHash,
+                  researchId: researchInternalId, // legacy internal id
+                  researchGroupId: researchGroupInternalId, // legacy internal id
+                  title: packageHash,
+                  permlink: packageHash,
+                  hash: packageHash,
+                  algo: "sha256",
+                  type: "package",
+                  status: "in-progress",
+                  "packageFiles": hashObj.children.map((f) => {
+                    return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
+                  }),
+                  authors: [jwtUsername],
+                  references: referencesStr ? referencesStr.split(",") : [],
+                  foreignReferences: []
                 });
-                const savedRc = await rc.save();
+
                 ctx.status = 200;
-                ctx.body = savedRc;
+                ctx.body = { rm: researchContentRm };
             }
         }
 
@@ -582,22 +616,22 @@ const uploadBulkResearchContent = async(ctx) => {
 
 const getResearchPackageFile = async function(ctx) {
     const hash = ctx.params.hash;
-    const researchId = ctx.params.researchId;
+    const researchExternalId = ctx.params.researchExternalId;
     const fileHash = ctx.params.fileHash;
     const isDownload = ctx.query.download === 'true';
     const jwtUsername = ctx.state.user.username;
 
-    const research = await deipRpc.api.getResearchByIdAsync(researchId);
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
     if (research.is_private) {
-      const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername)
-      if (!authorized) {
+      const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
+      if (!authorizedGroup) {
         ctx.status = 401;
         ctx.body = `"${jwtUsername}" is not permitted to get "${researchId}" research content`;
         return;
       }
     }
 
-    const rc = await findResearchContentByHash(researchId, hash);
+    const rc = await researchContentService.findResearchContentByHash(researchExternalId, hash);
     if (rc == null) {
         ctx.status = 404;
         ctx.body = `Package "${hash}" is not found`
@@ -615,11 +649,118 @@ const getResearchPackageFile = async function(ctx) {
         let ext = file.filename.substr(file.filename.lastIndexOf('.') + 1);
         let name = file.filename.substr(0, file.filename.lastIndexOf('.'));
         ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
-        ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchId, rc.hash, file.filename));
+        ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchExternalId, rc.hash, file.filename));
     } else {
-        await send(ctx, researchFilesPackageFilePath(rc.researchId, rc.hash, file.filename), { root: '/' });
+        await send(ctx, researchFilesPackageFilePath(rc.researchExternalId, rc.hash, file.filename), { root: '/' });
     }
 }
+
+
+const createResearchContent = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta, isProposal } = ctx.request.body;
+
+  try {
+    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+    const payload = operation[1];
+    const {
+      content: hash,
+      research_group: researchGroupAccount
+    } = payload;
+    
+    // TODO: remove this
+
+    if (!hash) {
+      ctx.status = 400;
+      ctx.body = `Mallformed operation: "${operation}"`;
+      return;
+    }
+
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
+    const researchGroupInternalId = authorizedGroup.id;
+    if (!authorizedGroup) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
+      return;
+    }
+
+    const {
+      title,
+      external_id: externalId,
+      permlink,
+      research_external_id: researchExternalId,
+      research_group: researchGroupExternalId,
+      authors,
+      foreignReferences
+    } = payload;
+
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const researchInternalId = research.id;
+    const rc = await researchContentService.findResearchContentByHash(researchExternalId, hash);
+    if (!rc) {
+      ctx.status = 400;
+      ctx.body = `Research content draft with hash "${hash}" does not exist`
+      return;
+    }
+
+    if (rc.status != 'in-progress') {
+      ctx.status = 409;
+      ctx.body = `Research content "${rc.permlink}" has '${rc.status}' status`
+      return;
+    }
+
+    const status = "proposed";
+    const folder = rc.folder;
+    const packageFiles = rc.packageFiles;
+    const references = rc.references;
+    const algo = rc.algo;
+    const type = rc.type;
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    await researchContentService.removeResearchContentByHash(researchExternalId, hash); // remove draft
+    const researchContentRm = await researchContentService.upsertResearchContent({
+      externalId,
+      researchExternalId,
+      researchGroupExternalId,
+      folder,
+      researchId: researchInternalId, // legacy internal id
+      researchGroupId: researchGroupInternalId, // legacy internal id
+      title, 
+      permlink,
+      hash,
+      algo,
+      type,
+      status,
+      packageFiles,
+      authors,
+      references,
+      foreignReferences
+    });
+
+
+    // LEGACY >>>
+    const parsedProposal = {
+      research_group_id: researchGroupInternalId,
+      action: deipRpc.formatter.getOperationTag("create_research_content"), 
+      creator: jwtUsername,
+      data: { permlink, title, research_id: researchInternalId },
+      isProposalAutoAccepted: !isProposal
+    };
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+    // <<< LEGACY
+
+    ctx.status = 200;
+    ctx.body = { rm: researchContentRm, txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 
 export default {
     // dar
@@ -640,5 +781,7 @@ export default {
 
     // drafts
     deleteContentDraft,
-    unlockContentDraft
+    unlockContentDraft,
+
+    createResearchContent
 }

@@ -12,7 +12,7 @@ const config = require('./../config');
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
 const researchService = require('./../services/research').default;
-const deipRpc = require('@deip/deip-oa-rpc-client');
+const deipRpc = require('@deip/rpc-client');
 
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
 deipRpc.config.set('chain_id', config.blockchain.chainId);
@@ -28,7 +28,7 @@ const run = async () => {
     })
     
     return researchService.upsertResearch({
-      researchGroupId: research.research_group_id,
+      researchGroupInternalId: research.research_group_id,
       permlink: research.permlink,
       milestones: milestones,
       videoSrc: info.videoSrc || "",

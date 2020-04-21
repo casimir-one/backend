@@ -2,7 +2,7 @@ import fs from 'fs'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util';
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
 import { hashElement } from 'folder-hash';
 import send from 'koa-send';

@@ -14,10 +14,16 @@ import koa_bodyparser from "koa-bodyparser";
 import cors from '@koa/cors';
 import config from './config';
 import mongoose from 'mongoose';
+// import { AppConfigService } from '@deip/app-config-service';
+import deipRpc from '@deip/rpc-client';
 
-import deipRpc from '@deip/deip-oa-rpc-client';
-deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
-deipRpc.config.set('chain_id', config.blockchain.chainId);
+// AppConfigService.getInstance().init({ env: process.env });
+
+// const env = AppConfigService.getInstance().get('env');
+
+deipRpc.api.setOptions({ url: process.env.DEIP_FULL_NODE_URL, reconnectTimeout: 3000 });
+deipRpc.config.set('chain_id', process.env.CHAIN_ID);
+
 
 const app = new Koa();
 const router = koa_router();

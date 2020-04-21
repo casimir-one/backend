@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import PROPOSAL_TYPE from './../constants/proposalType';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import TOKEN_SALE_STATUS from './../constants/tokenSaleStatus';
@@ -13,15 +13,14 @@ const researchGroupActivityLogHandler = new ResearchGroupActivityLogHandler();
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) => {
   const type = ACTIVITY_LOG_TYPE.PROPOSAL;
-  let { research_group_id: researchGroupId, action, creator, data } = proposal;
+  let { research_group_id: researchGroupId, action, creator, data, isProposalAutoAccepted } = proposal;
   let payload = data;
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let creatorProfile = await usersService.findUserProfileByOwner(creator);
-  let isProposalAutoAccepted = researchGroup.is_dao === false;
 
   switch (action) {
 
-    case PROPOSAL_TYPE.START_RESEARCH: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH: {
       let { permlink } = payload;
       let research = null;
 
@@ -69,7 +68,7 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) 
       break;
     }
 
-    case PROPOSAL_TYPE.START_RESEARCH_TOKEN_SALE: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;
       let research = await deipRpc.api.getResearchByIdAsync(research_id);
       let tokenSale = null;
@@ -130,7 +129,7 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, async (p
 
   switch (action) {
 
-    case PROPOSAL_TYPE.START_RESEARCH: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH: {
       let { permlink } = payload;
       let research = await deipRpc.api.getResearchByAbsolutePermlinkAsync(researchGroup.permlink, permlink);
 
@@ -168,7 +167,7 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, async (p
       break;
     }
 
-    case PROPOSAL_TYPE.START_RESEARCH_TOKEN_SALE: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;
       let research = await deipRpc.api.getResearchByIdAsync(research_id);
       let list = await deipRpc.api.getResearchTokenSalesByResearchIdAsync(research_id);
@@ -222,7 +221,7 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_VOTE, async ({ vot
   let research = null;
   let inviteeProfile = null;
   
-  if (action == PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL || action == PROPOSAL_TYPE.START_RESEARCH_TOKEN_SALE) {
+  if (action == PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL || action == PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE) {
     research = await deipRpc.api.getResearchByIdAsync(data.research_id);
   }
 

@@ -1,5 +1,5 @@
 import InvestmentPortfolio from './../schemas/investmentPortfolio';
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 
 async function findInvestmentPortfolioByOwner(_id) {
   const investmentPortfolio = await InvestmentPortfolio.findOne({ _id })

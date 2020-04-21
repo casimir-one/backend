@@ -1,38 +1,52 @@
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 
-async function findResearchByPermlink({ researchGroupId, permlink }) {
-  let research = await Research.findOne({
-    researchGroupId: researchGroupId,
-    permlink: permlink
-  });
+async function findResearchByPermlink({ permlink }) {
+  let research = await Research.findOne({ permlink: permlink });
+  return research;
+}
+
+async function findResearchById(externalId) {
+  let research = await Research.findOne({ _id: externalId });
+  return research;
+}
+
+async function removeResearchByPermlink(permlink) {
+  let research = await Research.deleteOne({ permlink });
   return research;
 }
 
 async function upsertResearch({
-  researchGroupId, 
+  externalId,
+  researchGroupExternalId,
   permlink, 
   milestones,
   videoSrc, 
   partners, 
-  trl
+  trl,
+  researchGroupInternalId
 }) {
 
-  let research = await findResearchByPermlink({ researchGroupId, permlink })
+  let research = await findResearchById(externalId);
 
   if (research) {
+    research.researchGroupExternalId = researchGroupExternalId;
+    research.permlink = permlink;
     research.milestones = milestones;
     research.videoSrc = videoSrc;
     research.partners = partners;
     research.trl = trl;
+    research.researchGroupId = researchGroupInternalId; // legacy internal id
   } else {
     research = new Research({
-      researchGroupId, 
+      _id: externalId,
+      researchGroupExternalId,
       permlink, 
       milestones,
       videoSrc, 
       partners, 
-      trl
+      trl,
+      researchGroupId: researchGroupInternalId, // legacy internal id
     })
   }
 
@@ -50,7 +64,9 @@ async function lookupResearchProposal(groupId, permlink) {
 }
 
 export default {
+  findResearchById,
   findResearchByPermlink,
+  removeResearchByPermlink,
   upsertResearch,
   lookupResearchProposal
 }

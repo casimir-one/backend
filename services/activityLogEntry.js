@@ -1,5 +1,5 @@
 import ActivityLogEntry from './../schemas/activityLogEntry';
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 
 async function findActivityLogsEntriesByResearchGroup(rgId) {
   let activityLogs = await ActivityLogEntry.find({ researchGroupId: rgId });

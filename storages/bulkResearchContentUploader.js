@@ -4,6 +4,7 @@ import path from 'path'
 import util from 'util';
 import multer from 'koa-multer';
 import config from './../config';
+import deipRpc from '@deip/rpc-client';
 
 const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
@@ -11,8 +12,8 @@ const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const researchFilesTempStoragePath = (researchId, postfix) => `${storagePath}/research-projects/${researchId}/temp-${postfix}`
 const bulkResearchContentStorage = multer.diskStorage({
     destination: async function(req, file, callback) {
-        const researchFilesTempStorage = researchFilesTempStoragePath(req.headers['research-id'], req.headers['upload-session'])
-        callback(null, researchFilesTempStorage);
+      const researchFilesTempStorage = researchFilesTempStoragePath(req.headers['research-external-id'], req.headers['upload-session'])
+      callback(null, researchFilesTempStorage);
     },
     filename: function(req, file, callback) {
         callback(null, file.originalname);

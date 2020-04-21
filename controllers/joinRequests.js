@@ -1,5 +1,5 @@
 import JoinRequest from './../schemas/joinRequest'
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 
 const getJoinRequestsByGroup = async (ctx) => {
     const groupId = parseInt(ctx.params.groupId);

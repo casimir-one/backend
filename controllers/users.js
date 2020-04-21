@@ -9,6 +9,7 @@ import UserBookmark from './../schemas/userBookmark';
 import UserProfile from './../schemas/user';
 import qs from 'qs';
 import usersService from './../services/users';
+import * as blockchainService from './../utils/blockchain';
 
 const getUserProfile = async (ctx) => {
   try {
@@ -123,9 +124,36 @@ const updateUserProfile = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
+
+const updateUserAccount = async (ctx) => {
+  const { tx } = ctx.request.body;
+  const username = ctx.params.username;
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+
+    if (username != jwtUsername) {
+      ctx.status = 403;
+      ctx.body = `You have no permission to edit '${username}' account`
+      return;
+    }
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    ctx.status = 200;
+    ctx.body = { txResult };
+
+    ctx.status = 200;
+    ctx.body = {}
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 
 const getUserBookmarks = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -389,6 +417,7 @@ export default {
   getUsersProfiles,
   createUserProfile,
   updateUserProfile,
+  updateUserAccount,
 
   getUserBookmarks,
   addUserBookmark,

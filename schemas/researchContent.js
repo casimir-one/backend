@@ -5,10 +5,13 @@ const Schema = mongoose.Schema;
 
 const ResearchContent = new Schema({
     "_id": { type: String },
+    "researchExternalId": { type: String, required: true },
+    "researchGroupExternalId": { type: String, required: true },
     "folder": { type: String, required: true },
-    "researchId": { type: Number, required: true },
-    "researchGroupId": { type: Number, required: true },
+    "researchId": { type: Number, required: true }, // legacy internal id
+    "researchGroupId": { type: Number, required: true }, // legacy internal id
     "title": { type: String },
+    "permlink": { type: String },
     "hash": {type: String, index: true },
     "algo": { type: String },
     "type": {
@@ -28,8 +31,8 @@ const ResearchContent = new Schema({
         "ext": { type: String, required: true },
     }],
     "authors": [{ type: String }],
-    "references": [{ type: Number }],
-    "externalReferences": [{ type: String }],
+    "references": [{ type: String }],
+    "foreignReferences": [{ type: String }],
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research-content', ResearchContent);

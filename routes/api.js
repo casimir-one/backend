@@ -19,6 +19,7 @@ router.post('/user/upload-avatar', users.uploadAvatar)
 router.get('/user/profile/:username', users.getUserProfile)
 router.get('/user/profiles', users.getUsersProfiles)
 router.post('/user/profile/:username', users.createUserProfile)
+router.put('/user/account/:username', users.updateUserAccount)
 router.put('/user/profile/:username', users.updateUserProfile)
 router.get('/user/avatar/:username', users.getAvatar);
 
@@ -49,27 +50,35 @@ router.get('/notifications/user/:username', notifications.getNotificationsByUser
 router.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
 router.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
 
+router.post('/proposals', proposals.createProposal)
+router.put('/proposals', proposals.updateProposal)
+router.delete('/proposals', proposals.deleteProposal)
 router.post('/proposals/vote', proposals.voteForProposal)
-router.post('/proposals/research', proposals.createResearchProposal)
-router.post('/proposals/content/:type', proposals.createContentProposal)
 router.post('/proposals/invite', proposals.createInviteProposal)
 router.post('/proposals/exclude', proposals.createExcludeProposal)
 router.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
 router.post('/groups', researchGroups.createResearchGroup)
+router.put('/groups', researchGroups.updateResearchGroup)
 router.get('/groups/activity-log/:researchGroupId', researchGroups.getResearchGroupActivityLogs)
 router.get('/groups/logo/:researchGroupId', researchGroups.getLogo)
 router.post('/groups/logo', researchGroups.uploadLogo)
+router.post('/groups/invite', researchGroups.inviteToResearchGroup)
+router.post('/groups/left', researchGroups.leftResearchGroup)
 
 router.post('/invites/approve', invites.approveInvite)
 router.post('/invites/reject', invites.rejectInvite)
 
 router.post('/reviews', reviews.makeReview)
 
-router.get('/research/background/:researchId', research.getBackground)
-router.post('/research/background', research.uploadBackground)
+router.post('/research', research.createResearch)
+router.put('/research', research.updateResearch)
+router.put('/research/meta/:researchExternalId', research.updateResearchMeta)
 router.get('/research/:researchId', research.getResearch)
-router.put('/research/:researchId', research.updateResearch)
+router.get('/research/background/:researchExternalId', research.getBackground)
+router.post('/research/background', research.uploadBackground)
+router.post('/research/token-sale', research.createResearchTokenSale)
+router.post('/research/token-sale/contribution', research.createResearchTokenSaleContribution)
 
 router.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 router.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

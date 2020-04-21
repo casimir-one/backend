@@ -4,7 +4,9 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const Research = new Schema({
-  "researchGroupId": { type: Number, required: true },
+  "_id": { type: String, required: true },
+  "researchGroupExternalId": { type: String, required: true },
+  "researchGroupId": { type: Number, required: true }, // legacy internal id
   "permlink": { type: String, required: true },
   "milestones": [{
     "_id": false,

@@ -3,7 +3,7 @@ import ReviewRequest from './../schemas/reviewRequest';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import USER_NOTIFICATION_TYPE from '../constants/userNotificationType';
 
 const makeReview = async (ctx) => {

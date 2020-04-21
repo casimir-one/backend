@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import PROPOSAL_TYPE from './../constants/proposalType';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 import TOKEN_SALE_STATUS from './../constants/tokenSaleStatus';
@@ -13,19 +13,18 @@ const userNotificationHandler = new UserNotificationHandler();
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => {
   const type = USER_NOTIFICATION_TYPE.PROPOSAL;
-  let { research_group_id: researchGroupId, action, creator, data } = proposal;
+  let { research_group_id: researchGroupId, action, creator, data, isProposalAutoAccepted } = proposal;
   let payload = data;
 
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
   let creatorProfile = await usersService.findUserProfileByOwner(creator);
-  let isProposalAutoAccepted = researchGroup.is_dao === false;
   
   let notificationsPromises = [];
 
   switch (action) {
 
-    case PROPOSAL_TYPE.START_RESEARCH: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH: {
 
       let { permlink } = payload;
       let research = null;
@@ -84,7 +83,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
       break;
     }
 
-    case PROPOSAL_TYPE.START_RESEARCH_TOKEN_SALE: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;
       let research = await deipRpc.api.getResearchByIdAsync(research_id);
       let tokenSale = null;
@@ -144,7 +143,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
       break;
     }
 
-    case PROPOSAL_TYPE.DROPOUT_MEMBER: {
+    case PROPOSAL_TYPE.EXCLUDE_MEMBER: {
       let { name } = payload;
       let excludedProfile = await usersService.findUserProfileByOwner(name);
 
@@ -173,7 +172,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
       break;
     }
 
-    case PROPOSAL_TYPE.CHANGE_RESEARCH_META_DATA_TYPE: {
+    case PROPOSAL_TYPE.UPDATE_RESEARCH: {
       let { permlink, research_id } = payload;
       let research = await deipRpc.api.getResearchByIdAsync(research_id);
       let researchContent = null;
@@ -194,6 +193,27 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
             researchGroup,
             research,
             researchContent,
+            creatorProfile
+          }
+        });
+        notificationsPromises.push(promise);
+      }
+
+      break;
+    }
+
+    case PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP: {
+
+      for (let i = 0; i < rgtList.length; i++) {
+        let rgt = rgtList[i];
+        let promise = usersNotificationService.createUserNotification({
+          username: rgt.owner,
+          status: 'unread',
+          type,
+          metadata: {
+            isProposalAutoAccepted,
+            proposal,
+            researchGroup,
             creatorProfile
           }
         });
@@ -226,7 +246,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
 
   switch (action) {
 
-    case PROPOSAL_TYPE.START_RESEARCH: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH: {
       let { permlink } = payload;
       let research = await deipRpc.api.getResearchByAbsolutePermlinkAsync(researchGroup.permlink, permlink);
 
@@ -274,7 +294,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
       break;
     }
 
-    case PROPOSAL_TYPE.START_RESEARCH_TOKEN_SALE: {
+    case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;
       let research = await deipRpc.api.getResearchByIdAsync(research_id);
       let list = await deipRpc.api.getResearchTokenSalesByResearchIdAsync(research_id);
@@ -326,7 +346,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
       break;
     }
 
-    case PROPOSAL_TYPE.DROPOUT_MEMBER: {
+    case PROPOSAL_TYPE.EXCLUDE_MEMBER: {
       let { name } = payload;
       let excludedProfile = await usersService.findUserProfileByOwner(name);
 

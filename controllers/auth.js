@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import config from './../config';
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
@@ -85,13 +85,7 @@ const signUp = async function (ctx) {
       key_auths: [[pubKey, 1]]
     };
 
-    const result = await createAccount(username, pubKey, owner);
-    if (!result.isSuccess) {
-      ctx.status = 500;
-      ctx.body = result.result;
-      return;
-    }
-
+    const txResult = await createAccountAsync(username, pubKey, owner);
     let profile = await usersService.findUserProfileByOwner(username);
     if (!profile) {
       profile = await usersService.createUserProfile({ username, email, firstName, lastName });
@@ -108,39 +102,30 @@ const signUp = async function (ctx) {
 }
 
 
-async function createAccount(username, pubKey, owner) {
+async function createAccountAsync(username, pubKey, owner) {
   const accountsCreator = config.blockchain.accountsCreator;
+  const chainConfig = await deipRpc.api.getConfigAsync();
+  const chainProps = await deipRpc.api.getChainPropertiesAsync();
+  // const ratio = chainConfig['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
+  // var fee = Asset.from(chainProps.account_creation_fee).multiply(ratio);
+  const jsonMetadata = '';
+  const traits = [];
+  const extensions = [];
 
-  let promise = new Promise((resolve) => {
-    deipRpc.api.getConfig((err, chainConfig) => {
-      if (err) {
-        console.log(err, chainConfig);
-        resolve({ isSuccess: false, result: err })
-      }
+  let txResult = await deipRpc.broadcast.createAccountAsync(
+    accountsCreator.wif,
+    accountsCreator.fee,
+    accountsCreator.username,
+    username,
+    owner,
+    owner,
+    owner,
+    pubKey,
+    jsonMetadata,
+    traits,
+    extensions);
 
-      deipRpc.api.getChainProperties((err, chainProps) => {
-        if (err) {
-          console.log(err, chainProps);
-          resolve({ isSuccess: false, result: err })
-        }
-
-        // const ratio = chainConfig['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
-        // var fee = Asset.from(chainProps.account_creation_fee).multiply(ratio);
-        const jsonMetadata = '';
-        deipRpc.broadcast.accountCreate(accountsCreator.wif, accountsCreator.fee,
-          accountsCreator.username, username, owner, owner, owner,
-          pubKey, jsonMetadata, (err, result) => {
-
-            if (err) {
-              console.log(err, chainProps);
-              resolve({ isSuccess: false, result: err })
-            }
-            resolve({ isSuccess: true, result: result })
-          });
-      });
-    });
-  });
-  return await promise;
+  return txResult
 }
 
 

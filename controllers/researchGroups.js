@@ -1,4 +1,4 @@
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import multer from 'koa-multer';
 import fs from 'fs';
 import fsExtra from 'fs-extra'
@@ -6,34 +6,171 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
-import { authorizeResearchGroup } from './../services/auth';
+import * as authService from './../services/auth';
+import * as blockchainService from './../utils/blockchain';
+import researchGroupsService from './../services/researchGroup';
+import researchGroupInvitesService from './../services/researchGroupInvites';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import activityLogEntriesService from './../services/activityLogEntry';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
+import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+
 
 const createResearchGroup = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const tx = ctx.request.body;
-  const operation = tx['operations'][0];
-  const payload = operation[1];
+  const { tx, offchainMeta } = ctx.request.body;
 
   try {
+    const operation = tx['operations'][0];
+    const payload = operation[1];
 
-    const result = await sendTransaction(tx);
-    if (result.isSuccess) {
-      processNewGroupTx(payload, result.txInfo)
-      ctx.status = 201;
-    } else {
-      throw new Error(`Could not proceed the transaction: ${tx}`);
-    }
+    const { 
+      new_account_name: researchGroupAccount, 
+      creator 
+    } = payload
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const researchGroupRm = await researchGroupsService.upsertResearchGroup({ 
+      externalId: researchGroupAccount, 
+      creator 
+    });
+
+    // processNewGroupTx(payload, result.txInfo)
+    ctx.status = 200;
+    ctx.body = { rm: researchGroupRm, txResult };
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
+
+
+const updateResearchGroup = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta, isProposal } = ctx.request.body;
+
+  try {
+
+    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+    const payload = operation[1];
+
+    const {
+      account: researchGroupAccount
+    } = payload;
+
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
+    if (!authorizedGroup) {
+      ctx.status = 400;
+      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
+      return;
+    }
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    const researchGroupInternalId = authorizedGroup.id;
+
+    // LEGACY >>>
+    const parsedProposal = {
+      research_group_id: researchGroupInternalId,
+      action: deipRpc.formatter.getOperationTag("update_account"),
+      creator: jwtUsername,
+      data: {},
+      isProposalAutoAccepted: !isProposal
+    };
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+    // <<< LEGACY
+    
+    ctx.status = 200;
+    ctx.body = { txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const inviteToResearchGroup = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta, isProposal } = ctx.request.body;
+
+  try {
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const {
+      research_group: researchGroupAccount,
+      member,
+      weight
+    } = payload;
+
+    const {
+      notes,
+    } = offchainMeta;
+
+    const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupAccount);
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const researchGroupInvite = await researchGroupInvitesService.createResearchGroupInvite({
+      externalId: `${Date.now()}`,
+      member,
+      researchGroupAccount,
+      weight,
+      status: "proposed",
+      notes,
+      expiration: Date.now()
+    });
+
+
+    // LEGACY >>>
+    const parsedProposal = {
+      research_group_id: researchGroup.id,
+      action: 2,
+      creator: jwtUsername,
+      data: {
+        name: member
+      },
+      isProposalAutoAccepted: !isProposal
+    };
+
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+    // <<< LEGACY
+
+    ctx.status = 201;
+    ctx.body = { rm: researchGroupInvite, txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
+const leftResearchGroup = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta, isProposal } = ctx.request.body;
+
+  try {
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    ctx.status = 201;
+    ctx.body = { txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
 
 const getResearchGroupActivityLogs = async (ctx) => {
   let jwtUsername = ctx.state.user.username;
@@ -79,7 +216,7 @@ const researchGroupLogoUploader = multer({
 const uploadLogo = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchGroupId = ctx.request.headers['research-group-id'];
-  const authorized = await authorizeResearchGroup(researchGroupId, jwtUsername);
+  const authorized = await authService.authorizeResearchGroup(researchGroupId, jwtUsername);
 
   if (!authorized) {
     ctx.status = 401;
@@ -190,7 +327,10 @@ async function processNewGroupTx(payload, txInfo) {
 
 export default {
   createResearchGroup,
+  updateResearchGroup,
   getResearchGroupActivityLogs,
   getLogo,
-  uploadLogo
+  uploadLogo,
+  inviteToResearchGroup,
+  leftResearchGroup
 }

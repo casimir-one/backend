@@ -4,7 +4,7 @@ import userNotificationHandler from './../event-handlers/userNotification';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 
 const approveInvite = async (ctx) => {
     const jwtUsername = ctx.state.user.username;

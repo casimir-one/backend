@@ -5,10 +5,144 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
-import deipRpc from '@deip/deip-oa-rpc-client';
+import deipRpc from '@deip/rpc-client';
 import researchService from './../services/research';
+import * as blockchainService from './../utils/blockchain';
+import * as authService from './../services/auth';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
+import userNotificationHandler from './../event-handlers/userNotification';
+import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 
-import { authorizeResearchGroup } from './../services/auth';
+
+const createResearch = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta, isProposal } = ctx.request.body;
+
+  try {
+
+    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+    const payload = operation[1];
+    const researchGroupAccount = payload.research_group;
+
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
+    if (!authorizedGroup) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
+      return;
+    }
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    const {
+      permlink,
+      title,
+      external_id: externalId,
+      research_group: researchGroupExternalId
+    } = payload;
+
+    const researchGroupInternalId = authorizedGroup.id;
+
+    const researcRm = await researchService.upsertResearch({
+      externalId,
+      researchGroupExternalId,
+      researchGroupInternalId,
+      permlink,
+      title,
+      ...offchainMeta
+    });
+
+    
+    // LEGACY >>>
+    const parsedProposal = {
+      research_group_id: researchGroupInternalId,
+      action: deipRpc.formatter.getOperationTag("create_research"),
+      creator: jwtUsername,
+      data: { permlink, title },
+      isProposalAutoAccepted: !isProposal
+    };
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+    // <<< LEGACY
+
+    ctx.status = 200;
+    ctx.body = { tx, txResult, rm: researcRm };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
+
+const createResearchTokenSale = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta, isProposal } = ctx.request.body;
+
+  try {
+    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+    const payload = operation[1];
+    const researchGroupAccount = payload.research_group;
+
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
+    if (!authorizedGroup) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
+      return;
+    }
+
+    const researchExternalId = payload.research_external_id;
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+
+    const researchGroupInternalId = authorizedGroup.id;
+    const researchInternalId = research.id;
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    // LEGACY >>>
+    const parsedProposal = {
+      research_group_id: researchGroupInternalId,
+      action: deipRpc.formatter.getOperationTag("create_research_token_sale"),
+      creator: jwtUsername,
+      data: { research_id: researchInternalId },
+      isProposalAutoAccepted: !isProposal
+    };
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+    // <<< LEGACY
+
+    ctx.status = 200;
+    ctx.body = { txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const createResearchTokenSaleContribution = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, isProposal } = ctx.request.body;
+
+  try {
+    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+    const payload = operation[1];
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    ctx.status = 200;
+    ctx.body = { txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 
 const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
 const researchStoragePath = (researchId) => `${filesStoragePath}/research-projects/${researchId}`;
@@ -18,7 +152,7 @@ const defaultBackgroundImagePath = () => path.join(__dirname, `./../default/defa
 const allowedBackgroundMimeTypes = ['image/png'];
 const researchStorage = multer.diskStorage({
   destination: function (req, file, callback) {
-    const dest = researchStoragePath(`${req.headers['research-id']}`)
+    const dest = researchStoragePath(`${req.headers['research-external-id']}`)
     callback(null, dest)
   },
   filename: function (req, file, callback) {
@@ -38,13 +172,13 @@ const backgroundImageUploader = multer({
 
 const uploadBackground = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const researchId = ctx.request.headers['research-id'];
-  const research = await deipRpc.api.getResearchByIdAsync(researchId);
-  const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername);
+  const researchExternalId = ctx.request.headers['research-external-id'];
+  const research = await deipRpc.api.getResearchAsync(researchExternalId);
+  const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
 
-  if (!authorized) {
+  if (!authorizedGroup) {
     ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
+    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
     return;
   }
 
@@ -53,12 +187,12 @@ const uploadBackground = async (ctx) => {
   const ensureDir = util.promisify(fsExtra.ensureDir);
 
   try {
-    const filepath = backgroundImagePath(researchId);
+    const filepath = backgroundImagePath(researchExternalId);
 
     await stat(filepath);
     await unlink(filepath);
   } catch (err) { 
-    await ensureDir(researchStoragePath(researchId))
+    await ensureDir(researchStoragePath(researchExternalId))
   }
 
   const backgroundImage = backgroundImageUploader.single('research-background');
@@ -71,13 +205,13 @@ const uploadBackground = async (ctx) => {
 }
 
 const getBackground = async (ctx) => {
-  const researchId = ctx.params.researchId;
+  const researchExternalId = ctx.params.researchExternalId;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
   const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
 
-  let src = backgroundImagePath(researchId);
+  let src = backgroundImagePath(researchExternalId);
   const stat = util.promisify(fs.stat);
 
   try {
@@ -130,54 +264,105 @@ const getBackground = async (ctx) => {
   ctx.body = background;
 }
 
-const updateResearch = async (ctx) => {
+const updateResearchMeta = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const researchId = ctx.params.researchId;
-
-  const research = await deipRpc.api.getResearchByIdAsync(researchId);
-  const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername);
-
-  if (!authorized) {
-    ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
-    return;
-  }
-
-  const researchRm = await researchService.findResearchByPermlink({
-    researchGroupId: research.research_group_id,
-    permlink: research.permlink
-  });
-
-  if (!researchRm) {
-    ctx.status = 400;
-    ctx.body = 'Read model not found';
-    return;
-  }
+  const researchExternalId = ctx.params.researchExternalId;
 
   try {
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
+
+    if (!authorizedGroup) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
+      return;
+    }
+
+    const researchRm = await researchService.findResearchById(researchExternalId);
+
+    if (!researchRm) {
+      ctx.status = 400;
+      ctx.body = 'Read model not found';
+      return;
+    }
+
     const { milestones, videoSrc, partners, trl } = ctx.request.body;
     researchRm.milestones = milestones || researchRm.milestones;
     researchRm.videoSrc = videoSrc || researchRm.videoSrc;
     researchRm.partners = partners || researchRm.partners;
     researchRm.trl = trl || researchRm.trl;
 
+    const updatedRm = await researchRm.save();
+
     ctx.status = 200;
-    ctx.body = await researchRm.save();
+    ctx.body = { rm: updatedRm };
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 };
+
+
+const updateResearch = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, isProposal } = ctx.request.body;
+
+  try {
+    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+    const payload = operation[1];
+    const { 
+      research_group: researchGroupAccount, 
+      external_id: researchExternalId
+    } = payload;
+
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
+    if (!authorizedGroup) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
+      return;
+    }
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    const researchGroupInternalId = authorizedGroup.id;
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const { id: researchInteranlId, permlink } = research;
+
+    // LEGACY >>>
+    const parsedProposal = {
+      research_group_id: researchGroupInternalId,
+      action: deipRpc.formatter.getOperationTag("update_research"),
+      creator: jwtUsername,
+      data: { 
+        permlink, 
+        research_id: researchInteranlId 
+      },
+      isProposalAutoAccepted: !isProposal
+    };
+
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+    // <<< LEGACY
+
+    ctx.status = 201;
+    ctx.body = { txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
+
+
 
 const getResearch = async (ctx) => {
   try {
     const researchId = ctx.params.researchId;
     const research = await deipRpc.api.getResearchByIdAsync(researchId);
-    const researcRm = await researchService.findResearchByPermlink({
-      researchGroupId: research.research_group_id,
-      permlink: research.permlink
-    });
+    const researcRm = await researchService.findResearchByPermlink({ permlink: research.permlink });
 
     ctx.status = 200;
     ctx.body = researcRm;
@@ -192,5 +377,9 @@ export default {
   getBackground,
   uploadBackground,
   getResearch,
-  updateResearch
+  updateResearch,
+  updateResearchMeta,
+  createResearch,
+  createResearchTokenSale,
+  createResearchTokenSaleContribution
 }
