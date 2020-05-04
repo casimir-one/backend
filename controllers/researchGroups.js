@@ -9,7 +9,7 @@ import config from './../config'
 import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
 import researchGroupsService from './../services/researchGroup';
-import researchGroupInvitesService from './../services/researchGroupInvites';
+// import researchGroupInvitesService from './../services/researchGroupInvites';
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import activityLogEntriesService from './../services/activityLogEntry';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
@@ -115,15 +115,15 @@ const inviteToResearchGroup = async (ctx) => {
 
     const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupAccount);
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const researchGroupInvite = await researchGroupInvitesService.createResearchGroupInvite({
-      externalId: `${Date.now()}`,
-      member,
-      researchGroupAccount,
-      weight,
-      status: "proposed",
-      notes,
-      expiration: Date.now()
-    });
+    // const researchGroupInvite = await researchGroupInvitesService.createResearchGroupInvite({
+    //   externalId: `${Date.now()}`,
+    //   member,
+    //   researchGroupAccount,
+    //   weight,
+    //   status: "proposed",
+    //   notes,
+    //   expiration: Date.now()
+    // });
 
 
     // LEGACY >>>
