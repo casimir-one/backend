@@ -9,9 +9,9 @@ RUN mkdir files
 # A wildcard is used to ensure both package.json AND package-lock.json are copied
 # where available (npm@5+)
 COPY package*.json ./
-COPY .npmrc .npmrc  
+COPY .npmrc ./
 
-RUN npm install
+RUN npm install --registry=https://npm-registry.deip.world
 
 # Bundle app source
 COPY . .
