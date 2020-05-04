@@ -11,7 +11,7 @@ RUN mkdir files
 COPY package*.json ./
 COPY .npmrc ./
 
-RUN npm install --registry=https://npm-registry.deip.world
+RUN npm install
 
 # Bundle app source
 COPY . .
