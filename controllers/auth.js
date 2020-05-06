@@ -3,8 +3,10 @@ import bcrypt from 'bcryptjs';
 import config from './../config';
 import deipRpc from '@deip/rpc-client';
 import crypto from '@deip/lib-crypto';
+
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
+import { USER_PROFILE_STATUS, SIGN_UP_POLICY} from './../constants/constants';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -57,42 +59,79 @@ const signIn = async function (ctx) {
 }
 
 const signUp = async function (ctx) {
-  const data = ctx.request.body;
-  const username = data.username;
-  const email = data.email;
-  const firstName = data.firstName;
-  const lastName = data.lastName;
-  const pubKey = data.pubKey;
+  const { 
+    username, 
+    email, 
+    firstName, 
+    lastName, 
+    pubKey,
+    phoneNumbers,
+    webPages,
+    location,
+    category,
+    occupation,
+    birthdate,
+    bio,
+    foreignIds
+  } = ctx.request.body;
 
-  if (!username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
-    ctx.status = 400;
-    ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required`;
-    return;
-  }
+
+
 
   try {
 
-    const accounts = await deipRpc.api.getAccountsAsync([username])
-    if (accounts[0]) {
+    let isAdmin = ctx.path.indexOf("tenant") != -1; // todo move to middleware
+
+    let status = ctx.tenantSettings.signUpPolicy == SIGN_UP_POLICY.FREE || isAdmin
+      ? USER_PROFILE_STATUS.APPROVED
+      : USER_PROFILE_STATUS.PENDING;
+
+
+    if (!username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
+      ctx.status = 400;
+      ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required`;
+      return;
+    }
+
+    const [existingAccount] = await deipRpc.api.getAccountsAsync([username])
+    if (existingAccount) {
       ctx.status = 409;
       ctx.body = `Account '${username}' already exists`;
       return;
     }
 
-    const owner = {
-      weight_threshold: 1,
-      account_auths: [],
-      key_auths: [[pubKey, 1]]
-    };
+    const existingProfile = await usersService.findUserProfileByOwner(username);
+    if (existingProfile) {
+      ctx.status = 409;
+      ctx.body = `Profile for '${username}' is under consideration or has been approved already`;
+      return;
+    }
 
-    const txResult = await createAccountAsync(username, pubKey, owner);
-    let profile = await usersService.findUserProfileByOwner(username);
-    if (!profile) {
-      profile = await usersService.createUserProfile({ username, email, firstName, lastName });
+    const profile = await usersService.createUserProfile({
+      username,
+      status,
+      signUpPubKey: pubKey,
+      tenant: config.TENANT,
+      email,
+      firstName,
+      lastName,
+      phoneNumbers,
+      webPages,
+      location,
+      category,
+      occupation,
+      foreignIds,
+      birthdate,
+      bio
+    });
+
+    let account = null;
+    if (status == USER_PROFILE_STATUS.APPROVED) {
+      account = await usersService.createUserAccount({ username, pubKey });
     }
 
     ctx.status = 200;
-    ctx.body = profile;
+    ctx.body = { profile, account };
 
   } catch (err) {
     console.error(err);
@@ -100,34 +139,6 @@ const signUp = async function (ctx) {
     ctx.body = err;
   }
 }
-
-
-async function createAccountAsync(username, pubKey, owner) {
-  const accountsCreator = config.blockchain.accountsCreator;
-  const chainConfig = await deipRpc.api.getConfigAsync();
-  const chainProps = await deipRpc.api.getChainPropertiesAsync();
-  // const ratio = chainConfig['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
-  // var fee = Asset.from(chainProps.account_creation_fee).multiply(ratio);
-  const jsonMetadata = '';
-  const traits = [];
-  const extensions = [];
-
-  let txResult = await deipRpc.broadcast.createAccountAsync(
-    accountsCreator.wif,
-    accountsCreator.fee,
-    accountsCreator.username,
-    username,
-    owner,
-    owner,
-    owner,
-    pubKey,
-    jsonMetadata,
-    traits,
-    extensions);
-
-  return txResult
-}
-
 
 export default {
   signIn,

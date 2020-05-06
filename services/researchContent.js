@@ -9,8 +9,8 @@ async function findResearchContentById(externalId) {
 }
 
 async function removeResearchContentById(externalId) {
-  let research = await ResearchContent.deleteOne({ _id: externalId });
-  return research;
+  let result = await ResearchContent.deleteOne({ _id: externalId });
+  return result;
 }
 
 async function findResearchContentByHash(researchExternalId, hash) {
@@ -24,13 +24,13 @@ async function findResearchContentByHashLegacy(researchId, hash) {
 }
 
 async function removeResearchContentByHash(researchExternalId, hash) {
-  const rc = await ResearchContent.deleteOne({ researchExternalId, hash });
-  return rc;
+  const result = await ResearchContent.deleteOne({ researchExternalId, hash });
+  return result;
 }
 
 async function removeResearchContentByHashLegacy(researchId, hash) {
-  const rc = await ResearchContent.deleteOne({ researchId, hash });
-  return rc;
+  const result = await ResearchContent.deleteOne({ researchId, hash });
+  return result;
 }
 
 async function findResearchContentByResearchId(researchExternalId) {

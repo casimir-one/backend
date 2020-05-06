@@ -66,9 +66,18 @@ app.on('error', function(err, ctx) {
     console.log('server error', err);
 });
 
+
+app.use(async function (ctx, next) {
+  let admin = await deipRpc.api.getAccountsAsync(['alice']);
+  ctx.tenantSettings = { signUpPolicy: "admin-approval" };
+  ctx.isAdmin = true;
+  await next();
+});
+
+
 app.use(serve('files/static'));
 router.use('/auth', auth.routes()); // authentication actions
-router.use('/tenants', tenant.routes());
+router.use('/tenant', tenant.routes());
 
 router.use('/api', jwt({
     secret: config.jwtSecret,

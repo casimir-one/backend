@@ -9,9 +9,9 @@
         "debug": "nodemon --inspect --delay 2000ms -w app.js -w server server-entry.js"
     },
     "dependencies": {
-        "@deip/rpc-client": "1.7.0",
-        "@deip/lib-crypto": "1.1.0",
         "@deip/app-config-service": "1.1.0",
+        "@deip/lib-crypto": "1.1.0",
+        "@deip/rpc-client": "1.7.0",
         "@koa/cors": "^2.2.1",
         "axios": "^0.15.3",
         "bcryptjs": "^2.4.0",

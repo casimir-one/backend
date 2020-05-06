@@ -6,16 +6,15 @@ import path from 'path';
 import sharp from 'sharp';
 import config from './../config';
 import UserBookmark from './../schemas/userBookmark';
-import UserProfile from './../schemas/user';
 import qs from 'qs';
 import usersService from './../services/users';
 import * as blockchainService from './../utils/blockchain';
 
 const getUserProfile = async (ctx) => {
-  try {
-    const username = ctx.params.username;
+  const username = ctx.params.username;
 
-    const profile = await UserProfile.findOne({ '_id': username })
+  try {
+    const profile = await usersService.findUserProfileByOwner(username);
     if (!profile) {
       ctx.status = 204;
       ctx.body = null;
@@ -46,44 +45,10 @@ const getUsersProfiles = async (ctx) => {
       accounts.push(...Object.values(parsed))
     }
 
-    const profiles = await UserProfile.find({ '_id': { $in: accounts } })
-
+    const profiles = await usersService.findUserProfiles(accounts);
+    
     ctx.status = 200;
     ctx.body = profiles;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-}
-
-const createUserProfile = async (ctx) => {
-  const data = ctx.request.body;
-  const username = ctx.params.username;
-  const jwtUsername = ctx.state.user.username;
-
-  try {
-
-    if (username != jwtUsername) { // revise this once we've got 'approve' operation working
-      ctx.status = 403;
-      ctx.body = `You have no permission to create '${username}' profile`
-      return;
-    }
-
-    const exists = await UserProfile.count({ '_id': username }) != 0;
-
-    if (exists) {
-      ctx.status = 409
-      ctx.body = `Profile for "${username}" already exists!`
-      return;
-    }
-
-    data._id = username;
-    const profile = new UserProfile(data)
-    const savedProfile = await profile.save()
-
-    ctx.status = 200;
-    ctx.body = savedProfile;
 
   } catch (err) {
     console.log(err);
@@ -91,7 +56,6 @@ const createUserProfile = async (ctx) => {
     ctx.body = err.message;
   }
 }
-
 
 const updateUserProfile = async (ctx) => {
   const data = ctx.request.body;
@@ -99,28 +63,24 @@ const updateUserProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
 
   try {
+
     if (username != jwtUsername) {
       ctx.status = 403;
       ctx.body = `You have no permission to edit '${username}' profile`
       return;
     }
 
-    const profile = await UserProfile.findOne({ '_id': username })
+    const profile = await usersService.findUserProfileByOwner(username);
     if (!profile) {
       ctx.status = 404;
-      ctx.body = `Profile for "${username}" does not exist!`
+      ctx.body = `Profile for '${username}' does not exist`
       return;
     }
 
-    for (let key in data) {
-      if (data.hasOwnProperty(key)) {
-        profile[key] = data[key]
-      }
-    }
-
-    const updatedProfile = await profile.save()
+    const updatedProfile = await usersService.updateUserProfile(username, { ...data });
     ctx.status = 200;
     ctx.body = updatedProfile
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -415,7 +375,6 @@ const getAvatar = async (ctx) => {
 export default {
   getUserProfile,
   getUsersProfiles,
-  createUserProfile,
   updateUserProfile,
   updateUserAccount,
 

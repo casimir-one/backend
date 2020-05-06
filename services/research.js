@@ -12,8 +12,8 @@ async function findResearchById(externalId) {
 }
 
 async function removeResearchByPermlink(permlink) {
-  let research = await Research.deleteOne({ permlink });
-  return research;
+  let result = await Research.deleteOne({ permlink });
+  return result;
 }
 
 async function upsertResearch({

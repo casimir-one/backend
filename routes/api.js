@@ -18,7 +18,6 @@ const router = koa_router()
 router.post('/user/upload-avatar', users.uploadAvatar)
 router.get('/user/profile/:username', users.getUserProfile)
 router.get('/user/profiles', users.getUsersProfiles)
-router.post('/user/profile/:username', users.createUserProfile)
 router.put('/user/account/:username', users.updateUserAccount)
 router.put('/user/profile/:username', users.updateUserProfile)
 router.get('/user/avatar/:username', users.getAvatar);

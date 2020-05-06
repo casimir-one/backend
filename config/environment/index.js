@@ -28,7 +28,8 @@ config = _.merge(config, {
     clientHost: process.env.DEIP_CLIENT_URL, // todo: get rid of this
     sigSeed: process.env.SIG_SEED,
     jwtSecret: process.env.JWT_SECRET,
-    fileStorageDir: process.env.FILE_STORAGE_DIR || 'files'
+    fileStorageDir: process.env.FILE_STORAGE_DIR || 'files',
+    TENANT: process.env.TENANT || 'DEIP'
 });
 
 module.exports = config;
