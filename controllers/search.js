@@ -2,7 +2,6 @@ import deipRpc from '@deip/rpc-client';
 
 const getAllResearchContents = async (ctx) => {
     const username = ctx.params.username;
-    const jwtUsername = ctx.state.user.username;
 
     try {
         const researchList = await deipRpc.api.getAllResearchesListingAsync(0, 0);

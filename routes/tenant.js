@@ -2,14 +2,20 @@ import koa_router from 'koa-router'
 import tenant from '../controllers/tenant'
 import auth from '../controllers/auth'
 
-const router = koa_router()
+const protected_route = koa_router();
+const public_route = koa_router();
 
-router.get('/logo', tenant.getTenantLogo);
-router.get('/profile', tenant.getTenantProfile);
-router.get('/sign-ups', tenant.getSignUpRequests);
-router.put('/sign-ups/approve', tenant.approveSignUpRequest);
-router.put('/sign-ups/reject', tenant.rejectSignUpRequest);
-router.post('/sign-up', auth.signUp);
+public_route.get('/logo', tenant.getTenantLogo);
+public_route.get('/profile', tenant.getTenantProfile);
+protected_route.get('/sign-ups', tenant.getSignUpRequests);
+protected_route.put('/sign-ups/approve', tenant.approveSignUpRequest);
+protected_route.put('/sign-ups/reject', tenant.rejectSignUpRequest);
+protected_route.post('/sign-up', auth.signUp);
 
 
-export default router;
+const routes = { 
+  protected: koa_router().use('/tenant', protected_route.routes()),
+  public: koa_router().use('/tenant', public_route.routes())
+}
+
+module.exports = routes;

@@ -1,32 +1,21 @@
 import Koa from 'koa';
 import json from 'koa-json';
 import logger from 'koa-logger';
-import auth from './routes/auth.js';
-import api from './routes/api.js';
-import tenant from './routes/tenant.js';
-import researchContent from './routes/researchContent.js';
-import application from './routes/application';
 import jwt from 'koa-jwt';
-import path from 'path';
 import serve from 'koa-static';
-import koa_router from "koa-router";
 import koa_bodyparser from "koa-bodyparser";
 import cors from '@koa/cors';
-import config from './config';
 import mongoose from 'mongoose';
-// import { AppConfigService } from '@deip/app-config-service';
 import deipRpc from '@deip/rpc-client';
+import config from './config';
 
-// AppConfigService.getInstance().init({ env: process.env });
-
-// const env = AppConfigService.getInstance().get('env');
+if (!config.TENANT) throw new Error(`Tenant is not specified`);
 
 deipRpc.api.setOptions({ url: process.env.DEIP_FULL_NODE_URL, reconnectTimeout: 3000 });
 deipRpc.config.set('chain_id', process.env.CHAIN_ID);
 
 
 const app = new Koa();
-const router = koa_router();
 
 const PORT = process.env.PORT || 80;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -44,21 +33,21 @@ app.use(async function(ctx, next) {
     console.log('%s %s - %s', ctx.method, ctx.url, ms);
 });
 
-app.use(async function(ctx, next) {
-    try {
-        await next();
-    } catch (err) {
-        if (401 === err.status) {
-            ctx.status = 401;
-            ctx.body = {
-                success: false,
-                token: null,
-                info: 'Protected resource, use "Authorization" header to get access'
-            };
-        } else {
-            throw err;
-        }
+app.use(async function (ctx, next) {
+  try {
+    await next();
+  } catch (err) {
+    if (401 === err.status) {
+      ctx.status = 401;
+      ctx.body = {
+        success: false,
+        token: null,
+        info: 'Protected resource, use "Authorization" header to get access'
+      };
+    } else {
+      throw err;
     }
+  }
 });
 
 
@@ -67,59 +56,35 @@ app.on('error', function(err, ctx) {
 });
 
 
-app.use(async function (ctx, next) {
-  let admin = await deipRpc.api.getAccountsAsync(['alice']);
-  ctx.tenantSettings = { signUpPolicy: "admin-approval" };
-  ctx.isAdmin = true;
-  await next();
-});
-
-
+// public routes layer
 app.use(serve('files/static'));
-router.use('/auth', auth.routes()); // authentication actions
-router.use('/tenant', tenant.routes());
+app.use(require('./routes/auth.js').public.routes());
+app.use(require('./routes/api.js').public.routes());
+app.use(require('./routes/researchContent.js').public.routes());
+app.use(require('./routes/tenant.js').public.routes());
 
-router.use('/api', jwt({
-    secret: config.jwtSecret,
-    getToken: function (opts) {
-        if (opts.request.query && opts.request.query.authorization) {
-            return opts.request.query.authorization;
-        }
-        return null;
+
+// user auth layer
+app.use(jwt({
+  secret: config.jwtSecret,
+  getToken: function (opts) {
+    if (opts.request.query && opts.request.query.authorization) {
+      return opts.request.query.authorization;
     }
-}).unless(function (ctx) {
-  return (
-    ctx.method === 'GET'
-    && /^\/api\/user|research|groups/.test(ctx.path)
-  );
-}), api.routes());
+    return null;
+  }})
+);
 
-router.use('/content', jwt({
-    secret: config.jwtSecret,
-    getToken: function (opts) {
-        if (opts.request.query && opts.request.query.authorization) {
-            return opts.request.query.authorization;
-        }
-        return null;
-    }
-}).unless(function (ctx) {
-  return (
-    ctx.method === 'GET'
-    && /^\/content\/refs\/research\/(?!package)/.test(ctx.path)
-  );
-}), researchContent.routes());
 
-router.use('/applications', jwt({
-    secret: config.jwtSecret,
-    getToken: function (opts) {
-        if (opts.request.query && opts.request.query.authorization) {
-            return opts.request.query.authorization;
-        }
-        return null;
-    }
-}), application.routes());
+// tenant auth layer
+app.use(require('./middlewares/tenant.js')());
 
-app.use(router.routes());
+
+// protected routes layer
+app.use(require('./routes/api.js').protected.routes());
+app.use(require('./routes/researchContent.js').protected.routes());
+app.use(require('./routes/tenant.js').protected.routes());
+
 
 mongoose.connect(config.mongo['deip-server'].connection);
 mongoose.connection.on('connected', () => {

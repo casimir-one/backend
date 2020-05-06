@@ -1,8 +1,15 @@
 import auth from '../controllers/auth.js'
 import koa_router from 'koa-router'
-const router = koa_router()
 
-router.post('/sign-in', auth.signIn)
-router.post('/sign-up', auth.signUp)
+const public_route = koa_router()
 
-export default router
+public_route.post('/sign-in', auth.signIn)
+public_route.post('/sign-up', auth.signUp)
+
+
+const routes = {
+  public: koa_router().use('/auth', public_route.routes())
+}
+
+
+module.exports = routes;
