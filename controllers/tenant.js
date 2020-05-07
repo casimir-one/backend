@@ -1,30 +1,30 @@
-import AgencyProfile from './../schemas/agency';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import sharp from 'sharp'
+import sharp from 'sharp';
 import deipRpc from '@deip/rpc-client';
 import usersService from './../services/users';
+import tenantService from './../services/tenant';
 import config from './../config';
-import USER_PROFILE_STATUS from './../constants/userProfileStatus';
+import { USER_PROFILE_STATUS } from './../constants/constants';
 
-const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 const logoPath = (agency, ext) => `${filesStoragePath}/agencies/${agency}/logo.${ext}`;
 
 const getTenantProfile = async (ctx) => {
-  const tenant = ctx.params.tenant;
+  const tenantId = ctx.params.tenant;
 
   try {
 
-    const profile = await AgencyProfile.findOne({ '_id': tenant });
-    if (!profile) {
-      ctx.status = 204;
-      ctx.body = null;
+    const tenantProfile = await tenantService.findTenantProfile(tenantId);
+    if (!tenantProfile) {
+      ctx.status = 404;
+      ctx.body = `Tenant Profile for '${tenantId}' does not exist`
       return;
     }
 
     ctx.status = 200;
-    ctx.body = profile;
+    ctx.body = tenantProfile;
 
   } catch (err) {
     console.log(err);
@@ -32,6 +32,40 @@ const getTenantProfile = async (ctx) => {
     ctx.body = err;
   }
 }
+
+
+const updateTenantProfile = async (ctx) => {
+  const update = ctx.request.body;
+  const jwtUsername = ctx.state.user.username;
+  const tenantId = ctx.state.tenant.id;
+
+  try {
+
+    const tenantProfile = await tenantService.findTenantProfile(tenantId);
+    if (!tenantProfile) {
+      ctx.status = 404;
+      ctx.body = `Tenant Profile for '${tenantId}' does not exist`
+      return;
+    }
+
+    const profileData = tenantProfile.toObject();
+    const updatedTenantProfile = await tenantService.updateTenantProfile(
+      tenantId, 
+      { ...profileData, ...update }, 
+      { ...profileData.settings, ...update.settings }
+    );
+
+    ctx.status = 200;
+    ctx.body = updatedTenantProfile;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 
 const getTenantLogo = async (ctx) => {
   const tenant = ctx.params.tenant;
@@ -134,13 +168,11 @@ const approveSignUpRequest = async (ctx) => {
 
 
 const rejectSignUpRequest = async (ctx) => {
-  
   const { username } = ctx.request.body;
 
   try {
 
     // TODO: check jwtUsername for admin
-
     const profile = await usersService.findUserProfileByOwner(username);
     if (!profile) {
       ctx.status = 404;
@@ -173,5 +205,6 @@ export default {
   getTenantLogo,
   getSignUpRequests,
   approveSignUpRequest,
-  rejectSignUpRequest
+  rejectSignUpRequest,
+  updateTenantProfile
 }

@@ -3,9 +3,10 @@ import bcrypt from 'bcryptjs';
 import config from './../config';
 import deipRpc from '@deip/rpc-client';
 import crypto from '@deip/lib-crypto';
-
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
+import tenantsService from './../services/tenant';
+
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY} from './../constants/constants';
 
 function Encodeuint8arr(seed) {
@@ -13,11 +14,8 @@ function Encodeuint8arr(seed) {
 }
 
 const signIn = async function (ctx) {
-  const {
-    username,
-    secretSigHex
-  } = ctx.request.body;
 
+  const { username, secretSigHex} = ctx.request.body;
   const [account] = await deipRpc.api.getAccountsAsync([username])
   if (!account) {
     ctx.body = {
@@ -29,16 +27,15 @@ const signIn = async function (ctx) {
 
   const pubWif = account.owner.key_auths[0][0]
   const publicKey = crypto.PublicKey.from(pubWif);
+
   let isValidSig;
   try {
-    // sigSeed should be uint8 array with length = 32
-    isValidSig = publicKey.verify(
-      Encodeuint8arr(config.sigSeed).buffer,
-      crypto.unhexify(secretSigHex).buffer
-    );
+    // SIG_SEED should be uint8 array with length = 32
+    isValidSig = publicKey.verify(Encodeuint8arr(config.SIG_SEED).buffer, crypto.unhexify(secretSigHex).buffer);
   } catch (err) {
     isValidSig = false;
   }
+
   if (!isValidSig) {
     ctx.body = {
       success: false,
@@ -47,10 +44,14 @@ const signIn = async function (ctx) {
     return;
   }
 
+  const tenant = await tenantsService.findTenantProfile(config.TENANT);
+
   const jwtToken = jwt.sign({
     username,
-    exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60), // 3 hours
-  }, config.jwtSecret)
+    tenant: tenant.id,
+    isTenantAdmin: tenant.admins.some(a => a.name == username),
+    exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
+  }, config.JWT_SECRET);
 
   ctx.body = {
     success: true,
@@ -75,21 +76,19 @@ const signUp = async function (ctx) {
     foreignIds
   } = ctx.request.body;
 
-
-
-
   try {
 
-    let isAdmin = ctx.path.indexOf("tenant") != -1; // todo move to middleware
+    const tenant = await (ctx.state.tenant ? Promise.resolve(ctx.state.tenant) : tenantsService.findTenantProfile(config.TENANT));
 
-    let status = ctx.tenantSettings.signUpPolicy == SIGN_UP_POLICY.FREE || isAdmin
+    const isAdmin = ctx.state.tenant ? ctx.state.isTenantAdmin : false;
+    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || isAdmin
       ? USER_PROFILE_STATUS.APPROVED
       : USER_PROFILE_STATUS.PENDING;
 
 
     if (!username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
       ctx.status = 400;
-      ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required`;
+      ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required. Username allowable symbols are: [a-z0-9] `;
       return;
     }
 

@@ -24,11 +24,11 @@ config = _.merge(config, {
         chainId: process.env.CHAIN_ID,
         accountsCreator : JSON.parse(process.env.FAUCET_ACCOUNT)
     },
-    serverHost: process.env.DEIP_SERVER_URL,
-    clientHost: process.env.DEIP_CLIENT_URL, // todo: get rid of this
-    sigSeed: process.env.SIG_SEED,
-    jwtSecret: process.env.JWT_SECRET,
-    fileStorageDir: process.env.FILE_STORAGE_DIR || 'files',
+    SERVER_HOST: process.env.DEIP_SERVER_URL,
+    CLIENT_URL: process.env.DEIP_CLIENT_URL, // todo: get rid of this
+    SIG_SEED: process.env.SIG_SEED,
+    JWT_SECRET: process.env.JWT_SECRET,
+    FILE_STORAGE_DIR: process.env.FILE_STORAGE_DIR || 'files',
     TENANT: process.env.TENANT || 'DEIP'
 });
 

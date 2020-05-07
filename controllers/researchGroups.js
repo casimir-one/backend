@@ -187,7 +187,7 @@ const getResearchGroupActivityLogs = async (ctx) => {
   }
 }
 
-const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 const researchGroupStoragePath = (researchGroupId) => `${filesStoragePath}/research-groups/${researchGroupId}`;
 const researchGroupLogoImagePath = (researchGroupId, ext = 'png') => `${researchGroupStoragePath(researchGroupId)}/logo.${ext}`;
 const defaultResearchGroupLogoPath = () => path.join(__dirname, `./../default/default-research-group-logo.png`);

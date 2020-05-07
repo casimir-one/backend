@@ -57,8 +57,22 @@ const getUsersProfiles = async (ctx) => {
   }
 }
 
+const getActiveUsersProfiles = async (ctx) => {
+
+  try {
+    const profiles = await usersService.findActiveUserProfiles();
+    ctx.status = 200;
+    ctx.body = profiles;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 const updateUserProfile = async (ctx) => {
-  const data = ctx.request.body;
+  const update = ctx.request.body;
   const username = ctx.params.username;
   const jwtUsername = ctx.state.user.username;
 
@@ -70,16 +84,21 @@ const updateUserProfile = async (ctx) => {
       return;
     }
 
-    const profile = await usersService.findUserProfileByOwner(username);
-    if (!profile) {
+    const userProfile = await usersService.findUserProfileByOwner(username);
+    if (!userProfile) {
       ctx.status = 404;
       ctx.body = `Profile for '${username}' does not exist`
       return;
     }
 
-    const updatedProfile = await usersService.updateUserProfile(username, { ...data });
+    const profileData = userProfile.toObject();
+    const updatedUserProfile = await usersService.updateUserProfile(
+      username, 
+      { ...profileData, ...update }
+    );
+
     ctx.status = 200;
-    ctx.body = updatedProfile
+    ctx.body = updatedUserProfile
 
   } catch (err) {
     console.log(err);
@@ -215,7 +234,7 @@ const removeUserBookmark = async (ctx) => {
 }
 
 
-const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 const accountsStoragePath = (username) => `${filesStoragePath}/accounts/${username}`;
 const avatarPath = (username, picture) => `${accountsStoragePath(username)}/${picture}`;
 const defaultAvatarPath = () => path.join(__dirname, `./../default/default-avatar.png`);
@@ -375,6 +394,7 @@ const getAvatar = async (ctx) => {
 export default {
   getUserProfile,
   getUsersProfiles,
+  getActiveUsersProfiles,
   updateUserProfile,
   updateUserAccount,
 

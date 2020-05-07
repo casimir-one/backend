@@ -6,7 +6,7 @@ import multer from 'koa-multer';
 import config from './../config';
 import deipRpc from '@deip/rpc-client';
 
-const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 
 const researchFilesTempStoragePath = (researchId, postfix) => `${storagePath}/research-projects/${researchId}/temp-${postfix}`

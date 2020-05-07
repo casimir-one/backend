@@ -5,7 +5,7 @@ import util from 'util';
 import multer from 'koa-multer';
 import config from './../config';
 
-const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 
 const researchAwardWithdrawalRequestsFilesStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}/award-withdrawal-requests-attachments`

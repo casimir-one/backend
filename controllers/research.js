@@ -144,7 +144,7 @@ const createResearchTokenSaleContribution = async (ctx) => {
 }
 
 
-const filesStoragePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 const researchStoragePath = (researchId) => `${filesStoragePath}/research-projects/${researchId}`;
 const backgroundImagePath = (researchId, ext = 'png') => `${researchStoragePath(researchId)}/background.${ext}`;
 const defaultBackgroundImagePath = () => path.join(__dirname, `./../default/default-research-background.png`);

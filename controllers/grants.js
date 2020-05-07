@@ -14,7 +14,7 @@ import rimraf from "rimraf";
 import slug from 'limax';
 import config from './../config';
 
-const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 
 const researchAwardWithdrawalRequestsFilesStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}/award-withdrawal-requests-attachments`
 const researchAwardWithdrawalRequestsFilesTempStoragePath = (researchId, postfix) => `${researchAwardWithdrawalRequestsFilesStoragePath(researchId)}/temp-${postfix}`

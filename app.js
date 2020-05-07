@@ -66,7 +66,7 @@ app.use(require('./routes/tenant.js').public.routes());
 
 // user auth layer
 app.use(jwt({
-  secret: config.jwtSecret,
+  secret: config.JWT_SECRET,
   getToken: function (opts) {
     if (opts.request.query && opts.request.query.authorization) {
       return opts.request.query.authorization;

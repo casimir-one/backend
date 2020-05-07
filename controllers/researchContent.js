@@ -28,7 +28,7 @@ import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 
 
-const storagePath = path.join(__dirname, `./../${config.fileStorageDir}`);
+const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 const blankDarPath = path.join(__dirname, `./../default/dar-blank`);
 
 const researchStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}`
@@ -99,7 +99,7 @@ const readDarArchive = async (ctx) => {
             if (record._binary) {
                 delete record._binary
                 record.encoding = 'url'
-                record.data = `${config['serverHost']}/content/${darId}/assets/${record.path}?authorization=${jwt}`;
+                record.data = `${config['SERVER_HOST']}/content/${darId}/assets/${record.path}?authorization=${jwt}`;
             }
         })
         ctx.status = 200;
@@ -473,7 +473,7 @@ const parseInternalReferences = (refList) => {
         .map(wref => {
             try {
                 const parsedUrl = url.parse(wref.uri[0]);
-                if (parsedUrl.href.indexOf(config.clientHost) === 0) {
+                if (parsedUrl.href.indexOf(config.CLIENT_URL) === 0) {
                     const segments = parsedUrl.hash.split('/');
                     const researchGroupPermlink = decodeURIComponent(segments[1]);
                     const researchPermlink = decodeURIComponent(segments[3]);

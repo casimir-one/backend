@@ -1,15 +1,15 @@
 
 import mongoose from 'mongoose';
+import { SIGN_UP_POLICY } from './../constants/constants';
 
 const Schema = mongoose.Schema;
 
 const ResearchArea = new Schema({
+  "_id": false,
+  "id": { type: String, required: true },
+  "parentId": { type: String },
   "title": { type: String, required: true },
-  "disciplines": [{ type: String }],
-  "subAreas": [{
-    "title": { type: String, required: true },
-    "disciplines": [{ type: Number }]
-  }]
+  "disciplines": [{ type: String, required: true }],
 });
 
 const FAQ = new Schema({
@@ -20,7 +20,7 @@ const FAQ = new Schema({
 
 const ResearchComponent = new Schema({
   "type": { type: String, enum: ['stepper'], required: true },
-  "values": { type: Object, required: true },
+  "component": { type: Object, required: true },
 });
 
 const TenantProfile = new Schema({
@@ -36,8 +36,9 @@ const TenantProfile = new Schema({
       "metadata": { type: Object, default: null }
     }],
     "settings": {
+      "signUpPolicy": { type: String, enum: [SIGN_UP_POLICY.FREE, SIGN_UP_POLICY.ADMIN_APPROVAL], required: true },
       "researchAreas": [ResearchArea],
-      "ResearchComponents": [ResearchComponent],
+      "researchComponents": [ResearchComponent],
       "faq": [FAQ],
       "researchesBlacklist": [{ type: String, required: true, trim: true }],
       "researchesWhitelist": [{ type: String, required: true, trim: true }]
@@ -46,6 +47,6 @@ const TenantProfile = new Schema({
 
 
 
-const model = mongoose.model('tenants', TenantProfile);
+const model = mongoose.model('tenants-profiles', TenantProfile);
 
 module.exports = model;
