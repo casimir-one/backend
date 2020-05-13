@@ -45,7 +45,7 @@ async function createUserProfile({
   location,
   foreignIds,
   bio,
-  birthdate,
+  birthdate
 }) {
 
   const userProfile = new UserProfile({
@@ -81,7 +81,9 @@ async function updateUserProfile(username, {
   location,
   foreignIds,
   bio,
-  birthdate
+  birthdate,
+  education,
+  employment
 }) {
 
   let userProfile = await findUserProfileByOwner(username);
@@ -102,6 +104,8 @@ async function updateUserProfile(username, {
   userProfile.foreignIds = foreignIds;
   userProfile.bio = bio;
   userProfile.birthdate = birthdate;
+  userProfile.education = education;
+  userProfile.employment = employment;  
 
   return userProfile.save();
 }
