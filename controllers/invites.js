@@ -38,13 +38,6 @@ const getResearchGroupPendingInvites = async (ctx) => {
 
   try {
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupExternalId}" research group`
-      return;
-    }
-
     const invites = await userInvitesService.findResearchGroupPendingInvites(researchGroupExternalId);
     ctx.status = 200;
     ctx.body = invites;
@@ -195,8 +188,6 @@ const rejectUserInvite = async (ctx) => {
   const { tx } = ctx.request.body;
 
   try {
-
-    console.log(tx)
 
     const operation = tx['operations'][0];
     const payload = operation[1];

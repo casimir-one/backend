@@ -11,13 +11,13 @@ async function findUserInvite(externalId) { // proposal id
 
 async function findUserActiveInvites(username) {
   let activeInvites = await UserInvite.find({ invitee: username, status: USER_INVITE_STATUS.SENT });
-  return activeInvites;
+  return activeInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
 }
 
 
 async function findResearchGroupPendingInvites(researchGroupExternalId) {
   let rgInvites = await UserInvite.find({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT });
-  return rgInvites;
+  return rgInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
 }
 
 

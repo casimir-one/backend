@@ -62,7 +62,7 @@ protected_route.put('/groups', researchGroups.updateResearchGroup)
 protected_route.get('/groups/activity-log/:researchGroupId', researchGroups.getResearchGroupActivityLogs)
 public_route.get('/groups/logo/:researchGroupId', researchGroups.getLogo)
 protected_route.post('/groups/logo', researchGroups.uploadLogo)
-protected_route.post('/groups/left', researchGroups.leftResearchGroup)
+protected_route.post('/groups/left', researchGroups.excludeFromResearchGroup)
 
 protected_route.get('/invites/:username', invites.getUserInvites)
 protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)

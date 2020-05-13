@@ -1,5 +1,4 @@
 import UserNotification from './../schemas/userNotification';
-import UserProfile from './../schemas/user';
 import deipRpc from '@deip/rpc-client';
 
 const getNotificationsByUser = async (ctx) => {

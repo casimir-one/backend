@@ -94,15 +94,42 @@ const updateResearchGroup = async (ctx) => {
 }
 
 
-const leftResearchGroup = async (ctx) => {
+const excludeFromResearchGroup = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
+  const { tx, offchainMeta, isProposal} = ctx.request.body;
 
   try {
-    const operation = tx['operations'][0];
+
+    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
     const payload = operation[1];
 
+    const {
+      research_group: researchGroupAccount,
+      member
+    } = payload;
+
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
+    if (!authorizedGroup) {
+      ctx.status = 400;
+      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
+      return;
+    }
+
     const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    const researchGroupInternalId = authorizedGroup.id;
+
+    // LEGACY >>>
+    const parsedProposal = {
+      research_group_id: researchGroupInternalId,
+      action: deipRpc.formatter.getOperationTag("left_research_group_membership"),
+      creator: jwtUsername,
+      data: { name: member },
+      isProposalAutoAccepted: !isProposal
+    };
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+    // <<< LEGACY
 
     ctx.status = 201;
     ctx.body = { txResult };
@@ -256,5 +283,5 @@ export default {
   getResearchGroupActivityLogs,
   getLogo,
   uploadLogo,
-  leftResearchGroup
+  excludeFromResearchGroup
 }
