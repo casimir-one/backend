@@ -244,7 +244,7 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_VOTE, async ({ vot
 
 researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.INVITATION_APPROVED, async (invite) => {
   const type = ACTIVITY_LOG_TYPE.INVITATION_APPROVED;
-  let { research_group_id: researchGroupId, account_name: invitee } = invite;
+  let { researchGroupId, invitee } = invite;
 
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
@@ -262,7 +262,7 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.INVITATION_APPROVED, async 
 
 researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.INVITATION_REJECTED, async (invite) => {
   const type = ACTIVITY_LOG_TYPE.INVITATION_REJECTED;
-  let { research_group_id: researchGroupId, account_name: invitee } = invite;
+  let { researchGroupId, invitee } = invite;
 
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let inviteeProfile = await usersService.findUserProfileByOwner(invitee);

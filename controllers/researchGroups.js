@@ -249,24 +249,6 @@ const getLogo = async (ctx) => {
   ctx.body = logo;
 }
 
-// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
-async function processNewGroupTx(payload, txInfo) {
-  const transaction = await getTransaction(txInfo.id);
-  for (let i = 0; i < transaction.operations.length; i++) {
-    const op = transaction.operations[i];
-    const opName = op[0];
-    const opPayload = op[1];
-    if (opName === 'create_research_group' && opPayload.permlink === payload.permlink) {
-      const researchGroup = await deipRpc.api.getResearchGroupByPermlinkAsync(opPayload.permlink);
-      for (let i = 0; i < opPayload.invitees.length; i++) {
-        let invitee = opPayload.invitees[i];
-        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { researchGroupId: researchGroup.id, invitee: invitee.account });
-      }
-      break;
-    }
-  }
-}
-
 
 export default {
   createResearchGroup,

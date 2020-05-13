@@ -20,7 +20,8 @@ const FAQ = new Schema({
 
 const ResearchComponent = new Schema({
   "type": { type: String, enum: ['stepper'], required: true },
-  "component": { type: Object, required: true },
+  "isVisible": { type: Boolean, required: true },
+  "component": { type: Object, required: true }
 });
 
 const TenantProfile = new Schema({

@@ -419,7 +419,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, async ({ e
 
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION_APPROVED, async (invite) => {
   const type = USER_NOTIFICATION_TYPE.INVITATION_APPROVED;
-  let { research_group_id: researchGroupId, account_name: invitee } = invite;
+  let { researchGroupId, invitee } = invite;
 
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
@@ -448,36 +448,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION_APPROVED, async (in
 
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION_REJECTED, async (invite) => {
   const type = USER_NOTIFICATION_TYPE.INVITATION_REJECTED;
-  let { research_group_id: researchGroupId, account_name: invitee } = invite;
-
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
-  let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroupId);
-  let notificationsPromises = [];
-
-  for (let i = 0; i < rgtList.length; i++) {
-    let rgt = rgtList[i];
-    if (rgt.owner != invitee) {
-      let promise = usersNotificationService.createUserNotification({
-        username: rgt.owner,
-        status: 'unread',
-        type,
-        metadata: {
-          researchGroup,
-          inviteeProfile
-        }
-      });
-      notificationsPromises.push(promise);
-    }
-  }
-
-  Promise.all(notificationsPromises);
-});
-
-
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION_REJECTED, async (invite) => {
-  const type = USER_NOTIFICATION_TYPE.INVITATION_REJECTED;
-  let { research_group_id: researchGroupId, account_name: invitee } = invite;
+  let { researchGroupId, invitee } = invite;
 
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let inviteeProfile = await usersService.findUserProfileByOwner(invitee);

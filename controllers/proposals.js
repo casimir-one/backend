@@ -1,10 +1,4 @@
 import deipRpc from '@deip/rpc-client';
-import UserNotification from './../schemas/userNotification';
-import JoinRequest from './../schemas/joinRequest';
-import researchService from './../services/research';
-import userInvitesService from './../services/userInvites';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
-import userNotificationHandler from './../event-handlers/userNotification';
 import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth'
 import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE, USER_INVITE_STATUS } from './../constants';
@@ -41,11 +35,9 @@ const updateProposal = async (ctx) => {
     const payload = operation[1];
     const { external_id: proposalId } = payload;
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-
-    await processInviteProposal(proposalId, jwtUsername, true);
-  
+    const txResult = await blockchainService.sendTransactionAsync(tx);  
     const proposal = await deipRpc.api.getProposalAsync(proposalId);
+    
     ctx.status = 200;
     ctx.body = { tx, txResult, isAprroved: proposal == null };
 
@@ -69,8 +61,6 @@ const deleteProposal = async (ctx) => {
     const payload = operation[1];
     const { external_id: proposalId } = payload;
 
-    await processInviteProposal(proposalId, jwtUsername, false);
-
     const txResult = await blockchainService.sendTransactionAsync(tx);
     // TODO: remove model
 
@@ -84,73 +74,6 @@ const deleteProposal = async (ctx) => {
   }
 }
 
-
-async function processInviteProposal(proposalId, signer, isUpdated) {
-  const userInvite = await userInvitesService.findUserInvite(proposalId);
-  if (!userInvite) return; // proposal is not an invite
-
-  const proposal = await deipRpc.api.getProposalAsync(proposalId);
-
-  if (isUpdated) {
-
-    if (!proposal) { // invitee should be the last who approves the invite before it executes
-      const approvedInvite = await userInvitesService.updateUserInvite(proposalId, {
-        status: USER_INVITE_STATUS.APPROVED,
-        approvedBy: [...userInvite.approvedBy, signer]
-      });
-
-      const researchGroup = await deipRpc.api.getResearchGroupAsync(approvedInvite.researchGroupExternalId);
-      const notificationPayload = { research_group_id: researchGroup.id, account_name: approvedInvite.invitee };
-
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION_APPROVED, notificationPayload);
-      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION_APPROVED, notificationPayload);
-
-    } else {
-
-      if (proposal.fail_reason && proposal.fail_reason != userInvite.failReason) {
-        const failedInvite = await userInvitesService.updateUserInvite(proposalId, {
-          status: userInvite.status,
-          failReason: proposal.fail_reason,
-          approvedBy: [...userInvite.approvedBy, signer]
-        });
-        return;
-      }
-
-      const [researchGroupAccount] = await deipRpc.api.getAccountsAsync([proposal.creator]);
-
-      const ownerWeight = researchGroupAccount.owner.account_auths.reduce((acc, [name, threshold]) => {
-        return proposal.available_owner_approvals.some(u => u == name) ? acc + threshold : acc;
-      }, 0);
-
-      const activeWeight = researchGroupAccount.active.account_auths.reduce((acc, [name, threshold]) => {
-        return proposal.available_active_approvals.some(u => u == name) ? acc + threshold : acc;
-      }, 0);
-
-      const isApproved = ownerWeight >= researchGroupAccount.owner.weight_threshold || activeWeight >= researchGroupAccount.active.weight_threshold;
-
-      if (isApproved && userInvite.status != USER_INVITE_STATUS.SENT) {
-        const sentInvite = await userInvitesService.updateUserInvite(proposalId, {
-          status: USER_INVITE_STATUS.SENT,
-          approvedBy: [...userInvite.approvedBy, signer]
-        });
-        const researchGroup = await deipRpc.api.getResearchGroupAsync(sentInvite.researchGroupExternalId);
-        const notificationPayload = { invitee: sentInvite.invitee, researchGroupId: researchGroup.id };
-        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
-      }
-    }
-  } else { // invite deleted
-    
-    const rejectedInvite = await userInvitesService.updateUserInvite(proposalId, {
-      status: USER_INVITE_STATUS.REJECTED,
-      rejectedBy: signer,
-      approvedBy: [...userInvite.approvedBy]
-    });
-    const researchGroup = await deipRpc.api.getResearchGroupAsync(rejectedInvite.researchGroupExternalId);
-    const notificationPayload = { research_group_id: researchGroup.id, account_name: rejectedInvite.invitee };
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION_REJECTED, notificationPayload);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION_REJECTED, notificationPayload);
-  }
-}
 
 
 const createExcludeProposal = async (ctx) => {
