@@ -28,7 +28,8 @@ async function createUserInvite({
   rewardShare,
   status,
   notes,
-  expiration
+  expiration,
+  approvedBy
 }) {
 
   const userInvite = new UserInvite({
@@ -39,7 +40,7 @@ async function createUserInvite({
     status,
     notes,
     expiration,
-    approvedBy: [],
+    approvedBy: approvedBy,
     rejectedBy: null,
     failReason: null
   });

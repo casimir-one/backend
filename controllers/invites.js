@@ -81,8 +81,11 @@ const createUserInvite = async (ctx) => {
     } = invitePayload;
 
     const {
-      notes
+      notes,
+      approver
     } = offchainMeta;
+
+    const isAutoApproved = approver != null;
 
     const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
     if (!authorizedGroup) {
@@ -98,26 +101,36 @@ const createUserInvite = async (ctx) => {
       invitee,
       researchGroupExternalId,
       rewardShare,
-      status: USER_INVITE_STATUS.PROPOSED,
+      status: isAutoApproved ? USER_INVITE_STATUS.SENT : USER_INVITE_STATUS.PROPOSED,
       notes,
-      expiration
+      expiration,
+      approvedBy: approver ? [approver] : [] 
     });
 
+    if (userInvite.status == USER_INVITE_STATUS.SENT) {
 
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroup.id,
-      action: deipRpc.formatter.getOperationTag("join_research_group_membership"),
-      creator: jwtUsername,
-      data: {
-        name: invitee
-      },
-      isProposalAutoAccepted: false
-    };
+      const researchGroup = await deipRpc.api.getResearchGroupAsync(userInvite.researchGroupExternalId);
+      const notificationPayload = { researchGroupId: researchGroup.id, invitee: userInvite.invitee };
+      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
+      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
 
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
+    } else {
+
+      // LEGACY >>>
+      const parsedProposal = {
+        research_group_id: researchGroup.id,
+        action: deipRpc.formatter.getOperationTag("join_research_group_membership"),
+        creator: jwtUsername,
+        data: {
+          name: invitee
+        },
+        isProposalAutoAccepted: false
+      };
+
+      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
+      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
+      // <<< LEGACY
+    }
 
     ctx.status = 201;
     ctx.body = { rm: userInvite, txResult };
