@@ -1,13 +1,14 @@
 import deipRpc from '@deip/rpc-client';
 import UserNotification from './../schemas/userNotification';
-import JoinRequest from './../schemas/joinRequest'
-import researchService from './../services/research'
+import JoinRequest from './../schemas/joinRequest';
+import researchService from './../services/research';
+import userInvitesService from './../services/userInvites';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth'
+import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE, USER_INVITE_STATUS } from './../constants';
+
 
 const createProposal = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -18,13 +19,6 @@ const createProposal = async (ctx) => {
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { creator: researchGroupAccount} = payload;
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
-    }
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
     ctx.status = 200;
@@ -45,14 +39,15 @@ const updateProposal = async (ctx) => {
 
     const operation = tx['operations'][0];
     const payload = operation[1];
-    const { external_id: externalId } = payload;
+    const { external_id: proposalId } = payload;
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const proposal = await deipRpc.api.getProposalAsync(externalId);
-    const isAprroved = proposal == null;
 
+    await processInviteProposal(proposalId, jwtUsername, true);
+  
+    const proposal = await deipRpc.api.getProposalAsync(proposalId);
     ctx.status = 200;
-    ctx.body = { tx, txResult, isAprroved };
+    ctx.body = { tx, txResult, isAprroved: proposal == null };
 
   } catch (err) {
     console.log(err);
@@ -68,9 +63,13 @@ const deleteProposal = async (ctx) => {
 
   try {
 
+    console.log(tx)
+
     const operation = tx['operations'][0];
     const payload = operation[1];
-    const { external_id: externalId } = payload;
+    const { external_id: proposalId } = payload;
+
+    await processInviteProposal(proposalId, jwtUsername, false);
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
     // TODO: remove model
@@ -86,92 +85,73 @@ const deleteProposal = async (ctx) => {
 }
 
 
-const voteForProposal = async (ctx) => {
-    const jwtUsername = ctx.state.user.username;
-    const tx = ctx.request.body;
-    const operation = tx['operations'][0];
-    const payload = operation[1];
+async function processInviteProposal(proposalId, signer, isUpdated) {
+  const userInvite = await userInvitesService.findUserInvite(proposalId);
+  if (!userInvite) return; // proposal is not an invite
 
-    const opGroupId = parseInt(payload.research_group_id);
+  const proposal = await deipRpc.api.getProposalAsync(proposalId);
 
-    if (isNaN(opGroupId)) {
-        ctx.status = 400;
-        ctx.body = `Mallformed operation: "${operation}"`;
+  if (isUpdated) {
+
+    if (!proposal) { // invitee should be the last who approves the invite before it executes
+      const approvedInvite = await userInvitesService.updateUserInvite(proposalId, {
+        status: USER_INVITE_STATUS.APPROVED,
+        approvedBy: [...userInvite.approvedBy, signer]
+      });
+
+      const researchGroup = await deipRpc.api.getResearchGroupAsync(approvedInvite.researchGroupExternalId);
+      const notificationPayload = { research_group_id: researchGroup.id, account_name: approvedInvite.invitee };
+
+      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION_APPROVED, notificationPayload);
+      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION_APPROVED, notificationPayload);
+
+    } else {
+
+      if (proposal.fail_reason && proposal.fail_reason != userInvite.failReason) {
+        const failedInvite = await userInvitesService.updateUserInvite(proposalId, {
+          status: userInvite.status,
+          failReason: proposal.fail_reason,
+          approvedBy: [...userInvite.approvedBy, signer]
+        });
         return;
+      }
+
+      const [researchGroupAccount] = await deipRpc.api.getAccountsAsync([proposal.creator]);
+
+      const ownerWeight = researchGroupAccount.owner.account_auths.reduce((acc, [name, threshold]) => {
+        return proposal.available_owner_approvals.some(u => u == name) ? acc + threshold : acc;
+      }, 0);
+
+      const activeWeight = researchGroupAccount.active.account_auths.reduce((acc, [name, threshold]) => {
+        return proposal.available_active_approvals.some(u => u == name) ? acc + threshold : acc;
+      }, 0);
+
+      const isApproved = ownerWeight >= researchGroupAccount.owner.weight_threshold || activeWeight >= researchGroupAccount.active.weight_threshold;
+
+      if (isApproved && userInvite.status != USER_INVITE_STATUS.SENT) {
+        const sentInvite = await userInvitesService.updateUserInvite(proposalId, {
+          status: USER_INVITE_STATUS.SENT,
+          approvedBy: [...userInvite.approvedBy, signer]
+        });
+        const researchGroup = await deipRpc.api.getResearchGroupAsync(sentInvite.researchGroupExternalId);
+        const notificationPayload = { invitee: sentInvite.invitee, researchGroupId: researchGroup.id };
+        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
+      }
     }
-
-    try {
-        const authorized = await authorizeResearchGroup(opGroupId, jwtUsername);
-        if (!authorized) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not a member of "${opGroupId}" group`
-            return;
-        }
-
-        /* proposal specific action code */
-
-        const result = await sendTransaction(tx);
-        if (result.isSuccess) {
-            processProposalVoteTx(payload, result.txInfo);
-            ctx.status = 201;
-        } else {
-            throw new Error(`Could not proceed the transaction: ${tx}`);
-        }
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
+  } else { // invite deleted
+    
+    const rejectedInvite = await userInvitesService.updateUserInvite(proposalId, {
+      status: USER_INVITE_STATUS.REJECTED,
+      rejectedBy: signer,
+      approvedBy: [...userInvite.approvedBy]
+    });
+    const researchGroup = await deipRpc.api.getResearchGroupAsync(rejectedInvite.researchGroupExternalId);
+    const notificationPayload = { research_group_id: researchGroup.id, account_name: rejectedInvite.invitee };
+    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION_REJECTED, notificationPayload);
+    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION_REJECTED, notificationPayload);
+  }
 }
 
-const createInviteProposal = async (ctx) => {
-    const jwtUsername = ctx.state.user.username;
-    const tx = ctx.request.body;
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-
-    const opGroupId = parseInt(payload.research_group_id);
-
-    if (isNaN(opGroupId)) {
-        ctx.status = 400;
-        ctx.body = `Mallformed operation: "${operation}"`;
-        return;
-    }
-
-    try {
-        const authorized = await authorizeResearchGroup(opGroupId, jwtUsername);
-        if (!authorized) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not a member of "${opGroupId}" group`
-            return;
-        }
-
-        /* proposal specific action code */
-
-        const proposal = JSON.parse(payload.data);
-        const joinRequests = await JoinRequest.find({ 'groupId': opGroupId, username: proposal.name, 'status': { $in: ['approved', 'pending'] } });
-
-        for (let i = 0; i < joinRequests.length; i++) {
-            const joinRequest = joinRequests[i];
-            joinRequest.status = 'approved';
-            await joinRequest.save();
-        }
-
-        const result = await sendTransaction(tx);
-        if (result.isSuccess) {
-            processNewProposalTx(payload, result.txInfo);
-            ctx.status = 201;
-        } else {
-            throw new Error(`Could not proceed the transaction: ${tx}`);
-        }
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
-}
 
 const createExcludeProposal = async (ctx) => {
     const jwtUsername = ctx.state.user.username;
@@ -212,43 +192,6 @@ const createExcludeProposal = async (ctx) => {
     }
 }
 
-const createTokenSaleProposal = async (ctx) => {
-    const jwtUsername = ctx.state.user.username;
-    const tx = ctx.request.body;
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-
-    const opGroupId = parseInt(payload.research_group_id);
-
-    if (isNaN(opGroupId)) {
-        ctx.status = 400;
-        ctx.body = `Mallformed operation: "${operation}"`;
-        return;
-    }
-
-    try {
-        const authorized = await authorizeResearchGroup(opGroupId, jwtUsername);
-        if (!authorized) {
-            ctx.status = 401;
-            ctx.body = `"${jwtUsername}" is not a member of "${opGroupId}" group`
-            return;
-        }
-
-        /* proposal specific action code */
-        const result = await sendTransaction(tx);
-        if (result.isSuccess) {
-            processNewProposalTx(payload, result.txInfo);
-            ctx.status = 201;
-        } else {
-            throw new Error(`Could not proceed the transaction: ${tx}`);
-        }
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
-}
 
 // TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
 async function processNewProposalTx(payload, txInfo) {
@@ -274,39 +217,8 @@ async function processNewProposalTx(payload, txInfo) {
     }
 }
 
-// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
-async function processProposalVoteTx(payload, txInfo) {
-    const transaction = await getTransaction(txInfo.id);
-    for (let i = 0; i < transaction.operations.length; i++) {
-        const op = transaction.operations[i];
-        const opName = op[0];
-        const opPayload = op[1];
-        if (opName === 'vote_proposal' && opPayload.proposal_id == payload.proposal_id) {
-            let proposal = await deipRpc.api.getProposalAsync(opPayload.proposal_id); 
-            let parsedProposal = { ...proposal, data: JSON.parse(proposal.data), research_group_id: opPayload.research_group_id };
-            
-            researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL_VOTE, { voter: opPayload.voter, proposal: parsedProposal });
-
-            // if proposal is completed - send notifications to all group members
-            if (proposal && proposal.is_completed) {
-                let count = await UserNotification.count({ 'type': USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, 'meta.id': proposal.id });
-                // in case user votes for approved proposal we shouldn't send notifications second time
-                if (!count) {
-                    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, parsedProposal);
-                    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, parsedProposal);
-                }
-                break;
-            }
-        }
-    }
-}
-
-
 export default {
-    voteForProposal,
-    createInviteProposal,
     createExcludeProposal,
-    createTokenSaleProposal,
     createProposal,
     updateProposal,
     deleteProposal

@@ -9,13 +9,11 @@ import config from './../config'
 import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
 import researchGroupsService from './../services/researchGroup';
-// import researchGroupInvitesService from './../services/researchGroupInvites';
-import { sendTransaction, getTransaction } from './../utils/blockchain';
+import { getTransaction } from './../utils/blockchain';
 import activityLogEntriesService from './../services/activityLogEntry';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
 
 
 const createResearchGroup = async (ctx) => {
@@ -95,61 +93,6 @@ const updateResearchGroup = async (ctx) => {
   }
 }
 
-
-const inviteToResearchGroup = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
-
-  try {
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    const {
-      research_group: researchGroupAccount,
-      member,
-      weight
-    } = payload;
-
-    const {
-      notes,
-    } = offchainMeta;
-
-    const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupAccount);
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    // const researchGroupInvite = await researchGroupInvitesService.createResearchGroupInvite({
-    //   externalId: `${Date.now()}`,
-    //   member,
-    //   researchGroupAccount,
-    //   weight,
-    //   status: "proposed",
-    //   notes,
-    //   expiration: Date.now()
-    // });
-
-
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroup.id,
-      action: 2,
-      creator: jwtUsername,
-      data: {
-        name: member
-      },
-      isProposalAutoAccepted: !isProposal
-    };
-
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
-
-    ctx.status = 201;
-    ctx.body = { rm: researchGroupInvite, txResult };
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-};
 
 const leftResearchGroup = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -331,6 +274,5 @@ export default {
   getResearchGroupActivityLogs,
   getLogo,
   uploadLogo,
-  inviteToResearchGroup,
   leftResearchGroup
 }

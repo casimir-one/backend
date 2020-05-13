@@ -5,6 +5,7 @@ import ACTIVITY_LOG_TYPE from './activityLogType';
 import USER_NOTIFICATION_TYPE from './userNotificationType';
 import PROPOSAL_TYPE from './proposalType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
+import USER_INVITE_STATUS from './userInviteStatus';
 
 
 export {
@@ -13,5 +14,6 @@ export {
   ACTIVITY_LOG_TYPE,
   USER_NOTIFICATION_TYPE,
   PROPOSAL_TYPE,
-  TOKEN_SALE_STATUS
+  TOKEN_SALE_STATUS,
+  USER_INVITE_STATUS
 } 

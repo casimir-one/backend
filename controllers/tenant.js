@@ -8,7 +8,7 @@ import usersService from './../services/users';
 import tenantService from './../services/tenant';
 import * as authService from './../services/auth';
 import config from './../config';
-import { USER_PROFILE_STATUS } from './../constants/constants';
+import { USER_PROFILE_STATUS } from './../constants';
 import { tenantBannerUploader } from './../storages/tenantBannerUploader';
 
 

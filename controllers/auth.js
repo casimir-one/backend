@@ -7,7 +7,7 @@ import { TextEncoder } from 'util';
 import usersService from './../services/users';
 import tenantsService from './../services/tenant';
 
-import { USER_PROFILE_STATUS, SIGN_UP_POLICY} from './../constants/constants';
+import { USER_PROFILE_STATUS, SIGN_UP_POLICY} from './../constants';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);

@@ -54,22 +54,19 @@ protected_route.put('/notifications/:username/mark-all-read', notifications.mark
 
 protected_route.post('/proposals', proposals.createProposal)
 protected_route.put('/proposals', proposals.updateProposal)
-protected_route.delete('/proposals', proposals.deleteProposal)
-protected_route.post('/proposals/vote', proposals.voteForProposal)
-protected_route.post('/proposals/invite', proposals.createInviteProposal)
+protected_route.put('/proposals/delete', proposals.deleteProposal)
 protected_route.post('/proposals/exclude', proposals.createExcludeProposal)
-protected_route.post('/proposals/token-sale', proposals.createTokenSaleProposal)
 
 protected_route.post('/groups', researchGroups.createResearchGroup)
 protected_route.put('/groups', researchGroups.updateResearchGroup)
 protected_route.get('/groups/activity-log/:researchGroupId', researchGroups.getResearchGroupActivityLogs)
 public_route.get('/groups/logo/:researchGroupId', researchGroups.getLogo)
 protected_route.post('/groups/logo', researchGroups.uploadLogo)
-protected_route.post('/groups/invite', researchGroups.inviteToResearchGroup)
 protected_route.post('/groups/left', researchGroups.leftResearchGroup)
 
-protected_route.post('/invites/approve', invites.approveInvite)
-protected_route.post('/invites/reject', invites.rejectInvite)
+protected_route.get('/invites/:username', invites.getUserInvites)
+protected_route.get('/invites/research-group/:researchGroupExternalId', invites.getResearchGroupInvites)
+protected_route.post('/invites', invites.inviteUser)
 
 protected_route.post('/reviews', reviews.makeReview)
 
@@ -81,6 +78,7 @@ public_route.get('/research/background/:researchExternalId', research.getBackgro
 protected_route.post('/research/background', research.uploadBackground)
 protected_route.post('/research/token-sale', research.createResearchTokenSale)
 protected_route.post('/research/token-sale/contribution', research.createResearchTokenSaleContribution)
+protected_route.post('/research/application', research.createResearchApplication)
 
 protected_route.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 protected_route.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

@@ -76,6 +76,28 @@ const createResearch = async (ctx) => {
 };
 
 
+const createResearchApplication = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx } = ctx.request.body;
+
+  try {
+
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const { creator: researchGroupAccount } = payload;
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    ctx.status = 200;
+    ctx.body = { tx, txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
+
 const createResearchTokenSale = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta, isProposal } = ctx.request.body;
@@ -380,6 +402,7 @@ export default {
   updateResearch,
   updateResearchMeta,
   createResearch,
+  createResearchApplication,
   createResearchTokenSale,
   createResearchTokenSaleContribution
 }

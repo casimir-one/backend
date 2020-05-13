@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY } from './../constants/constants';
+import { SIGN_UP_POLICY } from './../constants';
 
 const Schema = mongoose.Schema;
 
