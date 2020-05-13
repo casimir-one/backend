@@ -65,7 +65,7 @@ protected_route.post('/groups/logo', researchGroups.uploadLogo)
 protected_route.post('/groups/left', researchGroups.leftResearchGroup)
 
 protected_route.get('/invites/:username', invites.getUserInvites)
-protected_route.get('/invites/research-group/:researchGroupExternalId', invites.getResearchGroupInvites)
+protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)
 protected_route.post('/invites', invites.createUserInvite)
 protected_route.post('/invites/approve', invites.approveUserInvite)
 protected_route.post('/invites/reject', invites.rejectUserInvite)

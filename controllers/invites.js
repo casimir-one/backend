@@ -32,7 +32,7 @@ const getUserInvites = async (ctx) => {
 }
 
 
-const getResearchGroupInvites = async (ctx) => {
+const getResearchGroupPendingInvites = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
 
@@ -45,7 +45,7 @@ const getResearchGroupInvites = async (ctx) => {
       return;
     }
 
-    const invites = await userInvitesService.findResearchGroupInvites(researchGroupExternalId);
+    const invites = await userInvitesService.findResearchGroupPendingInvites(researchGroupExternalId);
     ctx.status = 200;
     ctx.body = invites;
 
@@ -216,7 +216,7 @@ const rejectUserInvite = async (ctx) => {
 
 export default {
   getUserInvites,
-  getResearchGroupInvites,
+  getResearchGroupPendingInvites,
   createUserInvite,
   approveUserInvite,
   rejectUserInvite

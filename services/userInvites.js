@@ -15,8 +15,8 @@ async function findUserActiveInvites(username) {
 }
 
 
-async function findResearchGroupInvites(researchGroupExternalId) {
-  let rgInvites = await UserInvite.find({ researchGroupExternalId: researchGroupExternalId });
+async function findResearchGroupPendingInvites(researchGroupExternalId) {
+  let rgInvites = await UserInvite.find({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT });
   return rgInvites;
 }
 
@@ -138,7 +138,7 @@ async function rejectUserInvite(inviteId, signer) {
 export default {
   findUserInvite,
   findUserActiveInvites,
-  findResearchGroupInvites,
+  findResearchGroupPendingInvites,
   createUserInvite,
   updateUserInvite,
   approveUserInvite,
