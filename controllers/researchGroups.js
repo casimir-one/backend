@@ -144,9 +144,13 @@ const excludeFromResearchGroup = async (ctx) => {
 
 const getResearchGroupActivityLogs = async (ctx) => {
   let jwtUsername = ctx.state.user.username;
-  let researchGroupId = ctx.params.researchGroupId;
+  let researchGroupExternalId = ctx.params.researchGroupExternalId;
   // todo: add access validation
   try {
+
+    const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+    const researchGroupId = researchGroup.id;
+
     let result = await activityLogEntriesService.findActivityLogsEntriesByResearchGroup(researchGroupId)
     ctx.status = 201;
     ctx.body = result;
@@ -217,11 +221,14 @@ const uploadLogo = async (ctx) => {
 }
 
 const getLogo = async (ctx) => {
-  const researchGroupId = ctx.params.researchGroupId;
+  const researchGroupExternalId = ctx.params.researchGroupExternalId;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
   const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
+
+  const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const researchGroupId = researchGroup.id;
 
   let src = researchGroupLogoImagePath(researchGroupId);
   const stat = util.promisify(fs.stat);

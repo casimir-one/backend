@@ -59,8 +59,8 @@ protected_route.post('/proposals/exclude', proposals.createExcludeProposal)
 
 protected_route.post('/groups', researchGroups.createResearchGroup)
 protected_route.put('/groups', researchGroups.updateResearchGroup)
-protected_route.get('/groups/activity-log/:researchGroupId', researchGroups.getResearchGroupActivityLogs)
-public_route.get('/groups/logo/:researchGroupId', researchGroups.getLogo)
+protected_route.get('/groups/activity-log/:researchGroupExternalId', researchGroups.getResearchGroupActivityLogs)
+public_route.get('/groups/logo/:researchGroupExternalId', researchGroups.getLogo)
 protected_route.post('/groups/logo', researchGroups.uploadLogo)
 protected_route.post('/groups/left', researchGroups.excludeFromResearchGroup)
 
