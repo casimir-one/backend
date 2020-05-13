@@ -19,7 +19,7 @@ const UserProfile = new Schema({
   "occupation": { type: String, default: null, trim: true },
   "roles": [{
     "role": { type: String, required: true, trim: true },
-    "researchGroupExteralId": { type: String, required: true },
+    "researchGroupExternalId": { type: String, required: true },
     "metadata": { type: Object, default: null }
   }],
   "location": {
