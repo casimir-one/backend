@@ -380,11 +380,11 @@ const updateResearch = async (ctx) => {
 
 
 
-const getResearch = async (ctx) => {
+const getResearchProfile = async (ctx) => {
   try {
-    const researchId = ctx.params.researchId;
-    const research = await deipRpc.api.getResearchByIdAsync(researchId);
-    const researcRm = await researchService.findResearchByPermlink({ permlink: research.permlink });
+
+    const researchExternalId = ctx.params.researchExternalId;
+    const researcRm = await researchService.findResearchById(researchExternalId);
 
     ctx.status = 200;
     ctx.body = researcRm;
@@ -398,7 +398,7 @@ const getResearch = async (ctx) => {
 export default {
   getBackground,
   uploadBackground,
-  getResearch,
+  getResearchProfile,
   updateResearch,
   updateResearchMeta,
   createResearch,
