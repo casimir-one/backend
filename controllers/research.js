@@ -56,7 +56,7 @@ const createResearch = async (ctx) => {
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
-      action: deipRpc.formatter.getOperationTag("create_research"),
+      action: deipRpc.operations.getOperationTag("create_research"),
       creator: jwtUsername,
       data: { permlink, title },
       isProposalAutoAccepted: !isProposal
@@ -125,7 +125,7 @@ const createResearchTokenSale = async (ctx) => {
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
-      action: deipRpc.formatter.getOperationTag("create_research_token_sale"),
+      action: deipRpc.operations.getOperationTag("create_research_token_sale"),
       creator: jwtUsername,
       data: { research_id: researchInternalId },
       isProposalAutoAccepted: !isProposal
@@ -354,7 +354,7 @@ const updateResearch = async (ctx) => {
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
-      action: deipRpc.formatter.getOperationTag("update_research"),
+      action: deipRpc.operations.getOperationTag("update_research"),
       creator: jwtUsername,
       data: { 
         permlink, 

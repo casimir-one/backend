@@ -104,17 +104,11 @@ async function lookupContentProposal(researchGroup, hash) {
   const proposals = await deipRpc.api.getProposalsByCreatorAsync(researchGroup);
   const content = proposals.find(p => {
     const [op_name, op_payload] = p['proposed_transaction']['operations'][0];
-    let tag = deipRpc.formatter.getOperationTag(op_name);
+    let tag = deipRpc.operations.getOperationTag(op_name);
     return tag == PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL && op_payload.content == hash;
   });
   return content;
 }
-
-
-// function proposalIsNotExpired(proposal) {
-//     const now = new Date();
-//     return proposal.is_completed || (new Date(`${proposal.expiration_time}Z`).getTime() > now.getTime());
-// }
 
 function proposalIsNotExpired(proposal) {
   return proposal != null;

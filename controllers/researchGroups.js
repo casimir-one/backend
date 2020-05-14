@@ -74,7 +74,7 @@ const updateResearchGroup = async (ctx) => {
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
-      action: deipRpc.formatter.getOperationTag("update_account"),
+      action: deipRpc.operations.getOperationTag("update_account"),
       creator: jwtUsername,
       data: {},
       isProposalAutoAccepted: !isProposal
@@ -122,7 +122,7 @@ const excludeFromResearchGroup = async (ctx) => {
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
-      action: deipRpc.formatter.getOperationTag("left_research_group_membership"),
+      action: deipRpc.operations.getOperationTag("left_research_group_membership"),
       creator: jwtUsername,
       data: { name: member },
       isProposalAutoAccepted: !isProposal

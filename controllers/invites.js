@@ -112,7 +112,7 @@ const createUserInvite = async (ctx) => {
       // LEGACY >>>
       const parsedProposal = {
         research_group_id: researchGroup.id,
-        action: deipRpc.formatter.getOperationTag("join_research_group_membership"),
+        action: deipRpc.operations.getOperationTag("join_research_group_membership"),
         creator: jwtUsername,
         data: {
           name: invitee

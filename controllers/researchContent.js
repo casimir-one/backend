@@ -742,7 +742,7 @@ const createResearchContent = async (ctx) => {
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
-      action: deipRpc.formatter.getOperationTag("create_research_content"), 
+      action: deipRpc.operations.getOperationTag("create_research_content"), 
       creator: jwtUsername,
       data: { permlink, title, research_id: researchInternalId },
       isProposalAutoAccepted: !isProposal
