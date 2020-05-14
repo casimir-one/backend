@@ -9,11 +9,11 @@ import config from './../config'
 import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
 import researchGroupsService from './../services/researchGroup';
-import { getTransaction } from './../utils/blockchain';
 import activityLogEntriesService from './../services/activityLogEntry';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
 import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
+import { researchGroupLogoUploader } from './../storages/researchGroupLogoUploader';
 
 
 const createResearchGroup = async (ctx) => {
@@ -162,39 +162,19 @@ const getResearchGroupActivityLogs = async (ctx) => {
 }
 
 const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
-const researchGroupStoragePath = (researchGroupId) => `${filesStoragePath}/research-groups/${researchGroupId}`;
-const researchGroupLogoImagePath = (researchGroupId, ext = 'png') => `${researchGroupStoragePath(researchGroupId)}/logo.${ext}`;
+const researchGroupStoragePath = (researchGroupExternalId) => `${filesStoragePath}/research-groups/${researchGroupExternalId}`;
+const researchGroupLogoImagePath = (researchGroupExternalId, ext = 'png') => `${researchGroupStoragePath(researchGroupExternalId)}/logo.${ext}`;
 const defaultResearchGroupLogoPath = () => path.join(__dirname, `./../default/default-research-group-logo.png`);
 
-const allowedLogoMimeTypes = ['image/png'];
-const researchGroupStorage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    const dest = researchGroupStoragePath(`${req.headers['research-group-id']}`)
-    callback(null, dest)
-  },
-  filename: function (req, file, callback) {
-    callback(null, `logo.png`);
-  }
-})
 
-const researchGroupLogoUploader = multer({
-  storage: researchGroupStorage,
-  fileFilter: function (req, file, callback) {
-    if (allowedLogoMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-      return callback(new Error('Only the following mime types are allowed: ' + allowedLogoMimeTypes.join(', ')), false);
-    }
-    callback(null, true);
-  }
-})
-
-const uploadLogo = async (ctx) => {
+const uploadResearchGroupLogo = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const researchGroupId = ctx.request.headers['research-group-id'];
-  const authorized = await authService.authorizeResearchGroup(researchGroupId, jwtUsername);
-
-  if (!authorized) {
+  const researchGroupExternalId = ctx.request.headers['research-group-external-id'];
+  
+  const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
+  if (!authorizedGroup) {
     ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupId}" research`;
+    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupExternalId}" research`;
     return;
   }
 
@@ -203,12 +183,12 @@ const uploadLogo = async (ctx) => {
   const ensureDir = util.promisify(fsExtra.ensureDir);
 
   try {
-    const filepath = researchGroupLogoImagePath(researchGroupId);
+    const filepath = researchGroupLogoImagePath(researchGroupExternalId);
 
     await stat(filepath);
     await unlink(filepath);
   } catch (err) {
-    await ensureDir(researchGroupStoragePath(researchGroupId))
+    await ensureDir(researchGroupStoragePath(researchGroupExternalId))
   }
 
   const logoImage = researchGroupLogoUploader.single('research-background');
@@ -220,17 +200,15 @@ const uploadLogo = async (ctx) => {
   ctx.body = result;
 }
 
-const getLogo = async (ctx) => {
+const getResearchGroupLogo = async (ctx) => {
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
   const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
 
-  const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
-  const researchGroupId = researchGroup.id;
 
-  let src = researchGroupLogoImagePath(researchGroupId);
+  let src = researchGroupLogoImagePath(researchGroupExternalId);
   const stat = util.promisify(fs.stat);
 
   try {
@@ -288,7 +266,7 @@ export default {
   createResearchGroup,
   updateResearchGroup,
   getResearchGroupActivityLogs,
-  getLogo,
-  uploadLogo,
+  getResearchGroupLogo,
+  uploadResearchGroupLogo,
   excludeFromResearchGroup
 }
