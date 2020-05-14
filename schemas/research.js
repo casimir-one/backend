@@ -31,7 +31,6 @@ const Research = new Schema({
     "type": { type: String, required: true },
     "title": { type: String, required: true }
   }],
-  "trl": { type: String, default: null },
   "tenantCriterias": [ResearchComponentValue]
 
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
