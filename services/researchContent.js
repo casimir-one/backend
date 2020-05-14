@@ -18,18 +18,8 @@ async function findResearchContentByHash(researchExternalId, hash) {
     return rc;
 }
 
-async function findResearchContentByHashLegacy(researchId, hash) {
-  const rc = await ResearchContent.findOne({ researchId, hash });
-  return rc;
-}
-
 async function removeResearchContentByHash(researchExternalId, hash) {
   const result = await ResearchContent.deleteOne({ researchExternalId, hash });
-  return result;
-}
-
-async function removeResearchContentByHashLegacy(researchId, hash) {
-  const result = await ResearchContent.deleteOne({ researchId, hash });
   return result;
 }
 
@@ -118,11 +108,9 @@ function proposalIsNotExpired(proposal) {
 export {
   findResearchContentById,
   findResearchContentByHash,
-  findResearchContentByHashLegacy,
   upsertResearchContent,
   removeResearchContentById,
   removeResearchContentByHash,
-  removeResearchContentByHashLegacy,
   findResearchContentByResearchId,
   lookupContentProposal,
   proposalIsNotExpired

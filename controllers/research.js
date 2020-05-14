@@ -43,12 +43,11 @@ const createResearch = async (ctx) => {
 
     const researchGroupInternalId = authorizedGroup.id;
 
-    const researcRm = await researchService.upsertResearch({
+    const researcRm = await researchService.createResearch({
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
       permlink,
-      title,
       ...offchainMeta
     });
 
@@ -192,7 +191,7 @@ const backgroundImageUploader = multer({
   }
 })
 
-const uploadBackground = async (ctx) => {
+const uploadResearchBackground = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.request.headers['research-external-id'];
   const research = await deipRpc.api.getResearchAsync(researchExternalId);
@@ -226,7 +225,7 @@ const uploadBackground = async (ctx) => {
   ctx.body = result;
 }
 
-const getBackground = async (ctx) => {
+const getResearchBackground = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
@@ -289,6 +288,7 @@ const getBackground = async (ctx) => {
 const updateResearchMeta = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.params.researchExternalId;
+  const update = ctx.request.body;
 
   try {
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
@@ -300,24 +300,18 @@ const updateResearchMeta = async (ctx) => {
       return;
     }
 
-    const researchRm = await researchService.findResearchById(researchExternalId);
-
-    if (!researchRm) {
+    const researchProfile = await researchService.findResearchById(researchExternalId);
+    if (!researchProfile) {
       ctx.status = 400;
       ctx.body = 'Read model not found';
       return;
     }
 
-    const { milestones, videoSrc, partners, trl } = ctx.request.body;
-    researchRm.milestones = milestones || researchRm.milestones;
-    researchRm.videoSrc = videoSrc || researchRm.videoSrc;
-    researchRm.partners = partners || researchRm.partners;
-    researchRm.trl = trl || researchRm.trl;
-
-    const updatedRm = await researchRm.save();
+    const profileData = researchProfile.toObject();
+    const updatedProfile = await researchService.updateResearch(researchExternalId, { ...profileData, ...update });
 
     ctx.status = 200;
-    ctx.body = { rm: updatedRm };
+    ctx.body = { rm: updatedProfile };
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -378,11 +372,9 @@ const updateResearch = async (ctx) => {
 };
 
 
-
-
 const getResearchProfile = async (ctx) => {
-  try {
 
+  try {
     const researchExternalId = ctx.params.researchExternalId;
     const researcRm = await researchService.findResearchById(researchExternalId);
 
@@ -395,9 +387,10 @@ const getResearchProfile = async (ctx) => {
   }
 };
 
+
 export default {
-  getBackground,
-  uploadBackground,
+  getResearchBackground,
+  uploadResearchBackground,
   getResearchProfile,
   updateResearch,
   updateResearchMeta,

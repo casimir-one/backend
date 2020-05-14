@@ -1,7 +1,15 @@
 
 import mongoose from 'mongoose';
+import { RESEARCH_COMPONENT_TYPE } from './../constants';
 
 const Schema = mongoose.Schema;
+
+const ResearchComponentValue = new Schema({
+  "_id": false,
+  "type": { type: String, enum: [RESEARCH_COMPONENT_TYPE.STEPPER], required: true },
+  "component": { type: String, required: true },
+  "value": { type: Object, required: true }
+});
 
 const Research = new Schema({
   "_id": { type: String, required: true },
@@ -24,6 +32,8 @@ const Research = new Schema({
     "title": { type: String, required: true }
   }],
   "trl": { type: String, default: null },
+  "tenantCriterias": [ResearchComponentValue]
+
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research', Research);

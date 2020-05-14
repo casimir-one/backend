@@ -35,7 +35,7 @@ const UserProfile = new Schema({
       required: true
     },
     "label": { type: String, default: null, required: true, trim: true },
-    "link": { type: String, required: true, trim: true },
+    "link": { type: String, default: "", trim: true },
     "metadata": { type: Object, default: null }
   }],
   "phoneNumbers": [{

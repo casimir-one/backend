@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY } from './../constants';
+import { SIGN_UP_POLICY, RESEARCH_COMPONENT_TYPE } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -15,11 +15,11 @@ const ResearchArea = new Schema({
 const FAQ = new Schema({
   "question": { type: String, required: true },
   "answer": { type: String, required: true },
-  "isVisible": { type: Boolean, required: true },
+  "isVisible": { type: Boolean, required: true }
 });
 
 const ResearchComponent = new Schema({
-  "type": { type: String, enum: ['stepper'], required: true },
+  "type": { type: String, enum: [RESEARCH_COMPONENT_TYPE.STEPPER], required: true },
   "isVisible": { type: Boolean, required: true },
   "component": { type: Object, required: true }
 });

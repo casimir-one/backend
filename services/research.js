@@ -1,54 +1,48 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 
-async function findResearchByPermlink({ permlink }) {
-  let research = await Research.findOne({ permlink: permlink });
-  return research;
-}
-
 async function findResearchById(externalId) {
   let research = await Research.findOne({ _id: externalId });
   return research;
 }
 
-async function removeResearchByPermlink(permlink) {
-  let result = await Research.deleteOne({ permlink });
-  return result;
-}
-
-async function upsertResearch({
+async function createResearch({
   externalId,
   researchGroupExternalId,
-  permlink, 
+  researchGroupInternalId,
+  permlink,
   milestones,
-  videoSrc, 
-  partners, 
-  trl,
-  researchGroupInternalId
+  videoSrc,
+  partners,
+  tenantCriterias,
 }) {
 
-  let research = await findResearchById(externalId);
+  const research = new Research({
+    _id: externalId,
+    researchGroupExternalId,
+    permlink,
+    milestones,
+    videoSrc,
+    partners,
+    tenantCriterias,
+    researchGroupId: researchGroupInternalId, // legacy internal id
+  });
 
-  if (research) {
-    research.researchGroupExternalId = researchGroupExternalId;
-    research.permlink = permlink;
-    research.milestones = milestones;
-    research.videoSrc = videoSrc;
-    research.partners = partners;
-    research.trl = trl;
-    research.researchGroupId = researchGroupInternalId; // legacy internal id
-  } else {
-    research = new Research({
-      _id: externalId,
-      researchGroupExternalId,
-      permlink, 
-      milestones,
-      videoSrc, 
-      partners, 
-      trl,
-      researchGroupId: researchGroupInternalId, // legacy internal id
-    })
-  }
+  return research.save();
+}
+
+async function updateResearch(externalId, {
+  milestones,
+  videoSrc,
+  partners,
+  tenantCriterias
+}) {
+
+  const research = await findResearchById(externalId);
+  research.milestones = milestones;
+  research.videoSrc = videoSrc;
+  research.partners = partners;
+  research.tenantCriterias = tenantCriterias;
 
   return research.save();
 }
@@ -65,8 +59,7 @@ async function lookupResearchProposal(groupId, permlink) {
 
 export default {
   findResearchById,
-  findResearchByPermlink,
-  removeResearchByPermlink,
-  upsertResearch,
+  createResearch,
+  updateResearch,
   lookupResearchProposal
 }
