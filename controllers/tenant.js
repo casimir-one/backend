@@ -6,6 +6,7 @@ import sharp from 'sharp';
 import deipRpc from '@deip/rpc-client';
 import usersService from './../services/users';
 import tenantService from './../services/tenant';
+import researchesService from './../services/research';
 import * as authService from './../services/auth';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
@@ -263,6 +264,12 @@ const updateTenantProfile = async (ctx) => {
       { ...profileData, ...update }, 
       { ...profileData.settings, ...update.settings }
     );
+    const updatedProfileData = updatedTenantProfile.toObject();
+
+    const oldComponents = profileData.settings.researchComponents;
+    const newComponents = updatedProfileData.settings.researchComponents;
+
+    await researchesService.processResearchCriterias(oldComponents, newComponents);
 
     ctx.status = 200;
     ctx.body = updatedTenantProfile;

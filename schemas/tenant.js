@@ -18,7 +18,7 @@ const FAQ = new Schema({
   "isVisible": { type: Boolean, required: true }
 });
 
-const ResearchComponent = new Schema({
+const ResearchCriteria = new Schema({
   "type": { type: String, enum: [RESEARCH_COMPONENT_TYPE.STEPPER], required: true },
   "isVisible": { type: Boolean, required: true },
   "component": { type: Object, required: true }
@@ -39,7 +39,7 @@ const TenantProfile = new Schema({
     "settings": {
       "signUpPolicy": { type: String, enum: [SIGN_UP_POLICY.FREE, SIGN_UP_POLICY.ADMIN_APPROVAL], required: true },
       "researchAreas": [ResearchArea],
-      "researchComponents": [ResearchComponent],
+      "researchComponents": [ResearchCriteria],
       "faq": [FAQ],
       "researchesBlacklist": [{ type: String, required: true, trim: true }],
       "researchesWhitelist": [{ type: String, required: true, trim: true }]
