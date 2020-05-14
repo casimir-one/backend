@@ -37,7 +37,13 @@ const run = async () => {
   for (let i = 0; i < researches.length; i++) {
     let research = researches[i];
     const trlIndex = getRandomInt(0, 7);
-    research.tenantCriterias = [{ "component": "5ebd469a2cea71001f84345a", "type": RESEARCH_COMPONENT_TYPE.STEPPER, "value": { index: trlIndex } }];
+    const marlIndex = getRandomInt(0, 7);
+    const srlIndex = getRandomInt(0, 7);
+    research.tenantCriterias = [
+      { "component": "5ebd469a2cea71001f84345a", "type": RESEARCH_COMPONENT_TYPE.STEPPER, "value": { index: trlIndex } },
+      { "component": "5ebd47762cea71001f843460", "type": RESEARCH_COMPONENT_TYPE.STEPPER, "value": { index: marlIndex } },
+      { "component": "5ebd4b842cea71001f843467", "type": RESEARCH_COMPONENT_TYPE.STEPPER, "value": { index: srlIndex } },
+    ];
     promises.push(research.save());
   }
 
