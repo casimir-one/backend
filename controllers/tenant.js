@@ -11,6 +11,7 @@ import * as authService from './../services/auth';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
 import { tenantBannerUploader } from './../storages/tenantBannerUploader';
+import * as blockchainService from './../utils/blockchain';
 
 
 const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
@@ -366,6 +367,48 @@ const rejectSignUpRequest = async (ctx) => {
 }
 
 
+const addTenantAdmin = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx } = ctx.request.body;
+
+  try {
+
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    ctx.status = 200;
+    ctx.body = { tx, txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const removeTenantAdmin = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx } = ctx.request.body;
+
+  try {
+
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    ctx.status = 200;
+    ctx.body = { tx, txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 export default {
   getTenantProfile,
   getTenantBanner,
@@ -374,5 +417,7 @@ export default {
   approveSignUpRequest,
   rejectSignUpRequest,
   updateTenantProfile,
-  uploadTenantBanner
+  uploadTenantBanner,
+  addTenantAdmin,
+  removeTenantAdmin
 }

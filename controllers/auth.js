@@ -14,49 +14,66 @@ function Encodeuint8arr(seed) {
 }
 
 const signIn = async function (ctx) {
+  const { username, secretSigHex } = ctx.request.body;
 
-  const { username, secretSigHex} = ctx.request.body;
-  const [account] = await deipRpc.api.getAccountsAsync([username])
-  if (!account) {
-    ctx.body = {
-      success: false,
-      error: `User "${username}" does not exist!`
-    };
-    return;
-  }
-
-  const pubWif = account.owner.key_auths[0][0]
-  const publicKey = crypto.PublicKey.from(pubWif);
-
-  let isValidSig;
   try {
-    // SIG_SEED should be uint8 array with length = 32
-    isValidSig = publicKey.verify(Encodeuint8arr(config.SIG_SEED).buffer, crypto.unhexify(secretSigHex).buffer);
-  } catch (err) {
-    isValidSig = false;
-  }
 
-  if (!isValidSig) {
+    const tenant = ctx.state.tenant;
+
+    const [account] = await deipRpc.api.getAccountsAsync([username])
+    if (!account) {
+      ctx.body = {
+        success: false,
+        error: `User "${username}" does not exist!`
+      };
+      return;
+    }
+
+    if (ctx.state.isTenantRoute && !tenant.admins.some(name => name.name == username)) {
+      ctx.body = {
+        success: false,
+        error: `User "${username}" does not have admin rights`
+      };
+      return;
+    }
+
+    const pubWif = account.owner.key_auths[0][0]
+    const publicKey = crypto.PublicKey.from(pubWif);
+
+    let isValidSig;
+    try {
+      // SIG_SEED should be uint8 array with length = 32
+      isValidSig = publicKey.verify(Encodeuint8arr(config.SIG_SEED).buffer, crypto.unhexify(secretSigHex).buffer);
+    } catch (err) {
+      isValidSig = false;
+    }
+
+    if (!isValidSig) {
+      ctx.body = {
+        success: false,
+        error: `Signature is invalid for ${username}, make sure you specify correct private key`
+      };
+      return;
+    }
+
+    const jwtToken = jwt.sign({
+      username,
+      tenant: tenant.id,
+      isTenantAdmin: tenant.admins.some(a => a.name == username),
+      exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
+    }, config.JWT_SECRET);
+
+    ctx.status = 200;
     ctx.body = {
-      success: false,
-      error: `Signature is invalid for ${username}, make sure you specify correct private key`
+      success: true,
+      jwtToken
     };
-    return;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err;
   }
-
-  const tenant = await tenantsService.findTenantProfile(config.TENANT);
-
-  const jwtToken = jwt.sign({
-    username,
-    tenant: tenant.id,
-    isTenantAdmin: tenant.admins.some(a => a.name == username),
-    exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
-  }, config.JWT_SECRET);
-
-  ctx.body = {
-    success: true,
-    jwtToken
-  };
 }
 
 const signUp = async function (ctx) {
@@ -78,10 +95,8 @@ const signUp = async function (ctx) {
 
   try {
 
-    const tenant = await (ctx.state.tenant ? Promise.resolve(ctx.state.tenant) : tenantsService.findTenantProfile(config.TENANT));
-
-    const isAdmin = ctx.state.tenant ? ctx.state.isTenantAdmin : false;
-    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || isAdmin
+    const tenant = ctx.state.tenant;
+    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
       ? USER_PROFILE_STATUS.APPROVED
       : USER_PROFILE_STATUS.PENDING;
 
@@ -110,7 +125,7 @@ const signUp = async function (ctx) {
       username,
       status,
       signUpPubKey: pubKey,
-      tenant: config.TENANT,
+      tenant: tenant.id,
       email,
       firstName,
       lastName,

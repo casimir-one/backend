@@ -55,6 +55,8 @@ app.on('error', function(err, ctx) {
     console.log('server error', err);
 });
 
+// tenant layer
+app.use(require('./middlewares/tenant.js')());
 
 // public routes layer
 app.use(serve('files/static'));
@@ -75,10 +77,8 @@ app.use(jwt({
   }})
 );
 
-
 // tenant auth layer
-app.use(require('./middlewares/tenant.js')());
-
+app.use(require('./middlewares/tenantAuth.js')());
 
 // protected routes layer
 app.use(require('./routes/api.js').protected.routes());
