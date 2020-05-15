@@ -29,7 +29,7 @@ const signIn = async function (ctx) {
       return;
     }
 
-    if (ctx.state.isTenantRoute && !tenant.admins.some(name => name.name == username)) {
+    if (ctx.state.isTenantRoute && !tenant.admins.some(name => name == username)) {
       ctx.body = {
         success: false,
         error: `User "${username}" does not have admin rights`
@@ -59,7 +59,7 @@ const signIn = async function (ctx) {
     const jwtToken = jwt.sign({
       username,
       tenant: tenant.id,
-      isTenantAdmin: tenant.admins.some(a => a.name == username),
+      isTenantAdmin: tenant.admins.some(name => name == username),
       exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
     }, config.JWT_SECRET);
 

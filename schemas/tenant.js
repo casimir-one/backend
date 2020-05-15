@@ -32,10 +32,6 @@ const TenantProfile = new Schema({
     "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
     "logo": { type: String, default: "default_tenant_logo.png" },
     "banner": { type: String, default: "default_banner_logo.png" },
-    "admins": [{
-      "name": { type: String, required: true, trim: true },
-      "metadata": { type: Object, default: null }
-    }],
     "settings": {
       "signUpPolicy": { type: String, enum: [SIGN_UP_POLICY.FREE, SIGN_UP_POLICY.ADMIN_APPROVAL], required: true },
       "researchAreas": [ResearchArea],
