@@ -1,14 +1,47 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import PROPOSAL_TYPE from './../constants/proposalType';
-import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
-import TOKEN_SALE_STATUS from './../constants/tokenSaleStatus';
+import { APP_EVENTS, PROPOSAL_TYPE, ACTIVITY_LOG_TYPE, TOKEN_SALE_STATUS } from './../constants';
 import activityLogEntriesService from './../services/activityLogEntry';
 import usersService from './../services/users';
 
 class ResearchGroupActivityLogHandler extends EventEmitter {}
 
 const researchGroupActivityLogHandler = new ResearchGroupActivityLogHandler();
+
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
+  const { researchGroup, research, proposer, title, isProposalAutoAccepted } = payload;
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId: researchGroup.id,
+    type: ACTIVITY_LOG_TYPE.PROPOSAL, // legacy
+    metadata: {
+      isProposalAutoAccepted, // legacy
+      proposal: { action: deipRpc.operations.getOperationTag("create_research"), data: { title } }, // legacy
+      researchGroup,
+      research,
+      creatorProfile: proposer
+    }
+  });
+});
+
+
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
+  const { researchGroup, research, creator } = payload;
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId: researchGroup.id,
+    type: ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, // legacy
+    metadata: {
+      isProposalAutoAccepted: true, // legacy
+      proposal: { action: deipRpc.operations.getOperationTag("create_research") }, // legacy
+      researchGroup,
+      research,
+      creatorProfile: creator
+    }
+  });
+});
+
+
 
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) => {
@@ -19,29 +52,6 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) 
   let creatorProfile = await usersService.findUserProfileByOwner(creator);
 
   switch (action) {
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH: {
-      let { permlink } = payload;
-      let research = null;
-
-      if (isProposalAutoAccepted) {
-        research = await deipRpc.api.getResearchByAbsolutePermlinkAsync(researchGroup.permlink, permlink);
-      }
-
-      activityLogEntriesService.createActivityLogEntry({
-        researchGroupId, 
-        type,
-        metadata: {
-          isProposalAutoAccepted,
-          proposal,
-          researchGroup,
-          research,
-          creatorProfile
-        }
-      });
-
-      break;
-    }
 
     case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
       let { permlink, research_id } = payload;

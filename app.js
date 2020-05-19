@@ -55,6 +55,9 @@ app.on('error', function(err, ctx) {
     console.log('server error', err);
 });
 
+// base app setup layer
+app.use(require('./middlewares/setup.js')());
+
 // tenant layer
 app.use(require('./middlewares/tenant.js')());
 
@@ -85,6 +88,7 @@ app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/researchContent.js').protected.routes());
 app.use(require('./routes/tenant.js').protected.routes());
 
+app.use(require('./middlewares/events.js')());
 
 mongoose.connect(config.mongo['deip-server'].connection);
 mongoose.connection.on('connected', () => {

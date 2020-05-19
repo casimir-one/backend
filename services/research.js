@@ -10,7 +10,6 @@ async function createResearch({
   externalId,
   researchGroupExternalId,
   researchGroupInternalId,
-  permlink,
   milestones,
   videoSrc,
   partners,
@@ -20,7 +19,6 @@ async function createResearch({
   const research = new Research({
     _id: externalId,
     researchGroupExternalId,
-    permlink,
     milestones,
     videoSrc,
     partners,

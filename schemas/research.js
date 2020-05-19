@@ -15,7 +15,6 @@ const Research = new Schema({
   "_id": { type: String, required: true },
   "researchGroupExternalId": { type: String, required: true },
   "researchGroupId": { type: Number, required: true }, // legacy internal id
-  "permlink": { type: String, required: true },
   "milestones": [{
     "_id": false,
     "goal": { type: String, required: true },

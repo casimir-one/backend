@@ -11,11 +11,10 @@ import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE } from './../constants';
 
 
-const createResearch = async (ctx) => {
+const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta, isProposal } = ctx.request.body;
 
@@ -23,55 +22,37 @@ const createResearch = async (ctx) => {
 
     const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
     const payload = operation[1];
-    const researchGroupAccount = payload.research_group;
+    const { external_id: externalId, research_group: researchGroupExternalId } = payload;
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
     if (!authorizedGroup) {
       ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
+      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupExternalId}" group`;
       return;
     }
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
-    const {
-      permlink,
-      title,
-      external_id: externalId,
-      research_group: researchGroupExternalId
-    } = payload;
-
     const researchGroupInternalId = authorizedGroup.id;
-
     const researcRm = await researchService.createResearch({
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
-      permlink,
       ...offchainMeta
     });
 
     
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("create_research"),
-      creator: jwtUsername,
-      data: { permlink, title },
-      isProposalAutoAccepted: !isProposal
-    };
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
-
     ctx.status = 200;
     ctx.body = { tx, txResult, rm: researcRm };
+    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, creator: jwtUsername }]);
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 };
 
 

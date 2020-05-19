@@ -7,6 +7,7 @@ import PROPOSAL_TYPE from './proposalType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
 import RESEARCH_COMPONENT_TYPE from './researchComponentsTypes';
+import APP_EVENTS from './appEvents';
 
 
 export {
@@ -17,5 +18,6 @@ export {
   PROPOSAL_TYPE,
   TOKEN_SALE_STATUS,
   USER_INVITE_STATUS,
-  RESEARCH_COMPONENT_TYPE
+  RESEARCH_COMPONENT_TYPE,
+  APP_EVENTS
 } 
