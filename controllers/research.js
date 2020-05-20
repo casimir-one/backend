@@ -63,14 +63,27 @@ const createResearchApplication = async (ctx) => {
 
   try {
 
-    const formUploader = researchApplicationFormUploader.fields([{ name: 'cv', maxCount: 1 }, { name: 'businessPlan', maxCount: 1 }]);
+    const formUploader = researchApplicationFormUploader.fields([
+      { name: 'budgetAttachment', maxCount: 1 },
+      { name: 'businessPlanAttachment', maxCount: 1 },
+      { name: 'cvAttachment', maxCount: 1 }, 
+      { name: 'marketResearchAttachment', maxCount: 1 }
+    ]);
+
     const form = await formUploader(ctx, () => new Promise((resolve, reject) => {
-      const [cvAttachment] = ctx.req.files.cv;
-      const [businessPlanAttachment] = ctx.req.files.businessPlan;
+      const [budgetAttachment] = ctx.req.files.budgetAttachment ? ctx.req.files.budgetAttachment : [null];
+      const [businessPlanAttachment] = ctx.req.files.businessPlanAttachment ? ctx.req.files.businessPlanAttachment : [null];
+      const [cvAttachment] = ctx.req.files.cvAttachment ? ctx.req.files.cvAttachment : [null];
+      const [marketResearchAttachment] = ctx.req.files.marketResearchAttachment ? ctx.req.files.marketResearchAttachment : [null];
+
       resolve({
-        cvAttachment: cvAttachment.filename, 
-        businessPlanAttachment: businessPlanAttachment.filename,
+        budgetAttachment: budgetAttachment ? budgetAttachment.filename : null,
+        businessPlanAttachment: businessPlanAttachment ? businessPlanAttachment.filename : null,
+        cvAttachment: cvAttachment ? cvAttachment.filename : null, 
+        marketResearchAttachment: marketResearchAttachment ? marketResearchAttachment.filename : null, 
+
         ...ctx.req.body,
+        location: JSON.parse(ctx.req.body.location),
         researchDisciplines: JSON.parse(ctx.req.body.researchDisciplines),
         tenantCriterias: JSON.parse(ctx.req.body.tenantCriterias),
         tx: JSON.parse(ctx.req.body.tx)
@@ -85,18 +98,18 @@ const createResearchApplication = async (ctx) => {
       title: form.researchTitle,
       abstract: form.researchAbstract,
       disciplines: form.researchDisciplines,
-      location: null,
+      location: form.location,
       problem: form.problem,
       solution: form.solution,
       tenantCriterias: form.tenantCriterias,
-      eta: new Date(),
-      cvAttachment: form.cvAttachment,
+      funding: form.funding,
+      eta: new Date(form.eta),
+      budgetAttachment: form.budgetAttachment,
       businessPlanAttachment: form.businessPlanAttachment,
-      marketResearchAttachment: "marketResearchAttachment",
-      fundingAttachment: "fundingAttachment",
-      budgetAttachment: "budgetAttachment"
+      cvAttachment: form.cvAttachment,
+      marketResearchAttachment: form.marketResearchAttachment
     });
-    
+
     ctx.status = 200;
     ctx.body = { txResult, tx: form.tx, rm: researchApplicationRm };
 

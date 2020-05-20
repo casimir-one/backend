@@ -53,16 +53,16 @@ async function createResearchApplication({
   title,
   abstract,
   disciplines,
-  location,
   problem,
   solution,
-  tenantCriterias,
+  funding,
   eta,
-  cvAttachment,
-  marketResearchAttachment,
-  fundingAttachment,
+  location,
+  tenantCriterias,
   budgetAttachment,
-  businessPlanAttachment
+  businessPlanAttachment,
+  cvAttachment,
+  marketResearchAttachment
 }) {
 
   const researchApplication = new ResearchApplication({
@@ -72,16 +72,16 @@ async function createResearchApplication({
     title,
     abstract,
     disciplines,
-    location,
     problem,
     solution,
-    tenantCriterias,
+    funding,
     eta,
-    cvAttachment,
-    marketResearchAttachment,
-    fundingAttachment,
+    location,
+    tenantCriterias,
     budgetAttachment,
-    businessPlanAttachment
+    businessPlanAttachment,
+    cvAttachment,
+    marketResearchAttachment
   });
 
   return researchApplication.save();
