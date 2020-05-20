@@ -8,6 +8,7 @@ import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
 import RESEARCH_COMPONENT_TYPE from './researchComponentsTypes';
 import APP_EVENTS from './appEvents';
+import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 
 
 export {
@@ -19,5 +20,6 @@ export {
   TOKEN_SALE_STATUS,
   USER_INVITE_STATUS,
   RESEARCH_COMPONENT_TYPE,
-  APP_EVENTS
+  APP_EVENTS,
+  RESEARCH_APPLICATION_STATUS
 } 

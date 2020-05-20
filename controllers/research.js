@@ -12,6 +12,8 @@ import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
 import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE } from './../constants';
+import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageFormUploader } from './../storages/researchStorage';
+import { researchApplicationFormUploader } from './../storages/researchApplicationStorage';
 
 
 const createResearch = async (ctx, next) => {
@@ -41,7 +43,7 @@ const createResearch = async (ctx, next) => {
       ...offchainMeta
     });
 
-    
+
     ctx.status = 200;
     ctx.body = { tx, txResult, rm: researcRm };
     ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, creator: jwtUsername }]);
@@ -58,17 +60,45 @@ const createResearch = async (ctx, next) => {
 
 const createResearchApplication = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
 
   try {
 
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    const { creator: researchGroupAccount } = payload;
+    const formUploader = researchApplicationFormUploader.fields([{ name: 'cv', maxCount: 1 }, { name: 'businessPlan', maxCount: 1 }]);
+    const form = await formUploader(ctx, () => new Promise((resolve, reject) => {
+      const [cvAttachment] = ctx.req.files.cv;
+      const [businessPlanAttachment] = ctx.req.files.businessPlan;
+      resolve({
+        cvAttachment: cvAttachment.filename, 
+        businessPlanAttachment: businessPlanAttachment.filename,
+        ...ctx.req.body,
+        researchDisciplines: JSON.parse(ctx.req.body.researchDisciplines),
+        tenantCriterias: JSON.parse(ctx.req.body.tenantCriterias),
+        tx: JSON.parse(ctx.req.body.tx)
+      });
+    }));
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const txResult = await blockchainService.sendTransactionAsync(form.tx);
+
+    const researchApplicationRm = await researchService.createResearchApplication({
+      proposalId: form.proposalId,
+      researcher: form.researcher,
+      title: form.researchTitle,
+      abstract: form.researchAbstract,
+      disciplines: form.researchDisciplines,
+      location: null,
+      problem: form.problem,
+      solution: form.solution,
+      tenantCriterias: form.tenantCriterias,
+      eta: new Date(),
+      cvAttachment: form.cvAttachment,
+      businessPlanAttachment: form.businessPlanAttachment,
+      marketResearchAttachment: "marketResearchAttachment",
+      fundingAttachment: "fundingAttachment",
+      budgetAttachment: "budgetAttachment"
+    });
+    
     ctx.status = 200;
-    ctx.body = { tx, txResult };
+    ctx.body = { txResult, tx: form.tx, rm: researchApplicationRm };
 
   } catch (err) {
     console.log(err);
@@ -77,6 +107,21 @@ const createResearchApplication = async (ctx) => {
   }
 };
 
+
+const getResearchApplications = async (ctx) => {
+  const status = ctx.query.status;
+  const researcher = ctx.query.researcher;
+
+  try {
+    const result = await researchService.getResearchApplications({ status, researcher });
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
 const createResearchTokenSale = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -146,64 +191,34 @@ const createResearchTokenSaleContribution = async (ctx) => {
 }
 
 
-const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
-const researchStoragePath = (researchId) => `${filesStoragePath}/research-projects/${researchId}`;
-const backgroundImagePath = (researchId, ext = 'png') => `${researchStoragePath(researchId)}/background.${ext}`;
-const defaultBackgroundImagePath = () => path.join(__dirname, `./../default/default-research-background.png`);
-
-const allowedBackgroundMimeTypes = ['image/png'];
-const researchStorage = multer.diskStorage({
-  destination: function (req, file, callback) {
-    const dest = researchStoragePath(`${req.headers['research-external-id']}`)
-    callback(null, dest)
-  },
-  filename: function (req, file, callback) {
-    callback(null, `background.png`);
-  }
-})
-
-const backgroundImageUploader = multer({
-  storage: researchStorage,
-  fileFilter: function (req, file, callback) {
-    if (allowedBackgroundMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-      return callback(new Error('Only the following mime types are allowed: ' + allowedBackgroundMimeTypes.join(', ')), false);
-    }
-    callback(null, true);
-  }
-})
-
 const uploadResearchBackground = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.request.headers['research-external-id'];
-  const research = await deipRpc.api.getResearchAsync(researchExternalId);
-  const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
-
-  if (!authorizedGroup) {
-    ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
-    return;
-  }
-
-  const stat = util.promisify(fs.stat);
-  const unlink = util.promisify(fs.unlink);
-  const ensureDir = util.promisify(fsExtra.ensureDir);
 
   try {
-    const filepath = backgroundImagePath(researchExternalId);
 
-    await stat(filepath);
-    await unlink(filepath);
-  } catch (err) { 
-    await ensureDir(researchStoragePath(researchExternalId))
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
+
+    if (!authorizedGroup) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
+      return;
+    }
+
+    const backgroundImage = researchBackgroundImageFormUploader.single('research-background');
+    const result = await backgroundImage(ctx, () => new Promise((resolve, reject) => {
+      resolve({ 'filename': ctx.req.file.filename });
+    }));
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
   }
-
-  const backgroundImage = backgroundImageUploader.single('research-background');
-  const result = await backgroundImage(ctx, () => new Promise((resolve, reject) => {
-    resolve({ 'filename': ctx.req.file.filename });
-  }));
-
-  ctx.status = 200;
-  ctx.body = result;
 }
 
 const getResearchBackground = async (ctx) => {
@@ -213,13 +228,13 @@ const getResearchBackground = async (ctx) => {
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
   const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
 
-  let src = backgroundImagePath(researchExternalId);
+  let src = researchBackgroundImageFilePath(researchExternalId);
   const stat = util.promisify(fs.stat);
 
   try {
     const check = await stat(src);
   } catch (err) {
-    src = defaultBackgroundImagePath();
+    src = defaultResearchBackgroundImagePath();
   }
 
   const resize = (w, h) => {
@@ -377,6 +392,7 @@ export default {
   updateResearchMeta,
   createResearch,
   createResearchApplication,
+  getResearchApplications,
   createResearchTokenSale,
   createResearchTokenSaleContribution
 }

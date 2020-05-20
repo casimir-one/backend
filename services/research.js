@@ -1,5 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
+import ResearchApplication from './../schemas/researchApplication';
+import { RESEARCH_APPLICATION_STATUS } from './../constants';
 
 async function findResearchById(externalId) {
   let research = await Research.findOne({ _id: externalId });
@@ -43,6 +45,59 @@ async function updateResearch(externalId, {
   research.tenantCriterias = tenantCriterias;
 
   return research.save();
+}
+
+async function createResearchApplication({
+  proposalId,
+  researcher,
+  title,
+  abstract,
+  disciplines,
+  location,
+  problem,
+  solution,
+  tenantCriterias,
+  eta,
+  cvAttachment,
+  marketResearchAttachment,
+  fundingAttachment,
+  budgetAttachment,
+  businessPlanAttachment
+}) {
+
+  const researchApplication = new ResearchApplication({
+    _id: proposalId,
+    researcher,
+    status: RESEARCH_APPLICATION_STATUS.PENDING,
+    title,
+    abstract,
+    disciplines,
+    location,
+    problem,
+    solution,
+    tenantCriterias,
+    eta,
+    cvAttachment,
+    marketResearchAttachment,
+    fundingAttachment,
+    budgetAttachment,
+    businessPlanAttachment
+  });
+
+  return researchApplication.save();
+}
+
+
+async function getResearchApplications({ status, researcher }) {
+  const query = {};
+  if (status) {
+    query.status = status;
+  }
+  if (researcher) {
+    query.researcher = researcher;
+  }
+  const result = await ResearchApplication.find(query);
+  return result;
 }
 
 async function processResearchCriterias(
@@ -109,5 +164,7 @@ export default {
   updateResearch,
   processResearchCriterias,
   addCriteriaToResearches,
-  removeCriteriaToResearches
+  removeCriteriaToResearches,
+  createResearchApplication,
+  getResearchApplications
 }
