@@ -10,7 +10,7 @@ const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
 
 const researchFilesTempStoragePath = (researchId, postfix) => `${storagePath}/research-projects/${researchId}/temp-${postfix}`
-const bulkResearchContentStorage = multer.diskStorage({
+const researchContentStorage = multer.diskStorage({
     destination: async function(req, file, callback) {
       const researchFilesTempStorage = researchFilesTempStoragePath(req.headers['research-external-id'], req.headers['upload-session'])
       callback(null, researchFilesTempStorage);
@@ -20,8 +20,8 @@ const bulkResearchContentStorage = multer.diskStorage({
     }
 })
 
-export const bulkResearchContentUploader = multer({
-    storage: bulkResearchContentStorage,
+export const researchContentForm = multer({
+    storage: researchContentStorage,
     fileFilter: function(req, file, callback) {
         // if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
         //     return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);

@@ -13,7 +13,7 @@ import deipRpc from '@deip/rpc-client';
 import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
 import config from './../config';
-import { bulkResearchContentUploader } from './../storages/bulkResearchContentUploader';
+import { researchContentForm } from './../forms/researchContentForms';
 import { authorizeResearchGroup } from './../services/auth'
 import url from 'url';
 import crypto from 'crypto';
@@ -525,7 +525,7 @@ const uploadBulkResearchContent = async(ctx) => {
         const researchFilesTempStorage = researchFilesTempStoragePath(researchExternalId, uploadSession)
         await ensureDir(researchFilesTempStorage);
         
-        const researchContent = bulkResearchContentUploader.any();
+        const researchContent = researchContentForm.any();
         const tempDestinationPath = await researchContent(ctx, () => new Promise((resolve, reject) => {
             if (!ctx.req.files[0] || !ctx.req.files[0].destination) {
                 reject(new Error(`No destination path found during bulk-uploading`))

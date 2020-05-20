@@ -20,7 +20,7 @@ const researchGroupStorage = multer.diskStorage({
   }
 })
 
-export const researchGroupLogoUploader = multer({
+export const researchGroupLogoForm = multer({
   storage: researchGroupStorage,
   fileFilter: function (req, file, callback) {
     if (allowedLogoMimeTypes.find(mime => mime === file.mimetype) === undefined) {

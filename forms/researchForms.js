@@ -21,7 +21,7 @@ export const researchBackgroundImageFilePath = (researchId, filename = `backgrou
 export const defaultResearchBackgroundImagePath = () => path.join(__dirname, `./../default/default-research-background.png`);
 
 
-const researchFilesStorage = (destFn, filename = null) => multer.diskStorage({
+const researchStorage = (destFn, filename = null) => multer.diskStorage({
   destination: async function (req, file, callback) {
     const researchExternalId = req.headers[RESEARCH_ID_HEADER];;
     const folderPath = destFn(researchExternalId);
@@ -43,8 +43,8 @@ const researchFilesStorage = (destFn, filename = null) => multer.diskStorage({
 
 
 const allowedBackgroundMimeTypes = ['image/png'];
-export const researchBackgroundImageFormUploader = multer({
-  storage: researchFilesStorage((researchExternalId) => researchBackgroundImageFolderPath(researchExternalId), `background.png`),
+export const researchBackgroundImageForm = multer({
+  storage: researchStorage((researchExternalId) => researchBackgroundImageFolderPath(researchExternalId), `background.png`),
   fileFilter: function (req, file, callback) {
     if (!allowedBackgroundMimeTypes.some(mime => mime === file.mimetype)) {
       return callback(new Error('Only the following mime types are allowed: ' + allowedBackgroundMimeTypes.join(', ')), false);

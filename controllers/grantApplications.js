@@ -11,7 +11,7 @@ import config from './../config';
 import { sendTransaction } from './../utils/blockchain';
 import { findApplicationPackageByHash } from './../services/applicationContent';
 import { authorizeResearchGroup } from './../services/auth';
-import { bulkApplicationContentUploader } from './../storages/bulkApplicationContentUploader';
+import { grantApplicationForm } from './../forms/grantApplicationForms';
 import crypto from 'crypto';
 import rimraf from "rimraf";
 
@@ -98,7 +98,7 @@ const uploadBulkApplicationContent = async(ctx) => {
             return;
         }
     
-        const applicationContent = bulkApplicationContentUploader.any();
+        const applicationContent = grantApplicationForm.any();
         const tempDestinationPath = await applicationContent(ctx, () => new Promise((resolve, reject) => {
             if (!ctx.req.files[0] || !ctx.req.files[0].destination) {
                 reject(new Error(`No destination path found during bulk-uploading`))

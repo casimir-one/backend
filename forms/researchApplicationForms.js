@@ -23,7 +23,7 @@ export const researchApplicationBusinessPlanFolderPath = (proposalId) => `${rese
 export const researchApplicationBusinessPlanFilePath = (proposalId, filename) => `${researchApplicationBusinessPlanFolderPath(proposalId)}/${filename}`;
 
 
-const researchApplicationFilesStorage = (destFn, filename = null) => multer.diskStorage({
+const researchApplicationStorage = (destFn, filename = null) => multer.diskStorage({
   destination: async function (req, file, callback) {
     const proposalId = req.headers[PROPOSAL_ID_HEADER];;
     const folderPath = destFn(proposalId);
@@ -45,8 +45,8 @@ const researchApplicationFilesStorage = (destFn, filename = null) => multer.disk
 
 
 const allowedAttachmentsMimeTypes = ['application/pdf'];
-export const researchApplicationFormUploader = multer({
-  storage: researchApplicationFilesStorage((proposalId) => researchApplicationStoragePath(proposalId)),
+export const researchApplicationForm = multer({
+  storage: researchApplicationStorage((proposalId) => researchApplicationStoragePath(proposalId)),
   fileFilter: function (req, file, callback) {
     // if (!allowedAttachmentsMimeTypes.some(mime => mime === file.mimetype)) {
     //   return callback(new Error('Only the following mime types are allowed: ' + allowedAttachmentsMimeTypes.join(', ')), false);

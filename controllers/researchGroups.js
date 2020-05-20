@@ -13,7 +13,7 @@ import activityLogEntriesService from './../services/activityLogEntry';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
 import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
-import { researchGroupLogoUploader } from './../storages/researchGroupLogoUploader';
+import { researchGroupLogoForm } from './../forms/researchGroupForms';
 
 
 const createResearchGroup = async (ctx) => {
@@ -191,7 +191,7 @@ const uploadResearchGroupLogo = async (ctx) => {
     await ensureDir(researchGroupStoragePath(researchGroupExternalId))
   }
 
-  const logoImage = researchGroupLogoUploader.single('research-background');
+  const logoImage = researchGroupLogoForm.single('research-background');
   const result = await logoImage(ctx, () => new Promise((resolve, reject) => {
     resolve({ 'filename': ctx.req.file.filename });
   }));

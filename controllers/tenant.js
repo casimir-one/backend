@@ -10,7 +10,7 @@ import researchesService from './../services/research';
 import * as authService from './../services/auth';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
-import { tenantBannerUploader } from './../storages/tenantBannerUploader';
+import { tenantBannerForm } from './../forms/tenantForms';
 import * as blockchainService from './../utils/blockchain';
 
 
@@ -55,7 +55,7 @@ const uploadTenantBanner = async (ctx) => {
     }
 
     const oldFilename = tenantProfile.banner;
-    const tenantBanner = tenantBannerUploader.single('tenant-banner');
+    const tenantBanner = tenantBannerForm.single('tenant-banner');
     const { filename } = await tenantBanner(ctx, () => new Promise((resolve, reject) => {
       resolve({ 'filename': ctx.req.file.filename });
     }));

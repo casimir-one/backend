@@ -12,7 +12,7 @@ const researchAwardWithdrawalRequestsFilesStoragePath = (researchId) => `${stora
 const researchAwardWithdrawalRequestsFilesTempStoragePath = (researchId, postfix) => `${researchAwardWithdrawalRequestsFilesStoragePath(researchId)}/temp-${postfix}`
 
 
-const bulkAwardWithdrawalRequestAttachmentsStorage = multer.diskStorage({
+const awardWithdrawalRequestsStorage = multer.diskStorage({
   destination: async function (req, file, callback) {
     const researchFilesTempStorage = researchAwardWithdrawalRequestsFilesTempStoragePath(req.headers['research-id'], req.headers['upload-session'])
     callback(null, researchFilesTempStorage);
@@ -22,8 +22,8 @@ const bulkAwardWithdrawalRequestAttachmentsStorage = multer.diskStorage({
   }
 })
 
-export const bulkAwardWithdrawalRequestAttachmentsUploader = multer({
-  storage: bulkAwardWithdrawalRequestAttachmentsStorage,
+export const awardWithdrawalRequestForm = multer({
+  storage: awardWithdrawalRequestsStorage,
   fileFilter: function (req, file, callback) {
     // if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
     //     return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);

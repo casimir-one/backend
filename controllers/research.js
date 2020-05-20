@@ -12,8 +12,8 @@ import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
 import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE } from './../constants';
-import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageFormUploader } from './../storages/researchStorage';
-import { researchApplicationFormUploader } from './../storages/researchApplicationStorage';
+import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
+import { researchApplicationForm } from './../forms/researchApplicationForms';
 
 
 const createResearch = async (ctx, next) => {
@@ -63,7 +63,7 @@ const createResearchApplication = async (ctx) => {
 
   try {
 
-    const formUploader = researchApplicationFormUploader.fields([
+    const formUploader = researchApplicationForm.fields([
       { name: 'budgetAttachment', maxCount: 1 },
       { name: 'businessPlanAttachment', maxCount: 1 },
       { name: 'cvAttachment', maxCount: 1 }, 
@@ -219,7 +219,7 @@ const uploadResearchBackground = async (ctx) => {
       return;
     }
 
-    const backgroundImage = researchBackgroundImageFormUploader.single('research-background');
+    const backgroundImage = researchBackgroundImageForm.single('research-background');
     const result = await backgroundImage(ctx, () => new Promise((resolve, reject) => {
       resolve({ 'filename': ctx.req.file.filename });
     }));

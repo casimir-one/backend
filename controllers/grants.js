@@ -7,7 +7,7 @@ import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
 import { hashElement } from 'folder-hash';
 import send from 'koa-send';
 import grantsService from './../services/grants';
-import { bulkAwardWithdrawalRequestAttachmentsUploader } from './../storages/bulkAwardWithdrawalRequestAttachmentsUploader';
+import { awardWithdrawalRequestForm } from './../forms/grantForms';
 import { authorizeResearchGroup } from './../services/auth'
 import crypto from 'crypto';
 import rimraf from "rimraf";
@@ -103,7 +103,7 @@ const uploadAwardWithdrawalRequestBulkAttachments = async (ctx) => {
     }
 
 
-    const attachmentsContent = bulkAwardWithdrawalRequestAttachmentsUploader.any();
+    const attachmentsContent = awardWithdrawalRequestForm.any();
     const tempDestinationPath = await attachmentsContent(ctx, () => new Promise((resolve, reject) => {
       if (!ctx.req.files[0] || !ctx.req.files[0].destination) {
         reject(new Error(`No destination path found during bulk-uploading`))

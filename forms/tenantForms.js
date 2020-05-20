@@ -21,7 +21,7 @@ const tenantStorage = multer.diskStorage({
   }
 })
 
-export const tenantBannerUploader = multer({
+export const tenantBannerForm = multer({
   storage: tenantStorage,
   fileFilter: function (req, file, callback) {
     if (allowedMimeTypes.find(mime => mime === file.mimetype) === undefined) {
