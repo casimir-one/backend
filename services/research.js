@@ -99,8 +99,6 @@ async function createResearchApplication({
 
 async function updateResearchApplication(applicationId, {
   status,
-  title,
-  abstract,
   disciplines,
   problem,
   solution,
@@ -116,8 +114,6 @@ async function updateResearchApplication(applicationId, {
 
   const researchApplication = await findResearchApplicationById(applicationId);
   researchApplication.status = status;
-  researchApplication.title = title;
-  researchApplication.abstract = abstract;
   researchApplication.disciplines = disciplines;
   researchApplication.problem = problem;
   researchApplication.solution = solution;

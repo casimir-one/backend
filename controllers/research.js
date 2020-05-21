@@ -5,6 +5,8 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
+import send from 'koa-send';
+import slug from 'limax';
 import deipRpc from '@deip/rpc-client';
 import researchService from './../services/research';
 import * as blockchainService from './../utils/blockchain';
@@ -13,8 +15,11 @@ import researchGroupActivityLogHandler from './../event-handlers/researchGroupAc
 import userNotificationHandler from './../event-handlers/userNotification';
 import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS } from './../constants';
 import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
-import { researchApplicationForm } from './../forms/researchApplicationForms';
+import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 
+const stat = util.promisify(fs.stat);
+const unlink = util.promisify(fs.unlink);
+const ensureDir = util.promisify(fsExtra.ensureDir);
 
 const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
@@ -121,6 +126,139 @@ const createResearchApplication = async (ctx) => {
     ctx.body = err;
   }
 };
+
+
+const editResearchApplication = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const applicationId = ctx.params.proposalId;
+
+  try {
+
+    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    if (!researchApplication) {
+      ctx.status = 404;
+      ctx.body = `Research application "${applicationId}" is not found`;
+      return;
+    }
+
+    if (researchApplication.status != RESEARCH_APPLICATION_STATUS.PENDING) {
+      ctx.status = 400;
+      ctx.body = `Research application "${applicationId}" status is ${researchApplication.status}`;
+      return;
+    }
+
+    const formUploader = researchApplicationForm.fields([
+      { name: 'budgetAttachment', maxCount: 1 },
+      { name: 'businessPlanAttachment', maxCount: 1 },
+      { name: 'cvAttachment', maxCount: 1 },
+      { name: 'marketResearchAttachment', maxCount: 1 }
+    ]);
+
+    const form = await formUploader(ctx, () => new Promise((resolve, reject) => {
+      const [budgetAttachment] = ctx.req.files.budgetAttachment ? ctx.req.files.budgetAttachment : [null];
+      const [businessPlanAttachment] = ctx.req.files.businessPlanAttachment ? ctx.req.files.businessPlanAttachment : [null];
+      const [cvAttachment] = ctx.req.files.cvAttachment ? ctx.req.files.cvAttachment : [null];
+      const [marketResearchAttachment] = ctx.req.files.marketResearchAttachment ? ctx.req.files.marketResearchAttachment : [null];
+
+      resolve({
+        budgetAttachment: budgetAttachment ? budgetAttachment.filename : null,
+        businessPlanAttachment: businessPlanAttachment ? businessPlanAttachment.filename : null,
+        cvAttachment: cvAttachment ? cvAttachment.filename : null,
+        marketResearchAttachment: marketResearchAttachment ? marketResearchAttachment.filename : null,
+
+        ...ctx.req.body,
+        location: JSON.parse(ctx.req.body.location),
+        tenantCriterias: JSON.parse(ctx.req.body.tenantCriterias)
+      });
+    }));
+
+    const update = {
+      ...form,
+      budgetAttachment: form.budgetAttachment ? form.budgetAttachment : researchApplication.budgetAttachment,
+      businessPlanAttachment: form.businessPlanAttachment ? form.businessPlanAttachment : researchApplication.businessPlanAttachment,
+      cvAttachment: form.cvAttachment ? form.cvAttachment : researchApplication.cvAttachment,
+      marketResearchAttachment: form.marketResearchAttachment ? form.marketResearchAttachment : researchApplication.marketResearchAttachment
+    }
+
+    try {
+      if (researchApplication.budgetAttachment != update.budgetAttachment) {
+        await unlink(researchApplicationAttachmentFilePath(applicationId, researchApplication.budgetAttachment));
+      }
+      if (researchApplication.businessPlanAttachment != update.businessPlanAttachment) {
+        await unlink(researchApplicationAttachmentFilePath(applicationId, researchApplication.businessPlanAttachment));
+      }
+      if (researchApplication.cvAttachment != update.cvAttachment) {
+        await unlink(researchApplicationAttachmentFilePath(applicationId, researchApplication.cvAttachment));
+      }
+      if (researchApplication.marketResearchAttachment != update.marketResearchAttachment) {
+        await unlink(researchApplicationAttachmentFilePath(applicationId, researchApplication.marketResearchAttachment));
+      }
+    } catch(err){}
+
+
+    const researchApplicationData = researchApplication.toObject();
+    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+      ...researchApplicationData,
+      ...update
+    });
+
+    ctx.status = 200;
+    ctx.body = { rm: updatedResearchApplication };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
+
+const getResearchApplicationAttachmentFile = async function (ctx) {
+  const applicationId = ctx.params.proposalId;
+  const filename = ctx.query.filename;
+  const isDownload = ctx.query.download === 'true';
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+
+    if (!filename) {
+      ctx.status = 400;
+      ctx.body = `"filename" query param is required`;
+      return;
+    }
+
+    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    if (!researchApplication) {
+      ctx.status = 404;
+      ctx.body = `Research application "${applicationId}" is not found`;
+      return;
+    }
+
+    const filepath = researchApplicationAttachmentFilePath(applicationId, filename);
+
+    try {
+      await stat(filepath);
+    } catch (err) {
+      ctx.status = 404;
+      ctx.body = `File "${filename}" is not found`;
+      return;
+    }
+
+    if (isDownload) {
+      let ext = filename.substr(filename.lastIndexOf('.') + 1);
+      let name = filename.substr(0, filename.lastIndexOf('.'));
+      ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
+      ctx.body = fs.createReadStream(filepath);
+    } else {
+      await send(ctx, filepath, { root: '/' });
+    }
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
 
 const approveResearchApplication = async (ctx) => {
@@ -502,8 +640,10 @@ export default {
   updateResearchMeta,
   createResearch,
   createResearchApplication,
+  editResearchApplication,
   approveResearchApplication,
   rejectResearchApplication,
+  getResearchApplicationAttachmentFile,
   getResearchApplications,
   createResearchTokenSale,
   createResearchTokenSaleContribution

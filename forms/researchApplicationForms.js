@@ -16,12 +16,8 @@ const PROPOSAL_ID_HEADER = "proposal-id";
 const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 export const researchApplicationStoragePath = (proposalId) => `${filesStoragePath}/research-projects-applications/${proposalId}`;
 
-export const researchApplicationCvFolderPath = (proposalId) => `${researchApplicationStoragePath(proposalId)}`;
-export const researchApplicationCvFilePath = (proposalId, filename) => `${researchApplicationCvFolderPath(proposalId)}/${filename}`;
-
-export const researchApplicationBusinessPlanFolderPath = (proposalId) => `${researchApplicationStoragePath(proposalId)}`;
-export const researchApplicationBusinessPlanFilePath = (proposalId, filename) => `${researchApplicationBusinessPlanFolderPath(proposalId)}/${filename}`;
-
+export const researchApplicationAttachmentFolderPath = (proposalId) => `${researchApplicationStoragePath(proposalId)}`;
+export const researchApplicationAttachmentFilePath = (proposalId, filename) => `${researchApplicationAttachmentFolderPath(proposalId)}/${filename}`;
 
 const researchApplicationStorage = (destFn, filename = null) => multer.diskStorage({
   destination: async function (req, file, callback) {
@@ -46,7 +42,7 @@ const researchApplicationStorage = (destFn, filename = null) => multer.diskStora
 
 const allowedAttachmentsMimeTypes = ['application/pdf'];
 export const researchApplicationForm = multer({
-  storage: researchApplicationStorage((proposalId) => researchApplicationStoragePath(proposalId)),
+  storage: researchApplicationStorage((proposalId) => researchApplicationAttachmentFolderPath(proposalId)),
   fileFilter: function (req, file, callback) {
     // if (!allowedAttachmentsMimeTypes.some(mime => mime === file.mimetype)) {
     //   return callback(new Error('Only the following mime types are allowed: ' + allowedAttachmentsMimeTypes.join(', ')), false);

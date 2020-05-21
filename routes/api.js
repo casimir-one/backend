@@ -80,8 +80,11 @@ public_route.get('/research/background/:researchExternalId', research.getResearc
 protected_route.post('/research/background', research.uploadResearchBackground)
 protected_route.post('/research/token-sale', research.createResearchTokenSale)
 protected_route.post('/research/token-sale/contribution', research.createResearchTokenSaleContribution)
+
 protected_route.post('/research/application', research.createResearchApplication)
+protected_route.put('/research/application/:proposalId', research.editResearchApplication)
 protected_route.get('/research/application/list', research.getResearchApplications)
+protected_route.get('/research/application/:proposalId/attachment', research.getResearchApplicationAttachmentFile)
 protected_route.post('/research/application/approve', research.approveResearchApplication)
 protected_route.post('/research/application/reject', research.rejectResearchApplication)
 
