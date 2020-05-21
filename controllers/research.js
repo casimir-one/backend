@@ -11,7 +11,7 @@ import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE } from './../constants';
+import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS } from './../constants';
 import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
 import { researchApplicationForm } from './../forms/researchApplicationForms';
 
@@ -94,6 +94,7 @@ const createResearchApplication = async (ctx) => {
 
     const researchApplicationRm = await researchService.createResearchApplication({
       proposalId: form.proposalId,
+      researchExternalId: form.researchExternalId,
       researcher: form.researcher,
       title: form.researchTitle,
       abstract: form.researchAbstract,
@@ -107,7 +108,8 @@ const createResearchApplication = async (ctx) => {
       budgetAttachment: form.budgetAttachment,
       businessPlanAttachment: form.businessPlanAttachment,
       cvAttachment: form.cvAttachment,
-      marketResearchAttachment: form.marketResearchAttachment
+      marketResearchAttachment: form.marketResearchAttachment,
+      tx: form.tx
     });
 
     ctx.status = 200;
@@ -119,6 +121,58 @@ const createResearchApplication = async (ctx) => {
     ctx.body = err;
   }
 };
+
+
+const approveResearchApplication = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx } = ctx.request.body;
+
+  try { 
+
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const { external_id: applicationId } = payload;
+
+    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    if (!researchApplication) {
+      ctx.status = 404;
+      ctx.body = `Research application "${applicationId}" is not found`;
+      return;
+    }
+
+    if (researchApplication.status != RESEARCH_APPLICATION_STATUS.PENDING) {
+      ctx.status = 400;
+      ctx.body = `Research application "${applicationId}" status is ${researchApplication.status}`;
+      return;
+    }
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const research = await deipRpc.api.getResearchAsync(researchApplication.researchExternalId);
+    const researcRm = await researchService.createResearch({
+      externalId: research.external_id,
+      researchGroupExternalId: research.research_group.external_id,
+      researchGroupInternalId: research.research_group.id,
+      milestones: [],
+      videoSrc: "",
+      partners: [],
+      tenantCriterias: researchApplication.tenantCriterias
+    });
+
+    const researchApplicationData = researchApplication.toObject();
+    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+      ...researchApplicationData,
+      status: RESEARCH_APPLICATION_STATUS.APPROVED
+    });
+
+    ctx.status = 200;
+    ctx.body = { tx, txResult, rm: researcRm };
+    
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
 
 const getResearchApplications = async (ctx) => {
@@ -405,6 +459,7 @@ export default {
   updateResearchMeta,
   createResearch,
   createResearchApplication,
+  approveResearchApplication,
   getResearchApplications,
   createResearchTokenSale,
   createResearchTokenSaleContribution

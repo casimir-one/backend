@@ -8,6 +8,7 @@ const Schema = mongoose.Schema;
 
 const ResearchApplication = new Schema({
   "_id": { type: String, trim: true, required: true },
+  "researchExternalId": { type: String, trim: true, required: true },  
   "researcher": { type: String, trim: true, required: true },
   "status": { type: String, enum: [RESEARCH_APPLICATION_STATUS.PENDING, RESEARCH_APPLICATION_STATUS.APPROVED, RESEARCH_APPLICATION_STATUS.REJECTED], required: true },
   "title": { type: String, trim: true, required: true }, // Title
@@ -27,6 +28,7 @@ const ResearchApplication = new Schema({
   "businessPlanAttachment": { type: String, required: false, default: null }, // Submit your business plan, if any
   "cvAttachment": { type: String, required: false, default: null }, // Submit your resume/CV
   "marketResearchAttachment": { type: String, required: false, default: null }, // Submit all relevant market research documents
+  "tx": { type: Object, required: true }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research-applications', ResearchApplication);

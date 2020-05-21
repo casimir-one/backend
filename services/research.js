@@ -47,9 +47,58 @@ async function updateResearch(externalId, {
   return research.save();
 }
 
+async function findResearchApplicationById(applicationId) {
+  let researchApplication = await ResearchApplication.findOne({ _id: applicationId });
+  return researchApplication;
+}
+
 async function createResearchApplication({
   proposalId,
+  researchExternalId,
   researcher,
+  title,
+  abstract,
+  disciplines,
+  problem,
+  solution,
+  funding,
+  eta,
+  location,
+  tenantCriterias,
+  budgetAttachment,
+  businessPlanAttachment,
+  cvAttachment,
+  marketResearchAttachment,
+  tx
+}) {
+
+  const researchApplication = new ResearchApplication({
+    _id: proposalId,
+    researchExternalId,
+    researcher,
+    status: RESEARCH_APPLICATION_STATUS.PENDING,
+    title,
+    abstract,
+    disciplines,
+    problem,
+    solution,
+    funding,
+    eta,
+    location,
+    tenantCriterias,
+    budgetAttachment,
+    businessPlanAttachment,
+    cvAttachment,
+    marketResearchAttachment,
+    tx
+  });
+
+  return researchApplication.save();
+}
+
+
+async function updateResearchApplication(applicationId, {
+  status,
   title,
   abstract,
   disciplines,
@@ -65,24 +114,21 @@ async function createResearchApplication({
   marketResearchAttachment
 }) {
 
-  const researchApplication = new ResearchApplication({
-    _id: proposalId,
-    researcher,
-    status: RESEARCH_APPLICATION_STATUS.PENDING,
-    title,
-    abstract,
-    disciplines,
-    problem,
-    solution,
-    funding,
-    eta,
-    location,
-    tenantCriterias,
-    budgetAttachment,
-    businessPlanAttachment,
-    cvAttachment,
-    marketResearchAttachment
-  });
+  const researchApplication = await findResearchApplicationById(applicationId);
+  researchApplication.status = status;
+  researchApplication.title = title;
+  researchApplication.abstract = abstract;
+  researchApplication.disciplines = disciplines;
+  researchApplication.problem = problem;
+  researchApplication.solution = solution;
+  researchApplication.funding = funding;
+  researchApplication.eta = eta;
+  researchApplication.location = location;
+  researchApplication.tenantCriterias = tenantCriterias;
+  researchApplication.budgetAttachment = budgetAttachment;
+  researchApplication.businessPlanAttachment = businessPlanAttachment;
+  researchApplication.cvAttachment = cvAttachment;
+  researchApplication.marketResearchAttachment = marketResearchAttachment;
 
   return researchApplication.save();
 }
@@ -166,5 +212,7 @@ export default {
   addCriteriaToResearches,
   removeCriteriaToResearches,
   createResearchApplication,
+  updateResearchApplication,
+  findResearchApplicationById,
   getResearchApplications
 }
