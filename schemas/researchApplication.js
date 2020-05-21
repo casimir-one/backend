@@ -12,7 +12,7 @@ const ResearchApplication = new Schema({
   "researcher": { type: String, trim: true, required: true },
   "status": { type: String, enum: [RESEARCH_APPLICATION_STATUS.PENDING, RESEARCH_APPLICATION_STATUS.APPROVED, RESEARCH_APPLICATION_STATUS.REJECTED], required: true },
   "title": { type: String, trim: true, required: true }, // Title
-  "abstract": { type: String, trim: true, required: true }, // What is your idea, please describe
+  "description": { type: String, trim: true, required: true }, // What is your idea, please describe
   "disciplines": [{ type: String, trim: true, required: true }], // Select your domain
   "problem": { type: String, trim: true, required: true }, // What are you trying to impact ?
   "solution": { type: String, trim: true, required: true }, // How will this solve the current problem ?

@@ -102,7 +102,7 @@ const createResearchApplication = async (ctx) => {
       researchExternalId: form.researchExternalId,
       researcher: form.researcher,
       title: form.researchTitle,
-      abstract: form.researchAbstract,
+      description: form.description,
       disciplines: form.researchDisciplines,
       location: form.location,
       problem: form.problem,

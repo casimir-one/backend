@@ -57,7 +57,7 @@ async function createResearchApplication({
   researchExternalId,
   researcher,
   title,
-  abstract,
+  description,
   disciplines,
   problem,
   solution,
@@ -78,7 +78,7 @@ async function createResearchApplication({
     researcher,
     status: RESEARCH_APPLICATION_STATUS.PENDING,
     title,
-    abstract,
+    description,
     disciplines,
     problem,
     solution,
@@ -99,6 +99,7 @@ async function createResearchApplication({
 
 async function updateResearchApplication(applicationId, {
   status,
+  description,
   disciplines,
   problem,
   solution,
@@ -113,6 +114,7 @@ async function updateResearchApplication(applicationId, {
 }) {
 
   const researchApplication = await findResearchApplicationById(applicationId);
+  researchApplication.description = description;
   researchApplication.status = status;
   researchApplication.disciplines = disciplines;
   researchApplication.problem = problem;
