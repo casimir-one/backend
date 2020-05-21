@@ -83,6 +83,7 @@ protected_route.post('/research/token-sale/contribution', research.createResearc
 protected_route.post('/research/application', research.createResearchApplication)
 protected_route.get('/research/application/list', research.getResearchApplications)
 protected_route.post('/research/application/approve', research.approveResearchApplication)
+protected_route.post('/research/application/reject', research.rejectResearchApplication)
 
 protected_route.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 protected_route.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

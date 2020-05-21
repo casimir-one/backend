@@ -147,6 +147,7 @@ const approveResearchApplication = async (ctx) => {
     }
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    
     const research = await deipRpc.api.getResearchAsync(researchApplication.researchExternalId);
     const researcRm = await researchService.createResearch({
       externalId: research.external_id,
@@ -167,6 +168,48 @@ const approveResearchApplication = async (ctx) => {
     ctx.status = 200;
     ctx.body = { tx, txResult, rm: researcRm };
     
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const rejectResearchApplication = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx } = ctx.request.body;
+
+  try { 
+
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const { external_id: applicationId } = payload;
+
+    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    if (!researchApplication) {
+      ctx.status = 404;
+      ctx.body = `Research application "${applicationId}" is not found`;
+      return;
+    }
+
+    if (researchApplication.status != RESEARCH_APPLICATION_STATUS.PENDING) {
+      ctx.status = 400;
+      ctx.body = `Research application "${applicationId}" status is ${researchApplication.status}`;
+      return;
+    }
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    const researchApplicationData = researchApplication.toObject();
+    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+      ...researchApplicationData,
+      status: RESEARCH_APPLICATION_STATUS.REJECTED
+    });
+
+    ctx.status = 200;
+    ctx.body = { tx, txResult };
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -460,6 +503,7 @@ export default {
   createResearch,
   createResearchApplication,
   approveResearchApplication,
+  rejectResearchApplication,
   getResearchApplications,
   createResearchTokenSale,
   createResearchTokenSaleContribution
