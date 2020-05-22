@@ -133,7 +133,7 @@ async function createUserAccount({ username, pubKey }) {
     active: owner,
     posting: owner,
     memo_key: pubKey,
-    json_metadata: "",
+    json_metadata: undefined,
     traits: [],
     extensions: []
   }

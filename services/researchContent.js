@@ -36,7 +36,6 @@ async function upsertResearchContent({
   researchId, // legacy internal id
   researchGroupId, // legacy internal id
   title,
-  permlink,
   hash,
   algo,
   type,
@@ -56,7 +55,6 @@ async function upsertResearchContent({
     researchContent.researchId = researchId; // legacy internal id
     researchContent.researchGroupId = researchGroupId; // legacy internal id
     researchContent.title = title;
-    researchContent.permlink = permlink;
     researchContent.hash = hash; 
     researchContent.algo = algo; 
     researchContent.type = type; 
@@ -74,7 +72,6 @@ async function upsertResearchContent({
       researchId, // legacy internal id
       researchGroupId, // legacy internal id
       title,
-      permlink,
       hash,
       algo,
       type,

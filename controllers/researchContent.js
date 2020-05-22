@@ -318,7 +318,6 @@ const createDarArchive = async (ctx) => {
         researchId: researchInternalId, // legacy internal id
         researchGroupId: researchGroupInternalId, // legacy internal id
         title: folder,
-        permlink: "",
         hash: "",
         algo: "",
         type: "dar",
@@ -589,7 +588,6 @@ const uploadBulkResearchContent = async(ctx) => {
                   researchId: researchInternalId, // legacy internal id
                   researchGroupId: researchGroupInternalId, // legacy internal id
                   title: packageHash,
-                  permlink: packageHash,
                   hash: packageHash,
                   algo: "sha256",
                   type: "package",
@@ -687,7 +685,6 @@ const createResearchContent = async (ctx) => {
     const {
       title,
       external_id: externalId,
-      permlink,
       research_external_id: researchExternalId,
       research_group: researchGroupExternalId,
       authors,
@@ -705,7 +702,7 @@ const createResearchContent = async (ctx) => {
 
     if (rc.status != 'in-progress') {
       ctx.status = 409;
-      ctx.body = `Research content "${rc.permlink}" has '${rc.status}' status`
+      ctx.body = `Research content "${researchExternalId}" has '${rc.status}' status`
       return;
     }
 
@@ -727,7 +724,6 @@ const createResearchContent = async (ctx) => {
       researchId: researchInternalId, // legacy internal id
       researchGroupId: researchGroupInternalId, // legacy internal id
       title, 
-      permlink,
       hash,
       algo,
       type,
@@ -738,13 +734,12 @@ const createResearchContent = async (ctx) => {
       foreignReferences
     });
 
-
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
       action: deipRpc.operations.getOperationTag("create_research_content"), 
       creator: jwtUsername,
-      data: { permlink, title, research_id: researchInternalId },
+      data: { externalId: externalId, title, research_id: researchInternalId },
       isProposalAutoAccepted: !isProposal
     };
     userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);

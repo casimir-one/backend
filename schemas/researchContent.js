@@ -11,7 +11,6 @@ const ResearchContent = new Schema({
     "researchId": { type: Number, required: true }, // legacy internal id
     "researchGroupId": { type: Number, required: true }, // legacy internal id
     "title": { type: String },
-    "permlink": { type: String },
     "hash": {type: String, index: true },
     "algo": { type: String },
     "type": {

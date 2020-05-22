@@ -54,12 +54,12 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) 
   switch (action) {
 
     case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
-      let { permlink, research_id } = payload;
+      let { externalId, research_id } = payload;
       let research = await deipRpc.api.getResearchByIdAsync(research_id);
       let researchContent = null;
 
       if (isProposalAutoAccepted) {
-        researchContent = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(researchGroup.permlink, research.permlink, permlink);
+        researchContent = await deipRpc.api.getResearchContentAsync(externalId);
       }
 
       activityLogEntriesService.createActivityLogEntry({
@@ -158,9 +158,9 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, async (p
     }
 
     case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
-      let { permlink, research_id } = payload;
+      let { externalId, research_id } = payload;
       let research = await deipRpc.api.getResearchByIdAsync(research_id);
-      let researchContent = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(researchGroup.permlink, research.permlink, permlink);
+      let researchContent = await deipRpc.api.getResearchContentAsync(externalId);
 
       activityLogEntriesService.createActivityLogEntry({
         researchGroupId,
