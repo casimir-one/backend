@@ -1,5 +1,6 @@
 
 import mongoose from 'mongoose';
+import { RESEARCH_CONTENT_STATUS } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -20,7 +21,11 @@ const ResearchContent = new Schema({
     },
     "status": {
         type: String,
-        enum : ['in-progress', 'proposed', 'finished'],
+        enum: [
+          RESEARCH_CONTENT_STATUS.IN_PROGRESS, 
+          RESEARCH_CONTENT_STATUS.PROPOSED, 
+          RESEARCH_CONTENT_STATUS.PUBLISHED
+        ],
         required: true
     },
     "packageFiles": [{

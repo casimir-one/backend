@@ -24,8 +24,7 @@ import * as authService from './../services/auth';
 import * as researchContentService from './../services/researchContent';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import { RESEARCH_CONTENT_STATUS, USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
 
 
 const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
@@ -57,13 +56,42 @@ const listDarArchives = async (ctx) => {
     }
 }
 
-const listContentRefs = async (ctx) => {
+const getResearchContentByResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
 
   try {
-    let drafts = await researchContentService.findResearchContentByResearchId(researchExternalId);
+
+    if (ctx.state.tenant.settings.researchesBlacklist.some(id => id == researchExternalId)) {
+      ctx.status = 200;
+      ctx.body = [];
+      return;
+    }
+
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    if (!research || research.is_private) {
+      ctx.status = 200;
+      ctx.body = [];
+      return;
+    }
+
+    const published = await researchContentService.findPublishedResearchContentByResearch(researchExternalId);
+    const chainResearchContents = await deipRpc.api.getResearchContentsAsync([...published.map(rc => rc._id)]);
+
+    const drafts = await researchContentService.findDraftResearchContentByResearch(researchExternalId);
+
+    const result = [
+      ...published.map((rc) => {
+        const chainContent = chainResearchContents.find(pubRc => rc.hash == pubRc.content);
+        return { ...chainContent, ref: rc.toObject(), isDraft: false };
+      }),
+      ...drafts.map((rc) => {
+        return { ref: rc.toObject(), isDraft: true };
+      })
+    ];
+
     ctx.status = 200;
-    ctx.body = drafts;
+    ctx.body = result;
+
   } catch(err) {
     console.log(err);
     ctx.status = 500;
@@ -169,8 +197,8 @@ const updateDarArchive = async (ctx) => {
     });
 
     try {
-      const rc = await researchContentService.findResearchContentById(darId);
-        if (!rc || rc.status != 'in-progress') {
+        const rc = await researchContentService.findResearchContentById(darId);
+        if (!rc || rc.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
             ctx.status = 405;
             ctx.body = `Research "${darId}" is locked for updates or does not exist`;
             return;
@@ -232,8 +260,8 @@ const unlockContentDraft = async (ctx) => {
     const refId = ctx.params.refId;
     
     try {
-      const rc = await researchContentService.findResearchContentById(refId);
-        if (!rc || (rc.status != 'proposed' && rc.status != 'completed')) {
+        const rc = await researchContentService.findResearchContentById(refId);
+        if (!rc || (rc.status != RESEARCH_CONTENT_STATUS.PROPOSED && rc.status != RESEARCH_CONTENT_STATUS.PUBLISHED )) {
             ctx.status = 405;
             ctx.body = `Proposed "${refId}" content archive is not found`;
             return;
@@ -255,7 +283,7 @@ const unlockContentDraft = async (ctx) => {
             return;
         }
 
-        rc.status = 'in-progress';
+        rc.status = RESEARCH_CONTENT_STATUS.IN_PROGRESS;
         const updatedRc = await rc.save();
         ctx.status = 200;
         ctx.body = updatedRc;
@@ -303,14 +331,14 @@ const createDarArchive = async (ctx) => {
           ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupInternalId}" research`;
           return;
       }
-      // const externalId = `draft-${researchExternalId}-${now}`;
+
       const now = new Date().getTime();
       const externalId = `draft-${researchExternalId}-${now}`;
       const darPath = researchDarArchivePath(researchExternalId, externalId);
       await cloneArchive(blankDarPath, darPath);
 
       const folder = externalId;
-      const researchContentRm = await researchContentService.upsertResearchContent({
+      const researchContentRm = await researchContentService.createResearchContent({
         externalId,
         researchExternalId,
         researchGroupExternalId,
@@ -321,7 +349,7 @@ const createDarArchive = async (ctx) => {
         hash: "",
         algo: "",
         type: "dar",
-        status: "in-progress",
+        status: RESEARCH_CONTENT_STATUS.IN_PROGRESS,
         packageFiles: [],
         authors: [],
         references: [],
@@ -580,7 +608,7 @@ const uploadBulkResearchContent = async(ctx) => {
             } else {
 
                 const externalId = `draft-${researchExternalId}-${packageHash}`;
-                const researchContentRm = await researchContentService.upsertResearchContent({
+                const researchContentRm = await researchContentService.createResearchContent({
                   externalId,
                   researchExternalId,
                   researchGroupExternalId: researchGroupExternalId,
@@ -591,7 +619,7 @@ const uploadBulkResearchContent = async(ctx) => {
                   hash: packageHash,
                   algo: "sha256",
                   type: "package",
-                  status: "in-progress",
+                  status: RESEARCH_CONTENT_STATUS.IN_PROGRESS,
                   "packageFiles": hashObj.children.map((f) => {
                     return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
                   }),
@@ -666,8 +694,6 @@ const createResearchContent = async (ctx) => {
       research_group: researchGroupAccount
     } = payload;
     
-    // TODO: remove this
-
     if (!hash) {
       ctx.status = 400;
       ctx.body = `Mallformed operation: "${operation}"`;
@@ -675,12 +701,13 @@ const createResearchContent = async (ctx) => {
     }
 
     const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    const researchGroupInternalId = authorizedGroup.id;
     if (!authorizedGroup) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
       return;
     }
+
+    const researchGroupInternalId = authorizedGroup.id;
 
     const {
       title,
@@ -694,19 +721,20 @@ const createResearchContent = async (ctx) => {
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
     const researchInternalId = research.id;
     const rc = await researchContentService.findResearchContentByHash(researchExternalId, hash);
+    
     if (!rc) {
       ctx.status = 400;
       ctx.body = `Research content draft with hash "${hash}" does not exist`
       return;
     }
 
-    if (rc.status != 'in-progress') {
+    if (rc.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
       ctx.status = 409;
       ctx.body = `Research content "${researchExternalId}" has '${rc.status}' status`
       return;
     }
 
-    const status = "proposed";
+    const status = isProposal ? RESEARCH_CONTENT_STATUS.PROPOSED : RESEARCH_CONTENT_STATUS.PUBLISHED;
     const folder = rc.folder;
     const packageFiles = rc.packageFiles;
     const references = rc.references;
@@ -716,7 +744,7 @@ const createResearchContent = async (ctx) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
     await researchContentService.removeResearchContentByHash(researchExternalId, hash); // remove draft
-    const researchContentRm = await researchContentService.upsertResearchContent({
+    const researchContentRm = await researchContentService.createResearchContent({
       externalId,
       researchExternalId,
       researchGroupExternalId,
@@ -772,7 +800,7 @@ export default {
     // refs
     getContentRefById,
     getContentRefByHash,
-    listContentRefs,
+    getResearchContentByResearch,
 
     // drafts
     deleteContentDraft,

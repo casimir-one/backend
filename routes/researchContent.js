@@ -11,7 +11,7 @@ protected_route.get('/:dar', researchContent.readDarArchive)
 protected_route.get('/:dar/assets/:file', researchContent.readDarArchiveStaticFiles)
 protected_route.put('/:dar', researchContent.updateDarArchive)
 
-public_route.get('/refs/research/:researchExternalId', researchContent.listContentRefs)
+public_route.get('/research/:researchExternalId', researchContent.getResearchContentByResearch)
 public_route.get('/refs/research/content-id/:refId', researchContent.getContentRefById)
 public_route.get('/refs/research/:researchExternalId/content-hash/:hash', researchContent.getContentRefByHash)
 

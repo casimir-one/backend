@@ -3,6 +3,12 @@ import Research from './../schemas/research';
 import ResearchApplication from './../schemas/researchApplication';
 import { RESEARCH_APPLICATION_STATUS } from './../constants';
 
+
+async function findAllResearches(blacklist = []) {
+  let researches = await Research.find({ _id: { $nin: blacklist } });
+  return researches;
+}
+
 async function findResearchById(externalId) {
   let research = await Research.findOne({ _id: externalId });
   return research;
@@ -144,10 +150,7 @@ async function getResearchApplications({ status, researcher }) {
   return result;
 }
 
-async function processResearchCriterias(
-  oldComponents,
-  newComponents
-) {
+async function processResearchCriterias(oldComponents, newComponents) {
 
   const addedComponents = [];
   const removedComponents = [];
@@ -186,10 +189,7 @@ async function processResearchCriterias(
 }
 
 
-async function addCriteriaToResearches({
-  component,
-  type
-}) {
+async function addCriteriaToResearches({component, type}) {
   const result = await Research.update({}, { $push: { tenantCriterias: { component: component, type: type } } }, { multi: true });
   return result;
 }
@@ -203,6 +203,7 @@ async function removeCriteriaToResearches({
 
 
 export default {
+  findAllResearches,
   findResearchById,
   createResearch,
   updateResearch,

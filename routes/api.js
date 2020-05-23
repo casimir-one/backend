@@ -72,6 +72,7 @@ protected_route.post('/invites/reject', invites.rejectUserInvite)
 
 protected_route.post('/reviews', reviews.makeReview)
 
+public_route.get('/research/listing', research.getPublicResearchListing)
 protected_route.post('/research', research.createResearch)
 protected_route.put('/research', research.updateResearch)
 protected_route.put('/research/meta/:researchExternalId', research.updateResearchMeta)

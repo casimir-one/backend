@@ -632,9 +632,37 @@ const getResearchProfile = async (ctx) => {
 };
 
 
+const getPublicResearchListing = async (ctx) => {
+  const tenant = ctx.state.tenant;
+
+  try {
+
+    const researches = await researchService.findAllResearches(tenant.settings.researchesBlacklist);
+    const chainResearches = await deipRpc.api.getResearchesAsync([...researches.map(r => r._id)]);
+    const publicChainResearches = chainResearches.filter((item) => { return !item.is_private });
+
+    const result = publicChainResearches.map((chainResearch) => {
+      const research = researches.find(r => r._id == chainResearch.external_id);
+      return { ...chainResearch, researchRef: research };
+    });
+
+    result.sort((a, b) => a.id - b.id);
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+
 export default {
   getResearchBackground,
   uploadResearchBackground,
+  getPublicResearchListing,
   getResearchProfile,
   updateResearch,
   updateResearchMeta,

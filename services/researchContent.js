@@ -1,7 +1,27 @@
 import deipRpc from '@deip/rpc-client';
 import ResearchContent from './../schemas/researchContent';
-import PROPOSAL_TYPE from './../constants/proposalType';
+import { PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS } from './../constants';
 
+
+async function findPublishedResearchContent() {
+  let researches = await ResearchContent.find({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+  return researches;
+}
+
+async function findDraftResearchContent() {
+  let researches = await ResearchContent.find({ $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
+  return researches;
+}
+
+async function findPublishedResearchContentByResearch(researchExternalId) {
+  let researches = await ResearchContent.find({ researchExternalId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+  return researches;
+}
+
+async function findDraftResearchContentByResearch(researchExternalId) {
+  let researches = await ResearchContent.find({ researchExternalId, $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
+  return researches;
+}
 
 async function findResearchContentById(externalId) {
   let research = await ResearchContent.findOne({ _id: externalId });
@@ -28,7 +48,7 @@ async function findResearchContentByResearchId(researchExternalId) {
   return list;
 }
 
-async function upsertResearchContent({
+async function createResearchContent({
   externalId,
   researchExternalId,
   researchGroupExternalId,
@@ -46,42 +66,53 @@ async function upsertResearchContent({
   foreignReferences
 }) {
 
-  let researchContent = await findResearchContentById({ _id: externalId });
+  const researchContent = new ResearchContent({
+    _id: externalId,
+    researchExternalId,
+    researchGroupExternalId,
+    folder,
+    researchId, // legacy internal id
+    researchGroupId, // legacy internal id
+    title,
+    hash,
+    algo,
+    type,
+    status,
+    packageFiles,
+    authors,
+    references,
+    foreignReferences
+  });
 
-  if (researchContent) {
-    researchContent.researchExternalId = researchExternalId;
-    researchContent.researchGroupExternalId = researchGroupExternalId;
-    researchContent.folder = folder;
-    researchContent.researchId = researchId; // legacy internal id
-    researchContent.researchGroupId = researchGroupId; // legacy internal id
-    researchContent.title = title;
-    researchContent.hash = hash; 
-    researchContent.algo = algo; 
-    researchContent.type = type; 
-    researchContent.status = status; 
-    researchContent.packageFiles = packageFiles; 
-    researchContent.authors = authors;
-    researchContent.references = references; 
-    researchContent.foreignReferences = foreignReferences;
-  } else {
-    researchContent = new ResearchContent({
-      _id: externalId,
-      researchExternalId,
-      researchGroupExternalId,
-      folder,
-      researchId, // legacy internal id
-      researchGroupId, // legacy internal id
-      title,
-      hash,
-      algo,
-      type,
-      status,
-      packageFiles,
-      authors,
-      references,
-      foreignReferences
-    })
-  }
+  return researchContent.save();
+}
+
+
+async function updateResearchContent(externalId, {
+  folder,
+  title,
+  hash,
+  algo,
+  type,
+  status,
+  packageFiles,
+  authors,
+  references,
+  foreignReferences
+}) {
+
+  const researchContent = await findResearchContentById(externalId);
+
+  researchContent.folder = folder;
+  researchContent.title = title;
+  researchContent.hash = hash;
+  researchContent.algo = algo;
+  researchContent.type = type;
+  researchContent.status = status;
+  researchContent.packageFiles = packageFiles;
+  researchContent.authors = authors;
+  researchContent.references = references;
+  researchContent.foreignReferences = foreignReferences;
 
   return researchContent.save();
 }
@@ -101,14 +132,18 @@ function proposalIsNotExpired(proposal) {
   return proposal != null;
 }
 
-
 export {
   findResearchContentById,
   findResearchContentByHash,
-  upsertResearchContent,
+  createResearchContent,
+  updateResearchContent,
   removeResearchContentById,
   removeResearchContentByHash,
   findResearchContentByResearchId,
   lookupContentProposal,
-  proposalIsNotExpired
+  proposalIsNotExpired,
+  findPublishedResearchContent,
+  findDraftResearchContent,
+  findPublishedResearchContentByResearch,
+  findDraftResearchContentByResearch,
 }
