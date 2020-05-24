@@ -11,7 +11,7 @@
     "dependencies": {
         "@deip/app-config-service": "1.1.0",
         "@deip/lib-crypto": "1.1.0",
-        "@deip/rpc-client": "1.17.0",
+        "@deip/rpc-client": "1.18.0",
         "@koa/cors": "^2.2.1",
         "axios": "^0.15.3",
         "bcryptjs": "^2.4.0",

@@ -58,10 +58,17 @@ const listDarArchives = async (ctx) => {
 
 const getResearchContentByResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
+  const tenant = ctx.state.tenant;
 
   try {
 
-    if (ctx.state.tenant.settings.researchesBlacklist.some(id => id == researchExternalId)) {
+    if (tenant.settings.researchesWhitelist && !tenant.settings.researchesWhitelist.some(id => id == researchExternalId)) {
+      ctx.status = 200;
+      ctx.body = [];
+      return;
+    }
+
+    if (tenant.settings.researchesBlacklist && tenant.settings.researchesBlacklist.some(id => id == researchExternalId)) {
       ctx.status = 200;
       ctx.body = [];
       return;
@@ -74,18 +81,17 @@ const getResearchContentByResearch = async (ctx) => {
       return;
     }
 
-    const published = await researchContentService.findPublishedResearchContentByResearch(researchExternalId);
-    const chainResearchContents = await deipRpc.api.getResearchContentsAsync([...published.map(rc => rc._id)]);
-
+    const chainResearchContents = await deipRpc.api.getResearchContentsByResearchAsync(researchExternalId)
+    const published = await researchContentService.findPublishedResearchContentByResearch(researchExternalId)
     const drafts = await researchContentService.findDraftResearchContentByResearch(researchExternalId);
 
     const result = [
       ...published.map((rc) => {
         const chainContent = chainResearchContents.find(pubRc => rc.hash == pubRc.content);
-        return { ...chainContent, ref: rc.toObject(), isDraft: false };
+        return { ...chainContent, researchContentRef: rc.toObject(), isDraft: false };
       }),
       ...drafts.map((rc) => {
-        return { ref: rc.toObject(), isDraft: true };
+        return { researchContentRef: rc.toObject(), isDraft: true };
       })
     ];
 
