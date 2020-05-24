@@ -3,29 +3,34 @@ import ResearchContent from './../schemas/researchContent';
 import { PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS } from './../constants';
 
 
+async function findResearchContents(list) {
+  let result = await ResearchContent.find({ _id: { $in: list } });
+  return result;
+}
+
 async function findPublishedResearchContent() {
-  let researches = await ResearchContent.find({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
-  return researches;
+  let result = await ResearchContent.find({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+  return result;
 }
 
 async function findDraftResearchContent() {
-  let researches = await ResearchContent.find({ $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
-  return researches;
+  let result = await ResearchContent.find({ $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
+  return result;
 }
 
 async function findPublishedResearchContentByResearch(researchExternalId) {
-  let researches = await ResearchContent.find({ researchExternalId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
-  return researches;
+  let result = await ResearchContent.find({ researchExternalId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+  return result;
 }
 
 async function findDraftResearchContentByResearch(researchExternalId) {
-  let researches = await ResearchContent.find({ researchExternalId, $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
-  return researches;
+  let result = await ResearchContent.find({ researchExternalId, $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
+  return result;
 }
 
 async function findResearchContentById(externalId) {
-  let research = await ResearchContent.findOne({ _id: externalId });
-  return research;
+  let result = await ResearchContent.findOne({ _id: externalId });
+  return result;
 }
 
 async function removeResearchContentById(externalId) {
@@ -133,6 +138,7 @@ function proposalIsNotExpired(proposal) {
 }
 
 export {
+  findResearchContents,
   findResearchContentById,
   findResearchContentByHash,
   createResearchContent,

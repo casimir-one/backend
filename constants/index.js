@@ -1,4 +1,5 @@
 
+import CHAIN_CONSTANTS from './chainConstants';
 import SIGN_UP_POLICY from './signUpPolicy';
 import USER_PROFILE_STATUS from './userProfileStatus';
 import ACTIVITY_LOG_TYPE from './activityLogType';
@@ -13,6 +14,7 @@ import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 
 
 export {
+  CHAIN_CONSTANTS,
   SIGN_UP_POLICY,
   USER_PROFILE_STATUS,
   ACTIVITY_LOG_TYPE,

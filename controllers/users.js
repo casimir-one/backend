@@ -183,11 +183,6 @@ const addUserBookmark = async (ctx) => {
     switch (bookmarkType) {
       case 'research':
         const researchId = +data.researchId;
-        if (!Number.isInteger(researchId) || researchId < 0) {
-          ctx.status = 400;
-          ctx.body = 'Invalid researchId value';
-          return;
-        }
         ref = data.researchId;
         break;
     }
@@ -197,6 +192,7 @@ const addUserBookmark = async (ctx) => {
       type: data.type,
       ref,
     });
+    
     const savedBookmark = await bookmark.save();
 
     ctx.status = 201;

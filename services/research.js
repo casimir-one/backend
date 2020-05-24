@@ -4,8 +4,8 @@ import ResearchApplication from './../schemas/researchApplication';
 import { RESEARCH_APPLICATION_STATUS } from './../constants';
 
 
-async function findAllResearches(blacklist = []) {
-  let researches = await Research.find({ _id: { $nin: blacklist } });
+async function findResearches(list) {
+  let researches = await Research.find({ _id: { $in: list } });
   return researches;
 }
 
@@ -203,7 +203,7 @@ async function removeCriteriaToResearches({
 
 
 export default {
-  findAllResearches,
+  findResearches,
   findResearchById,
   createResearch,
   updateResearch,

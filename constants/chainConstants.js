@@ -1,0 +1,8 @@
+const API_BULK_FETCH_LIMIT = 10000;
+
+
+const CHAIN_CONSTANTS = {
+  API_BULK_FETCH_LIMIT
+}
+
+export default CHAIN_CONSTANTS;

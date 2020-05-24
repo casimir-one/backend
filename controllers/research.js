@@ -13,7 +13,7 @@ import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS } from './../constants';
+import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS } from './../constants';
 import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 
@@ -616,37 +616,22 @@ const updateResearch = async (ctx) => {
 };
 
 
-const getResearchProfile = async (ctx) => {
-
-  try {
-    const researchExternalId = ctx.params.researchExternalId;
-    const researcRm = await researchService.findResearchById(researchExternalId);
-
-    ctx.status = 200;
-    ctx.body = researcRm;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-};
-
-
 const getPublicResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
 
   try {
 
-    const researches = await researchService.findAllResearches(tenant.settings.researchesBlacklist);
-    const chainResearches = await deipRpc.api.getResearchesAsync([...researches.map(r => r._id)]);
-    const publicChainResearches = chainResearches.filter((item) => { return !item.is_private });
+    const chainResearches = await deipRpc.api.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+    const filtered = chainResearches
+      .filter(r => !tenant.settings.researchesWhitelist || tenant.settings.researchesWhitelist.some(id => r.external_id == id))
+      .filter(r => !tenant.settings.researchesBlacklist || !tenant.settings.researchesBlacklist.some(id => r.external_id == id))
+      .filter(r => !r.is_private);
 
-    const result = publicChainResearches.map((chainResearch) => {
+    const researches = await researchService.findResearches([...filtered.map(r => r.external_id)]);
+    const result = filtered.map((chainResearch) => {
       const research = researches.find(r => r._id == chainResearch.external_id);
       return { ...chainResearch, researchRef: research };
     });
-
-    result.sort((a, b) => a.id - b.id);
 
     ctx.status = 200;
     ctx.body = result;
@@ -659,11 +644,111 @@ const getPublicResearchListing = async (ctx) => {
 };
 
 
+const getUserResearchListing = async (ctx) => {
+  const tenant = ctx.state.tenant;
+  const username = ctx.params.username;
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(username);
+    const filtered = chainResearches
+      .filter(r => !tenant.settings.researchesWhitelist || tenant.settings.researchesWhitelist.some(id => r.external_id == id))
+      .filter(r => !tenant.settings.researchesBlacklist || !tenant.settings.researchesBlacklist.some(id => r.external_id == id))
+      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+
+    const researches = await researchService.findResearches([...filtered.map(r => r.external_id)]);
+    const result = filtered.map((chainResearch) => {
+      const research = researches.find(r => r._id == chainResearch.external_id);
+      return { ...chainResearch, researchRef: research };
+    });
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+
+const getResearchGroupResearchListing = async (ctx) => {
+  const tenant = ctx.state.tenant;
+  const researchGroupExternalId = ctx.params.researchGroupExternalId;
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
+    const filtered = chainResearches
+      .filter(r => !tenant.settings.researchesWhitelist || tenant.settings.researchesWhitelist.some(id => r.external_id == id))
+      .filter(r => !tenant.settings.researchesBlacklist || !tenant.settings.researchesBlacklist.some(id => r.external_id == id))
+      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+
+    const researches = await researchService.findResearches([...filtered.map(r => r.external_id)]);
+    const result = filtered.map((chainResearch) => {
+      const research = researches.find(r => r._id == chainResearch.external_id);
+      return { ...chainResearch, researchRef: research };
+    });
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+
+const getResearch = async (ctx) => {
+  const tenant = ctx.state.tenant;
+  const researchExternalId = ctx.params.researchExternalId;
+
+  try {
+
+    if (tenant.settings.researchesWhitelist && !tenant.settings.researchesWhitelist.some(id => researchExternalId == id)) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+
+    if (tenant.settings.researchesBlacklist && tenant.settings.researchesBlacklist.some(id => researchExternalId == id)) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+
+    const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
+    if (!chainResearch) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+
+    const research = await researchService.findResearchById(researchExternalId);
+
+    ctx.status = 200;
+    ctx.body = { ...chainResearch, researchRef: research };;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+
 export default {
   getResearchBackground,
   uploadResearchBackground,
+  getResearch,
   getPublicResearchListing,
-  getResearchProfile,
+  getUserResearchListing,
+  getResearchGroupResearchListing,
   updateResearch,
   updateResearchMeta,
   createResearch,

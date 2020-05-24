@@ -18,7 +18,7 @@ const InvestmentPortfolio = new Schema({
     }],
     "researches": [{
         _id: false,
-        "id": { type: Number, required: true },
+        "id": { type: String, required: true },
         "tags": [{
             _id: false,
             "name": { type: String, required: true },

@@ -69,7 +69,7 @@ async function getSynchronizeInvestorPortfolio(username) {
     investorPortfolio = await createInvestmentPortfolio({ username, members: [{ username, role: "owner" }]});
   }
 
-  let actual = shares.map(rt => rt.research_id);
+  let actual = shares.map(rt => rt.research_external_id);
   let saved = investorPortfolio.researches.map(r => r.id);
   actual.sort();
   saved.sort();
