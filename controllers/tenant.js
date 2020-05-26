@@ -6,7 +6,7 @@ import sharp from 'sharp';
 import deipRpc from '@deip/rpc-client';
 import usersService from './../services/users';
 import tenantService from './../services/tenant';
-import researchesService from './../services/research';
+import ResearchService from './../services/research';
 import * as authService from './../services/auth';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
@@ -246,12 +246,14 @@ const getTenantProfile = async (ctx) => {
 
 
 const updateTenantProfile = async (ctx) => {
-  const update = ctx.request.body;
   const jwtUsername = ctx.state.user.username;
-  const tenantId = ctx.state.tenant.id;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
+  const update = ctx.request.body;
 
   try {
 
+    const tenantId = tenant.id;
     const tenantProfile = await tenantService.findTenantProfile(tenantId);
     if (!tenantProfile) {
       ctx.status = 404;
@@ -270,7 +272,7 @@ const updateTenantProfile = async (ctx) => {
     const oldComponents = profileData.settings.researchComponents;
     const newComponents = updatedProfileData.settings.researchComponents;
 
-    await researchesService.processResearchCriterias(oldComponents, newComponents);
+    await researchService.handleResearchCriterias(oldComponents, newComponents);
 
     ctx.status = 200;
     ctx.body = updatedTenantProfile;

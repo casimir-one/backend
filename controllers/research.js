@@ -8,7 +8,7 @@ import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';
 import deipRpc from '@deip/rpc-client';
-import researchService from './../services/research';
+import ResearchService from './../services/research';
 import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
@@ -23,6 +23,8 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 
 const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
   const { tx, offchainMeta, isProposal } = ctx.request.body;
 
   try {
@@ -41,7 +43,7 @@ const createResearch = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
     const researchGroupInternalId = authorizedGroup.id;
-    const researcRm = await researchService.createResearch({
+    const researcRm = await researchService.createResearchRef({
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
@@ -65,6 +67,8 @@ const createResearch = async (ctx, next) => {
 
 const createResearchApplication = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
 
   try {
 
@@ -130,6 +134,8 @@ const createResearchApplication = async (ctx) => {
 
 const editResearchApplication = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
   const applicationId = ctx.params.proposalId;
 
   try {
@@ -214,10 +220,12 @@ const editResearchApplication = async (ctx) => {
 
 
 const getResearchApplicationAttachmentFile = async function (ctx) {
+  const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
   const applicationId = ctx.params.proposalId;
   const filename = ctx.query.filename;
   const isDownload = ctx.query.download === 'true';
-  const jwtUsername = ctx.state.user.username;
 
   try {
 
@@ -263,6 +271,8 @@ const getResearchApplicationAttachmentFile = async function (ctx) {
 
 const approveResearchApplication = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
   const { tx } = ctx.request.body;
 
   try { 
@@ -287,7 +297,7 @@ const approveResearchApplication = async (ctx) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
     
     const research = await deipRpc.api.getResearchAsync(researchApplication.researchExternalId);
-    const researcRm = await researchService.createResearch({
+    const researcRm = await researchService.createResearchRef({
       externalId: research.external_id,
       researchGroupExternalId: research.research_group.external_id,
       researchGroupInternalId: research.research_group.id,
@@ -316,6 +326,8 @@ const approveResearchApplication = async (ctx) => {
 
 const rejectResearchApplication = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
   const { tx } = ctx.request.body;
 
   try { 
@@ -357,6 +369,8 @@ const rejectResearchApplication = async (ctx) => {
 
 
 const getResearchApplications = async (ctx) => {
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
   const status = ctx.query.status;
   const researcher = ctx.query.researcher;
 
@@ -531,8 +545,10 @@ const getResearchBackground = async (ctx) => {
 
 const updateResearchMeta = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
   const researchExternalId = ctx.params.researchExternalId;
   const update = ctx.request.body;
+  const researchService = new ResearchService(tenant);
 
   try {
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
@@ -544,7 +560,7 @@ const updateResearchMeta = async (ctx) => {
       return;
     }
 
-    const researchProfile = await researchService.findResearchById(researchExternalId);
+    const researchProfile = await researchService.findResearchRef(researchExternalId);
     if (!researchProfile) {
       ctx.status = 400;
       ctx.body = 'Read model not found';
@@ -552,7 +568,7 @@ const updateResearchMeta = async (ctx) => {
     }
 
     const profileData = researchProfile.toObject();
-    const updatedProfile = await researchService.updateResearch(researchExternalId, { ...profileData, ...update });
+    const updatedProfile = await researchService.updateResearchRef(researchExternalId, { ...profileData, ...update });
 
     ctx.status = 200;
     ctx.body = { rm: updatedProfile };
@@ -618,24 +634,12 @@ const updateResearch = async (ctx) => {
 
 const getPublicResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
 
   try {
-
-    const chainResearches = await deipRpc.api.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-    const filtered = chainResearches
-      .filter(r => !tenant.settings.researchesWhitelist || tenant.settings.researchesWhitelist.some(id => r.external_id == id))
-      .filter(r => !tenant.settings.researchesBlacklist || !tenant.settings.researchesBlacklist.some(id => r.external_id == id))
-      .filter(r => !r.is_private);
-
-    const researches = await researchService.findResearches([...filtered.map(r => r.external_id)]);
-    const result = filtered.map((chainResearch) => {
-      const research = researches.find(r => r._id == chainResearch.external_id);
-      return { ...chainResearch, researchRef: research };
-    });
-
+    const result = await researchService.lookupResearches(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
     ctx.status = 200;
     ctx.body = result;
-
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -645,27 +649,15 @@ const getPublicResearchListing = async (ctx) => {
 
 
 const getUserResearchListing = async (ctx) => {
-  const tenant = ctx.state.tenant;
-  const username = ctx.params.username;
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
+  const member = ctx.params.username;
 
   try {
-
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(username);
-    const filtered = chainResearches
-      .filter(r => !tenant.settings.researchesWhitelist || tenant.settings.researchesWhitelist.some(id => r.external_id == id))
-      .filter(r => !tenant.settings.researchesBlacklist || !tenant.settings.researchesBlacklist.some(id => r.external_id == id))
-      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
-
-    const researches = await researchService.findResearches([...filtered.map(r => r.external_id)]);
-    const result = filtered.map((chainResearch) => {
-      const research = researches.find(r => r._id == chainResearch.external_id);
-      return { ...chainResearch, researchRef: research };
-    });
-
+    const result = await researchService.getResearchesByResearchGroupMember(member, jwtUsername);
     ctx.status = 200;
     ctx.body = result;
-
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -676,26 +668,14 @@ const getUserResearchListing = async (ctx) => {
 
 const getResearchGroupResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
-  const researchGroupExternalId = ctx.params.researchGroupExternalId;
   const jwtUsername = ctx.state.user.username;
+  const researchGroupExternalId = ctx.params.researchGroupExternalId;
+  const researchService = new ResearchService(tenant);
 
   try {
-
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
-    const filtered = chainResearches
-      .filter(r => !tenant.settings.researchesWhitelist || tenant.settings.researchesWhitelist.some(id => r.external_id == id))
-      .filter(r => !tenant.settings.researchesBlacklist || !tenant.settings.researchesBlacklist.some(id => r.external_id == id))
-      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
-
-    const researches = await researchService.findResearches([...filtered.map(r => r.external_id)]);
-    const result = filtered.map((chainResearch) => {
-      const research = researches.find(r => r._id == chainResearch.external_id);
-      return { ...chainResearch, researchRef: research };
-    });
-
+    const result = await researchService.getResearchesByResearchGroup(researchGroupExternalId, jwtUsername);
     ctx.status = 200;
     ctx.body = result;
-
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -707,33 +687,19 @@ const getResearchGroupResearchListing = async (ctx) => {
 const getResearch = async (ctx) => {
   const tenant = ctx.state.tenant;
   const researchExternalId = ctx.params.researchExternalId;
+  const researchService = new ResearchService(tenant);
 
-  try {
+  try { 
 
-    if (tenant.settings.researchesWhitelist && !tenant.settings.researchesWhitelist.some(id => researchExternalId == id)) {
+    const research = await researchService.getResearch(researchExternalId);
+    if (!research) {
       ctx.status = 404;
       ctx.body = null;
       return;
     }
-
-    if (tenant.settings.researchesBlacklist && tenant.settings.researchesBlacklist.some(id => researchExternalId == id)) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-
-    const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
-    if (!chainResearch) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-
-    const research = await researchService.findResearchById(researchExternalId);
 
     ctx.status = 200;
-    ctx.body = { ...chainResearch, researchRef: research };;
-
+    ctx.body = research;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
