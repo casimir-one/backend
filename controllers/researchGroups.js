@@ -12,7 +12,7 @@ import researchGroupsService from './../services/researchGroup';
 import activityLogEntriesService from './../services/activityLogEntry';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
+import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE, APP_EVENTS } from './../constants';
 import { researchGroupLogoForm } from './../forms/researchGroupForms';
 
 
@@ -35,7 +35,6 @@ const createResearchGroup = async (ctx) => {
       creator 
     });
 
-    // processNewGroupTx(payload, result.txInfo)
     ctx.status = 200;
     ctx.body = { rm: researchGroupRm, txResult };
 
@@ -47,7 +46,7 @@ const createResearchGroup = async (ctx) => {
 }
 
 
-const updateResearchGroup = async (ctx) => {
+const updateResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta, isProposal } = ctx.request.body;
 
@@ -69,28 +68,18 @@ const updateResearchGroup = async (ctx) => {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
-    const researchGroupInternalId = authorizedGroup.id;
-
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("update_account"),
-      creator: jwtUsername,
-      data: {},
-      isProposalAutoAccepted: !isProposal
-    };
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
-    
     ctx.status = 200;
     ctx.body = { txResult };
+
+    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_GROUP_UPDATED, { tx, emitter: jwtUsername }]);
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 

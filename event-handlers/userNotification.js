@@ -179,6 +179,57 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (payload) => {
 });
 
 
+userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async (payload) => {
+  const { researchGroup, proposer } = payload;
+  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  const notificationsPromises = [];
+
+  for (let i = 0; i < members.length; i++) {
+    let rgt = members[i];
+    let promise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
+      metadata: {
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("update_account") }, // legacy
+        researchGroup,
+        creatorProfile: proposer
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
+
+userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (payload) => {
+  const { researchGroup, creator, isAcceptedByQuorum } = payload;
+  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  const notificationsPromises = [];
+
+  for (let i = 0; i < members.length; i++) {
+    let rgt = members[i];
+    let promise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        isProposalAutoAccepted: true, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("update_account"), is_completed: true }, // legacy
+        researchGroup,
+        creatorProfile: creator
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
 
 
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
@@ -279,28 +330,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
       if (isProposalAutoAccepted) {
         // TODO: this event should be fired by chain event emmiter
         userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, { excluded: name, researchGroupId: researchGroup.id });
-      }
-
-      break;
-    }
-
-
-    case PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP: {
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            isProposalAutoAccepted,
-            proposal,
-            researchGroup,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
       }
 
       break;

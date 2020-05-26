@@ -768,6 +768,7 @@ const createResearchContent = async (ctx, next) => {
 
     ctx.status = 200;
     ctx.body = { rm: researchContentRm, txResult };
+    
     ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_MATERIAL_PROPOSED : APP_EVENTS.RESEARCH_MATERIAL_CREATED, { tx, emitter: jwtUsername }]);
 
   } catch (err) {

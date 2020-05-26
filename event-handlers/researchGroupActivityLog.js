@@ -80,7 +80,6 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, async (
 });
 
 
-
 researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async (payload) => {
   const { researchGroup, research, proposer } = payload;
   const data = { permlink: research.permlink };
@@ -111,6 +110,38 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (payload) 
       proposal: { action: deipRpc.operations.getOperationTag("update_research"), data }, // legacy
       researchGroup,
       research,
+      creatorProfile: creator
+    }
+  });
+});
+
+
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async (payload) => {
+  const { researchGroup, proposer } = payload;
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId: researchGroup.id,
+    type: ACTIVITY_LOG_TYPE.PROPOSAL, // legacy
+    metadata: {
+      isProposalAutoAccepted: false, // legacy
+      proposal: { action: deipRpc.operations.getOperationTag("update_account") }, // legacy
+      researchGroup,
+      creatorProfile: proposer
+    }
+  });
+});
+
+
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (payload) => {
+  const { researchGroup, creator } = payload;
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId: researchGroup.id,
+    type: ACTIVITY_LOG_TYPE.PROPOSAL, // legacy
+    metadata: {
+      isProposalAutoAccepted: true, // legacy
+      proposal: { action: deipRpc.operations.getOperationTag("update_account") }, // legacy
+      researchGroup,
       creatorProfile: creator
     }
   });

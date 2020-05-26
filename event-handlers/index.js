@@ -29,6 +29,10 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, async (source) => {
       appEventHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, source);
       break
     }
+    case PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP: {
+      appEventHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, source);
+      break
+    }
     default: {
       break;
     }
@@ -142,6 +146,37 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (source) => {
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_UPDATED, payload);
   researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_UPDATED, payload);
+});
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async (source) => {
+  const { tx, emitter } = source;
+  const operation = tx['operations'][0][1]['proposed_ops'][0]['op'];
+  const { account: researchGroupExternalId } = operation[1];
+
+  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const proposerUser = await usersService.findUserProfileByOwner(emitter);
+
+  const payload = { researchGroup: chainResearchGroup, proposer: proposerUser };
+
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
+});
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (source) => {
+  const { tx, emitter } = source;
+  const operation = tx['operations'][0];
+  const { account: researchGroupExternalId } = operation[1];
+
+  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const creatorUser = await usersService.findUserProfileByOwner(emitter);
+  const isAcceptedByQuorum = researchGroupExternalId != emitter;
+
+  const payload = { researchGroup: chainResearchGroup, creator: creatorUser, isAcceptedByQuorum };
+
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, payload);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, payload);
 });
 
 
