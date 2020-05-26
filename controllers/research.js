@@ -584,7 +584,7 @@ const updateResearchMeta = async (ctx) => {
 };
 
 
-const updateResearch = async (ctx) => {
+const updateResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, isProposal } = ctx.request.body;
 
@@ -592,8 +592,7 @@ const updateResearch = async (ctx) => {
     const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
     const payload = operation[1];
     const { 
-      research_group: researchGroupAccount, 
-      external_id: researchExternalId
+      research_group: researchGroupAccount
     } = payload;
 
     const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
@@ -605,34 +604,18 @@ const updateResearch = async (ctx) => {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
-    const researchGroupInternalId = authorizedGroup.id;
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    const { id: researchInteranlId, permlink } = research;
-
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("update_research"),
-      creator: jwtUsername,
-      data: { 
-        permlink, 
-        research_id: researchInteranlId 
-      },
-      isProposalAutoAccepted: !isProposal
-    };
-
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
-
     ctx.status = 201;
     ctx.body = { txResult };
+
+    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_UPDATED, { tx, emitter: jwtUsername }]);
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 };
 
 
