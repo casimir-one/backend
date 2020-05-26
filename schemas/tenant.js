@@ -24,6 +24,10 @@ const ResearchCriteria = new Schema({
   "component": { type: Object, required: true }
 });
 
+const ResearchCategory = new Schema({
+  "text": { type: String, required: true }
+});
+
 const TenantProfile = new Schema({
     "_id": { type: String },
     "name": { type: String },
@@ -36,9 +40,10 @@ const TenantProfile = new Schema({
       "signUpPolicy": { type: String, enum: [SIGN_UP_POLICY.FREE, SIGN_UP_POLICY.ADMIN_APPROVAL], required: true },
       "researchAreas": [ResearchArea],
       "researchComponents": [ResearchCriteria],
+      "researchCategories": [ResearchCategory],
       "faq": [FAQ],
-      "researchesBlacklist": [{ type: String, required: true, trim: true }],
-      "researchesWhitelist": [{ type: String, required: true, trim: true }]
+      "researchBlacklist": [{ type: String, required: true, trim: true }],
+      "researchWhitelist": [{ type: String, required: true, trim: true }]
     }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 

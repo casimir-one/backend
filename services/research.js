@@ -6,16 +6,16 @@ import { RESEARCH_APPLICATION_STATUS, RESEARCH_COMPONENT_TYPE } from './../const
 class ResearchService {
 
   constructor(tenant) {
-    this.researchesWhitelist = tenant.settings.researchesWhitelist;
-    this.researchesBlacklist = tenant.settings.researchesBlacklist;
+    this.researchWhitelist = tenant.settings.researchWhitelist;
+    this.researchBlacklist = tenant.settings.researchBlacklist;
     this.activeComponents = tenant.settings.researchComponents.filter(comp => comp.isVisible);
   }
 
   async mapResearch(chainResearches, privateGuard = (r) => { return !r.is_private }) {
     const researches = await Research.find({ _id: { $in: chainResearches.map(r => r.external_id) } });
     return chainResearches
-      .filter(r => !this.researchesWhitelist || this.researchesWhitelist.some(id => r.external_id == id))
-      .filter(r => !this.researchesBlacklist || !this.researchesBlacklist.some(id => r.external_id == id))
+      .filter(r => !this.researchWhitelist || this.researchWhitelist.some(id => r.external_id == id))
+      .filter(r => !this.researchBlacklist || !this.researchBlacklist.some(id => r.external_id == id))
       .filter(privateGuard)
       .map((chainResearch) => {
         const research = researches.find(r => r._id == chainResearch.external_id);
@@ -89,6 +89,7 @@ class ResearchService {
     videoSrc,
     partners,
     tenantCriterias,
+    tenantCategory
   }) {
 
     const research = new Research({
@@ -98,17 +99,19 @@ class ResearchService {
       videoSrc,
       partners,
       tenantCriterias,
+      tenantCategory,
       researchGroupId: researchGroupInternalId, // legacy internal id
     });
 
     return research.save();
   }
-
+  
   async updateResearchRef(externalId, {
     milestones,
     videoSrc,
     partners,
-    tenantCriterias
+    tenantCriterias,
+    tenantCategory
   }) {
 
     const research = await this.findResearchRef(externalId);
@@ -116,6 +119,7 @@ class ResearchService {
     research.videoSrc = videoSrc;
     research.partners = partners;
     research.tenantCriterias = tenantCriterias;
+    research.tenantCategory = tenantCategory;
 
     return research.save();
   }

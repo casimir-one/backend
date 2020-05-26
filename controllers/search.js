@@ -11,8 +11,8 @@ const getAllResearchContents = async (ctx) => {
     const result = [];
     const chainResearches = await deipRpc.api.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
     const filtered = chainResearches
-      .filter(r => !tenant.settings.researchesWhitelist || tenant.settings.researchesWhitelist.some(id => r.external_id == id))
-      .filter(r => !tenant.settings.researchesBlacklist || !tenant.settings.researchesBlacklist.some(id => r.external_id == id))
+      .filter(r => !tenant.settings.researchWhitelist || tenant.settings.researchWhitelist.some(id => r.external_id == id))
+      .filter(r => !tenant.settings.researchBlacklist || !tenant.settings.researchBlacklist.some(id => r.external_id == id))
       .filter(r => !r.is_private);
 
     const promises = filtered.map(r => deipRpc.api.getResearchContentsByResearchAsync(r.external_id));

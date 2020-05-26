@@ -304,7 +304,8 @@ const approveResearchApplication = async (ctx) => {
       milestones: [],
       videoSrc: "",
       partners: [],
-      tenantCriterias: researchApplication.tenantCriterias
+      tenantCriterias: researchApplication.tenantCriterias,
+      tenantCategory: null
     });
 
     const researchApplicationData = researchApplication.toObject();
@@ -568,7 +569,10 @@ const updateResearchMeta = async (ctx) => {
     }
 
     const profileData = researchProfile.toObject();
-    const updatedProfile = await researchService.updateResearchRef(researchExternalId, { ...profileData, ...update });
+    const updatedProfile = await researchService.updateResearchRef(researchExternalId, { 
+      ...profileData, 
+      ...update 
+    });
 
     ctx.status = 200;
     ctx.body = { rm: updatedProfile };

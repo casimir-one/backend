@@ -1,6 +1,7 @@
 
 import mongoose from 'mongoose';
 import ResearchCriteriaValue from './researchCriteriaValue';
+import ResearchCategoryValue from './researchCategoryValue';
 
 const Schema = mongoose.Schema;
 
@@ -23,7 +24,8 @@ const Research = new Schema({
     "type": { type: String, required: true },
     "title": { type: String, required: true }
   }],
-  "tenantCriterias": [ResearchCriteriaValue]
+  "tenantCriterias": [ResearchCriteriaValue],
+  "tenantCategory": ResearchCategoryValue
 
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 

@@ -62,13 +62,13 @@ const getResearchContentByResearch = async (ctx) => {
 
   try {
 
-    if (tenant.settings.researchesWhitelist && !tenant.settings.researchesWhitelist.some(id => id == researchExternalId)) {
+    if (tenant.settings.researchWhitelist && !tenant.settings.researchWhitelist.some(id => id == researchExternalId)) {
       ctx.status = 200;
       ctx.body = [];
       return;
     }
 
-    if (tenant.settings.researchesBlacklist && tenant.settings.researchesBlacklist.some(id => id == researchExternalId)) {
+    if (tenant.settings.researchBlacklist && tenant.settings.researchBlacklist.some(id => id == researchExternalId)) {
       ctx.status = 200;
       ctx.body = [];
       return;
