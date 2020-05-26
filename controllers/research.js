@@ -53,7 +53,7 @@ const createResearch = async (ctx, next) => {
 
     ctx.status = 200;
     ctx.body = { tx, txResult, rm: researcRm };
-    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, creator: jwtUsername }]);
+    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, emitter: jwtUsername }]);
 
   } catch (err) {
     console.log(err);

@@ -38,10 +38,12 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
 
-  const { researchGroup, research, creator } = payload;
+  const { researchGroup, research, creator, isAcceptedByQuorum } = payload;
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
   const notificationsPromises = [];
+
+  const data = isAcceptedByQuorum ? { title: research.title } : undefined;
 
   for (let i = 0; i < members.length; i++) {
     let rgt = members[i];
@@ -51,7 +53,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         isProposalAutoAccepted: true, // legacy
-        proposal: { action: deipRpc.operations.getOperationTag("create_research") }, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("create_research"), data, is_completed: true }, // legacy
         researchGroup,
         research,
         creatorProfile: creator

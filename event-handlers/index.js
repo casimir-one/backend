@@ -20,9 +20,9 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, async (source) => {
     case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
       appEventHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, source);
     }
-    // case PROPOSAL_TYPE.CREATE_RESEARCH: {
-    //   appEventHandler.emit(APP_EVENTS.RESEARCH_CREATED, source);
-    // }
+    case PROPOSAL_TYPE.CREATE_RESEARCH: {
+      appEventHandler.emit(APP_EVENTS.RESEARCH_CREATED, source);
+    }
 
     default: {
       break;
@@ -33,7 +33,7 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, async (source) => {
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (source) => {
-  const { tx, creator } = source;
+  const { tx, emitter } = source;
   const operation = tx['operations'][0][1]['proposed_ops'][0]['op'];
   const { research_group: researchGroupAccount, external_id: researchExternalId, title } = operation[1];
   const isProposalAutoAccepted = false;
@@ -41,7 +41,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (source) => {
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupAccount);
   const chainResearchPromise = isProposalAutoAccepted ? deipRpc.api.getResearchAsync(researchExternalId) : Promise.resolve(null);
   const chainResearch = await chainResearchPromise;
-  const proposerUser = await usersService.findUserProfileByOwner(creator);
+  const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
   const payload = { researchGroup: chainResearchGroup, research: chainResearch, proposer: proposerUser, title, isProposalAutoAccepted };
 
@@ -51,15 +51,16 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (source) => {
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, async (source) => {
-  const { tx, creator } = source;
+  const { tx, emitter } = source;
   const operation = tx['operations'][0];
   const { research_group: researchGroupAccount, external_id: researchExternalId } = operation[1];
+  const isAcceptedByQuorum = researchGroupAccount != emitter;
 
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupAccount);
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
-  const creatorUser = await usersService.findUserProfileByOwner(creator);
+  const creatorUser = await usersService.findUserProfileByOwner(emitter);
 
-  const payload = { researchGroup: chainResearchGroup, research: chainResearch, creator: creatorUser };
+  const payload = { researchGroup: chainResearchGroup, research: chainResearch, creator: creatorUser, isAcceptedByQuorum };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CREATED, payload);
   researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_CREATED, payload);
