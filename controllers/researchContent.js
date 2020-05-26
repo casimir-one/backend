@@ -22,9 +22,7 @@ import slug from 'limax';
 import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import * as researchContentService from './../services/researchContent';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
-import userNotificationHandler from './../event-handlers/userNotification';
-import { RESEARCH_CONTENT_STATUS, USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
+import { RESEARCH_CONTENT_STATUS, APP_EVENTS } from './../constants';
 
 
 const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
@@ -688,7 +686,7 @@ const getResearchPackageFile = async function(ctx) {
 }
 
 
-const createResearchContent = async (ctx) => {
+const createResearchContent = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta, isProposal } = ctx.request.body;
 
@@ -768,26 +766,17 @@ const createResearchContent = async (ctx) => {
       foreignReferences
     });
 
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("create_research_content"), 
-      creator: jwtUsername,
-      data: { externalId: externalId, title, research_id: researchInternalId },
-      isProposalAutoAccepted: !isProposal
-    };
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
-
     ctx.status = 200;
     ctx.body = { rm: researchContentRm, txResult };
+    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_MATERIAL_PROPOSED : APP_EVENTS.RESEARCH_MATERIAL_CREATED, { tx, emitter: jwtUsername }]);
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 

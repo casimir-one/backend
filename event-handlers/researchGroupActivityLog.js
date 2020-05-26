@@ -9,16 +9,17 @@ class ResearchGroupActivityLogHandler extends EventEmitter {}
 const researchGroupActivityLogHandler = new ResearchGroupActivityLogHandler();
 
 researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
-  const { researchGroup, research, proposer, title, isProposalAutoAccepted } = payload;
+  const { researchGroup, proposer, title } = payload;
+  const data = { title };
 
   activityLogEntriesService.createActivityLogEntry({
     researchGroupId: researchGroup.id,
     type: ACTIVITY_LOG_TYPE.PROPOSAL, // legacy
     metadata: {
-      isProposalAutoAccepted, // legacy
-      proposal: { action: deipRpc.operations.getOperationTag("create_research"), data: { title } }, // legacy
+      isProposalAutoAccepted: false, // legacy
+      proposal: { action: deipRpc.operations.getOperationTag("create_research"), data }, // legacy
       researchGroup,
-      research,
+      research: null,
       creatorProfile: proposer
     }
   });
@@ -42,6 +43,42 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) 
 });
 
 
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, async (payload) => {
+  const { researchGroup, research, proposer, title } = payload;
+  const data = { title };
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId: researchGroup.id,
+    type: ACTIVITY_LOG_TYPE.PROPOSAL, // legacy
+    metadata: {
+      isProposalAutoAccepted: false, // legacy
+      proposal: { action: deipRpc.operations.getOperationTag("create_research_content"), data }, // legacy
+      researchGroup,
+      research,
+      researchContent: null,
+      creatorProfile: proposer
+    }
+  });
+});
+
+
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, async (payload) => {
+  const { researchGroup, research, researchContent, creator } = payload;
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId: researchGroup.id,
+    type: ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, // legacy
+    metadata: {
+      proposal: { action: deipRpc.operations.getOperationTag("create_research_content") }, // legacy
+      researchGroup,
+      research,
+      researchContent,
+      creatorProfile: creator
+    }
+  });
+});
+
+
 
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) => {
@@ -52,31 +89,6 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) 
   let creatorProfile = await usersService.findUserProfileByOwner(creator);
 
   switch (action) {
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
-      let { externalId, research_id } = payload;
-      let research = await deipRpc.api.getResearchByIdAsync(research_id);
-      let researchContent = null;
-
-      if (isProposalAutoAccepted) {
-        researchContent = await deipRpc.api.getResearchContentAsync(externalId);
-      }
-
-      activityLogEntriesService.createActivityLogEntry({
-        researchGroupId,
-        type,
-        metadata: {
-          isProposalAutoAccepted,
-          proposal,
-          researchGroup,
-          research,
-          researchContent,
-          creatorProfile
-        }
-      });
-
-      break;
-    }
 
     case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;
@@ -138,44 +150,6 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, async (p
   let creatorProfile = await usersService.findUserProfileByOwner(creator);
 
   switch (action) {
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH: {
-      let { permlink } = payload;
-      let research = await deipRpc.api.getResearchByAbsolutePermlinkAsync(researchGroup.permlink, permlink);
-
-      activityLogEntriesService.createActivityLogEntry({
-        researchGroupId,
-        type,
-        metadata: {
-          proposal,
-          researchGroup,
-          research,
-          creatorProfile
-        }
-      });
-
-      break;
-    }
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
-      let { externalId, research_id } = payload;
-      let research = await deipRpc.api.getResearchByIdAsync(research_id);
-      let researchContent = await deipRpc.api.getResearchContentAsync(externalId);
-
-      activityLogEntriesService.createActivityLogEntry({
-        researchGroupId,
-        type,
-        metadata: {
-          proposal,
-          researchGroup,
-          research,
-          researchContent,
-          creatorProfile
-        }
-      });
-
-      break;
-    }
 
     case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;

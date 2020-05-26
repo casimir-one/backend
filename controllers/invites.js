@@ -101,11 +101,13 @@ const createUserInvite = async (ctx) => {
     });
 
     if (userInvite.status == USER_INVITE_STATUS.SENT) {
-
+      
+      // LEGACY >>>
       const researchGroup = await deipRpc.api.getResearchGroupAsync(userInvite.researchGroupExternalId);
       const notificationPayload = { researchGroupId: researchGroup.id, invitee: userInvite.invitee };
       userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
       researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
+      // <<< LEGACY
 
     } else {
 

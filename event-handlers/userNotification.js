@@ -9,10 +9,11 @@ class UserNotificationHandler extends EventEmitter { }
 const userNotificationHandler = new UserNotificationHandler();
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
-  const { researchGroup, research, proposer, title, isProposalAutoAccepted } = payload;
+  const { researchGroup, proposer, title } = payload;
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
   
   const notificationsPromises = [];
+  const data = { title };
 
   for (let i = 0; i < members.length; i++) {
     let rgt = members[i];
@@ -21,10 +22,10 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
-        isProposalAutoAccepted,
-        proposal: { action: deipRpc.operations.getOperationTag("create_research"), data: { title } }, // legacy
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("create_research"), data }, // legacy
         researchGroup,
-        research,
+        research: null, // legacy
         creatorProfile: proposer
       }
     });
@@ -32,17 +33,14 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
   }
 
   Promise.all(notificationsPromises);
-
 });
 
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
-
   const { researchGroup, research, creator, isAcceptedByQuorum } = payload;
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
   const notificationsPromises = [];
-
   const data = isAcceptedByQuorum ? { title: research.title } : undefined;
 
   for (let i = 0; i < members.length; i++) {
@@ -63,7 +61,64 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
   }
 
   Promise.all(notificationsPromises);
+});
 
+
+userNotificationHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, async (payload) => {
+  const { researchGroup, research, proposer, title } = payload;
+  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  const notificationsPromises = [];
+  const data = { title };
+
+  for (let i = 0; i < members.length; i++) {
+    let rgt = members[i];
+    let promise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
+      metadata: {
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("create_research_content"), data }, // legacy
+        researchGroup,
+        research,
+        researchContent: null, // legacy
+        creatorProfile: proposer
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
+
+userNotificationHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, async (payload) => {
+  const { researchGroup, research, researchContent, creator, isAcceptedByQuorum } = payload;
+  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  const notificationsPromises = [];
+  const data = isAcceptedByQuorum ? { title: researchContent.title } : undefined;
+
+  for (let i = 0; i < members.length; i++) {
+    let rgt = members[i];
+    let promise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        isProposalAutoAccepted: true, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("create_research_content"), data, is_completed: true }, // legacy
+        researchGroup,
+        research,
+        researchContent,
+        creatorProfile: creator
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
 });
 
 
@@ -80,36 +135,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
   let notificationsPromises = [];
 
   switch (action) {
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
-      let { externalId, research_id } = payload;
-      let research = await deipRpc.api.getResearchByIdAsync(research_id);
-      let researchContent = null;
-
-      if (isProposalAutoAccepted) {
-        researchContent = await deipRpc.api.getResearchContentAsync(externalId);
-      }
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            isProposalAutoAccepted,
-            proposal,
-            researchGroup,
-            research,
-            researchContent,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      break;
-    }
 
     case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;
@@ -273,54 +298,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
   let notificationsPromises = [];
 
   switch (action) {
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH: {
-      let { permlink } = payload;
-      let research = await deipRpc.api.getResearchByAbsolutePermlinkAsync(researchGroup.permlink, permlink);
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            proposal,
-            researchGroup,
-            research,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      break;
-    }
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
-      let { externalId, research_id } = payload;
-      let research = await deipRpc.api.getResearchByIdAsync(research_id);
-      let researchContent = await deipRpc.api.getResearchContentAsync(externalId);
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            proposal,
-            researchGroup,
-            research,
-            researchContent,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      break;
-    }
 
     case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
       let { research_id } = payload;
