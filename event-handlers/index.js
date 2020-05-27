@@ -247,4 +247,43 @@ appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (source) => {
 });
 
 
+appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_EDITED, async (source) => {
+  const { tx, emitter, tenant } = source;
+  const create_proposal_operation = tx['operations'][0];
+  const create_research_operation = tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
+  const { creator, external_id: proposalId } = create_proposal_operation[1];
+  const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
+
+  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
+  const proposal = await deipRpc.api.getProposalAsync(proposalId);
+
+  const research = { researchExternalId, title, disciplines };
+
+  const payload = { research, requester: requesterUser, proposal, tenant };
+
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_APPLICATION_EDITED, payload);
+});
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (source) => {
+  const { tx, emitter, tenant } = source;
+  const create_proposal_operation = tx['operations'][0];
+  const create_research_operation = tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
+  const { creator, external_id: proposalId } = create_proposal_operation[1];
+  const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
+
+  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
+
+  const research = { researchExternalId, title, disciplines };
+
+  const payload = { research, requester: requesterUser, tenant };
+
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_APPLICATION_DELETED, payload);
+});
+
+
 export default appEventHandler;

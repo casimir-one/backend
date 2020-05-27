@@ -161,7 +161,7 @@ const createResearchApplication = async (ctx, next) => {
 };
 
 
-const editResearchApplication = async (ctx) => {
+const editResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
@@ -240,11 +240,15 @@ const editResearchApplication = async (ctx) => {
     ctx.status = 200;
     ctx.body = { rm: updatedResearchApplication };
 
+    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_EDITED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 };
 
 
@@ -410,7 +414,7 @@ const rejectResearchApplication = async (ctx, next) => {
 }
 
 
-const deleteResearchApplication = async (ctx) => {
+const deleteResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
@@ -453,11 +457,15 @@ const deleteResearchApplication = async (ctx) => {
     ctx.status = 200;
     ctx.body = { tx, txResult };
 
+    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_DELETED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+    
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 
