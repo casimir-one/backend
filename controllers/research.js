@@ -117,7 +117,7 @@ const createResearchApplication = async (ctx, next) => {
       solution: form.solution,
       tenantCriterias: form.tenantCriterias,
       funding: form.funding,
-      eta: new Date(form.eta),
+      eta: form.eta,
       budgetAttachment: form.budgetAttachment,
       businessPlanAttachment: form.businessPlanAttachment,
       cvAttachment: form.cvAttachment,

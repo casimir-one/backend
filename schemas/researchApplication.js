@@ -17,7 +17,7 @@ const ResearchApplication = new Schema({
   "problem": { type: String, trim: true, required: true }, // What are you trying to impact ?
   "solution": { type: String, trim: true, required: true }, // How will this solve the current problem ?
   "funding": { type: String, trim: true, required: true }, // How much funding are you expecting ?
-  "eta": { type: Date, default: null }, // What is your project estimate ?
+  "eta": { type: String, trim: true, default: null }, // What is your project estimate ?
   "location": { // Project location
     "city": { type: String, trim: true, default: null },
     "country": { type: String, trim: true, default: null },
