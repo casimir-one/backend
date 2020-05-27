@@ -180,4 +180,71 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (source) => {
 });
 
 
+appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_CREATED, async (source) => {
+  const { tx, emitter, tenant } = source;
+  const create_proposal_operation = tx['operations'][0];
+  const create_research_operation = tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
+  const { creator, external_id: proposalId } = create_proposal_operation[1];
+  const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
+
+  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
+
+  const proposal = await deipRpc.api.getProposalAsync(proposalId);
+  const research = { researchExternalId, title, disciplines };
+
+  const payload = { research, proposal, requester: requesterUser, tenant };
+
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_APPLICATION_CREATED, payload);
+});
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, async (source) => {
+  const { tx, emitter, tenant } = source;
+  const create_proposal_operation = tx['operations'][0];
+  const create_research_operation = tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
+  const { creator } = create_proposal_operation[1];
+  const { external_id: researchExternalId, research_group: researchGroupExternalId } = create_research_operation[1];
+
+  const approverUserProfile = await usersService.findUserProfileByOwner(emitter);
+  const [approverUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
+  const approverUser = { profile: approverUserProfile, account: approverUserAccount };
+
+  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
+
+  const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
+  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+
+  const payload = { research: chainResearch, researchGroup: chainResearchGroup, approver: approverUser, requester: requesterUser, tenant };
+
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, payload);
+});
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (source) => {
+  const { tx, emitter, tenant } = source;
+  const create_proposal_operation = tx['operations'][0];
+  const create_research_operation = tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
+  const { creator } = create_proposal_operation[1];
+  const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
+
+  const rejecterUserProfile = await usersService.findUserProfileByOwner(emitter);
+  const [rejecterUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
+  const rejecterUser = { profile: rejecterUserProfile, account: rejecterUserAccount };
+
+  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
+
+  const research = { researchExternalId, title, disciplines };
+
+  const payload = { research, rejecter: rejecterUser, requester: requesterUser, tenant };
+
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, payload);
+});
+
+
 export default appEventHandler;

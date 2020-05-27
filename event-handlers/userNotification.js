@@ -231,6 +231,62 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (payload) =>
 });
 
 
+userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_CREATED, async (payload) => {
+  const { research, requester, tenant, proposal } = payload;
+
+  const notificationsPromises = [];
+
+  for (let i = 0; i < tenant.admins.length; i++) {
+    let admin = tenant.admins[i];
+    let promise = usersNotificationService.createUserNotification({
+      username: admin,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_APPLICATION_CREATED,
+      metadata: {
+        research,
+        requester,
+        proposal
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+  
+  Promise.all(notificationsPromises);
+});
+
+
+userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, async (payload) => {
+  const { research, researchGroup, requester, approver, tenant } = payload;
+
+  usersNotificationService.createUserNotification({
+    username: requester.account.name,
+    status: 'unread',
+    type: USER_NOTIFICATION_TYPE.RESEARCH_APPLICATION_APPROVED,
+    metadata: {
+      researchGroup,
+      research,
+      approver,
+      requester
+    }
+  });
+});
+
+
+userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (payload) => {
+  const { research, requester, rejecter, tenant } = payload;
+
+  usersNotificationService.createUserNotification({
+    username: requester.account.name,
+    status: 'unread',
+    type: USER_NOTIFICATION_TYPE.RESEARCH_APPLICATION_REJECTED,
+    metadata: {
+      research,
+      rejecter,
+      requester
+    }
+  });
+});
+
 
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => {

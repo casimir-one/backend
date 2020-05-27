@@ -66,7 +66,7 @@ const createResearch = async (ctx, next) => {
 };
 
 
-const createResearchApplication = async (ctx) => {
+const createResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
@@ -125,11 +125,15 @@ const createResearchApplication = async (ctx) => {
     ctx.status = 200;
     ctx.body = { txResult, tx: form.tx, rm: researchApplicationRm };
 
+    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 };
 
 
@@ -270,7 +274,7 @@ const getResearchApplicationAttachmentFile = async function (ctx) {
 }
 
 
-const approveResearchApplication = async (ctx) => {
+const approveResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
@@ -296,7 +300,9 @@ const approveResearchApplication = async (ctx) => {
     }
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    
+    const updatedProposal = await deipRpc.api.getProposalAsync(applicationId);
+    const isAccepted = updatedProposal == null;
+
     const research = await deipRpc.api.getResearchAsync(researchApplication.researchExternalId);
     const researcRm = await researchService.createResearchRef({
       externalId: research.external_id,
@@ -317,16 +323,22 @@ const approveResearchApplication = async (ctx) => {
 
     ctx.status = 200;
     ctx.body = { tx, txResult, rm: researcRm };
+
+    if (isAccepted) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_APPROVED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+    }
     
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 
-const rejectResearchApplication = async (ctx) => {
+const rejectResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
@@ -362,11 +374,15 @@ const rejectResearchApplication = async (ctx) => {
     ctx.status = 200;
     ctx.body = { tx, txResult };
 
+    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_REJECTED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+    
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 
