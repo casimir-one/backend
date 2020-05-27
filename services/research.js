@@ -33,7 +33,7 @@ class ResearchService {
 
                 const readinessLevelTitle = component.readinessLevelTitle;
                 const readinessLevelShortTitle = component.readinessLevelShortTitle;
-                return { type, value, step, readinessLevelTitle, readinessLevelShortTitle };
+                return { component: componentId, type, value, step, readinessLevelTitle, readinessLevelShortTitle };
               }
               return null;
             })
