@@ -272,7 +272,11 @@ const updateTenantProfile = async (ctx) => {
     const oldComponents = profileData.settings.researchComponents;
     const newComponents = updatedProfileData.settings.researchComponents;
 
+    const oldCategories = profileData.settings.researchCategories;
+    const newCategories = updatedProfileData.settings.researchCategories;
+
     await researchService.handleResearchCriterias(oldComponents, newComponents);
+    await researchService.handleResearchCategories(oldCategories, newCategories);
 
     ctx.status = 200;
     ctx.body = updatedTenantProfile;

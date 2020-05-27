@@ -251,7 +251,7 @@ class ResearchService {
     let removedCriteriaPromises = [];
     for (let i = 0; i < removedComponents.length; i++) {
       let component = removedComponents[i];
-      removedCriteriaPromises.push(this.removeCriteriaToResearches({
+      removedCriteriaPromises.push(this.removeCriteriaFromResearches({
         component: component._id.toString()
       }))
     }
@@ -266,8 +266,39 @@ class ResearchService {
     return result;
   }
 
-  async removeCriteriaToResearches({ component }) {
+  async removeCriteriaFromResearches({ component }) {
     const result = await Research.update({}, { $pull: { tenantCriterias: { component: component } } }, { multi: true });
+    return result;
+  }
+
+  async handleResearchCategories(oldCategories, newCategories) {
+
+    const addedCategories = [];
+    const removedCategories = [];
+  
+    for (let i = 0; i < newCategories.length; i++) {
+      let newCat = newCategories[i];
+      if (oldCategories.some(oldCat => oldCat._id.toString() == newCat._id.toString())) continue;
+      addedCategories.push(newCat);
+    }
+
+    for (let i = 0; i < oldCategories.length; i++) {
+      let oldCat = oldCategories[i];
+      if (newCategories.some(newCat => newCat._id.toString() == oldCat._id.toString())) continue;
+      removedCategories.push(oldCat);
+    }
+
+    let removedCategoryPromises = [];
+    for (let i = 0; i < removedCategories.length; i++) {
+      let category = removedCategories[i];
+      removedCategoryPromises.push(this.removeCategoryFromResearches({
+        categoryId: category._id
+      }))
+    }
+  }
+
+  async removeCategoryFromResearches({ categoryId }) {
+    const result = await Research.update({ $and: [ { tenantCategory: { $exists: true } }, { "tenantCategory._id": categoryId }] }, { $set: { "tenantCategory": null } }, { multi: true });
     return result;
   }
 
