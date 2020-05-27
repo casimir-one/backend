@@ -234,8 +234,26 @@ const getTenantProfile = async (ctx) => {
       return;
     }
 
+    const tenant = tenantProfile.toObject();
+
+    const researchService = new ResearchService(tenant);
+    const categoryStatsPromises = [];
+
+    for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
+      let category = tenant.settings.researchCategories[i];
+      let promise = researchService.findResearchesByCategory(category);
+      categoryStatsPromises.push(promise);
+    }
+
+    const researchesByCategories = await Promise.all(categoryStatsPromises);
+
+    for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
+      let category = tenant.settings.researchCategories[i];
+      category.researchCount = researchesByCategories[i].length;
+    }
+
     ctx.status = 200;
-    ctx.body = tenantProfile;
+    ctx.body = tenant;
 
   } catch (err) {
     console.log(err);

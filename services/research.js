@@ -302,6 +302,12 @@ class ResearchService {
     return result;
   }
 
+  async findResearchesByCategory(category) {
+    let researches = await Research.find({ $and: [{ tenantCategory: { $exists: true } }, { "tenantCategory._id": category._id }] });
+    const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id.toString()));
+    const result = await this.mapResearch(chainResearches, (r) => { return true; });
+    return result;
+  }
 }
 
 export default ResearchService;
