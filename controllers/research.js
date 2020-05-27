@@ -410,6 +410,57 @@ const rejectResearchApplication = async (ctx, next) => {
 }
 
 
+const deleteResearchApplication = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
+  const { tx } = ctx.request.body;
+
+  try {
+
+    const operation = tx['operations'][0];
+    const payload = operation[1];
+    const { external_id: applicationId } = payload;
+
+    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    if (!researchApplication) {
+      ctx.status = 404;
+      ctx.body = `Research application "${applicationId}" is not found`;
+      return;
+    }
+
+    if (researchApplication.status != RESEARCH_APPLICATION_STATUS.PENDING) {
+      ctx.status = 400;
+      ctx.body = `Research application "${applicationId}" status is ${researchApplication.status}`;
+      return;
+    }
+
+    if (researchApplication.researcher != jwtUsername) {
+      ctx.status = 401;
+      ctx.body = `No access to research application "${applicationId}"`;
+      return;
+    }
+    
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+
+    const researchApplicationData = researchApplication.toObject();
+    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+      ...researchApplicationData,
+      status: RESEARCH_APPLICATION_STATUS.DELETED
+    });
+
+    ctx.status = 200;
+    ctx.body = { tx, txResult };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 const getResearchApplications = async (ctx) => {
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
@@ -750,6 +801,7 @@ export default {
   editResearchApplication,
   approveResearchApplication,
   rejectResearchApplication,
+  deleteResearchApplication,
   getResearchApplicationAttachmentFile,
   getResearchApplications,
   createResearchTokenSale,

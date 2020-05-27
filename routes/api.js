@@ -90,6 +90,7 @@ protected_route.get('/research/application/list', research.getResearchApplicatio
 protected_route.get('/research/application/:proposalId/attachment', research.getResearchApplicationAttachmentFile)
 protected_route.post('/research/application/approve', research.approveResearchApplication)
 protected_route.post('/research/application/reject', research.rejectResearchApplication)
+protected_route.post('/research/application/delete', research.deleteResearchApplication)
 
 protected_route.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 protected_route.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)
