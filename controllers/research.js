@@ -101,12 +101,15 @@ const createResearchApplication = async (ctx, next) => {
     }));
 
     const txResult = await blockchainService.sendTransactionAsync(form.tx);
+    const proposal = await deipRpc.api.getProposalAsync(form.proposalId);
+    const isAccepted = proposal == null;
 
     const researchApplicationRm = await researchService.createResearchApplication({
       proposalId: form.proposalId,
       researchExternalId: form.researchExternalId,
       researcher: form.researcher,
       title: form.researchTitle,
+      status: !isAccepted ? RESEARCH_APPLICATION_STATUS.PENDING : RESEARCH_APPLICATION_STATUS.APPROVED,
       description: form.description,
       disciplines: form.researchDisciplines,
       location: form.location,
@@ -122,10 +125,31 @@ const createResearchApplication = async (ctx, next) => {
       tx: form.tx
     });
 
-    ctx.status = 200;
-    ctx.body = { txResult, tx: form.tx, rm: researchApplicationRm };
+    const researchApplication = researchApplicationRm.toObject();
 
-    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
+    ctx.status = 200;
+    ctx.body = { txResult, tx: form.tx, rm: researchApplication };
+
+    if (!isAccepted) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
+    } else {
+      const research = await deipRpc.api.getResearchAsync(form.researchExternalId);
+      const researcRm = await researchService.createResearchRef({
+        externalId: research.external_id,
+        researchGroupExternalId: research.research_group.external_id,
+        researchGroupInternalId: research.research_group.id,
+        milestones: [],
+        videoSrc: "",
+        partners: [],
+        tenantCriterias: researchApplication.tenantCriterias,
+        tenantCategory: null
+      });
+
+      const create_research_operation = form.tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
+      const tx = { 'operations': [create_research_operation]}
+      
+      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { tx, emitter: jwtUsername }]);
+    }
 
   } catch (err) {
     console.log(err);
