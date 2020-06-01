@@ -43,7 +43,12 @@ const TenantProfile = new Schema({
       "researchCategories": [ResearchCategory],
       "faq": [FAQ],
       "researchBlacklist": [{ type: String, required: true, trim: true }],
-      "researchWhitelist": [{ type: String, required: true, trim: true }]
+      "researchWhitelist": [{ type: String, required: true, trim: true }],
+      "theme": { type: Object },
+      "modules": {
+        "review": { type: Boolean, default: false },
+        "fundraising": { type: Boolean, default: false }
+      }
     }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
