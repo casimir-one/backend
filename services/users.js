@@ -125,21 +125,21 @@ async function createUserAccount({ username, pubKey }) {
     key_auths: [[pubKey, 1]]
   };
 
-  const op = {
+
+  const create_account_op = ['create_account', {
     fee: fee,
     creator: creator,
     new_account_name: username,
     owner: owner,
     active: owner,
-    posting: owner,
+    active_overrides: [],
     memo_key: pubKey,
     json_metadata: undefined,
     traits: [],
     extensions: []
-  }
+  }];
 
-  const operation = ['create_account', op];
-  return blockchainService.signOperations([operation], wif)
+  return blockchainService.signOperations([create_account_op], wif)
     .then((signedTx) => {
       return blockchainService.sendTransactionAsync(signedTx);
     })

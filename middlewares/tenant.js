@@ -10,9 +10,8 @@ function tenant(options) {
 
     let ownerAuth = tenantAccount.active.account_auths.map(([name, threshold]) => name);
     let activeAuth = tenantAccount.owner.account_auths.map(([name, threshold]) => name);
-    let postingAuth = tenantAccount.posting.account_auths.map(([name, threshold]) => name);
 
-    const admins = [...ownerAuth, ...activeAuth, ...postingAuth].reduce((acc, name) => {
+    const admins = [...ownerAuth, ...activeAuth].reduce((acc, name) => {
       if (!acc.some(n => n == name)) {
         return [...acc, name];
       }
