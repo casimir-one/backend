@@ -5,7 +5,7 @@ async function findResearchGroupById(externalId) {
   return researchGroup;
 }
 
-async function upsertResearchGroup({
+async function createResearchGroup({
   externalId,
   creator
 }) {
@@ -25,5 +25,5 @@ async function upsertResearchGroup({
 
 export default {
   findResearchGroupById,
-  upsertResearchGroup
+  createResearchGroup
 }

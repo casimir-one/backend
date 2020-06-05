@@ -4,14 +4,6 @@ import { SIGN_UP_POLICY, RESEARCH_COMPONENT_TYPE } from './../constants';
 
 const Schema = mongoose.Schema;
 
-const ResearchArea = new Schema({
-  "_id": false,
-  "id": { type: String, required: true },
-  "parentId": { type: String },
-  "title": { type: String, required: true },
-  "disciplines": [{ type: String, required: true }],
-});
-
 const FAQ = new Schema({
   "question": { type: String, required: true },
   "answer": { type: String, required: true },
@@ -38,7 +30,6 @@ const TenantProfile = new Schema({
     "banner": { type: String, default: "default_banner_logo.png" },
     "settings": {
       "signUpPolicy": { type: String, enum: [SIGN_UP_POLICY.FREE, SIGN_UP_POLICY.ADMIN_APPROVAL], required: true },
-      "researchAreas": [ResearchArea],
       "researchComponents": [ResearchCriteria],
       "researchCategories": [ResearchCategory],
       "faq": [FAQ],

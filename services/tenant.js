@@ -16,7 +16,6 @@ async function createTenantProfile({
   admins
 }, {
   signUpPolicy,
-  researchAreas,
   researchComponents,
   researchCategories,
   faq,
@@ -35,7 +34,6 @@ async function createTenantProfile({
     admins: admins,
     settings: {
       signUpPolicy,
-      researchAreas,
       researchComponents,
       researchCategories,
       faq,
@@ -55,7 +53,6 @@ async function updateTenantProfile(tenantId, {
   logo,
   banner
 }, {
-  researchAreas,
   researchComponents,
   researchCategories,
   faq,
@@ -75,7 +72,6 @@ async function updateTenantProfile(tenantId, {
   tenantProfile.email = email;
   tenantProfile.logo = logo;
   tenantProfile.banner = banner;
-  tenantProfile.settings.researchAreas = researchAreas;
   tenantProfile.settings.researchComponents = researchComponents;
   tenantProfile.settings.researchCategories = researchCategories;
   tenantProfile.settings.faq = faq;

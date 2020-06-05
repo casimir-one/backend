@@ -30,7 +30,7 @@ const createResearchGroup = async (ctx) => {
     } = payload
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const researchGroupRm = await researchGroupsService.upsertResearchGroup({ 
+    const researchGroupRm = await researchGroupsService.createResearchGroup({ 
       externalId: researchGroupAccount, 
       creator 
     });
@@ -250,8 +250,28 @@ const getResearchGroupLogo = async (ctx) => {
   ctx.body = logo;
 }
 
+const getResearchGroup = async (ctx) => {
+  let researchGroupExternalId = ctx.params.researchGroupExternalId;
+ 
+  try {
+
+    const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+    const researchGroup = await researchGroupsService.findResearchGroupById(researchGroupExternalId);
+    ctx.status = 200;
+    ctx.body = {
+      ...chainResearchGroup,
+      researchGroupRef: researchGroup
+    };
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 
 export default {
+  getResearchGroup,
   createResearchGroup,
   updateResearchGroup,
   getResearchGroupActivityLogs,
