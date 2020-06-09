@@ -11,7 +11,7 @@ import RESEARCH_COMPONENT_TYPE from './researchComponentsTypes';
 import APP_EVENTS from './appEvents';
 import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
-
+import NEW_RESEARCH_POLICY from './newResearchPolicy';
 
 export {
   CHAIN_CONSTANTS,
@@ -25,5 +25,6 @@ export {
   RESEARCH_COMPONENT_TYPE,
   APP_EVENTS,
   RESEARCH_APPLICATION_STATUS,
-  RESEARCH_CONTENT_STATUS
+  RESEARCH_CONTENT_STATUS,
+  NEW_RESEARCH_POLICY
 } 

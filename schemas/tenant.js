@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, RESEARCH_COMPONENT_TYPE } from './../constants';
+import { SIGN_UP_POLICY, RESEARCH_COMPONENT_TYPE, NEW_RESEARCH_POLICY } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -29,7 +29,22 @@ const TenantProfile = new Schema({
     "logo": { type: String, default: "default_tenant_logo.png" },
     "banner": { type: String, default: "default_banner_logo.png" },
     "settings": {
-      "signUpPolicy": { type: String, enum: [SIGN_UP_POLICY.FREE, SIGN_UP_POLICY.ADMIN_APPROVAL], required: true },
+      "signUpPolicy": { 
+        type: String, 
+        enum: [
+          SIGN_UP_POLICY.FREE, 
+          SIGN_UP_POLICY.ADMIN_APPROVAL
+        ], 
+        required: true 
+      },
+      "newResearchPolicy": { 
+        type: String,
+        enum: [
+          NEW_RESEARCH_POLICY.FREE, 
+          NEW_RESEARCH_POLICY.ADMIN_APPROVAL
+        ], 
+        required: true 
+      },
       "researchComponents": [ResearchCriteria],
       "researchCategories": [ResearchCategory],
       "faq": [FAQ],
