@@ -118,7 +118,7 @@ async function createUserAccount({ username, pubKey }) {
   // const ratio = chainConfig['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];
   // var fee = Asset.from(chainProps.account_creation_fee).multiply(ratio);
 
-  const { username: creator, fee, wif } = registrar;
+  const { username: regacc, fee, wif } = registrar;
   const owner = {
     weight_threshold: 1,
     account_auths: [],
@@ -128,7 +128,7 @@ async function createUserAccount({ username, pubKey }) {
 
   const create_account_op = ['create_account', {
     fee: fee,
-    creator: creator,
+    creator: regacc,
     new_account_name: username,
     owner: owner,
     active: owner,
@@ -139,10 +139,11 @@ async function createUserAccount({ username, pubKey }) {
     extensions: []
   }];
 
-  return blockchainService.signOperations([create_account_op], wif)
-    .then((signedTx) => {
-      return blockchainService.sendTransactionAsync(signedTx);
-    })
+  const signedTx = await blockchainService.signOperations([create_account_op], wif);
+  const result = await blockchainService.sendTransactionAsync(signedTx);
+  deipRpc.broadcast.transferAsync(wif, regacc, username, fee, "", []); // transfer some assets to let account create research groups
+
+  return result;
 }
 
 export default {

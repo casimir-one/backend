@@ -9,6 +9,7 @@ import send from 'koa-send';
 import slug from 'limax';
 import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
+import researchGroupsService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
@@ -343,12 +344,21 @@ const approveResearchApplication = async (ctx, next) => {
       tenantCategory: null
     });
 
+    const researchGroupRm = await researchGroupsService.createResearchGroup({
+      externalId: research.research_group.external_id,
+      creator: researchApplication.researcher
+    });
+
     const researchApplicationData = researchApplication.toObject();
     const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.APPROVED
     });
 
+    const registrar = config.blockchain.accountsCreator;
+    const { username: regacc, fee, wif } = registrar;
+    deipRpc.broadcast.transferAsync(wif, regacc, research.research_group.external_id, fee, "", []); // transfer some assets to let account create groups
+    
     ctx.status = 200;
     ctx.body = { tx, txResult, rm: researcRm };
 
