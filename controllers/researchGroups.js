@@ -31,10 +31,6 @@ const createResearchGroup = async (ctx) => {
       creator 
     });
 
-    const registrar = config.blockchain.accountsCreator;
-    const { username: regacc, fee, wif } = registrar;
-    deipRpc.broadcast.transferAsync(wif, regacc, researchGroupAccount, fee, "", []); // transfer some assets to let account create groups
-
     ctx.status = 200;
     ctx.body = { rm: researchGroupRm, txResult };
 

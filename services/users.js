@@ -141,7 +141,6 @@ async function createUserAccount({ username, pubKey }) {
 
   const signedTx = await blockchainService.signOperations([create_account_op], wif);
   const result = await blockchainService.sendTransactionAsync(signedTx);
-  deipRpc.broadcast.transferAsync(wif, regacc, username, fee, "", []); // transfer some assets to let account create research groups
 
   return result;
 }

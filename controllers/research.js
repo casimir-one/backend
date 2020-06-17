@@ -354,10 +354,6 @@ const approveResearchApplication = async (ctx, next) => {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.APPROVED
     });
-
-    const registrar = config.blockchain.accountsCreator;
-    const { username: regacc, fee, wif } = registrar;
-    deipRpc.broadcast.transferAsync(wif, regacc, research.research_group.external_id, fee, "", []); // transfer some assets to let account create groups
     
     ctx.status = 200;
     ctx.body = { tx, txResult, rm: researcRm };
