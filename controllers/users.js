@@ -7,6 +7,7 @@ import sharp from 'sharp';
 import config from './../config';
 import UserBookmark from './../schemas/userBookmark';
 import qs from 'qs';
+import deipRpc from '@deip/rpc-client';
 import usersService from './../services/users';
 import * as blockchainService from './../utils/blockchain';
 
@@ -387,6 +388,34 @@ const getAvatar = async (ctx) => {
 }
 
 
+const getUsersEciStats = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  try {
+
+    const stats = await deipRpc.api.getAccountsEciStatsAsync(filter.discipline);
+    const users = await Promise.all(stats.map(([name, stat]) => usersService.findUser(stat.account)));
+
+    const result = stats.map(([name, stat], i) => {
+      const user = users[i];
+      return {
+        user,
+        ...stat
+      }
+    });
+    
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
 export default {
   getUserProfile,
   getUsersProfiles,
@@ -399,5 +428,7 @@ export default {
   removeUserBookmark,
 
   uploadAvatar,
-  getAvatar
+  getAvatar,
+
+  getUsersEciStats
 }

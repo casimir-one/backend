@@ -20,6 +20,7 @@ protected_route.post('/user/upload-avatar', users.uploadAvatar)
 public_route.get('/user/profile/:username', users.getUserProfile)
 public_route.get('/user/profiles', users.getUsersProfiles)
 public_route.get('/user/active', users.getActiveUsersProfiles)
+public_route.get('/users/stats', users.getUsersEciStats)
 
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', users.updateUserProfile)

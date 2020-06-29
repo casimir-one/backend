@@ -5,6 +5,12 @@ import config from './../config';
 import * as blockchainService from './../utils/blockchain';
 
 
+async function findUser(username) {
+  const profile = await UserProfile.findOne({ _id: username });
+  const [account] = await deipRpc.api.getAccountsAsync([username])
+  return { account, profile };
+}
+
 async function findUserProfileByOwner(username) {
   const userProfile = await UserProfile.findOne({ _id: username })
   return userProfile;
@@ -146,6 +152,7 @@ async function createUserAccount({ username, pubKey }) {
 }
 
 export default {
+  findUser,
   findUserProfileByOwner,
   findPendingUserProfiles,
   findActiveUserProfiles,
