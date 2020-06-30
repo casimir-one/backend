@@ -416,7 +416,9 @@ const getUsersEciStats = async (ctx) => {
         eci: criteriaEci
       }
     });
-    
+
+    result.sort((a, b) => b.eci - a.eci);
+
     ctx.status = 200;
     ctx.body = result;
 
