@@ -21,7 +21,7 @@ const makeReview = async (ctx) => {
 
     try {
         const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(payload.author); 
-        const content = await deipRpc.api.getResearchContentByIdAsync(payload.research_content_id);
+        const content = await deipRpc.api.getResearchContentAsync(payload.research_content_external_id);
         const research = await deipRpc.api.getResearchByIdAsync(content.research_id);
 
         if (rgtList.some(rgt => rgt.research_group_id == research.research_group_id)) {

@@ -8,7 +8,7 @@ import * as blockchainService from './../utils/blockchain';
 async function findUser(username) {
   const profile = await UserProfile.findOne({ _id: username });
   const [account] = await deipRpc.api.getAccountsAsync([username])
-  return { account, profile };
+  return { account, profile: profile || new UserProfile() };
 }
 
 async function findUserProfileByOwner(username) {

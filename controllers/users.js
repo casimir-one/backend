@@ -327,7 +327,7 @@ const getAvatar = async (ctx) => {
   try {
 
     let profile = await usersService.findUserProfileByOwner(username);
-    let src = avatarPath(username, profile.avatar);
+    let src = profile ? avatarPath(username, profile.avatar) : defaultAvatarPath();
 
     try {
 
@@ -394,14 +394,26 @@ const getUsersEciStats = async (ctx) => {
 
   try {
 
-    const stats = await deipRpc.api.getAccountsEciStatsAsync(filter.discipline);
+    const stats = await deipRpc.api.getAccountsEciStatsAsync(
+      filter.discipline, 
+      filter.contribution && filter.contribution !== '0' ? parseInt(filter.contribution) : undefined, 
+      filter.criteria && filter.criteria !== '0' ? parseInt(filter.criteria) : undefined);
+
     const users = await Promise.all(stats.map(([name, stat]) => usersService.findUser(stat.account)));
 
     const result = stats.map(([name, stat], i) => {
       const user = users[i];
+
+      let criteriaFactor = filter.criteria && filter.criteria !== '0' ? parseFloat(`1.${stat.assessment_criteria_sum_weight}`) : 1.0;
+      let x = stat.eci * criteriaFactor;
+      let y = x - stat.eci;
+      let criteriaEci = Math.floor(stat.eci - y);
+
       return {
         user,
-        ...stat
+        ...stat,
+        sourceEci: stat.eci,
+        eci: criteriaEci
       }
     });
     
