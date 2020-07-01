@@ -2,7 +2,7 @@ import koa_router from 'koa-router'
 import users from '../controllers/users'
 import joinRequests from '../controllers/joinRequests'
 import reviewRequests from '../controllers/reviewRequests'
-import expertiseClaims from '../controllers/expertiseClaims'
+import expertise from '../controllers/expertise'
 import search from '../controllers/search'
 import notifications from '../controllers/notifications'
 import proposals from '../controllers/proposals'
@@ -20,7 +20,6 @@ protected_route.post('/user/upload-avatar', users.uploadAvatar)
 public_route.get('/user/profile/:username', users.getUserProfile)
 public_route.get('/user/profiles', users.getUsersProfiles)
 public_route.get('/user/active', users.getActiveUsersProfiles)
-public_route.get('/users/stats', users.getUsersEciStats)
 
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', users.updateUserProfile)
@@ -40,12 +39,18 @@ protected_route.post('/review-requests/:id/deny', reviewRequests.denyReviewReque
 protected_route.get('/review-requests/expert/:username', reviewRequests.getReviewRequestsByExpert);
 protected_route.get('/review-requests/requestor/:username', reviewRequests.getReviewRequestsByRequestor);
 
-protected_route.post('/expertise-claims', expertiseClaims.createExpertiseClaim)
-protected_route.post('/expertise-claims/vote', expertiseClaims.voteForExpertiseClaim)
-protected_route.get('/expertise-claims', expertiseClaims.getExpertiseClaims)
-protected_route.get('/expertise-claims/user/:username', expertiseClaims.getExpertiseClaimsByUser)
-protected_route.get('/expertise-claims/discipline/:disciplineId', expertiseClaims.getExpertiseClaimsByDiscipline)
-protected_route.get('/expertise-claims/user/:username/discipline/:disciplineId', expertiseClaims.getExpertiseClaimsByUserAndDiscipline)
+protected_route.post('/expertise-claims', expertise.createExpertiseClaim)
+protected_route.post('/expertise-claims/vote', expertise.voteForExpertiseClaim)
+protected_route.get('/expertise-claims', expertise.getExpertiseClaims)
+protected_route.get('/expertise-claims/user/:username', expertise.getExpertiseClaimsByUser)
+protected_route.get('/expertise-claims/discipline/:disciplineId', expertise.getExpertiseClaimsByDiscipline)
+protected_route.get('/expertise-claims/user/:username/discipline/:disciplineId', expertise.getExpertiseClaimsByUserAndDiscipline)
+public_route.get('/expertise/users/stats', expertise.getUsersEciStats)
+public_route.get('/expertise/disciplines/stats-history', expertise.getDisciplinesEciStatsHistory)
+public_route.get('/expertise/disciplines/stats', expertise.getDisciplinesEciStats)
+public_route.get('/expertise/research-content/history', expertise.getResearchContentsEciHistory)
+
+
 
 public_route.get('/search/contents/all', search.getAllResearchContents)
 

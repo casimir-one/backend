@@ -3,6 +3,8 @@ import deipRpc from '@deip/rpc-client';
 import { getTransaction, sendTransaction } from './../utils/blockchain';
 import userNotificationHandler from './../event-handlers/userNotification';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import qs from 'qs';
+import usersService from './../services/users';
 
 const getExpertiseClaims = async (ctx) => {
     const status = ctx.query.status;
@@ -166,11 +168,109 @@ async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
     }
 }
 
+const getUsersEciStats = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  try {
+
+    const stats = await deipRpc.api.getAccountsEciStatsAsync(
+      filter.discipline,
+      filter.contribution && filter.contribution !== '0' ? parseInt(filter.contribution) : undefined,
+      filter.criteria && filter.criteria !== '0' ? parseInt(filter.criteria) : undefined);
+
+    const users = await Promise.all(stats.map(([name, stat]) => usersService.findUser(stat.account)));
+
+    const result = stats.map(([name, stat], i) => {
+      const user = users[i];
+
+      let criteriaFactor = filter.criteria && filter.criteria !== '0' ? parseFloat(`1.${stat.assessment_criteria_sum_weight}`) : 1.0;
+      let x = stat.eci * criteriaFactor;
+      let y = x - stat.eci;
+      let criteriaEci = Math.floor(stat.eci - y);
+
+      return {
+        user,
+        ...stat,
+        sourceEci: stat.eci,
+        eci: criteriaEci
+      }
+    });
+
+    result.sort((a, b) => b.eci - a.eci);
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getDisciplinesEciStatsHistory = async (ctx) => {
+
+  try {
+
+    const result = await deipRpc.api.getDisciplinesEciStatsHistoryAsync();
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getDisciplinesEciStats = async (ctx) => {
+
+  try {
+
+    const result = await deipRpc.api.getDisciplinesEciStatsAsync();
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getResearchContentsEciHistory = async (ctx) => {
+
+  try {
+
+    ctx.status = 200;
+    ctx.body = [];
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+
+
 export default {
     getExpertiseClaims,
     getExpertiseClaimsByUser,
     getExpertiseClaimsByDiscipline,
     getExpertiseClaimsByUserAndDiscipline,
     createExpertiseClaim,
-    voteForExpertiseClaim
+    voteForExpertiseClaim,
+
+    getUsersEciStats,
+    getDisciplinesEciStatsHistory,
+    getDisciplinesEciStats,
+    getResearchContentsEciHistory,
 }
