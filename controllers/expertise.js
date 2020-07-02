@@ -288,20 +288,27 @@ const getResearchContentsEciHistory = async (ctx) => {
 
   try {
 
+    const discipline = await deipRpc.api.getDisciplineAsync(filter.discipline);
+
+    if (!discipline) {
+      ctx.status = 404;
+      ctx.body = `Discipline ${discipline} not found`;
+      return;
+    }
+
     const researches = await deipRpc.api.lookupResearchesAsync(0, 10000);
     const filteredResearches = researches.filter((r) => {
       return r.disciplines.some((d) => filter.discipline == d.external_id);
     });
-
-    const researchContents = await Promise.all(filteredResearches.map(r => deipRpc.api.getResearchContentsByResearchAsync(r.external_id)));
-    const flattenResearchContents = [].concat.apply([], researchContents);
-    const discipline = await deipRpc.api.getDisciplineAsync(filter.discipline);
+    const contributions = await Promise.all(filteredResearches.map(r => deipRpc.api.getExpertiseContributionsByResearchAndDisciplineAsync(r.id, discipline.id)));
+    const flattenContributions = [].concat.apply([], contributions);
+    const contributionsWithEci = flattenContributions.filter((contrib) => contrib.eci != 0 && contrib.discipline_id == discipline.id);
 
     const promises = [];
 
-    for (let i = 0; i < flattenResearchContents.length; i++) {
-      let researchContent = flattenResearchContents[i];
-      promises.push(deipRpc.api.getEciHistoryByResearchContentAndDisciplineAsync(researchContent.id, discipline.id));
+    for (let i = 0; i < contributionsWithEci.length; i++) {
+      let contrib = contributionsWithEci[i];
+      promises.push(deipRpc.api.getEciHistoryByResearchContentAndDisciplineAsync(contrib.research_content_id, discipline.id));
     }
 
     const records = await Promise.all(promises);
