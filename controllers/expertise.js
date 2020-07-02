@@ -168,6 +168,44 @@ async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
     }
 }
 
+
+const getUserEciStats = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  const username = ctx.params.username;
+
+  try {
+
+    const stats = await deipRpc.api.getAccountsEciStatsAsync(filter.discipline || undefined, undefined, undefined);
+    const [name, stat] = stats.find(([name, stat]) => name == username);
+
+    if (!stat) {
+      ctx.status = 404;
+      ctx.body = `Expertise stats for ${username} not found`;
+      return;
+    }
+
+    const user = await usersService.findUser(username);
+    const result = {
+      user,
+      ...stat,
+      sourceEci: stat.eci,
+      eci: stat.eci
+    };
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+
 const getUsersEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
@@ -302,6 +340,7 @@ export default {
     createExpertiseClaim,
     voteForExpertiseClaim,
 
+    getUserEciStats,
     getUsersEciStats,
     getDisciplinesEciStatsHistory,
     getDisciplinesEciStats,

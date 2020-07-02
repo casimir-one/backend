@@ -46,6 +46,7 @@ protected_route.get('/expertise-claims/user/:username', expertise.getExpertiseCl
 protected_route.get('/expertise-claims/discipline/:disciplineId', expertise.getExpertiseClaimsByDiscipline)
 protected_route.get('/expertise-claims/user/:username/discipline/:disciplineId', expertise.getExpertiseClaimsByUserAndDiscipline)
 public_route.get('/expertise/users/stats', expertise.getUsersEciStats)
+public_route.get('/expertise/user/:username/stats', expertise.getUserEciStats)
 public_route.get('/expertise/disciplines/stats-history', expertise.getDisciplinesEciStatsHistory)
 public_route.get('/expertise/disciplines/stats', expertise.getDisciplinesEciStats)
 public_route.get('/expertise/research-content/history', expertise.getResearchContentsEciHistory)
