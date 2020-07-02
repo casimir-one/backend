@@ -291,7 +291,6 @@ const getResearchContentsEciHistory = async (ctx) => {
     const researches = await deipRpc.api.lookupResearchesAsync(0, 10000);
 
     const filteredResearches = researches.filter((r) => {
-      console.log(r);
       return r.disciplines.some(d => disciplineStatsWithEci.some(([discipline_external_id, stats]) => discipline_external_id == d.external_id));
     });
 
@@ -302,6 +301,7 @@ const getResearchContentsEciHistory = async (ctx) => {
 
     const promises = [];
 
+    console.log("Test 1 -->", promises.length);
     for (let i = 0; i < flattenResearchContents.length; i++) {
       let researchContent = flattenResearchContents[i];
       for (let j = 0; j < disciplines.length; j++) {
@@ -310,8 +310,14 @@ const getResearchContentsEciHistory = async (ctx) => {
       }
     }
 
+    console.log("Test 2 -->", promises.length);
+
+
     const records = await Promise.all(promises);
+    console.log("Test 3 -->", records.length);
+
     const flattenRecords = [].concat.apply([], records);
+    console.log("Test 4 -->", flattenRecords.length);
 
     flattenRecords.sort((a, b) => {
       let aTimestamp = new Date(a.timestamp);
@@ -320,6 +326,8 @@ const getResearchContentsEciHistory = async (ctx) => {
     });
 
     ctx.status = 200;
+    console.log("Test 5 -->", flattenRecords.length);
+
     ctx.body = flattenRecords;
 
   } catch (err) {
