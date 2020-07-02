@@ -283,41 +283,30 @@ const getDisciplinesEciStats = async (ctx) => {
 
 
 const getResearchContentsEciHistory = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
 
   try {
 
-    const disciplineStats = await deipRpc.api.getDisciplinesEciStatsAsync();
-    const disciplineStatsWithEci = disciplineStats.filter(([discipline_external_id, stats]) => stats.eci > 0);
     const researches = await deipRpc.api.lookupResearchesAsync(0, 10000);
-
     const filteredResearches = researches.filter((r) => {
-      return r.disciplines.some(d => disciplineStatsWithEci.some(([discipline_external_id, stats]) => discipline_external_id == d.external_id));
+      return r.disciplines.some((d) => filter.discipline == d.external_id);
     });
 
-    const disciplinesIds = disciplineStatsWithEci.map(([discipline_external_id, stats]) => discipline_external_id);
     const researchContents = await Promise.all(filteredResearches.map(r => deipRpc.api.getResearchContentsByResearchAsync(r.external_id)));
     const flattenResearchContents = [].concat.apply([], researchContents);
-    const disciplines = await Promise.all(disciplinesIds.map(d => deipRpc.api.getDisciplineAsync(d)));
+    const discipline = await deipRpc.api.getDisciplineAsync(filter.discipline);
 
     const promises = [];
 
-    console.log("Test 1 -->", promises.length);
     for (let i = 0; i < flattenResearchContents.length; i++) {
       let researchContent = flattenResearchContents[i];
-      for (let j = 0; j < disciplines.length; j++) {
-        let discipline = disciplines[j];
-        promises.push(deipRpc.api.getEciHistoryByResearchContentAndDisciplineAsync(researchContent.id, discipline.id));
-      }
+      promises.push(deipRpc.api.getEciHistoryByResearchContentAndDisciplineAsync(researchContent.id, discipline.id));
     }
 
-    console.log("Test 2 -->", promises.length);
-
-
     const records = await Promise.all(promises);
-    console.log("Test 3 -->", records.length);
 
     const flattenRecords = [].concat.apply([], records);
-    console.log("Test 4 -->", flattenRecords.length);
 
     flattenRecords.sort((a, b) => {
       let aTimestamp = new Date(a.timestamp);
@@ -326,8 +315,6 @@ const getResearchContentsEciHistory = async (ctx) => {
     });
 
     ctx.status = 200;
-    console.log("Test 5 -->", flattenRecords.length);
-
     ctx.body = flattenRecords;
 
   } catch (err) {
@@ -352,5 +339,5 @@ export default {
     getUsersEciStats,
     getDisciplinesEciStatsHistory,
     getDisciplinesEciStats,
-    getResearchContentsEciHistory,
+    getResearchContentsEciHistory
 }
