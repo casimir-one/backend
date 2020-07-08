@@ -177,15 +177,22 @@ const getAccountEciStats = async (ctx) => {
 
   try {
 
-    const stats = await deipRpc.api.getAccountsEciStatsAsync(filter.discipline || undefined, undefined, undefined);
-    const [name, stat] = stats.find(([name, stat]) => name == username);
+    const stats = await deipRpc.api.getAccountsEciStatsAsync(
+      filter.discipline || undefined, 
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
 
-    if (!stat) {
-      ctx.status = 404;
-      ctx.body = `Expertise stats for ${username} not found`;
+    const userStat = stats.find(([name, stat]) => name == username);
+    if (!userStat) {
+      ctx.status = 200;
+      ctx.body = null;
       return;
     }
 
+    const [name, stat] = userStat;
     const user = await usersService.findUser(username);
     const result = { user, ...stat };
 
@@ -238,6 +245,8 @@ const getAccountsEciStats = async (ctx) => {
 
     const stats = await deipRpc.api.getAccountsEciStatsAsync(
       filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
       filter.contribution || undefined,
       filter.criteria || undefined
     );
