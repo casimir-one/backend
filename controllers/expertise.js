@@ -169,7 +169,7 @@ async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
 }
 
 
-const getUserEciStats = async (ctx) => {
+const getAccountEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
@@ -198,15 +198,50 @@ const getUserEciStats = async (ctx) => {
     ctx.body = result;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
     ctx.body = err.message;
   }
 }
 
 
+const getAccountEciHistory = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
 
-const getUsersEciStats = async (ctx) => {
+  const username = ctx.params.username;
+
+  try {
+
+    if (!filter.discipline) {
+      ctx.status = 400;
+      ctx.body = `Filter should include target discipline and time period`;
+      return;
+    }
+
+    const records = await deipRpc.api.getEciHistoryByAccountAndDisciplineAsync(
+      username,
+      filter.discipline,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution && filter.contribution !== '0' ? parseInt(filter.contribution) : undefined,
+      filter.criteria && filter.criteria !== '0' ? parseInt(filter.criteria) : undefined
+    );
+
+    const result = records;
+    
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getAccountsEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
@@ -215,23 +250,17 @@ const getUsersEciStats = async (ctx) => {
     const stats = await deipRpc.api.getAccountsEciStatsAsync(
       filter.discipline,
       filter.contribution && filter.contribution !== '0' ? parseInt(filter.contribution) : undefined,
-      filter.criteria && filter.criteria !== '0' ? parseInt(filter.criteria) : undefined);
+      filter.criteria && filter.criteria !== '0' ? parseInt(filter.criteria) : undefined
+    );
 
     const users = await Promise.all(stats.map(([name, stat]) => usersService.findUser(stat.account)));
 
     const result = stats.map(([name, stat], i) => {
       const user = users[i];
 
-      let criteriaFactor = filter.criteria && filter.criteria !== '0' ? parseFloat(`1.${stat.assessment_criteria_sum_weight}`) : 1.0;
-      let x = stat.eci * criteriaFactor;
-      let y = x - stat.eci;
-      let criteriaEci = Math.floor(stat.eci - y);
-
       return {
         user,
-        ...stat,
-        sourceEci: stat.eci,
-        eci: criteriaEci
+        ...stat
       }
     });
 
@@ -241,7 +270,7 @@ const getUsersEciStats = async (ctx) => {
     ctx.body = result;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
     ctx.body = err.message;
   }
@@ -258,7 +287,7 @@ const getDisciplinesEciStatsHistory = async (ctx) => {
     ctx.body = result;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
     ctx.body = err.message;
   }
@@ -275,7 +304,7 @@ const getDisciplinesEciStats = async (ctx) => {
     ctx.body = result;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
     ctx.body = err.message;
   }
@@ -325,7 +354,7 @@ const getResearchContentsEciHistory = async (ctx) => {
     ctx.body = flattenRecords;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
     ctx.body = err.message;
   }
@@ -342,8 +371,9 @@ export default {
     createExpertiseClaim,
     voteForExpertiseClaim,
 
-    getUserEciStats,
-    getUsersEciStats,
+    getAccountEciStats,
+    getAccountEciHistory,
+    getAccountsEciStats,
     getDisciplinesEciStatsHistory,
     getDisciplinesEciStats,
     getResearchContentsEciHistory
