@@ -187,12 +187,7 @@ const getAccountEciStats = async (ctx) => {
     }
 
     const user = await usersService.findUser(username);
-    const result = {
-      user,
-      ...stat,
-      sourceEci: stat.eci,
-      eci: stat.eci
-    };
+    const result = { user, ...stat };
 
     ctx.status = 200;
     ctx.body = result;
@@ -224,8 +219,8 @@ const getAccountEciHistory = async (ctx) => {
       filter.discipline,
       filter.from || undefined,
       filter.to || undefined,
-      filter.contribution && filter.contribution !== '0' ? parseInt(filter.contribution) : undefined,
-      filter.criteria && filter.criteria !== '0' ? parseInt(filter.criteria) : undefined
+      filter.contribution || undefined,
+      filter.criteria || undefined
     );
 
     const result = records;
@@ -248,20 +243,16 @@ const getAccountsEciStats = async (ctx) => {
   try {
 
     const stats = await deipRpc.api.getAccountsEciStatsAsync(
-      filter.discipline,
-      filter.contribution && filter.contribution !== '0' ? parseInt(filter.contribution) : undefined,
-      filter.criteria && filter.criteria !== '0' ? parseInt(filter.criteria) : undefined
+      filter.discipline || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
     );
 
     const users = await Promise.all(stats.map(([name, stat]) => usersService.findUser(stat.account)));
 
     const result = stats.map(([name, stat], i) => {
       const user = users[i];
-
-      return {
-        user,
-        ...stat
-      }
+      return { user, ...stat };
     });
 
     result.sort((a, b) => b.eci - a.eci);
