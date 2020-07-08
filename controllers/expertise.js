@@ -208,15 +208,9 @@ const getAccountEciHistory = async (ctx) => {
 
   try {
 
-    if (!filter.discipline) {
-      ctx.status = 400;
-      ctx.body = `Filter should include target discipline and time period`;
-      return;
-    }
-
     const records = await deipRpc.api.getEciHistoryByAccountAndDisciplineAsync(
       username,
-      filter.discipline,
+      filter.discipline || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
