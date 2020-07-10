@@ -49,7 +49,7 @@ public_route.get('/expertise/user/:username/stats', expertise.getAccountEciStats
 public_route.get('/expertise/user/:username/history', expertise.getAccountEciHistory)
 public_route.get('/expertise/users/stats', expertise.getAccountsEciStats)
 public_route.get('/expertise/disciplines/stats-history', expertise.getDisciplinesEciStatsHistory)
-public_route.get('/expertise/disciplines/stats', expertise.getDisciplinesEciStats)
+public_route.get('/expertise/disciplines/stats', expertise.getDisciplinesEciLastStats)
 public_route.get('/expertise/research-content/history', expertise.getResearchContentsEciHistory)
 
 
