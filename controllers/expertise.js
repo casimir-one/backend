@@ -271,6 +271,31 @@ const getAccountsEciStats = async (ctx) => {
 }
 
 
+const getDisciplineEciHistory = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  try {
+
+    const result = await deipRpc.api.getDisciplineEciHistoryAsync(
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
 const getDisciplinesEciStatsHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
@@ -292,6 +317,7 @@ const getDisciplinesEciStatsHistory = async (ctx) => {
     ctx.body = err.message;
   }
 }
+
 
 const getDisciplinesEciLastStats = async (ctx) => {
 
@@ -373,6 +399,7 @@ export default {
     getAccountEciStats,
     getAccountEciHistory,
     getAccountsEciStats,
+    getDisciplineEciHistory,
     getDisciplinesEciStatsHistory,
     getDisciplinesEciLastStats,
     getResearchContentsEciHistory
