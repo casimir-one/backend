@@ -169,6 +169,35 @@ async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
 }
 
 
+const getAccountEciHistory = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  const username = ctx.params.username;
+
+  try {
+
+    const records = await deipRpc.api.getAccountEciHistoryAsync(
+      username,
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    const result = records;
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 const getAccountEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
@@ -207,36 +236,6 @@ const getAccountEciStats = async (ctx) => {
 }
 
 
-const getAccountEciHistory = async (ctx) => {
-  const query = qs.parse(ctx.query);
-  const filter = query.filter;
-
-  const username = ctx.params.username;
-
-  try {
-
-    const records = await deipRpc.api.getAccountEciHistoryAsync(
-      username,
-      filter.discipline || undefined,
-      filter.from || undefined,
-      filter.to || undefined,
-      filter.contribution || undefined,
-      filter.criteria || undefined
-    );
-
-    const result = records;
-    
-    ctx.status = 200;
-    ctx.body = result;
-
-  } catch (err) {
-    console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-}
-
-
 const getAccountsEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
@@ -259,6 +258,69 @@ const getAccountsEciStats = async (ctx) => {
     });
 
     result.sort((a, b) => b.eci - a.eci);
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getResearchEciHistory = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  const researchExternalId = ctx.params.research;
+
+  try {
+
+    const records = await deipRpc.api.getResearchEciHistoryAsync(
+      researchExternalId,
+      0, // cursor
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    const result = records;
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+
+const getResearchContentEciHistory = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  const researchContentExternalId = ctx.params.researchContent;
+
+  try {
+
+    const records = await deipRpc.api.getResearchContentEciHistoryAsync(
+      researchContentExternalId,
+      0, // cursor
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    const result = records;
 
     ctx.status = 200;
     ctx.body = result;
@@ -336,57 +398,6 @@ const getDisciplinesEciLastStats = async (ctx) => {
 }
 
 
-const getResearchContentsEciHistory = async (ctx) => {
-  const query = qs.parse(ctx.query);
-  const filter = query.filter;
-
-  try {
-
-    const discipline = await deipRpc.api.getDisciplineAsync(filter.discipline);
-
-    if (!discipline) {
-      ctx.status = 404;
-      ctx.body = `Discipline ${discipline} not found`;
-      return;
-    }
-
-    const researches = await deipRpc.api.lookupResearchesAsync(0, 10000);
-    const filteredResearches = researches.filter((r) => {
-      return r.disciplines.some((d) => filter.discipline == d.external_id);
-    });
-    const contributions = await Promise.all(filteredResearches.map(r => deipRpc.api.getExpertiseContributionsByResearchAndDisciplineAsync(r.id, discipline.id)));
-    const flattenContributions = [].concat.apply([], contributions);
-    const contributionsWithEci = flattenContributions.filter((contrib) => contrib.eci != 0 && contrib.discipline_id == discipline.id);
-
-    const promises = [];
-
-    for (let i = 0; i < contributionsWithEci.length; i++) {
-      let contrib = contributionsWithEci[i];
-      promises.push(deipRpc.api.getEciHistoryByResearchContentAndDisciplineAsync(contrib.research_content_id, discipline.id));
-    }
-
-    const records = await Promise.all(promises);
-
-    const flattenRecords = [].concat.apply([], records);
-
-    flattenRecords.sort((a, b) => {
-      let aTimestamp = new Date(a.timestamp);
-      let bTimestamp = new Date(b.timestamp);
-      return bTimestamp.getTime() - aTimestamp.getTime();
-    });
-
-    ctx.status = 200;
-    ctx.body = flattenRecords;
-
-  } catch (err) {
-    console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-}
-
-
-
 
 export default {
     getExpertiseClaims,
@@ -396,11 +407,14 @@ export default {
     createExpertiseClaim,
     voteForExpertiseClaim,
 
-    getAccountEciStats,
     getAccountEciHistory,
+    getAccountEciStats,
     getAccountsEciStats,
+
+    getResearchEciHistory,
+    getResearchContentEciHistory,
+
     getDisciplineEciHistory,
     getDisciplinesEciStatsHistory,
-    getDisciplinesEciLastStats,
-    getResearchContentsEciHistory
+    getDisciplinesEciLastStats
 }
