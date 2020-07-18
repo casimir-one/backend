@@ -172,13 +172,13 @@ async function processAllocatedExpertise(payload, txInfo, expertiseProposal) {
 const getAccountEciHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-
   const username = ctx.params.username;
 
   try {
 
     const records = await deipRpc.api.getAccountEciHistoryAsync(
       username,
+      0, // cursor
       filter.discipline || undefined,
       filter.from || undefined,
       filter.to || undefined,
@@ -201,12 +201,12 @@ const getAccountEciHistory = async (ctx) => {
 const getAccountEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-
   const username = ctx.params.username;
 
   try {
 
-    const stats = await deipRpc.api.getAccountsEciStatsAsync(
+    const stat = await deipRpc.api.getAccountEciStatsAsync(
+      username,
       filter.discipline || undefined, 
       filter.from || undefined,
       filter.to || undefined,
@@ -214,14 +214,6 @@ const getAccountEciStats = async (ctx) => {
       filter.criteria || undefined
     );
 
-    const userStat = stats.find(([name, stat]) => name == username);
-    if (!userStat) {
-      ctx.status = 200;
-      ctx.body = null;
-      return;
-    }
-
-    const [name, stat] = userStat;
     const user = await usersService.findUser(username);
     const result = { user, ...stat };
 
@@ -273,7 +265,6 @@ const getAccountsEciStats = async (ctx) => {
 const getResearchEciHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-
   const researchExternalId = ctx.params.research;
 
   try {
@@ -301,11 +292,65 @@ const getResearchEciHistory = async (ctx) => {
 }
 
 
+const getResearchEciStats = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+  const researchExternalId = ctx.params.research;
+
+  try {
+
+    const stat = await deipRpc.api.getResearchEciStatsAsync(
+      researchExternalId,
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    const result = { ...stat };
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getResearchesEciStats = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  try {
+
+    const stats = await deipRpc.api.getResearchesEciStatsAsync(
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    const result = stats;
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 
 const getResearchContentEciHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-
   const researchContentExternalId = ctx.params.researchContent;
 
   try {
@@ -321,6 +366,62 @@ const getResearchContentEciHistory = async (ctx) => {
     );
 
     const result = records;
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getResearchContentEciStats = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+  const researchContentExternalId = ctx.params.researchContent;
+
+  try {
+
+    const stat = await deipRpc.api.getResearchContentEciStatsAsync(
+      researchContentExternalId,
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    const result = { ...stat };
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getResearchContentsEciStats = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
+
+  try {
+
+    const stats = await deipRpc.api.getResearchContentsEciStatsAsync(
+      filter.discipline || undefined,
+      filter.from || undefined,
+      filter.to || undefined,
+      filter.contribution || undefined,
+      filter.criteria || undefined
+    );
+
+    const result = stats;
 
     ctx.status = 200;
     ctx.body = result;
@@ -412,7 +513,12 @@ export default {
     getAccountsEciStats,
 
     getResearchEciHistory,
+    getResearchEciStats,
+    getResearchesEciStats,
+
     getResearchContentEciHistory,
+    getResearchContentEciStats,
+    getResearchContentsEciStats,
 
     getDisciplineEciHistory,
     getDisciplinesEciStatsHistory,
