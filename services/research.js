@@ -2,13 +2,14 @@ import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 import ResearchApplication from './../schemas/researchApplication';
 import { RESEARCH_APPLICATION_STATUS, RESEARCH_COMPONENT_TYPE } from './../constants';
+import mongoose from 'mongoose';
 
 class ResearchService {
 
   constructor(tenant) {
     this.researchWhitelist = tenant.settings.researchWhitelist;
     this.researchBlacklist = tenant.settings.researchBlacklist;
-    this.activeComponents = tenant.settings.researchComponents.filter(comp => comp.isVisible);
+    this.enabledResearchAttributes = tenant.settings.researchAttributes.filter(attr => attr.isVisible);
   }
 
   async mapResearch(chainResearches, privateGuard = (r) => { return !r.is_private }) {
@@ -20,26 +21,28 @@ class ResearchService {
       .map((chainResearch) => {
         const research = researches.find(r => r._id == chainResearch.external_id);
         if (research) {
-          const tenantCriterias = research.tenantCriterias.filter(criteria => this.activeComponents.some(comp => comp._id.toString() == criteria.component));
-          const tenantCriteriasReadingList = tenantCriterias
-            .map((criteria) => {
-              const { component: componentId, value } = criteria;
-              const componentSchema = this.activeComponents.find(comp => comp._id.toString() == componentId);
-              if (componentSchema && value && componentSchema.type == RESEARCH_COMPONENT_TYPE.STEPPER) {
-                const { component, type } = componentSchema;
-                const { index } = value;
-                const step = component.readinessLevels[index];
+          const attributes = research.attributes.filter(a => this.enabledResearchAttributes.some(attr => attr._id.toString() == a.researchAttributeId.toString()));
+          const tenantAttributesReadingList = attributes.map((researchAttribute) => {
+            const researchAttributeSchema = this.enabledResearchAttributes.find(attr => attr._id.toString() == researchAttribute.researchAttributeId.toString());
+              
+              if (researchAttributeSchema && researchAttributeSchema.type == RESEARCH_COMPONENT_TYPE.STEPPER && researchAttribute.value) {
+                
+                const step = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
                 if (!step) return null;
+                
+                const number = researchAttributeSchema.valueOptions.indexOf(step) + 1;
 
-                const readinessLevelTitle = component.readinessLevelTitle;
-                const readinessLevelShortTitle = component.readinessLevelShortTitle;
-                return { component: componentId, type, value, step, readinessLevelTitle, readinessLevelShortTitle };
+                return {
+                  value: { ...step, number },
+                  attribute: researchAttributeSchema
+                };
               }
+
               return null;
             })
-            .filter((criteria) => !!criteria);
+            .filter((attr) => !!attr);
 
-          return { ...chainResearch, researchRef: { ...research.toObject(), tenantCriterias, tenantCriteriasReadingList } };
+          return { ...chainResearch, researchRef: { ...research.toObject(), attributes: attributes, tenantCriteriasReadingList: tenantAttributesReadingList } };
         }
         return { ...chainResearch, researchRef: null };
       });
@@ -88,7 +91,7 @@ class ResearchService {
     milestones,
     videoSrc,
     partners,
-    tenantCriterias,
+    attributes,
     tenantCategory
   }) {
 
@@ -98,7 +101,12 @@ class ResearchService {
       milestones,
       videoSrc,
       partners,
-      tenantCriterias,
+      attributes: attributes.map(attr => {
+        return {
+          value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
+          researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString())
+        }
+      }),
       tenantCategory,
       researchGroupId: researchGroupInternalId, // legacy internal id
     });
@@ -110,7 +118,7 @@ class ResearchService {
     milestones,
     videoSrc,
     partners,
-    tenantCriterias,
+    attributes,
     tenantCategory
   }) {
 
@@ -118,7 +126,12 @@ class ResearchService {
     research.milestones = milestones;
     research.videoSrc = videoSrc;
     research.partners = partners;
-    research.tenantCriterias = tenantCriterias;
+    research.attributes = attributes.map(attr => {
+      return {
+        value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
+        researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString())
+      }
+    });
     research.tenantCategory = tenantCategory;
 
     return research.save();
@@ -142,7 +155,7 @@ class ResearchService {
     funding,
     eta,
     location,
-    tenantCriterias,
+    attributes,
     budgetAttachment,
     businessPlanAttachment,
     cvAttachment,
@@ -163,7 +176,7 @@ class ResearchService {
       funding,
       eta,
       location,
-      tenantCriterias,
+      attributes,
       budgetAttachment,
       businessPlanAttachment,
       cvAttachment,
@@ -184,7 +197,7 @@ class ResearchService {
     funding,
     eta,
     location,
-    tenantCriterias,
+    attributes,
     budgetAttachment,
     businessPlanAttachment,
     cvAttachment,
@@ -200,7 +213,7 @@ class ResearchService {
     researchApplication.funding = funding;
     researchApplication.eta = eta;
     researchApplication.location = location;
-    researchApplication.tenantCriterias = tenantCriterias;
+    researchApplication.attributes = attributes;
     researchApplication.budgetAttachment = budgetAttachment;
     researchApplication.businessPlanAttachment = businessPlanAttachment;
     researchApplication.cvAttachment = cvAttachment;
@@ -222,53 +235,33 @@ class ResearchService {
     return result;
   }
 
-  async handleResearchCriterias(oldComponents, newComponents) {
-
-    const addedComponents = [];
-    const removedComponents = [];
-
-    for (let i = 0; i < newComponents.length; i++) {
-      let newCom = newComponents[i];
-      if (oldComponents.some(oldCom => oldCom._id.toString() == newCom._id.toString())) continue;
-      addedComponents.push(newCom);
-    }
-
-    for (let i = 0; i < oldComponents.length; i++) {
-      let oldCom = oldComponents[i];
-      if (newComponents.some(newCom => newCom._id.toString() == oldCom._id.toString())) continue;
-      removedComponents.push(oldCom);
-    }
-
-    let addedCriteriaPromises = [];
-    for (let i = 0; i < addedComponents.length; i++) {
-      let component = addedComponents[i];
-      addedCriteriaPromises.push(this.addCriteriaToResearches({
-        component: component._id.toString(),
-        type: component.type
-      }))
-    }
-
-    let removedCriteriaPromises = [];
-    for (let i = 0; i < removedComponents.length; i++) {
-      let component = removedComponents[i];
-      removedCriteriaPromises.push(this.removeCriteriaFromResearches({
-        component: component._id.toString()
-      }))
-    }
-
-    await Promise.all(addedCriteriaPromises);
-    await Promise.all(removedCriteriaPromises);
-  }
-
-
-  async addCriteriaToResearches({ component, type }) {
-    const result = await Research.update({}, { $push: { tenantCriterias: { component: component, type: type } } }, { multi: true });
+  async addAttributeToResearches({ researchAttributeId, type, defaultValue }) {
+    const result = await Research.update({}, { $push: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId), type, value: defaultValue } } }, { multi: true });
     return result;
   }
 
-  async removeCriteriaFromResearches({ component }) {
-    const result = await Research.update({}, { $pull: { tenantCriterias: { component: component } } }, { multi: true });
+  async removeAttributeFromResearches({ researchAttributeId }) {
+    const result = await Research.update({}, { $pull: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId) } } }, { multi: true });
     return result;
+  }
+
+  async updateAttributeInResearches({ researchAttributeId, type, valueOptions, defaultValue }) {
+    if (type == RESEARCH_COMPONENT_TYPE.STEPPER || type == RESEARCH_COMPONENT_TYPE.SELECT_LIST) {
+
+      const result = await Research.update(
+        {
+          $and: [
+            { 'attributes.researchAttributeId': mongoose.Types.ObjectId(researchAttributeId) },
+            { 'attributes.value': { $nin: [...valueOptions.map(opt => mongoose.Types.ObjectId(opt.value))] } }
+          ]
+        },
+        { $set: { 'attributes.$.value': defaultValue } }, 
+        { multi: true }
+      );
+
+      return result;
+    }
+    return Promise.resolve();
   }
 
   async handleResearchCategories(oldCategories, newCategories) {

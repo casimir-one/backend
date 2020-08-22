@@ -1,4 +1,5 @@
 import TenantProfile from './../schemas/tenant';
+import mongoose from 'mongoose';
 
 async function findTenantProfile(id) {
   const tenant = await TenantProfile.findOne({ _id: id });
@@ -16,7 +17,7 @@ async function createTenantProfile({
   admins
 }, {
   signUpPolicy,
-  researchComponents,
+  researchAttributes,
   researchCategories,
   faq,
   researchBlacklist,
@@ -34,7 +35,7 @@ async function createTenantProfile({
     admins: admins,
     settings: {
       signUpPolicy,
-      researchComponents,
+      researchAttributes,
       researchCategories,
       faq,
       researchBlacklist,
@@ -53,7 +54,7 @@ async function updateTenantProfile(tenantId, {
   logo,
   banner
 }, {
-  researchComponents,
+  researchAttributes,
   researchCategories,
   faq,
   researchBlacklist,
@@ -72,7 +73,6 @@ async function updateTenantProfile(tenantId, {
   tenantProfile.email = email;
   tenantProfile.logo = logo;
   tenantProfile.banner = banner;
-  tenantProfile.settings.researchComponents = researchComponents;
   tenantProfile.settings.researchCategories = researchCategories;
   tenantProfile.settings.faq = faq;
   tenantProfile.settings.researchBlacklist = researchBlacklist;
@@ -82,8 +82,82 @@ async function updateTenantProfile(tenantId, {
 }
 
 
+async function addTenantResearchAttribute(tenantId, {
+  _id: researchAttributeId,
+  type,
+  isVisible,
+  title,
+  shortTitle,
+  description,
+  valueOptions,
+  defaultValue
+}) {
+
+  const tenantProfile = await findTenantProfile(tenantId);
+  tenantProfile.settings.researchAttributes.push({
+    _id: mongoose.Types.ObjectId(researchAttributeId),
+    type,
+    isVisible,
+    title,
+    shortTitle,
+    description,
+    valueOptions: valueOptions.map(opt => {
+      return { ...opt, value: mongoose.Types.ObjectId() };
+    }),
+    defaultValue
+  });
+
+  return tenantProfile.save();
+}
+
+
+async function removeTenantResearchAttribute(tenantId, {
+  _id: researchAttributeId
+}) {
+
+  const tenantProfile = await findTenantProfile(tenantId);
+  tenantProfile.settings.researchAttributes = tenantProfile.settings.researchAttributes.filter(a => a._id.toString() !== mongoose.Types.ObjectId(researchAttributeId).toString());
+
+  return tenantProfile.save();
+}
+
+
+async function updateTenantResearchAttribute(tenantId, {
+  _id: researchAttributeId,
+  type,
+  isVisible,
+  title,
+  shortTitle,
+  description,
+  valueOptions,
+  defaultValue
+}) {
+
+  const tenantProfile = await findTenantProfile(tenantId);
+
+  const researchAttribute = tenantProfile.settings.researchAttributes.find(a => a._id.toString() === mongoose.Types.ObjectId(researchAttributeId).toString());
+  
+  researchAttribute.type = type;
+  researchAttribute.isVisible = isVisible;
+  researchAttribute.title = title;
+  researchAttribute.shortTitle = shortTitle;
+  researchAttribute.description = description;
+  researchAttribute.valueOptions = valueOptions.map(opt => {
+    return { ...opt, value: opt.value ? mongoose.Types.ObjectId(opt.value.toString()) : mongoose.Types.ObjectId() };
+  });
+  researchAttribute.defaultValue = defaultValue;
+
+  return tenantProfile.save();
+}
+
+
 export default {
   findTenantProfile,
+
+  addTenantResearchAttribute,
+  removeTenantResearchAttribute,
+  updateTenantResearchAttribute,
+
   createTenantProfile,
   updateTenantProfile
 }

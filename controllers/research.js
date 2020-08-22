@@ -96,7 +96,7 @@ const createResearchApplication = async (ctx, next) => {
         ...ctx.req.body,
         location: JSON.parse(ctx.req.body.location),
         researchDisciplines: JSON.parse(ctx.req.body.researchDisciplines),
-        tenantCriterias: JSON.parse(ctx.req.body.tenantCriterias),
+        attributes: JSON.parse(ctx.req.body.attributes),
         tx: JSON.parse(ctx.req.body.tx)
       });
     }));
@@ -116,7 +116,7 @@ const createResearchApplication = async (ctx, next) => {
       location: form.location,
       problem: form.problem,
       solution: form.solution,
-      tenantCriterias: form.tenantCriterias,
+      attributes: form.attributes,
       funding: form.funding,
       eta: form.eta,
       budgetAttachment: form.budgetAttachment,
@@ -142,7 +142,7 @@ const createResearchApplication = async (ctx, next) => {
         milestones: [],
         videoSrc: "",
         partners: [],
-        tenantCriterias: researchApplication.tenantCriterias,
+        attributes: researchApplication.attributes,
         tenantCategory: null
       });
 
@@ -204,7 +204,7 @@ const editResearchApplication = async (ctx, next) => {
 
         ...ctx.req.body,
         location: JSON.parse(ctx.req.body.location),
-        tenantCriterias: JSON.parse(ctx.req.body.tenantCriterias)
+        attributes: JSON.parse(ctx.req.body.attributes)
       });
     }));
 
@@ -340,7 +340,7 @@ const approveResearchApplication = async (ctx, next) => {
       milestones: [],
       videoSrc: "",
       partners: [],
-      tenantCriterias: researchApplication.tenantCriterias,
+      attributes: researchApplication.attributes,
       tenantCategory: null
     });
 
