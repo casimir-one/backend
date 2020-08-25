@@ -84,15 +84,15 @@ const run = async () => {
     let researchTenantCriterias = [];
 
     if (trlAttribute && trlValue) {
-      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(trlValue.component.toString()), type: trlValue.type, value: trlAttribute.valueOptions[trlValue.value.index].value });
+      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(trlValue.component.toString()), type: trlValue.type, value: trlValue.value ? trlAttribute.valueOptions[trlValue.value.index].value : null });
     }
 
     if (marlAttribute && marlValue) {
-      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(marlValue.component.toString()), type: marlValue.type, value: marlAttribute.valueOptions[marlValue.value.index].value });
+      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(marlValue.component.toString()), type: marlValue.type, value: marlValue.value ? marlAttribute.valueOptions[marlValue.value.index].value : null });
     }
 
     if (srlAttribute && srlValue) {
-      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(srlValue.component.toString()), type: srlValue.type, value: srlAttribute.valueOptions[srlValue.value.index].value })
+      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(srlValue.component.toString()), type: srlValue.type, value: srlValue.value ? srlAttribute.valueOptions[srlValue.value.index].value : null })
     }
 
     research.attributes = researchTenantCriterias;

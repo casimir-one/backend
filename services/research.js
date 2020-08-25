@@ -30,8 +30,10 @@ class ResearchService {
             if (researchAttributeSchema) {
               const { type } = researchAttributeSchema;
 
-              if (type == RESEARCH_COMPONENT_TYPE.STEPPER && researchAttribute.value) {
+              if (type == RESEARCH_COMPONENT_TYPE.STEPPER) {
 
+                if (!researchAttribute.value) return null;
+                
                 const step = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
                 if (!step) return null;
 
@@ -41,7 +43,9 @@ class ResearchService {
                   attribute: researchAttributeSchema
                 }
 
-              } else if (type == RESEARCH_COMPONENT_TYPE.SELECT_LIST && researchAttribute.value) {
+              } else if (type == RESEARCH_COMPONENT_TYPE.SELECT_LIST) {
+
+                if (!researchAttribute.value) return null;
 
                 const option = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
                 if (!option) return null;
