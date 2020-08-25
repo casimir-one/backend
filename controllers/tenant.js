@@ -12,6 +12,7 @@ import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
 import { tenantBannerForm } from './../forms/tenantForms';
 import * as blockchainService from './../utils/blockchain';
+import mongoose from 'mongoose';
 
 
 const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
@@ -287,17 +288,95 @@ const updateTenantProfile = async (ctx) => {
     );
     const updatedProfileData = updatedTenantProfile.toObject();
 
-    const oldComponents = profileData.settings.researchComponents;
-    const newComponents = updatedProfileData.settings.researchComponents;
-
     const oldCategories = profileData.settings.researchCategories;
     const newCategories = updatedProfileData.settings.researchCategories;
 
-    await researchService.handleResearchCriterias(oldComponents, newComponents);
     await researchService.handleResearchCategories(oldCategories, newCategories);
 
     ctx.status = 200;
     ctx.body = updatedTenantProfile;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const createTenantResearchAttribute = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchAttribute = ctx.request.body;
+
+  try {
+    const researchService = new ResearchService(tenant);
+
+    const researchAttributeId = mongoose.Types.ObjectId();
+    const updatedTenantProfile = await tenantService.addTenantResearchAttribute(tenant.id, { ...researchAttribute, _id: researchAttributeId.toString() });
+    const newResearchAttribute = updatedTenantProfile.settings.researchAttributes.find(a => a._id.toString() === researchAttributeId.toString());
+
+    await researchService.addAttributeToResearches({ 
+      researchAttributeId: newResearchAttribute._id.toString(), 
+      type: researchAttribute.type,
+      defaultValue: researchAttribute.defaultValue || null
+    });
+
+    ctx.status = 200;
+    ctx.body = updatedTenantProfile.toObject();
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const deleteTenantResearchAttribute = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchAttributeId = ctx.params.id;
+
+  try {
+    const researchService = new ResearchService(tenant);
+
+    const updatedTenantProfile = await tenantService.removeTenantResearchAttribute(tenant.id, { _id: researchAttributeId });
+
+    await researchService.removeAttributeFromResearches({
+      researchAttributeId: researchAttributeId
+    });
+
+    ctx.status = 200;
+    ctx.body = updatedTenantProfile.toObject();
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const updateTenantResearchAttribute = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchAttribute = ctx.request.body;
+
+  try {
+    const researchService = new ResearchService(tenant);
+
+    const updatedTenantProfile = await tenantService.updateTenantResearchAttribute(tenant.id, { ...researchAttribute });
+    
+    await researchService.updateAttributeInResearches({
+      researchAttributeId: researchAttribute._id,
+      type: researchAttribute.type,
+      valueOptions: researchAttribute.valueOptions,
+      defaultValue: researchAttribute.defaultValue || null
+    });
+
+    ctx.status = 200;
+    ctx.body = updatedTenantProfile.toObject();
 
   } catch (err) {
     console.log(err);
@@ -348,6 +427,7 @@ const approveSignUpRequest = async (ctx) => {
       ...profileData, 
       status: USER_PROFILE_STATUS.APPROVED
     });
+
     ctx.status = 200;
     ctx.body = { profile: approvedProfile };
 
@@ -382,8 +462,8 @@ const rejectSignUpRequest = async (ctx) => {
 
     ctx.status = 201;
     ctx.body = "";
-  }
-  catch (err) {
+
+  } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
@@ -434,6 +514,11 @@ const removeTenantAdmin = async (ctx) => {
 
 
 export default {
+
+  createTenantResearchAttribute,
+  updateTenantResearchAttribute,
+  deleteTenantResearchAttribute,
+
   getTenantProfile,
   getTenantBanner,
   getTenantLogo,

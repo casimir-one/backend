@@ -10,10 +10,32 @@ const FAQ = new Schema({
   "isVisible": { type: Boolean, required: true }
 });
 
-const ResearchCriteria = new Schema({
-  "type": { type: String, enum: [RESEARCH_COMPONENT_TYPE.STEPPER], required: true },
+const ResearchAttributeValueOption = new Schema({
+  "_id": false,
+  "title": { type: String, required: false },
+  "shortTitle": { type: String, required: false },
+  "description": { type: String, required: false },
+  "value": { type: Schema.Types.ObjectId, default: null }
+});
+
+const ResearchAttribute = new Schema({
+  "type": { 
+    type: String, 
+    enum: [
+      RESEARCH_COMPONENT_TYPE.STEPPER,
+      RESEARCH_COMPONENT_TYPE.TEXT,
+      RESEARCH_COMPONENT_TYPE.SELECT_LIST
+    ],
+    required: true
+  },
   "isVisible": { type: Boolean, required: true },
-  "component": { type: Object, required: true }
+  "title": { type: String, required: false },
+  "shortTitle": { type: String, required: false },
+  "description": { type: String, required: false },
+  "valueOptions": [ResearchAttributeValueOption],
+  "defaultValue": { type: Schema.Types.Mixed, default: null },
+
+  "component": { type: Object, required: false } // temp for migration
 });
 
 const ResearchCategory = new Schema({
@@ -45,7 +67,7 @@ const TenantProfile = new Schema({
         ], 
         required: true 
       },
-      "researchComponents": [ResearchCriteria],
+      "researchAttributes": [ResearchAttribute],
       "researchCategories": [ResearchCategory],
       "faq": [FAQ],
       "researchBlacklist": [{ type: String, required: true, trim: true }],
@@ -54,7 +76,9 @@ const TenantProfile = new Schema({
       "modules": {
         "review": { type: Boolean, default: false },
         "fundraising": { type: Boolean, default: false }
-      }
+      },
+
+      "researchComponents": [ResearchAttribute], // temp for migration
     }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 

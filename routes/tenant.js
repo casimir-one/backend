@@ -23,6 +23,11 @@ async function tenantAdminGuard(ctx, next) {
 }
 
 protected_route.put('/profile', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantProfile);
+
+protected_route.post('/research-attributes', compose([tenantRoute, tenantAdminGuard]), tenant.createTenantResearchAttribute);
+protected_route.put('/research-attributes', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantResearchAttribute);
+protected_route.delete('/research-attributes/:id', compose([tenantRoute, tenantAdminGuard]), tenant.deleteTenantResearchAttribute);
+
 protected_route.post('/banner', compose([tenantRoute, tenantAdminGuard]), tenant.uploadTenantBanner);
 protected_route.get('/sign-ups', compose([tenantRoute, tenantAdminGuard]), tenant.getSignUpRequests);
 protected_route.put('/sign-ups/approve', compose([tenantRoute, tenantAdminGuard]), tenant.approveSignUpRequest);
