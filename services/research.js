@@ -19,30 +19,54 @@ class ResearchService {
       .filter(r => !this.researchBlacklist || !this.researchBlacklist.some(id => r.external_id == id))
       .filter(privateGuard)
       .map((chainResearch) => {
+
         const research = researches.find(r => r._id == chainResearch.external_id);
         if (research) {
+
           const attributes = research.attributes.filter(a => this.enabledResearchAttributes.some(attr => attr._id.toString() == a.researchAttributeId.toString()));
-          const tenantAttributesReadingList = attributes.map((researchAttribute) => {
+          const extendedAttributes = attributes.map((researchAttribute) => {
+
             const researchAttributeSchema = this.enabledResearchAttributes.find(attr => attr._id.toString() == researchAttribute.researchAttributeId.toString());
-              
-              if (researchAttributeSchema && researchAttributeSchema.type == RESEARCH_COMPONENT_TYPE.STEPPER && researchAttribute.value) {
-                
+            if (researchAttributeSchema) {
+              const { type } = researchAttributeSchema;
+
+              if (type == RESEARCH_COMPONENT_TYPE.STEPPER && researchAttribute.value) {
+
                 const step = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
                 if (!step) return null;
-                
-                const number = researchAttributeSchema.valueOptions.indexOf(step) + 1;
 
+                const number = researchAttributeSchema.valueOptions.indexOf(step) + 1;
                 return {
                   value: { ...step, number },
                   attribute: researchAttributeSchema
-                };
+                }
+
+              } else if (type == RESEARCH_COMPONENT_TYPE.SELECT_LIST && researchAttribute.value) {
+
+                const option = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
+                if (!option) return null;
+
+                return {
+                  value: { ...option },
+                  attribute: researchAttributeSchema
+                }
+
+              } else {
+
+                return {
+                  value: researchAttribute.value,
+                  attribute: researchAttributeSchema
+                }
+
               }
 
+            } else {
               return null;
-            })
+            }
+          })
             .filter((attr) => !!attr);
 
-          return { ...chainResearch, researchRef: { ...research.toObject(), attributes: attributes, tenantCriteriasReadingList: tenantAttributesReadingList } };
+          return { ...chainResearch, researchRef: { ...research.toObject(), attributes, extendedAttributes } };
         }
         return { ...chainResearch, researchRef: null };
       });
