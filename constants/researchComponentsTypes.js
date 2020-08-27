@@ -1,11 +1,13 @@
 const STEPPER = "stepper";
 const TEXT = "text";
-const SELECT_LIST = "select-list";
+const TEXTAREA = "textarea";
+const SELECT = "select";
 
 const RESEARCH_COMPONENT_TYPE = {
   STEPPER,
   TEXT,
-  SELECT_LIST
+  TEXTAREA,
+  SELECT
 };
 
 export default RESEARCH_COMPONENT_TYPE;

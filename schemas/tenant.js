@@ -24,7 +24,8 @@ const ResearchAttribute = new Schema({
     enum: [
       RESEARCH_COMPONENT_TYPE.STEPPER,
       RESEARCH_COMPONENT_TYPE.TEXT,
-      RESEARCH_COMPONENT_TYPE.SELECT_LIST
+      RESEARCH_COMPONENT_TYPE.TEXTAREA,
+      RESEARCH_COMPONENT_TYPE.SELECT
     ],
     required: true
   },

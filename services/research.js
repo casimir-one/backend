@@ -43,7 +43,7 @@ class ResearchService {
                   attribute: researchAttributeSchema
                 }
 
-              } else if (type == RESEARCH_COMPONENT_TYPE.SELECT_LIST) {
+              } else if (type == RESEARCH_COMPONENT_TYPE.SELECT) {
 
                 if (!researchAttribute.value) return null;
 
@@ -274,7 +274,7 @@ class ResearchService {
   }
 
   async updateAttributeInResearches({ researchAttributeId, type, valueOptions, defaultValue }) {
-    if (type == RESEARCH_COMPONENT_TYPE.STEPPER || type == RESEARCH_COMPONENT_TYPE.SELECT_LIST) {
+    if (type == RESEARCH_COMPONENT_TYPE.STEPPER || type == RESEARCH_COMPONENT_TYPE.SELECT) {
 
       const result = await Research.update(
         {
