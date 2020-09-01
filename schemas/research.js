@@ -9,6 +9,13 @@ const Research = new Schema({
   "_id": { type: String, required: true },
   "researchGroupExternalId": { type: String, required: true },
   "researchGroupId": { type: Number, required: true }, // legacy internal id
+  "attributes": [ResearchAttributeValue],
+  "tenantCategory": ResearchCategoryValue,
+
+
+  /* === TEMP FOR MIGRATION === */
+  "videoSrc": { type: String, default: null },
+  "tenantCriterias": [ResearchAttributeValue],
   "milestones": [{
     "_id": false,
     "goal": { type: String, required: true },
@@ -18,16 +25,12 @@ const Research = new Schema({
     "eta": { type: Date, required: true },
     "isActive": { type: Boolean, default: false },
   }],
-  "videoSrc": { type: String, default: null },
   "partners": [{
     "_id": false,
     "type": { type: String, required: true },
     "title": { type: String, required: true }
-  }],
-  "attributes": [ResearchAttributeValue],
-  "tenantCategory": ResearchCategoryValue,
-
-  "tenantCriterias": [ResearchAttributeValue], // temp for migration
+  }]
+  /* === TEMP FOR MIGRATION === */
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research', Research);

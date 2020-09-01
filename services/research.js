@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 import ResearchApplication from './../schemas/researchApplication';
-import { RESEARCH_APPLICATION_STATUS, RESEARCH_COMPONENT_TYPE } from './../constants';
+import { RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import mongoose from 'mongoose';
 
 class ResearchService {
@@ -30,7 +30,7 @@ class ResearchService {
             if (researchAttributeSchema) {
               const { type } = researchAttributeSchema;
 
-              if (type == RESEARCH_COMPONENT_TYPE.STEPPER) {
+              if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER) {
 
                 if (!researchAttribute.value) return null;
                 
@@ -43,7 +43,7 @@ class ResearchService {
                   attribute: researchAttributeSchema
                 }
 
-              } else if (type == RESEARCH_COMPONENT_TYPE.SELECT) {
+              } else if (type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
 
                 if (!researchAttribute.value) return null;
 
@@ -274,7 +274,7 @@ class ResearchService {
   }
 
   async updateAttributeInResearches({ researchAttributeId, type, valueOptions, defaultValue }) {
-    if (type == RESEARCH_COMPONENT_TYPE.STEPPER || type == RESEARCH_COMPONENT_TYPE.SELECT) {
+    if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
 
       const result = await Research.update(
         {

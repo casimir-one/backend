@@ -15,7 +15,7 @@ const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
 const deipRpc = require('@deip/rpc-client');
-const RESEARCH_COMPONENT_TYPE = require('./../constants/researchComponentsTypes').default;
+const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
@@ -43,10 +43,12 @@ const run = async () => {
         _id: researchAttribute._id,
         type: researchAttribute.type,
         isVisible: researchAttribute.isVisible,
-        title: researchAttribute.type == RESEARCH_COMPONENT_TYPE.STEPPER ? researchAttribute.component.readinessLevelTitle : '',
-        shortTitle: researchAttribute.type == RESEARCH_COMPONENT_TYPE.STEPPER ? researchAttribute.component.readinessLevelShortTitle : '',
+        isEditable: true,
+        isFilterable: true,
+        title: researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelTitle : '',
+        shortTitle: researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelShortTitle : '',
         description: '',
-        valueOptions: researchAttribute.type == RESEARCH_COMPONENT_TYPE.STEPPER ? researchAttribute.component.readinessLevels.map(rl => {
+        valueOptions: researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevels.map(rl => {
           return {
             title: rl.title,
             shortTitle: '',
@@ -81,21 +83,21 @@ const run = async () => {
     let marlValue = research.attributes.find(a => a.component.toString() == marlAttribute._id.toString());
     let srlValue = research.attributes.find(a => a.component.toString() == srlAttribute._id.toString());
 
-    let researchTenantCriterias = [];
+    let attributes = [];
 
     if (trlAttribute && trlValue) {
-      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(trlValue.component.toString()), type: trlValue.type, value: trlValue.value ? trlAttribute.valueOptions[trlValue.value.index].value : null });
+      attributes.push({ researchAttributeId: mongoose.Types.ObjectId(trlValue.component.toString()), value: trlValue.value ? trlAttribute.valueOptions[trlValue.value.index].value : null });
     }
 
     if (marlAttribute && marlValue) {
-      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(marlValue.component.toString()), type: marlValue.type, value: marlValue.value ? marlAttribute.valueOptions[marlValue.value.index].value : null });
+      attributes.push({ researchAttributeId: mongoose.Types.ObjectId(marlValue.component.toString()), value: marlValue.value ? marlAttribute.valueOptions[marlValue.value.index].value : null });
     }
 
     if (srlAttribute && srlValue) {
-      researchTenantCriterias.push({ researchAttributeId: mongoose.Types.ObjectId(srlValue.component.toString()), type: srlValue.type, value: srlValue.value ? srlAttribute.valueOptions[srlValue.value.index].value : null })
+      attributes.push({ researchAttributeId: mongoose.Types.ObjectId(srlValue.component.toString()), value: srlValue.value ? srlAttribute.valueOptions[srlValue.value.index].value : null })
     }
 
-    research.attributes = researchTenantCriterias;
+    research.attributes = attributes;
 
     researchPromises.push(research.save());
   }

@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, RESEARCH_COMPONENT_TYPE, NEW_RESEARCH_POLICY } from './../constants';
+import { SIGN_UP_POLICY, RESEARCH_ATTRIBUTE_TYPE, NEW_RESEARCH_POLICY } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -21,15 +21,12 @@ const ResearchAttributeValueOption = new Schema({
 const ResearchAttribute = new Schema({
   "type": { 
     type: String, 
-    enum: [
-      RESEARCH_COMPONENT_TYPE.STEPPER,
-      RESEARCH_COMPONENT_TYPE.TEXT,
-      RESEARCH_COMPONENT_TYPE.TEXTAREA,
-      RESEARCH_COMPONENT_TYPE.SELECT
-    ],
+    enum: [...Object.values(RESEARCH_ATTRIBUTE_TYPE)],
     required: true
   },
   "isVisible": { type: Boolean, required: true },
+  "isEditable": { type: Boolean, default: false },
+  "isFilterable": { type: Boolean, default: false },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
