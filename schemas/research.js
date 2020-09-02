@@ -11,7 +11,7 @@ const Research = new Schema({
   "researchGroupId": { type: Number, required: true }, // legacy internal id
   "attributes": [ResearchAttributeValue],
   "tenantCategory": ResearchCategoryValue,
-
+  "customId": { type: String, required: false },
 
   /* === TEMP FOR MIGRATION === */
   "videoSrc": { type: String, default: null },
@@ -32,6 +32,8 @@ const Research = new Schema({
   }]
   /* === TEMP FOR MIGRATION === */
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+
+Research.index({ custom_id: 1 }, { unique: true, sparse: true });
 
 const model = mongoose.model('research', Research);
 

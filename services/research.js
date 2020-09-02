@@ -114,11 +114,9 @@ class ResearchService {
 
   async createResearchRef({
     externalId,
+    customId,
     researchGroupExternalId,
     researchGroupInternalId,
-    milestones,
-    videoSrc,
-    partners,
     attributes,
     tenantCategory
   }) {
@@ -126,9 +124,6 @@ class ResearchService {
     const research = new Research({
       _id: externalId,
       researchGroupExternalId,
-      milestones,
-      videoSrc,
-      partners,
       attributes: attributes.map(attr => {
         return {
           value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
@@ -139,21 +134,19 @@ class ResearchService {
       researchGroupId: researchGroupInternalId, // legacy internal id
     });
 
+    if (customId) {
+      research.customId = customId;
+    }
+
     return research.save();
   }
   
   async updateResearchRef(externalId, {
-    milestones,
-    videoSrc,
-    partners,
     attributes,
     tenantCategory
   }) {
 
     const research = await this.findResearchRef(externalId);
-    research.milestones = milestones;
-    research.videoSrc = videoSrc;
-    research.partners = partners;
     research.attributes = attributes.map(attr => {
       return {
         value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
