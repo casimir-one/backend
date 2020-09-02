@@ -59,7 +59,7 @@ const run = async () => {
 
   const videoSrcAttribute = {
     _id: mongoose.Types.ObjectId(),
-    type: RESEARCH_ATTRIBUTE_TYPE.LINK,
+    type: RESEARCH_ATTRIBUTE_TYPE.VIDEO_URL,
     isVisible: true,
     isEditable: true,
     isFilterable: false,
