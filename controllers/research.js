@@ -17,6 +17,7 @@ import userNotificationHandler from './../event-handlers/userNotification';
 import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS } from './../constants';
 import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
+import qs from 'qs';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -727,10 +728,12 @@ const updateResearch = async (ctx, next) => {
 
 const getPublicResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
   const researchService = new ResearchService(tenant);
 
   try {
-    const result = await researchService.lookupResearches(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+    const result = await researchService.lookupResearches(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT, filter);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {

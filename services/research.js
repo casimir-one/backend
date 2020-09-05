@@ -7,23 +7,30 @@ import mongoose from 'mongoose';
 class ResearchService {
 
   constructor(tenant) {
-    this.researchWhitelist = tenant.settings.researchWhitelist;
-    this.researchBlacklist = tenant.settings.researchBlacklist;
+    this.researchWhitelist = tenant.settings.researchWhitelist || [];
+    this.researchBlacklist = tenant.settings.researchBlacklist || [];
     this.enabledResearchAttributes = tenant.settings.researchAttributes.filter(attr => attr.isVisible);
   }
 
-  async mapResearch(chainResearches, privateGuard = (r) => { return !r.is_private }) {
+
+  async mapResearch(chainResearches, privateGuardFn, filterObj) {
+
+    const filter =  {
+      categories: [],
+      disciplines: [],
+      organizations: [],
+      researchAttributes: [], 
+      ...filterObj
+    }
+    
     const researches = await Research.find({ _id: { $in: chainResearches.map(r => r.external_id) } });
     return chainResearches
-      .filter(r => !this.researchWhitelist || this.researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !this.researchBlacklist || !this.researchBlacklist.some(id => r.external_id == id))
-      .filter(privateGuard)
       .map((chainResearch) => {
 
-        const research = researches.find(r => r._id == chainResearch.external_id);
-        if (research) {
+        const researchRef = researches.find(r => r._id == chainResearch.external_id);
+        if (researchRef) {
 
-          const attributes = research.attributes.filter(a => this.enabledResearchAttributes.some(attr => attr._id.toString() == a.researchAttributeId.toString()));
+          const attributes = researchRef.attributes.filter(a => this.enabledResearchAttributes.some(attr => attr._id.toString() == a.researchAttributeId.toString()));
           const extendedAttributes = attributes.map((researchAttribute) => {
 
             const researchAttributeSchema = this.enabledResearchAttributes.find(attr => attr._id.toString() == researchAttribute.researchAttributeId.toString());
@@ -33,7 +40,7 @@ class ResearchService {
               if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER) {
 
                 if (!researchAttribute.value) return null;
-                
+
                 const step = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
                 if (!step) return null;
 
@@ -70,16 +77,33 @@ class ResearchService {
           })
             .filter((attr) => !!attr);
 
-          return { ...chainResearch, researchRef: { ...research.toObject(), attributes, extendedAttributes } };
+          return { ...chainResearch, researchRef: { ...researchRef.toObject(), attributes, extendedAttributes } };
         }
         return { ...chainResearch, researchRef: null };
-      });
+      })
+      .filter(privateGuardFn)
+      .filter(r => !this.researchWhitelist.length || this.researchWhitelist.some(id => r.external_id == id))
+      .filter(r => !this.researchBlacklist.length || !this.researchBlacklist.some(id => r.external_id == id))
+      .filter(r => !filter.disciplines.length || filter.disciplines.some(id => r.disciplines.some(d => d.external_id == id)))
+      .filter(r => !filter.organizations.length || filter.organizations.some(id => r.research_group.external_id == id))
+      .filter(r => !filter.categories.length || filter.categories.some(id => r.researchRef && r.researchRef.tenantCategory && r.researchRef.tenantCategory._id == id))
+      .filter(r => !filter.researchAttributes.length || filter.researchAttributes.some(fAttr => {
+        const rAttr = r.researchRef ? r.researchRef.attributes.find((a) => a.researchAttributeId.toString() == fAttr.researchAttributeId.toString()) : null;
+        if (!rAttr || !rAttr.value)
+          return false;
+
+        return fAttr.values.some((v) => {
+          if (mongoose.Types.ObjectId.isValid(rAttr.value))
+            return v == rAttr.value.toString();
+
+          return v == rAttr.value;
+        });
+      }));
   }
 
-
-  async lookupResearches(lowerBound, limit) {
+  async lookupResearches(lowerBound, limit, filter) {
     const chainResearches = await deipRpc.api.lookupResearchesAsync(lowerBound, limit);
-    const result = await this.mapResearch(chainResearches);
+    const result = await this.mapResearch(chainResearches, (r) => { return !r.is_private }, filter);
     return result;
   }
 
