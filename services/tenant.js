@@ -85,7 +85,9 @@ async function addTenantResearchAttribute(tenantId, {
   shortTitle,
   description,
   valueOptions,
-  defaultValue
+  defaultValue,
+  areas,
+  order
 }) {
 
   const tenantProfile = await findTenantProfile(tenantId);
@@ -99,7 +101,9 @@ async function addTenantResearchAttribute(tenantId, {
     valueOptions: valueOptions.map(opt => {
       return { ...opt, value: mongoose.Types.ObjectId() };
     }),
-    defaultValue
+    defaultValue,
+    areas,
+    order: parseInt(order)
   });
 
   return tenantProfile.save();
@@ -125,7 +129,9 @@ async function updateTenantResearchAttribute(tenantId, {
   shortTitle,
   description,
   valueOptions,
-  defaultValue
+  defaultValue,
+  areas,
+  order
 }) {
 
   const tenantProfile = await findTenantProfile(tenantId);
@@ -141,6 +147,9 @@ async function updateTenantResearchAttribute(tenantId, {
     return { ...opt, value: opt.value ? mongoose.Types.ObjectId(opt.value.toString()) : mongoose.Types.ObjectId() };
   });
   researchAttribute.defaultValue = defaultValue;
+
+  researchAttribute.areas = areas;
+  researchAttribute.order = parseInt(order);
 
   return tenantProfile.save();
 }

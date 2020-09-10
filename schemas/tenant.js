@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, RESEARCH_ATTRIBUTE_TYPE, NEW_RESEARCH_POLICY } from './../constants';
+import { SIGN_UP_POLICY, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE_AREA, NEW_RESEARCH_POLICY } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -32,7 +32,12 @@ const ResearchAttribute = new Schema({
   "description": { type: String, required: false },
   "valueOptions": [ResearchAttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
-
+  "areas": {
+    type: [String],
+    enum: [...Object.values(RESEARCH_ATTRIBUTE_AREA)],
+    required: true
+  },
+  "order": { type: Number, required: false, default: 0 },
   "component": { type: Object, required: false } // temp for migration
 });
 
