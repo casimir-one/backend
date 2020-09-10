@@ -86,6 +86,8 @@ async function addTenantResearchAttribute(tenantId, {
   description,
   valueOptions,
   defaultValue,
+  isEditable,
+  isFilterable,
   areas,
   order
 }) {
@@ -102,6 +104,8 @@ async function addTenantResearchAttribute(tenantId, {
       return { ...opt, value: mongoose.Types.ObjectId() };
     }),
     defaultValue,
+    isEditable,
+    isFilterable,
     areas,
     order: parseInt(order)
   });
@@ -130,6 +134,8 @@ async function updateTenantResearchAttribute(tenantId, {
   description,
   valueOptions,
   defaultValue,
+  isEditable,
+  isFilterable,
   areas,
   order
 }) {
@@ -147,6 +153,9 @@ async function updateTenantResearchAttribute(tenantId, {
     return { ...opt, value: opt.value ? mongoose.Types.ObjectId(opt.value.toString()) : mongoose.Types.ObjectId() };
   });
   researchAttribute.defaultValue = defaultValue;
+
+  researchAttribute.isEditable = isEditable;
+  researchAttribute.isFilterable = isFilterable;
 
   researchAttribute.areas = areas;
   researchAttribute.order = parseInt(order);
