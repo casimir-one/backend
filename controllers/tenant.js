@@ -237,21 +237,21 @@ const getTenantProfile = async (ctx) => {
 
     const tenant = tenantProfile.toObject();
 
-    const researchService = new ResearchService(tenant);
-    const categoryStatsPromises = [];
+    // const researchService = new ResearchService(tenant);
+    // const categoryStatsPromises = [];
 
-    for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
-      let category = tenant.settings.researchCategories[i];
-      let promise = researchService.findResearchesByCategory(category);
-      categoryStatsPromises.push(promise);
-    }
+    // for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
+    //   let category = tenant.settings.researchCategories[i];
+    //   let promise = researchService.findResearchesByCategory(category);
+    //   categoryStatsPromises.push(promise);
+    // }
 
-    const researchesByCategories = await Promise.all(categoryStatsPromises);
+    // const researchesByCategories = await Promise.all(categoryStatsPromises);
 
-    for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
-      let category = tenant.settings.researchCategories[i];
-      category.researchCount = researchesByCategories[i].length;
-    }
+    // for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
+    //   let category = tenant.settings.researchCategories[i];
+    //   category.researchCount = researchesByCategories[i].length;
+    // }
 
     ctx.status = 200;
     ctx.body = tenant;
@@ -286,12 +286,6 @@ const updateTenantProfile = async (ctx) => {
       { ...profileData, ...update }, 
       { ...profileData.settings, ...update.settings }
     );
-    const updatedProfileData = updatedTenantProfile.toObject();
-
-    const oldCategories = profileData.settings.researchCategories;
-    const newCategories = updatedProfileData.settings.researchCategories;
-
-    await researchService.handleResearchCategories(oldCategories, newCategories);
 
     ctx.status = 200;
     ctx.body = updatedTenantProfile;

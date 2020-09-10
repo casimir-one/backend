@@ -18,7 +18,6 @@ async function createTenantProfile({
 }, {
   signUpPolicy,
   researchAttributes,
-  researchCategories,
   faq,
   researchBlacklist,
   researchWhitelist
@@ -36,7 +35,6 @@ async function createTenantProfile({
     settings: {
       signUpPolicy,
       researchAttributes,
-      researchCategories,
       faq,
       researchBlacklist,
       researchWhitelist
@@ -54,8 +52,6 @@ async function updateTenantProfile(tenantId, {
   logo,
   banner
 }, {
-  researchAttributes,
-  researchCategories,
   faq,
   researchBlacklist,
   researchWhitelist
@@ -73,7 +69,6 @@ async function updateTenantProfile(tenantId, {
   tenantProfile.email = email;
   tenantProfile.logo = logo;
   tenantProfile.banner = banner;
-  tenantProfile.settings.researchCategories = researchCategories;
   tenantProfile.settings.faq = faq;
   tenantProfile.settings.researchBlacklist = researchBlacklist;
   tenantProfile.settings.researchWhitelist = researchWhitelist;

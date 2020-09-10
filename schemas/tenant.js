@@ -66,7 +66,6 @@ const TenantProfile = new Schema({
         required: true 
       },
       "researchAttributes": [ResearchAttribute],
-      "researchCategories": [ResearchCategory],
       "faq": [FAQ],
       "researchBlacklist": [{ type: String, required: true, trim: true }],
       "researchWhitelist": [{ type: String, required: true, trim: true }],
@@ -76,6 +75,7 @@ const TenantProfile = new Schema({
         "fundraising": { type: Boolean, default: false }
       },
 
+      "researchCategories": [ResearchCategory], // temp for migration
       "researchComponents": [ResearchAttribute], // temp for migration
     }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
