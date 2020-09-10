@@ -16,7 +16,6 @@ class ResearchService {
   async mapResearch(chainResearches, privateGuardFn, filterObj) {
 
     const filter =  {
-      categories: [],
       disciplines: [],
       organizations: [],
       researchAttributes: [], 
@@ -86,7 +85,6 @@ class ResearchService {
       .filter(r => !this.researchBlacklist.length || !this.researchBlacklist.some(id => r.external_id == id))
       .filter(r => !filter.disciplines.length || filter.disciplines.some(id => r.disciplines.some(d => d.external_id == id)))
       .filter(r => !filter.organizations.length || filter.organizations.some(id => r.research_group.external_id == id))
-      .filter(r => !filter.categories.length || filter.categories.some(id => r.researchRef && r.researchRef.tenantCategory && r.researchRef.tenantCategory._id == id))
       .filter(r => !filter.researchAttributes.length || filter.researchAttributes.some(fAttr => {
         const rAttr = r.researchRef ? r.researchRef.attributes.find((a) => a.researchAttributeId.toString() == fAttr.researchAttributeId.toString()) : null;
         if (!rAttr || !rAttr.value)
@@ -94,7 +92,10 @@ class ResearchService {
 
         return fAttr.values.some((v) => {
           if (mongoose.Types.ObjectId.isValid(rAttr.value))
-            return v == rAttr.value.toString();
+            return v === rAttr.value.toString();
+
+          if (Array.isArray(rAttr.value))
+            return rAttr.value.some(rAttrV => mongoose.Types.ObjectId.isValid(rAttrV) ? v === rAttrV.toString() : v == rAttrV)
 
           return v == rAttr.value;
         });
@@ -141,8 +142,7 @@ class ResearchService {
     customId,
     researchGroupExternalId,
     researchGroupInternalId,
-    attributes,
-    tenantCategory
+    attributes
   }) {
 
     const research = new Research({
@@ -150,11 +150,16 @@ class ResearchService {
       researchGroupExternalId,
       attributes: attributes.map(attr => {
         return {
-          value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
-          researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString())
+          researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
+          value: attr.value 
+            ? Array.isArray(attr.value) 
+              ? attr.value.map(v => mongoose.Types.ObjectId.isValid(v) ? mongoose.Types.ObjectId(v) : v) 
+              : mongoose.Types.ObjectId.isValid(attr.value.toString()) 
+                ? mongoose.Types.ObjectId(attr.value.toString()) 
+                : attr.value 
+            : null
         }
       }),
-      tenantCategory,
       researchGroupId: researchGroupInternalId, // legacy internal id
     });
 
@@ -166,18 +171,22 @@ class ResearchService {
   }
   
   async updateResearchRef(externalId, {
-    attributes,
-    tenantCategory
+    attributes
   }) {
 
     const research = await this.findResearchRef(externalId);
     research.attributes = attributes.map(attr => {
       return {
-        value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
-        researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString())
+        researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
+        value: attr.value
+          ? Array.isArray(attr.value)
+            ? attr.value.map(v => mongoose.Types.ObjectId.isValid(v) ? mongoose.Types.ObjectId(v) : v)
+            : mongoose.Types.ObjectId.isValid(attr.value.toString())
+              ? mongoose.Types.ObjectId(attr.value.toString())
+              : attr.value
+          : null
       }
     });
-    research.tenantCategory = tenantCategory;
 
     return research.save();
   }
@@ -307,37 +316,6 @@ class ResearchService {
       return result;
     }
     return Promise.resolve();
-  }
-
-  async handleResearchCategories(oldCategories, newCategories) {
-
-    const addedCategories = [];
-    const removedCategories = [];
-  
-    for (let i = 0; i < newCategories.length; i++) {
-      let newCat = newCategories[i];
-      if (oldCategories.some(oldCat => oldCat._id.toString() == newCat._id.toString())) continue;
-      addedCategories.push(newCat);
-    }
-
-    for (let i = 0; i < oldCategories.length; i++) {
-      let oldCat = oldCategories[i];
-      if (newCategories.some(newCat => newCat._id.toString() == oldCat._id.toString())) continue;
-      removedCategories.push(oldCat);
-    }
-
-    let removedCategoryPromises = [];
-    for (let i = 0; i < removedCategories.length; i++) {
-      let category = removedCategories[i];
-      removedCategoryPromises.push(this.removeCategoryFromResearches({
-        categoryId: category._id
-      }))
-    }
-  }
-
-  async removeCategoryFromResearches({ categoryId }) {
-    const result = await Research.update({ $and: [ { tenantCategory: { $exists: true } }, { "tenantCategory._id": categoryId }] }, { $set: { "tenantCategory": null } }, { multi: true });
-    return result;
   }
 
   async findResearchesByCategory(category) {

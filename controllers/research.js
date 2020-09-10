@@ -143,8 +143,7 @@ const createResearchApplication = async (ctx, next) => {
         milestones: [],
         videoSrc: "",
         partners: [],
-        attributes: researchApplication.attributes,
-        tenantCategory: null
+        attributes: researchApplication.attributes
       });
 
       const create_research_operation = form.tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
@@ -341,8 +340,7 @@ const approveResearchApplication = async (ctx, next) => {
       milestones: [],
       videoSrc: "",
       partners: [],
-      attributes: researchApplication.attributes,
-      tenantCategory: null
+      attributes: researchApplication.attributes
     });
 
     const researchGroupRm = await researchGroupsService.createResearchGroup({

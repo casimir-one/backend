@@ -10,10 +10,11 @@ const Research = new Schema({
   "researchGroupExternalId": { type: String, required: true },
   "researchGroupId": { type: Number, required: true }, // legacy internal id
   "attributes": [ResearchAttributeValue],
-  "tenantCategory": ResearchCategoryValue,
   "customId": { type: String, required: false },
 
+
   /* === TEMP FOR MIGRATION === */
+  "tenantCategory": ResearchCategoryValue,
   "videoSrc": { type: String, default: null },
   "tenantCriterias": [ResearchAttributeValue],
   "milestones": [{
