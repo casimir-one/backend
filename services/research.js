@@ -25,58 +25,10 @@ class ResearchService {
     const researches = await Research.find({ _id: { $in: chainResearches.map(r => r.external_id) } });
     return chainResearches
       .map((chainResearch) => {
-
         const researchRef = researches.find(r => r._id == chainResearch.external_id);
         if (researchRef) {
-
           const attributes = researchRef.attributes.filter(a => this.enabledResearchAttributes.some(attr => attr._id.toString() == a.researchAttributeId.toString()));
-          const extendedAttributes = attributes.map((researchAttribute) => {
-
-            const researchAttributeSchema = this.enabledResearchAttributes.find(attr => attr._id.toString() == researchAttribute.researchAttributeId.toString());
-            if (researchAttributeSchema) {
-              const { type } = researchAttributeSchema;
-
-              if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER) {
-
-                if (!researchAttribute.value) return null;
-
-                const step = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
-                if (!step) return null;
-
-                const number = researchAttributeSchema.valueOptions.indexOf(step) + 1;
-                return {
-                  value: { ...step, number },
-                  attribute: researchAttributeSchema
-                }
-
-              } else if (type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
-
-                if (!researchAttribute.value) return null;
-
-                const option = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
-                if (!option) return null;
-
-                return {
-                  value: { ...option },
-                  attribute: researchAttributeSchema
-                }
-
-              } else {
-
-                return {
-                  value: researchAttribute.value,
-                  attribute: researchAttributeSchema
-                }
-
-              }
-
-            } else {
-              return null;
-            }
-          })
-            .filter((attr) => !!attr);
-
-          return { ...chainResearch, researchRef: { ...researchRef.toObject(), attributes, extendedAttributes } };
+          return { ...chainResearch, researchRef: { ...researchRef.toObject(), attributes } };
         }
         return { ...chainResearch, researchRef: null };
       })
