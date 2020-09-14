@@ -9,7 +9,7 @@ class ResearchService {
   constructor(tenant) {
     this.researchWhitelist = tenant.settings.researchWhitelist || [];
     this.researchBlacklist = tenant.settings.researchBlacklist || [];
-    this.enabledResearchAttributes = tenant.settings.researchAttributes.filter(attr => attr.isVisible);
+    this.researchAttributes = tenant.settings.researchAttributes || [];
   }
 
 
@@ -27,7 +27,7 @@ class ResearchService {
       .map((chainResearch) => {
         const researchRef = researches.find(r => r._id == chainResearch.external_id);
         if (researchRef) {
-          const attributes = researchRef.attributes.filter(a => this.enabledResearchAttributes.some(attr => attr._id.toString() == a.researchAttributeId.toString()));
+          const attributes = researchRef.attributes.filter(a => this.researchAttributes.some(attr => attr.isVisible && attr._id.toString() === a.researchAttributeId.toString() && a.value));
           return { ...chainResearch, researchRef: { ...researchRef.toObject(), attributes } };
         }
         return { ...chainResearch, researchRef: null };
@@ -38,16 +38,22 @@ class ResearchService {
       .filter(r => !filter.disciplines.length || filter.disciplines.some(id => r.disciplines.some(d => d.external_id == id)))
       .filter(r => !filter.organizations.length || filter.organizations.some(id => r.research_group.external_id == id))
       .filter(r => !filter.researchAttributes.length || filter.researchAttributes.some(fAttr => {
-        const rAttr = r.researchRef ? r.researchRef.attributes.find((a) => a.researchAttributeId.toString() == fAttr.researchAttributeId.toString()) : null;
-        if (!rAttr || !rAttr.value)
+
+        const attribute = this.researchAttributes.find(attr => attr.isFilterable && attr._id.toString() === fAttr.researchAttributeId.toString());
+        const rAttr = r.researchRef ? r.researchRef.attributes.find((a) => a.researchAttributeId.toString() === fAttr.researchAttributeId.toString()) : null;
+        
+        if (!attribute || !rAttr || !rAttr.value)
           return false;
 
         return fAttr.values.some((v) => {
-          if (mongoose.Types.ObjectId.isValid(rAttr.value))
-            return v === rAttr.value.toString();
 
-          if (Array.isArray(rAttr.value))
-            return rAttr.value.some(rAttrV => mongoose.Types.ObjectId.isValid(rAttrV) ? v === rAttrV.toString() : v == rAttrV)
+          if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || attribute.type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
+            return v === rAttr.value.toString();
+          }
+
+          if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT) {
+            return rAttr.value.some(rAttrV => v === rAttrV.toString());
+          }
 
           return v == rAttr.value;
         });
@@ -91,9 +97,10 @@ class ResearchService {
 
   async createResearchRef({
     externalId,
-    customId,
     researchGroupExternalId,
     researchGroupInternalId,
+    title,
+    abstract,
     attributes
   }) {
 
@@ -112,17 +119,17 @@ class ResearchService {
             : null
         }
       }),
-      researchGroupId: researchGroupInternalId, // legacy internal id
+      researchGroupId: researchGroupInternalId, // legacy internal id,
+      title: title,
+      abstract: abstract
     });
-
-    if (customId) {
-      research.customId = customId;
-    }
 
     return research.save();
   }
   
   async updateResearchRef(externalId, {
+    title,
+    abstract,
     attributes
   }) {
 
@@ -139,6 +146,9 @@ class ResearchService {
           : null
       }
     });
+
+    research.title = title;
+    research.abstract = abstract;
 
     return research.save();
   }

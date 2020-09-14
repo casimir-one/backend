@@ -33,7 +33,7 @@ const createResearch = async (ctx, next) => {
 
     const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
     const payload = operation[1];
-    const { external_id: externalId, research_group: researchGroupExternalId } = payload;
+    const { external_id: externalId, title, abstract, research_group: researchGroupExternalId } = payload;
 
     const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
     if (!authorizedGroup) {
@@ -46,6 +46,8 @@ const createResearch = async (ctx, next) => {
 
     const researchGroupInternalId = authorizedGroup.id;
     const researcRm = await researchService.createResearchRef({
+      title,
+      abstract,
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
@@ -140,9 +142,8 @@ const createResearchApplication = async (ctx, next) => {
         externalId: research.external_id,
         researchGroupExternalId: research.research_group.external_id,
         researchGroupInternalId: research.research_group.id,
-        milestones: [],
-        videoSrc: "",
-        partners: [],
+        title: research.title,
+        abstract: research.abstract,
         attributes: researchApplication.attributes
       });
 
@@ -337,9 +338,8 @@ const approveResearchApplication = async (ctx, next) => {
       externalId: research.external_id,
       researchGroupExternalId: research.research_group.external_id,
       researchGroupInternalId: research.research_group.id,
-      milestones: [],
-      videoSrc: "",
-      partners: [],
+      title: research.title,
+      abstract: research.abstract,
       attributes: researchApplication.attributes
     });
 
@@ -657,8 +657,8 @@ const updateResearchMeta = async (ctx) => {
   const researchService = new ResearchService(tenant);
 
   try {
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
+    const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(chainResearch.research_group.external_id, jwtUsername);
 
     if (!authorizedGroup) {
       ctx.status = 401;
@@ -666,16 +666,15 @@ const updateResearchMeta = async (ctx) => {
       return;
     }
 
-    const researchProfile = await researchService.findResearchRef(researchExternalId);
-    if (!researchProfile) {
+    const researchRef = await researchService.findResearchRef(researchExternalId);
+    if (!researchRef) {
       ctx.status = 400;
       ctx.body = 'Read model not found';
       return;
     }
 
-    const profileData = researchProfile.toObject();
     const updatedProfile = await researchService.updateResearchRef(researchExternalId, { 
-      ...profileData, 
+      ...researchRef.toObject(), 
       ...update 
     });
 

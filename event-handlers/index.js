@@ -6,6 +6,7 @@ import userNotificationsHandler from './userNotification';
 import researchGroupActivityLogHandler from './researchGroupActivityLog';
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
+import ResearchService from './../services/research';
 
 class AppEventHandler extends EventEmitter { }
 
@@ -133,16 +134,24 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async (source) => {
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (source) => {
-  const { tx, emitter } = source;
+  const { tx, emitter, tenant } = source;
   const operation = tx['operations'][0];
-  const { research_group: researchGroupExternalId, external_id: researchExternalId } = operation[1];
+  const { research_group: researchGroupExternalId, title, abstract, external_id: researchExternalId } = operation[1];
 
+  const researchService = new ResearchService(tenant);
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = researchGroupExternalId != emitter;
 
   const payload = { researchGroup: chainResearchGroup, research: chainResearch, creator: creatorUser, isAcceptedByQuorum };
+
+  const researchRef = await researchService.findResearchRef(researchExternalId);
+  const updatedProfile = await researchService.updateResearchRef(researchExternalId, {
+    ...researchRef.toObject(),
+    title,
+    abstract
+  });
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_UPDATED, payload);
   researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_UPDATED, payload);
