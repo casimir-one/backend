@@ -32,12 +32,7 @@ const ResearchAttribute = new Schema({
   "description": { type: String, required: false },
   "valueOptions": [ResearchAttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
-  "areas": {
-    type: [String],
-    enum: [...Object.values(RESEARCH_ATTRIBUTE_AREA)],
-    required: true
-  },
-  "order": { type: Number, required: false, default: 0 },
+  
   "component": { type: Object, required: false } // temp for migration
 });
 
@@ -71,6 +66,7 @@ const TenantProfile = new Schema({
         required: true 
       },
       "researchAttributes": [ResearchAttribute],
+      "researchAttributesAreas": { type: Object },
       "faq": [FAQ],
       "researchBlacklist": [{ type: String, required: true, trim: true }],
       "researchWhitelist": [{ type: String, required: true, trim: true }],

@@ -17,10 +17,11 @@ async function createTenantProfile({
   admins
 }, {
   signUpPolicy,
-  researchAttributes,
   faq,
   researchBlacklist,
-  researchWhitelist
+  researchWhitelist,
+  researchAttributes,
+  researchAttributesAreas
 }) {
 
   const tenantProfile = new TenantProfile({
@@ -34,10 +35,11 @@ async function createTenantProfile({
     admins: admins,
     settings: {
       signUpPolicy,
-      researchAttributes,
       faq,
       researchBlacklist,
-      researchWhitelist
+      researchWhitelist,
+      researchAttributes: researchAttributes || [],
+      researchAttributesAreas: researchAttributesAreas || {}
     }
   });
 
@@ -54,7 +56,8 @@ async function updateTenantProfile(tenantId, {
 }, {
   faq,
   researchBlacklist,
-  researchWhitelist
+  researchWhitelist,
+  researchAttributesAreas
 }) {
 
   let tenantProfile = await findTenantProfile(tenantId);
@@ -72,6 +75,7 @@ async function updateTenantProfile(tenantId, {
   tenantProfile.settings.faq = faq;
   tenantProfile.settings.researchBlacklist = researchBlacklist;
   tenantProfile.settings.researchWhitelist = researchWhitelist;
+  tenantProfile.settings.researchAttributesAreas = researchAttributesAreas;
 
   return tenantProfile.save();
 }
