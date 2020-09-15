@@ -16,6 +16,7 @@ class ResearchService {
   async mapResearch(chainResearches, privateGuardFn, filterObj) {
 
     const filter =  {
+      searchTerm: "",
       disciplines: [],
       organizations: [],
       researchAttributes: [], 
@@ -35,6 +36,7 @@ class ResearchService {
       .filter(privateGuardFn)
       .filter(r => !this.researchWhitelist.length || this.researchWhitelist.some(id => r.external_id == id))
       .filter(r => !this.researchBlacklist.length || !this.researchBlacklist.some(id => r.external_id == id))
+      .filter(r => !filter.searchTerm || r.title.includes(filter.searchTerm) || r.abstract.includes(filter.searchTerm))
       .filter(r => !filter.disciplines.length || filter.disciplines.some(id => r.disciplines.some(d => d.external_id == id)))
       .filter(r => !filter.organizations.length || filter.organizations.some(id => r.research_group.external_id == id))
       .filter(r => !filter.researchAttributes.length || filter.researchAttributes.some(fAttr => {
