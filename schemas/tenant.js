@@ -25,8 +25,8 @@ const ResearchAttribute = new Schema({
     required: true
   },
   "isVisible": { type: Boolean, required: true },
-  "isEditable": { type: Boolean, default: false },
   "isFilterable": { type: Boolean, default: false },
+  "isRequired": { type: Boolean, default: false },
   "isBlockchainMeta": { type: Boolean, default: false },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
@@ -34,6 +34,7 @@ const ResearchAttribute = new Schema({
   "valueOptions": [ResearchAttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
   
+  "isEditable": { type: Boolean, required: false }, // temp for migration
   "component": { type: Object, required: false } // temp for migration
 });
 
