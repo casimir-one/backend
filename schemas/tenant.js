@@ -27,6 +27,7 @@ const ResearchAttribute = new Schema({
   "isVisible": { type: Boolean, required: true },
   "isEditable": { type: Boolean, default: false },
   "isFilterable": { type: Boolean, default: false },
+  "isBlockchainMeta": { type: Boolean, default: false },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },

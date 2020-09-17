@@ -33,7 +33,7 @@ const createResearch = async (ctx, next) => {
 
     const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
     const payload = operation[1];
-    const { external_id: externalId, title, abstract, research_group: researchGroupExternalId } = payload;
+    const { external_id: externalId, research_group: researchGroupExternalId } = payload;
 
     const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
     if (!authorizedGroup) {
@@ -46,8 +46,6 @@ const createResearch = async (ctx, next) => {
 
     const researchGroupInternalId = authorizedGroup.id;
     const researcRm = await researchService.createResearchRef({
-      title,
-      abstract,
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
@@ -144,7 +142,7 @@ const createResearchApplication = async (ctx, next) => {
         researchGroupInternalId: research.research_group.id,
         title: research.title,
         abstract: research.abstract,
-        attributes: researchApplication.attributes
+        attributes: researchApplication.attributes || []
       });
 
       const create_research_operation = form.tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
@@ -340,7 +338,7 @@ const approveResearchApplication = async (ctx, next) => {
       researchGroupInternalId: research.research_group.id,
       title: research.title,
       abstract: research.abstract,
-      attributes: researchApplication.attributes
+      attributes: researchApplication.attributes || []
     });
 
     const researchGroupRm = await researchGroupsService.createResearchGroup({

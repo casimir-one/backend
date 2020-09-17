@@ -36,7 +36,10 @@ class ResearchService {
       .filter(privateGuardFn)
       .filter(r => !this.researchWhitelist.length || this.researchWhitelist.some(id => r.external_id == id))
       .filter(r => !this.researchBlacklist.length || !this.researchBlacklist.some(id => r.external_id == id))
-      .filter(r => !filter.searchTerm || r.title.includes(filter.searchTerm) || r.abstract.includes(filter.searchTerm))
+      .filter(r => !filter.searchTerm || r.researchAttributes.some(rAttr => {
+        const textAttributes = this.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.TEXT || attr.type == RESEARCH_ATTRIBUTE_TYPE.TEXTAREA);
+        return textAttributes.some(attr => attr._id.toString() == rAttr.researchAttributeId.toString()) && rAttr.value.includes(filter.searchTerm);
+      }))
       .filter(r => !filter.disciplines.length || filter.disciplines.some(id => r.disciplines.some(d => d.external_id == id)))
       .filter(r => !filter.organizations.length || filter.organizations.some(id => r.research_group.external_id == id))
       .filter(r => !filter.researchAttributes.length || filter.researchAttributes.some(fAttr => {
@@ -101,8 +104,6 @@ class ResearchService {
     externalId,
     researchGroupExternalId,
     researchGroupInternalId,
-    title,
-    abstract,
     attributes
   }) {
 
@@ -121,19 +122,13 @@ class ResearchService {
             : null
         }
       }),
-      researchGroupId: researchGroupInternalId, // legacy internal id,
-      title: title,
-      abstract: abstract
+      researchGroupId: researchGroupInternalId, // legacy internal id
     });
 
     return research.save();
   }
   
-  async updateResearchRef(externalId, {
-    title,
-    abstract,
-    attributes
-  }) {
+  async updateResearchRef(externalId, { attributes }) {
 
     const research = await this.findResearchRef(externalId);
     research.attributes = attributes.map(attr => {
@@ -148,9 +143,6 @@ class ResearchService {
           : null
       }
     });
-
-    research.title = title;
-    research.abstract = abstract;
 
     return research.save();
   }

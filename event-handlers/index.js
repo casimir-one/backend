@@ -136,7 +136,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async (source) => {
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (source) => {
   const { tx, emitter, tenant } = source;
   const operation = tx['operations'][0];
-  const { research_group: researchGroupExternalId, title, abstract, external_id: researchExternalId } = operation[1];
+  const { research_group: researchGroupExternalId, external_id: researchExternalId } = operation[1];
 
   const researchService = new ResearchService(tenant);
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
@@ -148,9 +148,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (source) => {
 
   const researchRef = await researchService.findResearchRef(researchExternalId);
   const updatedProfile = await researchService.updateResearchRef(researchExternalId, {
-    ...researchRef.toObject(),
-    title,
-    abstract
+    ...researchRef.toObject()
   });
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_UPDATED, payload);

@@ -1,0 +1,110 @@
+require("babel-core/register")({
+  "presets": [
+    ["env", {
+      "targets": {
+        "node": true
+      }
+    }]
+  ]
+});
+const config = require('./../config');
+
+const mongoose = require('mongoose');
+const bluebird = require('bluebird');
+const TenantProfile = require('./../schemas/tenant');
+const Research = require('./../schemas/research');
+
+const deipRpc = require('@deip/rpc-client');
+const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+
+
+deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
+deipRpc.config.set('chain_id', config.blockchain.chainId);
+mongoose.connect(config.mongo['deip-server'].connection);
+
+
+const run = async () => {
+  
+  await TenantProfile.update({}, { $set: { "settings.researchAttributes.$[].isBlockchainMeta": false } }, { multi: true });
+
+  const tenantPromises = [];
+  const tenants = await TenantProfile.find({});
+  
+  const researchTitleAttribute = {
+    _id: mongoose.Types.ObjectId(),
+    type: RESEARCH_ATTRIBUTE_TYPE.TEXT,
+    isVisible: true,
+    isEditable: false,
+    isFilterable: false,
+    isBlockchainMeta: true,
+    title: "Title",
+    shortTitle: "Title",
+    description: "",
+    valueOptions: [],
+    defaultValue: null
+  };
+
+
+  const researchDescriptionAttribute = {
+    _id: mongoose.Types.ObjectId(),
+    type: RESEARCH_ATTRIBUTE_TYPE.TEXTAREA,
+    isVisible: true,
+    isEditable: false,
+    isFilterable: false,
+    isBlockchainMeta: true,
+    title: "Description",
+    shortTitle: "Description",
+    description: "",
+    valueOptions: [],
+    defaultValue: null
+  };
+
+
+  for (let i = 0; i < tenants.length; i++) {
+    let tenant = tenants[i];
+
+    tenant.settings.researchAttributes.push(researchTitleAttribute);
+    tenant.settings.researchAttributes.push(researchDescriptionAttribute);
+    
+    tenantPromises.push(tenant.save());
+  }
+  
+  
+  const researchPromises = [];
+  const researches = await Research.find({});
+
+  for (let i = 0; i < researches.length; i++) {
+    let research = researches[i];
+    
+    research.attributes.push({
+      value: research.title,
+      researchAttributeId: researchTitleAttribute._id
+    });
+
+    research.attributes.push({
+      value: research.abstract,
+      researchAttributeId: researchDescriptionAttribute._id
+    });
+
+    researchPromises.push(research.save());
+  }
+
+  await Promise.all(tenantPromises);
+  await Promise.all(researchPromises);
+
+  await Research.update({}, { $unset: { "title": false } }, { multi: true });
+  await Research.update({}, { $unset: { "abstract": false } }, { multi: true });
+
+};
+
+run()
+  .then(() => {
+    console.log('Successfully finished');
+    process.exit(0);
+  })
+  .catch((err) => {
+    console.error(err);
+    process.exit(1);
+  });
+
+

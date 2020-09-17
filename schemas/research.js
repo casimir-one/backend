@@ -9,12 +9,13 @@ const Research = new Schema({
   "_id": { type: String, required: true },
   "researchGroupExternalId": { type: String, required: true },
   "researchGroupId": { type: Number, required: true }, // legacy internal id
-  "title": { type: String, required: false },
-  "abstract": { type: String, required: false, default: "" },
   "attributes": [ResearchAttributeValue],
 
 
+
   /* === TEMP FOR MIGRATION === */
+  "title": { type: String, required: false },
+  "abstract": { type: String, required: false, default: "" },
   "tenantCategory": ResearchCategoryValue,
   "videoSrc": { type: String, default: null },
   "tenantCriterias": [ResearchAttributeValue],
