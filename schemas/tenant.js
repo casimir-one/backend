@@ -18,6 +18,12 @@ const ResearchAttributeValueOption = new Schema({
   "value": { type: Schema.Types.ObjectId, default: null }
 });
 
+const BlockchainFieldMeta = new Schema({
+  "_id": false,
+  "field": { type: String, required: true },
+  "isPartial": { type: Boolean, required: false, default: false }
+});
+
 const ResearchAttribute = new Schema({
   "type": { 
     type: String, 
@@ -27,13 +33,14 @@ const ResearchAttribute = new Schema({
   "isVisible": { type: Boolean, required: true },
   "isFilterable": { type: Boolean, default: false },
   "isRequired": { type: Boolean, default: false },
-  "isBlockchainMeta": { type: Boolean, default: false },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
   "valueOptions": [ResearchAttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
-  
+  "blockchainFieldMeta": BlockchainFieldMeta,
+
+  "isBlockchainMeta": { type: Boolean, default: false }, // temp for migration
   "isEditable": { type: Boolean, required: false }, // temp for migration
   "component": { type: Object, required: false } // temp for migration
 });

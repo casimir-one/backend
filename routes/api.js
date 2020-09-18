@@ -92,7 +92,6 @@ protected_route.get('/research/user/listing/:username', research.getUserResearch
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 protected_route.post('/research', research.createResearch)
 protected_route.put('/research', research.updateResearch)
-protected_route.put('/research/meta/:researchExternalId', research.updateResearchMeta)
 protected_route.post('/research/background', research.uploadResearchBackground)
 protected_route.post('/research/token-sale', research.createResearchTokenSale)
 protected_route.post('/research/token-sale/contribution', research.createResearchTokenSaleContribution)

@@ -27,7 +27,7 @@ const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
+  const { tx, isProposal, offchainMeta: { attributes } } = ctx.request.body;
 
   try {
 
@@ -49,7 +49,7 @@ const createResearch = async (ctx, next) => {
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
-      ...offchainMeta
+      attributes
     });
 
 
@@ -491,7 +491,7 @@ const getResearchApplications = async (ctx) => {
 
 const createResearchTokenSale = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
+  const { tx, isProposal } = ctx.request.body;
 
   try {
     const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
@@ -647,54 +647,19 @@ const getResearchBackground = async (ctx) => {
   ctx.body = background;
 }
 
-const updateResearchMeta = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
-  const researchExternalId = ctx.params.researchExternalId;
-  const update = ctx.request.body;
-  const researchService = new ResearchService(tenant);
-
-  try {
-    const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(chainResearch.research_group.external_id, jwtUsername);
-
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
-      return;
-    }
-
-    const researchRef = await researchService.findResearchRef(researchExternalId);
-    if (!researchRef) {
-      ctx.status = 400;
-      ctx.body = 'Read model not found';
-      return;
-    }
-
-    const updatedProfile = await researchService.updateResearchRef(researchExternalId, { 
-      ...researchRef.toObject(), 
-      ...update 
-    });
-
-    ctx.status = 200;
-    ctx.body = { rm: updatedProfile };
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-};
-
 
 const updateResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, isProposal } = ctx.request.body;
+  const { tx, isProposal, offchainMeta: { attributes } } = ctx.request.body;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
 
   try {
     const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
     const payload = operation[1];
-    const { 
-      research_group: researchGroupAccount
+    const {
+      research_group: researchGroupAccount,
+      external_id: researchExternalId
     } = payload;
 
     const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
@@ -704,12 +669,24 @@ const updateResearch = async (ctx, next) => {
       return;
     }
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const research = await researchService.getResearch(researchExternalId);
+    const hasChainUpdate = Object.keys(research).some(k => {
+      return payload.hasOwnProperty(k) && payload[k] != research[k];
+    });
 
-    ctx.status = 201;
-    ctx.body = { txResult };
+    await researchService.updateResearchRef(researchExternalId, { attributes });
 
-    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_UPDATED, { tx, emitter: jwtUsername }]);
+    if (hasChainUpdate) {
+      await blockchainService.sendTransactionAsync(tx);
+
+      ctx.status = 201;
+      ctx.body = research;
+      ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_UPDATED, { tx, emitter: jwtUsername }]);
+
+    } else {
+      ctx.status = 201;
+      ctx.body = research;
+    }
 
   } catch (err) {
     console.log(err);
@@ -719,7 +696,6 @@ const updateResearch = async (ctx, next) => {
 
   await next();
 };
-
 
 const getPublicResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
@@ -807,7 +783,6 @@ export default {
   getUserResearchListing,
   getResearchGroupResearchListing,
   updateResearch,
-  updateResearchMeta,
   createResearch,
   createResearchApplication,
   editResearchApplication,
