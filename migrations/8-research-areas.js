@@ -70,8 +70,10 @@ const run = async () => {
 
     let researchAttributesAreas = {
       researchDetailsRightSidebar: researchDetailsRightSidebar,
-      researchDetailsMain: researchDetailsMain,
-      researchCard: researchCard
+      researchDetailsBody: researchDetailsMain,
+      researchCard: researchCard,
+      researchDetailsHeader: [],
+      researchForm: []
     }
 
     tenant.settings.researchAttributesAreas = researchAttributesAreas;

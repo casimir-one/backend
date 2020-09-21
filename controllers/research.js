@@ -672,7 +672,10 @@ const updateResearch = async (ctx, next) => {
 
     const research = await researchService.getResearch(researchExternalId);
     const hasChainUpdate = Object.keys(research).some(k => {
-      return payload.hasOwnProperty(k) && payload[k] != research[k];
+      return payload.hasOwnProperty(k) && 
+        (Array.isArray(payload[k]) 
+          ? (payload[k].length != research[k].length || !payload[k].every(item => research[k].some(item2 => item2 == item))) 
+          : payload[k] != research[k]);
     });
 
     const researchRef = await researchService.updateResearchRef(researchExternalId, { attributes });

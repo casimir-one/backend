@@ -88,6 +88,7 @@ class ResearchService {
 
   async getResearch(researchExternalId) {
     const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
+    if (!chainResearch) return null;
     const result = await this.mapResearch([chainResearch], (r) => { return true; });
     const [research] = result;
     return research;
