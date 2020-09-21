@@ -45,16 +45,17 @@ const createResearch = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
     const researchGroupInternalId = authorizedGroup.id;
-    const researcRm = await researchService.createResearchRef({
+    const researchRef = await researchService.createResearchRef({
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
       attributes
     });
 
+    const createdResearch = await researchService.getResearch(externalId);
 
     ctx.status = 200;
-    ctx.body = { tx, txResult, rm: researcRm };
+    ctx.body = createdResearch;
     
     ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, emitter: jwtUsername }]);
 
@@ -674,18 +675,19 @@ const updateResearch = async (ctx, next) => {
       return payload.hasOwnProperty(k) && payload[k] != research[k];
     });
 
-    await researchService.updateResearchRef(researchExternalId, { attributes });
+    const researchRef = await researchService.updateResearchRef(researchExternalId, { attributes });
+    const updatedResearch = await researchService.getResearch(externalId);
 
     if (hasChainUpdate) {
       await blockchainService.sendTransactionAsync(tx);
 
-      ctx.status = 201;
-      ctx.body = research;
+      ctx.status = 200;
+      ctx.body = updatedResearch;
       ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_UPDATED, { tx, emitter: jwtUsername }]);
 
     } else {
-      ctx.status = 201;
-      ctx.body = research;
+      ctx.status = 200;
+      ctx.body = updatedResearch;
     }
 
   } catch (err) {
