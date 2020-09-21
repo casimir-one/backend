@@ -676,7 +676,7 @@ const updateResearch = async (ctx, next) => {
     });
 
     const researchRef = await researchService.updateResearchRef(researchExternalId, { attributes });
-    const updatedResearch = await researchService.getResearch(externalId);
+    const updatedResearch = await researchService.getResearch(researchExternalId);
 
     if (hasChainUpdate) {
       await blockchainService.sendTransactionAsync(tx);
