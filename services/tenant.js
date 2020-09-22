@@ -88,7 +88,7 @@ async function updateTenantProfile(tenantId, {
 async function addTenantResearchAttribute(tenantId, {
   _id: researchAttributeId,
   type,
-  isVisible,
+  isPublished,
   isFilterable,
   title,
   shortTitle,
@@ -101,7 +101,7 @@ async function addTenantResearchAttribute(tenantId, {
   tenantProfile.settings.researchAttributes.push({
     _id: mongoose.Types.ObjectId(researchAttributeId),
     type,
-    isVisible,
+    isPublished,
     isFilterable,
     title,
     shortTitle,
@@ -130,7 +130,7 @@ async function removeTenantResearchAttribute(tenantId, {
 async function updateTenantResearchAttribute(tenantId, {
   _id: researchAttributeId,
   type,
-  isVisible,
+  isPublished,
   isFilterable,
   title,
   shortTitle,
@@ -144,7 +144,7 @@ async function updateTenantResearchAttribute(tenantId, {
   const researchAttribute = tenantProfile.settings.researchAttributes.find(a => a._id.toString() === mongoose.Types.ObjectId(researchAttributeId).toString());
   
   researchAttribute.type = type;
-  researchAttribute.isVisible = isVisible;
+  researchAttribute.isPublished = isPublished;
   researchAttribute.isFilterable = isFilterable;
   researchAttribute.title = title;
   researchAttribute.shortTitle = shortTitle;

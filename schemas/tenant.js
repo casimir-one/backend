@@ -7,7 +7,9 @@ const Schema = mongoose.Schema;
 const FAQ = new Schema({
   "question": { type: String, required: true },
   "answer": { type: String, required: true },
-  "isVisible": { type: Boolean, required: true }
+  "isPublished": { type: Boolean, required: true },
+
+  "isVisible": { type: Boolean, required: false } // temp for migration
 });
 
 const ResearchAttributeValueOption = new Schema({
@@ -30,9 +32,11 @@ const ResearchAttribute = new Schema({
     enum: [...Object.values(RESEARCH_ATTRIBUTE_TYPE)],
     required: true
   },
-  "isVisible": { type: Boolean, required: true },
+  "isPublished": { type: Boolean, required: true },
   "isFilterable": { type: Boolean, default: false },
+  "isEditable": { type: Boolean, required: false },
   "isRequired": { type: Boolean, default: false },
+  "isHidden": { type: Boolean, required: true },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
@@ -40,8 +44,8 @@ const ResearchAttribute = new Schema({
   "defaultValue": { type: Schema.Types.Mixed, default: null },
   "blockchainFieldMeta": BlockchainFieldMeta,
 
+  "isVisible": { type: Boolean, required: false }, // temp for migration
   "isBlockchainMeta": { type: Boolean, default: false }, // temp for migration
-  "isEditable": { type: Boolean, required: false }, // temp for migration
   "component": { type: Object, required: false } // temp for migration
 });
 
