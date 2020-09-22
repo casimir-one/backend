@@ -21,7 +21,8 @@ async function createTenantProfile({
   researchBlacklist,
   researchWhitelist,
   researchAttributes,
-  researchAttributesAreas
+  researchAttributesAreas,
+  researchLayouts
 }) {
 
   const tenantProfile = new TenantProfile({
@@ -39,7 +40,8 @@ async function createTenantProfile({
       researchBlacklist,
       researchWhitelist,
       researchAttributes: researchAttributes || [],
-      researchAttributesAreas: researchAttributesAreas || {}
+      researchAttributesAreas: researchAttributesAreas || {},
+      researchLayouts: researchLayouts || {}
     }
   });
 
@@ -57,7 +59,8 @@ async function updateTenantProfile(tenantId, {
   faq,
   researchBlacklist,
   researchWhitelist,
-  researchAttributesAreas
+  researchAttributesAreas,
+  researchLayouts
 }) {
 
   let tenantProfile = await findTenantProfile(tenantId);
@@ -76,6 +79,7 @@ async function updateTenantProfile(tenantId, {
   tenantProfile.settings.researchBlacklist = researchBlacklist;
   tenantProfile.settings.researchWhitelist = researchWhitelist;
   tenantProfile.settings.researchAttributesAreas = researchAttributesAreas;
+  tenantProfile.settings.researchLayouts = researchLayouts;
 
   return tenantProfile.save();
 }
@@ -85,15 +89,12 @@ async function addTenantResearchAttribute(tenantId, {
   _id: researchAttributeId,
   type,
   isVisible,
+  isFilterable,
   title,
   shortTitle,
   description,
   valueOptions,
-  defaultValue,
-  isEditable,
-  isFilterable,
-  areas,
-  order
+  defaultValue
 }) {
 
   const tenantProfile = await findTenantProfile(tenantId);
@@ -101,17 +102,14 @@ async function addTenantResearchAttribute(tenantId, {
     _id: mongoose.Types.ObjectId(researchAttributeId),
     type,
     isVisible,
+    isFilterable,
     title,
     shortTitle,
     description,
     valueOptions: valueOptions.map(opt => {
       return { ...opt, value: mongoose.Types.ObjectId() };
     }),
-    defaultValue,
-    isEditable,
-    isFilterable,
-    areas,
-    order: parseInt(order)
+    defaultValue
   });
 
   return tenantProfile.save();
@@ -133,15 +131,12 @@ async function updateTenantResearchAttribute(tenantId, {
   _id: researchAttributeId,
   type,
   isVisible,
+  isFilterable,
   title,
   shortTitle,
   description,
   valueOptions,
-  defaultValue,
-  isEditable,
-  isFilterable,
-  areas,
-  order
+  defaultValue
 }) {
 
   const tenantProfile = await findTenantProfile(tenantId);
@@ -150,6 +145,7 @@ async function updateTenantResearchAttribute(tenantId, {
   
   researchAttribute.type = type;
   researchAttribute.isVisible = isVisible;
+  researchAttribute.isFilterable = isFilterable;
   researchAttribute.title = title;
   researchAttribute.shortTitle = shortTitle;
   researchAttribute.description = description;
@@ -157,12 +153,6 @@ async function updateTenantResearchAttribute(tenantId, {
     return { ...opt, value: opt.value ? mongoose.Types.ObjectId(opt.value.toString()) : mongoose.Types.ObjectId() };
   });
   researchAttribute.defaultValue = defaultValue;
-
-  researchAttribute.isEditable = isEditable;
-  researchAttribute.isFilterable = isFilterable;
-
-  researchAttribute.areas = areas;
-  researchAttribute.order = parseInt(order);
 
   return tenantProfile.save();
 }
