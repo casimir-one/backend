@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
 const FAQ = new Schema({
   "question": { type: String, required: true },
   "answer": { type: String, required: true },
-  "isPublished": { type: Boolean, required: true },
+  "isPublished": { type: Boolean, required: false },
 
   "isVisible": { type: Boolean, required: false } // temp for migration
 });
@@ -32,11 +32,11 @@ const ResearchAttribute = new Schema({
     enum: [...Object.values(RESEARCH_ATTRIBUTE_TYPE)],
     required: true
   },
-  "isPublished": { type: Boolean, required: true },
+  "isPublished": { type: Boolean, required: false },
   "isFilterable": { type: Boolean, default: false },
   "isEditable": { type: Boolean, required: false },
   "isRequired": { type: Boolean, default: false },
-  "isHidden": { type: Boolean, required: true },
+  "isHidden": { type: Boolean, required: false },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
