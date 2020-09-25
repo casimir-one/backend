@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 import ResearchApplication from './../schemas/researchApplication';
-import { RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
+import { RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_AREA, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import mongoose from 'mongoose';
 
 class ResearchService {
@@ -36,33 +36,45 @@ class ResearchService {
       .filter(privateGuardFn)
       .filter(r => !this.researchWhitelist.length || this.researchWhitelist.some(id => r.external_id == id))
       .filter(r => !this.researchBlacklist.length || !this.researchBlacklist.some(id => r.external_id == id))
-      .filter(r => !filter.searchTerm || r.researchAttributes.some(rAttr => {
-        const textAttributes = this.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.TEXT || attr.type == RESEARCH_ATTRIBUTE_TYPE.TEXTAREA);
-        return textAttributes.some(attr => attr._id.toString() == rAttr.researchAttributeId.toString()) && rAttr.value.includes(filter.searchTerm);
-      }))
-      .filter(r => !filter.disciplines.length || filter.disciplines.some(id => r.disciplines.some(d => d.external_id == id)))
-      .filter(r => !filter.organizations.length || filter.organizations.some(id => r.research_group.external_id == id))
-      .filter(r => !filter.researchAttributes.length || filter.researchAttributes.some(fAttr => {
+      .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
+        
+        const attribute = this.researchAttributes.find(attr => attr._id.toString() === rAttr.researchAttributeId.toString());
+        
+        if (!attribute || !rAttr.value)
+          return false;
+        
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXT || attribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXTAREA) {
+          return rAttr.value.toLowerCase().includes(filter.searchTerm.toLowerCase());
+        }
+
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP || attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST) {
+          return r.research_group.name.toLowerCase().includes(filter.searchTerm.toLowerCase());
+        }
+
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.USER || attribute.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST) {
+          return r.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
+        }
+ 
+        return false;
+      })))
+      .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.some(fAttr => {
 
         const attribute = this.researchAttributes.find(attr => attr.isFilterable && attr._id.toString() === fAttr.researchAttributeId.toString());
-        const rAttr = r.researchRef ? r.researchRef.attributes.find((a) => a.researchAttributeId.toString() === fAttr.researchAttributeId.toString()) : null;
+        const rAttr = r.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() === fAttr.researchAttributeId.toString());
         
         if (!attribute || !rAttr || !rAttr.value)
           return false;
 
         return fAttr.values.some((v) => {
-
-          if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || attribute.type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
-            return v === rAttr.value.toString();
+          if (Array.isArray(rAttr.value)) {
+            return rAttr.value.some(rAttrV => rAttrV.toString() === v.toString());
           }
-
-          if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT) {
-            return rAttr.value.some(rAttrV => v === rAttrV.toString());
+          if (typeof rAttr.value === 'string') {
+            return rAttr.value.includes(v.toString());
           }
-
-          return v == rAttr.value;
+          return rAttr.value.toString() === v.toString();
         });
-      }));
+      })));
   }
 
   async lookupResearches(lowerBound, limit, filter) {

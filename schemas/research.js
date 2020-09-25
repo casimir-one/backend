@@ -21,17 +21,17 @@ const Research = new Schema({
   "tenantCriterias": [ResearchAttributeValue],
   "milestones": [{
     "_id": false,
-    "goal": { type: String, required: true },
+    "goal": { type: String, required: false },
     "budget": { type: String, defaul: null },
     "purpose": { type: String, defaul: null },
     "details": { type: String, default: null },
-    "eta": { type: Date, required: true },
+    "eta": { type: Date, required: false },
     "isActive": { type: Boolean, default: false },
   }],
   "partners": [{
     "_id": false,
-    "type": { type: String, required: true },
-    "title": { type: String, required: true }
+    "type": { type: String, required: false },
+    "title": { type: String, required: false }
   }]
   /* === TEMP FOR MIGRATION === */
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
