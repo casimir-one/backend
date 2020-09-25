@@ -55,7 +55,7 @@ async function processPublishedReviewTx(payload, txInfo) {
             opPayload.author == payload.author && 
             opPayload.research_content_id == payload.research_content_id) {
                 
-            let reviews = await deipRpc.api.getReviewsByContentAsync(payload.research_content_id);
+            let reviews = await deipRpc.api.getReviewsByResearchContentAsync(payload.research_content_id);
             let review = reviews.find(r => r.author == opPayload.author && r.content == opPayload.content);
             
             // todo move to event handler
