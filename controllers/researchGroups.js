@@ -26,13 +26,13 @@ const createResearchGroup = async (ctx) => {
 
     const { new_account_name: researchGroupAccount, creator } = payload;
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const researchGroupRm = await researchGroupsService.createResearchGroup({ 
+    const researchGroupRef = await researchGroupsService.createResearchGroupRef({ 
       externalId: researchGroupAccount, 
-      creator 
+      creator
     });
 
     ctx.status = 200;
-    ctx.body = { rm: researchGroupRm, txResult };
+    ctx.body = { researchGroupRef, external_id: researchGroupRef._id };
 
   } catch (err) {
     console.log(err);

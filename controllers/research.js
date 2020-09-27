@@ -14,10 +14,11 @@ import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS } from './../constants';
+import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, USER_INVITE_STATUS } from './../constants';
 import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import qs from 'qs';
+import userInvitesService from './../services/userInvites';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -27,25 +28,28 @@ const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
-  const { tx, isProposal, offchainMeta: { attributes } } = ctx.request.body;
+  const { tx, isProposal, isNewResearchGroup, offchainMeta: { attributes } } = ctx.request.body;
 
   try {
 
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
-    const { external_id: externalId, research_group: researchGroupExternalId } = payload;
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupExternalId}" group`;
-      return;
-    }
+    const create_research_operation = isProposal ? tx['operations'][0][1]['proposed_ops'][isNewResearchGroup ? 1 : 0]['op'] : tx['operations'][isNewResearchGroup ? 1 : 0];
+    const payload = create_research_operation[1];
+    const { external_id: externalId, members, research_group: researchGroupExternalId } = payload;
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
+    if (isNewResearchGroup) {
+      const create_research_group_operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+      const payload = create_research_group_operation[1];
+
+      const { new_account_name: researchGroupAccount, creator } = payload;
+      await researchGroupsService.createResearchGroupRef({ externalId: researchGroupAccount, creator });
+    }
+
+    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
+
     const researchGroupInternalId = authorizedGroup.id;
-    const researchRef = await researchService.createResearchRef({
+    await researchService.createResearchRef({
       externalId,
       researchGroupExternalId,
       researchGroupInternalId,
@@ -57,8 +61,42 @@ const createResearch = async (ctx, next) => {
     ctx.status = 200;
     ctx.body = createdResearch;
     
-    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, emitter: jwtUsername }]);
+    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, isNewResearchGroup, emitter: jwtUsername }]);
 
+    // if (isNewResearchGroup && members) {
+
+    //   for (let i = 0; i < members.length; i++) {
+
+    //     const invitee = members[i];
+
+    //     const create_research_group_operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
+
+    //     const userInvite = await userInvitesService.createUserInvite({
+    //       externalId,
+    //       invitee,
+    //       researchGroupExternalId,
+    //       rewardShare: `0.00 %`,
+    //       status: USER_INVITE_STATUS.SENT,
+    //       notes: "",
+    //       expiration,
+    //       approvedBy: [jwtUsername]
+    //     });
+
+
+    //     const parsedProposal = {
+    //       research_group_id: authorizedGroup.id,
+    //       action: deipRpc.operations.getOperationTag("join_research_group_membership"),
+    //       creator: jwtUsername,
+    //       data: {
+    //         name: invitee
+    //       },
+    //       isProposalAutoAccepted: false
+    //     };
+
+    //   }
+    // }
+
+    
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -342,7 +380,7 @@ const approveResearchApplication = async (ctx, next) => {
       attributes: researchApplication.attributes || []
     });
 
-    const researchGroupRm = await researchGroupsService.createResearchGroup({
+    await researchGroupsService.createResearchGroupRef({
       externalId: research.research_group.external_id,
       creator: researchApplication.researcher
     });

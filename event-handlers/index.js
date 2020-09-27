@@ -57,8 +57,8 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (source) => {
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, async (source) => {
-  const { tx, emitter } = source;
-  const operation = tx['operations'][0];
+  const { tx, emitter, isNewResearchGroup } = source;
+  const operation = tx['operations'][isNewResearchGroup ? 1 : 0];
   const { research_group: researchGroupExternalId, external_id: researchExternalId } = operation[1];
 
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
