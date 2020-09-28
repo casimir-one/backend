@@ -45,7 +45,8 @@ async function createUserInvite({
     failReason: null
   });
 
-  return userInvite.save();
+  const savedUserInvite = await userInvite.save();
+  return savedUserInvite.toObject();
 }
 
 

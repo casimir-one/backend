@@ -8,7 +8,7 @@ import sharp from 'sharp'
 import config from './../config'
 import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
-import researchGroupsService from './../services/researchGroup';
+import ResearchGroupService from './../services/researchGroup';
 import activityLogEntriesService from './../services/activityLogEntry';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
@@ -19,20 +19,24 @@ import { researchGroupLogoForm } from './../forms/researchGroupForms';
 const createResearchGroup = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta } = ctx.request.body;
+  const researchGroupsService = new ResearchGroupService();
 
   try {
     const operation = tx['operations'][0];
     const payload = operation[1];
 
-    const { new_account_name: researchGroupAccount, creator } = payload;
+    const { new_account_name: researchGroupExternalId, creator } = payload;
     const txResult = await blockchainService.sendTransactionAsync(tx);
+
     const researchGroupRef = await researchGroupsService.createResearchGroupRef({ 
-      externalId: researchGroupAccount, 
+      externalId: researchGroupExternalId, 
       creator
     });
 
+    const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
+
     ctx.status = 200;
-    ctx.body = { researchGroupRef, external_id: researchGroupRef._id };
+    ctx.body = researchGroup;
 
   } catch (err) {
     console.log(err);
@@ -248,16 +252,13 @@ const getResearchGroupLogo = async (ctx) => {
 
 const getResearchGroup = async (ctx) => {
   let researchGroupExternalId = ctx.params.researchGroupExternalId;
- 
+  const researchGroupsService = new ResearchGroupService();
+
   try {
 
-    const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
-    const researchGroup = await researchGroupsService.findResearchGroupById(researchGroupExternalId);
+    const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
     ctx.status = 200;
-    ctx.body = {
-      ...chainResearchGroup,
-      researchGroupRef: researchGroup
-    };
+    ctx.body = researchGroup;
   } catch (err) {
     console.log(err);
     ctx.status = 500;

@@ -8,7 +8,7 @@ const UserInvite = new Schema({
   "_id": { type: String },
   "invitee": { type: String, required: true, index: true },
   "researchGroupExternalId": { type: String, required: true, index: true },
-  "notes": { type: String, required: true, trim: true },
+  "notes": { type: String, required: false, trim: true },
   "rewardShare": { type: String },
   "failReason": { type: String },
   "approvedBy": [{ type: String }],

@@ -9,7 +9,7 @@ import send from 'koa-send';
 import slug from 'limax';
 import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
-import researchGroupsService from './../services/researchGroup';
+import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
@@ -19,84 +19,117 @@ import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, re
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import qs from 'qs';
 import userInvitesService from './../services/userInvites';
+import { extract } from 'extract-text-webpack-plugin';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
 
+
+
+function extractOperations(tx) {
+  const result = [];
+
+  for (let i = 0; i < tx.operations.length; i++) {
+    let [op_name, op_payload] = tx.operations[i];
+
+    result.push([op_name, op_payload, null]);
+
+    if (op_name === 'create_proposal') {
+      extractOperationsFromProposal(op_payload, result);
+    }
+  }
+
+  return result;
+}
+
+function extractOperationsFromProposal(proposal, result) {
+
+  for (let i = 0; i < proposal.proposed_ops.length; i++) {
+    let [op_name, op_payload] = proposal.proposed_ops[i]['op'];
+    result.push([op_name, op_payload, proposal]);
+
+    if (op_name === 'create_proposal') {
+      extractOperationsFromProposal(op_payload, result);
+    }
+
+    return result;
+  }
+}
+
+
 const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
-  const { tx, isProposal, isNewResearchGroup, offchainMeta: { attributes } } = ctx.request.body;
+  const researchGroupsService = new ResearchGroupService();
+
+  const { tx, offchainMeta: { attributes } } = ctx.request.body;
 
   try {
 
-    const create_research_operation = isProposal ? tx['operations'][0][1]['proposed_ops'][isNewResearchGroup ? 1 : 0]['op'] : tx['operations'][isNewResearchGroup ? 1 : 0];
-    const payload = create_research_operation[1];
-    const { external_id: externalId, members, research_group: researchGroupExternalId } = payload;
-
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
-    if (isNewResearchGroup) {
-      const create_research_group_operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-      const payload = create_research_group_operation[1];
+    const operations = extractOperations(tx);
+    const newResearch = operations.find(([op_name, ...rest]) => op_name == 'create_research');
+    const newResearchGroup = operations.find(([op_name, ...rest]) => op_name == 'create_account');
 
-      const { new_account_name: researchGroupAccount, creator } = payload;
-      await researchGroupsService.createResearchGroupRef({ externalId: researchGroupAccount, creator });
+    const isNewResearchGroup = !!newResearchGroup;
+
+    if (isNewResearchGroup) {
+      const [op_name, { new_account_name: researchGroupExternalId, creator }] = newResearchGroup;
+      await researchGroupsService.createResearchGroupRef({ 
+        externalId: researchGroupExternalId, 
+        creator 
+      });
     }
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
-
-    const researchGroupInternalId = authorizedGroup.id;
+    const [op_name, { external_id: researchExternalId, research_group: researchGroupExternalId }, proposal] = newResearch;
+    const isProposal = !!proposal;
+    const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
     await researchService.createResearchRef({
-      externalId,
+      externalId: researchExternalId,
       researchGroupExternalId,
-      researchGroupInternalId,
+      researchGroupInternalId: researchGroup.id, // TODO: get rid of this
       attributes
     });
 
-    const createdResearch = await researchService.getResearch(externalId);
+    const research = await researchService.getResearch(researchExternalId);
+
+    const invites = operations.filter(([op_name, ...rest]) => op_name == 'join_research_group_membership');
+    const invitesPromises = [];
+
+    // move this to handlers
+    for (let i = 0; i < invites.length; i++) {
+      let [op_name, op_payload, proposal] = invites[i];
+
+      const userInvitePromise = userInvitesService.createUserInvite({
+        externalId: proposal.external_id,
+        invitee: op_payload.member,
+        researchGroupExternalId: op_payload.research_group,
+        rewardShare: op_payload.reward_share,
+        status: USER_INVITE_STATUS.SENT,
+        notes: "",
+        expiration: proposal.expiration_time,
+        approvedBy: [jwtUsername]
+      });
+
+      invitesPromises.push(userInvitePromise);
+    }
+
+    const userInvites = await Promise.all(invitesPromises);
+    for (let i = 0; i < userInvites.length; i++) {
+      let userInvite = userInvites[i];
+      let notificationPayload = { researchGroupId: researchGroup.id, invitee: userInvite.invitee };
+      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
+      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
+    }
 
     ctx.status = 200;
-    ctx.body = createdResearch;
-    
+    ctx.body = research;
+
     ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, isNewResearchGroup, emitter: jwtUsername }]);
 
-    // if (isNewResearchGroup && members) {
-
-    //   for (let i = 0; i < members.length; i++) {
-
-    //     const invitee = members[i];
-
-    //     const create_research_group_operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-
-    //     const userInvite = await userInvitesService.createUserInvite({
-    //       externalId,
-    //       invitee,
-    //       researchGroupExternalId,
-    //       rewardShare: `0.00 %`,
-    //       status: USER_INVITE_STATUS.SENT,
-    //       notes: "",
-    //       expiration,
-    //       approvedBy: [jwtUsername]
-    //     });
-
-
-    //     const parsedProposal = {
-    //       research_group_id: authorizedGroup.id,
-    //       action: deipRpc.operations.getOperationTag("join_research_group_membership"),
-    //       creator: jwtUsername,
-    //       data: {
-    //         name: invitee
-    //       },
-    //       isProposalAutoAccepted: false
-    //     };
-
-    //   }
-    // }
-
-    
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -105,6 +138,7 @@ const createResearch = async (ctx, next) => {
 
   await next();
 };
+
 
 
 const createResearchApplication = async (ctx, next) => {
@@ -175,7 +209,7 @@ const createResearchApplication = async (ctx, next) => {
       ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
     } else {
       const research = await deipRpc.api.getResearchAsync(form.researchExternalId);
-      const researcRm = await researchService.createResearchRef({
+      await researchService.createResearchRef({
         externalId: research.external_id,
         researchGroupExternalId: research.research_group.external_id,
         researchGroupInternalId: research.research_group.id,
@@ -345,6 +379,8 @@ const approveResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
+  const researchGroupsService = new ResearchGroupService();
+
   const { tx } = ctx.request.body;
 
   try { 
@@ -716,7 +752,7 @@ const updateResearch = async (ctx, next) => {
           : payload[k] != research[k]);
     });
 
-    const researchRef = await researchService.updateResearchRef(researchExternalId, { attributes });
+    await researchService.updateResearchRef(researchExternalId, { attributes });
     const updatedResearch = await researchService.getResearch(researchExternalId);
 
     if (hasChainUpdate) {

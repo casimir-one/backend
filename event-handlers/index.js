@@ -147,7 +147,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (source) => {
   const payload = { researchGroup: chainResearchGroup, research: chainResearch, creator: creatorUser, isAcceptedByQuorum };
 
   const researchRef = await researchService.findResearchRef(researchExternalId);
-  const updatedProfile = await researchService.updateResearchRef(researchExternalId, {
+  await researchService.updateResearchRef(researchExternalId, {
     ...researchRef.toObject()
   });
 

@@ -138,7 +138,8 @@ class ResearchService {
       researchGroupId: researchGroupInternalId, // legacy internal id
     });
 
-    return research.save();
+    const savedResearch = await research.save();
+    return savedResearch.toObject();
   }
   
   async updateResearchRef(externalId, { attributes }) {
@@ -157,7 +158,8 @@ class ResearchService {
       }
     });
 
-    return research.save();
+    const updatedResearch = await research.save();
+    return updatedResearch.toObject();
   }
 
   async findResearchApplicationById(applicationId) {
