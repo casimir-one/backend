@@ -9,11 +9,11 @@ class UserNotificationHandler extends EventEmitter { }
 const userNotificationHandler = new UserNotificationHandler();
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
-  const { researchGroup, proposer, title } = payload;
+  const { researchGroup, proposer, researchTitle } = payload;
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
   
   const notificationsPromises = [];
-  const data = { title };
+  const data = { title: researchTitle };
 
   for (let i = 0; i < members.length; i++) {
     let rgt = members[i];
@@ -399,7 +399,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
 
       if (isProposalAutoAccepted) {
         // TODO: this event should be fired by chain event emmiter
-        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { invitee: name, researchGroupId: researchGroup.id });
+        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { invitee: name, researchGroup });
       }
 
       break;
@@ -504,7 +504,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
       }
 
       // TODO: this event should be fired by chain event emmiter
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { invitee: name, researchGroupId: researchGroup.id });
+      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { invitee: name, researchGroup });
 
       break;
     }
@@ -545,10 +545,10 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
 });
 
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION, async ({ invitee, researchGroupId }) => {
+userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION, async (payload) => {
   const type = USER_NOTIFICATION_TYPE.INVITATION;
+  let { invitee, researchGroup } = payload;
 
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
   let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
 
   usersNotificationService.createUserNotification({

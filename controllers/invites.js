@@ -103,8 +103,8 @@ const createUserInvite = async (ctx) => {
     if (userInvite.status == USER_INVITE_STATUS.SENT) {
       
       // LEGACY >>>
-      const researchGroup = await deipRpc.api.getResearchGroupAsync(userInvite.researchGroupExternalId);
-      const notificationPayload = { researchGroupId: researchGroup.id, invitee: userInvite.invitee };
+      const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(userInvite.researchGroupExternalId);
+      const notificationPayload = { researchGroup: chainResearchGroup, invitee: userInvite.invitee };
       userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
       researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
       // <<< LEGACY
@@ -160,8 +160,8 @@ const approveUserInvite = async (ctx) => {
 
     if (invite.status == USER_INVITE_STATUS.SENT && existingInvite.status != USER_INVITE_STATUS.SENT) {
 
-      const researchGroup = await deipRpc.api.getResearchGroupAsync(invite.researchGroupExternalId);
-      const notificationPayload = { researchGroupId: researchGroup.id, invitee: invite.invitee };
+      const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(invite.researchGroupExternalId);
+      const notificationPayload = { researchGroup: chainResearchGroup, invitee: invite.invitee };
       userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
       researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
 

@@ -1,12 +1,14 @@
 
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
 import userNotificationsHandler from './userNotification';
 import researchGroupActivityLogHandler from './researchGroupActivityLog';
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
+import ResearchGroupService from './../services/researchGroup';
+import userInvitesService from './../services/userInvites';
 
 class AppEventHandler extends EventEmitter { }
 
@@ -41,35 +43,83 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, async (source) => {
 });
 
 
+
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (source) => {
-  const { tx, emitter } = source;
-  const operation = tx['operations'][0][1]['proposed_ops'][0]['op'];
-  const { research_group: researchGroupExternalId, title } = operation[1];
+  const { opDatum, tenant, context: { emitter } } = source;
+  const researchService = new ResearchService(tenant);
+
+  const [opName, opPayload, opProposal] = opDatum;
+  const { title: researchTitle, research_group: researchGroupExternalId } = opPayload;
 
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
-  const payload = { researchGroup: chainResearchGroup, proposer: proposerUser, title };
+  const notificationPayload = { researchGroup: chainResearchGroup, proposer: proposerUser, researchTitle };
 
-  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, payload);
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
 });
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, async (source) => {
-  const { tx, emitter, isNewResearchGroup } = source;
-  const operation = tx['operations'][isNewResearchGroup ? 1 : 0];
-  const { research_group: researchGroupExternalId, external_id: researchExternalId } = operation[1];
+  const { opDatum, tenant, context: { emitter, offchainMeta: { attributes } } } = source;
+  const researchService = new ResearchService(tenant);
+
+  const [opName, opPayload, opProposal] = opDatum;
+  const { external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
+
+  const isProposal = !!opProposal;
+
+  await researchService.createResearchRef({
+    externalId: researchExternalId,
+    researchGroupExternalId: researchGroupExternalId,
+    attributes: attributes,
+    status: isProposal ? 'proposed' : 'created'
+  });
+
+  if (isProposal) {
+    appEventHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, source);
+    return;
+  }
 
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = researchGroupExternalId != emitter;
 
-  const payload = { researchGroup: chainResearchGroup, research: chainResearch, creator: creatorUser, isAcceptedByQuorum };
+  const notificationPayload = { researchGroup: chainResearchGroup, research: chainResearch, creator: creatorUser, isAcceptedByQuorum };
 
-  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CREATED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_CREATED, payload);
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CREATED, notificationPayload);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_CREATED, notificationPayload);
+});
+
+
+
+appEventHandler.on(APP_EVENTS.INVITATION_CREATED, async (source) => {
+  const { opDatum, context: { emitter, tenant } } = source;
+
+  const [opName, opPayload, opProposal] = opDatum;
+  const { member: invitee, research_group: researchGroupExternalId, reward_share: rewardShare } = opPayload;
+  const { external_id: proposalId, expiration_time: expiration } = opProposal;
+
+  await userInvitesService.createUserInvite({
+    externalId: proposalId,
+    invitee: invitee,
+    researchGroupExternalId: researchGroupExternalId,
+    rewardShare: rewardShare,
+    status: USER_INVITE_STATUS.SENT,
+    notes: "",
+    expiration: expiration,
+    approvedBy: [emitter]
+  });
+
+  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+
+  let notificationPayload = { researchGroup: chainResearchGroup, invitee };
+
+  userNotificationsHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
+  researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
+
 });
 
 
@@ -132,6 +182,17 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async (source) => {
   researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, payload);
 });
 
+
+appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_CREATED, async (source) => {
+  const { opDatum, context: { emitter, tenant } } = source;
+  const researchGroupsService = new ResearchGroupService();
+
+  const [opName, opPayload, opProposal] = opDatum;
+  await researchGroupsService.createResearchGroupRef({
+    externalId: opPayload.new_account_name,
+    creator: opPayload.creator
+  });
+});
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, async (source) => {
   const { tx, emitter, tenant } = source;

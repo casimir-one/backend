@@ -116,7 +116,6 @@ class ResearchService {
   async createResearchRef({
     externalId,
     researchGroupExternalId,
-    researchGroupInternalId,
     attributes
   }) {
 
@@ -134,8 +133,7 @@ class ResearchService {
                 : attr.value 
             : null
         }
-      }),
-      researchGroupId: researchGroupInternalId, // legacy internal id
+      })
     });
 
     const savedResearch = await research.save();

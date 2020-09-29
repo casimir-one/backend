@@ -9,8 +9,8 @@ class ResearchGroupActivityLogHandler extends EventEmitter {}
 const researchGroupActivityLogHandler = new ResearchGroupActivityLogHandler();
 
 researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
-  const { researchGroup, proposer, title } = payload;
-  const data = { title };
+  const { researchGroup, proposer, researchTitle } = payload;
+  const data = { title: researchTitle };
 
   activityLogEntriesService.createActivityLogEntry({
     researchGroupId: researchGroup.id,
