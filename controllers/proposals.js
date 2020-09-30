@@ -47,12 +47,17 @@ const updateProposal = async (ctx, next) => {
     if (isAccepted) {
       ctx.state.events.push([APP_EVENTS.PROPOSAL_ACCEPTED, { tx: proposal.proposed_transaction, emitter: jwtUsername }]);
 
-      // // TODO: move to handlers
-      // const operations = blockchainService.extractOperations(proposal.proposed_transaction);
+      const operations = blockchainService.extractOperations(proposal.proposed_transaction);
+      
       // const inviteDatum = operations.find(([opName]) => opName == 'join_research_group_membership');
       // if (inviteDatum) {
       //   ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: ['update_proposal', payload, null], context: { emitter: jwtUsername } }]);
       // }
+
+      const researchDatum = operations.find(([opName]) => opName == 'create_research');
+      if (researchDatum) {
+        ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta: {} } }]);
+      }
     }
 
     ctx.status = 200;

@@ -14,11 +14,10 @@ import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS, RESEARCH_STATUS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, USER_INVITE_STATUS } from './../constants';
 import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import qs from 'qs';
-import userInvitesService from './../services/userInvites';
 import { extract } from 'extract-text-webpack-plugin';
 
 const stat = util.promisify(fs.stat);
@@ -48,7 +47,12 @@ const createResearch = async (ctx, next) => {
       ctx.state.events.push([APP_EVENTS.RESEARCH_GROUP_CREATED, { opDatum: researchGroupDatum, context: { emitter: jwtUsername } }]);
     }
 
-    ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    const [opName, researchPayload, researchProposal] = researchDatum;
+    if (researchProposal) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_PROPOSED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    } else {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    }
 
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
@@ -61,7 +65,6 @@ const createResearch = async (ctx, next) => {
       }
     }
 
-    const [ opName, researchPayload, researchProposal ] = researchDatum;
     const isProposal = !!researchProposal;
 
     ctx.status = 200;
@@ -148,6 +151,7 @@ const createResearchApplication = async (ctx, next) => {
       const research = await deipRpc.api.getResearchAsync(form.researchExternalId);
       await researchService.createResearchRef({
         externalId: research.external_id,
+        status: RESEARCH_STATUS.APPROVED,
         researchGroupExternalId: research.research_group.external_id,
         researchGroupInternalId: research.research_group.id,
         title: research.title,
@@ -157,8 +161,11 @@ const createResearchApplication = async (ctx, next) => {
 
       const create_research_operation = form.tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
       const tx = { 'operations': [create_research_operation]}
-      
-      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { tx, emitter: jwtUsername }]);
+
+      const operations = blockchainService.extractOperations(tx);
+      const researchDatum = operations.find(([opName]) => opName == 'create_research');
+
+      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, emitter: jwtUsername, offchainMeta : {} }]);
     }
 
   } catch (err) {
@@ -346,6 +353,7 @@ const approveResearchApplication = async (ctx, next) => {
     const research = await deipRpc.api.getResearchAsync(researchApplication.researchExternalId);
     const researcRm = await researchService.createResearchRef({
       externalId: research.external_id,
+      status: RESEARCH_STATUS.APPROVED,
       researchGroupExternalId: research.research_group.external_id,
       researchGroupInternalId: research.research_group.id,
       title: research.title,

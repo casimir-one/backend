@@ -2,6 +2,7 @@
 import mongoose from 'mongoose';
 import ResearchAttributeValue from './researchAttributeValue';
 import ResearchCategoryValue from './researchCategoryValue';
+import { RESEARCH_STATUS } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -9,6 +10,7 @@ const Research = new Schema({
   "_id": { type: String, required: true },
   "researchGroupExternalId": { type: String, required: true },
   "attributes": [ResearchAttributeValue],
+  "status": { type: String, enum: [...Object.values(RESEARCH_STATUS)], required: false },
 
 
 

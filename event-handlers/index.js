@@ -1,7 +1,7 @@
 
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
+import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS } from './../constants';
 import userNotificationsHandler from './userNotification';
 import researchGroupActivityLogHandler from './researchGroupActivityLog';
 import usersService from './../services/users';
@@ -30,10 +30,6 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payl
   const tag = deipRpc.operations.getOperationTag(op_name);
 
   switch (tag) {
-    case PROPOSAL_TYPE.CREATE_RESEARCH: {
-      appEventHandler.emit(APP_EVENTS.RESEARCH_CREATED, source);
-      break
-    }
     case PROPOSAL_TYPE.UPDATE_RESEARCH: {
       appEventHandler.emit(APP_EVENTS.RESEARCH_UPDATED, source);
       break
@@ -56,17 +52,24 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payl
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter } } = source;
+  const { opDatum, tenant, context: { emitter, offchainMeta: { attributes } } } = source;
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
   const [opName, opPayload, opProposal] = opDatum;
-  const { title: researchTitle, research_group: researchGroupExternalId } = opPayload;
+  const { external_id: researchExternalId, title: researchTitle, research_group: researchGroupExternalId } = opPayload;
+
+  await researchService.createResearchRef({
+    externalId: researchExternalId,
+    researchGroupExternalId: researchGroupExternalId,
+    attributes: attributes,
+    status: RESEARCH_STATUS.PROPOSED
+  });
 
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
-  const proposerUser = await usersService.findUserProfileByOwner(emitter);
+  const proposerProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const notificationPayload = { researchGroup, proposer: proposerUser, researchTitle };
+  const notificationPayload = { researchGroup, proposer: proposerProfile, researchTitle };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
   researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
@@ -80,23 +83,24 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService(tenant);
 
-  const [opName, opPayload, opProposal] = opDatum;
+  const [opName, opPayload] = opDatum;
   const { external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
 
-  const isProposal = !!opProposal;
+  const researchRef = await researchService.findResearchRef(researchExternalId);
 
-  await researchService.createResearchRef({
-    externalId: researchExternalId,
-    researchGroupExternalId: researchGroupExternalId,
-    attributes: attributes,
-    status: isProposal ? 'proposed' : 'created'
-  });
-
-  if (isProposal) {
-    appEventHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, source);
-    return;
+  if (!researchRef) {
+    await researchService.createResearchRef({
+      externalId: researchExternalId,
+      researchGroupExternalId: researchGroupExternalId,
+      attributes: attributes,
+      status: RESEARCH_STATUS.APPROVED
+    });
+  } else {
+    await researchService.updateResearchRef(researchExternalId, {
+      status: RESEARCH_STATUS.APPROVED
+    });
   }
-
+  
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const research = await researchService.getResearch(researchExternalId);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
@@ -316,7 +320,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
 
   const researchRef = await researchService.findResearchRef(researchExternalId);
   await researchService.updateResearchRef(researchExternalId, {
-    ...researchRef.toObject()
+    ...researchRef
   });
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_UPDATED, payload);

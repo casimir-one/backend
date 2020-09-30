@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 import ResearchApplication from './../schemas/researchApplication';
-import { RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_AREA, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
+import { RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import mongoose from 'mongoose';
 
 class ResearchService {
@@ -109,19 +109,21 @@ class ResearchService {
 
   async findResearchRef(externalId) {
     let research = await Research.findOne({ _id: externalId });
-    return research;
+    return research ? research.toObject() : null;
   }
 
 
   async createResearchRef({
     externalId,
     researchGroupExternalId,
-    attributes
+    attributes,
+    status
   }) {
 
     const research = new Research({
       _id: externalId,
       researchGroupExternalId,
+      status,
       attributes: attributes.map(attr => {
         return {
           researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
@@ -140,10 +142,11 @@ class ResearchService {
     return savedResearch.toObject();
   }
   
-  async updateResearchRef(externalId, { attributes }) {
+  async updateResearchRef(externalId, { status, attributes }) {
 
-    const research = await this.findResearchRef(externalId);
-    research.attributes = attributes.map(attr => {
+    const research = await Research.findOne({ _id: externalId });
+    research.status = status ? status : research.status;
+    research.attributes = attributes ? attributes.map(attr => {
       return {
         researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
         value: attr.value
@@ -154,7 +157,7 @@ class ResearchService {
               : attr.value
           : null
       }
-    });
+    }) : research.attributes;
 
     const updatedResearch = await research.save();
     return updatedResearch.toObject();

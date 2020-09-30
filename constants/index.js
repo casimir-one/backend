@@ -13,6 +13,7 @@ import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 import NEW_RESEARCH_POLICY from './newResearchPolicy';
 import RESEARCH_ATTRIBUTE_AREA from './researchAttributeArea';
+import RESEARCH_STATUS from './researchStatus';
 
 export {
   CHAIN_CONSTANTS,
@@ -28,5 +29,6 @@ export {
   RESEARCH_APPLICATION_STATUS,
   RESEARCH_CONTENT_STATUS,
   NEW_RESEARCH_POLICY,
-  RESEARCH_ATTRIBUTE_AREA
+  RESEARCH_ATTRIBUTE_AREA,
+  RESEARCH_STATUS
 } 
