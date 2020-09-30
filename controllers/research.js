@@ -27,37 +27,6 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 
 
 
-function extractOperations(tx) {
-  const result = [];
-
-  for (let i = 0; i < tx.operations.length; i++) {
-    let [op_name, op_payload] = tx.operations[i];
-
-    result.push([op_name, op_payload, null]);
-
-    if (op_name === 'create_proposal') {
-      extractOperationsFromProposal(op_payload, result);
-    }
-  }
-
-  return result;
-}
-
-function extractOperationsFromProposal(proposal, result) {
-
-  for (let i = 0; i < proposal.proposed_ops.length; i++) {
-    let [op_name, op_payload] = proposal.proposed_ops[i]['op'];
-    result.push([op_name, op_payload, proposal]);
-
-    if (op_name === 'create_proposal') {
-      extractOperationsFromProposal(op_payload, result);
-    }
-
-    return result;
-  }
-}
-
-
 const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
@@ -69,11 +38,11 @@ const createResearch = async (ctx, next) => {
   try {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    const operations = blockchainService.extractOperations(tx);
 
-    const operations = extractOperations(tx);
-    const researchDatum = operations.find(([opName, ...rest]) => opName == 'create_research');
-    const researchGroupDatum = operations.find(([opName, ...rest]) => opName == 'create_account');
-    const invitesDatums = operations.filter(([opName, ...rest]) => opName == 'join_research_group_membership');
+    const researchDatum = operations.find(([opName]) => opName == 'create_research');
+    const researchGroupDatum = operations.find(([opName]) => opName == 'create_account');
+    const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
 
     if (researchGroupDatum) {
       ctx.state.events.push([APP_EVENTS.RESEARCH_GROUP_CREATED, { opDatum: researchGroupDatum, context: { emitter: jwtUsername } }]);
@@ -83,16 +52,20 @@ const createResearch = async (ctx, next) => {
 
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
-      ctx.state.events.push([APP_EVENTS.INVITATION_CREATED, { opDatum: inviteDatum, context: { emitter: jwtUsername } }]);
+      const [opName, opPayload, inviteProposal] = inviteDatum;
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_CREATED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
+      const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
+      
+      if (approveInviteDatum) {
+        ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { offchainMeta: {} } }]);
+      }
     }
 
-    const [ opName, opPayload, opProposal ] = researchDatum;
-    const isProposal = !!opProposal;
+    const [ opName, researchPayload, researchProposal ] = researchDatum;
+    const isProposal = !!researchProposal;
 
     ctx.status = 200;
-    ctx.body = '';
-
-    ctx.body = isProposal ? null : opPayload;
+    ctx.body = isProposal ? null : researchPayload;
 
   } catch (err) {
     console.log(err);

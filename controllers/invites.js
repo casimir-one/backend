@@ -1,11 +1,6 @@
-import { sendTransaction, getTransaction } from './../utils/blockchain';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
-import userNotificationHandler from './../event-handlers/userNotification';
-import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS } from './../constants';
 import userInvitesService from './../services/userInvites';
 import * as blockchainService from './../utils/blockchain';
-import * as authService from './../services/auth';
-import deipRpc from '@deip/rpc-client';
 
 
 const getUserInvites = async (ctx) => {
@@ -50,165 +45,56 @@ const getResearchGroupPendingInvites = async (ctx) => {
 }
 
 
-const createUserInvite = async (ctx) => {
+const createUserInvite = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta } = ctx.request.body;
 
   try {
 
-    const proposalOp = tx['operations'][0];
-    const inviteOp = tx['operations'][0][1]['proposed_ops'][0]['op'];
-
-    const proposalPayload = proposalOp[1];
-    const invitePayload = inviteOp[1];
-
-    const {
-      external_id: externalId,
-      expiration_time: expiration
-    } = proposalPayload;
-
-    const {
-      research_group: researchGroupExternalId,
-      member: invitee,
-      reward_share: rewardShare
-    } = invitePayload;
-
-    const {
-      notes,
-      approver
-    } = offchainMeta;
-
-    const isAutoApproved = approver != null;
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupExternalId}" research group`
-      return;
-    }
-
-    const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const userInvite = await userInvitesService.createUserInvite({
-      externalId,
-      invitee,
-      researchGroupExternalId,
-      rewardShare,
-      status: isAutoApproved ? USER_INVITE_STATUS.SENT : USER_INVITE_STATUS.PROPOSED,
-      notes,
-      expiration,
-      approvedBy: approver ? [approver] : [] 
-    });
+    const operations = blockchainService.extractOperations(tx);
 
-    if (userInvite.status == USER_INVITE_STATUS.SENT) {
-      
-      // LEGACY >>>
-      const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(userInvite.researchGroupExternalId);
-      const notificationPayload = { researchGroup: chainResearchGroup, invitee: userInvite.invitee };
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
-      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
-      // <<< LEGACY
+    const inviteDatum = operations.find(([opName, ...rest]) => opName == 'join_research_group_membership');
+    const approveInviteDatum = operations.find(([opName, ...rest]) => opName == 'update_proposal');
 
-    } else {
+    ctx.state.events.push([APP_EVENTS.USER_INVITATION_CREATED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta } }]);
 
-      // LEGACY >>>
-      const parsedProposal = {
-        research_group_id: researchGroup.id,
-        action: deipRpc.operations.getOperationTag("join_research_group_membership"),
-        creator: jwtUsername,
-        data: {
-          name: invitee
-        },
-        isProposalAutoAccepted: false
-      };
-
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-      // <<< LEGACY
+    if (approveInviteDatum) {
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { emitter: jwtUsername } }]);
     }
 
-    ctx.status = 201;
-    ctx.body = { rm: userInvite, txResult };
+    const [opName, invitePayload] = inviteDatum;
+
+    ctx.status = 200;
+    ctx.body = invitePayload;
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
+
 };
 
 
-const approveUserInvite = async (ctx) => {
+const approveUserInvite = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx } = ctx.request.body;
 
   try {
 
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    const { external_id: proposalId } = payload;
-
-    const existingInvite = await userInvitesService.findUserInvite(proposalId);
-    if (!existingInvite) {
-      ctx.status = 404;
-      ctx.body = `Invite ${proposalId} does not exist`
-      return;
-    }
-
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const invite = await userInvitesService.approveUserInvite(proposalId, jwtUsername, true);
+    const operations = blockchainService.extractOperations(tx);
 
-    if (invite.status == USER_INVITE_STATUS.SENT && existingInvite.status != USER_INVITE_STATUS.SENT) {
+    const approveInviteDatum = operations.find(([opName]) => opName == 'update_proposal');
+    const [opName, approveInvitePayload] = approveInviteDatum;
 
-      const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(invite.researchGroupExternalId);
-      const notificationPayload = { researchGroup: chainResearchGroup, invitee: invite.invitee };
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, notificationPayload);
-      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION, notificationPayload);
-
-    } else if (invite.status == USER_INVITE_STATUS.APPROVED) {
-
-      const researchGroup = await deipRpc.api.getResearchGroupAsync(invite.researchGroupExternalId);
-      const notificationPayload = { researchGroupId: researchGroup.id, invitee: invite.invitee };
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION_APPROVED, notificationPayload);
-      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION_APPROVED, notificationPayload);
-    }
-
+    ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { emitter: jwtUsername } }]);
+    
     ctx.status = 200;
-    ctx.body = { tx, txResult, rm: invite };
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-  
-}
-
-
-const rejectUserInvite = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    const { external_id: proposalId } = payload;
-
-    const invite = await userInvitesService.rejectUserInvite(proposalId, jwtUsername);
-
-    if (invite.status == USER_INVITE_STATUS.REJECTED) {
-      const researchGroup = await deipRpc.api.getResearchGroupAsync(invite.researchGroupExternalId);
-      const notificationPayload = { researchGroupId: researchGroup.id, invitee: invite.invitee };
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION_REJECTED, notificationPayload);
-      researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.INVITATION_REJECTED, notificationPayload);
-    }
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    // TODO: remove model
-
-    ctx.status = 200;
-    ctx.body = { tx, txResult };
+    ctx.body = approveInvitePayload;
 
   } catch (err) {
     console.log(err);
@@ -216,8 +102,37 @@ const rejectUserInvite = async (ctx) => {
     ctx.body = err;
   }
 
+  await next();
+
 }
 
+
+const rejectUserInvite = async (ctx, next) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx } = ctx.request.body;
+
+  try {
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const operations = blockchainService.extractOperations(tx);
+
+    const rejectInviteDatum = operations.find(([opName]) => opName == 'delete_proposal');
+    const [opName, rejectInvitePayload] = rejectInviteDatum;
+
+    ctx.state.events.push([APP_EVENTS.USER_INVITATION_CANCELED, { opDatum: rejectInviteDatum, context: { emitter: jwtUsername } }]);
+
+    ctx.status = 200;
+    ctx.body = rejectInvitePayload;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+
+  await next();
+
+}
 
 
 export default {

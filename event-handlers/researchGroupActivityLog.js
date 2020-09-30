@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_TYPE, ACTIVITY_LOG_TYPE, TOKEN_SALE_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_TYPE, ACTIVITY_LOG_TYPE, TOKEN_SALE_STATUS, USER_INVITE_STATUS } from './../constants';
 import activityLogEntriesService from './../services/activityLogEntry';
 import usersService from './../services/users';
 
@@ -148,6 +148,65 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (pay
 });
 
 
+researchGroupActivityLogHandler.on(APP_EVENTS.USER_INVITATION_CREATED, async (payload) => {
+  const { researchGroup, creator, invitee } = payload;
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId: researchGroup.id,
+    type: ACTIVITY_LOG_TYPE.PROPOSAL, // legacy frontend type
+    metadata: {
+      isProposalAutoAccepted: false,
+      proposal: { // legacy frontend object
+        research_group_id: researchGroup.id,
+        action: deipRpc.operations.getOperationTag("join_research_group_membership"),
+        creator: creator._id,
+        data: {
+          name: invitee._id
+        },
+        isProposalAutoAccepted: false
+      },
+      researchGroup,
+      inviteeProfile: invitee,
+      creatorProfile: creator
+    }
+  });
+
+});
+
+
+researchGroupActivityLogHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, async (payload) => {
+  const { researchGroup, invite, creator, invitee, approver } = payload;
+
+  if (invite.status == USER_INVITE_STATUS.APPROVED) {
+    activityLogEntriesService.createActivityLogEntry({
+      researchGroupId: researchGroup.id,
+      type: ACTIVITY_LOG_TYPE.INVITATION_APPROVED,
+      metadata: {
+        proposal: { action: deipRpc.operations.getOperationTag("join_research_group_membership") }, // legacy,
+        researchGroup,
+        inviteeProfile: invitee,
+        creatorProfile: creator
+      }
+    });
+  }
+});
+
+
+researchGroupActivityLogHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, async (payload) => {
+  const { researchGroup, invitee, invite } = payload;
+
+  activityLogEntriesService.createActivityLogEntry({
+    researchGroupId,
+    type: ACTIVITY_LOG_TYPE.INVITATION_REJECTED,
+    metadata: {
+      invite,
+      researchGroup,
+      inviteeProfile: invitee
+    }
+  });
+});
+
+
 
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) => {
@@ -185,24 +244,6 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL, async (proposal) 
       break;
     }
 
-    case PROPOSAL_TYPE.INVITE_MEMBER: {
-      let { name } = payload;
-      let inviteeProfile = await usersService.findUserProfileByOwner(name);
-
-      activityLogEntriesService.createActivityLogEntry({
-        researchGroupId,
-        type,
-        metadata: {
-          isProposalAutoAccepted,
-          proposal,
-          researchGroup,
-          inviteeProfile,
-          creatorProfile
-        }
-      });
-
-      break;
-    }
 
     default: {
       break;
@@ -234,24 +275,6 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_ACCEPTED, async (p
           researchGroup,
           research,
           tokenSale,
-          creatorProfile
-        }
-      });
-
-      break;
-    }
-
-    case PROPOSAL_TYPE.INVITE_MEMBER: {
-      let { name } = payload;
-      let inviteeProfile = await usersService.findUserProfileByOwner(name);
-
-      activityLogEntriesService.createActivityLogEntry({
-        researchGroupId,
-        type,
-        metadata: {
-          proposal,
-          researchGroup,
-          inviteeProfile,
           creatorProfile
         }
       });
@@ -295,41 +318,6 @@ researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_VOTE, async ({ vot
   });
 });
 
-researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.INVITATION_APPROVED, async (invite) => {
-  const type = ACTIVITY_LOG_TYPE.INVITATION_APPROVED;
-  let { researchGroupId, invitee } = invite;
-
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
-  
-  activityLogEntriesService.createActivityLogEntry({
-    researchGroupId,
-    type,
-    metadata: {
-      invite,
-      researchGroup,
-      inviteeProfile
-    }
-  });
-});
-
-researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.INVITATION_REJECTED, async (invite) => {
-  const type = ACTIVITY_LOG_TYPE.INVITATION_REJECTED;
-  let { researchGroupId, invitee } = invite;
-
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
-
-  activityLogEntriesService.createActivityLogEntry({
-    researchGroupId,
-    type,
-    metadata: {
-      invite,
-      researchGroup,
-      inviteeProfile
-    }
-  });
-});
 
 researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, async (review) => {
   const type = ACTIVITY_LOG_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;

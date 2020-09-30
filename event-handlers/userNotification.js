@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_TYPE, USER_NOTIFICATION_TYPE, TOKEN_SALE_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_TYPE, USER_NOTIFICATION_TYPE, TOKEN_SALE_STATUS, USER_INVITE_STATUS } from './../constants';
 import usersService from './../services/users';
 import * as usersNotificationService from './../services/userNotification';
 
@@ -331,6 +331,136 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (paylo
 });
 
 
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_CREATED, async (payload) => {
+  const { researchGroup, creator, invitee } = payload;
+
+  const notificationsPromises = [];
+
+  const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  for (let i = 0; i < rgtList.length; i++) {
+    let rgt = rgtList[i];
+    let promise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy frontend type
+      metadata: {
+        isProposalAutoAccepted: false,
+        proposal: { // legacy frontend object
+          research_group_id: researchGroup.id,
+          action: deipRpc.operations.getOperationTag("join_research_group_membership"),
+          creator: creator._id,
+          data: {
+            name: invitee._id
+          },
+          isProposalAutoAccepted: false
+        },
+        researchGroup,
+        inviteeProfile: invitee,
+        creatorProfile: creator
+      }
+    });
+
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
+
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, async (payload) => {
+  const { researchGroup, invite, creator, invitee, approver } = payload;
+
+  if (invite.status == USER_INVITE_STATUS.SENT) {
+
+    const notificationsPromises = [];
+    const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+    for (let i = 0; i < rgtList.length; i++) {
+      let rgt = rgtList[i];
+      let memberNotificationPromise = usersNotificationService.createUserNotification({
+        username: rgt.owner,
+        status: 'unread',
+        type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy frontend type
+        metadata: {
+          proposal: { // legacy frontend object
+            action: deipRpc.operations.getOperationTag("join_research_group_membership"),
+            is_completed: true
+          },
+          researchGroup,
+          inviteeProfile: invitee,
+          creatorProfile: creator
+        }
+      });
+
+      notificationsPromises.push(memberNotificationPromise);
+    }
+
+    const inviteeNotificationPromise = usersNotificationService.createUserNotification({
+      username: invitee,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.INVITATION,
+      metadata: {
+        researchGroup,
+        inviteeProfile: invitee
+      }
+    });
+
+    notificationsPromises.push(inviteeNotificationPromise);
+
+    Promise.all(notificationsPromises);
+
+  } else if (invite.status == USER_INVITE_STATUS.APPROVED) {
+
+    const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+    const notificationsPromises = [];
+
+    for (let i = 0; i < rgtList.length; i++) {
+      let rgt = rgtList[i];
+      if (rgt.owner != invite.invitee) {
+        let memberNotificationPromise = usersNotificationService.createUserNotification({
+          username: rgt.owner,
+          status: 'unread',
+          type: USER_NOTIFICATION_TYPE.INVITATION_APPROVED,
+          metadata: {
+            researchGroup,
+            inviteeProfile: invitee
+          }
+        });
+        notificationsPromises.push(memberNotificationPromise);
+      }
+    }
+
+    Promise.all(notificationsPromises);
+  }
+
+});
+
+
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, async (payload) => {
+  const { researchGroup, invite, creator, invitee, approver } = payload;
+
+  const notificationsPromises = [];
+  const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  for (let i = 0; i < rgtList.length; i++) {
+    let rgt = rgtList[i];
+    let memberNotificationPromise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.INVITATION_REJECTED,
+      metadata: {
+        researchGroup,
+        inviteeProfile: invitee
+      }
+    });
+    notificationsPromises.push(memberNotificationPromise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
+
+
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => {
   const type = USER_NOTIFICATION_TYPE.PROPOSAL;
@@ -371,35 +501,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
           }
         });
         notificationsPromises.push(promise);
-      }
-
-      break;
-    }
-
-    case PROPOSAL_TYPE.INVITE_MEMBER: {
-      let { name } = payload;
-      let inviteeProfile = await usersService.findUserProfileByOwner(name);
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            isProposalAutoAccepted,
-            proposal,
-            researchGroup,
-            inviteeProfile,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      if (isProposalAutoAccepted) {
-        // TODO: this event should be fired by chain event emmiter
-        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { invitee: name, researchGroup });
       }
 
       break;
@@ -483,31 +584,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
       break;
     }
 
-    case PROPOSAL_TYPE.INVITE_MEMBER: {
-      let { name } = payload;
-      let inviteeProfile = await usersService.findUserProfileByOwner(name);
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            proposal,
-            researchGroup,
-            inviteeProfile,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      // TODO: this event should be fired by chain event emmiter
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.INVITATION, { invitee: name, researchGroup });
-
-      break;
-    }
 
     case PROPOSAL_TYPE.EXCLUDE_MEMBER: {
       let { name } = payload;
@@ -545,23 +621,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
 });
 
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION, async (payload) => {
-  const type = USER_NOTIFICATION_TYPE.INVITATION;
-  let { invitee, researchGroup } = payload;
-
-  let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
-
-  usersNotificationService.createUserNotification({
-    username: invitee,
-    status: 'unread',
-    type,
-    metadata: {
-      researchGroup,
-      inviteeProfile
-    }
-  });
-});
-
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, async ({ excluded, researchGroupId }) => {
   const type = USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED;
 
@@ -577,64 +636,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, async ({ e
       excludedProfile
     }
   });
-});
-
-
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION_APPROVED, async (invite) => {
-  const type = USER_NOTIFICATION_TYPE.INVITATION_APPROVED;
-  let { researchGroupId, invitee } = invite;
-
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
-  let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroupId);
-  let notificationsPromises = [];
-
-  for (let i = 0; i < rgtList.length; i++) {
-    let rgt = rgtList[i];
-    if (rgt.owner != invitee) {
-      let promise = usersNotificationService.createUserNotification({
-        username: rgt.owner,
-        status: 'unread',
-        type,
-        metadata: {
-          researchGroup,
-          inviteeProfile
-        }
-      });
-      notificationsPromises.push(promise);
-    }
-  }
-
-  Promise.all(notificationsPromises);
-});
-
-
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.INVITATION_REJECTED, async (invite) => {
-  const type = USER_NOTIFICATION_TYPE.INVITATION_REJECTED;
-  let { researchGroupId, invitee } = invite;
-
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let inviteeProfile = await usersService.findUserProfileByOwner(invitee);
-  let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroupId);
-  let notificationsPromises = [];
-
-  for (let i = 0; i < rgtList.length; i++) {
-    let rgt = rgtList[i];
-    if (rgt.owner != invitee) {
-      let promise = usersNotificationService.createUserNotification({
-        username: rgt.owner,
-        status: 'unread',
-        type,
-        metadata: {
-          researchGroup,
-          inviteeProfile
-        }
-      });
-      notificationsPromises.push(promise);
-    }
-  }
-
-  Promise.all(notificationsPromises);
 });
 
 

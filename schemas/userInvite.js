@@ -7,15 +7,16 @@ const Schema = mongoose.Schema;
 const UserInvite = new Schema({
   "_id": { type: String },
   "invitee": { type: String, required: true, index: true },
+  "creator": { type: String },
   "researchGroupExternalId": { type: String, required: true, index: true },
   "notes": { type: String, required: false, trim: true },
-  "rewardShare": { type: String },
+  "rewardShare": { type: String, default: null },
   "failReason": { type: String },
   "approvedBy": [{ type: String }],
-  "rejectedBy": { type: String },
+  "rejectedBy": [{ type: String }],
   "status": {
     type: String,
-    enum: [USER_INVITE_STATUS.PROPOSED, USER_INVITE_STATUS.SENT, USER_INVITE_STATUS.APPROVED, USER_INVITE_STATUS.REJECTED, USER_INVITE_STATUS.EXPIRED],
+    enum: [...Object.values(USER_INVITE_STATUS)],
     required: true
   },
   "expiration": { type: Date, required: true, index: true },
