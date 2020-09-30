@@ -29,23 +29,31 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payl
   const [op_name, op_payload] = tx['operations'][0];
   const tag = deipRpc.operations.getOperationTag(op_name);
 
-  switch (tag) {
-    case PROPOSAL_TYPE.UPDATE_RESEARCH: {
-      appEventHandler.emit(APP_EVENTS.RESEARCH_UPDATED, source);
-      break
+  // temp
+  let promise = new Promise((resolve, reject) => {
+
+    const dummy = { success: resolve, failure: reject };
+
+    switch (tag) {
+      case PROPOSAL_TYPE.UPDATE_RESEARCH: {
+        appEventHandler.emit(APP_EVENTS.RESEARCH_UPDATED, source, dummy);
+        break
+      }
+      case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
+        appEventHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, source, dummy);
+        break
+      }
+      case PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP: {
+        appEventHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, source, dummy);
+        break
+      }
+      default: {
+        break;
+      }
     }
-    case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
-      appEventHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, source);
-      break
-    }
-    case PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP: {
-      appEventHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, source);
-      break
-    }
-    default: {
-      break;
-    }
-  }
+  });
+
+  await promise;
   
 }));
 
