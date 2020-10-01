@@ -28,8 +28,7 @@ class ResearchService {
       .map((chainResearch) => {
         const researchRef = researches.find(r => r._id == chainResearch.external_id);
         if (researchRef) {
-          const attributes = researchRef.attributes.filter(a => this.researchAttributes.some(attr => attr.isPublished && attr._id.toString() === a.researchAttributeId.toString() && a.value));
-          return { ...chainResearch, researchRef: { ...researchRef.toObject(), attributes } };
+          return { ...chainResearch, researchRef: { ...researchRef.toObject() } };
         }
         return { ...chainResearch, researchRef: null };
       })
