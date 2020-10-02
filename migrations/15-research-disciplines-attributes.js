@@ -44,12 +44,23 @@ const run = async () => {
       if (disciplinesA && !categoriesA) {
         research.attributes = research.attributes.filter(a => a.researchAttributeId.toString() != disciplinesAttr._id.toString());
         research.attributes.push({
-          value: disciplinesA.value,
+          value: disciplinesA.value.external_id,
           researchAttributeId: categoriesAttr._id
         })
-        researchPromises.push(research.save());
-
       }
+
+      let researchGroupAttr = tenant.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP);
+      let researchGroupA = research.attributes.find(a => a.researchAttributeId.toString() == researchGroupAttr._id.toString());
+
+      if (researchGroupA) {
+        research.attributes = research.attributes.filter(a => a.researchAttributeId.toString() != researchGroupAttr._id.toString());
+        research.attributes.push({
+          value: researchGroupA.value.external_id,
+          researchAttributeId: researchGroupAttr._id
+        })
+      }
+      
+      researchPromises.push(research.save());
     }
 
     tenant.settings.researchAttributes = tenant.settings.researchAttributes.filter(attr => attr.title != "ORIP Disciplines");
