@@ -111,7 +111,7 @@ const excludeFromResearchGroup = async (ctx) => {
     // LEGACY >>>
     const parsedProposal = {
       research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("left_research_group_membership"),
+      action: deipRpc.operations.getOperationTag("leave_research_group_membership"),
       creator: jwtUsername,
       data: { name: member },
       isProposalAutoAccepted: !isProposal

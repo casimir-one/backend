@@ -14,6 +14,7 @@ const UserInvite = new Schema({
   "failReason": { type: String },
   "approvedBy": [{ type: String }],
   "rejectedBy": [{ type: String }],
+  "researches": [{ type: String }],
   "status": {
     type: String,
     enum: [...Object.values(USER_INVITE_STATUS)],

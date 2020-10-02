@@ -58,6 +58,11 @@ const updateProposal = async (ctx, next) => {
       if (researchDatum) {
         ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta: {} } }]);
       }
+
+      const researchUpdateDatum = operations.find(([opName]) => opName == 'update_research');
+      if (researchUpdateDatum) {
+        ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta: {} } }]);
+      }
     }
 
     ctx.status = 200;

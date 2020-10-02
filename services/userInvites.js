@@ -9,7 +9,7 @@ async function findUserInvite(externalId) { // proposal id
 }
 
 
-async function findUserActiveInvites(username) {
+async function findUserPendingInvites(username) {
   let activeInvites = await UserInvite.find({ invitee: username, status: USER_INVITE_STATUS.SENT });
   return activeInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
 }
@@ -18,6 +18,25 @@ async function findUserActiveInvites(username) {
 async function findResearchGroupPendingInvites(researchGroupExternalId) {
   let rgInvites = await UserInvite.find({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT });
   return rgInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
+}
+
+
+async function findResearchPendingInvites(researchExternalId) {
+
+  const research = await deipRpc.api.getResearchAsync(researchExternalId);
+  const researchGroupExternalId = research.research_group.external_id;
+
+  const invites = await UserInvite.find({
+    researchGroupExternalId: researchGroupExternalId,
+    status: USER_INVITE_STATUS.SENT,
+    $or: [
+      { researches: { $exists: false } },
+      { researches: null },
+      { researches: { $in: [researchExternalId] } }
+    ]
+  });
+
+  return invites.filter(invite => invite.expiration.getTime() > new Date().getTime());
 }
 
 
@@ -43,7 +62,8 @@ async function createUserInvite({
     expiration,
     approvedBy: [],
     rejectedBy: [],
-    failReason: null
+    failReason: null,
+    researches: null
   });
 
   const savedUserInvite = await userInvite.save();
@@ -70,8 +90,9 @@ async function updateUserInvite(externalId, {
 
 export default {
   findUserInvite,
-  findUserActiveInvites,
+  findUserPendingInvites,
   findResearchGroupPendingInvites,
+  findResearchPendingInvites,
   createUserInvite,
   updateUserInvite
 }

@@ -15,7 +15,7 @@ const getUserInvites = async (ctx) => {
       return;
     }
 
-    const activeInvites = await userInvitesService.findUserActiveInvites(username);
+    const activeInvites = await userInvitesService.findUserPendingInvites(username);
     ctx.status = 200;
     ctx.body = activeInvites;
     
@@ -34,6 +34,24 @@ const getResearchGroupPendingInvites = async (ctx) => {
   try {
 
     const invites = await userInvitesService.findResearchGroupPendingInvites(researchGroupExternalId);
+    ctx.status = 200;
+    ctx.body = invites;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchPendingInvites = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const researchExternalId = ctx.params.researchExternalId;
+
+  try {
+
+    const invites = await userInvitesService.findResearchPendingInvites(researchExternalId);
     ctx.status = 200;
     ctx.body = invites;
 
@@ -137,6 +155,7 @@ const rejectUserInvite = async (ctx, next) => {
 
 export default {
   getUserInvites,
+  getResearchPendingInvites,
   getResearchGroupPendingInvites,
   createUserInvite,
   approveUserInvite,

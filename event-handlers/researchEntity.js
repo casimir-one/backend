@@ -59,5 +59,23 @@ researchEntityHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle
 
 
 
+researchEntityHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter, offchainMeta: { attributes } } } = source;
+  const [opName, opPayload] = opDatum;
+  const { external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
+  
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+
+  if (attributes) {
+    await researchService.updateResearchRef(researchExternalId, { attributes });
+  }
+
+  const updatedResearch = await researchService.getResearch(researchExternalId)
+  return updatedResearch;
+
+}));
+
 
 export default researchEntityHandler;

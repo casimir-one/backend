@@ -80,6 +80,52 @@ const createResearch = async (ctx, next) => {
 };
 
 
+const updateResearch = async (ctx, next) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta } = ctx.request.body;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
+
+  try {
+
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const operations = blockchainService.extractOperations(tx);
+
+    const researchUpdateDatum = operations.find(([opName]) => opName == 'update_research');
+    const [opName, researchUpdatePayload, researchUpdateProposal] = researchUpdateDatum;
+    if (researchUpdateProposal) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATE_PROPOSED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    } else {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    }
+
+    const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
+    for (let i = 0; i < invitesDatums.length; i++) {
+      const inviteDatum = invitesDatums[i];
+      const [opName, opPayload, inviteProposal] = inviteDatum;
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_CREATED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
+      const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
+
+      if (approveInviteDatum) {
+        ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { offchainMeta: {} } }]);
+      }
+    }
+
+    const isProposal = !!researchUpdateProposal;
+
+    ctx.status = 200;
+    ctx.body = isProposal ? null : researchUpdatePayload;
+    
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+
+  await next();
+};
+
+
 
 const createResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
@@ -667,59 +713,6 @@ const getResearchBackground = async (ctx) => {
   ctx.body = background;
 }
 
-
-const updateResearch = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx, isProposal, offchainMeta: { attributes } } = ctx.request.body;
-  const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
-
-  try {
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
-    const {
-      research_group: researchGroupAccount,
-      external_id: researchExternalId
-    } = payload;
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
-    }
-
-    const research = await researchService.getResearch(researchExternalId);
-    const hasChainUpdate = Object.keys(research).some(k => {
-      return payload.hasOwnProperty(k) && 
-        (Array.isArray(payload[k]) 
-          ? (payload[k].length != research[k].length || !payload[k].every(item => research[k].some(item2 => item2 == item))) 
-          : payload[k] != research[k]);
-    });
-
-    await researchService.updateResearchRef(researchExternalId, { attributes });
-    const updatedResearch = await researchService.getResearch(researchExternalId);
-
-    if (hasChainUpdate) {
-      await blockchainService.sendTransactionAsync(tx);
-
-      ctx.status = 200;
-      ctx.body = updatedResearch;
-      ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_UPDATED, { tx, emitter: jwtUsername }]);
-
-    } else {
-      ctx.status = 200;
-      ctx.body = updatedResearch;
-    }
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-};
 
 const getPublicResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
