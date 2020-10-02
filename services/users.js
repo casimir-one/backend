@@ -11,6 +11,17 @@ async function findUser(username) {
   return { account, profile: profile || new UserProfile() };
 }
 
+
+async function mapUsers(chainAccounts) {
+  const profiles = await UserProfile.find({ _id: { $in: chainAccounts.map(a => a.name) } });
+  return chainAccounts
+    .map((chainAccount) => {
+      const profileRef = profiles.find(r => r._id == chainAccount.name);
+      return { account: chainAccount, profile: profileRef ? profileRef.toObject() : null };
+    });
+}
+
+
 async function findUserProfileByOwner(username) {
   const userProfile = await UserProfile.findOne({ _id: username })
   return userProfile;
@@ -34,6 +45,13 @@ async function deleteUserProfile(username) {
 async function findUserProfiles(accounts) {
   const profiles = await UserProfile.find({ '_id': { $in: accounts } });
   return profiles;
+}
+
+async function findResearchGroupMembershipUsers(researchGroupExternalId) {
+  const membershipTokens = await deipRpc.api.getResearchGroupMembershipTokensAsync(researchGroupExternalId);
+  const chainAccounts = await deipRpc.api.getAccountsAsync(membershipTokens.map(rgt => rgt.owner));
+  const result = await mapUsers(chainAccounts);
+  return result;
 }
 
 async function createUserProfile({
@@ -157,6 +175,7 @@ export default {
   findPendingUserProfiles,
   findActiveUserProfiles,
   findUserProfiles,
+  findResearchGroupMembershipUsers,
   createUserAccount,
   createUserProfile,
   updateUserProfile,

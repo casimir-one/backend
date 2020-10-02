@@ -739,7 +739,7 @@ const getUserResearchListing = async (ctx) => {
   const member = ctx.params.username;
 
   try {
-    const result = await researchService.getResearchesByResearchGroupMember(member, jwtUsername);
+    const result = await researchService.getResearchesForMember(member, jwtUsername);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -757,7 +757,7 @@ const getResearchGroupResearchListing = async (ctx) => {
   const researchService = new ResearchService(tenant);
 
   try {
-    const result = await researchService.getResearchesByResearchGroup(researchGroupExternalId, jwtUsername);
+    const result = await researchService.getResearchesForMemberByResearchGroup(researchGroupExternalId, jwtUsername);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {

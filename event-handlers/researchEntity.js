@@ -3,6 +3,7 @@ import { APP_EVENTS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS } from './../const
 import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
+import usersService from './../services/users';
 
 
 class ResearchEntityHandler extends EventEmitter { }
@@ -76,6 +77,54 @@ researchEntityHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle
   return updatedResearch;
 
 }));
+
+
+researchEntityHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => handle(payload, reply, async (event) => {
+
+  const { tenant, researchGroup, invite } = event;
+
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+
+  const members = await usersService.findResearchGroupMembershipUsers(researchGroup.external_id);
+
+  const promises = [];
+
+  if (!members.some(user => user.account.name == invite.invitee)) {
+
+    const researches = [];
+    if (invite.researches) {
+      const result = await researchService.getResearches(invite.researches);
+      researches.push(...result);
+    } else {
+      const result = await researchService.getResearchesByResearchGroup(researchGroup.external_id);
+      researches.push(...result);
+    }
+
+    for (let i = 0; i < researches.length; i++) {
+      const research = researches[i];
+
+      const membersAttributes = tenant.settings.researchAttributes.filter(attr => attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
+      const researchMembersAttributes = research.researchRef.attributes.filter(rAttr => membersAttributes.some(attr => rAttr.researchAttributeId.toString() == attr._id.toString()));
+
+      for (let j = 0; j < researchMembersAttributes.length; j++) {
+        const rAttr = researchMembersAttributes[j];
+
+        if (rAttr.value && Array.isArray(rAttr.value)) {
+          rAttr.value = rAttr.value.filter(m => m != invite.invitee);
+        } else {
+          rAttr.value = null;
+        }
+      }
+
+      promises.push(researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes }));
+    }
+  }
+
+  await Promise.all(promises);
+
+}));
+
 
 
 export default researchEntityHandler;

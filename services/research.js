@@ -83,26 +83,40 @@ class ResearchService {
   }
 
 
-  async getResearchesByResearchGroupMember(member, requester) {
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
-    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
-    return result;
-  }
-
-
-  async getResearchesByResearchGroup(researchGroupExternalId, requester) {
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
-    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
-    return result;
-  }
-
-
   async getResearch(researchExternalId) {
     const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
     if (!chainResearch) return null;
     const result = await this.mapResearch([chainResearch], (r) => { return true; });
     const [research] = result;
     return research;
+  }
+
+
+  async getResearches(researchesExternalIds) {
+    const chainResearches = await deipRpc.api.getResearchesAsync(researchesExternalIds);
+    const result = await this.mapResearch(chainResearches, (r) => { return true; });
+    return result;
+  }
+
+
+  async getResearchesByResearchGroup(researchGroupExternalId) {
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
+    const result = await this.mapResearch(chainResearches, (r) => { return true; });
+    return result;
+  }
+
+
+  async getResearchesForMember(member, requester) {
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
+    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
+    return result;
+  }
+
+
+  async getResearchesForMemberByResearchGroup(researchGroupExternalId, requester) {
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
+    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
+    return result;
   }
 
 

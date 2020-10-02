@@ -196,7 +196,7 @@ researchGroupActivityLogHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, async (p
   const { researchGroup, invitee, invite } = payload;
 
   activityLogEntriesService.createActivityLogEntry({
-    researchGroupId,
+    researchGroupId: researchGroup.id,
     type: ACTIVITY_LOG_TYPE.INVITATION_REJECTED,
     metadata: {
       invite,

@@ -169,7 +169,7 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
 
 
 appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { opDatum, context: { emitter } } = source;
+  const { opDatum, tenant, context: { emitter } } = source;
   const researchGroupService = new ResearchGroupService();
 
   const [opName, opPayload, opProposal] = opDatum;
@@ -196,10 +196,11 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
   const creatorProfile = await usersService.findUserProfileByOwner(updatedInvite.creator);
   const rejectorProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const notificationPayload = { researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, rejector: rejectorProfile };
+  const event = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, rejector: rejectorProfile };
 
-  userNotificationsHandler.emit(APP_EVENTS.USER_INVITATION_CANCELED, notificationPayload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.USER_INVITATION_CANCELED, notificationPayload);
+  fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
+  fire(researchGroupActivityLogHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
+  fire(researchEntityHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
 
 }));
 
