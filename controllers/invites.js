@@ -72,16 +72,15 @@ const createUserInvite = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const operations = blockchainService.extractOperations(tx);
 
-    const inviteDatum = operations.find(([opName, ...rest]) => opName == 'join_research_group_membership');
-    const approveInviteDatum = operations.find(([opName, ...rest]) => opName == 'update_proposal');
+    const inviteDatum = operations.find(([opName]) => opName == 'join_research_group_membership');
 
-    ctx.state.events.push([APP_EVENTS.USER_INVITATION_CREATED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    const [opName, invitePayload, inviteProposal] = inviteDatum;
+    ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta } }]);
 
+    const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
     if (approveInviteDatum) {
       ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { emitter: jwtUsername } }]);
     }
-
-    const [opName, invitePayload] = inviteDatum;
 
     ctx.status = 200;
     ctx.body = invitePayload;

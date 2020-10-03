@@ -148,7 +148,7 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (pay
 });
 
 
-researchGroupActivityLogHandler.on(APP_EVENTS.USER_INVITATION_CREATED, async (payload) => {
+researchGroupActivityLogHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async (payload) => {
   const { researchGroup, creator, invitee } = payload;
 
   activityLogEntriesService.createActivityLogEntry({

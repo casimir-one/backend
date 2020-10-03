@@ -331,7 +331,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (paylo
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_CREATED, async (payload) => {
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async (payload) => {
   const { researchGroup, creator, invitee } = payload;
 
   const notificationsPromises = [];
@@ -460,6 +460,70 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, async (payload) 
 });
 
 
+userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async (event) => {
+  const { researchGroup, member, creator } = event;
+
+  const notificationsPromises = [];
+  const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  for (let i = 0; i < rgtList.length; i++) {
+    let rgt = rgtList[i];
+    let memberNotificationPromise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL,
+      metadata: {
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: member._id } }, // legacy
+        researchGroup,
+        excludedProfile: member,
+        creatorProfile: creator
+      }
+    });
+    notificationsPromises.push(memberNotificationPromise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
+
+userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, async (event) => {
+  const { researchGroup, member, creator } = event;
+
+  const notificationsPromises = [];
+  const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  for (let i = 0; i < rgtList.length; i++) {
+    let rgt = rgtList[i];
+    let memberNotificationPromise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED,
+      metadata: {
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: member._id } }, // legacy
+        researchGroup,
+        excludedProfile: member,
+        creatorProfile: creator
+      }
+    });
+
+    notificationsPromises.push(memberNotificationPromise);
+  }
+
+  notificationsPromises.push(usersNotificationService.createUserNotification({
+    username: member._id,
+    status: 'unread',
+    type: USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED,
+    metadata: {
+      researchGroup,
+      excludedProfile: member
+    }
+  }));
+
+  Promise.all(notificationsPromises);
+});
+
 
 // TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => {
@@ -501,35 +565,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => 
           }
         });
         notificationsPromises.push(promise);
-      }
-
-      break;
-    }
-
-    case PROPOSAL_TYPE.EXCLUDE_MEMBER: {
-      let { name } = payload;
-      let excludedProfile = await usersService.findUserProfileByOwner(name);
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            isProposalAutoAccepted,
-            proposal,
-            researchGroup,
-            excludedProfile,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      if (isProposalAutoAccepted) {
-        // TODO: this event should be fired by chain event emmiter
-        userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, { excluded: name, researchGroupId: researchGroup.id });
       }
 
       break;
@@ -584,33 +619,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
       break;
     }
 
-
-    case PROPOSAL_TYPE.EXCLUDE_MEMBER: {
-      let { name } = payload;
-      let excludedProfile = await usersService.findUserProfileByOwner(name);
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            proposal,
-            researchGroup,
-            excludedProfile,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      // TODO: this event should be fired by chain event emmiter
-      userNotificationHandler.emit(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, { excluded: name, researchGroupId: researchGroup.id });
-
-      break;
-    }
-
     default: {
       break;
     }
@@ -618,24 +626,6 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (prop
 
   Promise.all(notificationsPromises);
 
-});
-
-
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED, async ({ excluded, researchGroupId }) => {
-  const type = USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED;
-
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let excludedProfile = await usersService.findUserProfileByOwner(excluded);
-
-  usersNotificationService.createUserNotification({
-    username: excluded,
-    status: 'unread',
-    type,
-    metadata: {
-      researchGroup,
-      excludedProfile
-    }
-  });
 });
 
 

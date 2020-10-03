@@ -83,51 +83,35 @@ const updateResearchGroup = async (ctx, next) => {
 }
 
 
-const excludeFromResearchGroup = async (ctx) => {
+const leaveResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta, isProposal} = ctx.request.body;
+  const { tx, offchainMeta } = ctx.request.body;
 
   try {
 
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const operations = blockchainService.extractOperations(tx);
 
-    const {
-      research_group: researchGroupAccount,
-      member
-    } = payload;
+    const resignationDatum = operations.find(([opName, ...rest]) => opName == 'leave_research_group_membership');
+    const [opName, resignationPayload, resignationProposal] = resignationDatum;
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 400;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
+    ctx.state.events.push([APP_EVENTS.USER_RESIGNATION_PROPOSED, { opDatum: resignationDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+
+    const approveResignationDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == resignationProposal.external_id);
+    if (approveResignationDatum) {
+      ctx.state.events.push([APP_EVENTS.USER_RESIGNATION_SIGNED, { opDatum: approveResignationDatum, context: { emitter: jwtUsername, resignationPayload, offchainMeta: {} } }]);
     }
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-
-    const researchGroupInternalId = authorizedGroup.id;
-
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("leave_research_group_membership"),
-      creator: jwtUsername,
-      data: { name: member },
-      isProposalAutoAccepted: !isProposal
-    };
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
-
-    ctx.status = 201;
-    ctx.body = { txResult };
+    ctx.status = 200;
+    ctx.body = resignationPayload;
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 };
 
 
@@ -274,5 +258,5 @@ export default {
   getResearchGroupActivityLogs,
   getResearchGroupLogo,
   uploadResearchGroupLogo,
-  excludeFromResearchGroup
+  leaveResearchGroup
 }

@@ -57,7 +57,7 @@ const createResearch = async (ctx, next) => {
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
-      ctx.state.events.push([APP_EVENTS.USER_INVITATION_CREATED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
       const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
       
       if (approveInviteDatum) {
@@ -103,7 +103,7 @@ const updateResearch = async (ctx, next) => {
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
-      ctx.state.events.push([APP_EVENTS.USER_INVITATION_CREATED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
       const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
 
       if (approveInviteDatum) {

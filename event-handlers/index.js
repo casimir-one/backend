@@ -5,7 +5,7 @@ import { handle, fire, wait } from './utils';
 import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS } from './../constants';
 import userNotificationsHandler from './userNotification';
 import researchGroupActivityLogHandler from './researchGroupActivityLog';
-import researchEntityHandler from './researchEntity';
+import researchHandler from './research';
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
@@ -81,7 +81,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const research = await wait(researchEntityHandler, APP_EVENTS.RESEARCH_CREATED, source);
+  const research = await wait(researchHandler, APP_EVENTS.RESEARCH_CREATED, source);
 
   const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
@@ -95,9 +95,9 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 }));
 
 
-appEventHandler.on(APP_EVENTS.USER_INVITATION_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, context: { emitter, offchainMeta } } = source;
+  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
   const { notes } = offchainMeta;
   const researchGroupService = new ResearchGroupService();
 
@@ -120,17 +120,17 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_CREATED, (payload, reply) => handl
   const inviteeProfile = await usersService.findUserProfileByOwner(userInvite.invitee);
   const creatorProfile = await usersService.findUserProfileByOwner(userInvite.creator);
 
-  const notificationPayload = { researchGroup, invite: userInvite, invitee: inviteeProfile, creator: creatorProfile };
+  const event = { tenant, researchGroup, invite: userInvite, invitee: inviteeProfile, creator: creatorProfile };
 
-  userNotificationsHandler.emit(APP_EVENTS.USER_INVITATION_CREATED, notificationPayload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.USER_INVITATION_CREATED, notificationPayload);
+  userNotificationsHandler.emit(APP_EVENTS.USER_INVITATION_PROPOSED, event);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.USER_INVITATION_PROPOSED, event);
 
 }));
 
 
 appEventHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, context: { emitter, offchainMeta } } = source;
+  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
   const researchGroupService = new ResearchGroupService();
 
   const [opName, opPayload, opProposal] = opDatum;
@@ -160,10 +160,11 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
   const creatorProfile = await usersService.findUserProfileByOwner(updatedInvite.creator);
   const approverProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const notificationPayload = { researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, approver: approverProfile };
+  const event = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, approver: approverProfile };
 
-  userNotificationsHandler.emit(APP_EVENTS.USER_INVITATION_SIGNED, notificationPayload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.USER_INVITATION_SIGNED, notificationPayload);
+  fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_SIGNED, event);
+  fire(researchGroupActivityLogHandler, APP_EVENTS.USER_INVITATION_SIGNED, event);
+  fire(researchHandler, APP_EVENTS.USER_INVITATION_SIGNED, event)
 
 }));
 
@@ -200,7 +201,7 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
 
   fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
   fire(researchGroupActivityLogHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
-  fire(researchEntityHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
+  fire(researchHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
 
 }));
 
@@ -263,7 +264,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const research = await wait(researchEntityHandler, APP_EVENTS.RESEARCH_UPDATED, source);
+  const research = await wait(researchHandler, APP_EVENTS.RESEARCH_UPDATED, source);
 
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
@@ -296,7 +297,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService(tenant);
 
-  const research = await wait(researchEntityHandler, APP_EVENTS.RESEARCH_UPDATED, source);
+  const research = await wait(researchHandler, APP_EVENTS.RESEARCH_UPDATED, source);
   const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
   const updaterUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = research.research_group.external_id != emitter;
@@ -457,6 +458,50 @@ appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, (payload, reply) => 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_APPLICATION_DELETED, payload);
 
 }));
+
+
+appEventHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
+  const { notes } = offchainMeta;
+  const researchGroupService = new ResearchGroupService();
+
+  const [opName, opPayload, opProposal] = opDatum;
+  const { member, research_group: researchGroupExternalId } = opPayload;
+
+
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const memberProfile = await usersService.findUserProfileByOwner(member);
+  const creatorProfile = await usersService.findUserProfileByOwner(emitter);
+
+  const event = { tenant, researchGroup, member: memberProfile, creator: creatorProfile };
+
+  fire(userNotificationsHandler, APP_EVENTS.USER_RESIGNATION_PROPOSED, event)
+  fire(researchHandler, APP_EVENTS.USER_RESIGNATION_PROPOSED, event)
+
+}));
+
+
+appEventHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter, resignationPayload } } = source;
+  const researchGroupService = new ResearchGroupService();
+
+  const [opName, opPayload, opProposal] = opDatum;
+  const { member, research_group: researchGroupExternalId } = resignationPayload;
+
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const memberProfile = await usersService.findUserProfileByOwner(member);
+  const creatorProfile = await usersService.findUserProfileByOwner(emitter);
+
+  const event = { tenant, researchGroup, member: memberProfile, creator: creatorProfile };
+
+  fire(userNotificationsHandler, APP_EVENTS.USER_RESIGNATION_SIGNED, event)
+  fire(researchHandler, APP_EVENTS.USER_RESIGNATION_SIGNED, event)
+
+}));
+
+
 
 
 export default appEventHandler;

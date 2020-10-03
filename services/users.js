@@ -5,12 +5,6 @@ import config from './../config';
 import * as blockchainService from './../utils/blockchain';
 
 
-async function findUser(username) {
-  const profile = await UserProfile.findOne({ _id: username });
-  const [account] = await deipRpc.api.getAccountsAsync([username])
-  return { account, profile: profile || new UserProfile() };
-}
-
 
 async function mapUsers(chainAccounts) {
   const profiles = await UserProfile.find({ _id: { $in: chainAccounts.map(a => a.name) } });
@@ -21,6 +15,11 @@ async function mapUsers(chainAccounts) {
     });
 }
 
+async function findUser(username) {
+  const chainAccount = await deipRpc.api.getAccountsAsync([username]);
+  const [result] = await mapUsers([chainAccount]);
+  return result;
+}
 
 async function findUserProfileByOwner(username) {
   const userProfile = await UserProfile.findOne({ _id: username })
