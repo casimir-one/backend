@@ -16,7 +16,7 @@ async function mapUsers(chainAccounts) {
 }
 
 async function findUser(username) {
-  const chainAccount = await deipRpc.api.getAccountsAsync([username]);
+  const [chainAccount] = await deipRpc.api.getAccountsAsync([username]);
   const [result] = await mapUsers([chainAccount]);
   return result;
 }
