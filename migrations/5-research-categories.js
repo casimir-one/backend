@@ -29,7 +29,7 @@ const run = async () => {
   const tenants = await TenantProfile.find({});
   
   const categoriesAttribute = {
-    _id: mongoose.Types.ObjectId(),
+    _id: mongoose.Types.ObjectId("5f68be1d54f1da26e538b996"),
     type: RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT,
     isVisible: true,
     isEditable: true,

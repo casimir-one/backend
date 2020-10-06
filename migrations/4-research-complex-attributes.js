@@ -32,7 +32,7 @@ const run = async () => {
   const tenants = await TenantProfile.find({});
 
   const roadmapAttribute = {
-    _id: mongoose.Types.ObjectId(),
+    _id: mongoose.Types.ObjectId("5f68be12ae115a26e475fb90"),
     type: RESEARCH_ATTRIBUTE_TYPE.ROADMAP,
     isVisible: true,
     isEditable: false,
@@ -45,7 +45,7 @@ const run = async () => {
   };
 
   const partnersAttribute = {
-    _id: mongoose.Types.ObjectId(),
+    _id: mongoose.Types.ObjectId("5f68be12ae115a26e475fb91"),
     type: RESEARCH_ATTRIBUTE_TYPE.PARTNERS,
     isVisible: true,
     isEditable: false,
@@ -58,7 +58,7 @@ const run = async () => {
   };
 
   const videoSrcAttribute = {
-    _id: mongoose.Types.ObjectId(),
+    _id: mongoose.Types.ObjectId("5f68be12ae115a26e475fb92"),
     type: RESEARCH_ATTRIBUTE_TYPE.VIDEO_URL,
     isVisible: true,
     isEditable: true,
