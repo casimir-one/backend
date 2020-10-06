@@ -14,6 +14,10 @@ const DISCIPLINES_LIST = "disciplines-list";
 const RESEARCH_GROUP = "research-group";
 const RESEARCH_GROUPS_LIST = "research-groups-list";
 
+const IMAGE = "image";
+const FILE = "file";
+const EXPRESS_LICENSING = "express-licensing";
+
 const ROADMAP = "roadmap";
 const PARTNERS = "partners";
 
@@ -33,6 +37,11 @@ const RESEARCH_ATTRIBUTE_TYPE = {
   DISCIPLINES_LIST,
   RESEARCH_GROUP,
   RESEARCH_GROUPS_LIST,
+  IMAGE,
+  FILE,
+
+  EXPRESS_LICENSING,
+
   ROADMAP,
   PARTNERS
 };

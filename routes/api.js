@@ -88,12 +88,11 @@ protected_route.post('/reviews', reviews.makeReview)
 
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
-public_route.get('/research/background/:researchExternalId', research.getResearchBackground)
+public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 protected_route.post('/research', research.createResearch)
 protected_route.put('/research', research.updateResearch)
-protected_route.post('/research/background', research.uploadResearchBackground)
 protected_route.post('/research/token-sale', research.createResearchTokenSale)
 protected_route.post('/research/token-sale/contribution', research.createResearchTokenSaleContribution)
 

@@ -7,6 +7,7 @@ import sharp from 'sharp'
 import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';
+import mongoose from 'mongoose';
 import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
@@ -14,16 +15,14 @@ import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
 import userNotificationHandler from './../event-handlers/userNotification';
-import { APP_EVENTS, RESEARCH_STATUS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, USER_INVITE_STATUS } from './../constants';
-import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
+import { APP_EVENTS, RESEARCH_STATUS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
+import { researchForm, researchAttributeFilePath, researchFilePath } from './../forms/research';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import qs from 'qs';
-import { extract } from 'extract-text-webpack-plugin';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
-
 
 
 const createResearch = async (ctx, next) => {
@@ -32,11 +31,30 @@ const createResearch = async (ctx, next) => {
   const researchService = new ResearchService(tenant);
   const researchGroupsService = new ResearchGroupService();
 
-  const { tx, offchainMeta } = ctx.request.body;
-
   try {
+    
+    const formUploader = researchForm.any();
+    const { tx, offchainMeta } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
+      try {
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+        const tx = JSON.parse(ctx.req.body.tx);
+        const onchainData = JSON.parse(ctx.req.body.onchainData);
+        const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+        console.log(ctx.req.files);
+
+        const txResult = await blockchainService.sendTransactionAsync(tx);
+
+        resolve({
+          tx,
+          offchainMeta,
+          onchainData
+        });
+
+      } catch (err) {
+        reject(err);
+      } 
+    }));
+
     const operations = blockchainService.extractOperations(tx);
 
     const researchDatum = operations.find(([opName]) => opName == 'create_research');
@@ -59,7 +77,7 @@ const createResearch = async (ctx, next) => {
       const [opName, opPayload, inviteProposal] = inviteDatum;
       ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
       const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
-      
+
       if (approveInviteDatum) {
         ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { offchainMeta: {} } }]);
       }
@@ -82,13 +100,33 @@ const createResearch = async (ctx, next) => {
 
 const updateResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta } = ctx.request.body;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
 
   try {
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const formUploader = researchForm.any();
+    const { tx, offchainMeta } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
+      try {
+
+        const tx = JSON.parse(ctx.req.body.tx);
+        const onchainData = JSON.parse(ctx.req.body.onchainData);
+        const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+        console.log(ctx.req.files);
+
+        const txResult = await blockchainService.sendTransactionAsync(tx);
+
+        resolve({
+          tx,
+          offchainMeta,
+          onchainData
+        });
+
+      } catch (err) {
+        reject(err);
+      }
+    }));
+
     const operations = blockchainService.extractOperations(tx);
 
     const researchUpdateDatum = operations.find(([opName]) => opName == 'update_research');
@@ -115,7 +153,7 @@ const updateResearch = async (ctx, next) => {
 
     ctx.status = 200;
     ctx.body = isProposal ? null : researchUpdatePayload;
-    
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -623,94 +661,90 @@ const createResearchTokenSaleContribution = async (ctx) => {
 }
 
 
-const uploadResearchBackground = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const researchExternalId = ctx.request.headers['research-external-id'];
+
+const getResearchAttributeFile = async (ctx) => {
+  const researchExternalId = ctx.params.researchExternalId;
+  const researchAttributeId = ctx.params.researchAttributeId;
+  const filename = ctx.params.filename;
+  const tenant = ctx.state.tenant;
+
+  const isResearchRootFolder = researchExternalId == researchAttributeId;
+  const filepath = isResearchRootFolder ? researchFilePath(researchExternalId, filename) : researchAttributeFilePath(researchExternalId, researchAttributeId, filename);
 
   try {
 
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
+    const isImage = ctx.query.image === 'true';
 
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
-      return;
+    if (isImage) {
+
+      const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
+      const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
+      const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
+      const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
+
+      const check = await stat(filepath);
+      const resize = (w, h) => {
+        return new Promise((resolve) => {
+          sharp.cache(!noCache);
+          sharp(filepath)
+            .rotate()
+            .resize(w, h)
+            .png()
+            .toBuffer()
+            .then(data => {
+              resolve(data)
+            })
+            .catch(err => {
+              resolve(err)
+            });
+        })
+      }
+
+      let image = await resize(width, height);
+
+      if (isRound) {
+        let round = (w) => {
+          let r = w / 2;
+          let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
+          return new Promise((resolve, reject) => {
+            image = sharp(image)
+              .overlayWith(circleShape, { cutout: true })
+              .png()
+              .toBuffer()
+              .then(data => {
+                resolve(data)
+              })
+              .catch(err => {
+                reject(err)
+              });
+          });
+        }
+
+        image = await round(width);
+      }
+
+      ctx.type = 'image/png';
+      ctx.status = 200;
+      ctx.body = image;
+
+    } else {
+
+      const isDownload = ctx.query.download === 'true';
+      if (isDownload) {
+        let ext = filename.substr(filename.lastIndexOf('.') + 1);
+        let name = filename.substr(0, filename.lastIndexOf('.'));
+        ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
+        ctx.body = fs.createReadStream(filepath);
+      } else {
+        await send(ctx, filepath, { root: '/' });
+      }
     }
-
-    const backgroundImage = researchBackgroundImageForm.single('research-background');
-    const result = await backgroundImage(ctx, () => new Promise((resolve, reject) => {
-      resolve({ 'filename': ctx.req.file.filename });
-    }));
-
-    ctx.status = 200;
-    ctx.body = result;
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
-}
-
-const getResearchBackground = async (ctx) => {
-  const researchExternalId = ctx.params.researchExternalId;
-  const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
-  const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
-  const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
-  const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
-
-  let src = researchBackgroundImageFilePath(researchExternalId);
-  const stat = util.promisify(fs.stat);
-
-  try {
-    const check = await stat(src);
-  } catch (err) {
-    src = defaultResearchBackgroundImagePath();
-  }
-
-  const resize = (w, h) => {
-    return new Promise((resolve) => {
-      sharp.cache(!noCache);
-      sharp(src)
-        .rotate()
-        .resize(w, h)
-        .png()
-        .toBuffer()
-        .then(data => {
-          resolve(data)
-        })
-        .catch(err => {
-          resolve(err)
-        });
-    })
-  }
-
-  let background = await resize(width, height);
-
-  if (isRound) {
-    let round = (w) => {
-      let r = w / 2;
-      let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
-      return new Promise((resolve, reject) => {
-        background = sharp(background)
-          .overlayWith(circleShape, { cutout: true })
-          .png()
-          .toBuffer()
-          .then(data => {
-            resolve(data)
-          })
-          .catch(err => {
-            reject(err)
-          });
-      });
-    }
-
-    background = await round(width);
-  }
-
-  ctx.type = 'image/png';
-  ctx.body = background;
 }
 
 
@@ -793,8 +827,7 @@ const getResearch = async (ctx) => {
 
 
 export default {
-  getResearchBackground,
-  uploadResearchBackground,
+  getResearchAttributeFile,
   getResearch,
   getPublicResearchListing,
   getUserResearchListing,
