@@ -593,50 +593,35 @@ const getResearchApplications = async (ctx) => {
   }
 }
 
-const createResearchTokenSale = async (ctx) => {
+
+const createResearchTokenSale = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, isProposal } = ctx.request.body;
+  const { tx } = ctx.request.body;
 
   try {
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
-    const researchGroupAccount = payload.research_group;
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
-    }
-
-    const researchExternalId = payload.research_external_id;
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-
-    const researchGroupInternalId = authorizedGroup.id;
-    const researchInternalId = research.id;
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    const operations = blockchainService.extractOperations(tx);
 
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("create_research_token_sale"),
-      creator: jwtUsername,
-      data: { research_id: researchInternalId },
-      isProposalAutoAccepted: !isProposal
-    };
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
+    const researchTokenSaleDatum = operations.find(([opName]) => opName == 'create_research_token_sale');
+
+    const [opName, researchTokenSalePayload, researchTokenSaleProposal] = researchTokenSaleDatum;
+    if (researchTokenSaleProposal) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, { opDatum: researchTokenSaleDatum, context: { emitter: jwtUsername } }]);
+    } else {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, { opDatum: researchTokenSaleDatum, context: { emitter: jwtUsername } }]);
+    }
 
     ctx.status = 200;
-    ctx.body = { txResult };
+    ctx.body = researchTokenSalePayload;
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 

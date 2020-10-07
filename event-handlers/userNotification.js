@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_TYPE, USER_NOTIFICATION_TYPE, TOKEN_SALE_STATUS, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS, USER_NOTIFICATION_TYPE, USER_INVITE_STATUS } from './../constants';
 import usersService from './../services/users';
 import * as usersNotificationService from './../services/userNotification';
 
@@ -342,17 +342,16 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async (payload) 
     let promise = usersNotificationService.createUserNotification({
       username: rgt.owner,
       status: 'unread',
-      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy frontend type
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
-        isProposalAutoAccepted: false,
-        proposal: { // legacy frontend object
+        isProposalAutoAccepted: false, // legacy
+        proposal: { // legacy
           research_group_id: researchGroup.id,
           action: deipRpc.operations.getOperationTag("join_research_group_membership"),
           creator: creator._id,
           data: {
             name: invitee._id
-          },
-          isProposalAutoAccepted: false
+          }
         },
         researchGroup,
         inviteeProfile: invitee,
@@ -380,12 +379,9 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, async (payload) =>
       let memberNotificationPromise = usersNotificationService.createUserNotification({
         username: rgt.owner,
         status: 'unread',
-        type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy frontend type
+        type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
         metadata: {
-          proposal: { // legacy frontend object
-            action: deipRpc.operations.getOperationTag("join_research_group_membership"),
-            is_completed: true
-          },
+          proposal: { action: deipRpc.operations.getOperationTag("join_research_group_membership"), is_completed: true }, // legacy
           researchGroup,
           inviteeProfile: invitee,
           creatorProfile: creator
@@ -471,7 +467,7 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async (event) =
     let memberNotificationPromise = usersNotificationService.createUserNotification({
       username: rgt.owner,
       status: 'unread',
-      type: USER_NOTIFICATION_TYPE.PROPOSAL,
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
         proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: member._id } }, // legacy
@@ -498,9 +494,9 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, async (event) => 
     let memberNotificationPromise = usersNotificationService.createUserNotification({
       username: rgt.owner,
       status: 'unread',
-      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED,
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
-        isProposalAutoAccepted: false, // legacy
+        isProposalAutoAccepted: true, // legacy
         proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: member._id } }, // legacy
         researchGroup,
         excludedProfile: member,
@@ -525,107 +521,56 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, async (event) => 
 });
 
 
-// TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL, async (proposal) => {
-  const type = USER_NOTIFICATION_TYPE.PROPOSAL;
-  let { research_group_id: researchGroupId, action, creator, data, isProposalAutoAccepted } = proposal;
-  let payload = data;
+userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async (payload) => {
+  const { researchGroup, research, proposer, tokenSale } = payload;
+  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
-  let creatorProfile = await usersService.findUserProfileByOwner(creator);
-  
-  let notificationsPromises = [];
-
-  switch (action) {
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
-      let { research_id } = payload;
-      let research = await deipRpc.api.getResearchByIdAsync(research_id);
-      let tokenSale = null;
-
-      if (isProposalAutoAccepted) {
-        let list = await deipRpc.api.getResearchTokenSalesByResearchIdAsync(research_id);
-        tokenSale = list.find(ts => ts.status == TOKEN_SALE_STATUS.ACTIVE || ts.status == TOKEN_SALE_STATUS.INACTIVE);
+  const notificationsPromises = [];
+  for (let i = 0; i < members.length; i++) {
+    let rgt = members[i];
+    let memberNotificationPromise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
+      metadata: {
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("create_research_token_sale"), data: { research_id: research.id } }, // legacy
+        researchGroup,
+        research,
+        tokenSale,
+        creatorProfile: proposer
       }
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            isProposalAutoAccepted,
-            proposal,
-            researchGroup,
-            research,
-            tokenSale,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
-      }
-
-      break;
-    }
-
-    default: {
-      break;
-    }
+    });
+    notificationsPromises.push(memberNotificationPromise);
   }
 
   Promise.all(notificationsPromises);
-
 });
 
 
-// TODO: split this event handler on specific proposal types and broadcast specific events from chain event emitter
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, async (proposal) => {
-  const type = USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED;
-  let { research_group_id: researchGroupId, action, creator, data } = proposal;
-  let payload = data;
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let creatorProfile = await usersService.findUserProfileByOwner(creator);
-  let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async (payload) => {
+  const { researchGroup, research, creator, tokenSale } = payload;
+  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
-  let notificationsPromises = [];
-
-  switch (action) {
-
-    case PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE: {
-      let { research_id } = payload;
-      let research = await deipRpc.api.getResearchByIdAsync(research_id);
-      let list = await deipRpc.api.getResearchTokenSalesByResearchIdAsync(research_id);
-      let tokenSale = list.find(ts => ts.status == TOKEN_SALE_STATUS.ACTIVE || ts.status == TOKEN_SALE_STATUS.INACTIVE);
-
-      for (let i = 0; i < rgtList.length; i++) {
-        let rgt = rgtList[i];
-        let promise = usersNotificationService.createUserNotification({
-          username: rgt.owner,
-          status: 'unread',
-          type,
-          metadata: {
-            proposal,
-            researchGroup,
-            research,
-            tokenSale,
-            creatorProfile
-          }
-        });
-        notificationsPromises.push(promise);
+  const notificationsPromises = [];
+  for (let i = 0; i < members.length; i++) {
+    let rgt = members[i];
+    let memberNotificationPromise = usersNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        proposal: { action: deipRpc.operations.getOperationTag("create_research_token_sale"), data: { research_id: research.id }, is_completed: true }, // legacy
+        researchGroup,
+        research,
+        tokenSale,
+        creatorProfile: creator
       }
-
-      break;
-    }
-
-    default: {
-      break;
-    }
+    });
+    notificationsPromises.push(memberNotificationPromise);
   }
 
   Promise.all(notificationsPromises);
-
 });
 
 

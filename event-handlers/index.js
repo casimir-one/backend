@@ -2,7 +2,7 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { handle, fire, wait } from './utils';
-import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS, TOKEN_SALE_STATUS } from './../constants';
 import userNotificationsHandler from './userNotification';
 import researchGroupActivityLogHandler from './researchGroupActivityLog';
 import researchHandler from './research';
@@ -500,6 +500,53 @@ appEventHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, (payload, reply) => handl
   fire(researchHandler, APP_EVENTS.USER_RESIGNATION_SIGNED, event)
 
 }));
+
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter } } = source;
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+
+  const [opName, opPayload, opProposal] = opDatum;
+  const { research_external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
+
+  const research = await researchService.getResearch(researchExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const proposerProfile = await usersService.findUserProfileByOwner(emitter);
+
+  const event = { researchGroup, research, tokenSale: null, proposer: proposerProfile };
+
+  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, event);
+  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, event);
+
+}));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter } } = source;
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+
+  const [opName, opPayload] = opDatum;
+  const { research_external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
+
+  const research = await researchService.getResearch(researchExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const creatorProfile = await usersService.findUserProfileByOwner(emitter);
+
+  const tokenSales = await deipRpc.api.getResearchTokenSalesByResearchIdAsync(research.id);
+  const tokenSale = tokenSales.reverse().find(ts => ts.status == TOKEN_SALE_STATUS.ACTIVE || ts.status == TOKEN_SALE_STATUS.INACTIVE);
+
+  const event = { researchGroup, research, tokenSale, creator: creatorProfile };
+
+  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, event);
+  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, event);
+
+}));
+
 
 
 
