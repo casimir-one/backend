@@ -21,6 +21,8 @@ const researchAttributeFolderPath = (researchExternalId, researchAttributeId) =>
 const researchAttributeFilePath = (researchExternalId, researchAttributeId, filename) => `${researchAttributeFolderPath(researchExternalId, researchAttributeId)}/${filename}`;
 const researchFilePath = (researchExternalId, filename) => `${researchStoragePath(researchExternalId)}/${filename}`;
 
+const researchAttributeIdSplitter = '-';
+
 const researchStorage = (destFn, filename = null) => multer.diskStorage({
 
   destination: async function (req, file, callback) {
@@ -32,10 +34,12 @@ const researchStorage = (destFn, filename = null) => multer.diskStorage({
         folderPath = destFn(researchExternalId);
         filePath = `${folderPath}/${filename}`;
       } else {
-        const parts = file.originalname.split('-');
-        if (parts.length > 1 && mongoose.Types.ObjectId.isValid(parts[0])) {
-          folderPath = destFn(researchExternalId, parts[0]);
-          filePath = `${folderPath}/${parts.map((p, i) => i == 0 ? "" : p).join('')}`;
+        const parts = file.originalname.split(researchAttributeIdSplitter);
+        const researchAttributeId = parts[0];
+        if (parts.length > 1 && mongoose.Types.ObjectId.isValid(researchAttributeId)) {
+          folderPath = destFn(researchExternalId, researchAttributeId);
+          const name = file.originalname.substring(`${researchAttributeId}${researchAttributeIdSplitter}`.length, file.originalname.length);
+          filePath = `${folderPath}/${name}`;
         } else {
           folderPath = destFn(researchExternalId);
           filePath = `${folderPath}/${file.originalname}`;
@@ -56,9 +60,10 @@ const researchStorage = (destFn, filename = null) => multer.diskStorage({
     if (filename) {
       name = filename;
     } else {
-      const parts = file.originalname.split('-');
-      if (parts.length > 1 && mongoose.Types.ObjectId.isValid(parts[0])) {
-        name = parts.map((p, i) => i == 0 ? "" : p).join('');
+      const parts = file.originalname.split(researchAttributeIdSplitter);
+      const researchAttributeId = parts[0];
+      if (parts.length > 1 && mongoose.Types.ObjectId.isValid(researchAttributeId)) {
+        name = file.originalname.substring(`${researchAttributeId}${researchAttributeIdSplitter}`.length, file.originalname.length);
       } else {
         name = file.originalname;
       }
