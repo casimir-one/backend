@@ -12,6 +12,7 @@ import reviews from '../controllers/reviews'
 import research from '../controllers/research'
 import investmentPortfolio from '../controllers/investmentPortfolio'
 import grants from '../controllers/grants'
+import expressLicensing from '../controllers/expressLicensing'
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -111,6 +112,15 @@ protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', gr
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', grants.getAwardWithdrawalRequestAttachmentFile)
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.uploadAwardWithdrawalRequestBulkAttachments)
 
+
+protected_route.get('/express-licensing/all', expressLicensing.getExpressLicensingRequests)
+protected_route.get('/express-licensing/id/:requestId', expressLicensing.getExpressLicensingRequestById)
+protected_route.get('/express-licensing/status/:status', expressLicensing.getExpressLicensingRequestsByStatus)
+protected_route.get('/express-licensing/research/:researchExternalId', expressLicensing.getExpressLicensingRequestsByResearch)
+protected_route.get('/express-licensing/requester/:requester', expressLicensing.getExpressLicensingRequestsByRequester)
+protected_route.post('/express-licensing', expressLicensing.createExpressLicensingRequest)
+protected_route.put('/express-licensing/approve/:requestId', expressLicensing.approveExpressLicensingRequest)
+protected_route.put('/express-licensing/reject/:requestId', expressLicensing.rejectExpressLicensingRequest)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

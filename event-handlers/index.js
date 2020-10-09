@@ -6,6 +6,7 @@ import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS,
 import userNotificationsHandler from './userNotification';
 import researchGroupActivityLogHandler from './researchGroupActivityLog';
 import researchHandler from './research';
+import expressLicensingHandler from './expressLicensing';
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
@@ -134,7 +135,7 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
   const researchGroupService = new ResearchGroupService();
 
   const [opName, opPayload, opProposal] = opDatum;
-  const { external_id: proposalId, active_approvals_to_add: approvals1, owner_approvals_to_remove: approvals2 } = opPayload;
+  const { external_id: proposalId, active_approvals_to_add: approvals1, owner_approvals_to_add: approvals2 } = opPayload;
 
   const invite = await userInvitesService.findUserInvite(proposalId);
 
@@ -548,6 +549,26 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => h
 }));
 
 
+appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
+  const request = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, source);
+
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
+  const request = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, source);
+
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
+
+  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
+  const request = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, source);
+
+}));
 
 
 
