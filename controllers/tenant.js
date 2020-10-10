@@ -310,12 +310,6 @@ const createTenantResearchAttribute = async (ctx) => {
     const updatedTenantProfile = await tenantService.addTenantResearchAttribute(tenant.id, { ...researchAttribute, _id: researchAttributeId.toString() });
     const newResearchAttribute = updatedTenantProfile.settings.researchAttributes.find(a => a._id.toString() === researchAttributeId.toString());
 
-    await researchService.addAttributeToResearches({ 
-      researchAttributeId: newResearchAttribute._id.toString(), 
-      type: researchAttribute.type,
-      defaultValue: researchAttribute.defaultValue || null
-    });
-
     ctx.status = 200;
     ctx.body = updatedTenantProfile.toObject();
 
