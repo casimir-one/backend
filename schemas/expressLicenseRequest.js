@@ -1,10 +1,10 @@
 
 import mongoose from 'mongoose';
-import { EXPRESS_LICENSING_REQUEST_STATUS } from './../constants';
+import { EXPRESS_LICENSE_REQUEST_STATUS } from './../constants';
 
 const Schema = mongoose.Schema;
 
-const ExpressLicensingRequest = new Schema({
+const ExpressLicenseRequest = new Schema({
   "_id": { type: String, required: true },
   "requester": { type: String, required: true, index: true },
   "researchExternalId": { type: String, required: true, index: true },
@@ -12,7 +12,7 @@ const ExpressLicensingRequest = new Schema({
   "licencePlan": { type: Object, required: true },
   "status": {
     type: String,
-    enum: [...Object.values(EXPRESS_LICENSING_REQUEST_STATUS)],
+    enum: [...Object.values(EXPRESS_LICENSE_REQUEST_STATUS)],
     required: true
   },
   "expirationDate": { type: Date, required: true },
@@ -21,6 +21,6 @@ const ExpressLicensingRequest = new Schema({
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 
-const model = mongoose.model('express-licensing-request', ExpressLicensingRequest);
+const model = mongoose.model('express-license-request', ExpressLicenseRequest);
 
 module.exports = model;

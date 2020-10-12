@@ -23,7 +23,7 @@ const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
 
 
-const createExpressLicensingRequest = async (ctx, next) => {
+const createExpressLicenseRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta } = ctx.request.body;
 
@@ -55,7 +55,7 @@ const createExpressLicensingRequest = async (ctx, next) => {
 };
 
 
-const approveExpressLicensingRequest = async (ctx, next) => {
+const approveExpressLicenseRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta } = ctx.request.body;
 
@@ -83,7 +83,7 @@ const approveExpressLicensingRequest = async (ctx, next) => {
 };
 
 
-const rejectExpressLicensingRequest = async (ctx, next) => {
+const rejectExpressLicenseRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta } = ctx.request.body;
 
@@ -111,11 +111,11 @@ const rejectExpressLicensingRequest = async (ctx, next) => {
 
 
 
-const getExpressLicensingRequests = async (ctx) => {
+const getExpressLicenseRequests = async (ctx) => {
   const expressLicensingService = new ExpressLicensingService();
 
   try {
-    const result = await expressLicensingService.getExpressLicensingRequests()
+    const result = await expressLicensingService.getExpressLicenseRequests()
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -125,12 +125,12 @@ const getExpressLicensingRequests = async (ctx) => {
   }
 }
 
-const getExpressLicensingRequestsByStatus = async (ctx) => {
+const getExpressLicenseRequestsByStatus = async (ctx) => {
   const expressLicensingService = new ExpressLicensingService();
   const status = ctx.params.status;
 
   try {
-    const result = await expressLicensingService.getExpressLicensingRequestsByStatus(status);
+    const result = await expressLicensingService.getExpressLicenseRequestsByStatus(status);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -141,12 +141,12 @@ const getExpressLicensingRequestsByStatus = async (ctx) => {
 }
 
 
-const getExpressLicensingRequestById = async (ctx) => {
+const getExpressLicenseRequestById = async (ctx) => {
   const expressLicensingService = new ExpressLicensingService();
   const requestId = ctx.params.requestId;
 
   try {
-    const result = await expressLicensingService.getExpressLicensingRequestById(requestId);
+    const result = await expressLicensingService.getExpressLicenseRequestById(requestId);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -157,12 +157,12 @@ const getExpressLicensingRequestById = async (ctx) => {
 }
 
 
-const getExpressLicensingRequestsByResearch = async (ctx) => {
+const getExpressLicenseRequestsByResearch = async (ctx) => {
   const expressLicensingService = new ExpressLicensingService();
   const researchExternalId = ctx.params.researchExternalId;
 
   try {
-    const result = await expressLicensingService.getExpressLicensingRequestsByResearch(researchExternalId);
+    const result = await expressLicensingService.getExpressLicenseRequestsByResearch(researchExternalId);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -173,12 +173,12 @@ const getExpressLicensingRequestsByResearch = async (ctx) => {
 }
 
 
-const getExpressLicensingRequestsByRequester = async (ctx) => {
+const getExpressLicenseRequestsByRequester = async (ctx) => {
   const expressLicensingService = new ExpressLicensingService();
   const requester = ctx.params.requester;
 
   try {
-    const result = await expressLicensingService.getExpressLicensingRequestsByRequester(requester);
+    const result = await expressLicensingService.getExpressLicenseRequestsByRequester(requester);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -190,22 +190,14 @@ const getExpressLicensingRequestsByRequester = async (ctx) => {
 
 
 
-
-
-
-
-
-
-
-
 export default {
-  createExpressLicensingRequest,
-  approveExpressLicensingRequest,
-  rejectExpressLicensingRequest,
+  createExpressLicenseRequest,
+  approveExpressLicenseRequest,
+  rejectExpressLicenseRequest,
 
-  getExpressLicensingRequests,
-  getExpressLicensingRequestById,
-  getExpressLicensingRequestsByStatus,
-  getExpressLicensingRequestsByResearch,
-  getExpressLicensingRequestsByRequester
+  getExpressLicenseRequests,
+  getExpressLicenseRequestById,
+  getExpressLicenseRequestsByStatus,
+  getExpressLicenseRequestsByResearch,
+  getExpressLicenseRequestsByRequester
 }

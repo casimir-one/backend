@@ -1,6 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 import ResearchApplication from './../schemas/researchApplication';
+import ExpressLicensingService from './expressLicensing';
 import { RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import mongoose from 'mongoose';
 
@@ -10,6 +11,7 @@ class ResearchService {
     this.researchWhitelist = tenant.settings.researchWhitelist || [];
     this.researchBlacklist = tenant.settings.researchBlacklist || [];
     this.researchAttributes = tenant.settings.researchAttributes || [];
+    this.expressLicensingService = new ExpressLicensingService();
   }
 
 
@@ -23,12 +25,17 @@ class ResearchService {
       ...filterObj
     }
     
-    const researches = await Research.find({ _id: { $in: chainResearches.map(r => r.external_id) } });
+    const researchExternalIds = chainResearches.map(r => r.external_id);
+
+    const researches = await Research.find({ _id: { $in: researchExternalIds } });
+    const researchesExpressLicenses = await this.expressLicensingService.getExpressLicensesByResearches(researchExternalIds);
+    
     return chainResearches
       .map((chainResearch) => {
         const researchRef = researches.find(r => r._id == chainResearch.external_id);
+        const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id);
         if (researchRef) {
-          return { ...chainResearch, researchRef: { ...researchRef.toObject() } };
+          return { ...chainResearch, researchRef: { ...researchRef.toObject(), expressLicenses } };
         }
         return { ...chainResearch, researchRef: null };
       })
@@ -73,6 +80,7 @@ class ResearchService {
           }
           return rAttr.value.toString() === v.toString();
         });
+
       })));
   }
 

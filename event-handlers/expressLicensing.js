@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, EXPRESS_LICENSING_REQUEST_STATUS } from './../constants';
+import { APP_EVENTS, EXPRESS_LICENSE_REQUEST_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ExpressLicensingService from './../services/expressLicensing';
 
@@ -18,14 +18,14 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, 
   const { to: researchGroupExternalId } = opPayload;
   const { external_id: externalId, creator: requester, expiration_time: expirationDate } = opProposal;
 
-  const request = await expressLicensingService.createExpressLicensingRequest({
+  const request = await expressLicensingService.createExpressLicenseRequest({
     externalId,
     requester,
     researchExternalId,
     researchGroupExternalId,
     licencePlan,
     expirationDate,
-    status: EXPRESS_LICENSING_REQUEST_STATUS.PENDING,
+    status: EXPRESS_LICENSE_REQUEST_STATUS.PENDING,
     approvers: [],
     rejectors: []
   })
@@ -54,12 +54,24 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (
     return acc;
   }, []);
 
+  const status = approvers.some(a => a == request.researchGroupExternalId) && approvers.some(a => a == request.requester)
+    ? EXPRESS_LICENSE_REQUEST_STATUS.APPROVED
+    : request.status
+
   const updatedRequest = await expressLicensingService.updateExpressLicensingRequest(proposalId, {
     approvers: approvers,
-    status: approvers.some(a => a == request.researchGroupExternalId) && approvers.some(a => a == request.requester) 
-      ? EXPRESS_LICENSING_REQUEST_STATUS.APPROVED 
-      : request.status
+    status: status
   });
+
+  if (status == EXPRESS_LICENSE_REQUEST_STATUS.APPROVED) {
+    await expressLicensingService.createExpressLicense({
+      requestId: request._id,
+      owner: request.requester,
+      researchExternalId: request.researchExternalId,
+      researchGroupExternalId: request.researchGroupExternalId,
+      licencePlan: request.licencePlan
+    });
+  }
 
   return updatedRequest;
 
@@ -84,13 +96,14 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED,
     return acc;
   }, []);
 
+  const status = rejectors.some(a => a == request.researchGroupExternalId) || rejectors.some(a => a == request.requester)
+    ? EXPRESS_LICENSE_REQUEST_STATUS.REJECTED
+    : request.status;
+
   const updatedRequest = await expressLicensingService.updateExpressLicensingRequest(proposalId, {
     rejectors: rejectors,
-    status: rejectors.some(a => a == request.researchGroupExternalId) || rejectors.some(a => a == request.requester)
-      ? EXPRESS_LICENSING_REQUEST_STATUS.REJECTED
-      : request.status
+    status: status
   });
-
 
   return updatedRequest;
 
