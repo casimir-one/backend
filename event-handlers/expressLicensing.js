@@ -45,8 +45,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (
 
   const { external_id: proposalId, active_approvals_to_add: approvals1, owner_approvals_to_add: approvals2 } = opPayload;
 
-  const request = await expressLicensingService.findExpressLicensingRequest(proposalId);
-
+  const request = await expressLicensingService.getExpressLicensingRequest(proposalId);
   const approvers = [...request.approvers, ...approvals1, ...approvals2].reduce((acc, user) => {
     if (!acc.some(u => u == user)) {
       return [...acc, user];
@@ -89,7 +88,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED,
 
   const { external_id: proposalId, account: rejector } = opPayload;
 
-  const request = await expressLicensingService.findExpressLicensingRequest(proposalId);
+  const request = await expressLicensingService.getExpressLicensingRequest(proposalId);
   const rejectors = [...request.rejectors, rejector, emitter].reduce((acc, user) => {
     if (!acc.some(u => u == user)) {
       return [...acc, user];

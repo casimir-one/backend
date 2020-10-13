@@ -15,9 +15,15 @@ async function mapUsers(chainAccounts) {
     });
 }
 
-async function findUser(username) {
+async function getUser(username) {
   const [chainAccount] = await deipRpc.api.getAccountsAsync([username]);
   const [result] = await mapUsers([chainAccount]);
+  return result;
+}
+
+async function getUsers(usernames) {
+  const chainAccounts = await deipRpc.api.getAccountsAsync(usernames);
+  const result = await mapUsers(chainAccounts);
   return result;
 }
 
@@ -169,7 +175,8 @@ async function createUserAccount({ username, pubKey }) {
 }
 
 export default {
-  findUser,
+  getUser,
+  getUsers,
   findUserProfileByOwner,
   findPendingUserProfiles,
   findActiveUserProfiles,

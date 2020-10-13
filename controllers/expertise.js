@@ -214,7 +214,7 @@ const getAccountEciStats = async (ctx) => {
       filter.criteria || undefined
     );
 
-    const user = await usersService.findUser(username);
+    const user = await usersService.getUser(username);
     const result = { user, ...stat };
 
     ctx.status = 200;
@@ -242,7 +242,7 @@ const getAccountsEciStats = async (ctx) => {
       filter.criteria || undefined
     );
 
-    const users = await Promise.all(stats.map(([name, stat]) => usersService.findUser(stat.account)));
+    const users = await Promise.all(stats.map(([name, stat]) => usersService.getUser(stat.account)));
 
     const result = stats.map(([name, stat], i) => {
       const user = users[i];

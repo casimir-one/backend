@@ -23,6 +23,12 @@ class ResearchGroupService {
     return researchGroup;
   }
 
+  async getResearchGroups(researchGroupExternalIds) {
+    const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroupExternalIds);
+    const researchGroups = await this.mapResearchGroups(chainResearchGroups);
+    return researchGroups;
+  }  
+
   async lookupResearchGroups(lowerBound, limit) {
     const chainResearchGroups = await deipRpc.api.lookupResearchGroupsAsync(lowerBound, limit);
     const result = await this.mapResearchGroups(chainResearchGroups);

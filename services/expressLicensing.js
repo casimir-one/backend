@@ -1,17 +1,81 @@
 import deipRpc from '@deip/rpc-client';
 import ExpressLicense from './../schemas/expressLicense';
 import ExpressLicenseRequest from './../schemas/expressLicenseRequest';
+import usersService from './../services/users';
+import ResearchGroupService from './../services/researchGroup';
 import { EXPRESS_LICENSE_REQUEST_STATUS } from './../constants';
 
 
 class ExpressLicensingService {
 
-  constructor() {}
-
-  async findExpressLicensingRequest(externalId) {
-    let request = await ExpressLicenseRequest.findOne({ _id: externalId });
-    return request.toObject();
+  constructor() {
+    this.usersService = usersService;
+    this.researchGroupService = new ResearchGroupService();
   }
+
+  async mapExpressLicenseRequests(requests) {
+
+    const accounts = requests.reduce((acc, req) => {
+
+      for (let i = 0; i < req.approvers.length; i++) {
+        let approver = req.approvers[i];
+        if (!acc.some(a => a == approver)) {
+          acc.push(approver);
+        }
+      }
+
+      for (let i = 0; i < req.rejectors.length; i++) {
+        let rejector = req.rejectors[i];
+        if (!acc.some(a => a == rejector)) {
+          acc.push(rejector);
+        }
+      }
+
+      if (!acc.some(a => a == req.requester)) {
+        acc.push(req.requester);
+      }
+
+      if (!acc.some(a => a == req.researchGroupExternalId)) {
+        acc.push(req.researchGroupExternalId);
+      }
+
+      return acc;
+    }, []);
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(accounts);
+    
+    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
+    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
+
+    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
+
+    return requests.map((req) => {
+
+      const extendedDetails = {
+
+        approvers: req.approvers.map(a => {
+          let userApprover = users.find(u => u.account.name == a);
+          let researchGroupApprover = researchGroups.find(g => g.external_id == a);
+          return userApprover ? userApprover : researchGroupApprover;
+        }),
+
+        rejectors: req.rejectors.map(a => {
+          let userRejector = users.find(u => u.account.name == a);
+          let researchGroupRejector = researchGroups.find(g => g.external_id == a);
+          return userRejector ? userRejector : researchGroupRejector;
+        }),
+
+        requester: users.find(u => u.account.name == req.requester),
+
+        researchGroup: researchGroups.find(g => g.external_id == req.researchGroupExternalId)
+      }
+
+      return { ...req.toObject(), extendedDetails };
+    })
+
+  }
+
 
   async createExpressLicenseRequest({
     externalId,
@@ -59,39 +123,51 @@ class ExpressLicensingService {
   }
 
 
+  async getExpressLicensingRequest(externalId) {
+    let request = await ExpressLicenseRequest.findOne({ _id: externalId });
+    let [result] = await this.mapExpressLicenseRequests([request])
+    return result;
+  }
+
   async getExpressLicenseRequests() {
     const requests = await ExpressLicenseRequest.find({});
-    return requests.map(r => r.toObject());
+    const result = await this.mapExpressLicenseRequests(requests)
+    return result;
   }
 
 
   async getExpressLicenseRequestsByStatus(status) {
     const requests = await ExpressLicenseRequest.find({ status });
-    return requests.map(r => r.toObject());
+    const result = await this.mapExpressLicenseRequests(requests)
+    return result;
   }
 
 
   async getExpressLicenseRequestsByResearchGroups(researchGroupExternalIds) {
     const requests = await ExpressLicenseRequest.find({ researchGroupExternalId: { $in: researchGroupExternalIds } });
-    return requests.map(r => r.toObject());
+    const result = await this.mapExpressLicenseRequests(requests)
+    return result;  
   }
 
 
   async getExpressLicenseRequestById(requestId) {
     const request = await ExpressLicenseRequest.findOne({ _id: requestId });
-    return request.toObject();
+    const [result] = await this.mapExpressLicenseRequests([request])
+    return result;
   }
 
   
   async getExpressLicenseRequestsByResearch(researchExternalId) {
     const requests = await ExpressLicenseRequest.find({ researchExternalId });
-    return requests.map(r => r.toObject());
+    const result = await this.mapExpressLicenseRequests(requests)
+    return result;  
   }
 
 
   async getExpressLicenseRequestsByRequester(requester) {
     const requests = await ExpressLicenseRequest.find({ requester });
-    return requests.map(r => r.toObject());
+    const result = await this.mapExpressLicenseRequests(requests)
+    return result;  
   }
 
 
