@@ -64,7 +64,7 @@ class UserTransactionsService {
       })
       .filter(tx => !!tx);
 
-    const requiredApprovals = chainExpressLicensingTxs.reduce((acc, tx) => {
+    const approvalsNames = chainExpressLicensingTxs.reduce((acc, tx) => {
       
       for (let i = 0; i < tx.proposal.required_active_approvals.length; i++) {
         let activeApprover = tx.proposal.required_active_approvals[i];
@@ -80,11 +80,25 @@ class UserTransactionsService {
         }
       }
 
+      for (let i = 0; i < tx.proposal.available_active_approvals.length; i++) {
+        let activeApprover = tx.proposal.available_active_approvals[i];
+        if (!acc.some(a => a == activeApprover)) {
+          acc.push(activeApprover);
+        }
+      }
+
+      for (let i = 0; i < tx.proposal.available_owner_approvals.length; i++) {
+        let ownerApprover = tx.proposal.available_owner_approvals[i];
+        if (!acc.some(a => a == ownerApprover)) {
+          acc.push(ownerApprover);
+        }
+      }
+
       return acc;
 
     }, []);
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(requiredApprovals);
+    const chainAccounts = await deipRpc.api.getAccountsAsync(approvalsNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -94,16 +108,23 @@ class UserTransactionsService {
 
     return chainExpressLicensingTxs.map((tx) => {
       const extendedDetails = {
-        requiredActiveApprovals: tx.proposal.required_active_approvals.map(a => {
+        
+        requiredActiveApprovals: [...tx.proposal.required_active_approvals, ...tx.proposal.required_owner_approvals].map(a => {
           let userApprover = users.find(u => u.account.name == a);
           let researchGroupApprover = researchGroups.find(g => g.external_id == a);
           return userApprover ? userApprover : researchGroupApprover;
-        })
+        }),
+
+        availableActiveApprovals: [...tx.proposal.available_active_approvals, ...tx.proposal.available_owner_approvals].map(a => {
+          let userApprover = users.find(u => u.account.name == a);
+          let researchGroupApprover = researchGroups.find(g => g.external_id == a);
+          return userApprover ? userApprover : researchGroupApprover;
+        })        
       }
 
       return { ...tx, proposal: { ...tx.proposal, extendedDetails } };
     })
-    
+
   }
 
 
