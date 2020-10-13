@@ -63,7 +63,7 @@ class ResearchService {
  
         return false;
       })))
-      .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.some(fAttr => {
+      .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.every(fAttr => {
 
         const attribute = this.researchAttributes.find(attr => attr.isFilterable && attr._id.toString() === fAttr.researchAttributeId.toString());
         const rAttr = r.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() === fAttr.researchAttributeId.toString());
