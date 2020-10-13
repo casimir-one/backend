@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import { APP_EVENTS, EXPRESS_LICENSE_REQUEST_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ExpressLicensingService from './../services/expressLicensing';
-
+import deipRpc from '@deip/rpc-client';
 
 class ExpressLicensingHandler extends EventEmitter { }
 
@@ -54,9 +54,10 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (
     return acc;
   }, []);
 
-  const status = approvers.some(a => a == request.researchGroupExternalId) && approvers.some(a => a == request.requester)
-    ? EXPRESS_LICENSE_REQUEST_STATUS.APPROVED
-    : request.status
+  const chainProposal = await deipRpc.api.getProposalAsync(proposalId);
+  const status = !chainProposal
+    ? EXPRESS_LICENSE_REQUEST_STATUS.APPROVED 
+    : request.status;
 
   const updatedRequest = await expressLicensingService.updateExpressLicensingRequest(proposalId, {
     approvers: approvers,
@@ -96,7 +97,8 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED,
     return acc;
   }, []);
 
-  const status = rejectors.some(a => a == request.researchGroupExternalId) || rejectors.some(a => a == request.requester)
+  const chainProposal = await deipRpc.api.getProposalAsync(proposalId);
+  const status = !chainProposal
     ? EXPRESS_LICENSE_REQUEST_STATUS.REJECTED
     : request.status;
 
