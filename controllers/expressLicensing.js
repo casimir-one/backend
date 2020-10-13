@@ -29,17 +29,17 @@ const createExpressLicenseRequest = async (ctx, next) => {
 
   try {
     
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const txInfo = await blockchainService.sendTransactionAsync(tx);
     const operations = blockchainService.extractOperations(tx);
 
     const transferDatum = operations.find(([opName]) => opName == 'transfer');
     const approveTransferDatum = operations.find(([opName]) => opName == 'update_proposal');
 
     const [opName, transferPayload, transferProposal] = transferDatum;
-    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, { opDatum: transferDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, { opDatum: transferDatum, context: { emitter: jwtUsername, offchainMeta: { ...offchainMeta, txInfo: { ...txInfo, timestamp: new Date(Date.now()).toISOString() } } } }]);
 
     if (approveTransferDatum) {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, { opDatum: approveTransferDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+      ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, { opDatum: approveTransferDatum, context: { emitter: jwtUsername, offchainMeta: { ...offchainMeta, txInfo: { ...txInfo, timestamp: new Date(Date.now()).toISOString() } } } }]);
     }
     
     ctx.status = 200;
@@ -57,17 +57,18 @@ const createExpressLicenseRequest = async (ctx, next) => {
 
 const approveExpressLicenseRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta } = ctx.request.body;
+  const { tx } = ctx.request.body;
 
   try {
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const txInfo = await blockchainService.sendTransactionAsync(tx);
+
     const operations = blockchainService.extractOperations(tx);
 
     const approveTransferDatum = operations.find(([opName]) => opName == 'update_proposal');
     const [opName, approveTransferPayload] = approveTransferDatum;
 
-    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, { opDatum: approveTransferDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, { opDatum: approveTransferDatum, context: { emitter: jwtUsername, offchainMeta: { txInfo: { ...txInfo, timestamp: new Date(Date.now()).toISOString() } } } }]);
 
     ctx.status = 200;
     ctx.body = approveTransferPayload;
@@ -85,17 +86,17 @@ const approveExpressLicenseRequest = async (ctx, next) => {
 
 const rejectExpressLicenseRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta } = ctx.request.body;
+  const { tx } = ctx.request.body;
 
   try {
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const txInfo = await blockchainService.sendTransactionAsync(tx);
     const operations = blockchainService.extractOperations(tx);
 
     const rejectTransferDatum = operations.find(([opName]) => opName == 'delete_proposal');
     const [opName, rejectTransferPayload] = rejectTransferDatum;
 
-    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, { opDatum: rejectTransferDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, { opDatum: rejectTransferDatum, context: { emitter: jwtUsername, offchainMeta: { txInfo: { ...txInfo, timestamp: new Date(Date.now()).toISOString() } } } }]);
 
     ctx.status = 200;
     ctx.body = rejectTransferPayload;

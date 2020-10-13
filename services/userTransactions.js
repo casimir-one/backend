@@ -119,7 +119,7 @@ class UserTransactionsService {
           let userApprover = users.find(u => u.account.name == a);
           let researchGroupApprover = researchGroups.find(g => g.external_id == a);
           return userApprover ? userApprover : researchGroupApprover;
-        })        
+        })
       }
 
       return { ...tx, proposal: { ...tx.proposal, extendedDetails } };

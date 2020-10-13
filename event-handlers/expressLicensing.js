@@ -10,13 +10,22 @@ const expressLicensingHandler = new ExpressLicensingHandler();
 
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter, offchainMeta: { licencePlan, researchExternalId } } } = source;
+  const { opDatum, tenant, context: { emitter, offchainMeta: { licencePlan, researchExternalId, txInfo } } } = source;
   const expressLicensingService = new ExpressLicensingService();
 
   const [opName, opPayload, opProposal] = opDatum;
 
   const { to: researchGroupExternalId } = opPayload;
   const { external_id: externalId, creator: requester, expiration_time: expirationDate } = opProposal;
+
+  const chainProposal = await deipRpc.api.getProposalAsync(externalId);
+
+  const chainHistory = [...chainProposal.required_active_approvals, ...chainProposal.required_owner_approvals].reduce((acc, item) => {
+    if (item == requester) {
+      return { ...acc, [item]: txInfo };
+    }
+    return { ...acc, [item]: null };
+  }, {});
 
   const request = await expressLicensingService.createExpressLicenseRequest({
     externalId,
@@ -27,7 +36,8 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, 
     expirationDate,
     status: EXPRESS_LICENSE_REQUEST_STATUS.PENDING,
     approvers: [],
-    rejectors: []
+    rejectors: [],
+    chainHistory
   })
 
   return request;
@@ -38,7 +48,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, 
 
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter } } = source;
+  const { opDatum, tenant, context: { emitter, offchainMeta: { txInfo } } } = source;
   const expressLicensingService = new ExpressLicensingService();
 
   const [opName, opPayload] = opDatum;
@@ -60,7 +70,12 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (
 
   const updatedRequest = await expressLicensingService.updateExpressLicensingRequest(proposalId, {
     approvers: approvers,
-    status: status
+    status: status,
+    chainHistory: {
+      ...request.chainHistory, ...[...approvals1, ...approvals2].reduce((acc, item) => {
+        return { ...acc, [item]: txInfo };
+      }, {})
+    }
   });
 
   if (status == EXPRESS_LICENSE_REQUEST_STATUS.APPROVED) {
@@ -81,7 +96,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (
 
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter } } = source;
+  const { opDatum, tenant, context: { emitter, offchainMeta: { txInfo } } } = source;
   const expressLicensingService = new ExpressLicensingService();
 
   const [opName, opPayload] = opDatum;
@@ -103,7 +118,12 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED,
 
   const updatedRequest = await expressLicensingService.updateExpressLicensingRequest(proposalId, {
     rejectors: rejectors,
-    status: status
+    status: status,
+    chainHistory: {
+      ...request.chainHistory, ...[rejector, emitter].reduce((acc, item) => {
+        return { ...acc, [item]: txInfo };
+      }, {})
+    }
   });
 
   return updatedRequest;

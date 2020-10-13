@@ -86,7 +86,8 @@ class ExpressLicensingService {
     expirationDate,
     status,
     approvers,
-    rejectors
+    rejectors,
+    chainHistory
   }) {
 
     const request = new ExpressLicenseRequest({
@@ -98,7 +99,8 @@ class ExpressLicensingService {
       expirationDate,
       status,
       approvers,
-      rejectors
+      rejectors,
+      chainHistory
     });
 
     const savedRequest = await request.save();
@@ -109,7 +111,8 @@ class ExpressLicensingService {
   async updateExpressLicensingRequest(externalId, { 
     status,
     approvers,
-    rejectors
+    rejectors,
+    chainHistory
   }) {
 
     const request = await ExpressLicenseRequest.findOne({ _id: externalId });
@@ -117,6 +120,7 @@ class ExpressLicensingService {
     request.status = status ? status : request.status;
     request.approvers = approvers ? approvers : request.approvers;
     request.rejectors = rejectors ? rejectors : request.rejectors;
+    request.chainHistory = chainHistory ? chainHistory : request.chainHistory;
 
     const updatedRequest = await request.save();
     return updatedRequest.toObject();

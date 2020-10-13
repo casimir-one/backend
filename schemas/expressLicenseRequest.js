@@ -17,7 +17,8 @@ const ExpressLicenseRequest = new Schema({
   },
   "expirationDate": { type: Date, required: true },
   "approvers": [{ type: String }],
-  "rejectors": [{ type: String }]
+  "rejectors": [{ type: String }],
+  "chainHistory": { type: Object }, // temp
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 
