@@ -14,8 +14,17 @@ class UserTransactionsService {
   
   async getPendingExpressLisenceRequests(username) {
     const membershipTokens = await deipRpc.api.getResearchGroupTokensByAccountAsync(username);
-    const requests = await this.expressLicensingService.getExpressLicenseRequestsByResearchGroups(membershipTokens.map(rgt => rgt.research_group.external_id)); // aprovers
-    const pendingRequests = requests.filter(r => r.status == EXPRESS_LICENSE_REQUEST_STATUS.PENDING);
+    const requests1 = await this.expressLicensingService.getExpressLicenseRequestsByResearchGroups(membershipTokens.map(rgt => rgt.research_group.external_id)); // aprovers
+    const requests2 = await this.expressLicensingService.getExpressLicenseRequestsByRequester(username); // requester
+
+    const pendingRequests = [...requests1, ...requests2]
+      .filter(r => r.status == EXPRESS_LICENSE_REQUEST_STATUS.PENDING)
+      .reduce((unique, request) => {
+        if (unique.some((r) => r._id.toString() == request._id.toString()))
+          return unique;
+        return [request, ...unique];
+      }, []);
+      
     return pendingRequests;
   }
 
