@@ -15,7 +15,7 @@ class ExpressLicensingService {
 
   async mapExpressLicenseRequests(requests) {
 
-    const accounts = requests.reduce((acc, req) => {
+    const accountNames = requests.reduce((acc, req) => {
 
       for (let i = 0; i < req.approvers.length; i++) {
         let approver = req.approvers[i];
@@ -42,7 +42,15 @@ class ExpressLicensingService {
       return acc;
     }, []);
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(accounts);
+    const researchExternalIds = requests.reduce((acc, req) => {
+      if (!acc.some(r => r == req.researchExternalId)) {
+        acc.push(req.researchExternalId);
+      }
+      return acc;
+    }, []);
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+    const chainResearches = await deipRpc.api.getResearchesAsync(researchExternalIds);
     
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -68,7 +76,9 @@ class ExpressLicensingService {
 
         requester: users.find(u => u.account.name == req.requester),
 
-        researchGroup: researchGroups.find(g => g.external_id == req.researchGroupExternalId)
+        researchGroup: researchGroups.find(g => g.external_id == req.researchGroupExternalId),
+
+        research: chainResearches.find(r => r.external_id == req.researchExternalId)
       }
 
       return { ...req.toObject(), extendedDetails };
