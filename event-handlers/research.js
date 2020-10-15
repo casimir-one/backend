@@ -105,6 +105,16 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
           hasUpdate = true;
         }
       }
+      // refactor this !
+      const singleMemberAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
+      for (let j = 0; j < singleMemberAttributes.length; j++) {
+        const singleMembersAttribute = singleMemberAttributes[j];
+        const researchMemberAttribute = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == singleMembersAttribute._id.toString());
+
+        if (researchMemberAttribute.value == invite.invitee) {
+          hasUpdate = false;
+        }
+      }
 
       if (hasUpdate) {
         promises.push(researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes }));
