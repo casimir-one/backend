@@ -47,7 +47,8 @@ const run = async () => {
     return acc;
   }, {});
 
-  const newUserAccounts = chainUserAccounts.filter(a => !genesisJSON.accounts.some(ac => ac.name == a.name)).map(a => {
+  const newUserAccounts = chainUserAccounts.filter(a => a.name != 'regacc' && !genesisJSON.accounts.some(ac => ac.name == a.name)).map(a => {
+
     const key = a.owner.key_auths[0][0];
     return {
       "name": a.name,

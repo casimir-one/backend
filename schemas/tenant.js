@@ -32,11 +32,11 @@ const ResearchAttribute = new Schema({
     enum: [...Object.values(RESEARCH_ATTRIBUTE_TYPE)],
     required: true
   },
-  "isPublished": { type: Boolean, required: false },
   "isFilterable": { type: Boolean, default: false },
-  "isEditable": { type: Boolean, required: false },
+  "isEditable": { type: Boolean, default: true },
   "isRequired": { type: Boolean, default: false },
-  "isHidden": { type: Boolean, required: false },
+  "isHidden": { type: Boolean, default: false },
+  "isMultiple": { type: Boolean, default: false },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
@@ -44,6 +44,8 @@ const ResearchAttribute = new Schema({
   "defaultValue": { type: Schema.Types.Mixed, default: null },
   "blockchainFieldMeta": BlockchainFieldMeta,
 
+
+  "isPublished": { type: Boolean, required: false }, // temp for migration
   "isVisible": { type: Boolean, required: false }, // temp for migration
   "isBlockchainMeta": { type: Boolean, default: false }, // temp for migration
   "component": { type: Object, required: false } // temp for migration

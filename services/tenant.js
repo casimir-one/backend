@@ -91,6 +91,7 @@ async function addTenantResearchAttribute(tenantId, {
   isPublished,
   isFilterable,
   isHidden,
+  isMultiple,
   title,
   shortTitle,
   description,
@@ -105,6 +106,7 @@ async function addTenantResearchAttribute(tenantId, {
     isPublished,
     isFilterable,
     isHidden,
+    isMultiple,
     title,
     shortTitle,
     description,
@@ -135,6 +137,7 @@ async function updateTenantResearchAttribute(tenantId, {
   isPublished,
   isFilterable,
   isHidden,
+  isMultiple,
   title,
   shortTitle,
   description,
@@ -150,6 +153,7 @@ async function updateTenantResearchAttribute(tenantId, {
   researchAttribute.isPublished = isPublished;
   researchAttribute.isFilterable = isFilterable;
   researchAttribute.isHidden = isHidden;
+  researchAttribute.isMultiple = isMultiple;
   researchAttribute.title = title;
   researchAttribute.shortTitle = shortTitle;
   researchAttribute.description = description;
