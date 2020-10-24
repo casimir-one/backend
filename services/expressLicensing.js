@@ -92,6 +92,7 @@ class ExpressLicensingService {
     requester,
     researchExternalId,
     researchGroupExternalId,
+    licenseExternalId,
     licencePlan,
     expirationDate,
     status,
@@ -105,6 +106,7 @@ class ExpressLicensingService {
       requester,
       researchExternalId,
       researchGroupExternalId,
+      licenseExternalId,
       licencePlan,
       expirationDate,
       status,
@@ -186,6 +188,7 @@ class ExpressLicensingService {
 
 
   async createExpressLicense({
+    externalId,
     owner,
     requestId,
     researchExternalId,
@@ -194,6 +197,7 @@ class ExpressLicensingService {
   }) {
 
     const license = new ExpressLicense({
+      _id: externalId,
       owner,
       requestId,
       researchExternalId,

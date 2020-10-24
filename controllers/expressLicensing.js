@@ -32,18 +32,18 @@ const createExpressLicenseRequest = async (ctx, next) => {
     const txInfo = await blockchainService.sendTransactionAsync(tx);
     const operations = blockchainService.extractOperations(tx);
 
-    const transferDatum = operations.find(([opName]) => opName == 'transfer');
+    const createResearchLicenseDatum = operations.find(([opName]) => opName == 'create_research_license');
     const approveTransferDatum = operations.find(([opName]) => opName == 'update_proposal');
 
-    const [opName, transferPayload, transferProposal] = transferDatum;
-    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, { opDatum: transferDatum, context: { emitter: jwtUsername, offchainMeta: { ...offchainMeta, txInfo: { ...txInfo, timestamp: new Date(Date.now()).toISOString() } } } }]);
+    const [opName, createResearchLicensePayload, createResearchLicenseProposal] = createResearchLicenseDatum;
+    ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, { opDatum: createResearchLicenseDatum, context: { emitter: jwtUsername, offchainMeta: { ...offchainMeta, txInfo: { ...txInfo, timestamp: new Date(Date.now()).toISOString() } } } }]);
 
     if (approveTransferDatum) {
       ctx.state.events.push([APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, { opDatum: approveTransferDatum, context: { emitter: jwtUsername, offchainMeta: { ...offchainMeta, txInfo: { ...txInfo, timestamp: new Date(Date.now()).toISOString() } } } }]);
     }
     
     ctx.status = 200;
-    ctx.body = transferProposal;
+    ctx.body = createResearchLicenseProposal;
 
   } catch (err) {
     console.log(err);

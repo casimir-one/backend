@@ -9,6 +9,7 @@ const ExpressLicenseRequest = new Schema({
   "requester": { type: String, required: true, index: true },
   "researchExternalId": { type: String, required: true, index: true },
   "researchGroupExternalId": { type: String, required: true, index: true },
+  "licenseExternalId": { type: String, required: true, index: true },
   "licencePlan": { type: Object, required: true },
   "status": {
     type: String,

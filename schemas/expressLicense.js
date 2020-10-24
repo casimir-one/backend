@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const ExpressLicense = new Schema({
+  "_id": { type: String },
   "owner": { type: String, required: true, index: true },
   "requestId": { type: String, required: true, index: true },
   "researchExternalId": { type: String, required: true, index: true },

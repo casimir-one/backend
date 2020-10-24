@@ -10,13 +10,13 @@ const expressLicensingHandler = new ExpressLicensingHandler();
 
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter, offchainMeta: { licencePlan, researchExternalId, txInfo } } } = source;
+  const { opDatum, tenant, context: { emitter, offchainMeta: { licencePlan, txInfo } } } = source;
   const expressLicensingService = new ExpressLicensingService();
 
   const [opName, opPayload, opProposal] = opDatum;
 
-  const { to: researchGroupExternalId } = opPayload;
-  const { external_id: externalId, creator: requester, expiration_time: expirationDate } = opProposal;
+  const { external_id: licenseExternalId, research_external_id: researchExternalId, licenser: researchGroupExternalId, licensee: requester } = opPayload;
+  const { external_id: externalId, expiration_time: expirationDate } = opProposal;
 
   const chainProposal = await deipRpc.api.getProposalAsync(externalId);
 
@@ -32,6 +32,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, 
     requester,
     researchExternalId,
     researchGroupExternalId,
+    licenseExternalId,
     licencePlan,
     expirationDate,
     status: EXPRESS_LICENSE_REQUEST_STATUS.PENDING,
@@ -81,6 +82,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (
   if (status == EXPRESS_LICENSE_REQUEST_STATUS.APPROVED) {
     await expressLicensingService.createExpressLicense({
       requestId: request._id,
+      externalId: request.licenseExternalId,
       owner: request.requester,
       researchExternalId: request.researchExternalId,
       researchGroupExternalId: request.researchGroupExternalId,
