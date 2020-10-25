@@ -78,7 +78,7 @@ const createReviewRequest = async (ctx) => {
     ctx.body = 'Review with such params already requested';
     return;
   }
-  const contentReviews = await deipRpc.api.getReviewsByContentAsync(contentId);
+  const contentReviews = await deipRpc.api.getReviewsByResearchContentAsync(contentId);
   const existingReview = contentReviews.find(r => r.author === expert);
   if (existingReview) {
     ctx.status = 400;
