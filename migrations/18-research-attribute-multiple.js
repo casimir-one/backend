@@ -35,7 +35,8 @@ const run = async () => {
       if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST ||
         researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST ||
         researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST ||
-        researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT) {
+        researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT ||
+        researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.URL) {
 
         researchAttribute.isMultiple = true;
 
