@@ -40,6 +40,16 @@ const run = async () => {
 
         researchAttribute.isMultiple = true;
 
+        if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST) {
+          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP;
+        } else if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST) {
+          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.DISCIPLINE;
+        } else if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST) {
+          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.USER;
+        } else if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT) {
+          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.SELECT;
+        }
+
       } else {
         researchAttribute.isMultiple = false;
       }
