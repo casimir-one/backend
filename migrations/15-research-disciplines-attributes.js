@@ -24,13 +24,14 @@ mongoose.connect(config.mongo['deip-server'].connection);
 
 
 const run = async () => {
+  const DISCIPLINES_LIST = "disciplines-list";
 
   const tenant = await TenantProfile.findOne({ _id: "0000000000000000000000000000000000000000" });
 
   if (tenant) {
 
-    let categoriesAttr = tenant.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST && attr.title == "TTO Categories");
-    let disciplinesAttr = tenant.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST && attr.title == "ORIP Disciplines");
+    let categoriesAttr = tenant.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "TTO Categories");
+    let disciplinesAttr = tenant.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "ORIP Disciplines");
 
     const researchPromises = [];
     const researches = await Research.find({});

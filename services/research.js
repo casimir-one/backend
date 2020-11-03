@@ -53,11 +53,11 @@ class ResearchService {
           return rAttr.value.toLowerCase().includes(filter.searchTerm.toLowerCase());
         }
 
-        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP || attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST) {
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
           return r.research_group.name.toLowerCase().includes(filter.searchTerm.toLowerCase());
         }
 
-        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.USER || attribute.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST) {
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.USER) {
           return r.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
         }
  

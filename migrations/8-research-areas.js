@@ -23,7 +23,8 @@ mongoose.connect(config.mongo['deip-server'].connection);
 
 
 const run = async () => {
-  
+  const MULTI_SELECT = "multi-select";
+
   const tenantsPromises = [];
   const tenants = await TenantProfile.find({});
 
@@ -46,7 +47,7 @@ const run = async () => {
         researchDetailsMain.push(researchAttribute._id)
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.SELECT || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT) {
+      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.SELECT || researchAttribute.type == MULTI_SELECT) {
         researchDetailsRightSidebar.push(researchAttribute._id);
       }
 

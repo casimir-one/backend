@@ -24,7 +24,8 @@ mongoose.connect(config.mongo['deip-server'].connection);
 
 
 const run = async () => {
-  
+  const MULTI_SELECT = "multi-select";
+
   const tenantPromises = [];
   const tenants = await TenantProfile.find({});
 
@@ -36,7 +37,7 @@ const run = async () => {
 
       if (attr.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER) {
         attr.areas = [RESEARCH_ATTRIBUTE_AREA.SIDEBAR, RESEARCH_ATTRIBUTE_AREA.CARD];
-      } else if (attr.type == RESEARCH_ATTRIBUTE_TYPE.PARTNERS || attr.type == RESEARCH_ATTRIBUTE_TYPE.SELECT || attr.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT) {
+      } else if (attr.type == RESEARCH_ATTRIBUTE_TYPE.PARTNERS || attr.type == RESEARCH_ATTRIBUTE_TYPE.SELECT || attr.type == MULTI_SELECT) {
         attr.areas = [RESEARCH_ATTRIBUTE_AREA.SIDEBAR];
       } else {
         attr.areas = [RESEARCH_ATTRIBUTE_AREA.MAIN];

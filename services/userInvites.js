@@ -3,96 +3,96 @@ import UserInvite from './../schemas/userInvite';
 import { USER_INVITE_STATUS, USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
 
 
-async function findUserInvite(externalId) { // proposal id
-  let invite = await UserInvite.findOne({ _id: externalId });
-  return invite.toObject();
-}
+class UserInviteService {
+
+  constructor() {}
 
 
-async function findUserPendingInvites(username) {
-  let activeInvites = await UserInvite.find({ invitee: username, status: USER_INVITE_STATUS.SENT });
-  return activeInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
-}
+  async findUserInvite(externalId) { // proposal id
+    let invite = await UserInvite.findOne({ _id: externalId });
+    return invite.toObject();
+  }
 
 
-async function findResearchGroupPendingInvites(researchGroupExternalId) {
-  let rgInvites = await UserInvite.find({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT });
-  return rgInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
-}
+  async findUserPendingInvites(username) {
+    let activeInvites = await UserInvite.find({ invitee: username, status: USER_INVITE_STATUS.SENT });
+    return activeInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
+  }
 
 
-async function findResearchPendingInvites(researchExternalId) {
-
-  const research = await deipRpc.api.getResearchAsync(researchExternalId);
-  const researchGroupExternalId = research.research_group.external_id;
-
-  const invites = await UserInvite.find({
-    researchGroupExternalId: researchGroupExternalId,
-    status: USER_INVITE_STATUS.SENT,
-    $or: [
-      { researches: { $exists: false } },
-      { researches: null },
-      { researches: { $in: [researchExternalId] } }
-    ]
-  });
-
-  return invites.filter(invite => invite.expiration.getTime() > new Date().getTime());
-}
+  async findResearchGroupPendingInvites(researchGroupExternalId) {
+    let rgInvites = await UserInvite.find({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT });
+    return rgInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
+  }
 
 
-async function createUserInvite({
-  externalId,
-  invitee,
-  creator,
-  researchGroupExternalId,
-  rewardShare,
-  status,
-  notes,
-  expiration
-}) {
+  async findResearchPendingInvites(researchExternalId) {
 
-  const userInvite = new UserInvite({
-    _id: externalId,
+    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const researchGroupExternalId = research.research_group.external_id;
+
+    const invites = await UserInvite.find({
+      researchGroupExternalId: researchGroupExternalId,
+      status: USER_INVITE_STATUS.SENT,
+      $or: [
+        { 'researches': { $exists: false } },
+        { 'researches': null },
+        { 'researches.externalId': { $in: [researchExternalId] } }
+      ]
+    });
+
+    return invites.filter(invite => invite.expiration.getTime() > new Date().getTime());
+  }
+
+
+  async createUserInvite({
+    externalId,
     invitee,
     creator,
     researchGroupExternalId,
     rewardShare,
     status,
     notes,
-    expiration,
-    approvedBy: [],
-    rejectedBy: [],
-    failReason: null,
-    researches: null
-  });
+    researches,
+    expiration
+  }) {
 
-  const savedUserInvite = await userInvite.save();
-  return savedUserInvite.toObject();
+    const userInvite = new UserInvite({
+      _id: externalId,
+      invitee,
+      creator,
+      researchGroupExternalId,
+      rewardShare,
+      status,
+      notes,
+      expiration,
+      researches,
+      approvedBy: [],
+      rejectedBy: [],
+      failReason: null
+    });
+
+    const savedUserInvite = await userInvite.save();
+    return savedUserInvite.toObject();
+  }
+
+
+  async updateUserInvite(externalId, {
+    status,
+    failReason,
+    approvedBy,
+    rejectedBy
+  }) {
+
+    const userInvite = await UserInvite.findOne({ _id: externalId });
+    userInvite.status = status;
+    userInvite.approvedBy = approvedBy;
+    userInvite.rejectedBy = rejectedBy;
+    userInvite.failReason = failReason;
+
+    const updatedUserInvite = await userInvite.save();
+    return updatedUserInvite.toObject();
+  }
 }
 
-
-async function updateUserInvite(externalId, {
-  status,
-  failReason,
-  approvedBy,
-  rejectedBy
-}) {
-
-  const userInvite = await UserInvite.findOne({ _id: externalId });
-  userInvite.status = status;
-  userInvite.approvedBy = approvedBy;
-  userInvite.rejectedBy = rejectedBy;
-  userInvite.failReason = failReason;
-
-  const updatedUserInvite = await userInvite.save();
-  return updatedUserInvite.toObject();
-}
-
-export default {
-  findUserInvite,
-  findUserPendingInvites,
-  findResearchGroupPendingInvites,
-  findResearchPendingInvites,
-  createUserInvite,
-  updateUserInvite
-}
+export default UserInviteService;

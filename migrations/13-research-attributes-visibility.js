@@ -24,6 +24,8 @@ mongoose.connect(config.mongo['deip-server'].connection);
 
 
 const run = async () => {
+  const RESEARCH_GROUPS_LIST = "research-groups-list";
+  const DISCIPLINES_LIST = "disciplines-list";
 
   const tenantPromises = [];
   const tenants = await TenantProfile.find({});
@@ -43,13 +45,13 @@ const run = async () => {
       researchAttribute.isBlockchainMeta = undefined;
       researchAttribute.component = undefined;
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+      if (researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
         researchAttribute.isHidden = true;
       } else {
         researchAttribute.isHidden = false;
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINE || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+      if (researchAttribute.type == DISCIPLINES_LIST || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINE || researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
         researchAttribute.isEditable = false;
       } else {
         researchAttribute.isEditable = true;

@@ -23,6 +23,11 @@ mongoose.connect(config.mongo['deip-server'].connection);
 
 const run = async () => {
 
+  const RESEARCH_GROUPS_LIST = "research-groups-list";
+  const DISCIPLINES_LIST = "disciplines-list";
+  const USERS_LIST = "users-list";
+  const MULTI_SELECT = "multi-select";
+
   const tenantPromises = [];
   const tenants = await TenantProfile.find({});
 
@@ -32,21 +37,21 @@ const run = async () => {
     for (let j = 0; j < tenant.settings.researchAttributes.length; j++) {
       let researchAttribute = tenant.settings.researchAttributes[j];
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST ||
-        researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST ||
-        researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST ||
-        researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT ||
+      if (researchAttribute.type == RESEARCH_GROUPS_LIST ||
+        researchAttribute.type == DISCIPLINES_LIST ||
+        researchAttribute.type == USERS_LIST ||
+        researchAttribute.type == MULTI_SELECT ||
         researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.URL) {
 
         researchAttribute.isMultiple = true;
 
-        if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUPS_LIST) {
+        if (researchAttribute.type == RESEARCH_GROUPS_LIST) {
           researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP;
-        } else if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST) {
+        } else if (researchAttribute.type == DISCIPLINES_LIST) {
           researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.DISCIPLINE;
-        } else if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST) {
+        } else if (researchAttribute.type == USERS_LIST) {
           researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.USER;
-        } else if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.MULTI_SELECT) {
+        } else if (researchAttribute.type == MULTI_SELECT) {
           researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.SELECT;
         }
 

@@ -72,7 +72,15 @@ const createResearch = async (ctx, next) => {
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
-      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
+      const { member: invitee, researches } = opPayload;
+      const { attributes: researchAttributes } = offchainMeta;
+      const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const inviteResearches = researches ? researches
+        .map((externalId) => {
+          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
+          return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
+        }) : [];
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "", researches: inviteResearches } } }]);
       const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
 
       if (approveInviteDatum) {
@@ -133,12 +141,21 @@ const updateResearch = async (ctx, next) => {
     } else {
       ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta } }]);
     }
-
+    
     const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
-      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "" } } }]);
+      const { member: invitee, researches } = opPayload;
+      const { attributes: researchAttributes } = offchainMeta;
+      const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const inviteResearches = researches ? researches
+        .map((externalId) => {
+          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
+          return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
+        }) : [];
+        
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "", researches: inviteResearches } } }]);
       const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
 
       if (approveInviteDatum) {

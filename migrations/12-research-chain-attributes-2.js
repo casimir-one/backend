@@ -24,7 +24,9 @@ mongoose.connect(config.mongo['deip-server'].connection);
 
 
 const run = async () => {
-  
+  const DISCIPLINES_LIST = "disciplines-list";
+  const USERS_LIST = "users-list";
+
   await TenantProfile.update({}, { $set: { "settings.researchAttributes.$[].isBlockchainMeta": false } }, { multi: true });
 
   const tenantPromises = [];
@@ -33,7 +35,7 @@ const run = async () => {
 
   const researchDisciplinesAttribute = {
     _id: mongoose.Types.ObjectId("5f62d4fa98f46d2938dde1eb"),
-    type: RESEARCH_ATTRIBUTE_TYPE.DISCIPLINES_LIST,
+    type: DISCIPLINES_LIST,
     isVisible: true,
     isRequired: true,
     isFilterable: true,
@@ -84,7 +86,7 @@ const run = async () => {
 
   const researchInventorsAttribute = {
     _id: mongoose.Types.ObjectId("5f690af5cdaaa53a27af4a31"),
-    type: RESEARCH_ATTRIBUTE_TYPE.USERS_LIST,
+    type: USERS_LIST,
     isVisible: true,
     isRequired: true,
     isFilterable: false,

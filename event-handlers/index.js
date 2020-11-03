@@ -6,12 +6,12 @@ import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS,
 import userNotificationsHandler from './userNotification';
 import researchGroupActivityLogHandler from './researchGroupActivityLog';
 import researchHandler from './research';
+import userInviteHandler from './userInvite';
 import expressLicensingHandler from './expressLicensing';
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
-import userInvitesService from './../services/userInvites';
 
 class AppEventHandler extends EventEmitter { }
 
@@ -99,23 +99,9 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
 
   const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const { notes } = offchainMeta;
   const researchGroupService = new ResearchGroupService();
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { member: invitee, research_group: researchGroupExternalId, reward_share: rewardShare } = opPayload;
-  const { external_id: proposalId, expiration_time: expiration } = opProposal;
-
-  const userInvite = await userInvitesService.createUserInvite({
-    externalId: proposalId,
-    invitee: invitee,
-    creator: emitter,
-    researchGroupExternalId: researchGroupExternalId,
-    rewardShare: rewardShare,
-    status: USER_INVITE_STATUS.PROPOSED,
-    notes: notes,
-    expiration: expiration
-  });
+  const userInvite = await wait(userInviteHandler, APP_EVENTS.USER_INVITATION_PROPOSED, source);
 
   const researchGroup = await researchGroupService.getResearchGroup(userInvite.researchGroupExternalId);
   const inviteeProfile = await usersService.findUserProfileByOwner(userInvite.invitee);
@@ -134,27 +120,7 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
   const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
   const researchGroupService = new ResearchGroupService();
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { external_id: proposalId, active_approvals_to_add: approvals1, owner_approvals_to_add: approvals2 } = opPayload;
-
-  const invite = await userInvitesService.findUserInvite(proposalId);
-
-  const approvers = [...invite.approvedBy, ...approvals1, ...approvals2].reduce((acc, user) => {
-    if (!acc.some(u => u == user)) {
-      return [...acc, user];
-    }
-    return acc;
-  }, []);
-  
-  const updatedInvite = await userInvitesService.updateUserInvite(proposalId, {
-    status: approvers.some(u => u == invite.invitee) 
-      ? USER_INVITE_STATUS.APPROVED 
-      : USER_INVITE_STATUS.SENT, // only one research group member needs to agree to send the invite currently
-    approvedBy: approvers,
-    rejectedBy: invite.rejectedBy,
-    failReason: null
-  });
-
+  const updatedInvite = await wait(userInviteHandler, APP_EVENTS.USER_INVITATION_SIGNED, source);
 
   const researchGroup = await researchGroupService.getResearchGroup(updatedInvite.researchGroupExternalId);
   const inviteeProfile = await usersService.findUserProfileByOwner(updatedInvite.invitee);
@@ -174,24 +140,7 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
   const { opDatum, tenant, context: { emitter } } = source;
   const researchGroupService = new ResearchGroupService();
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { external_id: proposalId, account: rejector } = opPayload;
-
-  const invite = await userInvitesService.findUserInvite(proposalId);
-
-  const rejectors = [...invite.rejectedBy, rejector].reduce((acc, user) => {
-    if (!acc.some(u => u == user)) {
-      return [...acc, user];
-    }
-    return acc;
-  }, []);
-
-  const updatedInvite = await userInvitesService.updateUserInvite(proposalId, {
-    status: USER_INVITE_STATUS.REJECTED,
-    approvedBy: invite.approvedBy,
-    rejectedBy: rejectors,
-    failReason: null
-  });
+  const updatedInvite = await wait(userInviteHandler, APP_EVENTS.USER_INVITATION_CANCELED, source);
 
   const researchGroup = await researchGroupService.getResearchGroup(updatedInvite.researchGroupExternalId);
   const inviteeProfile = await usersService.findUserProfileByOwner(updatedInvite.invitee);
@@ -205,7 +154,6 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
   fire(researchHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
 
 }));
-
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {

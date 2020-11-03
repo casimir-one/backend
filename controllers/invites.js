@@ -1,11 +1,12 @@
 import { APP_EVENTS } from './../constants';
-import userInvitesService from './../services/userInvites';
+import UserInviteService from './../services/userInvites';
 import * as blockchainService from './../utils/blockchain';
 
 
 const getUserInvites = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const username = ctx.params.username;
+  const userInviteService = new UserInviteService();
 
   try {
 
@@ -15,7 +16,7 @@ const getUserInvites = async (ctx) => {
       return;
     }
 
-    const activeInvites = await userInvitesService.findUserPendingInvites(username);
+    const activeInvites = await userInviteService.findUserPendingInvites(username);
     ctx.status = 200;
     ctx.body = activeInvites;
     
@@ -30,10 +31,11 @@ const getUserInvites = async (ctx) => {
 const getResearchGroupPendingInvites = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
+  const userInviteService = new UserInviteService();
 
   try {
 
-    const invites = await userInvitesService.findResearchGroupPendingInvites(researchGroupExternalId);
+    const invites = await userInviteService.findResearchGroupPendingInvites(researchGroupExternalId);
     ctx.status = 200;
     ctx.body = invites;
 
@@ -48,10 +50,11 @@ const getResearchGroupPendingInvites = async (ctx) => {
 const getResearchPendingInvites = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.params.researchExternalId;
+  const userInviteService = new UserInviteService();
 
   try {
 
-    const invites = await userInvitesService.findResearchPendingInvites(researchExternalId);
+    const invites = await userInviteService.findResearchPendingInvites(researchExternalId);
     ctx.status = 200;
     ctx.body = invites;
 
@@ -75,7 +78,7 @@ const createUserInvite = async (ctx, next) => {
     const inviteDatum = operations.find(([opName]) => opName == 'join_research_group_membership');
 
     const [opName, invitePayload, inviteProposal] = inviteDatum;
-    ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { researches: [], ...offchainMeta } } }]);
 
     const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
     if (approveInviteDatum) {

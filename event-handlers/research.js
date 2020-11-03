@@ -37,8 +37,10 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
   const researchGroupAttribute = tenant.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
   if (researchGroupAttribute && researchGroupAttribute.isHidden) {
     const rAttr = attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchGroupAttribute._id.toString());
-    rAttr.value = researchGroupExternalId;
-    hasUpdate = true;
+    if (!rAttr.value) {
+      rAttr.value = [researchGroupExternalId];
+      hasUpdate = true;
+    }
   }
 
   if (hasUpdate) {
@@ -81,38 +83,26 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
   if (invite.status == USER_INVITE_STATUS.SENT) {
 
     const researches = [];
-    if (invite.researches) {
-      const result = await researchService.getResearches(invite.researches);
-      researches.push(...result);
-    } else {
-      const result = await researchService.getResearchesByResearchGroup(researchGroup.external_id);
+    if (invite.researches != null) {
+      const result = await researchService.getResearches(invite.researches.map(r => r.externalId));
       researches.push(...result);
     }
 
     const promises = [];
     for (let i = 0; i < researches.length; i++) {
       const research = researches[i];
+      const researchInvite = invite.researches.find(r => r.externalId == research.external_id);
 
       let hasUpdate = false;
 
-      const multipleMembersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
-      for (let j = 0; j < multipleMembersAttributes.length; j++) {
-        const multipleMembersAttribute = multipleMembersAttributes[j];
-        const researchMembersAttribute = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == multipleMembersAttribute._id.toString());
-
-        if (!researchMembersAttribute.value.some(m => m == invite.invitee)) {
-          researchMembersAttribute.value.push(invite.invitee);
-          hasUpdate = true;
-        }
-      }
-      // refactor this !
-      const singleMemberAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
-      for (let j = 0; j < singleMemberAttributes.length; j++) {
-        const singleMembersAttribute = singleMemberAttributes[j];
-        const researchMemberAttribute = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == singleMembersAttribute._id.toString());
-
-        if (researchMemberAttribute.value == invite.invitee) {
-          hasUpdate = false;
+      if (researchInvite) {
+        for (let j = 0; j < researchInvite.attributes.length; j++) {
+          const researchAttributeId = researchInvite.attributes[j];
+          const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchAttributeId.toString());
+          if (!rAttr.value.some(m => m == invite.invitee)) {
+            rAttr.value.push(invite.invitee);
+            hasUpdate = true;
+          }
         }
       }
 
@@ -139,11 +129,8 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
   if (!members.some(user => user.account.name == invite.invitee)) { // check if rejecting old invite
 
     const researches = [];
-    if (invite.researches) {
-      const result = await researchService.getResearches(invite.researches);
-      researches.push(...result);
-    } else {
-      const result = await researchService.getResearchesByResearchGroup(researchGroup.external_id);
+    if (invite.researches != null) {
+      const result = await researchService.getResearches(invite.researches.map(r => r.externalId));
       researches.push(...result);
     }
 
@@ -152,26 +139,17 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
       const research = researches[i];
 
       let hasUpdate = false;
+      
+      const researchInvite = invite.researches.find(r => r.externalId == research.external_id);
 
-      const multipleMembersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
-      for (let j = 0; j < multipleMembersAttributes.length; j++) {
-        const multipleMembersAttribute = multipleMembersAttributes[j];
-        const researchMembersAttribute = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == multipleMembersAttribute._id.toString());
-        
-        if (researchMembersAttribute.value.some(m => m == invite.invitee)) {
-          researchMembersAttribute.value = researchMembersAttribute.value.filter(m => m != invite.invitee);
-          hasUpdate = true;
-        }
-      }
-
-      const singleMemberAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
-      for (let j = 0; j < singleMemberAttributes.length; j++) {
-        const singleMembersAttribute = singleMemberAttributes[j];
-        const researchMemberAttribute = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == singleMembersAttribute._id.toString());
-
-        if (researchMemberAttribute.value == invite.invitee) {
-          researchMemberAttribute.value = null;
-          hasUpdate = true;
+      if (researchInvite) {
+        for (let j = 0; j < researchInvite.attributes.length; j++) {
+          const researchAttributeId = researchInvite.attributes[j];
+          const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchAttributeId.toString());
+          if (rAttr.value.some(m => m == invite.invitee)) {
+            rAttr.value = rAttr.value.filter(m => m != invite.invitee);
+            hasUpdate = true;
+          }
         }
       }
 
@@ -200,24 +178,13 @@ researchHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, (payload, reply) => handl
 
     let hasUpdate = false;
 
-    const multipleMembersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USERS_LIST && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
-    for (let j = 0; j < multipleMembersAttributes.length; j++) {
-      const multipleMembersAttribute = multipleMembersAttributes[j];
-      const researchMembersAttribute = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == multipleMembersAttribute._id.toString());
+    const membersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+    for (let j = 0; j < membersAttributes.length; j++) {
+      const membersAttribute = membersAttributes[j];
+      const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == membersAttribute._id.toString());
 
-      if (researchMembersAttribute.value.some(m => m == member._id)) {
-        researchMembersAttribute.value = researchMembersAttribute.value.filter(m => m != member._id);
-        hasUpdate = true;
-      }
-    }
-
-    const singleMemberAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'members');
-    for (let j = 0; j < singleMemberAttributes.length; j++) {
-      const singleMembersAttribute = singleMemberAttributes[j];
-      const researchMemberAttribute = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == singleMembersAttribute._id.toString());
-
-      if (researchMemberAttribute.value == member._id) {
-        researchMemberAttribute.value = null;
+      if (rAttr.value.some(m => m == member._id)) {
+        rAttr.value = rAttr.value.filter(m => m != member._id);
         hasUpdate = true;
       }
     }
