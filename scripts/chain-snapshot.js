@@ -79,6 +79,7 @@ const run = async () => {
       "abstract": r.abstract,
       "is_finished": r.is_finished,
       "is_private": r.is_private,
+      "members": r.members,
       "disciplines": r.disciplines.map(d => {
         return d.external_id;
       })
