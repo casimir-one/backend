@@ -68,16 +68,32 @@ class ResearchService {
         const attribute = this.researchAttributes.find(attr => attr.isFilterable && attr._id.toString() === fAttr.researchAttributeId.toString());
         const rAttr = r.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() === fAttr.researchAttributeId.toString());
         
-        if (!attribute || !rAttr || !rAttr.value)
+        if (!attribute || !rAttr) {
           return false;
+        }
 
         return fAttr.values.some((v) => {
+
+          if (!rAttr.value) {
+              return v == null;
+          }
+
+          if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.EXPRESS_LICENSING) {
+            if (v == true || v === 'true') {
+              return rAttr.value.length != 0;
+            } else {
+              return false;
+            }
+          }
+
           if (Array.isArray(rAttr.value)) {
             return rAttr.value.some(rAttrV => rAttrV.toString() === v.toString());
           }
+
           if (typeof rAttr.value === 'string') {
             return rAttr.value.includes(v.toString());
           }
+
           return rAttr.value.toString() === v.toString();
         });
 
