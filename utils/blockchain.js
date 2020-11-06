@@ -86,10 +86,42 @@ async function getTransaction(trxId) {
   })
 }
 
+
+function extractOperations(tx) {
+  const result = [];
+
+  for (let i = 0; i < tx.operations.length; i++) {
+    let [op_name, op_payload] = tx.operations[i];
+
+    result.push([op_name, op_payload, null]);
+
+    if (op_name === 'create_proposal') {
+      extractOperationsFromProposal(op_payload, result);
+    }
+  }
+
+  return result;
+}
+
+function extractOperationsFromProposal(proposal, result) {
+
+  for (let i = 0; i < proposal.proposed_ops.length; i++) {
+    let [op_name, op_payload] = proposal.proposed_ops[i]['op'];
+    result.push([op_name, op_payload, proposal]);
+
+    if (op_name === 'create_proposal') {
+      extractOperationsFromProposal(op_payload, result);
+    }
+
+    return result;
+  }
+}
+
 export {
   sendTransaction,
   getBlock,
   getTransaction,
   sendTransactionAsync,
-  signOperations
+  signOperations,
+  extractOperations
 }

@@ -5,10 +5,26 @@ import config from './../config';
 import * as blockchainService from './../utils/blockchain';
 
 
-async function findUser(username) {
-  const profile = await UserProfile.findOne({ _id: username });
-  const [account] = await deipRpc.api.getAccountsAsync([username])
-  return { account, profile: profile || new UserProfile() };
+
+async function mapUsers(chainAccounts) {
+  const profiles = await UserProfile.find({ _id: { $in: chainAccounts.map(a => a.name) } });
+  return chainAccounts
+    .map((chainAccount) => {
+      const profileRef = profiles.find(r => r._id == chainAccount.name);
+      return { account: chainAccount, profile: profileRef ? profileRef.toObject() : null };
+    });
+}
+
+async function getUser(username) {
+  const [chainAccount] = await deipRpc.api.getAccountsAsync([username]);
+  const [result] = await mapUsers([chainAccount]);
+  return result;
+}
+
+async function getUsers(usernames) {
+  const chainAccounts = await deipRpc.api.getAccountsAsync(usernames);
+  const result = await mapUsers(chainAccounts);
+  return result;
 }
 
 async function findUserProfileByOwner(username) {
@@ -34,6 +50,13 @@ async function deleteUserProfile(username) {
 async function findUserProfiles(accounts) {
   const profiles = await UserProfile.find({ '_id': { $in: accounts } });
   return profiles;
+}
+
+async function findResearchGroupMembershipUsers(researchGroupExternalId) {
+  const membershipTokens = await deipRpc.api.getResearchGroupMembershipTokensAsync(researchGroupExternalId);
+  const chainAccounts = await deipRpc.api.getAccountsAsync(membershipTokens.map(rgt => rgt.owner));
+  const result = await mapUsers(chainAccounts);
+  return result;
 }
 
 async function createUserProfile({
@@ -152,11 +175,13 @@ async function createUserAccount({ username, pubKey }) {
 }
 
 export default {
-  findUser,
+  getUser,
+  getUsers,
   findUserProfileByOwner,
   findPendingUserProfiles,
   findActiveUserProfiles,
   findUserProfiles,
+  findResearchGroupMembershipUsers,
   createUserAccount,
   createUserProfile,
   updateUserProfile,

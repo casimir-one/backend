@@ -7,11 +7,14 @@ import USER_NOTIFICATION_TYPE from './userNotificationType';
 import PROPOSAL_TYPE from './proposalType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
-import RESEARCH_COMPONENT_TYPE from './researchComponentsTypes';
+import RESEARCH_ATTRIBUTE_TYPE from './researchAttributeTypes';
 import APP_EVENTS from './appEvents';
 import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 import NEW_RESEARCH_POLICY from './newResearchPolicy';
+import RESEARCH_ATTRIBUTE_AREA from './researchAttributeArea';
+import RESEARCH_STATUS from './researchStatus';
+import EXPRESS_LICENSE_REQUEST_STATUS from './expressLicenseRequestStatus';
 
 export {
   CHAIN_CONSTANTS,
@@ -22,9 +25,12 @@ export {
   PROPOSAL_TYPE,
   TOKEN_SALE_STATUS,
   USER_INVITE_STATUS,
-  RESEARCH_COMPONENT_TYPE,
+  RESEARCH_ATTRIBUTE_TYPE,
   APP_EVENTS,
   RESEARCH_APPLICATION_STATUS,
   RESEARCH_CONTENT_STATUS,
-  NEW_RESEARCH_POLICY
+  NEW_RESEARCH_POLICY,
+  RESEARCH_ATTRIBUTE_AREA,
+  RESEARCH_STATUS,
+  EXPRESS_LICENSE_REQUEST_STATUS
 } 

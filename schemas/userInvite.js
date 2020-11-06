@@ -4,18 +4,26 @@ import { USER_INVITE_STATUS } from './../constants';
 
 const Schema = mongoose.Schema;
 
+const ResearchInvite = new Schema({
+  "_id": false,
+  "externalId": { type: String, required: true },
+  "attributes": [{ type: mongoose.Types.ObjectId, required: true }],
+});
+
 const UserInvite = new Schema({
   "_id": { type: String },
   "invitee": { type: String, required: true, index: true },
+  "creator": { type: String },
   "researchGroupExternalId": { type: String, required: true, index: true },
-  "notes": { type: String, required: true, trim: true },
-  "rewardShare": { type: String },
+  "notes": { type: String, required: false, trim: true },
+  "rewardShare": { type: String, default: null },
   "failReason": { type: String },
   "approvedBy": [{ type: String }],
-  "rejectedBy": { type: String },
+  "rejectedBy": [{ type: String }],
+  "researches": [ResearchInvite],
   "status": {
     type: String,
-    enum: [USER_INVITE_STATUS.PROPOSED, USER_INVITE_STATUS.SENT, USER_INVITE_STATUS.APPROVED, USER_INVITE_STATUS.REJECTED, USER_INVITE_STATUS.EXPIRED],
+    enum: [...Object.values(USER_INVITE_STATUS)],
     required: true
   },
   "expiration": { type: Date, required: true, index: true },

@@ -1,168 +1,203 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 import ResearchApplication from './../schemas/researchApplication';
-import { RESEARCH_APPLICATION_STATUS, RESEARCH_COMPONENT_TYPE } from './../constants';
+import ExpressLicensingService from './expressLicensing';
+import { RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import mongoose from 'mongoose';
 
 class ResearchService {
 
   constructor(tenant) {
-    this.researchWhitelist = tenant.settings.researchWhitelist;
-    this.researchBlacklist = tenant.settings.researchBlacklist;
-    this.enabledResearchAttributes = tenant.settings.researchAttributes.filter(attr => attr.isVisible);
+    this.researchWhitelist = tenant.settings.researchWhitelist || [];
+    this.researchBlacklist = tenant.settings.researchBlacklist || [];
+    this.researchAttributes = tenant.settings.researchAttributes || [];
+    this.expressLicensingService = new ExpressLicensingService();
   }
 
-  async mapResearch(chainResearches, privateGuard = (r) => { return !r.is_private }) {
-    const researches = await Research.find({ _id: { $in: chainResearches.map(r => r.external_id) } });
+
+  async mapResearch(chainResearches, privateGuardFn, filterObj) {
+
+    const filter =  {
+      searchTerm: "",
+      disciplines: [],
+      organizations: [],
+      researchAttributes: [], 
+      ...filterObj
+    }
+    
+    const researchExternalIds = chainResearches.map(r => r.external_id);
+
+    const researches = await Research.find({ _id: { $in: researchExternalIds } });
+    const researchesExpressLicenses = await this.expressLicensingService.getExpressLicensesByResearches(researchExternalIds);
+    
     return chainResearches
-      .filter(r => !this.researchWhitelist || this.researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !this.researchBlacklist || !this.researchBlacklist.some(id => r.external_id == id))
-      .filter(privateGuard)
       .map((chainResearch) => {
-
-        const research = researches.find(r => r._id == chainResearch.external_id);
-        if (research) {
-
-          const attributes = research.attributes.filter(a => this.enabledResearchAttributes.some(attr => attr._id.toString() == a.researchAttributeId.toString()));
-          const extendedAttributes = attributes.map((researchAttribute) => {
-
-            const researchAttributeSchema = this.enabledResearchAttributes.find(attr => attr._id.toString() == researchAttribute.researchAttributeId.toString());
-            if (researchAttributeSchema) {
-              const { type } = researchAttributeSchema;
-
-              if (type == RESEARCH_COMPONENT_TYPE.STEPPER) {
-
-                if (!researchAttribute.value) return null;
-                
-                const step = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
-                if (!step) return null;
-
-                const number = researchAttributeSchema.valueOptions.indexOf(step) + 1;
-                return {
-                  value: { ...step, number },
-                  attribute: researchAttributeSchema
-                }
-
-              } else if (type == RESEARCH_COMPONENT_TYPE.SELECT) {
-
-                if (!researchAttribute.value) return null;
-
-                const option = researchAttributeSchema.valueOptions.find(opt => opt.value.toString() == researchAttribute.value.toString());
-                if (!option) return null;
-
-                return {
-                  value: { ...option },
-                  attribute: researchAttributeSchema
-                }
-
-              } else {
-
-                return {
-                  value: researchAttribute.value,
-                  attribute: researchAttributeSchema
-                }
-
-              }
-
-            } else {
-              return null;
-            }
-          })
-            .filter((attr) => !!attr);
-
-          return { ...chainResearch, researchRef: { ...research.toObject(), attributes, extendedAttributes } };
+        const researchRef = researches.find(r => r._id == chainResearch.external_id);
+        const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id);
+        if (researchRef) {
+          return { ...chainResearch, researchRef: { ...researchRef.toObject(), expressLicenses } };
         }
         return { ...chainResearch, researchRef: null };
-      });
+      })
+      .filter(privateGuardFn)
+      .filter(r => !this.researchWhitelist.length || this.researchWhitelist.some(id => r.external_id == id))
+      .filter(r => !this.researchBlacklist.length || !this.researchBlacklist.some(id => r.external_id == id))
+      .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
+        
+        const attribute = this.researchAttributes.find(attr => attr._id.toString() === rAttr.researchAttributeId.toString());
+        
+        if (!attribute || !rAttr.value)
+          return false;
+        
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXT || attribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXTAREA) {
+          return rAttr.value.toLowerCase().includes(filter.searchTerm.toLowerCase());
+        }
+
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+          return r.research_group.name.toLowerCase().includes(filter.searchTerm.toLowerCase());
+        }
+
+        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.USER) {
+          return r.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
+        }
+ 
+        return false;
+      })))
+      .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.every(fAttr => {
+
+        const attribute = this.researchAttributes.find(attr => attr.isFilterable && attr._id.toString() === fAttr.researchAttributeId.toString());
+        const rAttr = r.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() === fAttr.researchAttributeId.toString());
+        
+        if (!attribute || !rAttr) {
+          return false;
+        }
+
+        return fAttr.values.some((v) => {
+
+          if (!rAttr.value) {
+              return v == null;
+          }
+
+          if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.EXPRESS_LICENSING) {
+            if (v == true || v === 'true') {
+              return rAttr.value.length != 0;
+            } else {
+              return false;
+            }
+          }
+
+          if (Array.isArray(rAttr.value)) {
+            return rAttr.value.some(rAttrV => rAttrV.toString() === v.toString());
+          }
+
+          if (typeof rAttr.value === 'string') {
+            return rAttr.value.includes(v.toString());
+          }
+
+          return rAttr.value.toString() === v.toString();
+        });
+
+      })));
   }
 
-
-  async lookupResearches(lowerBound, limit) {
+  async lookupResearches(lowerBound, limit, filter) {
     const chainResearches = await deipRpc.api.lookupResearchesAsync(lowerBound, limit);
-    const result = await this.mapResearch(chainResearches);
-    return result;
-  }
-
-
-  async getResearchesByResearchGroupMember(member, requester) {
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
-    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
-    return result;
-  }
-
-
-  async getResearchesByResearchGroup(researchGroupExternalId, requester) {
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
-    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
+    const result = await this.mapResearch(chainResearches, (r) => { return !r.is_private }, filter);
     return result;
   }
 
 
   async getResearch(researchExternalId) {
     const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
+    if (!chainResearch) return null;
     const result = await this.mapResearch([chainResearch], (r) => { return true; });
     const [research] = result;
     return research;
   }
 
 
+  async getResearches(researchesExternalIds) {
+    const chainResearches = await deipRpc.api.getResearchesAsync(researchesExternalIds);
+    const result = await this.mapResearch(chainResearches, (r) => { return true; });
+    return result;
+  }
+
+
+  async getResearchesByResearchGroup(researchGroupExternalId) {
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
+    const result = await this.mapResearch(chainResearches, (r) => { return true; });
+    return result;
+  }
+
+
+  async getResearchesForMember(member, requester) {
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
+    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
+    return result;
+  }
+
+
+  async getResearchesForMemberByResearchGroup(researchGroupExternalId, requester) {
+    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
+    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
+    return result;
+  }
+
+
   async findResearchRef(externalId) {
     let research = await Research.findOne({ _id: externalId });
-    return research;
+    return research ? research.toObject() : null;
   }
 
 
   async createResearchRef({
     externalId,
     researchGroupExternalId,
-    researchGroupInternalId,
-    milestones,
-    videoSrc,
-    partners,
     attributes,
-    tenantCategory
+    status
   }) {
 
     const research = new Research({
       _id: externalId,
       researchGroupExternalId,
-      milestones,
-      videoSrc,
-      partners,
+      status,
       attributes: attributes.map(attr => {
         return {
-          value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
-          researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString())
+          researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
+          value: attr.value 
+            ? Array.isArray(attr.value) 
+              ? attr.value.map(v => mongoose.Types.ObjectId.isValid(v) ? mongoose.Types.ObjectId(v) : v) 
+              : mongoose.Types.ObjectId.isValid(attr.value.toString()) 
+                ? mongoose.Types.ObjectId(attr.value.toString()) 
+                : attr.value 
+            : null
         }
-      }),
-      tenantCategory,
-      researchGroupId: researchGroupInternalId, // legacy internal id
+      })
     });
 
-    return research.save();
+    const savedResearch = await research.save();
+    return savedResearch.toObject();
   }
   
-  async updateResearchRef(externalId, {
-    milestones,
-    videoSrc,
-    partners,
-    attributes,
-    tenantCategory
-  }) {
+  async updateResearchRef(externalId, { status, attributes }) {
 
-    const research = await this.findResearchRef(externalId);
-    research.milestones = milestones;
-    research.videoSrc = videoSrc;
-    research.partners = partners;
-    research.attributes = attributes.map(attr => {
+    const research = await Research.findOne({ _id: externalId });
+    research.status = status ? status : research.status;
+    research.attributes = attributes ? attributes.map(attr => {
       return {
-        value: attr.value ? mongoose.Types.ObjectId(attr.value.toString()) : null,
-        researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString())
+        researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
+        value: attr.value
+          ? Array.isArray(attr.value)
+            ? attr.value.map(v => mongoose.Types.ObjectId.isValid(v) ? mongoose.Types.ObjectId(v) : v)
+            : mongoose.Types.ObjectId.isValid(attr.value.toString())
+              ? mongoose.Types.ObjectId(attr.value.toString())
+              : attr.value
+          : null
       }
-    });
-    research.tenantCategory = tenantCategory;
+    }) : research.attributes;
 
-    return research.save();
+    const updatedResearch = await research.save();
+    return updatedResearch.toObject();
   }
 
   async findResearchApplicationById(applicationId) {
@@ -274,7 +309,7 @@ class ResearchService {
   }
 
   async updateAttributeInResearches({ researchAttributeId, type, valueOptions, defaultValue }) {
-    if (type == RESEARCH_COMPONENT_TYPE.STEPPER || type == RESEARCH_COMPONENT_TYPE.SELECT) {
+    if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
 
       const result = await Research.update(
         {
@@ -290,37 +325,6 @@ class ResearchService {
       return result;
     }
     return Promise.resolve();
-  }
-
-  async handleResearchCategories(oldCategories, newCategories) {
-
-    const addedCategories = [];
-    const removedCategories = [];
-  
-    for (let i = 0; i < newCategories.length; i++) {
-      let newCat = newCategories[i];
-      if (oldCategories.some(oldCat => oldCat._id.toString() == newCat._id.toString())) continue;
-      addedCategories.push(newCat);
-    }
-
-    for (let i = 0; i < oldCategories.length; i++) {
-      let oldCat = oldCategories[i];
-      if (newCategories.some(newCat => newCat._id.toString() == oldCat._id.toString())) continue;
-      removedCategories.push(oldCat);
-    }
-
-    let removedCategoryPromises = [];
-    for (let i = 0; i < removedCategories.length; i++) {
-      let category = removedCategories[i];
-      removedCategoryPromises.push(this.removeCategoryFromResearches({
-        categoryId: category._id
-      }))
-    }
-  }
-
-  async removeCategoryFromResearches({ categoryId }) {
-    const result = await Research.update({ $and: [ { tenantCategory: { $exists: true } }, { "tenantCategory._id": categoryId }] }, { $set: { "tenantCategory": null } }, { multi: true });
-    return result;
   }
 
   async findResearchesByCategory(category) {

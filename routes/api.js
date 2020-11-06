@@ -12,6 +12,8 @@ import reviews from '../controllers/reviews'
 import research from '../controllers/research'
 import investmentPortfolio from '../controllers/investmentPortfolio'
 import grants from '../controllers/grants'
+import expressLicensing from '../controllers/expressLicensing'
+import userTransactions from '../controllers/userTransactions'
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -24,6 +26,7 @@ public_route.get('/user/active', users.getActiveUsersProfiles)
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', users.updateUserProfile)
 public_route.get('/user/avatar/:username', users.getAvatar);
+protected_route.get('/user/transactions/:status', userTransactions.getUserTransactions)
 
 protected_route.get('/bookmarks/user/:username', users.getUserBookmarks)
 protected_route.post('/bookmarks/user/:username', users.addUserBookmark)
@@ -74,10 +77,11 @@ protected_route.get('/groups/activity-log/:researchGroupExternalId', researchGro
 public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchGroup)
 public_route.get('/groups/logo/:researchGroupExternalId', researchGroups.getResearchGroupLogo)
 protected_route.post('/groups/logo', researchGroups.uploadResearchGroupLogo)
-protected_route.post('/groups/left', researchGroups.excludeFromResearchGroup)
+protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
 
 protected_route.get('/invites/:username', invites.getUserInvites)
 protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)
+protected_route.get('/invites/research/:researchExternalId', invites.getResearchPendingInvites)
 protected_route.post('/invites', invites.createUserInvite)
 protected_route.post('/invites/approve', invites.approveUserInvite)
 protected_route.post('/invites/reject', invites.rejectUserInvite)
@@ -87,13 +91,11 @@ protected_route.post('/reviews', reviews.makeReview)
 
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
-public_route.get('/research/background/:researchExternalId', research.getResearchBackground)
+public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 protected_route.post('/research', research.createResearch)
 protected_route.put('/research', research.updateResearch)
-protected_route.put('/research/meta/:researchExternalId', research.updateResearchMeta)
-protected_route.post('/research/background', research.uploadResearchBackground)
 protected_route.post('/research/token-sale', research.createResearchTokenSale)
 protected_route.post('/research/token-sale/contribution', research.createResearchTokenSaleContribution)
 
@@ -112,6 +114,15 @@ protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', gr
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', grants.getAwardWithdrawalRequestAttachmentFile)
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.uploadAwardWithdrawalRequestBulkAttachments)
 
+
+protected_route.get('/express-licensing/all', expressLicensing.getExpressLicenseRequests)
+protected_route.get('/express-licensing/id/:requestId', expressLicensing.getExpressLicenseRequestById)
+protected_route.get('/express-licensing/status/:status', expressLicensing.getExpressLicenseRequestsByStatus)
+protected_route.get('/express-licensing/research/:researchExternalId', expressLicensing.getExpressLicenseRequestsByResearch)
+protected_route.get('/express-licensing/requester/:requester', expressLicensing.getExpressLicenseRequestsByRequester)
+protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
+protected_route.put('/express-licensing/approve/:requestId', expressLicensing.approveExpressLicenseRequest)
+protected_route.put('/express-licensing/reject/:requestId', expressLicensing.rejectExpressLicenseRequest)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

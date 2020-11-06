@@ -7,55 +7,91 @@ import sharp from 'sharp'
 import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';
+import mongoose from 'mongoose';
 import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
-import researchGroupsService from './../services/researchGroup';
+import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
-import * as authService from './../services/auth';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
-import userNotificationHandler from './../event-handlers/userNotification';
-import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS } from './../constants';
-import { researchBackgroundImageFilePath, defaultResearchBackgroundImagePath, researchBackgroundImageForm } from './../forms/researchForms';
+import { APP_EVENTS, RESEARCH_STATUS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
+import { researchForm, researchAttributeFilePath, researchFilePath } from './../forms/research';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
+import qs from 'qs';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
 
+
 const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
+  const researchGroupsService = new ResearchGroupService();
 
   try {
+    
+    const formUploader = researchForm.any();
+    const { tx, offchainMeta } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
+      try {
 
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
-    const { external_id: externalId, research_group: researchGroupExternalId } = payload;
+        const tx = JSON.parse(ctx.req.body.tx);
+        const onchainData = JSON.parse(ctx.req.body.onchainData);
+        const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+        console.log(ctx.req.files);
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupExternalId}" group`;
-      return;
+        const txResult = await blockchainService.sendTransactionAsync(tx);
+
+        resolve({
+          tx,
+          offchainMeta,
+          onchainData
+        });
+
+      } catch (err) {
+        reject(err);
+      } 
+    }));
+
+    const operations = blockchainService.extractOperations(tx);
+
+    const researchDatum = operations.find(([opName]) => opName == 'create_research');
+    const researchGroupDatum = operations.find(([opName]) => opName == 'create_account');
+    const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
+
+    if (researchGroupDatum) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_GROUP_CREATED, { opDatum: researchGroupDatum, context: { emitter: jwtUsername } }]);
     }
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const [opName, researchPayload, researchProposal] = researchDatum;
+    if (researchProposal) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_PROPOSED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    } else {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    }
 
-    const researchGroupInternalId = authorizedGroup.id;
-    const researcRm = await researchService.createResearchRef({
-      externalId,
-      researchGroupExternalId,
-      researchGroupInternalId,
-      ...offchainMeta
-    });
+    for (let i = 0; i < invitesDatums.length; i++) {
+      const inviteDatum = invitesDatums[i];
+      const [opName, opPayload, inviteProposal] = inviteDatum;
+      const { member: invitee, researches } = opPayload;
+      const { attributes: researchAttributes } = offchainMeta;
+      const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const inviteResearches = researches ? researches
+        .map((externalId) => {
+          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
+          return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
+        }) : [];
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "", researches: inviteResearches } } }]);
+      const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
 
+      if (approveInviteDatum) {
+        ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { offchainMeta: {} } }]);
+      }
+    }
+
+    const isProposal = !!researchProposal;
 
     ctx.status = 200;
-    ctx.body = { tx, txResult, rm: researcRm };
-    
-    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_PROPOSED : APP_EVENTS.RESEARCH_CREATED, { tx, emitter: jwtUsername }]);
+    ctx.body = isProposal ? null : researchPayload;
 
   } catch (err) {
     console.log(err);
@@ -65,6 +101,82 @@ const createResearch = async (ctx, next) => {
 
   await next();
 };
+
+
+const updateResearch = async (ctx, next) => {
+  const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+  const researchService = new ResearchService(tenant);
+
+  try {
+
+    const formUploader = researchForm.any();
+    const { tx, offchainMeta } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
+      try {
+
+        const tx = JSON.parse(ctx.req.body.tx);
+        const onchainData = JSON.parse(ctx.req.body.onchainData);
+        const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+        console.log(ctx.req.files);
+
+        const txResult = await blockchainService.sendTransactionAsync(tx);
+
+        resolve({
+          tx,
+          offchainMeta,
+          onchainData
+        });
+
+      } catch (err) {
+        reject(err);
+      }
+    }));
+
+    const operations = blockchainService.extractOperations(tx);
+
+    const researchUpdateDatum = operations.find(([opName]) => opName == 'update_research');
+    const [opName, researchUpdatePayload, researchUpdateProposal] = researchUpdateDatum;
+    if (researchUpdateProposal) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATE_PROPOSED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    } else {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    }
+    
+    const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
+    for (let i = 0; i < invitesDatums.length; i++) {
+      const inviteDatum = invitesDatums[i];
+      const [opName, opPayload, inviteProposal] = inviteDatum;
+      const { member: invitee, researches } = opPayload;
+      const { attributes: researchAttributes } = offchainMeta;
+      const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const inviteResearches = researches ? researches
+        .map((externalId) => {
+          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
+          return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
+        }) : [];
+        
+      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "", researches: inviteResearches } } }]);
+      const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
+
+      if (approveInviteDatum) {
+        ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { offchainMeta: {} } }]);
+      }
+    }
+
+    const isProposal = !!researchUpdateProposal;
+
+    ctx.status = 200;
+    ctx.body = isProposal ? null : researchUpdatePayload;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+
+  await next();
+};
+
 
 
 const createResearchApplication = async (ctx, next) => {
@@ -135,21 +247,23 @@ const createResearchApplication = async (ctx, next) => {
       ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
     } else {
       const research = await deipRpc.api.getResearchAsync(form.researchExternalId);
-      const researcRm = await researchService.createResearchRef({
+      await researchService.createResearchRef({
         externalId: research.external_id,
+        status: RESEARCH_STATUS.APPROVED,
         researchGroupExternalId: research.research_group.external_id,
         researchGroupInternalId: research.research_group.id,
-        milestones: [],
-        videoSrc: "",
-        partners: [],
-        attributes: researchApplication.attributes,
-        tenantCategory: null
+        title: research.title,
+        abstract: research.abstract,
+        attributes: researchApplication.attributes || []
       });
 
       const create_research_operation = form.tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
       const tx = { 'operations': [create_research_operation]}
-      
-      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { tx, emitter: jwtUsername }]);
+
+      const operations = blockchainService.extractOperations(tx);
+      const researchDatum = operations.find(([opName]) => opName == 'create_research');
+
+      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, emitter: jwtUsername, offchainMeta : {} }]);
     }
 
   } catch (err) {
@@ -307,6 +421,8 @@ const approveResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
   const researchService = new ResearchService(tenant);
+  const researchGroupsService = new ResearchGroupService();
+
   const { tx } = ctx.request.body;
 
   try { 
@@ -335,16 +451,15 @@ const approveResearchApplication = async (ctx, next) => {
     const research = await deipRpc.api.getResearchAsync(researchApplication.researchExternalId);
     const researcRm = await researchService.createResearchRef({
       externalId: research.external_id,
+      status: RESEARCH_STATUS.APPROVED,
       researchGroupExternalId: research.research_group.external_id,
       researchGroupInternalId: research.research_group.id,
-      milestones: [],
-      videoSrc: "",
-      partners: [],
-      attributes: researchApplication.attributes,
-      tenantCategory: null
+      title: research.title,
+      abstract: research.abstract,
+      attributes: researchApplication.attributes || []
     });
 
-    const researchGroupRm = await researchGroupsService.createResearchGroup({
+    await researchGroupsService.createResearchGroupRef({
       externalId: research.research_group.external_id,
       creator: researchApplication.researcher
     });
@@ -492,50 +607,35 @@ const getResearchApplications = async (ctx) => {
   }
 }
 
-const createResearchTokenSale = async (ctx) => {
+
+const createResearchTokenSale = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
+  const { tx } = ctx.request.body;
 
   try {
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
-    const researchGroupAccount = payload.research_group;
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
-    }
-
-    const researchExternalId = payload.research_external_id;
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-
-    const researchGroupInternalId = authorizedGroup.id;
-    const researchInternalId = research.id;
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    const operations = blockchainService.extractOperations(tx);
 
-    // LEGACY >>>
-    const parsedProposal = {
-      research_group_id: researchGroupInternalId,
-      action: deipRpc.operations.getOperationTag("create_research_token_sale"),
-      creator: jwtUsername,
-      data: { research_id: researchInternalId },
-      isProposalAutoAccepted: !isProposal
-    };
-    userNotificationHandler.emit(USER_NOTIFICATION_TYPE.PROPOSAL, parsedProposal);
-    researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.PROPOSAL, parsedProposal);
-    // <<< LEGACY
+    const researchTokenSaleDatum = operations.find(([opName]) => opName == 'create_research_token_sale');
+
+    const [opName, researchTokenSalePayload, researchTokenSaleProposal] = researchTokenSaleDatum;
+    if (researchTokenSaleProposal) {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, { opDatum: researchTokenSaleDatum, context: { emitter: jwtUsername } }]);
+    } else {
+      ctx.state.events.push([APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, { opDatum: researchTokenSaleDatum, context: { emitter: jwtUsername } }]);
+    }
 
     ctx.status = 200;
-    ctx.body = { txResult };
+    ctx.body = researchTokenSalePayload;
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 
@@ -560,177 +660,101 @@ const createResearchTokenSaleContribution = async (ctx) => {
 }
 
 
-const uploadResearchBackground = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const researchExternalId = ctx.request.headers['research-external-id'];
 
-  try {
-
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
-
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
-      return;
-    }
-
-    const backgroundImage = researchBackgroundImageForm.single('research-background');
-    const result = await backgroundImage(ctx, () => new Promise((resolve, reject) => {
-      resolve({ 'filename': ctx.req.file.filename });
-    }));
-
-    ctx.status = 200;
-    ctx.body = result;
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-}
-
-const getResearchBackground = async (ctx) => {
+const getResearchAttributeFile = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
-  const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
-  const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
-  const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
-  const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
-
-  let src = researchBackgroundImageFilePath(researchExternalId);
-  const stat = util.promisify(fs.stat);
-
-  try {
-    const check = await stat(src);
-  } catch (err) {
-    src = defaultResearchBackgroundImagePath();
-  }
-
-  const resize = (w, h) => {
-    return new Promise((resolve) => {
-      sharp.cache(!noCache);
-      sharp(src)
-        .rotate()
-        .resize(w, h)
-        .png()
-        .toBuffer()
-        .then(data => {
-          resolve(data)
-        })
-        .catch(err => {
-          resolve(err)
-        });
-    })
-  }
-
-  let background = await resize(width, height);
-
-  if (isRound) {
-    let round = (w) => {
-      let r = w / 2;
-      let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
-      return new Promise((resolve, reject) => {
-        background = sharp(background)
-          .overlayWith(circleShape, { cutout: true })
-          .png()
-          .toBuffer()
-          .then(data => {
-            resolve(data)
-          })
-          .catch(err => {
-            reject(err)
-          });
-      });
-    }
-
-    background = await round(width);
-  }
-
-  ctx.type = 'image/png';
-  ctx.body = background;
-}
-
-const updateResearchMeta = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
+  const researchAttributeId = ctx.params.researchAttributeId;
+  const filename = ctx.params.filename;
   const tenant = ctx.state.tenant;
-  const researchExternalId = ctx.params.researchExternalId;
-  const update = ctx.request.body;
-  const researchService = new ResearchService(tenant);
+
+  const isResearchRootFolder = researchExternalId == researchAttributeId;
+  const filepath = isResearchRootFolder ? researchFilePath(researchExternalId, filename) : researchAttributeFilePath(researchExternalId, researchAttributeId, filename);
 
   try {
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
 
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
-      return;
+    const isImage = ctx.query.image === 'true';
+
+    if (isImage) {
+
+      const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
+      const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
+      const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
+      const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
+
+      const check = await stat(filepath);
+      const resize = (w, h) => {
+        return new Promise((resolve) => {
+          sharp.cache(!noCache);
+          sharp(filepath)
+            .rotate()
+            .resize(w, h)
+            .png()
+            .toBuffer()
+            .then(data => {
+              resolve(data)
+            })
+            .catch(err => {
+              resolve(err)
+            });
+        })
+      }
+
+      let image = await resize(width, height);
+
+      if (isRound) {
+        let round = (w) => {
+          let r = w / 2;
+          let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
+          return new Promise((resolve, reject) => {
+            image = sharp(image)
+              .overlayWith(circleShape, { cutout: true })
+              .png()
+              .toBuffer()
+              .then(data => {
+                resolve(data)
+              })
+              .catch(err => {
+                reject(err)
+              });
+          });
+        }
+
+        image = await round(width);
+      }
+
+      ctx.type = 'image/png';
+      ctx.status = 200;
+      ctx.body = image;
+
+    } else {
+
+      const isDownload = ctx.query.download === 'true';
+      if (isDownload) {
+        let ext = filename.substr(filename.lastIndexOf('.') + 1);
+        let name = filename.substr(0, filename.lastIndexOf('.'));
+        ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
+        ctx.body = fs.createReadStream(filepath);
+      } else {
+        await send(ctx, filepath, { root: '/' });
+      }
     }
 
-    const researchProfile = await researchService.findResearchRef(researchExternalId);
-    if (!researchProfile) {
-      ctx.status = 400;
-      ctx.body = 'Read model not found';
-      return;
-    }
-
-    const profileData = researchProfile.toObject();
-    const updatedProfile = await researchService.updateResearchRef(researchExternalId, { 
-      ...profileData, 
-      ...update 
-    });
-
-    ctx.status = 200;
-    ctx.body = { rm: updatedProfile };
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
-};
-
-
-const updateResearch = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx, isProposal } = ctx.request.body;
-
-  try {
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
-    const { 
-      research_group: researchGroupAccount
-    } = payload;
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
-    }
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-
-    ctx.status = 201;
-    ctx.body = { txResult };
-
-    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_UPDATED, { tx, emitter: jwtUsername }]);
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-};
+}
 
 
 const getPublicResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
+  const query = qs.parse(ctx.query);
+  const filter = query.filter;
   const researchService = new ResearchService(tenant);
 
   try {
-    const result = await researchService.lookupResearches(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+    const result = await researchService.lookupResearches(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT, filter);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -748,7 +772,7 @@ const getUserResearchListing = async (ctx) => {
   const member = ctx.params.username;
 
   try {
-    const result = await researchService.getResearchesByResearchGroupMember(member, jwtUsername);
+    const result = await researchService.getResearchesForMember(member, jwtUsername);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -766,7 +790,7 @@ const getResearchGroupResearchListing = async (ctx) => {
   const researchService = new ResearchService(tenant);
 
   try {
-    const result = await researchService.getResearchesByResearchGroup(researchGroupExternalId, jwtUsername);
+    const result = await researchService.getResearchesForMemberByResearchGroup(researchGroupExternalId, jwtUsername);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -802,14 +826,12 @@ const getResearch = async (ctx) => {
 
 
 export default {
-  getResearchBackground,
-  uploadResearchBackground,
+  getResearchAttributeFile,
   getResearch,
   getPublicResearchListing,
   getUserResearchListing,
   getResearchGroupResearchListing,
   updateResearch,
-  updateResearchMeta,
   createResearch,
   createResearchApplication,
   editResearchApplication,
