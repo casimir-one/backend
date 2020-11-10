@@ -21,7 +21,6 @@ async function createTenantProfile({
   researchBlacklist,
   researchWhitelist,
   researchAttributes,
-  researchAttributesAreas,
   researchLayouts
 }) {
 
@@ -40,7 +39,6 @@ async function createTenantProfile({
       researchBlacklist,
       researchWhitelist,
       researchAttributes: researchAttributes || [],
-      researchAttributesAreas: researchAttributesAreas || {},
       researchLayouts: researchLayouts || {}
     }
   });
@@ -59,7 +57,6 @@ async function updateTenantProfile(tenantId, {
   faq,
   researchBlacklist,
   researchWhitelist,
-  researchAttributesAreas,
   researchLayouts
 }) {
 
@@ -78,7 +75,6 @@ async function updateTenantProfile(tenantId, {
   tenantProfile.settings.faq = faq;
   tenantProfile.settings.researchBlacklist = researchBlacklist;
   tenantProfile.settings.researchWhitelist = researchWhitelist;
-  tenantProfile.settings.researchAttributesAreas = researchAttributesAreas;
   tenantProfile.settings.researchLayouts = researchLayouts;
 
   return tenantProfile.save();

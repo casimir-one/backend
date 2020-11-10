@@ -81,7 +81,6 @@ const TenantProfile = new Schema({
         required: true 
       },
       "researchAttributes": [ResearchAttribute],
-      "researchAttributesAreas": { type: Object },
       "researchLayouts": { type: Object },
       "faq": [FAQ],
       "researchBlacklist": [{ type: String, required: true, trim: true }],
