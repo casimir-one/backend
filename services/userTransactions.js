@@ -206,29 +206,7 @@ class UserTransactionsService {
           ]
             .filter((signer) => {
               let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
-
-              if (chainProposal.status == 1) { // pending
-                return id == party;
-              }
-
-              if (chainProposal.status == 2) { // approved
-                return chainProposal.approvals.some(([name, txInfo]) => name == id);
-              }
-
-              if (chainProposal.status == 3) { // rejected
-                return chainProposal.rejectors.some(([name, txInfo]) => name == id);
-              }
-
-              if (chainProposal.status == 4) { // failed
-                return chainProposal.approvals.some(([name, txInfo]) => name == id);
-              }
-
-              if (chainProposal.status == 5) { // failed
-                return chainProposal.approvals.some(([name, txInfo]) => name == id);
-              }
-
-              return false;
-
+              return chainProposal.approvals.some(([name, txInfo]) => name == id) || chainProposal.rejectors.some(([name, txInfo]) => name == id);
             })
             .map((signer) => {
               let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
