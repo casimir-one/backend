@@ -127,6 +127,107 @@ class UserTransactionsService {
 
   }
 
+  async getAccountProposals(username) {
+    const chainResearchGroups = await deipRpc.api.getResearchGroupsByMemberAsync(username);
+    const signers = [ username, ...chainResearchGroups.map(rg => rg.external_id)];
+    const allProposals = await deipRpc.api.getProposalsBySignersAsync(signers);
+    const chainProposals = allProposals.reduce((unique, chainProposal) => {
+      if (unique.some((p) => p.external_id == chainProposal.external_id))
+        return unique;
+      return [chainProposal, ...unique];
+    }, []);
+
+    let names = chainProposals.reduce((names, chainProposal) => {
+
+      if (!names.some((n) => n == chainProposal.proposer)) {
+        names.push(chainProposal.proposer);
+      }
+
+      for (let i = 0; i < chainProposal.required_approvals.length; i++) {
+        let name = chainProposal.required_approvals[i];
+        if (!names.some((n) => n == name)) {
+          names.push(name);
+        }
+      }
+      
+      for (let i = 0; i < chainProposal.approvals.length; i++) {
+        let [name, txInfo] = chainProposal.approvals[i];
+        if (!names.some((n) => n == name)) {
+          names.push(name);
+        }
+      }
+
+      for (let i = 0; i < chainProposal.rejectors.length; i++) {
+        let [name, txInfo] = chainProposal.rejectors[i];
+        if (!names.some((n) => n == name)) {
+          names.push(name);
+        }
+      }
+
+      return names;
+    }, []);
+
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(names);
+    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
+    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
+
+    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
+
+    const proposals = [];
+
+    for (let i = 0; i < chainProposals.length; i++)
+    {
+      let chainProposal = chainProposals[i];
+      let parties = {};
+      
+      for (let j = 0; j < chainProposal.required_approvals.length; j++)
+      {
+        let party = chainProposal.required_approvals[j];
+        let key = `party${j+1}`;
+
+        let chainAccount = chainAccounts.find(chainAccount => chainAccount.name == party);
+        let ownerAuth = chainAccount.active.account_auths.map(([name, threshold]) => name);
+        let activeAuth = chainAccount.owner.account_auths.map(([name, threshold]) => name);
+        let members = [...ownerAuth, ...activeAuth].reduce((acc, name) => {
+          if (!acc.some(n => n == name)) {
+            return [...acc, name];
+          }
+          return [...acc];
+        }, []);
+
+        parties[key] = {
+          isProposer: party == chainProposal.proposer,
+          account: chainAccount.is_research_group ? researchGroups.find(rg => rg.external_id == party) : users.find(user => user.account.name == party),
+          signers: [
+            ...users.filter((u) => members.some(member => u.account.name == member) || u.account.name == party),
+            ...researchGroups.filter((rg) => members.some(member => rg.external_id == member) || rg.external_id == party),
+          ].map((signer) => {
+            
+            let approval = chainProposal.approvals.find(([name, txInfo]) => signer.account.is_research_group ? name == signer.external_id : name == signer.account.name);
+            let reject = chainProposal.rejectors.find(([name, txInfo]) => signer.account.is_research_group ? name == signer.external_id : name == signer.account.name);
+
+            let txInfo = reject ? reject[1] : approval ? approval[1] : null;
+            return {
+              signer: signer,
+              txInfo: txInfo
+            }
+          })
+        }
+      }
+
+      proposals.push({
+        parties: parties,
+        proposal: chainProposal,
+        details: {}
+      })
+    }
+
+    return proposals;
+
+  }
+
 
   async getHistoryTransactions(username) {
     const expressLicensingTxs = await this.getResolvedExpressLisenceRequests(username);

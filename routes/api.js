@@ -70,6 +70,7 @@ protected_route.put('/notifications/:username/mark-all-read', notifications.mark
 protected_route.post('/proposals', proposals.createProposal)
 protected_route.put('/proposals', proposals.updateProposal)
 protected_route.put('/proposals/delete', proposals.deleteProposal)
+protected_route.get('/proposals/:username/:status', proposals.getAccountProposals)
 
 protected_route.post('/groups', researchGroups.createResearchGroup)
 protected_route.put('/groups', researchGroups.updateResearchGroup)
