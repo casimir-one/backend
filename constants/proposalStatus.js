@@ -1,0 +1,10 @@
+
+const PROPOSAL_STATUS = {
+  PENDING: 1,
+  APPROVED: 2,
+  REJECTED: 3,
+  FAILED: 4,
+  EXPIRED: 5
+};
+
+export default PROPOSAL_STATUS;

@@ -1,8 +1,12 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, EXPRESS_LICENSE_REQUEST_STATUS } from './../constants';
-import { handle, fire, wait } from './utils';
-import ExpressLicensingService from './../services/expressLicensing';
 import deipRpc from '@deip/rpc-client';
+import { APP_EVENTS, PROPOSAL_STATUS } from './../constants';
+import { handle, fire, wait } from './utils';
+import ResearchService from './../services/research';
+import ExpressLicensingService from './../services/expressLicensing';
+import ResearchGroupService from './../services/researchGroup';
+import ProposalService from './../services/proposal';
+import usersService from './../services/users';
 
 class ExpressLicensingHandler extends EventEmitter { }
 
@@ -10,39 +14,25 @@ const expressLicensingHandler = new ExpressLicensingHandler();
 
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter, offchainMeta: { licencePlan, txInfo } } } = source;
-  const expressLicensingService = new ExpressLicensingService();
-
+  const { opDatum, tenant, context: { offchainMeta: { licencePlan } } } = source;
   const [opName, opPayload, opProposal] = opDatum;
 
-  const { external_id: licenseExternalId, research_external_id: researchExternalId, licenser: researchGroupExternalId, licensee: requester } = opPayload;
-  const { external_id: externalId, expiration_time: expirationDate } = opProposal;
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
 
-  const chainProposal = await deipRpc.api.getProposalAsync(externalId);
+  const { external_id: licenseExternalId, research_external_id: researchExternalId, licensee: requester } = opPayload;
+  const { external_id: proposalId } = opProposal;
 
-  const chainHistory = [...chainProposal.required_active_approvals, ...chainProposal.required_owner_approvals].reduce((acc, item) => {
-    if (item == requester) {
-      return { ...acc, [item]: txInfo };
-    }
-    return { ...acc, [item]: null };
-  }, {});
-
-  const request = await expressLicensingService.createExpressLicenseRequest({
-    externalId,
+  const proposalRef = await expressLicensingService.createExpressLicenseRequest(proposalId, {
     requester,
     researchExternalId,
-    researchGroupExternalId,
     licenseExternalId,
-    licencePlan,
-    expirationDate,
-    status: EXPRESS_LICENSE_REQUEST_STATUS.PENDING,
-    approvers: [],
-    rejectors: [],
-    chainHistory
+    licencePlan
   })
 
-  return request;
-
+  return proposalRef;
 }));
 
 
@@ -50,89 +40,38 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, 
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
 
   const { opDatum, tenant, context: { emitter, offchainMeta: { txInfo } } } = source;
-  const expressLicensingService = new ExpressLicensingService();
-
   const [opName, opPayload] = opDatum;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
 
   const { external_id: proposalId, active_approvals_to_add: approvals1, owner_approvals_to_add: approvals2 } = opPayload;
 
   const request = await expressLicensingService.getExpressLicensingRequest(proposalId);
-  const approvers = [...request.approvers, ...approvals1, ...approvals2].reduce((acc, user) => {
-    if (!acc.some(u => u == user)) {
-      return [...acc, user];
-    }
-    return acc;
-  }, []);
+  const mapedProposal = await proposalsService.getProposal(proposalId);
 
-  const chainProposal = await deipRpc.api.getProposalAsync(proposalId);
-  const status = !chainProposal
-    ? EXPRESS_LICENSE_REQUEST_STATUS.APPROVED 
-    : request.status;
-
-  const updatedRequest = await expressLicensingService.updateExpressLicensingRequest(proposalId, {
-    approvers: approvers,
-    status: status,
-    chainHistory: {
-      ...request.chainHistory, ...[...approvals1, ...approvals2].reduce((acc, item) => {
-        return { ...acc, [item]: txInfo };
-      }, {})
-    }
-  });
-
-  if (status == EXPRESS_LICENSE_REQUEST_STATUS.APPROVED) {
+  if (mapedProposal.proposal.status == PROPOSAL_STATUS.APPROVED) {
     await expressLicensingService.createExpressLicense({
       requestId: request._id,
-      externalId: request.licenseExternalId,
-      owner: request.requester,
-      researchExternalId: request.researchExternalId,
-      researchGroupExternalId: request.researchGroupExternalId,
-      licencePlan: request.licencePlan
+      externalId: request.details.licenseExternalId,
+      owner: request.details.requester,
+      researchExternalId: request.details.researchExternalId,
+      licencePlan: request.details.licencePlan
     });
   }
 
-  return updatedRequest;
-
 }));
-
 
 
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
 
   const { opDatum, tenant, context: { emitter, offchainMeta: { txInfo } } } = source;
-  const expressLicensingService = new ExpressLicensingService();
-
   const [opName, opPayload] = opDatum;
 
   const { external_id: proposalId, account: rejector } = opPayload;
-
-  const request = await expressLicensingService.getExpressLicensingRequest(proposalId);
-  const rejectors = [...request.rejectors, rejector, emitter].reduce((acc, user) => {
-    if (!acc.some(u => u == user)) {
-      return [...acc, user];
-    }
-    return acc;
-  }, []);
-
-  const chainProposal = await deipRpc.api.getProposalAsync(proposalId);
-  const status = !chainProposal
-    ? EXPRESS_LICENSE_REQUEST_STATUS.REJECTED
-    : request.status;
-
-  const updatedRequest = await expressLicensingService.updateExpressLicensingRequest(proposalId, {
-    rejectors: rejectors,
-    status: status,
-    chainHistory: {
-      ...request.chainHistory, ...[rejector, emitter].reduce((acc, item) => {
-        return { ...acc, [item]: txInfo };
-      }, {})
-    }
-  });
-
-  return updatedRequest;
-
 }));
-
-
 
 
 

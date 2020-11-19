@@ -14,7 +14,7 @@ import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 import NEW_RESEARCH_POLICY from './newResearchPolicy';
 import RESEARCH_ATTRIBUTE_AREA from './researchAttributeArea';
 import RESEARCH_STATUS from './researchStatus';
-import EXPRESS_LICENSE_REQUEST_STATUS from './expressLicenseRequestStatus';
+import PROPOSAL_STATUS from './proposalStatus';
 
 export {
   CHAIN_CONSTANTS,
@@ -32,5 +32,5 @@ export {
   NEW_RESEARCH_POLICY,
   RESEARCH_ATTRIBUTE_AREA,
   RESEARCH_STATUS,
-  EXPRESS_LICENSE_REQUEST_STATUS
+  PROPOSAL_STATUS
 } 

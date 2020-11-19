@@ -1,7 +1,10 @@
 import deipRpc from '@deip/rpc-client';
 import * as blockchainService from './../utils/blockchain';
 import { APP_EVENTS } from './../constants';
-import UserTransactionsService from './../services/userTransactions';
+import ResearchService from './../services/research';
+import ProposalService from './../services/proposal';
+import ResearchGroupService from './../services/researchGroup';
+import usersService from './../services/users';
 
 const createProposal = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -121,11 +124,33 @@ const getAccountProposals = async (ctx) => {
   const tenant = ctx.state.tenant;
   const status = ctx.params.status;
   const username = ctx.params.username;
-  const userTransactionsService = new UserTransactionsService(tenant);
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
   try {
-    let result = await userTransactionsService.getAccountProposals(username);
+    let result = await proposalsService.getAccountProposals(username);
     ctx.body = status && status != 0 ? result.filter(p => p.proposal.status == status) : result;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getProposalById = async (ctx) => {
+  const tenant = ctx.state.tenant;
+  const externalId = ctx.params.proposalExternalId;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+
+  try {
+    let result = await proposalsService.getProposal(externalId);
+    ctx.body = result;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -137,5 +162,6 @@ export default {
     createProposal,
     updateProposal,
     deleteProposal,
-    getAccountProposals
+    getAccountProposals,
+    getProposalById
 }

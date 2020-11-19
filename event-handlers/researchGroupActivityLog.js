@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_TYPE, ACTIVITY_LOG_TYPE, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS, ACTIVITY_LOG_TYPE, USER_INVITE_STATUS } from './../constants';
 import activityLogEntriesService from './../services/activityLogEntry';
 import usersService from './../services/users';
 
@@ -239,32 +239,6 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async
       research,
       tokenSale,
       creatorProfile: creator
-    }
-  });
-});
-
-researchGroupActivityLogHandler.on(ACTIVITY_LOG_TYPE.PROPOSAL_VOTE, async ({ voter, proposal }) => {
-  const type = ACTIVITY_LOG_TYPE.PROPOSAL_VOTE;
-  let { research_group_id: researchGroupId, action, data } = proposal;
-  
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(researchGroupId);
-  let voterProfile = await usersService.findUserProfileByOwner(voter);
-  let research = null;
-  let inviteeProfile = null;
-  
-  if (action == PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL || action == PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE) {
-    research = await deipRpc.api.getResearchByIdAsync(data.research_id);
-  }
-
-  activityLogEntriesService.createActivityLogEntry({
-    researchGroupId,
-    type,
-    metadata: {
-      proposal,
-      researchGroup,
-      research,
-      inviteeProfile,
-      voterProfile,
     }
   });
 });

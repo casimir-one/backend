@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import ResearchContent from './../schemas/researchContent';
-import { PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS } from './../constants';
+import { RESEARCH_CONTENT_STATUS } from './../constants';
 
 
 async function findResearchContents(list) {
@@ -128,7 +128,7 @@ async function lookupContentProposal(researchGroup, hash) {
   const content = proposals.find(p => {
     const [op_name, op_payload] = p['proposed_transaction']['operations'][0];
     let tag = deipRpc.operations.getOperationTag(op_name);
-    return tag == PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL && op_payload.content == hash;
+    return tag == deipRpc.operations.getOperationTag("create_research_content") && op_payload.content == hash;
   });
   return content;
 }

@@ -9,7 +9,6 @@ import send from 'koa-send';
 import slug from 'limax';
 import deipRpc from '@deip/rpc-client';
 import qs from 'qs';
-import UserTransactionsService from './../services/userTransactions';
 
 
 const stat = util.promisify(fs.stat);
@@ -20,18 +19,11 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 const getUserTransactions = async (ctx) => {
   const tenant = ctx.state.tenant;
   const jwtUsername = ctx.state.user.username;
-  const userTransactionsService = new UserTransactionsService(tenant);
   const status = ctx.params.status;
 
   try {
 
     let result = [];
-    if (status == 'pending') {
-      result = await userTransactionsService.getPendingTransactions(jwtUsername)
-    } else if (status == 'resolved') {
-      result = await userTransactionsService.getHistoryTransactions(jwtUsername)
-    }
-
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {

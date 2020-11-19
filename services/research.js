@@ -1,19 +1,15 @@
 import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
+import ExpressLicense from './../schemas/expressLicense';
 import ResearchApplication from './../schemas/researchApplication';
-import ExpressLicensingService from './expressLicensing';
 import { RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import mongoose from 'mongoose';
 
 class ResearchService {
 
   constructor(tenant) {
-    this.researchWhitelist = tenant.settings.researchWhitelist || [];
-    this.researchBlacklist = tenant.settings.researchBlacklist || [];
     this.researchAttributes = tenant.settings.researchAttributes || [];
-    this.expressLicensingService = new ExpressLicensingService();
   }
-
 
   async mapResearch(chainResearches, privateGuardFn, filterObj) {
 
@@ -28,20 +24,19 @@ class ResearchService {
     const researchExternalIds = chainResearches.map(r => r.external_id);
 
     const researches = await Research.find({ _id: { $in: researchExternalIds } });
-    const researchesExpressLicenses = await this.expressLicensingService.getExpressLicensesByResearches(researchExternalIds);
+    // TODO: replace with service call
+    const researchesExpressLicenses = await ExpressLicense.find({ researchExternalId: { $in: researchExternalIds } });
     
     return chainResearches
       .map((chainResearch) => {
         const researchRef = researches.find(r => r._id == chainResearch.external_id);
-        const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id);
+        const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id).map(l => l.toObject());
         if (researchRef) {
           return { ...chainResearch, researchRef: { ...researchRef.toObject(), expressLicenses } };
         }
         return { ...chainResearch, researchRef: null };
       })
       .filter(privateGuardFn)
-      .filter(r => !this.researchWhitelist.length || this.researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !this.researchBlacklist.length || !this.researchBlacklist.some(id => r.external_id == id))
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         
         const attribute = this.researchAttributes.find(attr => attr._id.toString() === rAttr.researchAttributeId.toString());

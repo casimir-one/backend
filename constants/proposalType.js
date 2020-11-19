@@ -1,15 +1,30 @@
 
 import deipRpc from '@deip/rpc-client';
 
+const CREATE_RESEARCH = 1;
+const UPDATE_RESEARCH = 2;
+const CREATE_RESEARCH_MATERIAL = 3;
+const CREATE_RESEARCH_TOKEN_SALE = 4;
+const UPDATE_RESEARCH_GROUP = 5;
+const INVITE_MEMBER = 6;
+const EXCLUDE_MEMBER = 7;
+const TRANSFER = 8;
+const EXPRESS_LICENSE_REQUEST = 9;
+const ASSET_EXCHANGE_REQUEST = 10;
+
+
 const PROPOSAL_TYPE = {
-  CREATE_RESEARCH: deipRpc.operations.getOperationTag("create_research"),
-  INVITE_MEMBER: deipRpc.operations.getOperationTag("join_research_group_membership"),
-  EXCLUDE_MEMBER: deipRpc.operations.getOperationTag("leave_research_group_membership"),
-  TRANSFER: deipRpc.operations.getOperationTag("transfer"),
-  CREATE_RESEARCH_TOKEN_SALE: deipRpc.operations.getOperationTag("create_research_token_sale"),
-  CREATE_RESEARCH_MATERIAL: deipRpc.operations.getOperationTag("create_research_content"),
-  UPDATE_RESEARCH_GROUP: deipRpc.operations.getOperationTag("update_account"),
-  UPDATE_RESEARCH: deipRpc.operations.getOperationTag("update_research")
+  CREATE_RESEARCH,
+  UPDATE_RESEARCH,
+  CREATE_RESEARCH_MATERIAL,
+  CREATE_RESEARCH_TOKEN_SALE,
+  UPDATE_RESEARCH_GROUP,
+  INVITE_MEMBER,
+  EXCLUDE_MEMBER,
+  TRANSFER,
+  EXPRESS_LICENSE_REQUEST,
+  ASSET_EXCHANGE_REQUEST
 };
+
 
 export default PROPOSAL_TYPE;

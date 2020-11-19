@@ -29,11 +29,11 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payl
     const dummy = { success: resolve, failure: reject };
 
     switch (tag) {
-      case PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL: {
+      case deipRpc.operations.getOperationTag("create_research_content"): {
         appEventHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, source, dummy);
         break
       }
-      case PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP: {
+      case deipRpc.operations.getOperationTag("update_account"): {
         appEventHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, source, dummy);
         break
       }

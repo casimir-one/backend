@@ -12,7 +12,8 @@ import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import ExpressLicensingService from './../services/expressLicensing';
-
+import usersService from './../services/users';
+import ProposalService from './../services/proposal';
 import * as blockchainService from './../utils/blockchain';
 import { APP_EVENTS, RESEARCH_STATUS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import qs from 'qs';
@@ -62,7 +63,6 @@ const approveExpressLicenseRequest = async (ctx, next) => {
   try {
 
     const txInfo = await blockchainService.sendTransactionAsync(tx);
-
     const operations = blockchainService.extractOperations(tx);
 
     const approveTransferDatum = operations.find(([opName]) => opName == 'update_proposal');
@@ -113,7 +113,12 @@ const rejectExpressLicenseRequest = async (ctx, next) => {
 
 
 const getExpressLicenseRequests = async (ctx) => {
-  const expressLicensingService = new ExpressLicensingService();
+  const tenant = ctx.state.tenant;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
 
   try {
     const result = await expressLicensingService.getExpressLicenseRequests()
@@ -126,25 +131,15 @@ const getExpressLicenseRequests = async (ctx) => {
   }
 }
 
-const getExpressLicenseRequestsByStatus = async (ctx) => {
-  const expressLicensingService = new ExpressLicensingService();
-  const status = ctx.params.status;
-
-  try {
-    const result = await expressLicensingService.getExpressLicenseRequestsByStatus(status);
-    ctx.status = 200;
-    ctx.body = result;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-}
-
 
 const getExpressLicenseRequestById = async (ctx) => {
-  const expressLicensingService = new ExpressLicensingService();
+  const tenant = ctx.state.tenant;
   const requestId = ctx.params.requestId;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
 
   try {
     const result = await expressLicensingService.getExpressLicenseRequestById(requestId);
@@ -159,8 +154,13 @@ const getExpressLicenseRequestById = async (ctx) => {
 
 
 const getExpressLicenseRequestsByResearch = async (ctx) => {
-  const expressLicensingService = new ExpressLicensingService();
+  const tenant = ctx.state.tenant;
   const researchExternalId = ctx.params.researchExternalId;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
 
   try {
     const result = await expressLicensingService.getExpressLicenseRequestsByResearch(researchExternalId);
@@ -175,8 +175,13 @@ const getExpressLicenseRequestsByResearch = async (ctx) => {
 
 
 const getExpressLicenseRequestsByRequester = async (ctx) => {
-  const expressLicensingService = new ExpressLicensingService();
+  const tenant = ctx.state.tenant;
   const requester = ctx.params.requester;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
 
   try {
     const result = await expressLicensingService.getExpressLicenseRequestsByRequester(requester);
@@ -198,7 +203,6 @@ export default {
 
   getExpressLicenseRequests,
   getExpressLicenseRequestById,
-  getExpressLicenseRequestsByStatus,
   getExpressLicenseRequestsByResearch,
   getExpressLicenseRequestsByRequester
 }

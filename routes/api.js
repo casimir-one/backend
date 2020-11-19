@@ -67,6 +67,8 @@ protected_route.get('/notifications/user/:username', notifications.getNotificati
 protected_route.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
 protected_route.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
 
+
+protected_route.post('/proposals/:proposalExternalId', proposals.getProposalById)
 protected_route.post('/proposals', proposals.createProposal)
 protected_route.put('/proposals', proposals.updateProposal)
 protected_route.put('/proposals/delete', proposals.deleteProposal)
@@ -118,7 +120,6 @@ protected_route.post('/award-withdrawal-requests/upload-attachments', grants.upl
 
 protected_route.get('/express-licensing/all', expressLicensing.getExpressLicenseRequests)
 protected_route.get('/express-licensing/id/:requestId', expressLicensing.getExpressLicenseRequestById)
-protected_route.get('/express-licensing/status/:status', expressLicensing.getExpressLicenseRequestsByStatus)
 protected_route.get('/express-licensing/research/:researchExternalId', expressLicensing.getExpressLicenseRequestsByResearch)
 protected_route.get('/express-licensing/requester/:requester', expressLicensing.getExpressLicenseRequestsByRequester)
 protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
