@@ -8,6 +8,7 @@ import notifications from '../controllers/notifications'
 import proposals from '../controllers/proposals'
 import researchGroups from '../controllers/researchGroups'
 import invites from '../controllers/invites'
+import assets from '../controllers/assets'
 import reviews from '../controllers/reviews'
 import research from '../controllers/research'
 import investmentPortfolio from '../controllers/investmentPortfolio'
@@ -125,6 +126,14 @@ protected_route.get('/express-licensing/requester/:requester', expressLicensing.
 protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
 protected_route.put('/express-licensing/approve/:requestId', expressLicensing.approveExpressLicenseRequest)
 protected_route.put('/express-licensing/reject/:requestId', expressLicensing.rejectExpressLicenseRequest)
+
+protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
+protected_route.post('/assets/transfer/approve', assets.approveAssetTransferRequest)
+protected_route.post('/assets/transfer/reject', assets.rejectAssetTransferRequest)
+
+protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
+protected_route.post('/assets/exchange/approve', assets.approveAssetExchangeRequest)
+protected_route.post('/assets/exchange/reject', assets.rejectAssetExchangeRequest)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

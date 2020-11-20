@@ -2,8 +2,8 @@ import deipRpc from '@deip/rpc-client';
 import ReviewRequest from './../schemas/reviewRequest';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
-import userNotificationHandler from './../event-handlers/userNotification';
+import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLogHandler';
+import userNotificationHandler from './../event-handlers/userNotificationHandler';
 
 const getReviewRequestsByExpert = async (ctx) => {
   const jwtUsername = ctx.state.user.username;

@@ -112,8 +112,6 @@ function extractOperationsFromProposal(proposal, result) {
     if (op_name === 'create_proposal') {
       extractOperationsFromProposal(op_payload, result);
     }
-
-    return result;
   }
 }
 

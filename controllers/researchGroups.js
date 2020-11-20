@@ -10,8 +10,6 @@ import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
 import activityLogEntriesService from './../services/activityLogEntry';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLog';
-import userNotificationHandler from './../event-handlers/userNotification';
 import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE, APP_EVENTS } from './../constants';
 import { researchGroupLogoForm } from './../forms/researchGroupForms';
 

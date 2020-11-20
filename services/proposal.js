@@ -126,6 +126,12 @@ class ProposalService {
     const licenseRequests = await this.extendExpressLicenseRequests(grouped[PROPOSAL_TYPE.EXPRESS_LICENSE_REQUEST] || []);
     result.push(...licenseRequests);
 
+    const assetExchangesProposals = await this.extendAssetExchangeProposals(grouped[PROPOSAL_TYPE.ASSET_EXCHANGE] || []);
+    result.push(...assetExchangesProposals);
+
+    const assetTransfersProposals = await this.extendAssetTransferProposals(grouped[PROPOSAL_TYPE.ASSET_TRANSFER] || []);
+    result.push(...assetTransfersProposals);
+
     return result;
   }
 
@@ -164,6 +170,77 @@ class ProposalService {
     })
   }
 
+  async extendAssetExchangeProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.party1)) {
+        acc.push(proposal.details.party1);
+      }
+      if (!acc.some(a => a == proposal.details.party2)) {
+        acc.push(proposal.details.party2);
+      }
+      return acc;
+    }, []);
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+
+    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
+    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
+
+    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+
+    return proposals.map((proposal) => {
+      const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
+      const party2Account = chainAccounts.find(a => a.name == proposal.details.party2);
+
+      const party1 = party1Account.is_research_group 
+        ? researchGroups.find(rg => rg.external_id == proposal.details.party1) 
+        : users.find(u => u.account.name == proposal.details.party1);
+
+      const party2 = party2Account.is_research_group
+        ? researchGroups.find(rg => rg.external_id == proposal.details.party2)
+        : users.find(u => u.account.name == proposal.details.party2);
+
+      const extendedDetails = { party1, party2 };
+      return { ...proposal, extendedDetails };
+    })
+  }
+
+  async extendAssetTransferProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.party1)) {
+        acc.push(proposal.details.party1);
+      }
+      if (!acc.some(a => a == proposal.details.party2)) {
+        acc.push(proposal.details.party2);
+      }
+      return acc;
+    }, []);
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+
+    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
+    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
+
+    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+
+    return proposals.map((proposal) => {
+      const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
+      const party2Account = chainAccounts.find(a => a.name == proposal.details.party2);
+
+      const party1 = party1Account.is_research_group
+        ? researchGroups.find(rg => rg.external_id == proposal.details.party1)
+        : users.find(u => u.account.name == proposal.details.party1);
+
+      const party2 = party2Account.is_research_group
+        ? researchGroups.find(rg => rg.external_id == proposal.details.party2)
+        : users.find(u => u.account.name == proposal.details.party2);
+
+      const extendedDetails = { party1, party2 };
+      return { ...proposal, extendedDetails };
+    })
+  }
 
 
   async getProposalRef(externalId) {

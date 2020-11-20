@@ -12,13 +12,21 @@ async function handle(payload, reply, handler) {
   }
 }
 
-function fire(handler, eventName, event) {
-  handler.emit(eventName, { ...event });
+function fire(handler, event, payload, tenant) {
+  if (typeof event === 'string') { // legacy
+    handler.emit(event, { ...payload });
+  } else {
+    handler.emit(event.getAppEventName(), { event, tenant });
+  }
 }
 
-async function wait(handler, eventName, event) {
+async function wait(handler, event, payload, tenant) {
   const promise = new Promise((resolve, reject) => {
-    handler.emit(eventName, { ...event }, { success: resolve, failure: reject });
+    if (typeof event === 'string') { // legacy
+      handler.emit(event, { ...payload }, { success: resolve, failure: reject });
+    } else {
+      handler.emit(event.getAppEventName(), { event, tenant }, { success: resolve, failure: reject });
+    }
   });
 
   try {

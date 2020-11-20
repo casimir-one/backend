@@ -1,7 +1,7 @@
 import ExpertiseClaim from './../schemas/expertiseClaim';
 import deipRpc from '@deip/rpc-client';
 import { getTransaction, sendTransaction } from './../utils/blockchain';
-import userNotificationHandler from './../event-handlers/userNotification';
+import userNotificationHandler from './../event-handlers/userNotificationHandler';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 import qs from 'qs';
 import usersService from './../services/users';

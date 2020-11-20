@@ -3,11 +3,12 @@ import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { handle, fire, wait } from './utils';
 import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS, TOKEN_SALE_STATUS } from './../constants';
-import userNotificationsHandler from './userNotification';
-import researchGroupActivityLogHandler from './researchGroupActivityLog';
-import researchHandler from './research';
-import userInviteHandler from './userInvite';
-import expressLicensingHandler from './expressLicensing';
+import userNotificationsHandler from './userNotificationHandler';
+import researchGroupActivityLogHandler from './researchGroupActivityLogHandler';
+import researchHandler from './researchHandler';
+import userInviteHandler from './userInviteHandler';
+import expressLicensingHandler from './expressLicensingHandler';
+import accountAssetBalanceHandler from './accountAssetBalanceHandler';
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
@@ -500,24 +501,56 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => h
 appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
   const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const request = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, source);
+  const result = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, source);
 
 }));
 
 appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
 
   const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const request = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, source);
+  const result = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, source);
 
 }));
 
 appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
-
   const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const request = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, source);
-
+  const result = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, source);
 }));
 
 
+appEventHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetExchangeProposedEvent, tenant } = source;
+  const result = await wait(accountAssetBalanceHandler, assetExchangeProposedEvent, null, tenant);
+}));
+
+appEventHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetExchangeProposalSignedEvent, tenant } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetExchangeProposalRejectedEvent, tenant } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.ASSET_TRANSFER, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetTransferEvent, tenant } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetTransferProposedEvent, tenant } = source;
+  const result = await wait(accountAssetBalanceHandler, assetTransferProposedEvent, null, tenant);
+}));
+
+appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetTransferProposalSignedEvent, tenant } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetTransferProposalRejectedEvent, tenant } = source;
+  // register handlers
+}));
 
 export default appEventHandler;
