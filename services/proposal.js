@@ -56,6 +56,11 @@ class ProposalService {
 
     for (let i = 0; i < chainProposals.length; i++) {
       let chainProposal = chainProposals[i];
+      let proposerAccount = chainAccounts.find(a => a.name == chainProposal.proposer);
+      let proposer = proposerAccount.is_research_group
+        ? researchGroups.find(rg => rg.external_id == chainProposal.proposer)
+        : users.find(u => u.account.name == chainProposal.proposer);
+
       let proposalRef = proposalsRefs.find(p => p._id == chainProposal.external_id);
       if (!proposalRef) continue;
 
@@ -101,6 +106,7 @@ class ProposalService {
       }
 
       proposals.push({
+        proposer: proposer,
         parties: parties,
         proposal: chainProposal,
         type: proposalRef.type,
