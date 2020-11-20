@@ -1,7 +1,8 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_STATUS, PROPOSAL_TYPE, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
+import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
 import usersService from './../services/users';
 
@@ -94,13 +95,29 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const { researchExternalId, researchGroupExternalId, attributes } = researchUpdateProposedEvent.getEventModel();
+  const { researchExternalId } = researchUpdateProposedEvent.getEventModel();
+  const updatedResearch = await researchService.getResearch(researchExternalId)
+  return updatedResearch;
+}));
 
-  if (attributes) {
+
+researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchUpdateProposalSignedEvent, tenant } = source;
+
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+
+  const proposalId = researchUpdateProposalSignedEvent.getProposalId();
+
+  const proposal = await proposalsService.getProposal(proposalId);
+  const { status } = proposal.proposal;
+  const { researchExternalId, attributes } = proposal.details;
+  if (status == PROPOSAL_STATUS.APPROVED) {
     await researchService.updateResearchRef(researchExternalId, { attributes });
   }
 
-  const updatedResearch = await researchService.getResearch(researchExternalId)
+  const updatedResearch = await researchService.getResearch(researchExternalId);
   return updatedResearch;
 }));
 

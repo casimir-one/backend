@@ -21,6 +21,8 @@ import ResearchProposalSignedEvent from './../events/researchProposalSignedEvent
 import ResearchProposalRejectedEvent from './../events/researchProposalRejectedEvent';
 import ResearchUpdatedEvent from './../events/researchUpdatedEvent';
 import ResearchUpdateProposedEvent from './../events/researchUpdateProposedEvent';
+import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
+import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
 
 
 const stat = util.promisify(fs.stat);
@@ -155,8 +157,8 @@ const updateResearch = async (ctx, next) => {
       const researchUpdateApprovals = researchUpdateProposedEvent.getProposalApprovals();
       for (let i = 0; i < researchUpdateApprovals.length; i++) {
         const approval = researchUpdateApprovals[i];
-        // const researchProposalSignedEvent = new ResearchProposalSignedEvent([approval]);
-        // ctx.state.events.push(researchProposalSignedEvent);
+        const researchUpdateProposalSignedEvent = new ResearchUpdateProposalSignedEvent([approval]);
+        ctx.state.events.push(researchUpdateProposalSignedEvent);
       }
     } else {
       const researchUpdatedEvent = new ResearchUpdatedEvent(datums, offchainMeta);

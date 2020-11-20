@@ -214,11 +214,12 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
-  const research = await wait(researchHandler, researchUpdateProposedEvent, null, tenant);
+  await wait(researchHandler, researchUpdateProposedEvent, null, tenant);
   await wait(proposalHandler, researchUpdateProposedEvent, null, tenant);
 
   // legacy
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const research = await researchService.getResearch(researchExternalId)
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
   const payload = { researchGroup: researchGroup, research: research, proposer: proposerUser };
@@ -230,6 +231,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposalSignedEvent, tenant } = source;
+  await wait(researchHandler, researchUpdateProposalSignedEvent, null, tenant);
   // register handlers
 }));
 
