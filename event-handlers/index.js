@@ -6,6 +6,7 @@ import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS,
 import userNotificationsHandler from './userNotificationHandler';
 import researchGroupActivityLogHandler from './researchGroupActivityLogHandler';
 import researchHandler from './researchHandler';
+import researchGroupHandler from './researchGroupHandler';
 import userInviteHandler from './userInviteHandler';
 import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
@@ -242,16 +243,8 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_REJECTED, (payload, reply
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, context: { emitter } } = source;
-  const researchGroupsService = new ResearchGroupService();
-
-  const [opName, opPayload, opProposal] = opDatum;
-  await researchGroupsService.createResearchGroupRef({
-    externalId: opPayload.new_account_name,
-    creator: opPayload.creator
-  });
-
+  const { event: researchGroupCreatedEvent, tenant } = source;
+  await wait(researchGroupHandler, researchGroupCreatedEvent, null, tenant);
 }));
 
 

@@ -10,37 +10,32 @@ import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
 import activityLogEntriesService from './../services/activityLogEntry';
-import { USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE, APP_EVENTS } from './../constants';
+import { APP_EVENTS } from './../constants';
 import { researchGroupLogoForm } from './../forms/researchGroupForms';
+import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
 
 
-const createResearchGroup = async (ctx) => {
+const createResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta } = ctx.request.body;
-  const researchGroupsService = new ResearchGroupService();
+  const { tx } = ctx.request.body;
 
   try {
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-
-    const { new_account_name: researchGroupExternalId, creator } = payload;
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    const datums = blockchainService.extractOperations(tx);
 
-    const researchGroupRef = await researchGroupsService.createResearchGroupRef({ 
-      externalId: researchGroupExternalId, 
-      creator
-    });
-
-    const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
-
+    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
+    ctx.state.events.push(researchGroupCreatedEvent);
+      
     ctx.status = 200;
-    ctx.body = researchGroup;
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 

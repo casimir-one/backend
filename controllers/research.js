@@ -23,7 +23,7 @@ import ResearchUpdatedEvent from './../events/researchUpdatedEvent';
 import ResearchUpdateProposedEvent from './../events/researchUpdateProposedEvent';
 import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
 import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
-
+import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -63,11 +63,11 @@ const createResearch = async (ctx, next) => {
     const operations = blockchainService.extractOperations(tx);
     const datums = operations;
 
-    const researchGroupDatum = operations.find(([opName]) => opName == 'create_account');
     const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
 
-    if (researchGroupDatum) {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_GROUP_CREATED, { opDatum: researchGroupDatum, context: { emitter: jwtUsername } }]);
+    if (datums.some(([opName]) => opName == 'create_account')) {
+      const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
+      ctx.state.events.push(researchGroupCreatedEvent);
     }
 
     if (datums.some(([opName]) => opName == 'create_proposal')) {
@@ -440,10 +440,10 @@ const getResearchApplicationAttachmentFile = async function (ctx) {
 const approveResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
+  const { tx } = ctx.request.body;
+
   const researchService = new ResearchService(tenant);
   const researchGroupsService = new ResearchGroupService();
-
-  const { tx } = ctx.request.body;
 
   try { 
 
@@ -465,6 +465,8 @@ const approveResearchApplication = async (ctx, next) => {
     }
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    const datums = blockchainService.extractOperations(tx);
+
     const updatedProposal = await deipRpc.api.getProposalAsync(applicationId);
     const isAccepted = updatedProposal == null;
 
@@ -483,6 +485,11 @@ const approveResearchApplication = async (ctx, next) => {
       externalId: research.research_group.external_id,
       creator: researchApplication.researcher
     });
+
+    if (datums.some(([opName]) => opName == 'create_account')) {
+      const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
+      ctx.state.events.push(researchGroupCreatedEvent);
+    }
 
     const researchApplicationData = researchApplication.toObject();
     const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
