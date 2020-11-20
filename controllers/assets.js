@@ -4,7 +4,7 @@ import * as blockchainService from './../utils/blockchain';
 import AssetExchangeProposedEvent from './../events/assetExchangeProposedEvent';
 import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalSignedEvent';
 import AssetExchangeProposalRejectedEvent from './../events/assetExchangeProposalRejectedEvent';
-import AssetTransferEvent from './../events/assetTransferEvent';
+import AssetTransferredEvent from './../events/assetTransferredEvent';
 import AssetTransferProposedEvent from './../events/assetTransferProposedEvent';
 import AssetTransferProposalSignedEvent from './../events/assetTransferProposalSignedEvent';
 import AssetTransferProposalRejectedEvent from './../events/assetTransferProposalRejectedEvent';
@@ -19,10 +19,7 @@ const createAssetTransferRequest = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
-    if (!datums.some(([opName]) => opName == 'create_proposal')) {
-      const assetTransferEvent = new AssetTransferEvent(datums);
-      ctx.state.events.push(assetTransferEvent);
-    } else {
+    if (datums.some(([opName]) => opName == 'create_proposal')) {
       const assetTransferProposedEvent = new AssetTransferProposedEvent(datums);
       ctx.state.events.push(assetTransferProposedEvent);
 
@@ -32,6 +29,9 @@ const createAssetTransferRequest = async (ctx, next) => {
         const assetTransferProposalSignedEvent = new AssetTransferProposalSignedEvent([approval]);
         ctx.state.events.push(assetTransferProposalSignedEvent);
       }
+    } else {
+      const assetTransferredEvent = new AssetTransferredEvent(datums);
+      ctx.state.events.push(assetTransferredEvent);
     }
 
     ctx.status = 200;

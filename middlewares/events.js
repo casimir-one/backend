@@ -17,7 +17,7 @@ function events(options) {
         let eventName = appEvent.getAppEventName();
         chain = chain.then(() => {
           return new Promise((success, failure) => {
-            appEventHandler.emit(eventName, { event: appEvent, tenant: ctx.state.tenant }, { success, failure });
+            appEventHandler.emit(eventName, { event: appEvent, tenant: ctx.state.tenant, emitter: ctx.state.user.username }, { success, failure });
           });
         });
       }

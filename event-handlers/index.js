@@ -8,7 +8,7 @@ import researchGroupActivityLogHandler from './researchGroupActivityLogHandler';
 import researchHandler from './researchHandler';
 import userInviteHandler from './userInviteHandler';
 import expressLicensingHandler from './expressLicensingHandler';
-import accountAssetBalanceHandler from './accountAssetBalanceHandler';
+import proposalHandler from './proposalHandler';
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
@@ -51,20 +51,16 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payl
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter, offchainMeta: { attributes } } } = source;
+  const { event: researchProposedEvent, tenant, emitter } = source;
+  
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+  const { researchTitle, researchGroupExternalId } = researchProposedEvent.getEventModel();
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { external_id: researchExternalId, title: researchTitle, research_group: researchGroupExternalId } = opPayload;
+  await wait(researchHandler, researchProposedEvent, null, tenant);
+  await wait(proposalHandler, researchProposedEvent, null, tenant);
 
-  await researchService.createResearchRef({
-    externalId: researchExternalId,
-    researchGroupExternalId: researchGroupExternalId,
-    attributes: attributes,
-    status: RESEARCH_STATUS.PROPOSED
-  });
-
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const proposerProfile = await usersService.findUserProfileByOwner(emitter);
 
@@ -72,19 +68,18 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
   researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
-
 }));
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchCreatedEvent, tenant, emitter } = source;
 
-  const { opDatum, tenant, context: { emitter } } = source;
-  
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const research = await wait(researchHandler, APP_EVENTS.RESEARCH_CREATED, source);
+  const research = await wait(researchHandler, researchCreatedEvent, null, tenant);
 
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = research.research_group.external_id != emitter;
@@ -93,9 +88,17 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_CREATED, payload);
   fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_CREATED, payload);
-  
 }));
 
+appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchProposalSignedEvent, tenant } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchProposalRejectedEvent, tenant } = source;
+  // register handlers
+}));
 
 appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
 
@@ -206,16 +209,15 @@ appEventHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, (payload, reply) => han
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter } } = source;
-  const [opName, opPayload, opProposal] = opDatum;
-  const { research_group: researchGroupExternalId, external_id: researchExternalId } = opPayload;
+  const { event: researchUpdateProposedEvent, tenant, emitter } = source;
+  const { researchExternalId, researchGroupExternalId } = researchUpdateProposedEvent.getEventModel();
 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+  const research = await wait(researchHandler, researchUpdateProposedEvent, null, tenant);
+  await wait(proposalHandler, researchUpdateProposedEvent, null, tenant);
 
-  const research = await wait(researchHandler, APP_EVENTS.RESEARCH_UPDATED, source);
-
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
@@ -225,6 +227,17 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
   fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_UPDATE_PROPOSED, payload);
 
 }));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchUpdateProposalSignedEvent, tenant } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchUpdateProposalRejectedEvent, tenant } = source;
+  // register handlers
+}));
+
 
 appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
@@ -242,12 +255,13 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter } } = source;
+  const { event: researchUpdatedEvent, tenant, emitter } = source;
 
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService(tenant);
+  const research = await wait(researchHandler, researchUpdatedEvent, null, tenant);
 
-  const research = await wait(researchHandler, APP_EVENTS.RESEARCH_UPDATED, source);
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
   const updaterUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = research.research_group.external_id != emitter;
@@ -520,7 +534,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, (payloa
 
 appEventHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetExchangeProposedEvent, tenant } = source;
-  const result = await wait(accountAssetBalanceHandler, assetExchangeProposedEvent, null, tenant);
+  await wait(proposalHandler, assetExchangeProposedEvent, null, tenant);
 }));
 
 appEventHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
@@ -533,14 +547,14 @@ appEventHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSAL_REJECTED, (payload, reply)
   // register handlers
 }));
 
-appEventHandler.on(APP_EVENTS.ASSET_TRANSFER, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetTransferEvent, tenant } = source;
+appEventHandler.on(APP_EVENTS.ASSET_TRANSFERRED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: assetTransferredEvent, tenant } = source;
   // register handlers
 }));
 
 appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetTransferProposedEvent, tenant } = source;
-  const result = await wait(accountAssetBalanceHandler, assetTransferProposedEvent, null, tenant);
+  await wait(proposalHandler, assetTransferProposedEvent, null, tenant);
 }));
 
 appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {

@@ -2,8 +2,8 @@ import assert from 'assert';
 import { APP_EVENTS } from './../constants';
 import AppEvent from './appEvent';
 
-class AssetTransferEvent extends AppEvent {
-  constructor(onchainDatums, offchainMeta, eventName = APP_EVENTS.ASSET_TRANSFER) {
+class AssetTransferredEvent extends AppEvent {
+  constructor(onchainDatums, offchainMeta, eventName = APP_EVENTS.ASSET_TRANSFERRED) {
     assert(onchainDatums.some(([opName]) => opName == 'transfer'), "transfer_operation is not provided");
     super(onchainDatums, offchainMeta, eventName);
   }
@@ -15,4 +15,4 @@ class AssetTransferEvent extends AppEvent {
   }
 }
 
-module.exports = AssetTransferEvent;
+module.exports = AssetTransferredEvent;

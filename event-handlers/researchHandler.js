@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
@@ -11,12 +11,11 @@ class ResearchHandler extends EventEmitter { }
 const researchHandler = new ResearchHandler();
 
 researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchCreatedEvent, tenant } = source;
 
-  const { opDatum, tenant, context: { emitter, offchainMeta: { attributes } } } = source;
-  const [opName, opPayload] = opDatum;
-  const { external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+  const { researchExternalId, researchGroupExternalId, attributes } = researchCreatedEvent.getEventModel();
 
   const researchRef = await researchService.findResearchRef(researchExternalId);
 
@@ -53,15 +52,32 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 }));
 
 
+researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchProposedEvent, tenant } = source;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+
+  const { researchExternalId, researchGroupExternalId, attributes } = researchProposedEvent.getEventModel();
+
+  const createdResearchRef = await researchService.createResearchRef({
+    externalId: researchExternalId,
+    researchGroupExternalId: researchGroupExternalId,
+    attributes: attributes,
+    status: RESEARCH_STATUS.PROPOSED
+  });
+
+  return createdResearchRef;
+}));
+
 
 researchHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter, offchainMeta: { attributes } } } = source;
-  const [opName, opPayload] = opDatum;
-  const { external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
+  const { event: researchUpdatedEvent, tenant } = source;
   
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+
+  const { researchExternalId, researchGroupExternalId, attributes } = researchUpdatedEvent.getEventModel();
 
   if (attributes) {
     await researchService.updateResearchRef(researchExternalId, { attributes });
@@ -69,7 +85,23 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
 
   const updatedResearch = await researchService.getResearch(researchExternalId)
   return updatedResearch;
+}));
 
+
+researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchUpdateProposedEvent, tenant } = source;
+
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+
+  const { researchExternalId, researchGroupExternalId, attributes } = researchUpdateProposedEvent.getEventModel();
+
+  if (attributes) {
+    await researchService.updateResearchRef(researchExternalId, { attributes });
+  }
+
+  const updatedResearch = await researchService.getResearch(researchExternalId)
+  return updatedResearch;
 }));
 
 

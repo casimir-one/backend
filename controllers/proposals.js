@@ -5,6 +5,8 @@ import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
 import usersService from './../services/users';
+import ResearchCreatedEvent from './../events/researchCreatedEvent'
+import ResearchUpdatedEvent from './../events/researchUpdatedEvent'
 
 const createProposal = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -52,20 +54,21 @@ const updateProposal = async (ctx, next) => {
       ctx.state.events.push([APP_EVENTS.PROPOSAL_ACCEPTED, { tx: proposal.proposed_transaction, emitter: jwtUsername }]);
 
       const operations = blockchainService.extractOperations(proposal.proposed_transaction);
-      
+      const datums = operations;
+
       // const inviteDatum = operations.find(([opName]) => opName == 'join_research_group_membership');
       // if (inviteDatum) {
       //   ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: ['update_proposal', payload, null], context: { emitter: jwtUsername } }]);
       // }
 
-      const researchDatum = operations.find(([opName]) => opName == 'create_research');
-      if (researchDatum) {
-        ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta: {} } }]);
+      if (datums.some(([opName]) => opName == 'create_research')) {
+        const researchCreatedEvent = new ResearchCreatedEvent(datums);
+        ctx.state.events.push(researchCreatedEvent);
       }
 
-      const researchUpdateDatum = operations.find(([opName]) => opName == 'update_research');
-      if (researchUpdateDatum) {
-        ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta: {} } }]);
+      if (datums.some(([opName]) => opName == 'update_research')) {
+        const researchUpdatedEvent = new ResearchUpdatedEvent(datums);
+        ctx.state.events.push(researchUpdatedEvent);
       }
 
       const researchTokenSaleDatum = operations.find(([opName]) => opName == 'create_research_token_sale');

@@ -7,15 +7,21 @@ import sharp from 'sharp'
 import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';
-import mongoose from 'mongoose';
+import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, RESEARCH_STATUS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
+import { APP_EVENTS, RESEARCH_STATUS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import { researchForm, researchAttributeFilePath, researchFilePath } from './../forms/research';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
-import qs from 'qs';
+import ResearchCreatedEvent from './../events/researchCreatedEvent';
+import ResearchProposedEvent from './../events/researchProposedEvent';
+import ResearchProposalSignedEvent from './../events/researchProposalSignedEvent';
+import ResearchProposalRejectedEvent from './../events/researchProposalRejectedEvent';
+import ResearchUpdatedEvent from './../events/researchUpdatedEvent';
+import ResearchUpdateProposedEvent from './../events/researchUpdateProposedEvent';
+
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -53,8 +59,8 @@ const createResearch = async (ctx, next) => {
     }));
 
     const operations = blockchainService.extractOperations(tx);
+    const datums = operations;
 
-    const researchDatum = operations.find(([opName]) => opName == 'create_research');
     const researchGroupDatum = operations.find(([opName]) => opName == 'create_account');
     const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
 
@@ -62,11 +68,20 @@ const createResearch = async (ctx, next) => {
       ctx.state.events.push([APP_EVENTS.RESEARCH_GROUP_CREATED, { opDatum: researchGroupDatum, context: { emitter: jwtUsername } }]);
     }
 
-    const [opName, researchPayload, researchProposal] = researchDatum;
-    if (researchProposal) {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_PROPOSED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    if (datums.some(([opName]) => opName == 'create_proposal')) {
+      const researchProposedEvent = new ResearchProposedEvent(datums, offchainMeta);
+      ctx.state.events.push(researchProposedEvent);
+
+      const researchApprovals = researchProposedEvent.getProposalApprovals();
+      for (let i = 0; i < researchApprovals.length; i++) {
+        const approval = researchApprovals[i];
+        const researchProposalSignedEvent = new ResearchProposalSignedEvent([approval]);
+        ctx.state.events.push(researchProposalSignedEvent);
+      }
+
     } else {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+      const researchCreatedEvent = new ResearchCreatedEvent(datums, offchainMeta);
+      ctx.state.events.push(researchCreatedEvent);
     }
 
     for (let i = 0; i < invitesDatums.length; i++) {
@@ -88,10 +103,8 @@ const createResearch = async (ctx, next) => {
       }
     }
 
-    const isProposal = !!researchProposal;
-
     ctx.status = 200;
-    ctx.body = isProposal ? null : researchPayload;
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);
@@ -133,15 +146,23 @@ const updateResearch = async (ctx, next) => {
     }));
 
     const operations = blockchainService.extractOperations(tx);
+    const datums = operations;
 
-    const researchUpdateDatum = operations.find(([opName]) => opName == 'update_research');
-    const [opName, researchUpdatePayload, researchUpdateProposal] = researchUpdateDatum;
-    if (researchUpdateProposal) {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATE_PROPOSED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+    if (datums.some(([opName]) => opName == 'create_proposal')) {
+      const researchUpdateProposedEvent = new ResearchUpdateProposedEvent(datums, offchainMeta);
+      ctx.state.events.push(researchUpdateProposedEvent);
+
+      const researchUpdateApprovals = researchUpdateProposedEvent.getProposalApprovals();
+      for (let i = 0; i < researchUpdateApprovals.length; i++) {
+        const approval = researchUpdateApprovals[i];
+        // const researchProposalSignedEvent = new ResearchProposalSignedEvent([approval]);
+        // ctx.state.events.push(researchProposalSignedEvent);
+      }
     } else {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_UPDATED, { opDatum: researchUpdateDatum, context: { emitter: jwtUsername, offchainMeta } }]);
+      const researchUpdatedEvent = new ResearchUpdatedEvent(datums, offchainMeta);
+      ctx.state.events.push(researchUpdatedEvent);
     }
-    
+
     const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
@@ -163,10 +184,8 @@ const updateResearch = async (ctx, next) => {
       }
     }
 
-    const isProposal = !!researchUpdateProposal;
-
     ctx.status = 200;
-    ctx.body = isProposal ? null : researchUpdatePayload;
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);
@@ -260,10 +279,9 @@ const createResearchApplication = async (ctx, next) => {
       const create_research_operation = form.tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
       const tx = { 'operations': [create_research_operation]}
 
-      const operations = blockchainService.extractOperations(tx);
-      const researchDatum = operations.find(([opName]) => opName == 'create_research');
-
-      ctx.state.events.push([APP_EVENTS.RESEARCH_CREATED, { opDatum: researchDatum, emitter: jwtUsername, offchainMeta : {} }]);
+      const datums = blockchainService.extractOperations(tx);
+      const researchCreatedEvent = new ResearchCreatedEvent(datums);
+      ctx.state.events.push(researchCreatedEvent);
     }
 
   } catch (err) {
