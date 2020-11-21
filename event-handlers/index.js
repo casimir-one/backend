@@ -10,6 +10,8 @@ import researchGroupHandler from './researchGroupHandler';
 import userInviteHandler from './userInviteHandler';
 import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
+import researchContentHandler from './researchContentHandler';
+
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
@@ -25,24 +27,6 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payl
   const [op_name, op_payload] = tx['operations'][0];
   const tag = deipRpc.operations.getOperationTag(op_name);
 
-  // temp
-  let promise = new Promise((resolve, reject) => {
-
-    const dummy = { success: resolve, failure: reject };
-
-    switch (tag) {
-      case deipRpc.operations.getOperationTag("create_research_content"): {
-        appEventHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, source, dummy);
-        break
-      }
-      default: {
-        break;
-      }
-    }
-  });
-
-  await promise;
-  
 }));
 
 
@@ -157,51 +141,57 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
 }));
 
 
-appEventHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchContentProposedEvent, tenant, emitter } = source;
+  const { researchGroupExternalId, researchExternalId, title } = researchContentProposedEvent.getEventModel();
+  
+  await wait(proposalHandler, researchContentProposedEvent, null, tenant);
 
-  const { tx, emitter } = source;
-  const operation = tx['operations'][0][1]['proposed_ops'][0]['op'];
-  const { research_group: researchGroupExternalId, research_external_id: researchExternalId, title } = operation[1];
-
+  // legacy
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
   const payload = { researchGroup: chainResearchGroup, research: chainResearch, proposer: proposerUser, title };
 
-  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, payload);
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, payload);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, payload);
 
 }));
 
 
-appEventHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { tx, emitter } = source;
-  const operation = tx['operations'][0];
-  const { external_id: researchContentExternalId, research_external_id: researchExternalId } = operation[1];
+  const { event: researchContentCreatedEvent, tenant, emitter } = source;
+  const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getEventModel();
 
+  await wait(researchContentHandler, researchContentCreatedEvent, null, tenant);
+
+  // legacy
   const chainResearchContent = await deipRpc.api.getResearchContentAsync(researchContentExternalId);
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(chainResearch.research_group.external_id);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = chainResearchGroup.external_id != emitter;
 
-  const researchContent = await researchContentService.findResearchContentById(researchContentExternalId)
-
-  const researchContentData = researchContent.toObject();
-  const update = { status: RESEARCH_CONTENT_STATUS.PUBLISHED };
-
-  const updatedResearchContent = await researchContentService.updateResearchContent(researchContentExternalId, {
-    ...researchContentData,
-    ...update
-  });
-
   const payload = { researchGroup: chainResearchGroup, research: chainResearch, researchContent: chainResearchContent, creator: creatorUser, isAcceptedByQuorum };
 
-  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, payload);
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CONTENT_CREATED, payload);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_CONTENT_CREATED, payload);
 
+}));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchContentProposalSignedEvent, tenant } = source;
+  await wait(researchContentHandler, researchContentProposalSignedEvent, null, tenant);
+  // register handlers
+}));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchContentProposalRejectedEvent, tenant } = source;
+  // register handlers
 }));
 
 

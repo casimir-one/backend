@@ -63,4 +63,12 @@ proposalHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) =
   return proposalRef;
 }));
 
+proposalHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchContentProposedEvent, tenant } = source;
+  const proposalRef = await createProposalRef(researchContentProposedEvent, PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL, tenant);
+  return proposalRef;
+}));
+
+
+
 export default proposalHandler;

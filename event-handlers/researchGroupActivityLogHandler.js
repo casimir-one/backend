@@ -43,7 +43,7 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) 
 });
 
 
-researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, async (payload) => {
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async (payload) => {
   const { researchGroup, research, proposer, title } = payload;
   const data = { title };
 
@@ -62,7 +62,7 @@ researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, async 
 });
 
 
-researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, async (payload) => {
+researchGroupActivityLogHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async (payload) => {
   const { researchGroup, research, researchContent, creator } = payload;
 
   activityLogEntriesService.createActivityLogEntry({

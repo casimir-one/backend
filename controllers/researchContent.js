@@ -23,6 +23,10 @@ import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
 import * as researchContentService from './../services/researchContent';
 import { RESEARCH_CONTENT_STATUS, APP_EVENTS } from './../constants';
+import ResearchContentCreatedEvent from './../events/researchContentCreatedEvent';
+import ResearchContentProposedEvent from './../events/researchContentProposedEvent';
+import ResearchContentProposalSignedEvent from './../events/researchContentProposalSignedEvent';
+import ResearchContentProposalRejectedEvent from './../events/researchContentProposalRejectedEvent';
 
 
 const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
@@ -746,6 +750,7 @@ const createResearchContent = async (ctx, next) => {
     const type = rc.type;
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    const datums = blockchainService.extractOperations(tx);
 
     await researchContentService.removeResearchContentByHash(researchExternalId, hash); // remove draft
     const researchContentRm = await researchContentService.createResearchContent({
@@ -766,10 +771,23 @@ const createResearchContent = async (ctx, next) => {
       foreignReferences
     });
 
+    if (isProposal) {
+      const researchContentProposedEvent = new ResearchContentProposedEvent(datums);
+      ctx.state.events.push(researchContentProposedEvent);
+      
+      const researchContentApprovals = researchContentProposedEvent.getProposalApprovals();
+      for (let i = 0; i < researchContentApprovals.length; i++) {
+        const approval = researchContentApprovals[i];
+        const researchContentProposalSignedEvent = new ResearchContentProposalSignedEvent([approval]);
+        ctx.state.events.push(researchContentProposalSignedEvent);
+      }
+    } else {
+      const researchContentCreatedEvent = new ResearchContentCreatedEvent(datums);
+      ctx.state.events.push(researchContentCreatedEvent);
+    }
+    
     ctx.status = 200;
     ctx.body = { rm: researchContentRm, txResult };
-    
-    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_MATERIAL_PROPOSED : APP_EVENTS.RESEARCH_MATERIAL_CREATED, { tx, emitter: jwtUsername }]);
 
   } catch (err) {
     console.log(err);

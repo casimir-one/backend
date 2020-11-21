@@ -64,7 +64,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, async (payload) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async (payload) => {
   const { researchGroup, research, proposer, title } = payload;
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -93,7 +93,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_MATERIAL_PROPOSED, async (payload
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, async (payload) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async (payload) => {
   const { researchGroup, research, researchContent, creator, isAcceptedByQuorum } = payload;
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 

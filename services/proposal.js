@@ -147,6 +147,9 @@ class ProposalService {
     const researchGroupUpdateProposals = await this.extendResearchGroupUpdateProposals(grouped[PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP] || []);
     result.push(...researchGroupUpdateProposals);
 
+    const researchContentProposals = await this.extendResearchContentProposals(grouped[PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL] || []);
+    result.push(...researchContentProposals);
+
     return result;
   }
 
@@ -318,6 +321,35 @@ class ProposalService {
       return { ...proposal, extendedDetails };
     });
   }
+
+
+  async extendResearchContentProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
+        acc.push(proposal.details.researchGroupExternalId);
+      }
+      return acc;
+    }, []);
+
+    const researchExternalIds = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.researchExternalId)) {
+        acc.push(proposal.details.researchExternalId);
+      }
+      return acc;
+    }, []);
+
+    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researches = await this.researchService.getResearches(researchExternalIds.map(rId => rId));
+
+    return proposals.map((proposal) => {
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
+      const extendedDetails = { researchGroup, research };
+      return { ...proposal, extendedDetails };
+    });
+  }
+
+
 
   async getProposalRef(externalId) {
     let proposal = await ProposalRef.findOne({ _id: externalId });
