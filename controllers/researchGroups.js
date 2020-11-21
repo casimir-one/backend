@@ -44,14 +44,14 @@ const createResearchGroup = async (ctx, next) => {
 
 const updateResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
+  const { tx, offchainMeta, isProposal } = ctx.request.body;
 
   try {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
-    if (datums.some(([opName]) => opName == 'create_proposal')) {
+    if (isProposal) {
       const researchGroupUpdateProposedEvent = new ResearchGroupUpdateProposedEvent(datums);
       ctx.state.events.push(researchGroupUpdateProposedEvent);
 

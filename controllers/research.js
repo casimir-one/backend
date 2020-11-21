@@ -39,12 +39,13 @@ const createResearch = async (ctx, next) => {
   try {
     
     const formUploader = researchForm.any();
-    const { tx, offchainMeta } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
+    const { tx, offchainMeta, isProposal } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
       try {
 
         const tx = JSON.parse(ctx.req.body.tx);
         const onchainData = JSON.parse(ctx.req.body.onchainData);
         const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+        const isProposal = ctx.req.body.isProposal === 'true';
         console.log(ctx.req.files);
 
         const txResult = await blockchainService.sendTransactionAsync(tx);
@@ -52,7 +53,8 @@ const createResearch = async (ctx, next) => {
         resolve({
           tx,
           offchainMeta,
-          onchainData
+          onchainData,
+          isProposal
         });
 
       } catch (err) {
@@ -70,7 +72,7 @@ const createResearch = async (ctx, next) => {
       ctx.state.events.push(researchGroupCreatedEvent);
     }
 
-    if (datums.some(([opName]) => opName == 'create_proposal')) {
+    if (isProposal) {
       const researchProposedEvent = new ResearchProposedEvent(datums, offchainMeta);
       ctx.state.events.push(researchProposedEvent);
 
@@ -126,12 +128,13 @@ const updateResearch = async (ctx, next) => {
   try {
 
     const formUploader = researchForm.any();
-    const { tx, offchainMeta } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
+    const { tx, offchainMeta, isProposal } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
       try {
 
         const tx = JSON.parse(ctx.req.body.tx);
         const onchainData = JSON.parse(ctx.req.body.onchainData);
         const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+        const isProposal = ctx.req.body.isProposal === 'true';
         console.log(ctx.req.files);
 
         const txResult = await blockchainService.sendTransactionAsync(tx);
@@ -139,7 +142,8 @@ const updateResearch = async (ctx, next) => {
         resolve({
           tx,
           offchainMeta,
-          onchainData
+          onchainData,
+          isProposal
         });
 
       } catch (err) {
@@ -150,7 +154,7 @@ const updateResearch = async (ctx, next) => {
     const operations = blockchainService.extractOperations(tx);
     const datums = operations;
 
-    if (datums.some(([opName]) => opName == 'create_proposal')) {
+    if (isProposal) {
       const researchUpdateProposedEvent = new ResearchUpdateProposedEvent(datums, offchainMeta);
       ctx.state.events.push(researchUpdateProposedEvent);
 
