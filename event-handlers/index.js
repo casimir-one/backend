@@ -35,10 +35,6 @@ appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payl
         appEventHandler.emit(APP_EVENTS.RESEARCH_MATERIAL_CREATED, source, dummy);
         break
       }
-      case deipRpc.operations.getOperationTag("update_account"): {
-        appEventHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, source, dummy);
-        break
-      }
       default: {
         break;
       }
@@ -93,7 +89,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchProposalSignedEvent, tenant } = source;
-  // register handlers
+  await wait(researchHandler, researchProposalSignedEvent, null, tenant);
 }));
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
@@ -209,6 +205,26 @@ appEventHandler.on(APP_EVENTS.RESEARCH_MATERIAL_CREATED, (payload, reply) => han
 }));
 
 
+appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchUpdatedEvent, tenant, emitter } = source;
+
+  const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService(tenant);
+  const research = await wait(researchHandler, researchUpdatedEvent, null, tenant);
+
+  // legacy
+  const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
+  const updaterUser = await usersService.findUserProfileByOwner(emitter);
+  const isAcceptedByQuorum = research.research_group.external_id != emitter;
+
+  const payload = { researchGroup: researchGroup, research: research, creator: updaterUser, isAcceptedByQuorum };
+
+  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_UPDATED, payload);
+  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_UPDATED, payload);
+
+}));
+
+
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposedEvent, tenant, emitter } = source;
   const { researchExternalId, researchGroupExternalId } = researchUpdateProposedEvent.getEventModel();
@@ -248,49 +264,10 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle
 }));
 
 
-appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { event: researchUpdatedEvent, tenant, emitter } = source;
-
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
-  const research = await wait(researchHandler, researchUpdatedEvent, null, tenant);
-
-  // legacy
-  const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
-  const updaterUser = await usersService.findUserProfileByOwner(emitter);
-  const isAcceptedByQuorum = research.research_group.external_id != emitter;
-
-  const payload = { researchGroup: researchGroup, research: research, creator: updaterUser, isAcceptedByQuorum };
-
-  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_UPDATED, payload);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_UPDATED, payload);
-
-}));
-
-
-appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { tx, emitter } = source;
-  const operation = tx['operations'][0][1]['proposed_ops'][0]['op'];
-  const { account: researchGroupExternalId } = operation[1];
-
-  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
-  const proposerUser = await usersService.findUserProfileByOwner(emitter);
-
-  const payload = { researchGroup: chainResearchGroup, proposer: proposerUser };
-
-  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
-
-}));
-
-
 appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchGroupUpdatedEvent, tenant, emitter } = source;
 
-  const { tx, emitter } = source;
-  const operation = tx['operations'][0];
-  const { account: researchGroupExternalId } = operation[1];
+  const { researchGroupExternalId } = researchGroupUpdatedEvent.getEventModel();
 
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
@@ -301,6 +278,32 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, payload);
   researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, payload);
 
+}));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchGroupUpdateProposedEvent, tenant, emitter } = source;
+  const { researchGroupExternalId } = researchGroupUpdateProposedEvent.getEventModel();
+
+  await wait(proposalHandler, researchGroupUpdateProposedEvent, null, tenant);
+
+  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const proposerUser = await usersService.findUserProfileByOwner(emitter);
+
+  const payload = { researchGroup: chainResearchGroup, proposer: proposerUser };
+  userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
+  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
+
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchGroupUpdateProposalSignedEvent, tenant, emitter } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchGroupUpdateProposalRejectedEvent, tenant, emitter } = source;
+  // register handlers
 }));
 
 

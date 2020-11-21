@@ -13,6 +13,9 @@ import activityLogEntriesService from './../services/activityLogEntry';
 import { APP_EVENTS } from './../constants';
 import { researchGroupLogoForm } from './../forms/researchGroupForms';
 import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
+import ResearchGroupUpdatedEvent from './../events/researchGroupUpdatedEvent';
+import ResearchGroupUpdateProposedEvent from './../events/researchGroupUpdateProposedEvent';
+import ResearchGroupUpdateProposalSignedEvent from './../events/researchGroupUpdateProposalSignedEvent';
 
 
 const createResearchGroup = async (ctx, next) => {
@@ -41,30 +44,31 @@ const createResearchGroup = async (ctx, next) => {
 
 const updateResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
+  const { tx } = ctx.request.body;
 
   try {
 
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const datums = blockchainService.extractOperations(tx);
 
-    const {
-      account: researchGroupAccount
-    } = payload;
+    if (datums.some(([opName]) => opName == 'create_proposal')) {
+      const researchGroupUpdateProposedEvent = new ResearchGroupUpdateProposedEvent(datums);
+      ctx.state.events.push(researchGroupUpdateProposedEvent);
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 400;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
+      const researchGroupUpdateApprovals = researchGroupUpdateProposedEvent.getProposalApprovals();
+      for (let i = 0; i < researchGroupUpdateApprovals.length; i++) {
+        const approval = researchGroupUpdateApprovals[i];
+        const researchGroupUpdateProposalSignedEvent = new ResearchGroupUpdateProposalSignedEvent([approval]);
+        ctx.state.events.push(researchGroupUpdateProposalSignedEvent);
+      }
+      
+    } else {
+      const researchGroupUpdatedEvent = new ResearchGroupUpdatedEvent(datums);
+      ctx.state.events.push(researchGroupUpdatedEvent);
     }
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-
     ctx.status = 200;
-    ctx.body = { txResult };
-
-    ctx.state.events.push([isProposal ? APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED : APP_EVENTS.RESEARCH_GROUP_UPDATED, { tx, emitter: jwtUsername }]);
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);

@@ -18,20 +18,12 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
   const researchGroupService = new ResearchGroupService();
   const { researchExternalId, researchGroupExternalId, attributes } = researchCreatedEvent.getEventModel();
 
-  const researchRef = await researchService.findResearchRef(researchExternalId);
-
-  if (!researchRef) {
-    await researchService.createResearchRef({
-      externalId: researchExternalId,
-      researchGroupExternalId: researchGroupExternalId,
-      attributes: attributes,
-      status: RESEARCH_STATUS.APPROVED
-    });
-  } else {
-    await researchService.updateResearchRef(researchExternalId, {
-      status: RESEARCH_STATUS.APPROVED
-    });
-  }
+  const researchRef = await researchService.createResearchRef({
+    externalId: researchExternalId,
+    researchGroupExternalId: researchGroupExternalId,
+    attributes: attributes,
+    status: RESEARCH_STATUS.APPROVED
+  });
   
   let hasUpdate = false;
   const researchGroupAttribute = tenant.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
@@ -61,14 +53,14 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
 
   const { researchExternalId, researchGroupExternalId, attributes } = researchProposedEvent.getEventModel();
 
-  const createdResearchRef = await researchService.createResearchRef({
+  const researchRef = await researchService.createResearchRef({
     externalId: researchExternalId,
     researchGroupExternalId: researchGroupExternalId,
     attributes: attributes,
     status: RESEARCH_STATUS.PROPOSED
   });
 
-  return createdResearchRef;
+  return researchRef;
 }));
 
 
@@ -101,6 +93,31 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
 }));
 
 
+researchHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchProposalSignedEvent, tenant } = source;
+
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+
+  const proposalId = researchProposalSignedEvent.getProposalId();
+
+  const proposal = await proposalsService.getProposal(proposalId);
+  const { status } = proposal.proposal;
+  const { researchExternalId, attributes } = proposal.details;
+
+  if (status == PROPOSAL_STATUS.APPROVED) {
+    await researchService.updateResearchRef(researchExternalId, {
+      status: RESEARCH_STATUS.APPROVED,
+      attributes: attributes
+    });
+  }
+
+  const updatedResearch = await researchService.getResearch(researchExternalId);
+  return updatedResearch;
+}));
+
+
 researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposalSignedEvent, tenant } = source;
 
@@ -113,8 +130,11 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) 
   const proposal = await proposalsService.getProposal(proposalId);
   const { status } = proposal.proposal;
   const { researchExternalId, attributes } = proposal.details;
+
   if (status == PROPOSAL_STATUS.APPROVED) {
-    await researchService.updateResearchRef(researchExternalId, { attributes });
+    await researchService.updateResearchRef(researchExternalId, {
+      attributes: attributes
+    });
   }
 
   const updatedResearch = await researchService.getResearch(researchExternalId);

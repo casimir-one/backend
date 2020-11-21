@@ -57,5 +57,10 @@ proposalHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSED, (payload, reply) => handl
   return proposalRef;
 }));
 
+proposalHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchGroupUpdateProposedEvent, tenant } = source;
+  const proposalRef = await createProposalRef(researchGroupUpdateProposedEvent, PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP, tenant);
+  return proposalRef;
+}));
 
 export default proposalHandler;

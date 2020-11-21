@@ -12,7 +12,7 @@ import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, RESEARCH_STATUS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
+import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import { researchForm, researchAttributeFilePath, researchFilePath } from './../forms/research';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import ResearchCreatedEvent from './../events/researchCreatedEvent';
@@ -160,6 +160,7 @@ const updateResearch = async (ctx, next) => {
         const researchUpdateProposalSignedEvent = new ResearchUpdateProposalSignedEvent([approval]);
         ctx.state.events.push(researchUpdateProposalSignedEvent);
       }
+
     } else {
       const researchUpdatedEvent = new ResearchUpdatedEvent(datums, offchainMeta);
       ctx.state.events.push(researchUpdatedEvent);
@@ -235,6 +236,7 @@ const createResearchApplication = async (ctx, next) => {
     }));
 
     const txResult = await blockchainService.sendTransactionAsync(form.tx);
+    const datums = blockchainService.extractOperations(form.tx);
     const proposal = await deipRpc.api.getProposalAsync(form.proposalId);
     const isAccepted = proposal == null;
 
@@ -267,22 +269,7 @@ const createResearchApplication = async (ctx, next) => {
     if (!isAccepted) {
       ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
     } else {
-      const research = await deipRpc.api.getResearchAsync(form.researchExternalId);
-      await researchService.createResearchRef({
-        externalId: research.external_id,
-        status: RESEARCH_STATUS.APPROVED,
-        researchGroupExternalId: research.research_group.external_id,
-        researchGroupInternalId: research.research_group.id,
-        title: research.title,
-        abstract: research.abstract,
-        attributes: researchApplication.attributes || []
-      });
-
-      const create_research_operation = form.tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
-      const tx = { 'operations': [create_research_operation]}
-
-      const datums = blockchainService.extractOperations(tx);
-      const researchCreatedEvent = new ResearchCreatedEvent(datums);
+      const researchCreatedEvent = new ResearchCreatedEvent(datums, { attributes: researchApplication.attributes || []});
       ctx.state.events.push(researchCreatedEvent);
     }
 
@@ -470,26 +457,11 @@ const approveResearchApplication = async (ctx, next) => {
     const updatedProposal = await deipRpc.api.getProposalAsync(applicationId);
     const isAccepted = updatedProposal == null;
 
-    const research = await deipRpc.api.getResearchAsync(researchApplication.researchExternalId);
-    const researcRm = await researchService.createResearchRef({
-      externalId: research.external_id,
-      status: RESEARCH_STATUS.APPROVED,
-      researchGroupExternalId: research.research_group.external_id,
-      researchGroupInternalId: research.research_group.id,
-      title: research.title,
-      abstract: research.abstract,
-      attributes: researchApplication.attributes || []
-    });
+    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
+    ctx.state.events.push(researchGroupCreatedEvent);
 
-    await researchGroupsService.createResearchGroupRef({
-      externalId: research.research_group.external_id,
-      creator: researchApplication.researcher
-    });
-
-    if (datums.some(([opName]) => opName == 'create_account')) {
-      const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
-      ctx.state.events.push(researchGroupCreatedEvent);
-    }
+    const researchCreatedEvent = new ResearchCreatedEvent(datums, { attributes: researchApplication.attributes || [] });
+    ctx.state.events.push(researchCreatedEvent);
 
     const researchApplicationData = researchApplication.toObject();
     const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
@@ -498,7 +470,7 @@ const approveResearchApplication = async (ctx, next) => {
     });
     
     ctx.status = 200;
-    ctx.body = { tx, txResult, rm: researcRm };
+    ctx.body = { tx, txResult, rm: researchCreatedEvent.getEventModel() };
 
     if (isAccepted) {
       ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_APPROVED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);

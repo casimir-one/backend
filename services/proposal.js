@@ -144,6 +144,9 @@ class ProposalService {
     const researchUpdateProposals = await this.extendResearchUpdateProposals(grouped[PROPOSAL_TYPE.UPDATE_RESEARCH] || []);
     result.push(...researchUpdateProposals);
 
+    const researchGroupUpdateProposals = await this.extendResearchGroupUpdateProposals(grouped[PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP] || []);
+    result.push(...researchGroupUpdateProposals);
+
     return result;
   }
 
@@ -294,6 +297,24 @@ class ProposalService {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
       const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
       const extendedDetails = { researchGroup, research };
+      return { ...proposal, extendedDetails };
+    });
+  }
+
+
+  async extendResearchGroupUpdateProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
+        acc.push(proposal.details.researchGroupExternalId);
+      }
+      return acc;
+    }, []);
+
+    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
+
+    return proposals.map((proposal) => {
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const extendedDetails = { researchGroup };
       return { ...proposal, extendedDetails };
     });
   }
