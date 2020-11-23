@@ -49,35 +49,6 @@ class ExpressLicensingService {
   } 
 
 
-  async getExpressLicenseRequests() {
-    const requests = this.proposalsService.getProposalRefsByType(SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST);
-    const result = await this.proposalsService.extendExpressLicenseRequests(requests)
-    return result;
-  }
-
-
-  async getExpressLicenseRequestById(requestId) {
-    const request = await this.proposalsService.getProposalRef(requestId);
-    const [result] = await this.proposalsService.extendExpressLicenseRequests([request])
-    return result;
-  }
-
-
-  async getExpressLicenseRequestsByResearch(researchExternalId) {
-    const allRequests = this.proposalsService.getProposalRefsByType(SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST);
-    const requests = allRequests.filter(r => r.details.researchExternalId == researchExternalId)
-    const result = await this.proposalsService.extendExpressLicenseRequests(requests)
-    return result;  
-  }
-
-
-  async getExpressLicenseRequestsByRequester(requester) {
-    const allRequests = this.proposalsService.getProposalRefsByType(SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST);
-    const requests = allRequests.filter(r => r.details.requester == requester)
-    const result = await this.proposalsService.extendExpressLicenseRequests(requests)
-    return result;  
-  }
-
 
   async createExpressLicense({
     externalId,

@@ -159,6 +159,9 @@ const getAccountProposals = async (ctx) => {
 
   try {
     let result = await proposalsService.getAccountProposals(username);
+    result.sort(function (a, b) {
+      return new Date(b.proposal.created_at) - new Date(a.proposal.created_at);
+    });
     ctx.body = status && status != 0 ? result.filter(p => p.proposal.status == status) : result;
   } catch (err) {
     console.log(err);

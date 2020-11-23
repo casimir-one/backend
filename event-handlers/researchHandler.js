@@ -60,6 +60,20 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
     status: RESEARCH_STATUS.PROPOSED
   });
 
+  let hasUpdate = false;
+  const researchGroupAttribute = tenant.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
+  if (researchGroupAttribute && researchGroupAttribute.isHidden) {
+    const rAttr = attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchGroupAttribute._id.toString());
+    if (!rAttr.value) {
+      rAttr.value = [researchGroupExternalId];
+      hasUpdate = true;
+    }
+  }
+
+  if (hasUpdate) {
+    await researchService.updateResearchRef(researchExternalId, { attributes: attributes });
+  }
+
   return researchRef;
 }));
 
