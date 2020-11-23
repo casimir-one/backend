@@ -118,10 +118,6 @@ protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fil
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.uploadAwardWithdrawalRequestBulkAttachments)
 
 
-protected_route.get('/express-licensing/all', expressLicensing.getExpressLicenseRequests)
-protected_route.get('/express-licensing/id/:requestId', expressLicensing.getExpressLicenseRequestById)
-protected_route.get('/express-licensing/research/:researchExternalId', expressLicensing.getExpressLicenseRequestsByResearch)
-protected_route.get('/express-licensing/requester/:requester', expressLicensing.getExpressLicenseRequestsByRequester)
 protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
 protected_route.put('/express-licensing/approve/:requestId', expressLicensing.approveExpressLicenseRequest)
 protected_route.put('/express-licensing/reject/:requestId', expressLicensing.rejectExpressLicenseRequest)
