@@ -1,6 +1,5 @@
 import { sendTransaction, getTransaction } from './../utils/blockchain';
 import ReviewRequest from './../schemas/reviewRequest';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLogHandler';
 import userNotificationHandler from './../event-handlers/userNotificationHandler';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import deipRpc from '@deip/rpc-client';
@@ -62,7 +61,6 @@ async function processPublishedReviewTx(payload, txInfo) {
             ReviewRequest.update({ expert: payload.author, contentId: payload.research_content_id }, { $set: { status: 'approved' } });
             
             userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, review);
-            researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, review);
             break;
         }
     }

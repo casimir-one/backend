@@ -2,7 +2,6 @@ import deipRpc from '@deip/rpc-client';
 import ReviewRequest from './../schemas/reviewRequest';
 import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
-import researchGroupActivityLogHandler from './../event-handlers/researchGroupActivityLogHandler';
 import userNotificationHandler from './../event-handlers/userNotificationHandler';
 
 const getReviewRequestsByExpert = async (ctx) => {
@@ -95,7 +94,6 @@ const createReviewRequest = async (ctx) => {
   const savedReviewRequest = await reviewRequest.save();
   
   userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, reviewRequest);
-  researchGroupActivityLogHandler.emit(ACTIVITY_LOG_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, reviewRequest);
 
   ctx.status = 201;
   ctx.body = savedReviewRequest;

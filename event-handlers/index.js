@@ -4,7 +4,6 @@ import deipRpc from '@deip/rpc-client';
 import { handle, fire, wait } from './utils';
 import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS, TOKEN_SALE_STATUS } from './../constants';
 import userNotificationsHandler from './userNotificationHandler';
-import researchGroupActivityLogHandler from './researchGroupActivityLogHandler';
 import researchHandler from './researchHandler';
 import researchGroupHandler from './researchGroupHandler';
 import userInviteHandler from './userInviteHandler';
@@ -48,7 +47,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
   const notificationPayload = { researchGroup, proposer: proposerProfile, researchTitle };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_PROPOSED, notificationPayload);
 }));
 
 
@@ -68,7 +66,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
   const payload = { tenant, researchGroup, research, creator: creatorUser, isAcceptedByQuorum };
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_CREATED, payload);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_CREATED, payload);
 }));
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
@@ -95,7 +92,6 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => hand
   const event = { tenant, researchGroup, invite: userInvite, invitee: inviteeProfile, creator: creatorProfile };
 
   userNotificationsHandler.emit(APP_EVENTS.USER_INVITATION_PROPOSED, event);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.USER_INVITATION_PROPOSED, event);
 
 }));
 
@@ -115,7 +111,6 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
   const event = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, approver: approverProfile };
 
   fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_SIGNED, event);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.USER_INVITATION_SIGNED, event);
   fire(researchHandler, APP_EVENTS.USER_INVITATION_SIGNED, event)
 
 }));
@@ -135,7 +130,6 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
   const event = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, rejector: rejectorProfile };
 
   fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
   fire(researchHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
 
 }));
@@ -155,7 +149,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => han
   const payload = { researchGroup: chainResearchGroup, research: chainResearch, proposer: proposerUser, title };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, payload);
 
 }));
 
@@ -177,7 +170,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => hand
   const payload = { researchGroup: chainResearchGroup, research: chainResearch, researchContent: chainResearchContent, creator: creatorUser, isAcceptedByQuorum };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CONTENT_CREATED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_CONTENT_CREATED, payload);
 
 }));
 
@@ -210,7 +202,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
   const payload = { researchGroup: researchGroup, research: research, creator: updaterUser, isAcceptedByQuorum };
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_UPDATED, payload);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_UPDATED, payload);
 
 }));
 
@@ -232,7 +223,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
   const payload = { researchGroup: researchGroup, research: research, proposer: proposerUser };
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_UPDATE_PROPOSED, payload);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_UPDATE_PROPOSED, payload);
 
 }));
 
@@ -266,7 +256,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle
   const payload = { researchGroup: chainResearchGroup, creator: creatorUser, isAcceptedByQuorum };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, payload);
 
 }));
 
@@ -282,7 +271,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) =
 
   const payload = { researchGroup: chainResearchGroup, proposer: proposerUser };
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
-  researchGroupActivityLogHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
 
 }));
 
@@ -471,7 +459,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => h
   const paylod = { researchGroup, research, tokenSale, creator: creatorProfile };
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, paylod);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, paylod);
 
 }));
 
@@ -494,7 +481,6 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => 
   const paylod = { researchGroup, research, tokenSale: null, proposer: proposerProfile };
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, paylod);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, paylod);
 
 }));
 
