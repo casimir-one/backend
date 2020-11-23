@@ -16,7 +16,7 @@ researchGroupHandler.on(APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => h
   const { event: researchGroupCreatedEvent, tenant } = source;
 
   const researchGroupsService = new ResearchGroupService();
-  const { researchGroupExternalId, creator } = researchGroupCreatedEvent.getEventModel();
+  const { researchGroupExternalId, creator } = researchGroupCreatedEvent.getSourceData();
 
   await researchGroupsService.createResearchGroupRef({
     externalId: researchGroupExternalId,

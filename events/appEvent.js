@@ -11,7 +11,7 @@ class AppEvent {
   getAppEventName() { return this.appEventName; }
   getProposalId() { return null; }
   getProposalApprovals() { return []; }
-  getEventModel() { return null; }
+  getSourceData() { return null; }
 }
 
 module.exports = AppEvent;

@@ -8,7 +8,7 @@ class AssetTransferredEvent extends AppEvent {
     super(onchainDatums, offchainMeta, eventName);
   }
 
-  getEventModel() {
+  getSourceData() {
     let [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'transfer');
     let { from: party1, to: party2, amount: asset, memo } = opPayload;
     return { party1, party2, asset, memo };

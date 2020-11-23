@@ -8,7 +8,7 @@ class ResearchGroupCreatedEvent extends AppEvent {
     super(onchainDatums, offchainMeta, eventName);
   }
 
-  getEventModel() {
+  getSourceData() {
     const [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'create_account');
     const { new_account_name: researchGroupExternalId, creator } = opPayload;
     return { researchGroupExternalId, creator } ;

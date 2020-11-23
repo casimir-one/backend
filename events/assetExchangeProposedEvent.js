@@ -9,7 +9,7 @@ class AssetExchangeProposedEvent extends ProposalEvent(AppEvent) {
     super(onchainDatums, offchainMeta, eventName);
   }
 
-  getEventModel() {
+  getSourceData() {
     let [opName1, opPayload1] = this.onchainDatums.filter(([opName]) => opName == 'transfer')[0];
     let [opName2, opPayload2] = this.onchainDatums.filter(([opName]) => opName == 'transfer')[1];
 

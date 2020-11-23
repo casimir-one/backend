@@ -16,7 +16,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
-  const { researchExternalId, researchGroupExternalId, attributes } = researchCreatedEvent.getEventModel();
+  const { researchExternalId, researchGroupExternalId, attributes } = researchCreatedEvent.getSourceData();
 
   const researchRef = await researchService.createResearchRef({
     externalId: researchExternalId,
@@ -51,7 +51,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService(tenant);
 
-  const { researchExternalId, researchGroupExternalId, attributes } = researchProposedEvent.getEventModel();
+  const { researchExternalId, researchGroupExternalId, attributes } = researchProposedEvent.getSourceData();
 
   const researchRef = await researchService.createResearchRef({
     externalId: researchExternalId,
@@ -70,7 +70,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const { researchExternalId, researchGroupExternalId, attributes } = researchUpdatedEvent.getEventModel();
+  const { researchExternalId, researchGroupExternalId, attributes } = researchUpdatedEvent.getSourceData();
 
   if (attributes) {
     await researchService.updateResearchRef(researchExternalId, { attributes });
@@ -87,7 +87,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const { researchExternalId } = researchUpdateProposedEvent.getEventModel();
+  const { researchExternalId } = researchUpdateProposedEvent.getSourceData();
   const updatedResearch = await researchService.getResearch(researchExternalId)
   return updatedResearch;
 }));

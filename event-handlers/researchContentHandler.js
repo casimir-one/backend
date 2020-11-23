@@ -18,7 +18,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const { researchContentExternalId } = researchContentCreatedEvent.getEventModel();
+  const { researchContentExternalId } = researchContentCreatedEvent.getSourceData();
 
   const researchContent = await researchContentService.findResearchContentById(researchContentExternalId)
   const researchContentData = researchContent.toObject();

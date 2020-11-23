@@ -8,7 +8,7 @@ class ResearchContentCreatedEvent extends AppEvent {
     super(onchainDatums, offchainMeta, eventName);
   }
 
-  getEventModel() {
+  getSourceData() {
     const [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'create_research_content');
     const { external_id: researchContentExternalId, research_group: researchGroupExternalId, research_external_id: researchExternalId, title } = opPayload;
     return { researchContentExternalId, researchExternalId, researchGroupExternalId, title };

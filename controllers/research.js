@@ -479,7 +479,7 @@ const approveResearchApplication = async (ctx, next) => {
     });
     
     ctx.status = 200;
-    ctx.body = { tx, txResult, rm: researchCreatedEvent.getEventModel() };
+    ctx.body = { tx, txResult, rm: researchCreatedEvent.getSourceData() };
 
     if (isAccepted) {
       ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_APPROVED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);

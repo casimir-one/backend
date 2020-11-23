@@ -8,7 +8,7 @@ class ResearchGroupUpdatedEvent extends AppEvent {
     super(onchainDatums, offchainMeta, eventName);
   }
 
-  getEventModel() {
+  getSourceData() {
     const [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'update_account');
     const { account: researchGroupExternalId, traits: [[traitName, { name, description }]] } = opPayload;
     return { researchGroupExternalId, name, description };

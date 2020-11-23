@@ -8,7 +8,7 @@ class ResearchTokenSaleCreatedEvent extends AppEvent {
     super(onchainDatums, offchainMeta, eventName);
   }
 
-  getEventModel() {
+  getSourceData() {
     let [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'create_research_token_sale');
     let { external_id: researchTokenSaleExternalId, research_external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
     return { researchTokenSaleExternalId, researchExternalId, researchGroupExternalId };

@@ -18,7 +18,7 @@ async function createProposalRef(event, chainContractType, tenant) {
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
   const proposalId = event.getProposalId();
-  const eventModel = event.getEventModel();
+  const eventModel = event.getSourceData();
 
   const proposalRef = await proposalsService.createProposalRef(proposalId, {
     type: chainContractType,
