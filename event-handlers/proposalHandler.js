@@ -69,6 +69,11 @@ proposalHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => han
   return proposalRef;
 }));
 
+proposalHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchTokenSaleProposedEvent, tenant } = source;
+  const proposalRef = await createProposalRef(researchTokenSaleProposedEvent, PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE, tenant);
+  return proposalRef;
+}));
 
 
 export default proposalHandler;

@@ -150,6 +150,9 @@ class ProposalService {
     const researchContentProposals = await this.extendResearchContentProposals(grouped[PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL] || []);
     result.push(...researchContentProposals);
 
+    const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE] || []);
+    result.push(...researchTokenSaleProposals);
+
     return result;
   }
 
@@ -349,6 +352,43 @@ class ProposalService {
     });
   }
 
+  async extendResearchTokenSaleProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
+        acc.push(proposal.details.researchGroupExternalId);
+      }
+      return acc;
+    }, []);
+
+    const researchExternalIds = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.researchExternalId)) {
+        acc.push(proposal.details.researchExternalId);
+      }
+      return acc;
+    }, []);
+
+    const researchTokenSaleExternalIds = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.researchTokenSaleExternalId)) {
+        acc.push(proposal.details.researchTokenSaleExternalId);
+      }
+      return acc;
+    }, []);
+
+
+    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researches = await this.researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => deipRpc.api.getResearchTokenSaleAsync(id)));
+
+
+    return proposals.map((proposal) => {
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
+      const researchTokenSale = researchTokenSales.find(ts => ts.external_id == proposal.details.researchTokenSaleExternalId);
+
+      const extendedDetails = { researchGroup, research, researchTokenSale };
+      return { ...proposal, extendedDetails };
+    });
+  }
 
 
   async getProposalRef(externalId) {

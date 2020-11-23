@@ -24,6 +24,11 @@ import ResearchUpdateProposedEvent from './../events/researchUpdateProposedEvent
 import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
 import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
 import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
+import ResearchTokenSaleCreatedEvent from './../events/researchTokenSaleCreatedEvent';
+import ResearchTokenSaleProposedEvent from './../events/researchTokenSaleProposedEvent';
+import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleProposalSignedEvent';
+import ResearchTokenSaleProposalRejectedEvent from './../events/researchTokenSaleProposalRejectedEvent';
+
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -613,24 +618,32 @@ const getResearchApplications = async (ctx) => {
 
 const createResearchTokenSale = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
+  const { tx, isProposal } = ctx.request.body;
 
   try {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const operations = blockchainService.extractOperations(tx);
+    const datums = operations;
 
-    const researchTokenSaleDatum = operations.find(([opName]) => opName == 'create_research_token_sale');
+    if (isProposal) {
+      const researchTokenSaleProposedEvent = new ResearchTokenSaleProposedEvent(datums);
+      ctx.state.events.push(researchTokenSaleProposedEvent);
 
-    const [opName, researchTokenSalePayload, researchTokenSaleProposal] = researchTokenSaleDatum;
-    if (researchTokenSaleProposal) {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, { opDatum: researchTokenSaleDatum, context: { emitter: jwtUsername } }]);
+      const researchTokenSaleApprovals = researchTokenSaleProposedEvent.getProposalApprovals();
+      for (let i = 0; i < researchTokenSaleApprovals.length; i++) {
+        const approval = researchTokenSaleApprovals[i];
+        const researchTokenSaleProposalSignedEvent = new ResearchTokenSaleProposalSignedEvent([approval]);
+        ctx.state.events.push(researchTokenSaleProposalSignedEvent);
+      }
+
     } else {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, { opDatum: researchTokenSaleDatum, context: { emitter: jwtUsername } }]);
+      const researchTokenSaleCreatedEvent = new ResearchTokenSaleCreatedEvent(datums);
+      ctx.state.events.push(researchTokenSaleCreatedEvent);
     }
 
     ctx.status = 200;
-    ctx.body = researchTokenSalePayload;
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);

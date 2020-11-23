@@ -453,50 +453,61 @@ appEventHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, (payload, reply) => handl
 
 }));
 
-
-
-appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter } } = source;
-  const researchService = new ResearchService(tenant);
-  const researchGroupService = new ResearchGroupService();
-
-  const [opName, opPayload, opProposal] = opDatum;
-  const { research_external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
-
-  const research = await researchService.getResearch(researchExternalId);
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
-  const proposerProfile = await usersService.findUserProfileByOwner(emitter);
-
-  const event = { researchGroup, research, tokenSale: null, proposer: proposerProfile };
-
-  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, event);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, event);
-
-}));
-
-
 appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter } } = source;
+  const { event: researchTokenSaleCreatedEvent, tenant, emitter } = source;
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const [opName, opPayload] = opDatum;
-  const { research_external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
+  const { researchTokenSaleExternalId, researchExternalId, researchGroupExternalId } = researchTokenSaleCreatedEvent.getEventModel();
 
+  // legacy
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const creatorProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const tokenSales = await deipRpc.api.getResearchTokenSalesByResearchIdAsync(research.id);
-  const tokenSale = tokenSales.reverse().find(ts => ts.status == TOKEN_SALE_STATUS.ACTIVE || ts.status == TOKEN_SALE_STATUS.INACTIVE);
+  const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(researchTokenSaleExternalId);
 
-  const event = { researchGroup, research, tokenSale, creator: creatorProfile };
+  const paylod = { researchGroup, research, tokenSale, creator: creatorProfile };
 
-  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, event);
-  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, event);
+  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, paylod);
+  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, paylod);
 
+}));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchTokenSaleProposedEvent, tenant, emitter } = source;
+
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+
+  const { researchExternalId, researchGroupExternalId } = researchTokenSaleProposedEvent.getEventModel();
+
+  await wait(proposalHandler, researchTokenSaleProposedEvent, null, tenant);
+
+  // legacy
+  const research = await researchService.getResearch(researchExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const proposerProfile = await usersService.findUserProfileByOwner(emitter);
+
+  const paylod = { researchGroup, research, tokenSale: null, proposer: proposerProfile };
+
+  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, paylod);
+  fire(researchGroupActivityLogHandler, APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, paylod);
+
+}));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchTokenSaleProposalSignedEvent, tenant } = source;
+  // register handlers
+}));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchTokenSaleProposalRejectedEvent, tenant } = source;
+  // register handlers
 }));
 
 

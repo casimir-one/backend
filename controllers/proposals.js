@@ -7,6 +7,7 @@ import ResearchGroupService from './../services/researchGroup';
 import usersService from './../services/users';
 import ResearchCreatedEvent from './../events/researchCreatedEvent'
 import ResearchUpdatedEvent from './../events/researchUpdatedEvent'
+import ResearchTokenSaleCreatedEvent from './../events/researchTokenSaleCreatedEvent'
 
 const createProposal = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -73,7 +74,8 @@ const updateProposal = async (ctx, next) => {
 
       const researchTokenSaleDatum = operations.find(([opName]) => opName == 'create_research_token_sale');
       if (researchTokenSaleDatum) {
-        ctx.state.events.push([APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, { opDatum: researchTokenSaleDatum, context: { emitter: jwtUsername, offchainMeta: {} } }]);
+        const researchTokenSaleCreatedEvent = new ResearchTokenSaleCreatedEvent(datums);
+        ctx.state.events.push(researchTokenSaleCreatedEvent);
       }
     }
 
