@@ -1,7 +1,7 @@
 
 import mongoose from 'mongoose';
 import ExpressLicenseRequest from './expressLicenseRequest';
-import { PROPOSAL_TYPE } from './../constants';
+import { SMART_CONTRACT_TYPE } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -9,7 +9,7 @@ const ProposalRef = new Schema({
   "_id": { type: String, required: true },
   "type": {
     type: Number,
-    enum: [...Object.values(PROPOSAL_TYPE)],
+    enum: [...Object.values(SMART_CONTRACT_TYPE)],
     required: true
   },
   "details": {

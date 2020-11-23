@@ -2,7 +2,7 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { handle, fire, wait } from './utils';
-import { APP_EVENTS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS, TOKEN_SALE_STATUS } from './../constants';
+import { APP_EVENTS, SMART_CONTRACT_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS, TOKEN_SALE_STATUS } from './../constants';
 import userNotificationsHandler from './userNotificationHandler';
 import researchHandler from './researchHandler';
 import researchGroupHandler from './researchGroupHandler';
@@ -10,7 +10,6 @@ import userInviteHandler from './userInviteHandler';
 import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
-
 import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
@@ -19,14 +18,6 @@ import ResearchGroupService from './../services/researchGroup';
 class AppEventHandler extends EventEmitter { }
 
 const appEventHandler = new AppEventHandler();
-
-appEventHandler.on(APP_EVENTS.PROPOSAL_ACCEPTED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { tx, emitter } = source;
-  const [op_name, op_payload] = tx['operations'][0];
-  const tag = deipRpc.operations.getOperationTag(op_name);
-
-}));
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {

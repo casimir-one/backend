@@ -77,7 +77,6 @@ protected_route.get('/proposals/:username/:status', proposals.getAccountProposal
 
 protected_route.post('/groups', researchGroups.createResearchGroup)
 protected_route.put('/groups', researchGroups.updateResearchGroup)
-protected_route.get('/groups/activity-log/:researchGroupExternalId', researchGroups.getResearchGroupActivityLogs)
 public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchGroup)
 public_route.get('/groups/logo/:researchGroupExternalId', researchGroups.getResearchGroupLogo)
 protected_route.post('/groups/logo', researchGroups.uploadResearchGroupLogo)

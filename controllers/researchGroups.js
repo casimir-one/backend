@@ -9,7 +9,6 @@ import config from './../config'
 import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
-import activityLogEntriesService from './../services/activityLogEntry';
 import { APP_EVENTS } from './../constants';
 import { researchGroupLogoForm } from './../forms/researchGroupForms';
 import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
@@ -111,25 +110,6 @@ const leaveResearchGroup = async (ctx, next) => {
   await next();
 };
 
-
-const getResearchGroupActivityLogs = async (ctx) => {
-  let jwtUsername = ctx.state.user.username;
-  let researchGroupExternalId = ctx.params.researchGroupExternalId;
-  // todo: add access validation
-  try {
-
-    const researchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
-    const researchGroupId = researchGroup.id;
-
-    let result = await activityLogEntriesService.findActivityLogsEntriesByResearchGroup(researchGroupId)
-    ctx.status = 201;
-    ctx.body = result;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-}
 
 const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 const researchGroupStoragePath = (researchGroupExternalId) => `${filesStoragePath}/research-groups/${researchGroupExternalId}`;
@@ -252,7 +232,6 @@ export default {
   getResearchGroup,
   createResearchGroup,
   updateResearchGroup,
-  getResearchGroupActivityLogs,
   getResearchGroupLogo,
   uploadResearchGroupLogo,
   leaveResearchGroup

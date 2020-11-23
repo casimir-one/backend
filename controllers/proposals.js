@@ -1,16 +1,22 @@
 import deipRpc from '@deip/rpc-client';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS } from './../constants';
+import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE } from './../constants';
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
 import usersService from './../services/users';
-import ResearchCreatedEvent from './../events/researchCreatedEvent'
-import ResearchUpdatedEvent from './../events/researchUpdatedEvent'
-import ResearchTokenSaleCreatedEvent from './../events/researchTokenSaleCreatedEvent'
+import ResearchProposalSignedEvent from './../events/researchProposalSignedEvent';
+import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
+import ResearchContentProposalSignedEvent from './../events/researchContentProposalSignedEvent';
+import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleProposalSignedEvent';
+import ResearchGroupUpdateProposalSignedEvent from './../events/researchGroupUpdateProposalSignedEvent';
+import AssetTransferProposalSignedEvent from './../events/assetTransferProposalSignedEvent';
+import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalSignedEvent';
+
 
 const createProposal = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try {
@@ -32,50 +38,66 @@ const createProposal = async (ctx) => {
 
 const updateProposal = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try {
+
+    const researchGroupService = new ResearchGroupService();
+    const researchService = new ResearchService(tenant);
+    const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: proposalId } = payload;
 
-    const proposal = await deipRpc.api.getProposalAsync(proposalId);
-    if (!proposal) {
-      ctx.status = 404;
-      ctx.body = `Proposal for "${proposalId}" is not found`;
-      return;
-    }
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);  
-    const updatedProposal = await deipRpc.api.getProposalAsync(proposalId);
-    const isAccepted = updatedProposal == null;
-    
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const datums = blockchainService.extractOperations(tx);
+
+    const updatedProposal = await proposalsService.getProposal(proposalId);
+    const isAccepted = updatedProposal.proposal.status == PROPOSAL_STATUS.APPROVED;
     if (isAccepted) {
-      ctx.state.events.push([APP_EVENTS.PROPOSAL_ACCEPTED, { tx: proposal.proposed_transaction, emitter: jwtUsername }]);
-
-      const operations = blockchainService.extractOperations(proposal.proposed_transaction);
-      const datums = operations;
 
       // const inviteDatum = operations.find(([opName]) => opName == 'join_research_group_membership');
       // if (inviteDatum) {
       //   ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: ['update_proposal', payload, null], context: { emitter: jwtUsername } }]);
       // }
 
-      if (datums.some(([opName]) => opName == 'create_research')) {
-        const researchCreatedEvent = new ResearchCreatedEvent(datums);
-        ctx.state.events.push(researchCreatedEvent);
+
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH) {
+        const researchProposalSignedEvent = new ResearchProposalSignedEvent(datums);
+        ctx.state.events.push(researchProposalSignedEvent);
       }
 
-      if (datums.some(([opName]) => opName == 'update_research')) {
-        const researchUpdatedEvent = new ResearchUpdatedEvent(datums);
-        ctx.state.events.push(researchUpdatedEvent);
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.UPDATE_RESEARCH) {
+        const researchUpdateProposalSignedEvent = new ResearchUpdateProposalSignedEvent(datums);
+        ctx.state.events.push(researchUpdateProposalSignedEvent);
       }
 
-      const researchTokenSaleDatum = operations.find(([opName]) => opName == 'create_research_token_sale');
-      if (researchTokenSaleDatum) {
-        const researchTokenSaleCreatedEvent = new ResearchTokenSaleCreatedEvent(datums);
-        ctx.state.events.push(researchTokenSaleCreatedEvent);
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH_CONTENT) { // wip
+        const researchContentProposalSignedEvent = new ResearchContentProposalSignedEvent(datums);
+        ctx.state.events.push(researchContentProposalSignedEvent);
+      }
+
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH_TOKEN_SALE) {
+        const researchTokenSaleProposalSignedEvent = new ResearchTokenSaleProposalSignedEvent(datums);
+        ctx.state.events.push(researchTokenSaleProposalSignedEvent);
+      }
+
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.UPDATE_RESEARCH_GROUP) {
+        const researchGroupUpdateProposalSignedEvent = new ResearchGroupUpdateProposalSignedEvent(datums);
+        ctx.state.events.push(researchGroupUpdateProposalSignedEvent);
+      }
+
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.ASSET_TRANSFER) {
+        const assetTransferProposalSignedEvent = new AssetTransferProposalSignedEvent(datums);
+        ctx.state.events.push(assetTransferProposalSignedEvent);
+      }
+
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.ASSET_EXCHANGE) {
+        const assetExchangeProposalSignedEvent = new AssetExchangeProposalSignedEvent(datums);
+        ctx.state.events.push(assetExchangeProposalSignedEvent);
       }
     }
 
@@ -94,6 +116,7 @@ const updateProposal = async (ctx, next) => {
 
 const deleteProposal = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try {

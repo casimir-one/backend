@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import mongoose from 'mongoose';
 import ProposalRef from './../schemas/proposal';
-import { PROPOSAL_TYPE } from './../constants';
+import { SMART_CONTRACT_TYPE } from './../constants';
 
 class ProposalService {
 
@@ -129,28 +129,28 @@ class ProposalService {
       return acc;
     }, {});
 
-    const licenseRequests = await this.extendExpressLicenseRequests(grouped[PROPOSAL_TYPE.EXPRESS_LICENSE_REQUEST] || []);
+    const licenseRequests = await this.extendExpressLicenseRequests(grouped[SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST] || []);
     result.push(...licenseRequests);
 
-    const assetExchangesProposals = await this.extendAssetExchangeProposals(grouped[PROPOSAL_TYPE.ASSET_EXCHANGE] || []);
+    const assetExchangesProposals = await this.extendAssetExchangeProposals(grouped[SMART_CONTRACT_TYPE.ASSET_EXCHANGE] || []);
     result.push(...assetExchangesProposals);
 
-    const assetTransfersProposals = await this.extendAssetTransferProposals(grouped[PROPOSAL_TYPE.ASSET_TRANSFER] || []);
+    const assetTransfersProposals = await this.extendAssetTransferProposals(grouped[SMART_CONTRACT_TYPE.ASSET_TRANSFER] || []);
     result.push(...assetTransfersProposals);
 
-    const researchProposals = await this.extendResearchProposals(grouped[PROPOSAL_TYPE.CREATE_RESEARCH] || []);
+    const researchProposals = await this.extendResearchProposals(grouped[SMART_CONTRACT_TYPE.CREATE_RESEARCH] || []);
     result.push(...researchProposals);
 
-    const researchUpdateProposals = await this.extendResearchUpdateProposals(grouped[PROPOSAL_TYPE.UPDATE_RESEARCH] || []);
+    const researchUpdateProposals = await this.extendResearchUpdateProposals(grouped[SMART_CONTRACT_TYPE.UPDATE_RESEARCH] || []);
     result.push(...researchUpdateProposals);
 
-    const researchGroupUpdateProposals = await this.extendResearchGroupUpdateProposals(grouped[PROPOSAL_TYPE.UPDATE_RESEARCH_GROUP] || []);
+    const researchGroupUpdateProposals = await this.extendResearchGroupUpdateProposals(grouped[SMART_CONTRACT_TYPE.UPDATE_RESEARCH_GROUP] || []);
     result.push(...researchGroupUpdateProposals);
 
-    const researchContentProposals = await this.extendResearchContentProposals(grouped[PROPOSAL_TYPE.CREATE_RESEARCH_MATERIAL] || []);
+    const researchContentProposals = await this.extendResearchContentProposals(grouped[SMART_CONTRACT_TYPE.CREATE_RESEARCH_CONTENT] || []);
     result.push(...researchContentProposals);
 
-    const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[PROPOSAL_TYPE.CREATE_RESEARCH_TOKEN_SALE] || []);
+    const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[SMART_CONTRACT_TYPE.CREATE_RESEARCH_TOKEN_SALE] || []);
     result.push(...researchTokenSaleProposals);
 
     return result;

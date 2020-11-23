@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, PROPOSAL_STATUS, PROPOSAL_TYPE, RESEARCH_CONTENT_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE, RESEARCH_CONTENT_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';

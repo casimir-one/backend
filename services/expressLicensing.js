@@ -1,8 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import ExpressLicense from './../schemas/expressLicense';
 import ExpressLicenseRequest from './../schemas/expressLicenseRequest';
-import { PROPOSAL_TYPE } from '../constants';
-import { request } from 'express';
+import { SMART_CONTRACT_TYPE } from '../constants';
 
 
 class ExpressLicensingService {
@@ -29,7 +28,7 @@ class ExpressLicensingService {
     // });
 
     const proposalRef = await this.proposalsService.createProposalRef(proposalId, {
-      type: PROPOSAL_TYPE.EXPRESS_LICENSE_REQUEST,
+      type: SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST,
       details: {
         _id: proposalId,
         requester,
@@ -51,7 +50,7 @@ class ExpressLicensingService {
 
 
   async getExpressLicenseRequests() {
-    const requests = this.proposalsService.getProposalRefsByType(PROPOSAL_TYPE.EXPRESS_LICENSE_REQUEST);
+    const requests = this.proposalsService.getProposalRefsByType(SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST);
     const result = await this.proposalsService.extendExpressLicenseRequests(requests)
     return result;
   }
@@ -65,7 +64,7 @@ class ExpressLicensingService {
 
 
   async getExpressLicenseRequestsByResearch(researchExternalId) {
-    const allRequests = this.proposalsService.getProposalRefsByType(PROPOSAL_TYPE.EXPRESS_LICENSE_REQUEST);
+    const allRequests = this.proposalsService.getProposalRefsByType(SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST);
     const requests = allRequests.filter(r => r.details.researchExternalId == researchExternalId)
     const result = await this.proposalsService.extendExpressLicenseRequests(requests)
     return result;  
@@ -73,7 +72,7 @@ class ExpressLicensingService {
 
 
   async getExpressLicenseRequestsByRequester(requester) {
-    const allRequests = this.proposalsService.getProposalRefsByType(PROPOSAL_TYPE.EXPRESS_LICENSE_REQUEST);
+    const allRequests = this.proposalsService.getProposalRefsByType(SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST);
     const requests = allRequests.filter(r => r.details.requester == requester)
     const result = await this.proposalsService.extendExpressLicenseRequests(requests)
     return result;  
