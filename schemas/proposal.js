@@ -1,6 +1,5 @@
 
 import mongoose from 'mongoose';
-import ExpressLicenseRequest from './expressLicenseRequest';
 import { SMART_CONTRACT_TYPE } from './../constants';
 
 const Schema = mongoose.Schema;

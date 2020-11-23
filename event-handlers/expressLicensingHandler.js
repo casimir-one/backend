@@ -12,65 +12,29 @@ class ExpressLicensingHandler extends EventEmitter { }
 
 const expressLicensingHandler = new ExpressLicensingHandler();
 
-expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { offchainMeta: { licencePlan } } } = source;
-  const [opName, opPayload, opProposal] = opDatum;
-
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
-
-  const { external_id: licenseExternalId, research_external_id: researchExternalId, licensee: requester } = opPayload;
-  const { external_id: proposalId } = opProposal;
-
-  const proposalRef = await expressLicensingService.createExpressLicenseRequest(proposalId, {
-    requester,
-    researchExternalId,
-    licenseExternalId,
-    licencePlan
-  })
-
-  return proposalRef;
-}));
-
-
-
-expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter, offchainMeta: { txInfo } } } = source;
-  const [opName, opPayload] = opDatum;
+expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchExpressLicenseProposalSignedEvent, tenant } = source;
 
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService(tenant);
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
   const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
 
-  const { external_id: proposalId, active_approvals_to_add: approvals1, owner_approvals_to_add: approvals2 } = opPayload;
+  const proposalId = researchExpressLicenseProposalSignedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
 
-  const request = await expressLicensingService.getExpressLicensingRequest(proposalId);
-  const mapedProposal = await proposalsService.getProposal(proposalId);
-
-  if (mapedProposal.proposal.status == PROPOSAL_STATUS.APPROVED) {
+  if (proposal.proposal.status == PROPOSAL_STATUS.APPROVED) {
     await expressLicensingService.createExpressLicense({
-      requestId: request._id,
-      externalId: request.details.licenseExternalId,
-      owner: request.details.requester,
-      researchExternalId: request.details.researchExternalId,
-      licencePlan: request.details.licencePlan
+      externalId: proposal.details.licenseExternalId,
+      requestId: proposal.proposal.external_id,
+      owner: proposal.details.licensee,
+      licenser: proposal.details.licenser,
+      researchExternalId: proposal.details.researchExternalId,
+      licencePlan: proposal.details.licencePlan
     });
   }
 
-}));
-
-
-expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter, offchainMeta: { txInfo } } } = source;
-  const [opName, opPayload] = opDatum;
-
-  const { external_id: proposalId, account: rejector } = opPayload;
 }));
 
 

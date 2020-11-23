@@ -36,20 +36,17 @@ proposalHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
   return proposalRef;
 }));
 
-
 proposalHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposedEvent, tenant } = source;
   const proposalRef = await createProposalRef(researchUpdateProposedEvent, SMART_CONTRACT_TYPE.UPDATE_RESEARCH, tenant);
   return proposalRef;
 }));
 
-
 proposalHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetExchangeProposedEvent, tenant } = source;
   const proposalRef = await createProposalRef(assetExchangeProposedEvent, SMART_CONTRACT_TYPE.ASSET_EXCHANGE, tenant);
   return proposalRef;
 }));
-
 
 proposalHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetTransferProposedEvent, tenant } = source;
@@ -72,6 +69,12 @@ proposalHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => han
 proposalHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchTokenSaleProposedEvent, tenant } = source;
   const proposalRef = await createProposalRef(researchTokenSaleProposedEvent, SMART_CONTRACT_TYPE.CREATE_RESEARCH_TOKEN_SALE, tenant);
+  return proposalRef;
+}));
+
+proposalHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchExpressLicenseProposedEvent, tenant } = source;
+  const proposalRef = await createProposalRef(researchExpressLicenseProposedEvent, SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST, tenant);
   return proposalRef;
 }));
 

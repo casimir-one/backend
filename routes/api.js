@@ -117,18 +117,10 @@ protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', gr
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', grants.getAwardWithdrawalRequestAttachmentFile)
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.uploadAwardWithdrawalRequestBulkAttachments)
 
-
 protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
-protected_route.put('/express-licensing/approve/:requestId', expressLicensing.approveExpressLicenseRequest)
-protected_route.put('/express-licensing/reject/:requestId', expressLicensing.rejectExpressLicenseRequest)
 
 protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
-protected_route.post('/assets/transfer/approve', assets.approveAssetTransferRequest)
-protected_route.post('/assets/transfer/reject', assets.rejectAssetTransferRequest)
-
 protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
-protected_route.post('/assets/exchange/approve', assets.approveAssetExchangeRequest)
-protected_route.post('/assets/exchange/reject', assets.rejectAssetExchangeRequest)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

@@ -159,8 +159,8 @@ class ProposalService {
 
   async extendExpressLicenseRequests(requests) {
     const accountNames = requests.reduce((acc, req) => {
-      if (!acc.some(a => a == req.details.requester)) {
-        acc.push(req.details.requester);
+      if (!acc.some(a => a == req.details.licensee)) {
+        acc.push(req.details.licensee);
       }
       return acc;
     }, []);
@@ -184,7 +184,7 @@ class ProposalService {
 
     return requests.map((req) => {
       const extendedDetails = {
-        requester: users.find(u => u.account.name == req.details.requester),
+        requester: users.find(u => u.account.name == req.details.licensee),
         research: researches.find(r => r.external_id == req.details.researchExternalId)
       }
       return { ...req, extendedDetails };

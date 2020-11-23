@@ -12,6 +12,7 @@ import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleP
 import ResearchGroupUpdateProposalSignedEvent from './../events/researchGroupUpdateProposalSignedEvent';
 import AssetTransferProposalSignedEvent from './../events/assetTransferProposalSignedEvent';
 import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalSignedEvent';
+import ResearchExpressLicenseProposalSignedEvent from './../events/researchExpressLicenseProposalSignedEvent';
 
 
 const createProposal = async (ctx) => {
@@ -99,10 +100,15 @@ const updateProposal = async (ctx, next) => {
         const assetExchangeProposalSignedEvent = new AssetExchangeProposalSignedEvent(datums);
         ctx.state.events.push(assetExchangeProposalSignedEvent);
       }
+
+      if (updatedProposal.type == SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST) {
+        const researchExpressLicenseProposalSignedEvent = new ResearchExpressLicenseProposalSignedEvent(datums);
+        ctx.state.events.push(researchExpressLicenseProposalSignedEvent);
+      }
     }
 
     ctx.status = 200;
-    ctx.body = { tx, txResult, isAccepted };
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);

@@ -487,26 +487,20 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_REJECTED, (payload, r
   // register handlers
 }));
 
-
-appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const result = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CREATED, source);
-
+appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchExpressLicenseProposedEvent, tenant } = source;
+  await wait(proposalHandler, researchExpressLicenseProposedEvent, null, tenant);
 }));
 
-appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const result = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_SIGNED, source);
-
+appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchExpressLicenseProposalSignedEvent, tenant } = source;
+  await wait(expressLicensingHandler, researchExpressLicenseProposalSignedEvent, null, tenant);
 }));
 
-appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const result = await wait(expressLicensingHandler, APP_EVENTS.RESEARCH_EXPRESS_LICENSE_REQUEST_CANCELED, source);
+appEventHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchExpressLicenseProposalRejectedEvent, tenant } = source;
+  // register handlers
 }));
-
 
 appEventHandler.on(APP_EVENTS.ASSET_EXCHANGE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetExchangeProposedEvent, tenant } = source;

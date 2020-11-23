@@ -47,58 +47,6 @@ const createAssetTransferRequest = async (ctx, next) => {
 };
 
 
-
-const approveAssetTransferRequest = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const assetTransferProposalSignedEvent = new AssetTransferProposalSignedEvent(datums);
-    ctx.state.events.push(assetTransferProposalSignedEvent);
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
-const rejectAssetTransferRequest = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const assetTransferProposalRejectedEvent = new AssetTransferProposalRejectedEvent(datums);
-    ctx.state.events.push(assetTransferProposalRejectedEvent);
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
-
 const createAssetExchangeRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta } = ctx.request.body;
@@ -132,62 +80,7 @@ const createAssetExchangeRequest = async (ctx, next) => {
 };
 
 
-const approveAssetExchangeRequest= async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const assetExchangeProposalSignedEvent = new AssetExchangeProposalSignedEvent(datums);
-    ctx.state.events.push(assetExchangeProposalSignedEvent);
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
-const rejectAssetExchangeRequest = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const assetExchangeProposalRejectedEvent = new AssetExchangeProposalRejectedEvent(datums);
-    ctx.state.events.push(assetExchangeProposalRejectedEvent);
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
 export default {
   createAssetExchangeRequest,
-  approveAssetExchangeRequest,
-  rejectAssetExchangeRequest,
-
-  createAssetTransferRequest,
-  approveAssetTransferRequest,
-  rejectAssetTransferRequest
+  createAssetTransferRequest
 }

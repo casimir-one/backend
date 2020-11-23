@@ -1,6 +1,5 @@
 import deipRpc from '@deip/rpc-client';
 import ExpressLicense from './../schemas/expressLicense';
-import ExpressLicenseRequest from './../schemas/expressLicenseRequest';
 import { SMART_CONTRACT_TYPE } from '../constants';
 
 
@@ -11,44 +10,6 @@ class ExpressLicensingService {
     this.usersService = usersService;
     this.researchGroupService = researchGroupService;
   }
-
-  async createExpressLicenseRequest(proposalId, {
-    requester,
-    researchExternalId,
-    licenseExternalId,
-    licencePlan
-  }) {
-
-    // const expressLicenseRequest = new ExpressLicenseRequest({
-    //   _id: proposalId,
-    //   requester,
-    //   researchExternalId,
-    //   licenseExternalId,
-    //   licencePlan
-    // });
-
-    const proposalRef = await this.proposalsService.createProposalRef(proposalId, {
-      type: SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST,
-      details: {
-        _id: proposalId,
-        requester,
-        researchExternalId,
-        licenseExternalId,
-        licencePlan
-      }
-    });
-
-    return proposalRef;
-  }
-
-
-  async getExpressLicensingRequest(externalId) {
-    let request = await this.proposalsService.getProposalRef(externalId);
-    let [result] = await this.proposalsService.extendExpressLicenseRequests([request])
-    return result;
-  } 
-
-
 
   async createExpressLicense({
     externalId,
