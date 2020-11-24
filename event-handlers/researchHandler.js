@@ -278,8 +278,8 @@ researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply)
       const membersAttribute = membersAttributes[j];
       const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == membersAttribute._id.toString());
 
-      if (rAttr.value.some(m => m == member._id)) {
-        rAttr.value = rAttr.value.filter(m => m != member._id);
+      if (rAttr.value.some(m => m == member)) {
+        rAttr.value = rAttr.value.filter(m => m != member);
         hasUpdate = true;
       }
     }
