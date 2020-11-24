@@ -67,8 +67,6 @@ class UserInviteService {
       notes,
       expiration,
       researches,
-      approvedBy: [],
-      rejectedBy: [],
       failReason: null
     });
 
@@ -80,14 +78,10 @@ class UserInviteService {
   async updateUserInvite(externalId, {
     status,
     failReason,
-    approvedBy,
-    rejectedBy
   }) {
 
     const userInvite = await UserInvite.findOne({ _id: externalId });
     userInvite.status = status;
-    userInvite.approvedBy = approvedBy;
-    userInvite.rejectedBy = rejectedBy;
     userInvite.failReason = failReason;
 
     const updatedUserInvite = await userInvite.save();

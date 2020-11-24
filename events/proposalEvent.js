@@ -12,6 +12,11 @@ const ProposalEvent = (ProposalEvent) => class extends ProposalEvent {
     return proposalId;
   }
 
+  getProposalExpirationTime() {
+    const [opName, { expiration_time: expiration }] = this.onchainDatums.find(([opName]) => opName == 'create_proposal');
+    return expiration;
+  }
+
   getProposalApprovals() {
     const proposalId = this.getProposalId();
     return this.onchainDatums.filter(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == proposalId);

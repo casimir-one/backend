@@ -70,59 +70,58 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_REJECTED, (payload, reply) => ha
 }));
 
 appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: userInvitationProposedEvent, tenant } = source;
 
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
   const researchGroupService = new ResearchGroupService();
+  await wait(proposalHandler, userInvitationProposedEvent, null, tenant);
+  const userInvite = await wait(userInviteHandler, userInvitationProposedEvent, null, tenant);
 
-  const userInvite = await wait(userInviteHandler, APP_EVENTS.USER_INVITATION_PROPOSED, source);
-
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(userInvite.researchGroupExternalId);
   const inviteeProfile = await usersService.findUserProfileByOwner(userInvite.invitee);
   const creatorProfile = await usersService.findUserProfileByOwner(userInvite.creator);
 
-  const event = { tenant, researchGroup, invite: userInvite, invitee: inviteeProfile, creator: creatorProfile };
+  const payload = { tenant, researchGroup, invite: userInvite, invitee: inviteeProfile, creator: creatorProfile };
 
-  userNotificationsHandler.emit(APP_EVENTS.USER_INVITATION_PROPOSED, event);
-
+  userNotificationsHandler.emit(APP_EVENTS.USER_INVITATION_PROPOSED, payload);
 }));
 
 
-appEventHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
+appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: userInvitationProposalSignedEvent, tenant, emitter } = source;
   const researchGroupService = new ResearchGroupService();
 
-  const updatedInvite = await wait(userInviteHandler, APP_EVENTS.USER_INVITATION_SIGNED, source);
+  const updatedInvite = await wait(userInviteHandler, userInvitationProposalSignedEvent, null, tenant);
+  fire(researchHandler, userInvitationProposalSignedEvent, null, tenant);
 
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(updatedInvite.researchGroupExternalId);
   const inviteeProfile = await usersService.findUserProfileByOwner(updatedInvite.invitee);
   const creatorProfile = await usersService.findUserProfileByOwner(updatedInvite.creator);
   const approverProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const event = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, approver: approverProfile };
-
-  fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_SIGNED, event);
-  fire(researchHandler, APP_EVENTS.USER_INVITATION_SIGNED, event)
-
+  const payload = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, approver: approverProfile };
+  fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, payload);
 }));
 
 
-appEventHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { opDatum, tenant, context: { emitter } } = source;
+appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: userInvitationProposalRejectedEvent, tenant, emitter } = source;
   const researchGroupService = new ResearchGroupService();
 
-  const updatedInvite = await wait(userInviteHandler, APP_EVENTS.USER_INVITATION_CANCELED, source);
+  const updatedInvite = await wait(userInviteHandler, userInvitationProposalRejectedEvent, null, tenant);
 
+  fire(researchHandler, userInvitationProposalRejectedEvent, null, tenant);
+
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(updatedInvite.researchGroupExternalId);
   const inviteeProfile = await usersService.findUserProfileByOwner(updatedInvite.invitee);
   const creatorProfile = await usersService.findUserProfileByOwner(updatedInvite.creator);
   const rejectorProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const event = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, rejector: rejectorProfile };
+  const payload = { tenant, researchGroup, invite: updatedInvite, invitee: inviteeProfile, creator: creatorProfile, rejector: rejectorProfile };
 
-  fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
-  fire(researchHandler, APP_EVENTS.USER_INVITATION_CANCELED, event);
-
+  fire(userNotificationsHandler, APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, payload);
 }));
 
 

@@ -1,6 +1,8 @@
 import { APP_EVENTS } from './../constants';
 import UserInviteService from './../services/userInvites';
 import * as blockchainService from './../utils/blockchain';
+import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
 
 
 const getUserInvites = async (ctx) => {
@@ -73,20 +75,20 @@ const createUserInvite = async (ctx, next) => {
   try {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const operations = blockchainService.extractOperations(tx);
+    const datums = blockchainService.extractOperations(tx);
 
-    const inviteDatum = operations.find(([opName]) => opName == 'join_research_group_membership');
+    const userInvitationProposedEvent = new UserInvitationProposedEvent(datums, { researches: [], ...offchainMeta });
+    ctx.state.events.push(userInvitationProposedEvent);
 
-    const [opName, invitePayload, inviteProposal] = inviteDatum;
-    ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { researches: [], ...offchainMeta } } }]);
-
-    const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
-    if (approveInviteDatum) {
-      ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { emitter: jwtUsername } }]);
+    const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
+    for (let i = 0; i < userInvitationApprovals.length; i++) {
+      const approval = userInvitationApprovals[i];
+      const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+      ctx.state.events.push(userInvitationProposalSignedEvent);
     }
 
     ctx.status = 200;
-    ctx.body = invitePayload;
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);
@@ -99,67 +101,9 @@ const createUserInvite = async (ctx, next) => {
 };
 
 
-const approveUserInvite = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const operations = blockchainService.extractOperations(tx);
-
-    const approveInviteDatum = operations.find(([opName]) => opName == 'update_proposal');
-    const [opName, approveInvitePayload] = approveInviteDatum;
-
-    ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { emitter: jwtUsername } }]);
-    
-    ctx.status = 200;
-    ctx.body = approveInvitePayload;
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-
-}
-
-
-const rejectUserInvite = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const operations = blockchainService.extractOperations(tx);
-
-    const rejectInviteDatum = operations.find(([opName]) => opName == 'delete_proposal');
-    const [opName, rejectInvitePayload] = rejectInviteDatum;
-
-    ctx.state.events.push([APP_EVENTS.USER_INVITATION_CANCELED, { opDatum: rejectInviteDatum, context: { emitter: jwtUsername } }]);
-
-    ctx.status = 200;
-    ctx.body = rejectInvitePayload;
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-
-}
-
-
 export default {
   getUserInvites,
   getResearchPendingInvites,
   getResearchGroupPendingInvites,
-  createUserInvite,
-  approveUserInvite,
-  rejectUserInvite
+  createUserInvite
 }

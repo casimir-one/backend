@@ -10,6 +10,7 @@ class AppEvent {
 
   getAppEventName() { return this.appEventName; }
   getProposalId() { return null; }
+  getProposalExpirationTime() { return null; }
   getProposalApprovals() { return []; }
   getSourceData() { return null; }
 }

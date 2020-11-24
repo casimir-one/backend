@@ -78,5 +78,11 @@ proposalHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload, reply
   return proposalRef;
 }));
 
+proposalHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: userInvitationProposedEvent, tenant } = source;
+  const proposalRef = await createProposalRef(userInvitationProposedEvent, SMART_CONTRACT_TYPE.INVITE_MEMBER, tenant);
+  return proposalRef;
+}));
+
 
 export default proposalHandler;

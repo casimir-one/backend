@@ -366,8 +366,8 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async (payload) 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, async (payload) => {
-  const { researchGroup, invite, creator, invitee, approver } = payload;
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async (payload) => {
+  const { researchGroup, invite, creator, invitee } = payload;
 
   if (invite.status == USER_INVITE_STATUS.SENT) {
 
@@ -432,7 +432,7 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, async (payload) =>
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, async (payload) => {
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async (payload) => {
   const { researchGroup, invite, creator, invitee, approver } = payload;
 
   const notificationsPromises = [];

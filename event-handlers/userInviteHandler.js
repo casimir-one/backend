@@ -1,26 +1,32 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS, USER_INVITE_STATUS, PROPOSAL_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import UserInviteService from './../services/userInvites';
 import ResearchService from './../services/research';
+import ResearchGroupService from './../services/researchGroup';
+import ProposalService from './../services/proposal';
+import usersService from './../services/users';
 
 class UserInviteHandler extends EventEmitter { }
 
 const userInviteHandler = new UserInviteHandler();
 
 userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const { notes, researches } = offchainMeta;
+  const { event: userInvitationProposedEvent, emitter, tenant } = source;
   const userInviteService = new UserInviteService();
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { member: invitee, research_group: researchGroupExternalId, reward_share: rewardShare } = opPayload;
-  const { external_id: proposalId, expiration_time: expiration } = opProposal;
+  const { invitee, researchGroupExternalId, rewardShare, researches, notes } = userInvitationProposedEvent.getSourceData();
+  const expiration = userInvitationProposedEvent.getProposalExpirationTime();
+  const proposalId = userInvitationProposedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
 
   const userInvite = await userInviteService.createUserInvite({
     externalId: proposalId,
     invitee: invitee,
-    creator: emitter,
+    creator: proposal.proposal.proposer,
     researchGroupExternalId: researchGroupExternalId,
     rewardShare: rewardShare,
     status: USER_INVITE_STATUS.PROPOSED,
@@ -30,33 +36,24 @@ userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => ha
   });
 
   return userInvite;
-
 }));
 
 
-userInviteHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;  
+  const { event: userInvitationProposalSignedEvent, tenant } = source;
   const userInviteService = new UserInviteService();
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { external_id: proposalId, active_approvals_to_add: approvals1, owner_approvals_to_add: approvals2 } = opPayload;
-
-  const invite = await userInviteService.findUserInvite(proposalId);
-
-  const approvers = [...invite.approvedBy, ...approvals1, ...approvals2].reduce((acc, user) => {
-    if (!acc.some(u => u == user)) {
-      return [...acc, user];
-    }
-    return acc;
-  }, []);
+  const proposalId = userInvitationProposalSignedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
 
   const updatedInvite = await userInviteService.updateUserInvite(proposalId, {
-    status: approvers.some(u => u == invite.invitee)
+    status: proposal.proposal.status == PROPOSAL_STATUS.APPROVED
       ? USER_INVITE_STATUS.APPROVED
       : USER_INVITE_STATUS.SENT, // only one research group member needs to agree to send the invite currently
-    approvedBy: approvers,
-    rejectedBy: invite.rejectedBy,
     failReason: null
   });
 
@@ -65,26 +62,15 @@ userInviteHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => hand
 }));
 
 
-userInviteHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { opDatum, tenant, context: { emitter } } = source;
+userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: userInvitationProposalRejectedEvent, tenant } = source;
   const userInviteService = new UserInviteService();
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { external_id: proposalId, account: rejector } = opPayload;
-
+  const proposalId = userInvitationProposalRejectedEvent.getProposalId();
   const invite = await userInviteService.findUserInvite(proposalId);
-
-  const rejectors = [...invite.rejectedBy, rejector].reduce((acc, user) => {
-    if (!acc.some(u => u == user)) {
-      return [...acc, user];
-    }
-    return acc;
-  }, []);
 
   const updatedInvite = await userInviteService.updateUserInvite(proposalId, {
     status: USER_INVITE_STATUS.REJECTED,
-    approvedBy: invite.approvedBy,
-    rejectedBy: rejectors,
     failReason: null
   });
 

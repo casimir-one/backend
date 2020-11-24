@@ -5,6 +5,7 @@ import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
 import usersService from './../services/users';
+import UserInviteService from './../services/userInvites';
 
 
 class ResearchHandler extends EventEmitter { }
@@ -156,12 +157,15 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) 
 }));
 
 
-researchHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
-
-  const { tenant, researchGroup, invite } = event;
+researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
+  const { event: userInvitationProposalSignedEvent, tenant } = event;
 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+  const userInviteService = new UserInviteService();
+
+  const proposalId = userInvitationProposalSignedEvent.getProposalId();
+  const invite = await userInviteService.findUserInvite(proposalId);
 
   if (invite.status == USER_INVITE_STATUS.SENT) {
 
@@ -200,14 +204,17 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_SIGNED, (payload, reply) => handle
 }));
 
 
-researchHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => handle(payload, reply, async (event) => {
-
-  const { tenant, researchGroup, invite } = event;
+researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (event) => {
+  const { event: userInvitationProposalRejectedEvent, tenant } = event;
 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const userInviteService = new UserInviteService();
 
-  const members = await usersService.findResearchGroupMembershipUsers(researchGroup.external_id);
+  const proposalId = userInvitationProposalRejectedEvent.getProposalId();
+  const invite = await userInviteService.findUserInvite(proposalId);
+  const members = await usersService.findResearchGroupMembershipUsers(invite.researchGroupExternalId);
 
   if (!members.some(user => user.account.name == invite.invitee)) { // check if rejecting old invite
 
@@ -243,7 +250,6 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_CANCELED, (payload, reply) => hand
 
     await Promise.all(promises);
   }
-
 }));
 
 

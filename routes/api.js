@@ -86,9 +86,6 @@ protected_route.get('/invites/:username', invites.getUserInvites)
 protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)
 protected_route.get('/invites/research/:researchExternalId', invites.getResearchPendingInvites)
 protected_route.post('/invites', invites.createUserInvite)
-protected_route.post('/invites/approve', invites.approveUserInvite)
-protected_route.post('/invites/reject', invites.rejectUserInvite)
-
 
 protected_route.post('/reviews', reviews.makeReview)
 

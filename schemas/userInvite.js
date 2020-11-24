@@ -18,8 +18,6 @@ const UserInvite = new Schema({
   "notes": { type: String, required: false, trim: true },
   "rewardShare": { type: String, default: null },
   "failReason": { type: String },
-  "approvedBy": [{ type: String }],
-  "rejectedBy": [{ type: String }],
   "researches": [ResearchInvite],
   "status": {
     type: String,

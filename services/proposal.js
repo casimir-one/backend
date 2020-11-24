@@ -120,7 +120,7 @@ class ProposalService {
     return extendedProposals;
   }
 
-
+  
   async extendProposalsDetails(proposals) {
     const result = [];
     const grouped = proposals.reduce((acc, proposal) => {
@@ -152,6 +152,9 @@ class ProposalService {
 
     const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[SMART_CONTRACT_TYPE.CREATE_RESEARCH_TOKEN_SALE] || []);
     result.push(...researchTokenSaleProposals);
+
+    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[SMART_CONTRACT_TYPE.INVITE_MEMBER] || []);
+    result.push(...userInvitationProposals);
 
     return result;
   }
@@ -386,6 +389,34 @@ class ProposalService {
       const researchTokenSale = researchTokenSales.find(ts => ts.external_id == proposal.details.researchTokenSaleExternalId);
 
       const extendedDetails = { researchGroup, research, researchTokenSale };
+      return { ...proposal, extendedDetails };
+    });
+  }
+
+
+  async extendUserInvitationProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.invitee)) {
+        acc.push(proposal.details.invitee);
+      }
+      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
+        acc.push(proposal.details.researchGroupExternalId);
+      }
+      return acc;
+    }, []);
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+
+    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
+    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
+
+    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+
+    return proposals.map((proposal) => {
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const invitee = users.find(a => a.account.name == proposal.details.invitee);
+      const extendedDetails = { researchGroup, invitee };
       return { ...proposal, extendedDetails };
     });
   }

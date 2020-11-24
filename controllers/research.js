@@ -28,6 +28,9 @@ import ResearchTokenSaleCreatedEvent from './../events/researchTokenSaleCreatedE
 import ResearchTokenSaleProposedEvent from './../events/researchTokenSaleProposedEvent';
 import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleProposalSignedEvent';
 import ResearchTokenSaleProposalRejectedEvent from './../events/researchTokenSaleProposalRejectedEvent';
+import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
+import UserInvitationProposalRejectedEvent from './../events/userInvitationProposalRejectedEvent';
 
 
 const stat = util.promisify(fs.stat);
@@ -67,10 +70,7 @@ const createResearch = async (ctx, next) => {
       } 
     }));
 
-    const operations = blockchainService.extractOperations(tx);
-    const datums = operations;
-
-    const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
+    const datums = blockchainService.extractOperations(tx);
 
     if (datums.some(([opName]) => opName == 'create_account')) {
       const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
@@ -93,6 +93,8 @@ const createResearch = async (ctx, next) => {
       ctx.state.events.push(researchCreatedEvent);
     }
 
+    const invitesDatums = datums.filter(([opName]) => opName == 'join_research_group_membership');
+    
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
@@ -104,11 +106,15 @@ const createResearch = async (ctx, next) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
           return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
         }) : [];
-      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "", researches: inviteResearches } } }]);
-      const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
 
-      if (approveInviteDatum) {
-        ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { offchainMeta: {} } }]);
+      const userInvitationProposedEvent = new UserInvitationProposedEvent([inviteDatum, ['create_proposal', inviteProposal, null]], { notes: "", researches: inviteResearches });
+      ctx.state.events.push(userInvitationProposedEvent);
+      
+      const inviteApprovals = datums.filter(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
+      for (let i = 0; i < inviteApprovals.length; i++) {
+        const approval = inviteApprovals[i];
+        const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+        ctx.state.events.push(userInvitationProposalSignedEvent);
       }
     }
 
@@ -156,8 +162,7 @@ const updateResearch = async (ctx, next) => {
       }
     }));
 
-    const operations = blockchainService.extractOperations(tx);
-    const datums = operations;
+    const datums = blockchainService.extractOperations(tx);
 
     if (isProposal) {
       const researchUpdateProposedEvent = new ResearchUpdateProposedEvent(datums, offchainMeta);
@@ -175,7 +180,7 @@ const updateResearch = async (ctx, next) => {
       ctx.state.events.push(researchUpdatedEvent);
     }
 
-    const invitesDatums = operations.filter(([opName]) => opName == 'join_research_group_membership');
+    const invitesDatums = datums.filter(([opName]) => opName == 'join_research_group_membership');
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
@@ -187,12 +192,15 @@ const updateResearch = async (ctx, next) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
           return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
         }) : [];
-        
-      ctx.state.events.push([APP_EVENTS.USER_INVITATION_PROPOSED, { opDatum: inviteDatum, context: { emitter: jwtUsername, offchainMeta: { notes: "", researches: inviteResearches } } }]);
-      const approveInviteDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
 
-      if (approveInviteDatum) {
-        ctx.state.events.push([APP_EVENTS.USER_INVITATION_SIGNED, { opDatum: approveInviteDatum, context: { offchainMeta: {} } }]);
+      const userInvitationProposedEvent = new UserInvitationProposedEvent([inviteDatum, ['create_proposal', inviteProposal, null]], { notes: "", researches: inviteResearches });
+      ctx.state.events.push(userInvitationProposedEvent);
+
+      const inviteApprovals = datums.filter(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
+      for (let i = 0; i < inviteApprovals.length; i++) {
+        const approval = inviteApprovals[i];
+        const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+        ctx.state.events.push(userInvitationProposalSignedEvent);
       }
     }
 
@@ -623,8 +631,7 @@ const createResearchTokenSale = async (ctx, next) => {
   try {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const operations = blockchainService.extractOperations(tx);
-    const datums = operations;
+    const datums = blockchainService.extractOperations(tx);
 
     if (isProposal) {
       const researchTokenSaleProposedEvent = new ResearchTokenSaleProposedEvent(datums);
