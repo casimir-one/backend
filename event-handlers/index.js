@@ -70,7 +70,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_REJECTED, (payload, reply) => ha
 }));
 
 appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: userInvitationProposedEvent, tenant } = source;
+  const { event: userInvitationProposedEvent, tenant, emitter } = source;
 
   const researchGroupService = new ResearchGroupService();
   await wait(proposalHandler, userInvitationProposedEvent, null, tenant);
@@ -79,7 +79,7 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => hand
   // legacy
   const researchGroup = await researchGroupService.getResearchGroup(userInvite.researchGroupExternalId);
   const inviteeProfile = await usersService.findUserProfileByOwner(userInvite.invitee);
-  const creatorProfile = await usersService.findUserProfileByOwner(userInvite.creator);
+  const creatorProfile = await usersService.findUserProfileByOwner(emitter);
 
   const payload = { tenant, researchGroup, invite: userInvite, invitee: inviteeProfile, creator: creatorProfile };
 
