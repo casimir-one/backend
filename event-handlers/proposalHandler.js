@@ -84,5 +84,10 @@ proposalHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => hand
   return proposalRef;
 }));
 
+proposalHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: userResignationProposedEvent, tenant } = source;
+  const proposalRef = await createProposalRef(userResignationProposedEvent, SMART_CONTRACT_TYPE.EXCLUDE_MEMBER, tenant);
+  return proposalRef;
+}));
 
 export default proposalHandler;

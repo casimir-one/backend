@@ -14,6 +14,7 @@ import usersService from './../services/users';
 import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
+import ProposalService from './../services/proposal';
 
 class AppEventHandler extends EventEmitter { }
 
@@ -392,43 +393,50 @@ appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, (payload, reply) => 
 
 appEventHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter, offchainMeta } } = source;
-  const { notes } = offchainMeta;
+  const { event: userResignationProposedEvent, tenant, emitter } = source;
   const researchGroupService = new ResearchGroupService();
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { member, research_group: researchGroupExternalId } = opPayload;
+  const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
 
+  await wait(proposalHandler, userResignationProposedEvent, null, tenant);
 
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const memberProfile = await usersService.findUserProfileByOwner(member);
   const creatorProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const event = { tenant, researchGroup, member: memberProfile, creator: creatorProfile };
-
-  fire(userNotificationsHandler, APP_EVENTS.USER_RESIGNATION_PROPOSED, event)
-  fire(researchHandler, APP_EVENTS.USER_RESIGNATION_PROPOSED, event)
-
+  const payload = { tenant, researchGroup, member: memberProfile, creator: creatorProfile };
+  fire(userNotificationsHandler, APP_EVENTS.USER_RESIGNATION_PROPOSED, payload);
 }));
 
 
-appEventHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+appEventHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
 
-  const { opDatum, tenant, context: { emitter, resignationPayload } } = source;
+  const { event: userResignationProposalSignedEvent, tenant, emitter } = source;
+
+  const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
-  const [opName, opPayload, opProposal] = opDatum;
-  const { member, research_group: researchGroupExternalId } = resignationPayload;
+  const proposalId = userResignationProposalSignedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
+  const { member, researchGroupExternalId } = proposal.details;
 
+  fire(researchHandler, userResignationProposalSignedEvent, null, tenant);
+
+  // legacy
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const memberProfile = await usersService.findUserProfileByOwner(member);
   const creatorProfile = await usersService.findUserProfileByOwner(emitter);
 
-  const event = { tenant, researchGroup, member: memberProfile, creator: creatorProfile };
+  const payload = { tenant, researchGroup, member: memberProfile, creator: creatorProfile };
+  fire(userNotificationsHandler, APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, payload);
+}));
 
-  fire(userNotificationsHandler, APP_EVENTS.USER_RESIGNATION_SIGNED, event)
-  fire(researchHandler, APP_EVENTS.USER_RESIGNATION_SIGNED, event)
 
+appEventHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: userResignationProposalSignedEvent, tenant, emitter } = source;
+  // register handlers
 }));
 
 appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (source) => {

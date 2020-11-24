@@ -156,6 +156,9 @@ class ProposalService {
     const userInvitationProposals = await this.extendUserInvitationProposals(grouped[SMART_CONTRACT_TYPE.INVITE_MEMBER] || []);
     result.push(...userInvitationProposals);
 
+    const userResignationProposals = await this.extendUserResignationProposals(grouped[SMART_CONTRACT_TYPE.EXCLUDE_MEMBER] || []);
+    result.push(...userResignationProposals);
+
     return result;
   }
 
@@ -420,6 +423,37 @@ class ProposalService {
       return { ...proposal, extendedDetails };
     });
   }
+
+
+  async extendUserResignationProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.member)) {
+        acc.push(proposal.details.member);
+      }
+      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
+        acc.push(proposal.details.researchGroupExternalId);
+      }
+      return acc;
+    }, []);
+
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+
+    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
+    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
+
+    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+
+    return proposals.map((proposal) => {
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const member = users.find(a => a.account.name == proposal.details.member);
+      const extendedDetails = { researchGroup, member };
+      return { ...proposal, extendedDetails };
+    });
+
+  }
+
 
 
   async getProposalRef(externalId) {

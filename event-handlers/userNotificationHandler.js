@@ -483,7 +483,7 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async (event) =
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, async (event) => {
+userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async (event) => {
   const { researchGroup, member, creator } = event;
 
   const notificationsPromises = [];

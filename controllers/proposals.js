@@ -15,6 +15,7 @@ import AssetTransferProposalSignedEvent from './../events/assetTransferProposalS
 import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalSignedEvent';
 import ResearchExpressLicenseProposalSignedEvent from './../events/researchExpressLicenseProposalSignedEvent';
 import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
+import UserResignationProposalSignedEvent from './../events/userResignationProposalSignedEvent';
 
 import ResearchProposalRejectedEvent from './../events/researchProposalRejectedEvent';
 import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
@@ -25,6 +26,7 @@ import AssetTransferProposalRejectedEvent from './../events/assetTransferProposa
 import AssetExchangeProposalRejectedEvent from './../events/assetExchangeProposalRejectedEvent';
 import ResearchExpressLicenseProposalRejectedEvent from './../events/researchExpressLicenseProposalRejectedEvent';
 import UserInvitationProposalRejectedEvent from './../events/userInvitationProposalRejectedEvent';
+import UserResignationProposalRejectedEvent from './../events/userResignationProposalRejectedEvent';
 
 
 const createProposal = async (ctx) => {
@@ -114,6 +116,11 @@ const updateProposal = async (ctx, next) => {
       ctx.state.events.push(userInvitationProposalSignedEvent);
     }
 
+    if (updatedProposal.type == SMART_CONTRACT_TYPE.EXCLUDE_MEMBER) {
+      const userResignationProposalSignedEvent = new UserResignationProposalSignedEvent(datums);
+      ctx.state.events.push(userResignationProposalSignedEvent);
+    }
+
     ctx.status = 200;
     ctx.body = [...ctx.state.events];
 
@@ -190,6 +197,11 @@ const deleteProposal = async (ctx, next) => {
     if (deletedProposal.type == SMART_CONTRACT_TYPE.INVITE_MEMBER) {
       const userInvitationProposalRejectedEvent = new UserInvitationProposalRejectedEvent(datums);
       ctx.state.events.push(userInvitationProposalRejectedEvent);
+    }
+
+    if (deletedProposal.type == SMART_CONTRACT_TYPE.EXCLUDE_MEMBER) {
+      const userResignationProposalRejectedEvent = new UserResignationProposalRejectedEvent(datums);
+      ctx.state.events.push(userResignationProposalRejectedEvent);
     }
 
     ctx.status = 200;

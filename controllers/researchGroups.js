@@ -15,6 +15,8 @@ import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
 import ResearchGroupUpdatedEvent from './../events/researchGroupUpdatedEvent';
 import ResearchGroupUpdateProposedEvent from './../events/researchGroupUpdateProposedEvent';
 import ResearchGroupUpdateProposalSignedEvent from './../events/researchGroupUpdateProposalSignedEvent';
+import UserResignationProposedEvent from './../events/userResignationProposedEvent';
+import UserResignationProposalSignedEvent from './../events/userResignationProposalSignedEvent';
 
 
 const createResearchGroup = async (ctx, next) => {
@@ -86,20 +88,20 @@ const leaveResearchGroup = async (ctx, next) => {
   try {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    const operations = blockchainService.extractOperations(tx);
+    const datums = blockchainService.extractOperations(tx);
 
-    const resignationDatum = operations.find(([opName, ...rest]) => opName == 'leave_research_group_membership');
-    const [opName, resignationPayload, resignationProposal] = resignationDatum;
-
-    ctx.state.events.push([APP_EVENTS.USER_RESIGNATION_PROPOSED, { opDatum: resignationDatum, context: { emitter: jwtUsername, offchainMeta } }]);
-
-    const approveResignationDatum = operations.find(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == resignationProposal.external_id);
-    if (approveResignationDatum) {
-      ctx.state.events.push([APP_EVENTS.USER_RESIGNATION_SIGNED, { opDatum: approveResignationDatum, context: { emitter: jwtUsername, resignationPayload, offchainMeta: {} } }]);
+    const userResignationProposedEvent = new UserResignationProposedEvent(datums, offchainMeta);
+    ctx.state.events.push(userResignationProposedEvent);
+    
+    const userResignationApprovals = userResignationProposedEvent.getProposalApprovals();
+    for (let i = 0; i < userResignationApprovals.length; i++) {
+      const approval = userResignationApprovals[i];
+      const userResignationProposalSignedEvent = new UserResignationProposalSignedEvent([approval]);
+      ctx.state.events.push(userResignationProposalSignedEvent);
     }
 
     ctx.status = 200;
-    ctx.body = resignationPayload;
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);

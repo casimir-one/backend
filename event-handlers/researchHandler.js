@@ -254,12 +254,18 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply
 
 
 
-researchHandler.on(APP_EVENTS.USER_RESIGNATION_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
-
-  const { tenant, researchGroup, member } = event;
+researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
+  const { event: userResignationProposalSignedEvent, tenant } = event;
 
   const researchService = new ResearchService(tenant);
-  const researches = await researchService.getResearchesByResearchGroup(researchGroup.external_id);
+  const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+
+  const proposalId = userResignationProposalSignedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
+  const { member, researchGroupExternalId } = proposal.details;
+
+  const researches = await researchService.getResearchesByResearchGroup(researchGroupExternalId);
 
   const promises = [];
   for (let i = 0; i < researches.length; i++) {
