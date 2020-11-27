@@ -30,8 +30,12 @@ const getAllResearchContents = async (ctx) => {
         researchContentRef: researchContent,
         research_title: chainResearch.title,
         group_permlink: chainResearch.research_group.permlink,
-        research_permlink: chainResearch.permlink
-      })
+        research_permlink: chainResearch.permlink,
+
+        researchGroupExternalId: chainResearch.research_group.external_id,
+        researchExternalId: chainResearch.external_id,
+        researchContentExternalId: chainResearchContent.external_id
+      });
     }
 
     ctx.status = 200
