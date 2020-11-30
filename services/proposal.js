@@ -72,19 +72,30 @@ class ProposalService {
         let chainAccount = chainAccounts.find(chainAccount => chainAccount.name == party);
         let ownerAuth = chainAccount.active.account_auths.map(([name, threshold]) => name);
         let activeAuth = chainAccount.owner.account_auths.map(([name, threshold]) => name);
-        let members = [...ownerAuth, ...activeAuth].reduce((acc, name) => {
-          if (!acc.some(n => n == name)) {
-            return [...acc, name];
-          }
-          return [...acc];
-        }, []);
+        let members = [...ownerAuth, ...activeAuth];
+        let possibleSigners = members
+          .reduce((acc, name) => {
+            if (!acc.some(n => n == name) && !chainProposal.required_approvals.some(a => a == name)) {
+              return [...acc, name];
+            }
+            return [...acc];
+          }, []);
+
+        const isApproved = chainAccount.is_research_group
+          ? members.some(member => chainProposal.approvals.some(([name,]) => name == member))
+          : chainProposal.approvals.some(([name,]) => name == party);
+
+        const isRejected = chainAccount.is_research_group
+          ? members.some(member => chainProposal.rejectors.some(([name,]) => name == member))
+          : chainProposal.rejectors.some(([name,]) => name == party);
 
         parties[key] = {
           isProposer: party == chainProposal.proposer,
+          status: isApproved ? 'approved' : isRejected ? 'rejected' : 'pending',
           account: chainAccount.is_research_group ? researchGroups.find(rg => rg.external_id == party) : users.find(user => user.account.name == party),
           signers: [
-            ...users.filter((u) => members.some(member => u.account.name == member) || u.account.name == party),
-            ...researchGroups.filter((rg) => members.some(member => rg.external_id == member) || rg.external_id == party),
+            ...users.filter((u) => possibleSigners.some(member => u.account.name == member) || u.account.name == party),
+            ...researchGroups.filter((rg) => possibleSigners.some(member => rg.external_id == member) || rg.external_id == party),
           ]
             .filter((signer) => {
               let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
