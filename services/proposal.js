@@ -91,7 +91,7 @@ class ProposalService {
 
         parties[key] = {
           isProposer: party == chainProposal.proposer,
-          status: isApproved ? 'approved' : isRejected ? 'rejected' : 'pending',
+          status: isApproved ? 2 : isRejected ? 3 : 1,
           account: chainAccount.is_research_group ? researchGroups.find(rg => rg.external_id == party) : users.find(user => user.account.name == party),
           signers: [
             ...users.filter((u) => possibleSigners.some(member => u.account.name == member) || u.account.name == party),
