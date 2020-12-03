@@ -129,15 +129,16 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply
 appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentProposedEvent, tenant, emitter } = source;
   const { researchGroupExternalId, researchExternalId, title } = researchContentProposedEvent.getSourceData();
-  
+  const researchGroupService = new ResearchGroupService();
+
   await wait(proposalHandler, researchContentProposedEvent, null, tenant);
 
   // legacy
-  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
-  const payload = { researchGroup: chainResearchGroup, research: chainResearch, proposer: proposerUser, title };
+  const payload = { researchGroup, research: chainResearch, proposer: proposerUser, title };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, payload);
 
@@ -148,17 +149,18 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => hand
 
   const { event: researchContentCreatedEvent, tenant, emitter } = source;
   const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getSourceData();
+  const researchGroupService = new ResearchGroupService();
 
   await wait(researchContentHandler, researchContentCreatedEvent, null, tenant);
 
   // legacy
   const chainResearchContent = await deipRpc.api.getResearchContentAsync(researchContentExternalId);
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
-  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(chainResearch.research_group.external_id);
+  const researchGroup = await researchGroupService.getResearchGroup(chainResearch.research_group.external_id);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
-  const isAcceptedByQuorum = chainResearchGroup.external_id != emitter;
+  const isAcceptedByQuorum = researchGroup.external_id != emitter;
 
-  const payload = { researchGroup: chainResearchGroup, research: chainResearch, researchContent: chainResearchContent, creator: creatorUser, isAcceptedByQuorum };
+  const payload = { researchGroup, research: chainResearch, researchContent: chainResearchContent, creator: creatorUser, isAcceptedByQuorum };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CONTENT_CREATED, payload);
 
@@ -211,7 +213,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
   const research = await researchService.getResearch(researchExternalId)
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
-  const payload = { researchGroup: researchGroup, research: research, proposer: proposerUser };
+  const payload = { researchGroup, research: research, proposer: proposerUser };
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_UPDATE_PROPOSED, payload);
 
@@ -237,15 +239,16 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle
 
 appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdatedEvent, tenant, emitter } = source;
+  const researchGroupService = new ResearchGroupService();
 
   const { researchGroupExternalId } = researchGroupUpdatedEvent.getSourceData();
   await wait(researchGroupHandler, researchGroupUpdatedEvent, null, tenant);
 
-  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = researchGroupExternalId != emitter;
 
-  const payload = { researchGroup: chainResearchGroup, creator: creatorUser, isAcceptedByQuorum };
+  const payload = { researchGroup, creator: creatorUser, isAcceptedByQuorum };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATED, payload);
 
@@ -254,14 +257,16 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle
 
 appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdateProposedEvent, tenant, emitter } = source;
+  const researchGroupService = new ResearchGroupService();
+
   const { researchGroupExternalId } = researchGroupUpdateProposedEvent.getSourceData();
 
   await wait(proposalHandler, researchGroupUpdateProposedEvent, null, tenant);
 
-  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const proposerUser = await usersService.findUserProfileByOwner(emitter);
 
-  const payload = { researchGroup: chainResearchGroup, proposer: proposerUser };
+  const payload = { researchGroup, proposer: proposerUser };
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, payload);
 
 }));
@@ -305,6 +310,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, (payload, reply) =>
   const create_research_operation = tx['operations'][0][1]['proposed_ops'][1]['op'][1]['proposed_ops'][0]['op'];
   const { creator } = create_proposal_operation[1];
   const { external_id: researchExternalId, research_group: researchGroupExternalId } = create_research_operation[1];
+  const researchGroupService = new ResearchGroupService();
 
   const approverUserProfile = await usersService.findUserProfileByOwner(emitter);
   const [approverUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
@@ -315,9 +321,9 @@ appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, (payload, reply) =>
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
   const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
-  const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
 
-  const payload = { research: chainResearch, researchGroup: chainResearchGroup, approver: approverUser, requester: requesterUser, tenant };
+  const payload = { research: chainResearch, researchGroup, approver: approverUser, requester: requesterUser, tenant };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, payload);
 
