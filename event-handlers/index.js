@@ -239,6 +239,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle
   const { event: researchGroupUpdatedEvent, tenant, emitter } = source;
 
   const { researchGroupExternalId } = researchGroupUpdatedEvent.getSourceData();
+  await wait(researchGroupHandler, researchGroupUpdatedEvent, null, tenant);
 
   const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
@@ -267,7 +268,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) =
 
 appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdateProposalSignedEvent, tenant, emitter } = source;
-  // register handlers
+  await wait(researchGroupHandler, researchGroupUpdateProposalSignedEvent, null, tenant);
 }));
 
 appEventHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {

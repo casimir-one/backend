@@ -5,6 +5,7 @@ import deipRpc from '@deip/rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
+import ResearchGroupService from './../services/researchGroup';
 import tenantsService from './../services/tenant';
 
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY} from './../constants';
@@ -95,6 +96,8 @@ const signUp = async function (ctx) {
 
   try {
 
+    const researchGroupService = new ResearchGroupService();
+
     const tenant = ctx.state.tenant;
     const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
       ? USER_PROFILE_STATUS.APPROVED
@@ -142,6 +145,14 @@ const signUp = async function (ctx) {
     let account = null;
     if (status == USER_PROFILE_STATUS.APPROVED) {
       account = await usersService.createUserAccount({ username, pubKey });
+
+      const researchGroup = await deipRpc.api.getResearchGroupByPermlinkAsync(username);
+      await researchGroupService.createResearchGroupRef({
+        externalId: researchGroup.external_id,
+        creator: researchGroup.creator,
+        name: username,
+        description: username
+      });
     }
 
     ctx.status = 200;

@@ -21,13 +21,13 @@ import UserResignationProposalSignedEvent from './../events/userResignationPropo
 
 const createResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
+  const { tx, offchainMeta } = ctx.request.body;
 
   try {
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
-    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
+    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, offchainMeta.researchGroup);
     ctx.state.events.push(researchGroupCreatedEvent);
       
     ctx.status = 200;
@@ -53,7 +53,7 @@ const updateResearchGroup = async (ctx, next) => {
     const datums = blockchainService.extractOperations(tx);
 
     if (isProposal) {
-      const researchGroupUpdateProposedEvent = new ResearchGroupUpdateProposedEvent(datums);
+      const researchGroupUpdateProposedEvent = new ResearchGroupUpdateProposedEvent(datums, offchainMeta.researchGroup);
       ctx.state.events.push(researchGroupUpdateProposedEvent);
 
       const researchGroupUpdateApprovals = researchGroupUpdateProposedEvent.getProposalApprovals();
@@ -65,7 +65,7 @@ const updateResearchGroup = async (ctx, next) => {
       
     } else {
       const researchGroupUpdatedEvent = new ResearchGroupUpdatedEvent(datums);
-      ctx.state.events.push(researchGroupUpdatedEvent);
+      ctx.state.events.push(researchGroupUpdatedEvent, offchainMeta.researchGroup);
     }
 
     ctx.status = 200;

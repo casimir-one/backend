@@ -12,6 +12,10 @@ class ResearchGroupService {
       .map((chainResearchGroup) => {
         const researchGroupRef = researchGroups.find(r => r._id == chainResearchGroup.external_id);
         return { ...chainResearchGroup, researchGroupRef: researchGroupRef ? researchGroupRef.toObject() : null };
+      })
+      .map((researchGroup) => {
+        const override = researchGroup.researchGroupRef ? { name: researchGroup.researchGroupRef.name, description: researchGroup.researchGroupRef.description } : { name: "Not specified", description: "Not specified" };
+        return { ...researchGroup, ...override };
       });
   }
 
@@ -42,18 +46,36 @@ class ResearchGroupService {
 
   async createResearchGroupRef({
     externalId,
-    creator
+    creator,
+    name,
+    description
   }) {
 
     const researchGroup = new ResearchGroup({
       _id: externalId,
-      creator
+      creator,
+      name,
+      description
     });
 
     const savedResearchGroup = await researchGroup.save();
     return savedResearchGroup.toObject();
   }
   
+  async updateResearchGroupRef(externalId, {
+    name,
+    description
+  }) {
+
+    const researchGroup = await ResearchGroup.findOne({ _id: externalId });
+
+    researchGroup.name = name || researchGroup.name;
+    researchGroup.description = description || researchGroup.description;
+    
+    const updatedResearchGroup = await researchGroup.save();
+    return updatedResearchGroup.toObject();
+  }
+
 }
 
 export default ResearchGroupService;

@@ -73,7 +73,7 @@ const createResearch = async (ctx, next) => {
     const datums = blockchainService.extractOperations(tx);
 
     if (datums.some(([opName]) => opName == 'create_account')) {
-      const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
+      const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, offchainMeta.researchGroup);
       ctx.state.events.push(researchGroupCreatedEvent);
     }
 
@@ -474,7 +474,7 @@ const approveResearchApplication = async (ctx, next) => {
     const updatedProposal = await deipRpc.api.getProposalAsync(applicationId);
     const isAccepted = updatedProposal == null;
 
-    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums);
+    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, { name: "", description: "" });
     ctx.state.events.push(researchGroupCreatedEvent);
 
     const researchCreatedEvent = new ResearchCreatedEvent(datums, { attributes: researchApplication.attributes || [] });
