@@ -494,6 +494,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
 }
 
 const parseInternalReferences = (refList) => {
+    return [];
     const webpageRefs = refList.filter(ref => {
         try {
             return ref['element-citation'][0]['$']['publication-type'] === 'webpage';
