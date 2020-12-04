@@ -11,7 +11,7 @@ class ResearchService {
     this.researchAttributes = tenant.settings.researchAttributes || [];
   }
 
-  async mapResearch(chainResearches, privateGuardFn, filterObj) {
+  async mapResearch(chainResearches, filterObj) {
 
     const filter =  {
       searchTerm: "",
@@ -43,7 +43,6 @@ class ResearchService {
 
         return { ...chainResearch, title, abstract, researchRef: researchRef ? { ...researchRef.toObject(), expressLicenses } : { attributes: [], expressLicenses: []} };
       })
-      .filter(privateGuardFn)
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         
         const attribute = this.researchAttributes.find(attr => attr._id.toString() === rAttr.researchAttributeId.toString());
@@ -104,7 +103,7 @@ class ResearchService {
 
   async lookupResearches(lowerBound, limit, filter) {
     const chainResearches = await deipRpc.api.lookupResearchesAsync(lowerBound, limit);
-    const result = await this.mapResearch(chainResearches, (r) => { return !r.is_private }, filter);
+    const result = await this.mapResearch(chainResearches, filter);
     return result;
   }
 
@@ -112,7 +111,7 @@ class ResearchService {
   async getResearch(researchExternalId) {
     const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
     if (!chainResearch) return null;
-    const result = await this.mapResearch([chainResearch], (r) => { return true; });
+    const result = await this.mapResearch([chainResearch]);
     const [research] = result;
     return research;
   }
@@ -120,28 +119,28 @@ class ResearchService {
 
   async getResearches(researchesExternalIds) {
     const chainResearches = await deipRpc.api.getResearchesAsync(researchesExternalIds);
-    const result = await this.mapResearch(chainResearches, (r) => { return true; });
+    const result = await this.mapResearch(chainResearches);
     return result;
   }
 
 
   async getResearchesByResearchGroup(researchGroupExternalId) {
     const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
-    const result = await this.mapResearch(chainResearches, (r) => { return true; });
+    const result = await this.mapResearch(chainResearches);
     return result;
   }
 
 
-  async getResearchesForMember(member, requester) {
+  async getResearchesForMember(member) {
     const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
-    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
+    const result = await this.mapResearch(chainResearches);
     return result;
   }
 
 
-  async getResearchesForMemberByResearchGroup(researchGroupExternalId, requester) {
+  async getResearchesForMemberByResearchGroup(researchGroupExternalId) {
     const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
-    const result = await this.mapResearch(chainResearches, (r) => !r.is_private || r.members.some(m => m == requester));
+    const result = await this.mapResearch(chainResearches);
     return result;
   }
 

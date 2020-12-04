@@ -785,7 +785,9 @@ const getPublicResearchListing = async (ctx) => {
     ctx.status = 200;
     ctx.body = result
       .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id));
+      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
+      .filter(r => !r.is_private);
+      
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -804,11 +806,13 @@ const getUserResearchListing = async (ctx) => {
   const researchBlacklist = tenant.settings.researchBlacklist || [];
 
   try {
-    const result = await researchService.getResearchesForMember(member, jwtUsername)
+    const result = await researchService.getResearchesForMember(member)
     ctx.status = 200;
     ctx.body = result
       .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id));
+      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
+      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -827,11 +831,13 @@ const getResearchGroupResearchListing = async (ctx) => {
   const researchBlacklist = tenant.settings.researchBlacklist || [];
 
   try {
-    const result = await researchService.getResearchesForMemberByResearchGroup(researchGroupExternalId, jwtUsername);
+    const result = await researchService.getResearchesForMemberByResearchGroup(researchGroupExternalId);
     ctx.status = 200;
     ctx.body = result
       .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
       .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
+      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
