@@ -2,7 +2,7 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { handle, fire, wait } from './utils';
-import { APP_EVENTS, SMART_CONTRACT_TYPE, RESEARCH_CONTENT_STATUS, USER_INVITE_STATUS, RESEARCH_STATUS, TOKEN_SALE_STATUS } from './../constants';
+import { APP_EVENTS, RESEARCH_ATTRIBUTE } from './../constants';
 import userNotificationsHandler from './userNotificationHandler';
 import researchHandler from './researchHandler';
 import researchGroupHandler from './researchGroupHandler';
@@ -25,9 +25,8 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
 
   const { event: researchProposedEvent, tenant, emitter } = source;
   
-  const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
-  const { researchTitle, researchGroupExternalId } = researchProposedEvent.getSourceData();
+  const { researchGroupExternalId, source: { offchain: { attributes } } } = researchProposedEvent.getSourceData();
 
   await wait(researchHandler, researchProposedEvent, null, tenant);
   await wait(proposalHandler, researchProposedEvent, null, tenant);
@@ -35,6 +34,10 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
   // legacy
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const proposerProfile = await usersService.findUserProfileByOwner(emitter);
+
+  const researchTitle = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+    ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+    : "Not Specified";
 
   const notificationPayload = { researchGroup, proposer: proposerProfile, researchTitle };
 

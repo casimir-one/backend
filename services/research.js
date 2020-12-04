@@ -2,8 +2,8 @@ import deipRpc from '@deip/rpc-client';
 import Research from './../schemas/research';
 import ExpressLicense from './../schemas/expressLicense';
 import ResearchApplication from './../schemas/researchApplication';
-import { RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import mongoose from 'mongoose';
+import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE } from './../constants';
 
 class ResearchService {
 
@@ -31,10 +31,17 @@ class ResearchService {
       .map((chainResearch) => {
         const researchRef = researches.find(r => r._id == chainResearch.external_id);
         const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id).map(l => l.toObject());
-        if (researchRef) {
-          return { ...chainResearch, researchRef: { ...researchRef.toObject(), expressLicenses } };
-        }
-        return { ...chainResearch, researchRef: null };
+        const attributes = researchRef ? researchRef.attributes : [];
+       
+        const title = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+          : "Not Specified";
+
+        const abstract = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value
+          : "Not Specified";
+
+        return { ...chainResearch, title, abstract, researchRef: researchRef ? { ...researchRef.toObject(), expressLicenses } : { attributes: [], expressLicenses: []} };
       })
       .filter(privateGuardFn)
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {

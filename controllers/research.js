@@ -78,7 +78,7 @@ const createResearch = async (ctx, next) => {
     }
 
     if (isProposal) {
-      const researchProposedEvent = new ResearchProposedEvent(datums, offchainMeta);
+      const researchProposedEvent = new ResearchProposedEvent(datums, offchainMeta.research);
       ctx.state.events.push(researchProposedEvent);
 
       const researchApprovals = researchProposedEvent.getProposalApprovals();
@@ -89,7 +89,7 @@ const createResearch = async (ctx, next) => {
       }
 
     } else {
-      const researchCreatedEvent = new ResearchCreatedEvent(datums, offchainMeta);
+      const researchCreatedEvent = new ResearchCreatedEvent(datums, offchainMeta.research);
       ctx.state.events.push(researchCreatedEvent);
     }
 
@@ -99,7 +99,7 @@ const createResearch = async (ctx, next) => {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
-      const { attributes: researchAttributes } = offchainMeta;
+      const { attributes: researchAttributes } = offchainMeta.research;
       const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
@@ -165,7 +165,7 @@ const updateResearch = async (ctx, next) => {
     const datums = blockchainService.extractOperations(tx);
 
     if (isProposal) {
-      const researchUpdateProposedEvent = new ResearchUpdateProposedEvent(datums, offchainMeta);
+      const researchUpdateProposedEvent = new ResearchUpdateProposedEvent(datums, offchainMeta.research);
       ctx.state.events.push(researchUpdateProposedEvent);
 
       const researchUpdateApprovals = researchUpdateProposedEvent.getProposalApprovals();
@@ -176,7 +176,7 @@ const updateResearch = async (ctx, next) => {
       }
 
     } else {
-      const researchUpdatedEvent = new ResearchUpdatedEvent(datums, offchainMeta);
+      const researchUpdatedEvent = new ResearchUpdatedEvent(datums, offchainMeta.research);
       ctx.state.events.push(researchUpdatedEvent);
     }
 
@@ -185,7 +185,7 @@ const updateResearch = async (ctx, next) => {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
-      const { attributes: researchAttributes } = offchainMeta;
+      const { attributes: researchAttributes } = offchainMeta.research;
       const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {

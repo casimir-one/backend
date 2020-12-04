@@ -15,6 +15,8 @@ import NEW_RESEARCH_POLICY from './newResearchPolicy';
 import RESEARCH_ATTRIBUTE_AREA from './researchAttributeArea';
 import RESEARCH_STATUS from './researchStatus';
 import PROPOSAL_STATUS from './proposalStatus';
+import RESEARCH_ATTRIBUTE from './researchAttributes';
+
 
 export {
   CHAIN_CONSTANTS,
@@ -32,5 +34,6 @@ export {
   NEW_RESEARCH_POLICY,
   RESEARCH_ATTRIBUTE_AREA,
   RESEARCH_STATUS,
-  PROPOSAL_STATUS
+  PROPOSAL_STATUS,
+  RESEARCH_ATTRIBUTE
 } 

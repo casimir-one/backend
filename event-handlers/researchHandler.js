@@ -17,7 +17,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
-  const { researchExternalId, researchGroupExternalId, attributes } = researchCreatedEvent.getSourceData();
+  const { researchExternalId, researchGroupExternalId, source: { offchain: { attributes } } } = researchCreatedEvent.getSourceData();
 
   const researchRef = await researchService.createResearchRef({
     externalId: researchExternalId,
@@ -52,7 +52,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService(tenant);
 
-  const { researchExternalId, researchGroupExternalId, attributes } = researchProposedEvent.getSourceData();
+  const { researchExternalId, researchGroupExternalId, source: { offchain: { attributes } } } = researchProposedEvent.getSourceData();
 
   const researchRef = await researchService.createResearchRef({
     externalId: researchExternalId,
@@ -85,7 +85,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
 
-  const { researchExternalId, researchGroupExternalId, attributes } = researchUpdatedEvent.getSourceData();
+  const { researchExternalId, source: { offchain: { attributes } } } = researchUpdatedEvent.getSourceData();
 
   if (attributes) {
     await researchService.updateResearchRef(researchExternalId, { attributes });
@@ -119,7 +119,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => hand
 
   const proposal = await proposalsService.getProposal(proposalId);
   const { status } = proposal.proposal;
-  const { researchExternalId, attributes } = proposal.details;
+  const { researchExternalId, source: { offchain: { attributes } } } = proposal.details;
 
   if (status == PROPOSAL_STATUS.APPROVED) {
     await researchService.updateResearchRef(researchExternalId, {
@@ -144,7 +144,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) 
 
   const proposal = await proposalsService.getProposal(proposalId);
   const { status } = proposal.proposal;
-  const { researchExternalId, attributes } = proposal.details;
+  const { researchExternalId, source: { offchain: { attributes } } } = proposal.details;
 
   if (status == PROPOSAL_STATUS.APPROVED) {
     await researchService.updateResearchRef(researchExternalId, {

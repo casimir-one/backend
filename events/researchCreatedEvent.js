@@ -10,9 +10,8 @@ class ResearchCreatedEvent extends AppEvent {
 
   getSourceData() {
     let [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'create_research');
-    let { external_id: researchExternalId, title: researchTitle, research_group: researchGroupExternalId } = opPayload;
-    let { attributes } = this.offchainMeta;
-    return { researchExternalId, researchTitle, researchGroupExternalId, attributes };
+    let { external_id: researchExternalId, research_group: researchGroupExternalId } = opPayload;
+    return { ...super.getSourceData(), researchExternalId, researchGroupExternalId };
   }
 }
 
