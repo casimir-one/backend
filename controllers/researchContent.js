@@ -21,7 +21,7 @@ import rimraf from "rimraf";
 import slug from 'limax';
 import * as blockchainService from './../utils/blockchain';
 import * as authService from './../services/auth';
-import * as researchContentService from './../services/researchContent';
+import ResearchContentService from './../services/researchContent';
 import { RESEARCH_CONTENT_STATUS, APP_EVENTS } from './../constants';
 import ResearchContentCreatedEvent from './../events/researchContentCreatedEvent';
 import ResearchContentProposedEvent from './../events/researchContentProposedEvent';
@@ -64,6 +64,7 @@ const getResearchContentByResearch = async (ctx) => {
 
   try {
 
+    const researchContentService = new ResearchContentService()
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
     if (!research) {
       ctx.status = 404;
@@ -102,6 +103,8 @@ const readDarArchive = async (ctx) => {
     const jwt = authorization.substring(authorization.indexOf("Bearer ") + "Bearer ".length, authorization.length);
 
     try {
+      const researchContentService = new ResearchContentService();
+
       const rc = await researchContentService.findResearchContentById(darId);
         if (!rc) {
             ctx.status = 404;
@@ -139,6 +142,8 @@ const readDarArchive = async (ctx) => {
 const readDarArchiveStaticFiles = async (ctx) => {
     const darId = ctx.params.dar;
     try {
+      const researchContentService = new ResearchContentService();
+
       const rc = await researchContentService.findResearchContentById(darId);
         const archivePath = researchDarArchivePath(rc.researchExternalId, rc.folder);
 
@@ -155,6 +160,8 @@ const readDarArchiveStaticFiles = async (ctx) => {
 const getContentRefById = async (ctx) => {
     const refId = ctx.params.refId;
     try {
+      const researchContentService = new ResearchContentService();
+
       const ref = await researchContentService.findResearchContentById(refId);
         ctx.status = 200;
         ctx.body = ref;
@@ -168,6 +175,8 @@ const getContentRefByHash = async (ctx) => {
   const hash = ctx.params.hash;
   const researchExternalId = ctx.params.researchExternalId;
   try {
+    const researchContentService = new ResearchContentService();
+
     const ref = await researchContentService.findResearchContentByHash(researchExternalId, hash);
     ctx.status = 200;
     ctx.body = ref;
@@ -193,6 +202,8 @@ const updateDarArchive = async (ctx) => {
     });
 
     try {
+      const researchContentService = new ResearchContentService();
+
         const rc = await researchContentService.findResearchContentById(darId);
         if (!rc || rc.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
             ctx.status = 405;
@@ -256,6 +267,8 @@ const unlockContentDraft = async (ctx) => {
     const refId = ctx.params.refId;
     
     try {
+      const researchContentService = new ResearchContentService();
+
         const rc = await researchContentService.findResearchContentById(refId);
         if (!rc || (rc.status != RESEARCH_CONTENT_STATUS.PROPOSED && rc.status != RESEARCH_CONTENT_STATUS.PUBLISHED )) {
             ctx.status = 405;
@@ -315,6 +328,7 @@ const createDarArchive = async (ctx) => {
     }
 
     try {
+      const researchContentService = new ResearchContentService();
       const research = await deipRpc.api.getResearchAsync(researchExternalId);
       const researchInternalId = research.id;
 
@@ -369,6 +383,8 @@ const deleteContentDraft = async (ctx) => {
     const refId = ctx.params.refId;
 
     try {
+      const researchContentService = new ResearchContentService();
+
       const rc = await researchContentService.findResearchContentById(refId);
         if (!rc) {
             ctx.status = 404;
@@ -414,6 +430,8 @@ const deleteContentDraft = async (ctx) => {
 }
 
 const updateDraftMetaAsync = async (researchContentId, archive) => {
+  const researchContentService = new ResearchContentService();
+
     const parseDraftMetaAsync = () => new Promise(resolve => {
         xml2js.parseString(archive.resources['manuscript.xml'].data, (err, result) => {
             if (err) {
@@ -523,6 +541,7 @@ const uploadBulkResearchContent = async(ctx) => {
     const uploadSession = ctx.request.header['upload-session'];
 
     try {
+      const researchContentService = new ResearchContentService();
 
         if (!researchExternalId) {
             ctx.status = 400;
@@ -644,6 +663,8 @@ const getResearchPackageFile = async function(ctx) {
     const isDownload = ctx.query.download === 'true';
     const jwtUsername = ctx.state.user.username;
 
+  const researchContentService = new ResearchContentService();
+
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
     if (research.is_private) {
       const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
@@ -684,6 +705,8 @@ const createResearchContent = async (ctx, next) => {
   const { tx, offchainMeta, isProposal } = ctx.request.body;
 
   try {
+    const researchContentService = new ResearchContentService();
+
     const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
     const payload = operation[1];
     const {

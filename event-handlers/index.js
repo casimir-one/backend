@@ -11,7 +11,6 @@ import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
 import usersService from './../services/users';
-import * as researchContentService from './../services/researchContent';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import ProposalService from './../services/proposal';

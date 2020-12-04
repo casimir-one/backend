@@ -4,8 +4,8 @@ import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
+import ResearchContentService from './../services/researchContent';
 import usersService from './../services/users';
-import * as researchContentService from './../services/researchContent';
 
 
 class ResearchContentHandler extends EventEmitter { }
@@ -17,6 +17,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) 
 
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
+  const researchContentService = new ResearchContentService();
 
   const { researchContentExternalId } = researchContentCreatedEvent.getSourceData();
 
@@ -38,7 +39,8 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload,
   const researchService = new ResearchService(tenant);
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-  
+  const researchContentService = new ResearchContentService();
+
   const proposalId = researchContentProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
 

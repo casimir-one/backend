@@ -1,5 +1,5 @@
 import deipRpc from '@deip/rpc-client';
-import * as researchContentService from './../services/researchContent';
+import ResearchContentService from './../services/researchContent';
 import { CHAIN_CONSTANTS } from './../constants';
 
 const getAllResearchContents = async (ctx) => {
@@ -7,6 +7,7 @@ const getAllResearchContents = async (ctx) => {
   const tenant = ctx.state.tenant;
 
   try {
+    const researchContentService = new ResearchContentService();
 
     const result = [];
     const chainResearches = await deipRpc.api.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
