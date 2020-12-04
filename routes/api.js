@@ -91,6 +91,7 @@ protected_route.post('/reviews', reviews.makeReview)
 
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
+public_route.get('/researches', research.getResearches)
 public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)

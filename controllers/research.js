@@ -787,7 +787,7 @@ const getPublicResearchListing = async (ctx) => {
       .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
       .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
       .filter(r => !r.is_private);
-      
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -850,28 +850,15 @@ const getResearch = async (ctx) => {
   const tenant = ctx.state.tenant;
   const researchExternalId = ctx.params.researchExternalId;
 
-  const researchService = new ResearchService(tenant);
-  const researchWhitelist = tenant.settings.researchWhitelist || [];
-  const researchBlacklist = tenant.settings.researchBlacklist || [];
-
-  try { 
-
+  try {
+    const researchService = new ResearchService(tenant);
     const research = await researchService.getResearch(researchExternalId);
     if (!research) {
       ctx.status = 404;
       ctx.body = null;
       return;
     }
-    const result = [research]
-      .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
    
-    if (!result.length) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-
     ctx.status = 200;
     ctx.body = research;
   } catch (err) {
@@ -882,9 +869,38 @@ const getResearch = async (ctx) => {
 };
 
 
+const getResearches = async (ctx) => {
+  const tenant = ctx.state.tenant;
+  const query = qs.parse(ctx.query);
+  const researchesExternalIds = query.researches;
+
+  try {
+
+    if (!Array.isArray(researchesExternalIds)) {
+      ctx.status = 400;
+      ctx.body = `Bad request (${JSON.stringify(query)})`;
+      return;
+    }
+
+    const researchService = new ResearchService(tenant);
+    const researches = await researchService.getResearches(researchesExternalIds);
+
+    const result = researches;
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+
 export default {
-  getResearchAttributeFile,
   getResearch,
+  getResearches,
+  getResearchAttributeFile,
   getPublicResearchListing,
   getUserResearchListing,
   getResearchGroupResearchListing,

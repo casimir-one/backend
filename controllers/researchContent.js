@@ -64,22 +64,10 @@ const getResearchContentByResearch = async (ctx) => {
 
   try {
 
-    if (tenant.settings.researchWhitelist && !tenant.settings.researchWhitelist.some(id => id == researchExternalId)) {
-      ctx.status = 200;
-      ctx.body = [];
-      return;
-    }
-
-    if (tenant.settings.researchBlacklist && tenant.settings.researchBlacklist.some(id => id == researchExternalId)) {
-      ctx.status = 200;
-      ctx.body = [];
-      return;
-    }
-
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    if (!research || research.is_private) {
-      ctx.status = 200;
-      ctx.body = [];
+    if (!research) {
+      ctx.status = 404;
+      ctx.body = `${researchExternalId} research is not found`;
       return;
     }
 
