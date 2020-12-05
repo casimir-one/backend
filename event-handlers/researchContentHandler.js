@@ -23,7 +23,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) 
   const { researchContentExternalId, researchExternalId, researchGroupExternalId, hash, references, authors, source: { offchain: { title, folder, algo, packageFiles, foreignReferences, type } } } = researchContentCreatedEvent.getSourceData();
   const research = await researchService.getResearch(researchExternalId);
 
-  const researchContent = await researchContentService.createResearchContent({
+  const researchContent = await researchContentService.createResearchContentRef({
     externalId: researchContentExternalId,
     researchExternalId,
     researchGroupExternalId,
@@ -54,7 +54,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply)
   const { researchContentExternalId, researchExternalId, researchGroupExternalId, hash, references, authors, source: { offchain: { title, folder, algo, packageFiles, foreignReferences, type } } } = researchContentCreatedEvent.getSourceData();
   const research = await researchService.getResearch(researchExternalId);
 
-  const researchContent = await researchContentService.createResearchContent({
+  const researchContent = await researchContentService.createResearchContentRef({
     externalId: researchContentExternalId,
     researchExternalId,
     researchGroupExternalId,
@@ -90,7 +90,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload,
   const { researchContentExternalId } = proposal.details;
 
   if (status == PROPOSAL_STATUS.APPROVED) {
-    await researchContentService.updateResearchContent(researchContentExternalId, { 
+    await researchContentService.updateResearchContentRef(researchContentExternalId, { 
       status: RESEARCH_CONTENT_STATUS.PUBLISHED 
     });
   }

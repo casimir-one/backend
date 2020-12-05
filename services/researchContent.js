@@ -41,57 +41,37 @@ class ResearchContentService {
     return researchContents;
   }
 
-  async findResearchContents(list) {
-    let result = await ResearchContent.find({ _id: { $in: list } });
-    return result;
-  }
-
-  async findPublishedResearchContent() {
-    let result = await ResearchContent.find({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
-    return result;
-  }
-
-  async findDraftResearchContent() {
-    let result = await ResearchContent.find({ $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
-    return result;
-  }
-
-  async findPublishedResearchContentByResearch(researchExternalId) {
+  async findPublishedResearchContentRefsByResearch(researchExternalId) {
     let result = await ResearchContent.find({ researchExternalId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
-    return result;
+    return [...result.map(rc => rc.toObject())];
   }
 
-  async findDraftResearchContentByResearch(researchExternalId) {
+  async findDraftResearchContentRefsByResearch(researchExternalId) {
     let result = await ResearchContent.find({ researchExternalId, $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
-    return result;
+    return [...result.map(rc => rc.toObject())];
   }
 
-  async findResearchContentById(externalId) {
+  async findResearchContentRefById(externalId) {
     let result = await ResearchContent.findOne({ _id: externalId });
     return result;
   }
 
-  async removeResearchContentById(externalId) {
+  async removeResearchContentRefById(externalId) {
     let result = await ResearchContent.deleteOne({ _id: externalId });
     return result;
   }
 
-  async findResearchContentByHash(researchExternalId, hash) {
+  async findResearchContentRefByHash(researchExternalId, hash) {
     const rc = await ResearchContent.findOne({ researchExternalId, hash });
     return rc;
   }
 
-  async removeResearchContentByHash(researchExternalId, hash) {
+  async removeResearchContentRefByHash(researchExternalId, hash) {
     const result = await ResearchContent.deleteOne({ researchExternalId, hash });
     return result;
   }
 
-  async findResearchContentByResearchId(researchExternalId) {
-    const list = await ResearchContent.find({ researchExternalId });
-    return list;
-  }
-
-  async createResearchContent({
+  async createResearchContentRef({
     externalId,
     researchExternalId,
     researchGroupExternalId,
@@ -129,7 +109,7 @@ class ResearchContentService {
   }
 
 
-  async updateResearchContent(externalId, {
+  async updateResearchContentRef(externalId, {
     folder,
     title,
     hash,

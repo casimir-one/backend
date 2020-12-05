@@ -124,8 +124,8 @@ const getResearchContentByResearch = async (ctx) => {
     }
 
     const researchContents = await researchContentService.getResearchContentsByResearch(researchExternalId)
-    const published = await researchContentService.findPublishedResearchContentByResearch(researchExternalId)
-    const drafts = await researchContentService.findDraftResearchContentByResearch(researchExternalId);
+    const published = await researchContentService.findPublishedResearchContentRefsByResearch(researchExternalId)
+    const drafts = await researchContentService.findDraftResearchContentRefsByResearch(researchExternalId);
 
     const result = [
       ...published.map((rc) => {
@@ -156,7 +156,7 @@ const readDarArchive = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentById(darId);
+    const rc = await researchContentService.findResearchContentRefById(darId);
     if (!rc) {
       ctx.status = 404;
       ctx.body = `Dar for "${darId}" id is not found`;
@@ -195,7 +195,7 @@ const readDarArchiveStaticFiles = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentById(darId);
+    const rc = await researchContentService.findResearchContentRefById(darId);
     const archivePath = researchDarArchivePath(rc.researchExternalId, rc.folder);
 
     const stat = util.promisify(fs.stat);
@@ -213,7 +213,7 @@ const getContentRef = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const ref = await researchContentService.findResearchContentById(refId);
+    const ref = await researchContentService.findResearchContentRefById(refId);
     ctx.status = 200;
     ctx.body = ref;
   } catch (err) {
@@ -228,7 +228,7 @@ const getContentRefByHash = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const ref = await researchContentService.findResearchContentByHash(researchExternalId, hash);
+    const ref = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
     ctx.status = 200;
     ctx.body = ref;
   } catch (err) {
@@ -255,7 +255,7 @@ const updateDarArchive = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentById(darId);
+    const rc = await researchContentService.findResearchContentRefById(darId);
     if (!rc || rc.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
       ctx.status = 405;
       ctx.body = `Research "${darId}" is locked for updates or does not exist`;
@@ -320,7 +320,7 @@ const unlockContentDraft = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentById(refId);
+    const rc = await researchContentService.findResearchContentRefById(refId);
     if (!rc || (rc.status != RESEARCH_CONTENT_STATUS.PROPOSED && rc.status != RESEARCH_CONTENT_STATUS.PUBLISHED)) {
       ctx.status = 405;
       ctx.body = `Proposed "${refId}" content archive is not found`;
@@ -398,7 +398,7 @@ const createDarArchive = async (ctx) => {
     await cloneArchive(blankDarPath, darPath);
 
     const folder = externalId;
-    const researchContentRm = await researchContentService.createResearchContent({
+    const researchContentRm = await researchContentService.createResearchContentRef({
       externalId,
       researchExternalId,
       researchGroupExternalId,
@@ -434,7 +434,7 @@ const deleteContentDraft = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentById(refId);
+    const rc = await researchContentService.findResearchContentRefById(refId);
     if (!rc) {
       ctx.status = 404;
       ctx.body = `Dar for "${refId}" id is not found`;
@@ -467,7 +467,7 @@ const deleteContentDraft = async (ctx) => {
       await fsExtra.remove(researchFilesPackagePath(rc.researchExternalId, rc.hash));
     }
 
-    await researchContentService.removeResearchContentById(refId);
+    await researchContentService.removeResearchContentRefById(refId);
     ctx.status = 201;
     ctx.body = "";
 
@@ -507,7 +507,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   })
 
   const { title, authors, references } = await parseDraftMetaAsync();
-  const rc = await researchContentService.findResearchContentById(researchContentId);
+  const rc = await researchContentService.findResearchContentRefById(researchContentId);
 
   const accounts = [];
   for (let i = 0; i < authors.length; i++) {
@@ -644,7 +644,7 @@ const uploadBulkResearchContent = async (ctx) => {
     const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
 
     var exists = false;
-    const rc = await researchContentService.findResearchContentByHash(researchExternalId, packageHash);
+    const rc = await researchContentService.findResearchContentRefByHash(researchExternalId, packageHash);
     const packagePath = researchFilesPackagePath(researchExternalId, packageHash);
 
     if (rc) {
@@ -675,7 +675,7 @@ const uploadBulkResearchContent = async (ctx) => {
       } else {
 
         const externalId = `draft-${researchExternalId}-${packageHash}`;
-        const researchContentRm = await researchContentService.createResearchContent({
+        const researchContentRm = await researchContentService.createResearchContentRef({
           externalId,
           researchExternalId,
           researchGroupExternalId: researchGroupExternalId,
@@ -725,7 +725,7 @@ const getResearchPackageFile = async function (ctx) {
     }
   }
 
-  const rc = await researchContentService.findResearchContentByHash(researchExternalId, hash);
+  const rc = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
   if (rc == null) {
     ctx.status = 404;
     ctx.body = `Package "${hash}" is not found`
@@ -761,7 +761,7 @@ const createResearchContent = async (ctx, next) => {
     const [opName, opPayload] = datums.find(([opName,]) => opName == 'create_research_content');
     const { content: hash, external_id: researchContentExternalId, research_external_id: researchExternalId } = opPayload;
     
-    const rc = await researchContentService.findResearchContentByHash(researchExternalId, hash);
+    const rc = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
     const draft = rc ? rc.toObject() : null;
     
     if (!draft) {
@@ -777,7 +777,7 @@ const createResearchContent = async (ctx, next) => {
     }
     
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    await researchContentService.removeResearchContentByHash(researchExternalId, hash); // remove draft
+    await researchContentService.removeResearchContentRefByHash(researchExternalId, hash); // remove draft
 
     offchainMeta.researchContent.folder = draft.folder;
     offchainMeta.researchContent.packageFiles = draft.packageFiles;
