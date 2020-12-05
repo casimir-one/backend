@@ -128,12 +128,12 @@ const getResearchContentByResearch = async (ctx) => {
     const drafts = await researchContentService.findDraftResearchContentRefsByResearch(researchExternalId);
 
     const result = [
-      ...published.map((rc) => {
-        const researchContent = researchContents.find(researchContent => rc._id.toString() == researchContent.external_id);
+      ...published.map((ref) => {
+        const researchContent = researchContents.find(researchContent => ref._id.toString() == researchContent.external_id);
         return { ...researchContent, isDraft: false };
       }),
-      ...drafts.map((rc) => {
-        return { researchContentRef: rc.toObject(), isDraft: true };
+      ...drafts.map((ref) => {
+        return { researchContentRef: ref, isDraft: true };
       })
     ];
 
