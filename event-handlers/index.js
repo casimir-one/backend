@@ -12,6 +12,7 @@ import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
 import usersService from './../services/users';
 import ResearchService from './../services/research';
+import ResearchContentService from './../services/researchContent';
 import ResearchGroupService from './../services/researchGroup';
 import ProposalService from './../services/proposal';
 
@@ -134,7 +135,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => han
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService(tenant);
 
-  const researchContent = await wait(researchContentHandler, researchContentProposedEvent, null, tenant);
+  await wait(researchContentHandler, researchContentProposedEvent, null, tenant);
   await wait(proposalHandler, researchContentProposedEvent, null, tenant);
 
   // legacy
@@ -156,17 +157,18 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => hand
   const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getSourceData();
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService(tenant);
+  const researchContentService = new ResearchContentService();
 
-  const researchContent = await wait(researchContentHandler, researchContentCreatedEvent, null, tenant);
+  await wait(researchContentHandler, researchContentCreatedEvent, null, tenant);
 
   // legacy
-  const chainResearchContent = await deipRpc.api.getResearchContentAsync(researchContentExternalId);
+  const researchContent = await researchContentService.getResearchContent(researchContentExternalId);
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
   const creatorUser = await usersService.findUserProfileByOwner(emitter);
   const isAcceptedByQuorum = researchGroup.external_id != emitter;
 
-  const payload = { researchGroup, research, researchContent: chainResearchContent, creator: creatorUser, isAcceptedByQuorum };
+  const payload = { researchGroup, research, researchContent, creator: creatorUser, isAcceptedByQuorum };
 
   userNotificationsHandler.emit(APP_EVENTS.RESEARCH_CONTENT_CREATED, payload);
 

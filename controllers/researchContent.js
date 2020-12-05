@@ -57,6 +57,58 @@ const listDarArchives = async (ctx) => {
   }
 }
 
+
+const getResearchContent = async (ctx) => {
+  let researchContentExternalId = ctx.params.researchContentExternalId;
+
+  try {
+    const researchContentService = new ResearchContentService();
+    const researchContent = await researchContentService.getResearchContent(researchContentExternalId);
+    
+    if (!researchContent) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    
+    ctx.status = 200;
+    ctx.body = researchContent;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+
+const getResearchContents = async (ctx) => {
+  const tenant = ctx.state.tenant;
+  const query = qs.parse(ctx.query);
+  const researchContentsExternalIds = query.researchContents;
+
+  try {
+
+    if (!Array.isArray(researchContentsExternalIds)) {
+      ctx.status = 400;
+      ctx.body = `Bad request (${JSON.stringify(query)})`;
+      return;
+    }
+
+    const researchContentService = new ResearchContentService();
+    const result = await researchContentService.getResearchContents(researchContentsExternalIds);
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+};
+
+
 const getResearchContentByResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
   const tenant = ctx.state.tenant;
@@ -71,14 +123,14 @@ const getResearchContentByResearch = async (ctx) => {
       return;
     }
 
-    const chainResearchContents = await deipRpc.api.getResearchContentsByResearchAsync(researchExternalId)
+    const researchContents = await researchContentService.getResearchContentsByResearch(researchExternalId)
     const published = await researchContentService.findPublishedResearchContentByResearch(researchExternalId)
     const drafts = await researchContentService.findDraftResearchContentByResearch(researchExternalId);
 
     const result = [
       ...published.map((rc) => {
-        const chainContent = chainResearchContents.find(pubRc => rc.hash == pubRc.content);
-        return { ...chainContent, researchContentRef: rc.toObject(), isDraft: false };
+        const researchContent = researchContents.find(researchContent => rc._id.toString() == researchContent.external_id);
+        return { ...researchContent, isDraft: false };
       }),
       ...drafts.map((rc) => {
         return { researchContentRef: rc.toObject(), isDraft: true };
@@ -156,7 +208,7 @@ const readDarArchiveStaticFiles = async (ctx) => {
   }
 }
 
-const getContentRefById = async (ctx) => {
+const getContentRef = async (ctx) => {
   const refId = ctx.params.refId;
   try {
     const researchContentService = new ResearchContentService();
@@ -470,9 +522,11 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   for (let i = 0; i < references.length; i++) {
     const ref = references[i];
     const content = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(ref.researchGroupPermlink, ref.researchPermlink, ref.researchContentPermlink);
-    if (content.research_external_id != rc.researchExternalId) {
+    const researchContent = await researchContentService.getResearchContent(content.external_id);
+
+    if (researchContent.research_external_id != rc.researchExternalId) {
       // exclude references to the same research
-      contentRefs.push(content.external_id);
+      contentRefs.push(researchContent.external_id);
     }
   }
 
@@ -772,8 +826,11 @@ export default {
   getResearchPackageFile,
 
   // refs
-  getContentRefById,
+  getContentRef,
   getContentRefByHash,
+
+  getResearchContent,
+  getResearchContents,
   getResearchContentByResearch,
 
   // drafts

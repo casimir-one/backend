@@ -29,7 +29,7 @@ class ResearchService {
     
     return chainResearches
       .map((chainResearch) => {
-        const researchRef = researches.find(r => r._id == chainResearch.external_id);
+        const researchRef = researches.find(r => r._id.toString() == chainResearch.external_id);
         const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id).map(l => l.toObject());
         const attributes = researchRef ? researchRef.attributes : [];
        

@@ -12,7 +12,10 @@ protected_route.get('/:dar/assets/:file', researchContent.readDarArchiveStaticFi
 protected_route.put('/:dar', researchContent.updateDarArchive)
 
 public_route.get('/research/:researchExternalId', researchContent.getResearchContentByResearch)
-public_route.get('/refs/research/content-id/:refId', researchContent.getContentRefById)
+public_route.get('/research-content/:researchContentExternalId', researchContent.getResearchContent)
+public_route.get('/research-contents', researchContent.getResearchContents)
+
+public_route.get('/refs/research/content-id/:refId', researchContent.getContentRef)
 public_route.get('/refs/research/:researchExternalId/content-hash/:hash', researchContent.getContentRefByHash)
 
 protected_route.get('/refs/research/package/:researchExternalId/:hash/:fileHash', researchContent.getResearchPackageFile)

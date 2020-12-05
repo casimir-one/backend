@@ -7,6 +7,40 @@ class ResearchContentService {
 
   constructor() { }
 
+  async mapResearchContents(chainResearchContents) {
+    const researchContents = await ResearchContent.find({ _id: { $in: chainResearchContents.map(r => r.external_id) } });
+
+    return chainResearchContents
+      .map((chainResearchContent) => {
+        const researchContentRef = researchContents.find(r => r._id.toString() == chainResearchContent.external_id);
+        return { ...chainResearchContent, researchContentRef: researchContentRef ? researchContentRef.toObject() : null };
+      })
+      .map((researchContent) => {
+        const override = researchContent.researchContentRef ? { title: researchContent.researchContentRef.title } : { title: "Not specified" };
+        return { ...researchContent, ...override };
+      });
+  }
+
+  async getResearchContent(researchContentExternalId) {
+    const chainResearchContent = await deipRpc.api.getResearchContentAsync(researchContentExternalId);
+    if (!chainResearchContent) return null;
+    const result = await this.mapResearchContents([chainResearchContent]);
+    const [researchContent] = result;
+    return researchContent;
+  }
+
+  async getResearchContents(researchContentExternalIds) {
+    const chainResearchContents = await deipRpc.api.getResearchContentsAsync(researchContentExternalIds);
+    const researchContents = await this.mapResearchContents(chainResearchContents);
+    return researchContents;
+  }
+
+  async getResearchContentsByResearch(researchExternalId) {
+    const chainResearchContents = await deipRpc.api.getResearchContentsByResearchAsync(researchExternalId);
+    const researchContents = await this.mapResearchContents(chainResearchContents);
+    return researchContents;
+  }
+
   async findResearchContents(list) {
     let result = await ResearchContent.find({ _id: { $in: list } });
     return result;

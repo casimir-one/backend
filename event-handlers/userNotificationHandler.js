@@ -3,6 +3,7 @@ import deipRpc from '@deip/rpc-client';
 import { APP_EVENTS, USER_NOTIFICATION_TYPE, USER_INVITE_STATUS } from './../constants';
 import usersService from './../services/users';
 import * as usersNotificationService from './../services/userNotification';
+import ResearchContentService from './../services/researchContent';
 
 class UserNotificationHandler extends EventEmitter { }
 
@@ -577,9 +578,12 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async (payloa
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, async (review) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
   let { author, research_content_id: researchContentId } = review;
+  const researchContentService = new ResearchContentService();
 
   let reviewerProfile = await usersService.findUserProfileByOwner(author);
-  let researchContent = await deipRpc.api.getResearchContentByIdAsync(researchContentId);
+  let content = await deipRpc.api.getResearchContentByIdAsync(researchContentId);
+  let researchContent = await researchContentService.getResearchContent(content.external_id);
+
   let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
   let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
@@ -609,9 +613,12 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, async (review) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
   let { author, research_content_id: researchContentId } = review;
+  const researchContentService = new ResearchContentService();
 
   let reviewerProfile = await usersService.findUserProfileByOwner(author);
-  let researchContent = await deipRpc.api.getResearchContentByIdAsync(researchContentId);
+  let content = await deipRpc.api.getResearchContentByIdAsync(researchContentId);
+  let researchContent = await researchContentService.getResearchContent(content.external_id);
+
   let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
   let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
@@ -640,10 +647,13 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW
 
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, async ({ requestor, expert, contentId }) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST;
+  const researchContentService = new ResearchContentService();
 
   let requestorProfile = await usersService.findUserProfileByOwner(requestor);
   let expertProfile = await usersService.findUserProfileByOwner(expert);
-  let researchContent = await deipRpc.api.getResearchContentByIdAsync(contentId);
+  let content = await deipRpc.api.getResearchContentByIdAsync(contentId);
+  let researchContent = await researchContentService.getResearchContent(content.external_id);
+
   let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
 

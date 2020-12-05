@@ -220,6 +220,12 @@ const getResearchGroup = async (ctx) => {
   try {
 
     const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
+    if (!researchGroup) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    
     ctx.status = 200;
     ctx.body = researchGroup;
   } catch (err) {

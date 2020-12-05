@@ -10,7 +10,7 @@ const ResearchContent = new Schema({
     "researchGroupExternalId": { type: String, required: true },
     "folder": { type: String, required: true },
     "researchId": { type: Number, required: true }, // legacy internal id
-    "title": { type: String },
+    "title": { type: String, required: true },
     "hash": {type: String, index: true },
     "algo": { type: String },
     "type": {

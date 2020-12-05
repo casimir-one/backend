@@ -19,23 +19,22 @@ const getAllResearchContents = async (ctx) => {
     const promises = filtered.map(r => deipRpc.api.getResearchContentsByResearchAsync(r.external_id));
     const all = await Promise.all(promises);
     const chainResearchContents = [].concat.apply([], all);
-    const researchContents = await researchContentService.findResearchContents(chainResearchContents.map(rc => rc.external_id));
+    const researchContents = await researchContentService.getResearchContents(chainResearchContents.map(rc => rc.external_id));
 
     for (let i = 0; i < researchContents.length; i++) {
       const researchContent = researchContents[i];
-      const chainResearchContent = chainResearchContents.find(rc => rc.external_id == researchContent._id);
-      const chainResearch = chainResearches.find(r => r.external_id == researchContent.researchExternalId);
+      const chainResearch = chainResearches.find(r => r.external_id == researchContent.research_external_id);
 
       result.push({
-        ...chainResearchContent,
+        ...researchContent,
         researchContentRef: researchContent,
-        research_title: chainResearch.title,
+        research_title: researchContent.title,
         group_permlink: chainResearch.research_group.permlink,
         research_permlink: chainResearch.permlink,
 
         researchGroupExternalId: chainResearch.research_group.external_id,
         researchExternalId: chainResearch.external_id,
-        researchContentExternalId: chainResearchContent.external_id
+        researchContentExternalId: researchContent.external_id
       });
     }
 

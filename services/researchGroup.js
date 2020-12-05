@@ -10,7 +10,7 @@ class ResearchGroupService {
     const researchGroups = await ResearchGroup.find({ _id: { $in: chainResearchGroups.map(r => r.external_id) } });
     return chainResearchGroups
       .map((chainResearchGroup) => {
-        const researchGroupRef = researchGroups.find(r => r._id == chainResearchGroup.external_id);
+        const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.external_id);
         return { ...chainResearchGroup, researchGroupRef: researchGroupRef ? researchGroupRef.toObject() : null };
       })
       .map((researchGroup) => {
