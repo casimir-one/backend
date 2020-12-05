@@ -63,7 +63,6 @@ class ResearchContentService {
     researchGroupExternalId,
     folder,
     researchId, // legacy internal id
-    researchGroupId, // legacy internal id
     title,
     hash,
     algo,
@@ -81,7 +80,6 @@ class ResearchContentService {
       researchGroupExternalId,
       folder,
       researchId, // legacy internal id
-      researchGroupId, // legacy internal id
       title,
       hash,
       algo,
@@ -112,16 +110,16 @@ class ResearchContentService {
 
     const researchContent = await ResearchContent.findOne({ _id: externalId });
 
-    researchContent.folder = folder;
-    researchContent.title = title;
-    researchContent.hash = hash;
-    researchContent.algo = algo;
-    researchContent.type = type;
-    researchContent.status = status;
-    researchContent.packageFiles = packageFiles;
-    researchContent.authors = authors;
-    researchContent.references = references;
-    researchContent.foreignReferences = foreignReferences;
+    researchContent.folder = folder || researchContent.folder;
+    researchContent.title = title || researchContent.title;
+    researchContent.hash = hash || researchContent.hash;
+    researchContent.algo = algo || researchContent.algo;
+    researchContent.type = type || researchContent.type;
+    researchContent.status = status || researchContent.status;
+    researchContent.packageFiles = packageFiles || researchContent.packageFiles;
+    researchContent.authors = authors || researchContent.authors;
+    researchContent.references = references || researchContent.references;
+    researchContent.foreignReferences = foreignReferences || researchContent.foreignReferences;
 
     return researchContent.save();
   }

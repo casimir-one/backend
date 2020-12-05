@@ -14,7 +14,6 @@ import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
 import config from './../config';
 import { researchContentForm } from './../forms/researchContentForms';
-import { authorizeResearchGroup } from './../services/auth'
 import url from 'url';
 import crypto from 'crypto';
 import rimraf from "rimraf";
@@ -210,7 +209,7 @@ const updateDarArchive = async (ctx) => {
       ctx.body = `Research "${darId}" is locked for updates or does not exist`;
       return;
     }
-    const authorized = await authorizeResearchGroup(rc.researchGroupId, jwtUsername)
+    const authorized = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.researchId}" research`;
@@ -276,7 +275,7 @@ const unlockContentDraft = async (ctx) => {
       return;
     }
 
-    const authorized = await authorizeResearchGroup(rc.researchGroupId, jwtUsername)
+    const authorized = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.researchId}" research`;
@@ -333,12 +332,11 @@ const createDarArchive = async (ctx) => {
     const researchInternalId = research.id;
 
     const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
-    const researchGroupInternalId = authorizedGroup.id;
     const researchGroupExternalId = authorizedGroup.external_id;
 
     if (!authorizedGroup) {
       ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupInternalId}" research`;
+      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupExternalId}" research`;
       return;
     }
 
@@ -354,7 +352,6 @@ const createDarArchive = async (ctx) => {
       researchGroupExternalId,
       folder: folder,
       researchId: researchInternalId, // legacy internal id
-      researchGroupId: researchGroupInternalId, // legacy internal id
       title: folder,
       hash: "",
       algo: "",
@@ -392,7 +389,7 @@ const deleteContentDraft = async (ctx) => {
       return;
     }
 
-    const authorized = await authorizeResearchGroup(rc.researchGroupId, jwtUsername)
+    const authorized = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
@@ -463,7 +460,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   const accounts = [];
   for (let i = 0; i < authors.length; i++) {
     const username = authors[i];
-    const hasRgt = await authorizeResearchGroup(rc.researchGroupId, username)
+    const hasRgt = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, username)
     if (hasRgt) {
       accounts.push(username)
     }
@@ -630,7 +627,6 @@ const uploadBulkResearchContent = async (ctx) => {
           researchGroupExternalId: researchGroupExternalId,
           folder: packageHash,
           researchId: researchInternalId, // legacy internal id
-          researchGroupId: researchGroupInternalId, // legacy internal id
           title: packageHash,
           hash: packageHash,
           algo: "sha256",
@@ -670,7 +666,7 @@ const getResearchPackageFile = async function (ctx) {
     const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
       ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to get "${researchId}" research content`;
+      ctx.body = `"${jwtUsername}" is not permitted to get "${research.external_id}" research content`;
       return;
     }
   }
@@ -706,85 +702,37 @@ const createResearchContent = async (ctx, next) => {
 
   try {
     const researchContentService = new ResearchContentService();
-
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
-    const {
-      content: hash,
-      research_group: researchGroupAccount
-    } = payload;
-
-    if (!hash) {
-      ctx.status = 400;
-      ctx.body = `Mallformed operation: "${operation}"`;
-      return;
-    }
-
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupAccount, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not a member of "${researchGroupAccount}" group`;
-      return;
-    }
-
-    const researchGroupInternalId = authorizedGroup.id;
-
-    const {
-      title,
-      external_id: externalId,
-      research_external_id: researchExternalId,
-      research_group: researchGroupExternalId,
-      authors,
-      foreignReferences
-    } = payload;
-
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    const researchInternalId = research.id;
-    const rc = await researchContentService.findResearchContentByHash(researchExternalId, hash);
-
-    if (!rc) {
-      ctx.status = 400;
-      ctx.body = `Research content draft with hash "${hash}" does not exist`
-      return;
-    }
-
-    if (rc.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
-      ctx.status = 409;
-      ctx.body = `Research content "${researchExternalId}" has '${rc.status}' status`
-      return;
-    }
-
-    const status = isProposal ? RESEARCH_CONTENT_STATUS.PROPOSED : RESEARCH_CONTENT_STATUS.PUBLISHED;
-    const folder = rc.folder;
-    const packageFiles = rc.packageFiles;
-    const references = rc.references;
-    const algo = rc.algo;
-    const type = rc.type;
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
+    const [opName, opPayload] = datums.find(([opName,]) => opName == 'create_research_content');
+    const { content: hash, external_id: researchContentExternalId, research_external_id: researchExternalId } = opPayload;
+    
+    const rc = await researchContentService.findResearchContentByHash(researchExternalId, hash);
+    const draft = rc ? rc.toObject() : null;
+    
+    if (!draft) {
+      ctx.status = 400;
+      ctx.body = `Research content draft with hash "${hash}" does not exist`;
+      return;
+    }
+
+    if (draft.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
+      ctx.status = 409;
+      ctx.body = `Research content "${researchContentExternalId}" is in '${draft.status}' status`
+      return;
+    }
+    
+    const txResult = await blockchainService.sendTransactionAsync(tx);
     await researchContentService.removeResearchContentByHash(researchExternalId, hash); // remove draft
-    const researchContentRm = await researchContentService.createResearchContent({
-      externalId,
-      researchExternalId,
-      researchGroupExternalId,
-      folder,
-      researchId: researchInternalId, // legacy internal id
-      researchGroupId: researchGroupInternalId, // legacy internal id
-      title,
-      hash,
-      algo,
-      type,
-      status,
-      packageFiles,
-      authors,
-      references,
-      foreignReferences
-    });
+
+    offchainMeta.researchContent.folder = draft.folder;
+    offchainMeta.researchContent.packageFiles = draft.packageFiles;
+    offchainMeta.researchContent.algo = draft.algo;
+    offchainMeta.researchContent.type = draft.type;
+    offchainMeta.researchContent.foreignReferences = draft.foreignReferences;
 
     if (isProposal) {
-      const researchContentProposedEvent = new ResearchContentProposedEvent(datums);
+      const researchContentProposedEvent = new ResearchContentProposedEvent(datums, offchainMeta.researchContent);
       ctx.state.events.push(researchContentProposedEvent);
 
       const researchContentApprovals = researchContentProposedEvent.getProposalApprovals();
@@ -794,12 +742,12 @@ const createResearchContent = async (ctx, next) => {
         ctx.state.events.push(researchContentProposalSignedEvent);
       }
     } else {
-      const researchContentCreatedEvent = new ResearchContentCreatedEvent(datums);
+      const researchContentCreatedEvent = new ResearchContentCreatedEvent(datums, offchainMeta.researchContent);
       ctx.state.events.push(researchContentCreatedEvent);
     }
 
     ctx.status = 200;
-    ctx.body = { rm: researchContentRm, txResult };
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);

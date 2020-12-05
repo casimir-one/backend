@@ -10,7 +10,6 @@ const ResearchContent = new Schema({
     "researchGroupExternalId": { type: String, required: true },
     "folder": { type: String, required: true },
     "researchId": { type: Number, required: true }, // legacy internal id
-    "researchGroupId": { type: Number, required: true }, // legacy internal id
     "title": { type: String },
     "hash": {type: String, index: true },
     "algo": { type: String },
@@ -21,11 +20,7 @@ const ResearchContent = new Schema({
     },
     "status": {
         type: String,
-        enum: [
-          RESEARCH_CONTENT_STATUS.IN_PROGRESS, 
-          RESEARCH_CONTENT_STATUS.PROPOSED, 
-          RESEARCH_CONTENT_STATUS.PUBLISHED
-        ],
+        enum: [...Object.values(RESEARCH_CONTENT_STATUS)],
         required: true
     },
     "packageFiles": [{
