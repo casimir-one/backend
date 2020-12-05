@@ -26,8 +26,6 @@ const run = async () => {
 
   const researchesPromises = [];
   const chainResearches = await deipRpc.api.lookupResearchesAsync(0, 10000);
-
-  console.log("->>>",chainResearches.length)
   
   for (let i = 0; i < chainResearches.length; i++) {
     const chainResearch = chainResearches[i];
