@@ -87,7 +87,13 @@ protected_route.get('/invites/group/:researchGroupExternalId', invites.getResear
 protected_route.get('/invites/research/:researchExternalId', invites.getResearchPendingInvites)
 protected_route.post('/invites', invites.createUserInvite)
 
-protected_route.post('/reviews', reviews.makeReview)
+
+public_route.get('/reviews/:reviewExternalId', reviews.getReview)
+public_route.get('/reviews/research/:researchExternalId', reviews.getReviewsByResearch)
+public_route.get('/reviews/research-content/:researchContentExternalId', reviews.getReviewsByResearchContent)
+public_route.get('/reviews/author/:author', reviews.getReviewsByAuthor)
+protected_route.post('/reviews', reviews.createReview)
+
 
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)

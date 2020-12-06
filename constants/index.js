@@ -2,7 +2,6 @@
 import CHAIN_CONSTANTS from './chainConstants';
 import SIGN_UP_POLICY from './signUpPolicy';
 import USER_PROFILE_STATUS from './userProfileStatus';
-import ACTIVITY_LOG_TYPE from './activityLogType';
 import USER_NOTIFICATION_TYPE from './userNotificationType';
 import SMART_CONTRACT_TYPE from './smartContractType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
@@ -22,7 +21,6 @@ export {
   CHAIN_CONSTANTS,
   SIGN_UP_POLICY,
   USER_PROFILE_STATUS,
-  ACTIVITY_LOG_TYPE,
   USER_NOTIFICATION_TYPE,
   SMART_CONTRACT_TYPE,
   TOKEN_SALE_STATUS,

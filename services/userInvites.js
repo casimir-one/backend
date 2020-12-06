@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import UserInvite from './../schemas/userInvite';
-import { USER_INVITE_STATUS, USER_NOTIFICATION_TYPE, ACTIVITY_LOG_TYPE } from './../constants';
+import { USER_INVITE_STATUS, USER_NOTIFICATION_TYPE } from './../constants';
 
 
 class UserInviteService {

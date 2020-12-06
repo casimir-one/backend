@@ -1,47 +1,110 @@
-import { sendTransaction, getTransaction } from './../utils/blockchain';
+import deipRpc from '@deip/rpc-client';
+import * as blockchainService from './../utils/blockchain';
+import ReviewService from './../services/review';
 import ReviewRequest from './../schemas/reviewRequest';
 import userNotificationHandler from './../event-handlers/userNotificationHandler';
-import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
-import deipRpc from '@deip/rpc-client';
+import ReviewCreatedEvent from './../events/reviewCreatedEvent';
 import USER_NOTIFICATION_TYPE from '../constants/userNotificationType';
 
-const makeReview = async (ctx) => {
-    const jwtUsername = ctx.state.user.username;
-    const tx = ctx.request.body;
 
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    
-    if (payload.author != jwtUsername) {
-        ctx.status = 403;
-        ctx.body = `You are not authorized as "${payload.author} account`
-        return;
-    }
+const createReview = async (ctx, next) => {
+  const jwtUsername = ctx.state.user.username;
+  const { tx, offchainMeta } = ctx.request.body;
 
-    try {
-        const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(payload.author); 
-        const content = await deipRpc.api.getResearchContentAsync(payload.research_content_external_id);
-        const research = await deipRpc.api.getResearchByIdAsync(content.research_id);
+  try {
+    const txResult = await blockchainService.sendTransactionAsync(tx);
+    const datums = blockchainService.extractOperations(tx);
 
-        if (rgtList.some(rgt => rgt.research_group_id == research.research_group_id)) {
-            ctx.status = 405;
-            ctx.body = `You are not permitted to post reviews for "${research.title}`
-            return;
-        }
+    const reviewCreatedEvent = new ReviewCreatedEvent(datums, offchainMeta.review);
+    ctx.state.events.push(reviewCreatedEvent);
 
-        const result = await sendTransaction(tx);
-        if (result.isSuccess) {
-            processPublishedReviewTx(payload, result.txInfo);
-            ctx.status = 201;
-        } else {
-            throw new Error(`Could not proceed the transaction: ${tx}`);
-        }
-    } catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
-    }
+    ctx.status = 200;
+    ctx.body = [...ctx.state.events];
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+
+  await next();
 }
+
+
+const getReview = async (ctx) => {
+  const reviewExternalId = ctx.params.reviewExternalId;
+
+  try {
+    const reviewService = new ReviewService();
+    const review = await reviewService.getReview(reviewExternalId);
+    
+    if (!review) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = review;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getReviewsByResearch = async (ctx) => {
+  const researchExternalId = ctx.params.researchExternalId;
+
+  try {
+    const reviewService = new ReviewService();
+    const reviews = await reviewService.getReviewsByResearch(researchExternalId);
+    ctx.status = 200;
+    ctx.body = reviews;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getReviewsByResearchContent = async (ctx) => {
+  const researchContentExternalId = ctx.params.researchContentExternalId;
+
+  try {
+    const reviewService = new ReviewService();
+    const reviews = await reviewService.getReviewsByResearchContent(researchContentExternalId);
+    ctx.status = 200;
+    ctx.body = reviews;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getReviewsByAuthor = async (ctx) => {
+  const author = ctx.params.author;
+
+  try {
+    const reviewService = new ReviewService();
+    const reviews = await reviewService.getReviewsByAuthor(author);
+    ctx.status = 200;
+    ctx.body = reviews;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 
 // TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
 async function processPublishedReviewTx(payload, txInfo) {
@@ -67,5 +130,9 @@ async function processPublishedReviewTx(payload, txInfo) {
 }
 
 export default {
-    makeReview
+  createReview,
+  getReview,
+  getReviewsByResearch,
+  getReviewsByResearchContent,
+  getReviewsByAuthor
 }

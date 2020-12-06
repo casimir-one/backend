@@ -10,6 +10,8 @@ import userInviteHandler from './userInviteHandler';
 import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
+import reviewHandler from './reviewHandler';
+
 import usersService from './../services/users';
 import ResearchService from './../services/research';
 import ResearchContentService from './../services/researchContent';
@@ -559,6 +561,13 @@ appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSAL_SIGNED, (payload, reply) =
 appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetTransferProposalRejectedEvent, tenant } = source;
   // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: reviewCreatedEvent, tenant } = source;
+  await wait(reviewHandler, reviewCreatedEvent, null, tenant);
+
+  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, source);
 }));
 
 export default appEventHandler;

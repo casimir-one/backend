@@ -1,6 +1,5 @@
 import deipRpc from '@deip/rpc-client';
 import ReviewRequest from './../schemas/reviewRequest';
-import ACTIVITY_LOG_TYPE from './../constants/activityLogType';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 import userNotificationHandler from './../event-handlers/userNotificationHandler';
 

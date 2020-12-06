@@ -4,6 +4,7 @@ import { APP_EVENTS, USER_NOTIFICATION_TYPE, USER_INVITE_STATUS } from './../con
 import usersService from './../services/users';
 import * as usersNotificationService from './../services/userNotification';
 import ResearchContentService from './../services/researchContent';
+import ReviewService from '../services/review';
 
 class UserNotificationHandler extends EventEmitter { }
 
@@ -575,51 +576,20 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async (payloa
 });
 
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, async (review) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, async (source) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
-  let { author, research_content_id: researchContentId } = review;
+  const { event: reviewCreatedEvent, tenant } = source;
   const researchContentService = new ResearchContentService();
+  const reviewService = new ReviewService();
+
+  const { reviewExternalId, researchContentExternalId, author } = reviewCreatedEvent.getSourceData();
 
   let reviewerProfile = await usersService.findUserProfileByOwner(author);
-  let content = await deipRpc.api.getResearchContentByIdAsync(researchContentId);
-  let researchContent = await researchContentService.getResearchContent(content.external_id);
+  let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
   let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
-  let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
-  let notificationsPromises = [];
+  let review = await reviewService.getReview(reviewExternalId);
 
-  for (let i = 0; i < rgtList.length; i++) {
-    const rgt = rgtList[i];
-    let promise = usersNotificationService.createUserNotification({
-      username: rgt.owner,
-      status: 'unread',
-      type,
-      metadata: {
-        review,
-        researchContent,
-        research,
-        researchGroup,
-        reviewerProfile
-      }
-    });
-    notificationsPromises.push(promise);
-  }
-
-  Promise.all(notificationsPromises);
-});
-
-
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, async (review) => {
-  const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
-  let { author, research_content_id: researchContentId } = review;
-  const researchContentService = new ResearchContentService();
-
-  let reviewerProfile = await usersService.findUserProfileByOwner(author);
-  let content = await deipRpc.api.getResearchContentByIdAsync(researchContentId);
-  let researchContent = await researchContentService.getResearchContent(content.external_id);
-
-  let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
   let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
   let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
   let notificationsPromises = [];

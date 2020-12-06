@@ -16,7 +16,6 @@ import ExpressLicensingService from './../services/expressLicensing';
 import usersService from './../services/users';
 import ProposalService from './../services/proposal';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, RESEARCH_STATUS, ACTIVITY_LOG_TYPE, USER_NOTIFICATION_TYPE, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
 import ResearchExpressLicenseProposedEvent from './../events/researchExpressLicenseProposedEvent';
 import ResearchExpressLicenseProposalSignedEvent from './../events/researchExpressLicenseProposalSignedEvent';
 
