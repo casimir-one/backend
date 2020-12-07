@@ -5,6 +5,8 @@ import usersService from './../services/users';
 import * as usersNotificationService from './../services/userNotification';
 import ResearchContentService from './../services/researchContent';
 import ReviewService from '../services/review';
+import ResearchService from '../services/research';
+import ResearchGroupService from '../services/researchGroup';
 
 class UserNotificationHandler extends EventEmitter { }
 
@@ -580,17 +582,19 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
   const { event: reviewCreatedEvent, tenant } = source;
   const researchContentService = new ResearchContentService();
+  const researchService = new ResearchService(tenant); 
   const reviewService = new ReviewService();
+  const researchGroupService = new ResearchGroupService(); 
 
   const { reviewExternalId, researchContentExternalId, author } = reviewCreatedEvent.getSourceData();
 
   let reviewerProfile = await usersService.findUserProfileByOwner(author);
   let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
-  let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
+  let research = await researchService.getResearch(researchContent.research_external_id);
   let review = await reviewService.getReview(reviewExternalId);
 
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
+  let researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
   let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
   let notificationsPromises = [];
 
@@ -615,17 +619,19 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
 });
 
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, async ({ requestor, expert, contentId }) => {
+userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, async (payload) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST;
+  const { requestor, expert, researchContentExternalId, tenant } = payload;
   const researchContentService = new ResearchContentService();
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService(); 
 
   let requestorProfile = await usersService.findUserProfileByOwner(requestor);
   let expertProfile = await usersService.findUserProfileByOwner(expert);
-  let content = await deipRpc.api.getResearchContentByIdAsync(contentId);
-  let researchContent = await researchContentService.getResearchContent(content.external_id);
+  let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
-  let research = await deipRpc.api.getResearchByIdAsync(researchContent.research_id);
-  let researchGroup = await deipRpc.api.getResearchGroupByIdAsync(research.research_group_id);
+  let research = await researchService.getResearch(researchContent.research_external_id);
+  let researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
 
   usersNotificationService.createUserNotification({
     username: expert,

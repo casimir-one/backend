@@ -34,11 +34,11 @@ class ResearchService {
         const attributes = researchRef ? researchRef.attributes : [];
        
         const title = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
-          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value.toString()
           : "Not Specified";
 
         const abstract = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
-          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value
+          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
           : "Not Specified";
 
         return { ...chainResearch, title, abstract, researchRef: researchRef ? { ...researchRef.toObject(), expressLicenses } : { attributes: [], expressLicenses: []} };

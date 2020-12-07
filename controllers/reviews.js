@@ -105,30 +105,6 @@ const getReviewsByAuthor = async (ctx) => {
   }
 }
 
-
-// TODO: move this to chain/app event emmiter to forward specific events to event handlers (subscribers)
-async function processPublishedReviewTx(payload, txInfo) {
-    const transaction = await getTransaction(txInfo.id);
-    for (let i = 0; i < transaction.operations.length; i++) {
-        const op = transaction.operations[i];
-        const opName = op[0];
-        const opPayload = op[1];
-        if (opName === 'make_review' && 
-            opPayload.author == payload.author && 
-            opPayload.research_content_id == payload.research_content_id) {
-                
-            let reviews = await deipRpc.api.getReviewsByResearchContentAsync(payload.research_content_id);
-            let review = reviews.find(r => r.author == opPayload.author && r.content == opPayload.content);
-            
-            // todo move to event handler
-            ReviewRequest.update({ expert: payload.author, contentId: payload.research_content_id }, { $set: { status: 'approved' } });
-            
-            userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW, review);
-            break;
-        }
-    }
-}
-
 export default {
   createReview,
   getReview,

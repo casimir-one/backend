@@ -38,7 +38,7 @@ class ReviewService {
     const chainReviews = await deipRpc.api.getReviewsByResearchContentAsync(researchContentExternalId);
     const reviews = await this.mapReviews(chainReviews);
     return reviews;
-  }  
+  }
 
   async getReviewsByAuthor(author) {
     const chainReviews = await deipRpc.api.getReviewsByAuthorAsync(author);
@@ -61,7 +61,7 @@ class ReviewService {
     });
 
     const savedReview = await review.save();
-    // await ReviewRequest.update({ expert: author, contentId: researchContentExternalId }, { $set: { status: 'approved' } });
+    await ReviewRequest.update({ expert: author, researchContentExternalId: researchContentExternalId }, { $set: { status: 'approved' } });
 
     return savedReview.toObject();
   }

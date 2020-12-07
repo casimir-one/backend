@@ -16,9 +16,7 @@ const getReviewRequestsByExpert = async (ctx) => {
     return;
   }
 
-  const query = {
-    expert: username,
-  };
+  const query = { expert: username };
   if (ctx.query.status) {
     query.status = ctx.query.status;
   }
@@ -46,10 +44,9 @@ const getReviewRequestsByRequestor = async (ctx) => {
   };
 
   if (ctx.query.status) {
-    console.log(ctx.query.status)
-    console.log("3fhuefnu3unr")
     query.status = ctx.query.status;
   }
+  
   const reviewRequests = await ReviewRequest.find(query);
 
   ctx.status = 200;
@@ -58,9 +55,9 @@ const getReviewRequestsByRequestor = async (ctx) => {
 
 const createReviewRequest = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const {
-    contentId, expert,
-  } = ctx.request.body;
+  const tenant = ctx.state.tenant;
+
+  const { researchContentExternalId, expert } = ctx.request.body;
   const requestor = jwtUsername;
 
   if (jwtUsername === expert) {
@@ -68,15 +65,14 @@ const createReviewRequest = async (ctx) => {
     ctx.body = `You can't request review from yourself`;
     return;
   }
-  const exists = await ReviewRequest.findOne({
-    expert, contentId,
-  });
+  
+  const exists = await ReviewRequest.findOne({ expert, researchContentExternalId });
   if (exists) {
     ctx.status = 400;
     ctx.body = 'Review with such params already requested';
     return;
   }
-  const contentReviews = await deipRpc.api.getReviewsByResearchContentAsync(contentId);
+  const contentReviews = await deipRpc.api.getReviewsByResearchContentAsync(researchContentExternalId);
   const existingReview = contentReviews.find(r => r.author === expert);
   if (existingReview) {
     ctx.status = 400;
@@ -86,13 +82,13 @@ const createReviewRequest = async (ctx) => {
 
   const reviewRequest = new ReviewRequest({
     expert, 
-    contentId,
+    researchContentExternalId,
     requestor: requestor,
     status: 'pending'
   });
   const savedReviewRequest = await reviewRequest.save();
   
-  userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, reviewRequest);
+  userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, { ...reviewRequest.toObject(), tenant});
 
   ctx.status = 201;
   ctx.body = savedReviewRequest;
@@ -102,12 +98,9 @@ const createReviewRequest = async (ctx) => {
 const denyReviewRequest = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
 
-  await ReviewRequest.update({
-    _id: ctx.params.id,
-    expert: jwtUsername,
-  }, { $set: { status: 'denied' } });
-
+  await ReviewRequest.update({ _id: ctx.params.id, expert: jwtUsername }, { $set: { status: 'denied' } });
   ctx.status = 200;
+  ctx.body = "";
 };
 
 export default {
