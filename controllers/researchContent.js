@@ -809,7 +809,7 @@ const createResearchContent = async (ctx, next) => {
     }
 
     ctx.status = 200;
-    ctx.body = entityExternalId;
+    ctx.body = { external_id: researchContentExternalId };
 
   } catch (err) {
     console.log(err);

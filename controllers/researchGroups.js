@@ -33,7 +33,7 @@ const createResearchGroup = async (ctx, next) => {
     const { researchGroupExternalId } = researchGroupCreatedEvent.getSourceData();
       
     ctx.status = 200;
-    ctx.body = researchGroupExternalId;
+    ctx.body = { external_id: researchGroupExternalId };
 
   } catch (err) {
     console.log(err);
