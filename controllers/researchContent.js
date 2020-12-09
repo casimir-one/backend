@@ -785,6 +785,7 @@ const createResearchContent = async (ctx, next) => {
     offchainMeta.researchContent.type = draft.type;
     offchainMeta.researchContent.foreignReferences = draft.foreignReferences;
 
+    let entityExternalId;
     if (isProposal) {
       const researchContentProposedEvent = new ResearchContentProposedEvent(datums, offchainMeta.researchContent);
       ctx.state.events.push(researchContentProposedEvent);
@@ -795,13 +796,20 @@ const createResearchContent = async (ctx, next) => {
         const researchContentProposalSignedEvent = new ResearchContentProposalSignedEvent([approval]);
         ctx.state.events.push(researchContentProposalSignedEvent);
       }
+
+      const { researchContentExternalId } = researchContentProposedEvent.getSourceData();
+      entityExternalId = researchContentExternalId;
+
     } else {
       const researchContentCreatedEvent = new ResearchContentCreatedEvent(datums, offchainMeta.researchContent);
       ctx.state.events.push(researchContentCreatedEvent);
+
+      const { researchContentExternalId } = researchContentCreatedEvent.getSourceData();
+      entityExternalId = researchContentExternalId;
     }
 
     ctx.status = 200;
-    ctx.body = [...ctx.state.events];
+    ctx.body = entityExternalId;
 
   } catch (err) {
     console.log(err);

@@ -29,9 +29,11 @@ const createResearchGroup = async (ctx, next) => {
 
     const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, offchainMeta.researchGroup);
     ctx.state.events.push(researchGroupCreatedEvent);
+
+    const { researchGroupExternalId } = researchGroupCreatedEvent.getSourceData();
       
     ctx.status = 200;
-    ctx.body = [...ctx.state.events];
+    ctx.body = researchGroupExternalId;
 
   } catch (err) {
     console.log(err);

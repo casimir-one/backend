@@ -77,9 +77,13 @@ const createResearch = async (ctx, next) => {
       ctx.state.events.push(researchGroupCreatedEvent);
     }
 
+    let entityExternalId;
     if (isProposal) {
       const researchProposedEvent = new ResearchProposedEvent(datums, offchainMeta.research);
       ctx.state.events.push(researchProposedEvent);
+      
+      const { researhExternalId } = researchProposedEvent.getSourceData();
+      entityExternalId = researhExternalId;
 
       const researchApprovals = researchProposedEvent.getProposalApprovals();
       for (let i = 0; i < researchApprovals.length; i++) {
@@ -91,6 +95,9 @@ const createResearch = async (ctx, next) => {
     } else {
       const researchCreatedEvent = new ResearchCreatedEvent(datums, offchainMeta.research);
       ctx.state.events.push(researchCreatedEvent);
+
+      const { researhExternalId } = researchCreatedEvent.getSourceData();
+      entityExternalId = researhExternalId;
     }
 
     const invitesDatums = datums.filter(([opName]) => opName == 'join_research_group_membership');
@@ -119,7 +126,7 @@ const createResearch = async (ctx, next) => {
     }
 
     ctx.status = 200;
-    ctx.body = [...ctx.state.events];
+    ctx.body = entityExternalId;
 
   } catch (err) {
     console.log(err);
