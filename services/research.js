@@ -50,13 +50,14 @@ class ResearchService {
         if (!attribute || !rAttr.value)
           return false;
         
-        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXT || attribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXTAREA) {
+        if (rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()
+          || rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()) {
           return rAttr.value.toLowerCase().includes(filter.searchTerm.toLowerCase());
         }
 
-        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
-          return r.research_group.name.toLowerCase().includes(filter.searchTerm.toLowerCase());
-        }
+        // if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+        //   return r.research_group.name.toLowerCase().includes(filter.searchTerm.toLowerCase());
+        // }
 
         if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.USER) {
           return r.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
