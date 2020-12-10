@@ -466,6 +466,8 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => h
 
   const { researchTokenSaleExternalId, researchExternalId, researchGroupExternalId } = researchTokenSaleCreatedEvent.getSourceData();
 
+  await wait(researchHandler, researchTokenSaleCreatedEvent, null, tenant);
+
   // legacy
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
@@ -504,7 +506,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchTokenSaleProposalSignedEvent, tenant } = source;
-  // register handlers
+  await wait(researchHandler, researchTokenSaleProposalSignedEvent, null, tenant);
 }));
 
 
@@ -569,5 +571,12 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, 
 
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, source);
 }));
+
+
+appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchTokenSaleContributedEvent, tenant } = source;
+  await wait(researchHandler, researchTokenSaleContributedEvent, null, tenant);
+}));
+
 
 export default appEventHandler;

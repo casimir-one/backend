@@ -1,5 +1,6 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS } from './../constants';
+import deipRpc from '@deip/rpc-client';
+import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
@@ -290,6 +291,102 @@ researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply)
   }
 
   await Promise.all(promises);
+
+}));
+
+researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (event) => {
+  const { event: researchTokenSaleCreatedEvent, tenant, emitter } = event;
+  const researchService = new ResearchService(tenant);
+
+  const { researchExternalId } = researchTokenSaleCreatedEvent.getSourceData();
+
+  const research = await researchService.getResearch(researchExternalId);
+  const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+
+  let hasUpdate = false;
+  if (!investmentOpportunityAttr) {
+    research.researchRef.attributes.push({
+      researchAttributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+      value: true
+    });
+    hasUpdate = true;
+  } else if (!investmentOpportunityAttr.value) {
+    investmentOpportunityAttr.value = true;
+    hasUpdate = true;
+  }
+
+  if (hasUpdate) {
+    await researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes });
+  }
+
+}));
+
+
+
+researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
+  const { event: researchTokenSaleProposalSignedEvent, tenant } = event;
+  
+  const researchService = new ResearchService(tenant);
+  const researchGroupService = new ResearchGroupService();
+  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+
+
+  const proposalId = researchTokenSaleProposalSignedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
+  const { researchExternalId } = proposal.details;
+
+  const research = await researchService.getResearch(researchExternalId);
+  const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+
+  let hasUpdate = false;
+
+  if (!investmentOpportunityAttr) {
+    research.researchRef.attributes.push({
+      researchAttributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+      value: true
+    });
+    hasUpdate = true;
+  } else if (!investmentOpportunityAttr.value) {
+    investmentOpportunityAttr.value = true;
+    hasUpdate = true;
+  }
+
+  if (hasUpdate) {
+    await researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes });
+  }
+
+}));
+
+
+researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) => handle(payload, reply, async (event) => {
+  const { event: researchTokenSaleContributedEvent, tenant } = event;
+  const researchService = new ResearchService(tenant);
+
+  const { tokenSaleExternalId } = researchTokenSaleContributedEvent.getSourceData();
+  const researchTokenSale = await deipRpc.api.getResearchTokenSaleAsync(tokenSaleExternalId);
+
+  const research = await researchService.getResearch(researchTokenSale.research_external_id);
+  
+  if (researchTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
+    const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+    let hasUpdate = false;
+
+    if (!investmentOpportunityAttr) {
+      research.researchRef.attributes.push({
+        researchAttributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+        value: false
+      });
+      hasUpdate = true;
+    } else if (investmentOpportunityAttr.value) {
+      investmentOpportunityAttr.value = false;
+      hasUpdate = true;
+    }
+
+    if (hasUpdate) {
+      await researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes });
+    }
+  }
+
 
 }));
 

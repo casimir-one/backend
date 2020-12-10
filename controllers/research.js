@@ -31,6 +31,7 @@ import ResearchTokenSaleProposalRejectedEvent from './../events/researchTokenSal
 import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
 import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
 import UserInvitationProposalRejectedEvent from './../events/userInvitationProposalRejectedEvent';
+import ResearchTokenSaleContributedEvent from './../events/researchTokenSaleContributedEvent';
 
 
 const stat = util.promisify(fs.stat);
@@ -669,24 +670,28 @@ const createResearchTokenSale = async (ctx, next) => {
 }
 
 
-const createResearchTokenSaleContribution = async (ctx) => {
+const createResearchTokenSaleContribution = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, isProposal } = ctx.request.body;
 
   try {
-    const operation = isProposal ? tx['operations'][0][1]['proposed_ops'][0]['op'] : tx['operations'][0];
-    const payload = operation[1];
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
+    const datums = blockchainService.extractOperations(tx);
+
+    const researchTokenSaleContributedEvent = new ResearchTokenSaleContributedEvent(datums);
+    ctx.state.events.push(researchTokenSaleContributedEvent);
 
     ctx.status = 200;
-    ctx.body = { txResult };
+    ctx.body = [...ctx.state.events];
 
   } catch (err) {
     console.log(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 
