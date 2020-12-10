@@ -14,7 +14,7 @@ class ResearchExpressLicenseProposedEvent extends ProposalEvent(AppEvent) {
     const [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'create_research_license');
     const { external_id: licenseExternalId, research_external_id: researchExternalId, licensee, licenser } = opPayload;
     const { licencePlan } = this.offchainMeta;
-    return { licenseExternalId, researchExternalId, licensee, licenser, licencePlan };
+    return { ...super.getSourceData(), licenseExternalId, researchExternalId, licensee, licenser, licencePlan };
   }
 }
 

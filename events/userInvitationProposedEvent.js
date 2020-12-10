@@ -14,7 +14,7 @@ class UserInvitationProposedEvent extends ProposalEvent(AppEvent) {
     const { notes, researches } = this.offchainMeta;
     const { member: invitee, research_group: researchGroupExternalId, reward_share: rewardShare } = opPayload;
 
-    return { invitee, researchGroupExternalId, rewardShare, notes, researches };
+    return { ...super.getSourceData(), invitee, researchGroupExternalId, rewardShare, notes, researches };
   }
 }
 

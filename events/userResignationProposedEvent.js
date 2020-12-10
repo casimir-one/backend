@@ -13,7 +13,7 @@ class UserResignationProposedEvent extends ProposalEvent(AppEvent) {
     const [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'leave_research_group_membership');
     const { member, research_group: researchGroupExternalId } = opPayload;
     const { notes } = this.offchainMeta;
-    return { member, researchGroupExternalId, notes };
+    return { ...super.getSourceData(), member, researchGroupExternalId, notes };
   }
 }
 

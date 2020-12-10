@@ -16,7 +16,7 @@ class AssetExchangeProposedEvent extends ProposalEvent(AppEvent) {
     let { from: party1, amount: asset1, memo: memo1 } = opPayload1;
     let { from: party2, amount: asset2, memo: memo2 } = opPayload2;
 
-    return { party1, party2, asset2, asset1, memo1, memo2 };
+    return { ...super.getSourceData(), party1, party2, asset2, asset1, memo1, memo2 };
   }
 }
 
