@@ -162,18 +162,7 @@ class ResearchService {
       _id: externalId,
       researchGroupExternalId,
       status,
-      attributes: attributes.map(attr => {
-        return {
-          researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
-          value: attr.value 
-            ? Array.isArray(attr.value) 
-              ? attr.value.map(v => mongoose.Types.ObjectId.isValid(v) ? mongoose.Types.ObjectId(v) : v) 
-              : mongoose.Types.ObjectId.isValid(attr.value.toString()) 
-                ? mongoose.Types.ObjectId(attr.value.toString()) 
-                : attr.value 
-            : null
-        }
-      })
+      attributes: this.mapAttributes(attributes)
     });
 
     const savedResearch = await research.save();
@@ -183,22 +172,104 @@ class ResearchService {
   async updateResearchRef(externalId, { status, attributes }) {
 
     const research = await Research.findOne({ _id: externalId });
+
     research.status = status ? status : research.status;
-    research.attributes = attributes ? attributes.map(attr => {
-      return {
-        researchAttributeId: mongoose.Types.ObjectId(attr.researchAttributeId.toString()),
-        value: attr.value
-          ? Array.isArray(attr.value)
-            ? attr.value.map(v => mongoose.Types.ObjectId.isValid(v) ? mongoose.Types.ObjectId(v) : v)
-            : mongoose.Types.ObjectId.isValid(attr.value.toString())
-              ? mongoose.Types.ObjectId(attr.value.toString())
-              : attr.value
-          : null
-      }
-    }) : research.attributes;
+    research.attributes = attributes ? this.mapAttributes(attributes) : research.attributes;
 
     const updatedResearch = await research.save();
     return updatedResearch.toObject();
+  }
+
+  mapAttributes(attributes) {
+    return attributes.map(rAttr => {
+      const rAttrId = mongoose.Types.ObjectId(rAttr.researchAttributeId.toString());
+
+      const attribute = this.researchAttributes.find(a => a._id.toString() == rAttrId);
+      let rAttrValue = null;
+
+      if (!attribute || rAttr.value == null) {
+        return {
+          researchAttributeId: rAttrId,
+          value: rAttrValue
+        };
+      }
+
+      switch (attribute.type) {
+        case RESEARCH_ATTRIBUTE_TYPE.STEPPER: {
+          rAttrValue = mongoose.Types.ObjectId(rAttr.value.toString()); // _id
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.TEXT: {
+          rAttrValue = rAttr.value.toString(); // text
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.TEXTAREA: {
+          rAttrValue = rAttr.value.toString(); // text
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.SELECT: {
+          rAttrValue = rAttr.value.map(v => mongoose.Types.ObjectId(v.toString())); // _id
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.URL: {
+          rAttrValue = rAttr.value.map(v => v); // schema
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.VIDEO_URL: {
+          rAttrValue = rAttr.value.toString(); // url
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.SWITCH: {
+          rAttrValue = rAttr.value == true || rAttr.value === 'true';
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.CHECKBOX: {
+          rAttrValue = rAttr.value == true || rAttr.value === 'true';
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.USER: {
+          rAttrValue = rAttr.value.map(v => v.toString()); // username / external_id
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.DISCIPLINE: {
+          rAttrValue = rAttr.value.map(v => v.toString()); // external_id
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP: {
+          rAttrValue = rAttr.value.map(v => v.toString()); // external_id
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.IMAGE: {
+          rAttrValue = rAttr.value.toString(); // image name
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.FILE: {
+          rAttrValue = rAttr.value.toString(); // file name
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.EXPRESS_LICENSING: {
+          rAttrValue = rAttr.value.map(v => v); // schema
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.ROADMAP: {
+          rAttrValue = rAttr.value.map(v => v); // schema
+          break;
+        }
+        case RESEARCH_ATTRIBUTE_TYPE.PARTNERS: {
+          rAttrValue = rAttr.value.map(v => v); // schema
+          break;
+        }
+        default: {
+          rAttrValue = null;
+          break;
+        }
+      }
+
+      return {
+        researchAttributeId: rAttrId,
+        value: rAttrValue
+      }
+    })
   }
 
   async findResearchApplicationById(applicationId) {
