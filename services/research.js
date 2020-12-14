@@ -162,7 +162,7 @@ class ResearchService {
       _id: externalId,
       researchGroupExternalId,
       status,
-      attributes: this.mapAttributes(attributes)
+      attributes: this.mapAttributes(externalId, attributes)
     });
 
     const savedResearch = await research.save();
@@ -174,18 +174,24 @@ class ResearchService {
     const research = await Research.findOne({ _id: externalId });
 
     research.status = status ? status : research.status;
-    research.attributes = attributes ? this.mapAttributes(attributes) : research.attributes;
+    research.attributes = attributes ? this.mapAttributes(externalId, attributes) : research.attributes;
 
     const updatedResearch = await research.save();
     return updatedResearch.toObject();
   }
 
-  mapAttributes(attributes) {
+  mapAttributes(researchId, attributes) {
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.researchAttributeId.toString());
 
       const attribute = this.researchAttributes.find(a => a._id.toString() == rAttrId);
       let rAttrValue = null;
+
+      if (!attribute) {
+        console.warn(`${rAttrId} is obsolete attribute`);
+      }
+
+      console.log(`${researchId} attribute update: `, JSON.stringify(rAttr, null, 2));
 
       if (!attribute || rAttr.value == null) {
         return {
@@ -260,6 +266,7 @@ class ResearchService {
           break;
         }
         default: {
+          console.warn(`Unknown attribute type ${attribute.type}`);
           rAttrValue = null;
           break;
         }
