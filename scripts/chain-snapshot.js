@@ -64,7 +64,6 @@ const run = async () => {
     return {
       "account": rg.external_id,
       "creator": rg.creator,
-      "name": rg.name,
       "description": rg.description,
       "members": chainResearchGroupMembershipTokensMap[rg.external_id],
       "subgroups": []
@@ -75,8 +74,7 @@ const run = async () => {
     return {
       "external_id": r.external_id,
       "account": r.research_group.external_id,
-      "title": r.title,
-      "abstract": r.abstract,
+      "description": r.description,
       "is_finished": r.is_finished,
       "is_private": r.is_private,
       "members": r.members,
@@ -91,7 +89,7 @@ const run = async () => {
     return {
       "external_id": rc.external_id,
       "research_external_id": research.external_id,
-      "title": rc.title,
+      "description": rc.description,
       "content": rc.content,
       "type": RESEARCH_CONTENT_TYPES[rc.content_type.toUpperCase()],
       "authors": rc.authors,
