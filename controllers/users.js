@@ -7,23 +7,88 @@ import sharp from 'sharp';
 import config from './../config';
 import UserBookmark from './../schemas/userBookmark';
 import qs from 'qs';
-import deipRpc from '@deip/rpc-client';
 import usersService from './../services/users';
 import * as blockchainService from './../utils/blockchain';
 
-const getUserProfile = async (ctx) => {
+
+const getUser = async (ctx) => {
   const username = ctx.params.username;
 
   try {
-    const profile = await usersService.findUserProfileByOwner(username);
-    if (!profile) {
+
+    const user = await usersService.getUser(username);
+    if (!user) {
       ctx.status = 204;
       ctx.body = null;
       return;
     }
 
     ctx.status = 200;
-    ctx.body = profile;
+    ctx.body = user;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getUsers = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  const usernames = query.usernames;
+
+  try {
+
+    const users = await usersService.getUsers(usernames);
+    ctx.status = 200;
+    ctx.body = users;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getUserByEmail = async (ctx) => {
+  const email = ctx.params.email;
+
+  try {
+
+    const user = await usersService.getUserByEmail(email);
+    if (!user) {
+      ctx.status = 204;
+      ctx.body = null;
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = user;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getUserProfile = async (ctx) => {
+  const username = ctx.params.username;
+
+  try {
+
+    const userProfile = await usersService.findUserProfileByOwner(username);
+    if (!userProfile) {
+      ctx.status = 204;
+      ctx.body = null;
+      return;
+    }
+
+    ctx.status = 200;
+    ctx.body = userProfile;
 
   } catch (err) {
     console.log(err);
@@ -46,10 +111,10 @@ const getUsersProfiles = async (ctx) => {
       accounts.push(...Object.values(parsed))
     }
 
-    const profiles = await usersService.findUserProfiles(accounts);
+    const usersProfiles = await usersService.findUserProfiles(accounts);
     
     ctx.status = 200;
-    ctx.body = profiles;
+    ctx.body = usersProfiles;
 
   } catch (err) {
     console.log(err);
@@ -61,9 +126,9 @@ const getUsersProfiles = async (ctx) => {
 const getActiveUsersProfiles = async (ctx) => {
 
   try {
-    const profiles = await usersService.findActiveUserProfiles();
+    const activeUsersProfiles = await usersService.findActiveUserProfiles();
     ctx.status = 200;
-    ctx.body = profiles;
+    ctx.body = activeUsersProfiles;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -92,14 +157,10 @@ const updateUserProfile = async (ctx) => {
       return;
     }
 
-    const profileData = userProfile.toObject();
-    const updatedUserProfile = await usersService.updateUserProfile(
-      username, 
-      { ...profileData, ...update }
-    );
+    const updatedUserProfile = await usersService.updateUserProfile(username, { ...update });
 
     ctx.status = 200;
-    ctx.body = updatedUserProfile
+    ctx.body = updatedUserProfile;
 
   } catch (err) {
     console.log(err);
@@ -273,8 +334,8 @@ const uploadAvatar = async (ctx) => {
       return;
     }
 
-    const profile = await usersService.findUserProfileByOwner(username);
-    if (!profile) {
+    const userProfile = await usersService.findUserProfileByOwner(username);
+    if (!userProfile) {
       ctx.status = 404;
       ctx.body = `Profile for "${username}" does not exist!`;
       return;
@@ -292,14 +353,14 @@ const uploadAvatar = async (ctx) => {
       await ensureDir(accountsStoragePath(username))
     }
 
-    const oldFilename = profile.avatar;
+    const oldFilename = userProfile.avatar;
     const userAvatar = avatarUploader.single('user-avatar');
     const { filename } = await userAvatar(ctx, () => new Promise((resolve, reject) => {
       resolve({ 'filename': ctx.req.file.filename });
     }));
 
-    profile.avatar = filename;
-    const updatedProfile = await profile.save();
+    const updatedUserProfile = await usersService.updateUserProfile(username, { avatar: filename });
+
 
     if (oldFilename != filename) {
       try {
@@ -308,7 +369,7 @@ const uploadAvatar = async (ctx) => {
     }
 
     ctx.status = 200;
-    ctx.body = updatedProfile;
+    ctx.body = updatedUserProfile;
 
   } catch(err) {
     console.log(err);
@@ -326,8 +387,8 @@ const getAvatar = async (ctx) => {
 
   try {
 
-    let profile = await usersService.findUserProfileByOwner(username);
-    let src = profile ? avatarPath(username, profile.avatar) : defaultAvatarPath();
+    let user = await usersService.getUser(username);
+    let src = user && user.profile ? avatarPath(user.account.name, user.profile.avatar) : defaultAvatarPath();
 
     try {
 
@@ -389,6 +450,10 @@ const getAvatar = async (ctx) => {
 
 
 export default {
+  getUser,
+  getUsers,
+  getUserByEmail,
+
   getUserProfile,
   getUsersProfiles,
   getActiveUsersProfiles,

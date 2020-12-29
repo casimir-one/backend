@@ -6,7 +6,7 @@ const Schema = mongoose.Schema;
 
 const UserProfile = new Schema({
   "_id": { type: String },
-  "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
+  "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "signUpPubKey": { type: String, default: null },
   "status": { type: String, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
   "tenant": { type: String, default: "deip" },

@@ -15,31 +15,41 @@ async function mapUsers(chainAccounts) {
     });
 }
 
+async function getUserByEmail(email) {
+  const profile = await UserProfile.findOne({ email: email });
+  if (!profile) return null;
+
+  const user = await getUser(profile._id);
+  return user;
+}
+
 async function getUser(username) {
   const [chainAccount] = await deipRpc.api.getAccountsAsync([username]);
+  if (!chainAccount) return null;
+
   const [result] = await mapUsers([chainAccount]);
   return result;
 }
 
 async function getUsers(usernames) {
   const chainAccounts = await deipRpc.api.getAccountsAsync(usernames);
-  const result = await mapUsers(chainAccounts);
+  const result = await mapUsers(chainAccounts.filter(a => !!a));
   return result;
 }
 
 async function findUserProfileByOwner(username) {
-  const userProfile = await UserProfile.findOne({ _id: username })
-  return userProfile;
+  const userProfile = await UserProfile.findOne({ _id: username });
+  return userProfile ? userProfile.toObject() : null;
 }
 
 async function findPendingUserProfiles() {
   const profiles = await UserProfile.find({ status: USER_PROFILE_STATUS.PENDING })
-  return profiles;
+  return [...profiles.map(p => p.toObject())];
 }
 
 async function findActiveUserProfiles() {
   const profiles = await UserProfile.find({ status: USER_PROFILE_STATUS.APPROVED })
-  return profiles;
+  return [...profiles.map(p => p.toObject())];;
 }
 
 async function deleteUserProfile(username) {
@@ -49,7 +59,7 @@ async function deleteUserProfile(username) {
 
 async function findUserProfiles(accounts) {
   const profiles = await UserProfile.find({ '_id': { $in: accounts } });
-  return profiles;
+  return [...profiles.map(p => p.toObject())];
 }
 
 async function findResearchGroupMembershipUsers(researchGroupExternalId) {
@@ -94,8 +104,9 @@ async function createUserProfile({
     birthdate: birthdate,
     tenant: tenant
   });
-  
-  return userProfile.save();
+
+  const savedUserProfile = await userProfile.save();
+  return savedUserProfile.toObject();
 }
 
 async function updateUserProfile(username, {
@@ -112,31 +123,30 @@ async function updateUserProfile(username, {
   bio,
   birthdate,
   education,
-  employment
+  employment,
+  avatar
 }) {
 
-  let userProfile = await findUserProfileByOwner(username);
-  
-  if (!userProfile) {
-    throw new Error(`User profile ${us} does not exist`);
-  }
+  const userProfile = await UserProfile.findOne({ _id: username });
 
-  userProfile.status = status;
-  userProfile.email = email;
-  userProfile.firstName = firstName;
-  userProfile.lastName = lastName;
-  userProfile.category = category;
-  userProfile.occupation = occupation;
-  userProfile.phoneNumbers = phoneNumbers;
-  userProfile.webPages = webPages;
-  userProfile.location = location;
-  userProfile.foreignIds = foreignIds;
-  userProfile.bio = bio;
-  userProfile.birthdate = birthdate;
-  userProfile.education = education;
-  userProfile.employment = employment;  
+  userProfile.status = status ? status : userProfile.status;
+  userProfile.email = email ? email : userProfile.email;
+  userProfile.firstName = firstName ? firstName : userProfile.firstName;
+  userProfile.lastName = lastName ? lastName : userProfile.lastName;
+  userProfile.category = category ? category : userProfile.category;
+  userProfile.occupation = occupation ? occupation : userProfile.occupation;
+  userProfile.phoneNumbers = phoneNumbers ? phoneNumbers : userProfile.phoneNumbers;
+  userProfile.webPages = webPages ? webPages : userProfile.webPages;
+  userProfile.location = location ? location : userProfile.location;
+  userProfile.foreignIds = foreignIds ? foreignIds : userProfile.foreignIds;
+  userProfile.bio = bio ? bio : userProfile.bio;
+  userProfile.birthdate = birthdate ? birthdate : userProfile.birthdate;
+  userProfile.education = education ? education : userProfile.education;
+  userProfile.employment = employment ? employment : userProfile.employment;  
+  userProfile.avatar = avatar ? avatar : userProfile.avatar;
 
-  return userProfile.save();
+  const updatedUserProfile = await userProfile.save();
+  return updatedUserProfile.toObject();
 }
 
 
@@ -177,6 +187,7 @@ async function createUserAccount({ username, pubKey }) {
 export default {
   getUser,
   getUsers,
+  getUserByEmail,
   findUserProfileByOwner,
   findPendingUserProfiles,
   findActiveUserProfiles,

@@ -16,10 +16,9 @@ function Encodeuint8arr(seed) {
 
 const signIn = async function (ctx) {
   const { username, secretSigHex } = ctx.request.body;
+  const tenant = ctx.state.tenant;
 
   try {
-
-    const tenant = ctx.state.tenant;
 
     const [account] = await deipRpc.api.getAccountsAsync([username])
     if (!account) {
@@ -104,9 +103,9 @@ const signUp = async function (ctx) {
       : USER_PROFILE_STATUS.PENDING;
 
 
-    if (!username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
+    if (!username || !pubKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
       ctx.status = 400;
-      ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required. Username allowable symbols are: [a-z0-9] `;
+      ctx.body = `'username', 'pubKey', 'email', fields are required. Username allowable symbols are: [a-z0-9] `;
       return;
     }
 
@@ -124,7 +123,7 @@ const signUp = async function (ctx) {
       return;
     }
 
-    const profile = await usersService.createUserProfile({
+    const userProfile = await usersService.createUserProfile({
       username,
       status,
       signUpPubKey: pubKey,
@@ -156,7 +155,7 @@ const signUp = async function (ctx) {
     }
 
     ctx.status = 200;
-    ctx.body = { profile, account };
+    ctx.body = { profile: userProfile, account };
 
   } catch (err) {
     console.error(err);

@@ -23,10 +23,13 @@ protected_route.post('/user/upload-avatar', users.uploadAvatar)
 public_route.get('/user/profile/:username', users.getUserProfile)
 public_route.get('/user/profiles', users.getUsersProfiles)
 public_route.get('/user/active', users.getActiveUsersProfiles)
+public_route.get('/user/name/:username', users.getUser)
+public_route.get('/user/email/:email', users.getUserByEmail)
+public_route.get('/users', users.getUsers)
 
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', users.updateUserProfile)
-public_route.get('/user/avatar/:username', users.getAvatar);
+public_route.get('/user/avatar/:username', users.getAvatar)
 protected_route.get('/user/transactions/:status', userTransactions.getUserTransactions)
 
 protected_route.get('/bookmarks/user/:username', users.getUserBookmarks)

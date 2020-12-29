@@ -375,12 +375,10 @@ const updateTenantResearchAttribute = async (ctx) => {
 
 
 const getSignUpRequests = async (ctx) => {
-
   try {
-
-    const profiles = await usersService.findPendingUserProfiles();
+    const pendingUsersProfiles = await usersService.findPendingUserProfiles();
     ctx.status = 200;
-    ctx.body = profiles;
+    ctx.body = pendingUsersProfiles;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -395,26 +393,21 @@ const approveSignUpRequest = async (ctx) => {
   try {
 
     // TODO: check jwtUsername for admin
-
-    const profile = await usersService.findUserProfileByOwner(username);
-    if (!profile) {
+    const userProfile = await usersService.findUserProfileByOwner(username);
+    if (!userProfile) {
       ctx.status = 404;
       ctx.body = `Sign up request for ${username} does not exist`;
       return;
     }
 
-    if (profile.status != USER_PROFILE_STATUS.PENDING) {
+    if (userProfile.status != USER_PROFILE_STATUS.PENDING) {
       ctx.status = 400;
       ctx.body = `Sign up request for ${username} was already approved`;
       return;
     }
 
-    const profileData = profile.toObject();
-    await usersService.createUserAccount({ username, pubKey: profile.signUpPubKey });
-    const approvedProfile = await usersService.updateUserProfile(username, { 
-      ...profileData, 
-      status: USER_PROFILE_STATUS.APPROVED
-    });
+    await usersService.createUserAccount({ username, pubKey: userProfile.signUpPubKey });
+    const approvedProfile = await usersService.updateUserProfile(username, { status: USER_PROFILE_STATUS.APPROVED });
 
     const researchGroup = await deipRpc.api.getResearchGroupByPermlinkAsync(username);
     await researchGroupService.createResearchGroupRef({
@@ -441,14 +434,14 @@ const rejectSignUpRequest = async (ctx) => {
   try {
 
     // TODO: check jwtUsername for admin
-    const profile = await usersService.findUserProfileByOwner(username);
-    if (!profile) {
+    const userProfile = await usersService.findUserProfileByOwner(username);
+    if (!userProfile) {
       ctx.status = 404;
       ctx.body = `Sign up request for ${username} does not exist`;
       return;
     }
 
-    if (profile.status != USER_PROFILE_STATUS.PENDING) {
+    if (userProfile.status != USER_PROFILE_STATUS.PENDING) {
       ctx.status = 400;
       ctx.body = `Sign up request for ${username} was already approved and can not be rejected`;
       return;
