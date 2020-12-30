@@ -407,15 +407,14 @@ const approveSignUpRequest = async (ctx) => {
     }
 
     await usersService.createUserAccount({ username, pubKey: userProfile.signUpPubKey });
-    const approvedProfile = await usersService.updateUserProfile(username, { status: USER_PROFILE_STATUS.APPROVED });
-
-    const researchGroup = await deipRpc.api.getResearchGroupByPermlinkAsync(username);
     await researchGroupService.createResearchGroupRef({
-      externalId: researchGroup.external_id,
-      creator: researchGroup.creator,
+      externalId: username,
+      creator: username,
       name: username,
       description: username
     });
+
+    const approvedProfile = await usersService.updateUserProfile(username, { status: USER_PROFILE_STATUS.APPROVED });
 
     ctx.status = 200;
     ctx.body = { profile: approvedProfile };

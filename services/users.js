@@ -49,7 +49,7 @@ async function findPendingUserProfiles() {
 
 async function findActiveUserProfiles() {
   const profiles = await UserProfile.find({ status: USER_PROFILE_STATUS.APPROVED })
-  return [...profiles.map(p => p.toObject())];;
+  return [...profiles.map(p => p.toObject())];
 }
 
 async function deleteUserProfile(username) {

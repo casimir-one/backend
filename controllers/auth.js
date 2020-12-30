@@ -1,14 +1,13 @@
 import jwt from 'jsonwebtoken';
+import util from 'util';
+import request from 'request';
 import bcrypt from 'bcryptjs';
 import config from './../config';
-import deipRpc from '@deip/rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
 import ResearchGroupService from './../services/researchGroup';
-import tenantsService from './../services/tenant';
-
-import { USER_PROFILE_STATUS, SIGN_UP_POLICY} from './../constants';
+import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../constants';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -20,8 +19,8 @@ const signIn = async function (ctx) {
 
   try {
 
-    const [account] = await deipRpc.api.getAccountsAsync([username])
-    if (!account) {
+    const user = await usersService.getUser(username);
+    if (!user) {
       ctx.body = {
         success: false,
         error: `User "${username}" does not exist!`
@@ -37,7 +36,7 @@ const signIn = async function (ctx) {
       return;
     }
 
-    const pubWif = account.owner.key_auths[0][0]
+    const pubWif = user.account.owner.key_auths[0][0]
     const publicKey = crypto.PublicKey.from(pubWif);
 
     let isValidSig;
@@ -77,6 +76,7 @@ const signIn = async function (ctx) {
 }
 
 const signUp = async function (ctx) {
+  const tenant = ctx.state.tenant;
   const { 
     username, 
     email, 
@@ -97,22 +97,21 @@ const signUp = async function (ctx) {
 
     const researchGroupService = new ResearchGroupService();
 
-    const tenant = ctx.state.tenant;
-    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
-      ? USER_PROFILE_STATUS.APPROVED
-      : USER_PROFILE_STATUS.PENDING;
-
-
     if (!username || !pubKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
       ctx.status = 400;
       ctx.body = `'username', 'pubKey', 'email', fields are required. Username allowable symbols are: [a-z0-9] `;
       return;
     }
 
-    const [existingAccount] = await deipRpc.api.getAccountsAsync([username])
-    if (existingAccount) {
+    const accountExists = await usernameExistsInGlobalNetwork(username, [
+      config.blockchain.rpcEndpoint,
+      'https://jcu-full-node.deip.world',
+      'https://ar3c-demo-full-node.deip.world'
+    ]);
+
+    if (accountExists) {
       ctx.status = 409;
-      ctx.body = `Account '${username}' already exists`;
+      ctx.body = `Account '${username}' already exists in the network`;
       return;
     }
 
@@ -122,6 +121,10 @@ const signUp = async function (ctx) {
       ctx.body = `Profile for '${username}' is under consideration or has been approved already`;
       return;
     }
+
+    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
+      ? USER_PROFILE_STATUS.APPROVED
+      : USER_PROFILE_STATUS.PENDING;
 
     const userProfile = await usersService.createUserProfile({
       username,
@@ -144,11 +147,9 @@ const signUp = async function (ctx) {
     let account = null;
     if (status == USER_PROFILE_STATUS.APPROVED) {
       account = await usersService.createUserAccount({ username, pubKey });
-
-      const researchGroup = await deipRpc.api.getResearchGroupByPermlinkAsync(username);
       await researchGroupService.createResearchGroupRef({
-        externalId: researchGroup.external_id,
-        creator: researchGroup.creator,
+        externalId: username,
+        creator: username,
         name: username,
         description: username
       });
@@ -162,6 +163,39 @@ const signUp = async function (ctx) {
     ctx.status = 500;
     ctx.body = err;
   }
+}
+
+// temporary solution until we unite all tenants into global network
+async function usernameExistsInGlobalNetwork(username, endpoints) {
+  const requestPromise = util.promisify(request);
+
+  const promises = [];
+  for (let i = 0; i < endpoints.length; i++) {
+    let endpoint = endpoints[i];
+    const options = {
+      url: endpoint,
+      method: "post",
+      headers: {
+        "content-type": "text/plain"
+      },
+      body: JSON.stringify({ "jsonrpc": "2.0", "method": "get_accounts", "params": [[username]], "id": 1 })
+    };
+
+    promises.push(requestPromise(options));
+  }
+
+  const results = await Promise.all(promises);
+
+  const usernames = results
+    .reduce((acc, { error, body }) => {
+      if (error) return acc;
+      const bodyJson = JSON.parse(body);
+      const usernames = bodyJson.result.filter(a => a != null).map(a => a.name);
+      return [...acc, ...usernames];
+    }, []);
+
+  const exists = usernames.some(name => name == username);
+  return exists;
 }
 
 export default {
