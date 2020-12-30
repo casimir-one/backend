@@ -5,8 +5,7 @@ import deipRpc from '@deip/rpc-client';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
-import tenantsService from './../services/tenant';
-
+import * as blockchainService from './../utils/blockchain';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY} from './../constants';
 
 function Encodeuint8arr(seed) {
@@ -77,6 +76,7 @@ const signIn = async function (ctx) {
 }
 
 const signUp = async function (ctx) {
+  const tenant = ctx.state.tenant;
   const { 
     username, 
     email, 
@@ -95,22 +95,16 @@ const signUp = async function (ctx) {
 
   try {
 
-    const tenant = ctx.state.tenant;
-    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
-      ? USER_PROFILE_STATUS.APPROVED
-      : USER_PROFILE_STATUS.PENDING;
-
-
     if (!username || !pubKey || !email || !firstName || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
       ctx.status = 400;
       ctx.body = `'username', 'pubKey', 'email', 'firstName' fields are required. Username allowable symbols are: [a-z0-9] `;
       return;
     }
 
-    const [existingAccount] = await deipRpc.api.getAccountsAsync([username])
-    if (existingAccount) {
+    const accountExists = await blockchainService.usernameExistsInGlobalNetwork(username, tenant);
+    if (accountExists) {
       ctx.status = 409;
-      ctx.body = `Account '${username}' already exists`;
+      ctx.body = `Account '${username}' already exists in the network`;
       return;
     }
 
@@ -120,6 +114,10 @@ const signUp = async function (ctx) {
       ctx.body = `Profile for '${username}' is under consideration or has been approved already`;
       return;
     }
+
+    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
+      ? USER_PROFILE_STATUS.APPROVED
+      : USER_PROFILE_STATUS.PENDING;
 
     const profile = await usersService.createUserProfile({
       username,

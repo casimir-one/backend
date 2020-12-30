@@ -20,6 +20,10 @@ const ResearchCategory = new Schema({
   "text": { type: String, required: true }
 });
 
+const GlobalNetworkSettings = new Schema({
+  "nodes": [String]
+});
+
 const TenantProfile = new Schema({
     "_id": { type: String },
     "name": { type: String },
@@ -28,6 +32,7 @@ const TenantProfile = new Schema({
     "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
     "logo": { type: String, default: "default_tenant_logo.png" },
     "banner": { type: String, default: "default_banner_logo.png" },
+    "network": GlobalNetworkSettings,
     "settings": {
       "signUpPolicy": { 
         type: String, 
