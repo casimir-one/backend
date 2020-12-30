@@ -1,11 +1,10 @@
 import jwt from 'jsonwebtoken';
-import util from 'util';
-import request from 'request';
 import bcrypt from 'bcryptjs';
 import config from './../config';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
 import usersService from './../services/users';
+import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../constants';
 
@@ -103,12 +102,7 @@ const signUp = async function (ctx) {
       return;
     }
 
-    const accountExists = await usernameExistsInGlobalNetwork(username, [
-      config.blockchain.rpcEndpoint,
-      'https://jcu-full-node.deip.world',
-      'https://ar3c-demo-full-node.deip.world'
-    ]);
-
+    const accountExists = await blockchainService.usernameExistsInGlobalNetwork(username, tenant);
     if (accountExists) {
       ctx.status = 409;
       ctx.body = `Account '${username}' already exists in the network`;
@@ -163,39 +157,6 @@ const signUp = async function (ctx) {
     ctx.status = 500;
     ctx.body = err;
   }
-}
-
-// temporary solution until we unite all tenants into global network
-async function usernameExistsInGlobalNetwork(username, endpoints) {
-  const requestPromise = util.promisify(request);
-
-  const promises = [];
-  for (let i = 0; i < endpoints.length; i++) {
-    let endpoint = endpoints[i];
-    const options = {
-      url: endpoint,
-      method: "post",
-      headers: {
-        "content-type": "text/plain"
-      },
-      body: JSON.stringify({ "jsonrpc": "2.0", "method": "get_accounts", "params": [[username]], "id": 1 })
-    };
-
-    promises.push(requestPromise(options));
-  }
-
-  const results = await Promise.all(promises);
-
-  const usernames = results
-    .reduce((acc, { error, body }) => {
-      if (error) return acc;
-      const bodyJson = JSON.parse(body);
-      const usernames = bodyJson.result.filter(a => a != null).map(a => a.name);
-      return [...acc, ...usernames];
-    }, []);
-
-  const exists = usernames.some(name => name == username);
-  return exists;
 }
 
 export default {
