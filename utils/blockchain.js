@@ -17,7 +17,13 @@ async function signOperations(operations, ownerKey) {
 
           const unsignedTX = {
             expiration: expire,
-            extensions: [],
+            extensions: [[
+              "tenant_marker",
+              {
+                tenant: config.TENANT,
+                extensions: []
+              }
+            ]],
             operations: operations,
             ref_block_num: BlockNum,
             ref_block_prefix: BlockPrefix

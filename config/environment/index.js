@@ -29,7 +29,7 @@ config = _.merge(config, {
     SIG_SEED: process.env.SIG_SEED,
     JWT_SECRET: process.env.JWT_SECRET,
     FILE_STORAGE_DIR: process.env.FILE_STORAGE_DIR || 'files',
-    TENANT: process.env.TENANT || 'DEIP'
+    TENANT: process.env.TENANT || '0000000000000000000000000000000000000000'
 });
 
 module.exports = config;
