@@ -15,6 +15,7 @@ import investmentPortfolio from '../controllers/investmentPortfolio'
 import grants from '../controllers/grants'
 import expressLicensing from '../controllers/expressLicensing'
 import userTransactions from '../controllers/userTransactions'
+import disciplines from '../controllers/disciplines'
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -128,6 +129,8 @@ protected_route.post('/express-licensing', expressLicensing.createExpressLicense
 
 protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
 protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
+
+public_route.get('/disciplines', disciplines.getAllDisciplines)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),
