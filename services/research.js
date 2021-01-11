@@ -67,23 +67,22 @@ class ResearchService {
       .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.every(fAttr => {
 
         const attribute = this.researchAttributes.find(attr => attr._id.toString() === fAttr.researchAttributeId.toString());
-        const rAttr = r.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() === fAttr.researchAttributeId.toString());
-        
-        if (!attribute || !rAttr) {
+        if (!attribute) {
           return false;
         }
 
+        const rAttr = r.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() === fAttr.researchAttributeId.toString());
         return fAttr.values.some((v) => {
 
-          if (!rAttr.value) {
-              return v == null;
+          if (!rAttr || !rAttr.value) {
+            return !v || v === 'false';
           }
 
           if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.EXPRESS_LICENSING) {
             if (v == true || v === 'true') {
               return rAttr.value.length != 0;
             } else {
-              return false;
+              return true;
             }
           }
 
