@@ -793,7 +793,7 @@ const getPublicResearchListing = async (ctx) => {
 
 
   try {
-    const result = await researchService.lookupResearches(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT, filter);
+    const result = await researchService.lookupResearches(filter);
     ctx.status = 200;
     ctx.body = result
       .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))

@@ -101,7 +101,7 @@ class ResearchService extends BaseReadModelService {
   }
 
 
-  async lookupResearches(lowerBound, limit, filter) {
+  async lookupResearches(filter) {
     const researches = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
     const result = await this.mapResearch(researches, filter);
     return result;

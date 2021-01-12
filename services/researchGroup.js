@@ -1,18 +1,19 @@
-import ResearchGroup from './../schemas/researchGroup';
 import deipRpc from '@deip/rpc-client';
-import config from './../config';
+import BaseReadModelService from './base';
+import ResearchGroup from './../schemas/researchGroup';
 
 
-class ResearchGroupService {
+class ResearchGroupService extends BaseReadModelService {
 
-  constructor() { }
+  constructor() { super(ResearchGroup); }
 
-  async mapResearchGroups(chainResearchGroups) {
-    const researchGroups = await ResearchGroup.find({ _id: { $in: chainResearchGroups.map(r => r.external_id) } });
+  async mapResearchGroups(researchGroups) {
+    
+    const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroups.map(r => r._id));
     return chainResearchGroups
       .map((chainResearchGroup) => {
         const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.external_id);
-        return { ...chainResearchGroup, researchGroupRef: researchGroupRef ? researchGroupRef.toObject() : null };
+        return { ...chainResearchGroup, researchGroupRef: researchGroupRef ? researchGroupRef : null };
       })
       .map((researchGroup) => {
         const override = researchGroup.researchGroupRef ? { name: researchGroup.researchGroupRef.name, description: researchGroup.researchGroupRef.description } : { name: "Not specified", description: "Not specified" };
@@ -20,30 +21,28 @@ class ResearchGroupService {
       });
   }
 
-  async getResearchGroup(researchGroupExternalId) {
-    const chainResearchGroup = await deipRpc.api.getResearchGroupAsync(researchGroupExternalId);
-    if (!chainResearchGroup) return null;
-    const result = await this.mapResearchGroups([chainResearchGroup]);
-    const [researchGroup] = result;
-    return researchGroup;
-  }
 
-  async getResearchGroups(researchGroupExternalIds) {
-    const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroupExternalIds);
-    const researchGroups = await this.mapResearchGroups(chainResearchGroups);
-    return researchGroups;
-  }  
-
-  async lookupResearchGroups(lowerBound, limit) {
-    const chainResearchGroups = await deipRpc.api.lookupResearchGroupsAsync(lowerBound, limit);
-    const result = await this.mapResearchGroups(chainResearchGroups);
+  async lookupResearchGroups() {
+    const researchGroups = await this.findMany();
+    const result = await this.mapResearchGroups(researchGroups);
     return result;
   }
 
-  async findResearchGroupRef(externalId) {
-    let researchGroup = await ResearchGroup.findOne({ _id: externalId });
-    return researchGroup;
+
+  async getResearchGroup(researchGroupExternalId) {
+    const researchGroup = await this.findOne({ _id: researchGroupExternalId });
+    const results = await this.mapResearchGroups([researchGroup]);
+    const [result] = results;
+    return result;
   }
+
+
+  async getResearchGroups(researchGroupExternalIds) {
+    const researchGroups = await this.findMany({ _id: { $in: [...researchGroupExternalIds] } });
+    const result = await this.mapResearchGroups(researchGroups);
+    return result;
+  }
+
 
   async createResearchGroupRef({
     externalId,
@@ -52,30 +51,28 @@ class ResearchGroupService {
     description
   }) {
 
-    const researchGroup = new ResearchGroup({
-      tenantId: config.TENANT,
+    const savedResearchGroup = await this.createOne({
       _id: externalId,
       creator,
       name,
       description
     });
 
-    const savedResearchGroup = await researchGroup.save();
-    return savedResearchGroup.toObject();
+    return savedResearchGroup;
   }
-  
+
+
   async updateResearchGroupRef(externalId, {
     name,
     description
   }) {
 
-    const researchGroup = await ResearchGroup.findOne({ _id: externalId });
+    const updatedResearchGroup = this.updateOne({ _id: externalId }, {
+      name: name ? name : undefined,
+      description: description ? description : undefined
+    });
 
-    researchGroup.name = name || researchGroup.name;
-    researchGroup.description = description || researchGroup.description;
-    
-    const updatedResearchGroup = await researchGroup.save();
-    return updatedResearchGroup.toObject();
+    return updatedResearchGroup;
   }
 
 }
