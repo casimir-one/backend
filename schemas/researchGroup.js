@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 
 const ResearchGroup = new Schema({
   "_id": { type: String, required: true },
+  "tenantId": { type: String, required: true },
   "creator": { type: String, required: true },
   "name": { type: String, required: true },
   "description": { type: String, required: false, default: "" },

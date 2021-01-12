@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 
 const ResearchContent = new Schema({
     "_id": { type: String },
+    "tenantId": { type: String, required: true },
     "researchExternalId": { type: String, required: true },
     "researchGroupExternalId": { type: String, required: true },
     "folder": { type: String, required: true },

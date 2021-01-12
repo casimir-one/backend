@@ -59,7 +59,7 @@ const updateProposal = async (ctx, next) => {
   try {
 
     const researchGroupService = new ResearchGroupService();
-    const researchService = new ResearchService(tenant);
+    const researchService = new ResearchService();
     const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
     const operation = tx['operations'][0];
@@ -142,7 +142,7 @@ const deleteProposal = async (ctx, next) => {
   try {
 
     const researchGroupService = new ResearchGroupService();
-    const researchService = new ResearchService(tenant);
+    const researchService = new ResearchService();
     const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
     const operation = tx['operations'][0];
@@ -223,7 +223,7 @@ const getAccountProposals = async (ctx) => {
   const username = ctx.params.username;
 
   const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
   try {
@@ -245,7 +245,7 @@ const getProposalById = async (ctx) => {
   const externalId = ctx.params.proposalExternalId;
 
   const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
   try {

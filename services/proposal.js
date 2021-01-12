@@ -1,6 +1,8 @@
 import deipRpc from '@deip/rpc-client';
 import mongoose from 'mongoose';
 import ProposalRef from './../schemas/proposal';
+import config from './../config';
+
 import { SMART_CONTRACT_TYPE } from './../constants';
 
 class ProposalService {
@@ -488,6 +490,7 @@ class ProposalService {
   }) {
 
     const proposal = new ProposalRef({
+      tenantId: config.TENANT,
       _id: externalId,
       type: type,
       details: details

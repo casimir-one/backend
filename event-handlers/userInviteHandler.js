@@ -14,7 +14,7 @@ const userInviteHandler = new UserInviteHandler();
 userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userInvitationProposedEvent, emitter, tenant } = source;
   const userInviteService = new UserInviteService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
@@ -43,7 +43,7 @@ userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply
 
   const { event: userInvitationProposalSignedEvent, tenant } = source;
   const userInviteService = new UserInviteService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 

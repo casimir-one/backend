@@ -1,31 +1,32 @@
 import deipRpc from '@deip/rpc-client';
+import BaseReadModelService from './base';
 import Research from './../schemas/research';
 import ExpressLicense from './../schemas/expressLicense';
 import ResearchApplication from './../schemas/researchApplication';
 import mongoose from 'mongoose';
-import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE } from './../constants';
+import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS } from './../constants';
 
-class ResearchService {
+class ResearchService extends BaseReadModelService {
 
-  constructor(tenant) {
-    this.researchAttributes = tenant.settings.researchAttributes || [];
+  constructor() { super(Research); }
+
+  async getResearchAttributes() {
+    const tenant = await this.getTenantInstance();
+    return tenant.settings.researchAttributes || [];
   }
 
-  async mapResearch(chainResearches, filterObj) {
+  async mapResearch(researches, filterObj) {
 
     const filter =  {
       searchTerm: "",
-      disciplines: [],
-      organizations: [],
       researchAttributes: [], 
       ...filterObj
     }
-    
-    const researchExternalIds = chainResearches.map(r => r.external_id);
 
-    const researches = await Research.find({ _id: { $in: researchExternalIds } });
+    const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id));
     // TODO: replace with service call
-    const researchesExpressLicenses = await ExpressLicense.find({ researchExternalId: { $in: researchExternalIds } });
+    const researchesExpressLicenses = await ExpressLicense.find({ researchExternalId: { $in: chainResearches.map(r => r.external_id) } });
+    const researchAttributes = await this.getResearchAttributes();
     
     return chainResearches
       .map((chainResearch) => {
@@ -41,12 +42,11 @@ class ResearchService {
           ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
           : "Not Specified";
 
-        return { ...chainResearch, title, abstract, researchRef: researchRef ? { ...researchRef.toObject(), expressLicenses } : { attributes: [], expressLicenses: []} };
+        return { ...chainResearch, title, abstract, researchRef: researchRef ? { ...researchRef, expressLicenses } : { attributes: [], expressLicenses: []} };
       })
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         
-        const attribute = this.researchAttributes.find(attr => attr._id.toString() === rAttr.researchAttributeId.toString());
-        
+        const attribute = researchAttributes.find(attr => attr._id.toString() === rAttr.researchAttributeId.toString());
         if (!attribute || !rAttr.value)
           return false;
         
@@ -66,7 +66,7 @@ class ResearchService {
       })))
       .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.every(fAttr => {
 
-        const attribute = this.researchAttributes.find(attr => attr._id.toString() === fAttr.researchAttributeId.toString());
+        const attribute = researchAttributes.find(attr => attr._id.toString() === fAttr.researchAttributeId.toString());
         if (!attribute) {
           return false;
         }
@@ -100,56 +100,45 @@ class ResearchService {
       })));
   }
 
+
   async lookupResearches(lowerBound, limit, filter) {
-    const chainResearches = await deipRpc.api.lookupResearchesAsync(lowerBound, limit);
-    const result = await this.mapResearch(chainResearches, filter);
+    const researches = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
+    const result = await this.mapResearch(researches, filter);
     return result;
   }
 
 
   async getResearch(researchExternalId) {
-    const chainResearch = await deipRpc.api.getResearchAsync(researchExternalId);
-    if (!chainResearch) return null;
-    const result = await this.mapResearch([chainResearch]);
-    const [research] = result;
-    return research;
+    const research = await this.findOne({ _id: researchExternalId, status: RESEARCH_STATUS.APPROVED });
+    if (!research) return null;
+    const items = await this.mapResearch([research]);
+    const [result] = items;
+    return result;
   }
 
 
   async getResearches(researchesExternalIds) {
-    const chainResearches = await deipRpc.api.getResearchesAsync(researchesExternalIds);
-    const result = await this.mapResearch(chainResearches);
+    const researches = await this.findMany({ _id: { $in: [...researchesExternalIds] }, status: RESEARCH_STATUS.APPROVED });
+    const result = await this.mapResearch(researches);
     return result;
   }
 
 
   async getResearchesByResearchGroup(researchGroupExternalId) {
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
-    const result = await this.mapResearch(chainResearches);
+    const researches = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: RESEARCH_STATUS.APPROVED });
+    const result = await this.mapResearch(researches);
     return result;
   }
 
 
   async getResearchesForMember(member) {
     const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
-    const result = await this.mapResearch(chainResearches);
+    const researches = await this.findMany({ _id: { $in: [...chainResearches.map(r => r.external_id)] }, status: RESEARCH_STATUS.APPROVED });
+    const result = await this.mapResearch(researches);
     return result;
   }
 
-
-  async getResearchesForMemberByResearchGroup(researchGroupExternalId) {
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupAsync(researchGroupExternalId);
-    const result = await this.mapResearch(chainResearches);
-    return result;
-  }
-
-
-  async findResearchRef(externalId) {
-    let research = await Research.findOne({ _id: externalId });
-    return research ? research.toObject() : null;
-  }
-
-
+  
   async createResearchRef({
     externalId,
     researchGroupExternalId,
@@ -157,40 +146,46 @@ class ResearchService {
     status
   }) {
 
-    const research = new Research({
+    const mappedAttributes = await this.mapAttributes(attributes);
+    const savedResearch = await this.createOne({
       _id: externalId,
       researchGroupExternalId,
       status,
-      attributes: this.mapAttributes(externalId, attributes)
-    });
+      attributes: mappedAttributes
+    })
 
-    const savedResearch = await research.save();
-    return savedResearch.toObject();
+    return savedResearch;
   }
   
+
   async updateResearchRef(externalId, { status, attributes }) {
 
-    const research = await Research.findOne({ _id: externalId });
+    let mappedAttributes;
+    if (attributes) {
+      mappedAttributes = await this.mapAttributes(attributes);
+    }
 
-    research.status = status ? status : research.status;
-    research.attributes = attributes ? this.mapAttributes(externalId, attributes) : research.attributes;
+    const updatedResearch = this.updateOne({ _id: externalId }, {
+      status: status ? status : undefined, 
+      attributes: attributes ? mappedAttributes : undefined
+    });
 
-    const updatedResearch = await research.save();
-    return updatedResearch.toObject();
+    return updatedResearch;
   }
 
-  mapAttributes(researchId, attributes) {
+
+  async mapAttributes(attributes) {
+    const researchAttributes = await this.getResearchAttributes();
+
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.researchAttributeId.toString());
 
-      const attribute = this.researchAttributes.find(a => a._id.toString() == rAttrId);
+      const attribute = researchAttributes.find(a => a._id.toString() == rAttrId);
       let rAttrValue = null;
 
       if (!attribute) {
         console.warn(`${rAttrId} is obsolete attribute`);
       }
-
-      console.log(`${researchId} attribute update: `, JSON.stringify(rAttr, null, 2));
 
       if (!attribute || rAttr.value == null) {
         return {
@@ -278,6 +273,41 @@ class ResearchService {
     })
   }
 
+
+  async addAttributeToResearches({ researchAttributeId, type, defaultValue }) {
+    const result = await this.updateMany({}, { $push: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId), type, value: defaultValue } } });
+    return result;
+  }
+
+
+  async removeAttributeFromResearches({ researchAttributeId }) {
+    const result = await this.updateMany({}, { $pull: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId) } } });
+    return result;
+  }
+
+
+  async updateAttributeInResearches({ researchAttributeId, type, valueOptions, defaultValue }) {
+    if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
+      const result = await this.updateMany(
+        {
+          $and: [
+            { 'attributes.researchAttributeId': mongoose.Types.ObjectId(researchAttributeId) },
+            { 'attributes.value': { $nin: [...valueOptions.map(opt => mongoose.Types.ObjectId(opt.value))] } }
+          ]
+        },
+        { $set: { 'attributes.$.value': defaultValue } }
+      );
+
+      return result;
+    } else {
+      return Promise.resolve();
+    }
+  }
+
+
+
+  // TODO: move to separate service
+  
   async findResearchApplicationById(applicationId) {
     let researchApplication = await ResearchApplication.findOne({ _id: applicationId });
     return researchApplication;
@@ -373,42 +403,6 @@ class ResearchService {
       query.researcher = researcher;
     }
     const result = await ResearchApplication.find(query);
-    return result;
-  }
-
-  async addAttributeToResearches({ researchAttributeId, type, defaultValue }) {
-    const result = await Research.update({}, { $push: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId), type, value: defaultValue } } }, { multi: true });
-    return result;
-  }
-
-  async removeAttributeFromResearches({ researchAttributeId }) {
-    const result = await Research.update({}, { $pull: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId) } } }, { multi: true });
-    return result;
-  }
-
-  async updateAttributeInResearches({ researchAttributeId, type, valueOptions, defaultValue }) {
-    if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
-
-      const result = await Research.update(
-        {
-          $and: [
-            { 'attributes.researchAttributeId': mongoose.Types.ObjectId(researchAttributeId) },
-            { 'attributes.value': { $nin: [...valueOptions.map(opt => mongoose.Types.ObjectId(opt.value))] } }
-          ]
-        },
-        { $set: { 'attributes.$.value': defaultValue } }, 
-        { multi: true }
-      );
-
-      return result;
-    }
-    return Promise.resolve();
-  }
-
-  async findResearchesByCategory(category) {
-    let researches = await Research.find({ $and: [{ tenantCategory: { $exists: true } }, { "tenantCategory._id": category._id }] });
-    const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id.toString()));
-    const result = await this.mapResearch(chainResearches, (r) => { return true; });
     return result;
   }
 }

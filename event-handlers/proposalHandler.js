@@ -14,7 +14,7 @@ const proposalHandler = new ProposalHandler();
 
 async function createProposalRef(event, chainContractType, tenant) {
   const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
   const proposalId = event.getProposalId();

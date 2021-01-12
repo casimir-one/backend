@@ -1,4 +1,5 @@
 import UserNotification from './../schemas/userNotification';
+import config from './../config';
 
 async function createUserNotification({
 	username,
@@ -7,6 +8,7 @@ async function createUserNotification({
 	metadata
 }) {
 	let notification = new UserNotification({
+    tenantId: config.TENANT,
 		username,
 		status,
 		type,

@@ -582,7 +582,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
   const { event: reviewCreatedEvent, tenant } = source;
   const researchContentService = new ResearchContentService();
-  const researchService = new ResearchService(tenant); 
+  const researchService = new ResearchService(); 
   const reviewService = new ReviewService();
   const researchGroupService = new ResearchGroupService(); 
 
@@ -623,7 +623,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST;
   const { requestor, expert, researchContentExternalId, tenant } = payload;
   const researchContentService = new ResearchContentService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService(); 
 
   let requestorProfile = await usersService.findUserProfileByOwner(requestor);

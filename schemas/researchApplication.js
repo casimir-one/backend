@@ -8,6 +8,7 @@ const Schema = mongoose.Schema;
 
 const ResearchApplication = new Schema({
   "_id": { type: String, trim: true, required: true },
+  "tenantId": { type: String, required: true },
   "researchExternalId": { type: String, trim: true, required: true },  
   "researcher": { type: String, trim: true, required: true },
   "status": { type: String, enum: [

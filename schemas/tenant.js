@@ -56,6 +56,7 @@ const ResearchCategory = new Schema({
 });
 
 const GlobalNetworkSettings = new Schema({
+  "scope": [String],
   "nodes": [String]
 });
 

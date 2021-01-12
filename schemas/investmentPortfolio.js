@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 
 const InvestmentPortfolio = new Schema({
     "_id": { type: String },
+    "tenantId": { type: String, required: true },
     "title": { type: String, default: "" },
     "description": { type: String, default: "" },
     "members": [{

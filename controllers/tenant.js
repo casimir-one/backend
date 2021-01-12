@@ -237,22 +237,6 @@ const getTenantProfile = async (ctx) => {
 
     const tenant = tenantProfile.toObject();
 
-    // const researchService = new ResearchService(tenant);
-    // const categoryStatsPromises = [];
-
-    // for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
-    //   let category = tenant.settings.researchCategories[i];
-    //   let promise = researchService.findResearchesByCategory(category);
-    //   categoryStatsPromises.push(promise);
-    // }
-
-    // const researchesByCategories = await Promise.all(categoryStatsPromises);
-
-    // for (let i = 0; i < tenant.settings.researchCategories.length; i++) {
-    //   let category = tenant.settings.researchCategories[i];
-    //   category.researchCount = researchesByCategories[i].length;
-    // }
-
     ctx.status = 200;
     ctx.body = tenant;
 
@@ -267,7 +251,7 @@ const getTenantProfile = async (ctx) => {
 const updateTenantProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const update = ctx.request.body;
 
   try {
@@ -304,7 +288,7 @@ const createTenantResearchAttribute = async (ctx) => {
   const researchAttribute = ctx.request.body;
 
   try {
-    const researchService = new ResearchService(tenant);
+    const researchService = new ResearchService();
 
     const researchAttributeId = mongoose.Types.ObjectId();
     const updatedTenantProfile = await tenantService.addTenantResearchAttribute(tenant.id, { ...researchAttribute, _id: researchAttributeId.toString() });
@@ -327,7 +311,7 @@ const deleteTenantResearchAttribute = async (ctx) => {
   const researchAttributeId = ctx.params.id;
 
   try {
-    const researchService = new ResearchService(tenant);
+    const researchService = new ResearchService();
 
     const updatedTenantProfile = await tenantService.removeTenantResearchAttribute(tenant.id, { _id: researchAttributeId });
 
@@ -352,7 +336,7 @@ const updateTenantResearchAttribute = async (ctx) => {
   const researchAttribute = ctx.request.body;
 
   try {
-    const researchService = new ResearchService(tenant);
+    const researchService = new ResearchService();
 
     const updatedTenantProfile = await tenantService.updateTenantResearchAttribute(tenant.id, { ...researchAttribute });
     

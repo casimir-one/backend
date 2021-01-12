@@ -16,7 +16,7 @@ const researchContentHandler = new ResearchContentHandler();
 researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentCreatedEvent, tenant } = source;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const researchContentService = new ResearchContentService();
 
@@ -47,7 +47,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) 
 researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentCreatedEvent, tenant } = source;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const researchContentService = new ResearchContentService();
 
@@ -78,7 +78,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply)
 researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentProposalSignedEvent, tenant } = source;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
   const researchContentService = new ResearchContentService();

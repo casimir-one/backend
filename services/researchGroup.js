@@ -1,5 +1,6 @@
 import ResearchGroup from './../schemas/researchGroup';
 import deipRpc from '@deip/rpc-client';
+import config from './../config';
 
 
 class ResearchGroupService {
@@ -52,6 +53,7 @@ class ResearchGroupService {
   }) {
 
     const researchGroup = new ResearchGroup({
+      tenantId: config.TENANT,
       _id: externalId,
       creator,
       name,

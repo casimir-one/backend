@@ -1,6 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import UserInvite from './../schemas/userInvite';
 import { USER_INVITE_STATUS, USER_NOTIFICATION_TYPE } from './../constants';
+import config from './../config';
 
 
 class UserInviteService {
@@ -58,6 +59,7 @@ class UserInviteService {
   }) {
 
     const userInvite = new UserInvite({
+      tenantId: config.TENANT,
       _id: externalId,
       invitee,
       creator,

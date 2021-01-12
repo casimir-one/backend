@@ -5,6 +5,7 @@ import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 const Schema = mongoose.Schema;
 
 const UserNotification = new Schema({
+    "tenantId": { type: String, required: true },
     "username": { type: String, required: true, index: true },
     "status": {
         type: String,

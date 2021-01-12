@@ -42,7 +42,7 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupsService = new ResearchGroupService();
 
   try {
@@ -142,7 +142,7 @@ const createResearch = async (ctx, next) => {
 const updateResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
 
   try {
 
@@ -229,7 +229,7 @@ const updateResearch = async (ctx, next) => {
 const createResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
 
   try {
 
@@ -311,7 +311,7 @@ const createResearchApplication = async (ctx, next) => {
 const editResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const applicationId = ctx.params.proposalId;
 
   try {
@@ -402,7 +402,7 @@ const editResearchApplication = async (ctx, next) => {
 const getResearchApplicationAttachmentFile = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const applicationId = ctx.params.proposalId;
   const filename = ctx.query.filename;
   const isDownload = ctx.query.download === 'true';
@@ -454,7 +454,7 @@ const approveResearchApplication = async (ctx, next) => {
   const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupsService = new ResearchGroupService();
 
   try { 
@@ -514,7 +514,7 @@ const approveResearchApplication = async (ctx, next) => {
 const rejectResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const { tx } = ctx.request.body;
 
   try { 
@@ -562,7 +562,7 @@ const rejectResearchApplication = async (ctx, next) => {
 const deleteResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const { tx } = ctx.request.body;
 
   try {
@@ -616,7 +616,7 @@ const deleteResearchApplication = async (ctx, next) => {
 
 const getResearchApplications = async (ctx) => {
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const status = ctx.query.status;
   const researcher = ctx.query.researcher;
 
@@ -787,7 +787,7 @@ const getPublicResearchListing = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchWhitelist = tenant.settings.researchWhitelist || [];
   const researchBlacklist = tenant.settings.researchBlacklist || [];
 
@@ -813,7 +813,7 @@ const getUserResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;
   const member = ctx.params.username;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchWhitelist = tenant.settings.researchWhitelist || [];
   const researchBlacklist = tenant.settings.researchBlacklist || [];
 
@@ -838,12 +838,12 @@ const getResearchGroupResearchListing = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchWhitelist = tenant.settings.researchWhitelist || [];
   const researchBlacklist = tenant.settings.researchBlacklist || [];
 
   try {
-    const result = await researchService.getResearchesForMemberByResearchGroup(researchGroupExternalId);
+    const result = await researchService.getResearchesByResearchGroup(researchGroupExternalId);
     ctx.status = 200;
     ctx.body = result
       .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
@@ -863,7 +863,7 @@ const getResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
 
   try {
-    const researchService = new ResearchService(tenant);
+    const researchService = new ResearchService();
     const research = await researchService.getResearch(researchExternalId);
     if (!research) {
       ctx.status = 404;
@@ -894,7 +894,7 @@ const getResearches = async (ctx) => {
       return;
     }
 
-    const researchService = new ResearchService(tenant);
+    const researchService = new ResearchService();
     const researches = await researchService.getResearches(researchesExternalIds);
 
     const result = researches;

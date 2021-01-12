@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const JoinRequest = new Schema({
+    "tenantId": { type: String, required: true },
     "username": { type: String, required: true, index: true },
     "groupId": { type: Number, required: true, index: true },
     "coverLetter": { type: String, required: true, trim: true },

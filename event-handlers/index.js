@@ -50,7 +50,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
 appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchCreatedEvent, tenant, emitter } = source;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
 
   const research = await wait(researchHandler, researchCreatedEvent, null, tenant);
@@ -135,7 +135,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => han
   const { event: researchContentProposedEvent, tenant, emitter } = source;
   const { researchGroupExternalId, researchExternalId, source: { offchain: { title } } } = researchContentProposedEvent.getSourceData();
   const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
 
   await wait(researchContentHandler, researchContentProposedEvent, null, tenant);
   await wait(proposalHandler, researchContentProposedEvent, null, tenant);
@@ -158,7 +158,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => hand
   const { event: researchContentCreatedEvent, tenant, emitter } = source;
   const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getSourceData();
   const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchContentService = new ResearchContentService();
 
   await wait(researchContentHandler, researchContentCreatedEvent, null, tenant);
@@ -194,7 +194,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
   const { event: researchUpdatedEvent, tenant, emitter } = source;
 
   const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const research = await wait(researchHandler, researchUpdatedEvent, null, tenant);
 
   // legacy
@@ -213,7 +213,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
   const { event: researchUpdateProposedEvent, tenant, emitter } = source;
   const { researchExternalId, researchGroupExternalId } = researchUpdateProposedEvent.getSourceData();
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   await wait(researchHandler, researchUpdateProposedEvent, null, tenant);
   await wait(proposalHandler, researchUpdateProposedEvent, null, tenant);
@@ -322,7 +322,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, (payload, reply) =>
   const { external_id: researchExternalId, research_group: researchGroupExternalId } = create_research_operation[1];
   
   const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
 
   const approverUserProfile = await usersService.findUserProfileByOwner(emitter);
   const [approverUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
@@ -433,7 +433,7 @@ appEventHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply)
 
   const { event: userResignationProposalSignedEvent, tenant, emitter } = source;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
 
@@ -461,7 +461,7 @@ appEventHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_REJECTED, (payload, repl
 appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
 
   const { event: researchTokenSaleCreatedEvent, tenant, emitter } = source;
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
 
   const { researchTokenSaleExternalId, researchExternalId, researchGroupExternalId } = researchTokenSaleCreatedEvent.getSourceData();
@@ -485,7 +485,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => h
 appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchTokenSaleProposedEvent, tenant, emitter } = source;
 
-  const researchService = new ResearchService(tenant);
+  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
 
   const { researchExternalId, researchGroupExternalId } = researchTokenSaleProposedEvent.getSourceData();

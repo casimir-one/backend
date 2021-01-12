@@ -12,6 +12,7 @@ const ResearchInvite = new Schema({
 
 const UserInvite = new Schema({
   "_id": { type: String },
+  "tenantId": { type: String, required: true },
   "invitee": { type: String, required: true, index: true },
   "creator": { type: String },
   "researchGroupExternalId": { type: String, required: true, index: true },

@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const ReviewRequest = new Schema({
+  "tenantId": { type: String, required: true },
   "expert": { type: String, required: true, index: true },
   "requestor": { type: String, required: true },
   "researchContentExternalId": { type: String, required: true },

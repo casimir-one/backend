@@ -4,6 +4,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const AwardWithdrawalRequest = new Schema({
+  "tenantId": { type: String, required: true },
   "filename": { type: String, required: true },
   "researchId": { type: Number, required: true },
   "researchGroupId": { type: Number, required: true },

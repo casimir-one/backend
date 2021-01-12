@@ -3,6 +3,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const UserBookmark = new Schema({
+    "tenantId": { type: String, required: true },
     "username": { type: String, required: true },
     "type": {
       type: String,

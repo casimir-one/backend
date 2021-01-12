@@ -5,6 +5,7 @@ const Schema = mongoose.Schema;
 
 const ExpressLicense = new Schema({
   "_id": { type: String },
+  "tenantId": { type: String, required: true },
   "owner": { type: String, required: true, index: true },
   "licenser": { type: String },
   "requestId": { type: String, required: true, index: true },
