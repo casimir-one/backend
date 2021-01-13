@@ -1,5 +1,4 @@
 import deipRpc from '@deip/rpc-client';
-import config from './../config';
 import BaseReadModelService from './base';
 import UserInvite from './../schemas/userInvite';
 import ResearchService from './../services/research';

@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const Review = new Schema({
   "_id": { type: String, required: true },
   "tenantId": { type: String, required: true },
+  "researchExternalId": { type: String, required: true },
   "researchContentExternalId": { type: String, required: true },
   "author": { type: String, required: true },
   "content": { type: String, required: true }

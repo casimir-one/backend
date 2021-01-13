@@ -1,5 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import ResearchContent from './../schemas/researchContent';
+import config from './../config';
 import { RESEARCH_CONTENT_STATUS } from './../constants';
 
 
@@ -90,6 +91,7 @@ class ResearchContentService {
 
     const researchContent = new ResearchContent({
       _id: externalId,
+      tenantId: config.TENANT,
       researchExternalId,
       researchGroupExternalId,
       folder,

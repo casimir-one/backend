@@ -1,18 +1,19 @@
 import deipRpc from '@deip/rpc-client';
+import BaseReadModelService from './base';
 import Review from './../schemas/review';
-import ReviewRequest from './../schemas/reviewRequest';
 
 
-class ReviewService {
+class ReviewService extends BaseReadModelService {
 
-  constructor() { }
+  constructor() { super(Review); }
 
-  async mapReviews(chainReviews) {
-    const reviews = await Review.find({ _id: { $in: chainReviews.map(r => r.external_id) } });
+  async mapReviews(reviews) {
+    const chainReviews = await deipRpc.api.getReviewsAsync(reviews.map(r => r._id));
+
     return chainReviews
       .map((chainReview) => {
         const reviewRef = reviews.find(r => r._id.toString() == chainReview.external_id);
-        return { ...chainReview, reviewRef: reviewRef ? reviewRef.toObject() : null };
+        return { ...chainReview, reviewRef: reviewRef ? reviewRef : null };
       })
       .map((review) => {
         const override = review.reviewRef ? { content: review.reviewRef.content } : { content: "Not specified" };
@@ -20,50 +21,49 @@ class ReviewService {
       });
   }
 
-  async getReview(reviewExternalId) {
-    const chainReview = await deipRpc.api.getReviewAsync(reviewExternalId);
-    if (!chainReview) return null;
-    const result = await this.mapReviews([chainReview]);
-    const [review] = result;
-    return review;
+  async getReview(externalId) {
+    const review = await this.findOne({ _id: externalId });
+    if (!review) return null;
+    const results = await this.mapReviews([review]);
+    const [result] = results;
+    return result;
   }
 
   async getReviewsByResearch(researchExternalId) {
-    const chainReviews = await deipRpc.api.getReviewsByResearchAsync(researchExternalId);
-    const reviews = await this.mapReviews(chainReviews);
-    return reviews;
+    const reviews = await this.findMany({ researchExternalId: researchExternalId });
+    const result = await this.mapReviews(reviews);
+    return result;
   }
 
   async getReviewsByResearchContent(researchContentExternalId) {
-    const chainReviews = await deipRpc.api.getReviewsByResearchContentAsync(researchContentExternalId);
-    const reviews = await this.mapReviews(chainReviews);
-    return reviews;
+    const reviews = await this.findMany({ researchContentExternalId: researchContentExternalId });
+    const result = await this.mapReviews(reviews);
+    return result;
   }
 
   async getReviewsByAuthor(author) {
-    const chainReviews = await deipRpc.api.getReviewsByAuthorAsync(author);
-    const reviews = await this.mapReviews(chainReviews);
-    return reviews;
+    const reviews = await this.findMany({ author: author });
+    const result = await this.mapReviews(reviews);
+    return result;
   }  
 
   async createReviewRef({
     externalId,
+    researchExternalId,
     researchContentExternalId,
     author,
     content
   }) {
 
-    const review = new Review({
+    const result = await this.createOne({
       _id: externalId,
       researchContentExternalId,
+      researchExternalId,
       author,
       content
     });
 
-    const savedReview = await review.save();
-    await ReviewRequest.update({ expert: author, researchContentExternalId: researchContentExternalId }, { $set: { status: 'approved' } });
-
-    return savedReview.toObject();
+    return result;
   }
   
 }
