@@ -31,6 +31,7 @@ class ResearchGroupService extends BaseReadModelService {
 
   async getResearchGroup(researchGroupExternalId) {
     const researchGroup = await this.findOne({ _id: researchGroupExternalId });
+    if (!researchGroup) return null;
     const results = await this.mapResearchGroups([researchGroup]);
     const [result] = results;
     return result;
@@ -51,14 +52,14 @@ class ResearchGroupService extends BaseReadModelService {
     description
   }) {
 
-    const savedResearchGroup = await this.createOne({
+    const result = await this.createOne({
       _id: externalId,
       creator,
       name,
       description
     });
 
-    return savedResearchGroup;
+    return result;
   }
 
 
@@ -67,12 +68,12 @@ class ResearchGroupService extends BaseReadModelService {
     description
   }) {
 
-    const updatedResearchGroup = this.updateOne({ _id: externalId }, {
+    const result = this.updateOne({ _id: externalId }, {
       name: name ? name : undefined,
       description: description ? description : undefined
     });
 
-    return updatedResearchGroup;
+    return result;
   }
 
 }

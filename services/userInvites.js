@@ -1,48 +1,51 @@
 import deipRpc from '@deip/rpc-client';
-import UserInvite from './../schemas/userInvite';
-import { USER_INVITE_STATUS, USER_NOTIFICATION_TYPE } from './../constants';
 import config from './../config';
+import BaseReadModelService from './base';
+import UserInvite from './../schemas/userInvite';
+import ResearchService from './../services/research';
+import { USER_INVITE_STATUS } from './../constants';
 
 
-class UserInviteService {
+class UserInviteService extends BaseReadModelService {
 
-  constructor() {}
+  constructor() { super(UserInvite); }
 
-
-  async findUserInvite(externalId) { // proposal id
-    let invite = await UserInvite.findOne({ _id: externalId });
-    return invite.toObject();
+  async findUserInvite(externalId) {
+    const result = await this.findOne({ _id: externalId });
+    return result;
   }
 
 
   async findUserPendingInvites(username) {
-    let activeInvites = await UserInvite.find({ invitee: username, status: USER_INVITE_STATUS.SENT });
-    return activeInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
+    const result = await this.findMany({ invitee: username, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date() } });
+    return result;
   }
 
 
   async findResearchGroupPendingInvites(researchGroupExternalId) {
-    let rgInvites = await UserInvite.find({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT });
-    return rgInvites.filter(invite => invite.expiration.getTime() > new Date().getTime());
+    const result = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date() } });
+    return result;
   }
 
 
   async findResearchPendingInvites(researchExternalId) {
+    const researchService = new ResearchService();
 
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const research = await researchService.getResearch(researchExternalId);
     const researchGroupExternalId = research.research_group.external_id;
 
-    const invites = await UserInvite.find({
+    const result = await this.findMany({
       researchGroupExternalId: researchGroupExternalId,
       status: USER_INVITE_STATUS.SENT,
       $or: [
         { 'researches': { $exists: false } },
         { 'researches': null },
         { 'researches.externalId': { $in: [researchExternalId] } }
-      ]
+      ],
+      expiration: { $gt: new Date() }
     });
 
-    return invites.filter(invite => invite.expiration.getTime() > new Date().getTime());
+    return result;
   }
 
 
@@ -58,8 +61,7 @@ class UserInviteService {
     expiration
   }) {
 
-    const userInvite = new UserInvite({
-      tenantId: config.TENANT,
+    const result = await this.createOne({
       _id: externalId,
       invitee,
       creator,
@@ -72,8 +74,7 @@ class UserInviteService {
       failReason: null
     });
 
-    const savedUserInvite = await userInvite.save();
-    return savedUserInvite.toObject();
+    return result;
   }
 
 
@@ -82,12 +83,12 @@ class UserInviteService {
     failReason,
   }) {
 
-    const userInvite = await UserInvite.findOne({ _id: externalId });
-    userInvite.status = status;
-    userInvite.failReason = failReason;
+    const result = await this.updateOne({ _id: externalId }, {
+      status: status ? status : status,
+      failReason: failReason ? failReason : failReason
+    });
 
-    const updatedUserInvite = await userInvite.save();
-    return updatedUserInvite.toObject();
+    return result;
   }
 }
 

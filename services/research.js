@@ -111,8 +111,8 @@ class ResearchService extends BaseReadModelService {
   async getResearch(researchExternalId) {
     const research = await this.findOne({ _id: researchExternalId, status: RESEARCH_STATUS.APPROVED });
     if (!research) return null;
-    const items = await this.mapResearch([research]);
-    const [result] = items;
+    const results = await this.mapResearch([research]);
+    const [result] = results;
     return result;
   }
 
@@ -147,14 +147,14 @@ class ResearchService extends BaseReadModelService {
   }) {
 
     const mappedAttributes = await this.mapAttributes(attributes);
-    const savedResearch = await this.createOne({
+    const result = await this.createOne({
       _id: externalId,
       researchGroupExternalId,
       status,
       attributes: mappedAttributes
     })
 
-    return savedResearch;
+    return result;
   }
   
 
@@ -165,12 +165,12 @@ class ResearchService extends BaseReadModelService {
       mappedAttributes = await this.mapAttributes(attributes);
     }
 
-    const updatedResearch = this.updateOne({ _id: externalId }, {
+    const result = this.updateOne({ _id: externalId }, {
       status: status ? status : undefined, 
       attributes: attributes ? mappedAttributes : undefined
     });
 
-    return updatedResearch;
+    return result;
   }
 
 
