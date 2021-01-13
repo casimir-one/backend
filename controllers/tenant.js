@@ -8,7 +8,6 @@ import UserService from './../services/users';
 import tenantService from './../services/tenant';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
-import * as authService from './../services/auth';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
 import { tenantBannerForm } from './../forms/tenantForms';
@@ -30,7 +29,9 @@ const uploadTenantBanner = async (ctx) => {
 
   try {
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(tenantId, jwtUsername);
+    const researchGroupService = new ResearchGroupService();
+    
+    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(tenantId, jwtUsername);
     if (!authorizedGroup) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${tenantId}" research`;

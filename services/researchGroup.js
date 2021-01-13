@@ -76,6 +76,17 @@ class ResearchGroupService extends BaseReadModelService {
     return result;
   }
 
+
+  async authorizeResearchGroupAccount(account, member) {
+    // TODO: check account authorities
+    const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(member);
+    const rgt = rgtList.find(rgt => rgt.research_group.external_id == account);
+    if (!rgt) return null;
+    const researchGroup = await this.getResearchGroup(rgt.research_group.external_id);
+    return researchGroup;
+  }
+  
+
 }
 
 export default ResearchGroupService;

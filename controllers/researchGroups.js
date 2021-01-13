@@ -6,10 +6,8 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
-import * as authService from './../services/auth';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
-import { APP_EVENTS } from './../constants';
 import { researchGroupLogoForm } from './../forms/researchGroupForms';
 import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
 import ResearchGroupUpdatedEvent from './../events/researchGroupUpdatedEvent';
@@ -124,8 +122,9 @@ const defaultResearchGroupLogoPath = () => path.join(__dirname, `./../default/de
 const uploadResearchGroupLogo = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchGroupExternalId = ctx.request.headers['research-group-external-id'];
+  const researchGroupService = new ResearchGroupService();
   
-  const authorizedGroup = await authService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
+  const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
   if (!authorizedGroup) {
     ctx.status = 401;
     ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupExternalId}" research`;

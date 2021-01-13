@@ -8,7 +8,7 @@ import { hashElement } from 'folder-hash';
 import send from 'koa-send';
 import grantsService from './../services/grants';
 import { awardWithdrawalRequestForm } from './../forms/grantForms';
-import { authorizeResearchGroup } from './../services/auth'
+import ResearchGroupService from './../services/researchGroup';
 import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
@@ -74,28 +74,30 @@ const uploadAwardWithdrawalRequestBulkAttachments = async (ctx) => {
   const awardNumber = ctx.request.header['award-number'];
   const subawardNumber = ctx.request.header['subaward-number'];
   const paymentNumber = ctx.request.header['payment-number'];
-
-  if (researchId == undefined) {
-    ctx.status = 400;
-    ctx.body = { error: `"research-id" header is required` };
-    return;
-  }
-
-  if (!awardNumber || !subawardNumber || !paymentNumber) {
-    ctx.status = 400;
-    ctx.body = { error: `"award-number", "subaward-number", "payment-number" headers are required` };
-    return;
-  }
-
-  const stat = util.promisify(fs.stat);
-  const ensureDir = util.promisify(fsExtra.ensureDir);
-
   try {
+
+    const researchGroupService = new ResearchGroupService();
+
+    if (researchId == undefined) {
+      ctx.status = 400;
+      ctx.body = { error: `"research-id" header is required` };
+      return;
+    }
+
+    if (!awardNumber || !subawardNumber || !paymentNumber) {
+      ctx.status = 400;
+      ctx.body = { error: `"award-number", "subaward-number", "payment-number" headers are required` };
+      return;
+    }
+
+    const stat = util.promisify(fs.stat);
+    const ensureDir = util.promisify(fsExtra.ensureDir);
+
     const researchFilesTempStorage = researchAwardWithdrawalRequestsFilesTempStoragePath(ctx.request.header['research-id'], ctx.request.header['upload-session'])
     await ensureDir(researchFilesTempStorage);
 
     const research = await deipRpc.api.getResearchByIdAsync(researchId);
-    const authorized = await authorizeResearchGroup(research.research_group_id, jwtUsername)
+    const authorized = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to post to "${researchId}" research`;

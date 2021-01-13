@@ -19,7 +19,7 @@ import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
 import * as blockchainService from './../utils/blockchain';
-import * as authService from './../services/auth';
+import ResearchGroupService from './../services/researchGroup';
 import ResearchContentService from './../services/researchContent';
 import { RESEARCH_CONTENT_STATUS, APP_EVENTS } from './../constants';
 import ResearchContentCreatedEvent from './../events/researchContentCreatedEvent';
@@ -242,17 +242,20 @@ const getContentRefByHash = async (ctx) => {
 const updateDarArchive = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const darId = ctx.params.dar;
-  const formValidation = () => new Promise(resolve => {
-    parseFormdata(ctx.req, (err, formData) => {
-      if (err) {
-        resolve({ isSuccess: false, err: err })
-      } else {
-        resolve({ isSuccess: true, formData: formData })
-      }
-    })
-  });
 
   try {
+
+    const formValidation = () => new Promise(resolve => {
+      parseFormdata(ctx.req, (err, formData) => {
+        if (err) {
+          resolve({ isSuccess: false, err: err })
+        } else {
+          resolve({ isSuccess: true, formData: formData })
+        }
+      })
+    });
+
+    const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
 
     const rc = await researchContentService.findResearchContentRefById(darId);
@@ -261,7 +264,8 @@ const updateDarArchive = async (ctx) => {
       ctx.body = `Research "${darId}" is locked for updates or does not exist`;
       return;
     }
-    const authorized = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
+
+    const authorized = await researchGroupService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.researchId}" research`;
@@ -372,18 +376,21 @@ const createDarArchive = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.params.researchExternalId;
 
-  if (!researchExternalId) {
-    ctx.status = 400;
-    ctx.body = `"${researchExternalId}" is invalid research id`;
-    return;
-  }
-
   try {
+
+    if (!researchExternalId) {
+      ctx.status = 400;
+      ctx.body = `"${researchExternalId}" is invalid research id`;
+      return;
+    }
+
+    const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
+
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
     const researchInternalId = research.id;
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
+    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
     const researchGroupExternalId = authorizedGroup.external_id;
 
     if (!authorizedGroup) {
@@ -432,6 +439,8 @@ const deleteContentDraft = async (ctx) => {
   const refId = ctx.params.refId;
 
   try {
+
+    const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
 
     const rc = await researchContentService.findResearchContentRefById(refId);
@@ -441,7 +450,7 @@ const deleteContentDraft = async (ctx) => {
       return;
     }
 
-    const authorized = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
+    const authorized = await researchGroupService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
@@ -479,6 +488,8 @@ const deleteContentDraft = async (ctx) => {
 }
 
 const updateDraftMetaAsync = async (researchContentId, archive) => {
+
+  const researchGroupService = new ResearchGroupService();
   const researchContentService = new ResearchContentService();
 
   const parseDraftMetaAsync = () => new Promise(resolve => {
@@ -512,7 +523,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   const accounts = [];
   for (let i = 0; i < authors.length; i++) {
     const username = authors[i];
-    const hasRgt = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, username)
+    const hasRgt = await researchGroupService.authorizeResearchGroupAccount(rc.researchGroupExternalId, username)
     if (hasRgt) {
       accounts.push(username)
     }
@@ -592,6 +603,8 @@ const uploadBulkResearchContent = async (ctx) => {
   const uploadSession = ctx.request.header['upload-session'];
 
   try {
+
+    const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
 
     if (!researchExternalId) {
@@ -606,7 +619,7 @@ const uploadBulkResearchContent = async (ctx) => {
     const research = await deipRpc.api.getResearchAsync(researchExternalId);
     const researchInternalId = research.id;
 
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
+    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${researchExternalId}" research`;
@@ -714,10 +727,12 @@ const getResearchPackageFile = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
 
   const researchContentService = new ResearchContentService();
+  const researchGroupService = new ResearchGroupService();
 
   const research = await deipRpc.api.getResearchAsync(researchExternalId);
+  
   if (research.is_private) {
-    const authorizedGroup = await authService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
+    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to get "${research.external_id}" research content`;
