@@ -1,21 +1,22 @@
 import deipRpc from '@deip/rpc-client';
-import mongoose from 'mongoose';
+import BaseReadModelService from './base';
 import ProposalRef from './../schemas/proposal';
-import config from './../config';
-
 import { SMART_CONTRACT_TYPE } from './../constants';
 
-class ProposalService {
+class ProposalService extends BaseReadModelService {
 
   constructor(usersService, researchGroupService, researchService) {
+    super(ProposalRef);
     this.usersService = usersService;
     this.researchService = researchService;
     this.researchGroupService = researchGroupService;
   }
 
-  async mapProposals(chainProposals, extended = true) {
+  
+  async mapProposals(proposalsRefs, extended = true) {
 
-    const proposalsRefs = await this.getProposalRefs(chainProposals.map(p => p.external_id));
+    const chainProposals = await deipRpc.api.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
+
     const names = chainProposals.reduce((names, chainProposal) => {
 
       if (!names.some((n) => n == chainProposal.proposer)) {
@@ -64,7 +65,6 @@ class ProposalService {
         : users.find(u => u.account.name == chainProposal.proposer);
 
       let proposalRef = proposalsRefs.find(p => p._id == chainProposal.external_id);
-      if (!proposalRef) continue;
 
       let parties = {};
       for (let j = 0; j < chainProposal.required_approvals.length; j++) {
@@ -468,59 +468,51 @@ class ProposalService {
   }
 
 
-
-  async getProposalRef(externalId) {
-    let proposal = await ProposalRef.findOne({ _id: externalId });
-    return proposal ? proposal.toObject() : null;
-  }
-
-  async getProposalRefs(externalIds) {
-    let proposals = await ProposalRef.find({ _id: { $in: externalIds }});
-    return proposals.map(p => p.toObject());
-  }
-
-  async getProposalRefsByType(status) {
-    let proposals = await ProposalRef.find({ status: status });
-    return proposals.map(p => p.toObject());
-  }
-
   async createProposalRef(externalId, {
     type,
     details
   }) {
 
-    const proposal = new ProposalRef({
-      tenantId: config.TENANT,
+    const result = await this.createOne({
       _id: externalId,
       type: type,
       details: details
     });
 
-    const savedProposal = await proposal.save();
-    return savedProposal.toObject();
+    return result;
   }
+
 
   async getAccountProposals(username) {
     const chainResearchGroups = await deipRpc.api.getResearchGroupsByMemberAsync(username);
     const signers = [username, ...chainResearchGroups.map(rg => rg.external_id)];
     const allProposals = await deipRpc.api.getProposalsBySignersAsync(signers);
-    const chainProposals = allProposals.reduce((unique, chainProposal) => {
-      if (unique.some((p) => p.external_id == chainProposal.external_id))
+    const externalIds = allProposals.reduce((unique, chainProposal) => {
+      if (unique.some((id) => id == chainProposal.external_id))
         return unique;
-      return [chainProposal, ...unique];
+      return [chainProposal.external_id, ...unique];
     }, []);
 
-    const result = await this.mapProposals(chainProposals);
+    const proposals = await this.findMany({ _id: { $in: [...externalIds] } });
+    const result = await this.mapProposals(proposals);
     return result;
   }
 
+
   async getProposal(externalId) {
-    const chainProposal = await deipRpc.api.getProposalStateAsync(externalId);
-    if (!chainProposal) return null;
-    const result = await this.mapProposals([chainProposal]);
-    const [proposal] = result;
-    return proposal;
+    const proposal = await this.findOne({ _id: externalId });
+    if (!proposal) return null;
+    const [result] = await this.mapProposals([proposal]);
+    return result;
   }
+
+
+  async getProposals(externalIds) {
+    const proposals = await this.findMany({ _id: { $in: [...externalIds] } });
+    const result = await this.mapProposals(proposals);
+    return result;
+  }
+
 
 }
 
