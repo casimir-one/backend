@@ -5,7 +5,7 @@ import UserInviteService from './../services/userInvites';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import ProposalService from './../services/proposal';
-import usersService from './../services/users';
+import UserService from './../services/users';
 
 class UserInviteHandler extends EventEmitter { }
 
@@ -13,6 +13,8 @@ const userInviteHandler = new UserInviteHandler();
 
 userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userInvitationProposedEvent, emitter, tenant } = source;
+
+  const usersService = new UserService();
   const userInviteService = new UserInviteService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
@@ -40,8 +42,9 @@ userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => ha
 
 
 userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-
   const { event: userInvitationProposalSignedEvent, tenant } = source;
+
+  const usersService = new UserService();
   const userInviteService = new UserInviteService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();

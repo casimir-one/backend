@@ -103,6 +103,12 @@ class BaseReadModelService {
     return result;
   }
 
+  
+  async deleteOne(searchQuery) {
+    const scopeQuery = await this.getBaseScopeQuery();
+    const result = await this._schema.deleteOne({ ...searchQuery, ...scopeQuery });
+    return result;
+  }
 
 }
 

@@ -6,7 +6,7 @@ import ResearchService from './../services/research';
 import ExpressLicensingService from './../services/expressLicensing';
 import ResearchGroupService from './../services/researchGroup';
 import ProposalService from './../services/proposal';
-import usersService from './../services/users';
+import UserService from './../services/users';
 
 class ExpressLicensingHandler extends EventEmitter { }
 
@@ -16,6 +16,7 @@ const expressLicensingHandler = new ExpressLicensingHandler();
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposalSignedEvent, tenant } = source;
 
+  const usersService = new UserService();
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);

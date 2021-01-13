@@ -4,7 +4,7 @@ import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE } from './../constants
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
-import usersService from './../services/users';
+import UserService from './../services/users';
 
 import ResearchProposalSignedEvent from './../events/researchProposalSignedEvent';
 import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
@@ -58,6 +58,7 @@ const updateProposal = async (ctx, next) => {
 
   try {
 
+    const usersService = new UserService();
     const researchGroupService = new ResearchGroupService();
     const researchService = new ResearchService();
     const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
@@ -141,6 +142,7 @@ const deleteProposal = async (ctx, next) => {
 
   try {
 
+    const usersService = new UserService();
     const researchGroupService = new ResearchGroupService();
     const researchService = new ResearchService();
     const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
@@ -222,11 +224,12 @@ const getAccountProposals = async (ctx) => {
   const status = ctx.params.status;
   const username = ctx.params.username;
 
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService();
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-
   try {
+    const usersService = new UserService();
+    const researchGroupService = new ResearchGroupService();
+    const researchService = new ResearchService();
+    const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+
     let result = await proposalsService.getAccountProposals(username);
     result.sort(function (a, b) {
       return new Date(b.proposal.created_at) - new Date(a.proposal.created_at);
@@ -244,12 +247,14 @@ const getProposalById = async (ctx) => {
   const tenant = ctx.state.tenant;
   const externalId = ctx.params.proposalExternalId;
 
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService();
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-
   try {
-    let result = await proposalsService.getProposal(externalId);
+
+    const usersService = new UserService();
+    const researchGroupService = new ResearchGroupService();
+    const researchService = new ResearchService();
+    const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+
+    const result = await proposalsService.getProposal(externalId);
     ctx.body = result;
   } catch (err) {
     console.log(err);

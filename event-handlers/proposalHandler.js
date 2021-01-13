@@ -5,7 +5,7 @@ import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import ProposalService from './../services/proposal';
-import usersService from './../services/users';
+import UserService from './../services/users';
 
 class ProposalHandler extends EventEmitter { }
 
@@ -13,6 +13,8 @@ const proposalHandler = new ProposalHandler();
 
 
 async function createProposalRef(event, chainContractType, tenant) {
+
+  const usersService = new UserService();
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);

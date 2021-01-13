@@ -5,7 +5,7 @@ import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
-import usersService from './../services/users';
+import UserService from './../services/users';
 import UserInviteService from './../services/userInvites';
 
 
@@ -113,6 +113,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
 researchHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchProposalSignedEvent, tenant } = source;
 
+  const usersService = new UserService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
@@ -138,6 +139,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => hand
 researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposalSignedEvent, tenant } = source;
 
+  const usersService = new UserService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
@@ -209,6 +211,7 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) 
 researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: userInvitationProposalRejectedEvent, tenant } = event;
 
+  const usersService = new UserService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
@@ -259,6 +262,7 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply
 researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: userResignationProposalSignedEvent, tenant } = event;
 
+  const usersService = new UserService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
@@ -327,6 +331,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => h
 researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: researchTokenSaleProposalSignedEvent, tenant } = event;
   
+  const usersService = new UserService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);

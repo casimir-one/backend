@@ -3,9 +3,9 @@ import bcrypt from 'bcryptjs';
 import config from './../config';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import usersService from './../services/users';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
+import UserService from './../services/users';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../constants';
 
 function Encodeuint8arr(seed) {
@@ -18,6 +18,7 @@ const signIn = async function (ctx) {
 
   try {
 
+    const usersService = new UserService();
     const user = await usersService.getUser(username);
     if (!user) {
       ctx.body = {
@@ -94,6 +95,7 @@ const signUp = async function (ctx) {
 
   try {
 
+    const usersService = new UserService();
     const researchGroupService = new ResearchGroupService();
 
     if (!username || !pubKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {

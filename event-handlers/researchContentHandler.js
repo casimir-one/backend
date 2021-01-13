@@ -6,7 +6,7 @@ import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
 import ResearchContentService from './../services/researchContent';
-import usersService from './../services/users';
+import UserService from './../services/users';
 
 
 class ResearchContentHandler extends EventEmitter { }
@@ -78,6 +78,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply)
 researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentProposalSignedEvent, tenant } = source;
 
+  const usersService = new UserService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);

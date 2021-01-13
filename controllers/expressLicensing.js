@@ -13,7 +13,6 @@ import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import ExpressLicensingService from './../services/expressLicensing';
-import usersService from './../services/users';
 import ProposalService from './../services/proposal';
 import * as blockchainService from './../utils/blockchain';
 import ResearchExpressLicenseProposedEvent from './../events/researchExpressLicenseProposedEvent';

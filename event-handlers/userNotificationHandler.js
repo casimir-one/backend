@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { APP_EVENTS, USER_NOTIFICATION_TYPE, USER_INVITE_STATUS } from './../constants';
-import usersService from './../services/users';
+import UserService from './../services/users';
 import * as usersNotificationService from './../services/userNotification';
 import ResearchContentService from './../services/researchContent';
 import ReviewService from '../services/review';
@@ -581,6 +581,8 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async (payloa
 userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, async (source) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
   const { event: reviewCreatedEvent, tenant } = source;
+
+  const usersService = new UserService();
   const researchContentService = new ResearchContentService();
   const researchService = new ResearchService(); 
   const reviewService = new ReviewService();
@@ -622,6 +624,8 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, async (payload) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST;
   const { requestor, expert, researchContentExternalId, tenant } = payload;
+
+  const usersService = new UserService();
   const researchContentService = new ResearchContentService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService(); 
@@ -651,7 +655,9 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW
 userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXPERTISE_ALLOCATED, async (expertiseProposal) => {
   const type = USER_NOTIFICATION_TYPE.EXPERTISE_ALLOCATED;
   let { claimer } = expertiseProposal;
-  let claimerProfile = await usersService.findUserProfileByOwner(claimer);
+
+  const usersService = new UserService();
+  const claimerProfile = await usersService.findUserProfileByOwner(claimer);
 
   usersNotificationService.createUserNotification({
     username: claimer,

@@ -7,8 +7,9 @@ import sharp from 'sharp';
 import config from './../config';
 import UserBookmark from './../schemas/userBookmark';
 import qs from 'qs';
-import usersService from './../services/users';
+import UserService from './../services/users';
 import * as blockchainService from './../utils/blockchain';
+import { USER_PROFILE_STATUS } from './../constants';
 
 
 const getUser = async (ctx) => {
@@ -16,6 +17,7 @@ const getUser = async (ctx) => {
 
   try {
 
+    const usersService = new UserService();
     const user = await usersService.getUser(username);
     if (!user) {
       ctx.status = 204;
@@ -39,7 +41,7 @@ const getUsers = async (ctx) => {
   const usernames = query.usernames;
 
   try {
-
+    const usersService = new UserService();
     const users = await usersService.getUsers(usernames);
     ctx.status = 200;
     ctx.body = users;
@@ -56,7 +58,7 @@ const getUserByEmail = async (ctx) => {
   const email = ctx.params.email;
 
   try {
-
+    const usersService = new UserService();
     const user = await usersService.getUserByEmail(email);
     if (!user) {
       ctx.status = 204;
@@ -79,7 +81,7 @@ const getUserProfile = async (ctx) => {
   const username = ctx.params.username;
 
   try {
-
+    const usersService = new UserService();
     const userProfile = await usersService.findUserProfileByOwner(username);
     if (!userProfile) {
       ctx.status = 204;
@@ -104,6 +106,7 @@ const getUsersProfiles = async (ctx) => {
   const accounts = [];
 
   try {
+    const usersService = new UserService();
 
     if (Array.isArray(parsed)) {
       accounts.push(...parsed)
@@ -126,7 +129,8 @@ const getUsersProfiles = async (ctx) => {
 const getActiveUsersProfiles = async (ctx) => {
 
   try {
-    const activeUsersProfiles = await usersService.findActiveUserProfiles();
+    const usersService = new UserService();
+    const activeUsersProfiles = await usersService.findUserProfilesByStatus(USER_PROFILE_STATUS.APPROVED);
     ctx.status = 200;
     ctx.body = activeUsersProfiles;
   } catch (err) {
@@ -144,6 +148,7 @@ const updateUserProfile = async (ctx) => {
 
   try {
 
+    const usersService = new UserService();
     if (username != jwtUsername) {
       ctx.status = 403;
       ctx.body = `You have no permission to edit '${username}' profile`
@@ -328,6 +333,7 @@ const uploadAvatar = async (ctx) => {
   
   try {
 
+    const usersService = new UserService();
     if (username != jwtUsername) {
       ctx.status = 403;
       ctx.body = `You have no permission to upload avatar for '${username}' profile`;
@@ -387,7 +393,8 @@ const getAvatar = async (ctx) => {
 
   try {
 
-    let user = await usersService.getUser(username);
+    const usersService = new UserService();
+    const user = await usersService.getUser(username);
     let src = user && user.profile ? avatarPath(user.account.name, user.profile.avatar) : defaultAvatarPath();
 
     try {

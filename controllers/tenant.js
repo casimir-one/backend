@@ -4,9 +4,10 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp';
 import deipRpc from '@deip/rpc-client';
-import usersService from './../services/users';
+import UserService from './../services/users';
 import tenantService from './../services/tenant';
 import ResearchService from './../services/research';
+import ResearchGroupService from './../services/researchGroup';
 import * as authService from './../services/auth';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
@@ -360,7 +361,8 @@ const updateTenantResearchAttribute = async (ctx) => {
 
 const getSignUpRequests = async (ctx) => {
   try {
-    const pendingUsersProfiles = await usersService.findPendingUserProfiles();
+    const usersService = new UserService();
+    const pendingUsersProfiles = await usersService.findUserProfilesByStatus(USER_PROFILE_STATUS.PENDING);
     ctx.status = 200;
     ctx.body = pendingUsersProfiles;
   } catch (err) {
@@ -377,6 +379,9 @@ const approveSignUpRequest = async (ctx) => {
   try {
 
     // TODO: check jwtUsername for admin
+    const usersService = new UserService();
+    const researchGroupService = new ResearchGroupService();
+
     const userProfile = await usersService.findUserProfileByOwner(username);
     if (!userProfile) {
       ctx.status = 404;
@@ -417,6 +422,7 @@ const rejectSignUpRequest = async (ctx) => {
   try {
 
     // TODO: check jwtUsername for admin
+    const usersService = new UserService();
     const userProfile = await usersService.findUserProfileByOwner(username);
     if (!userProfile) {
       ctx.status = 404;

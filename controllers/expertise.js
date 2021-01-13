@@ -4,7 +4,7 @@ import { getTransaction, sendTransaction } from './../utils/blockchain';
 import userNotificationHandler from './../event-handlers/userNotificationHandler';
 import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 import qs from 'qs';
-import usersService from './../services/users';
+import UserService from './../services/users';
 
 const getExpertiseClaims = async (ctx) => {
     const status = ctx.query.status;
@@ -204,6 +204,7 @@ const getAccountEciStats = async (ctx) => {
   const username = ctx.params.username;
 
   try {
+    const usersService = new UserService();
 
     const stat = await deipRpc.api.getAccountEciStatsAsync(
       username,
@@ -233,7 +234,7 @@ const getAccountsEciStats = async (ctx) => {
   const filter = query.filter;
 
   try {
-
+    const usersService = new UserService();
     const stats = await deipRpc.api.getAccountsEciStatsAsync(
       filter.discipline || undefined,
       filter.from || undefined,

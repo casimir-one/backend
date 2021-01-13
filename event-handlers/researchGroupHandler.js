@@ -5,7 +5,7 @@ import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import ProposalService from './../services/proposal';
-import usersService from './../services/users';
+import UserService from './../services/users';
 
 class ResearchGroupHandler extends EventEmitter { }
 
@@ -50,6 +50,7 @@ researchGroupHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => h
 researchGroupHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdateProposalSignedEvent, tenant } = source;
 
+  const usersService = new UserService();
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
