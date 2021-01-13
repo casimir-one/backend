@@ -20,7 +20,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, 
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService();
   const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-  const expressLicensingService = new ExpressLicensingService(proposalsService, usersService, researchGroupService);
+  const expressLicensingService = new ExpressLicensingService();
 
   const proposalId = researchExpressLicenseProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);

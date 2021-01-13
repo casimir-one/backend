@@ -1,14 +1,12 @@
 import deipRpc from '@deip/rpc-client';
 import ExpressLicense from './../schemas/expressLicense';
-import { SMART_CONTRACT_TYPE } from '../constants';
+import BaseReadModelService from './base';
 
 
-class ExpressLicensingService {
+class ExpressLicensingService extends BaseReadModelService {
 
-  constructor(proposalsService, usersService, researchGroupService) {
-    this.proposalsService = proposalsService;
-    this.usersService = usersService;
-    this.researchGroupService = researchGroupService;
+  constructor() {
+    super(ExpressLicense);
   }
 
   async createExpressLicense({
@@ -19,7 +17,7 @@ class ExpressLicensingService {
     licencePlan
   }) {
 
-    const license = new ExpressLicense({
+    const result = await this.createOne({
       _id: externalId,
       owner,
       requestId,
@@ -27,40 +25,40 @@ class ExpressLicensingService {
       licencePlan
     });
 
-    const savedLicense = await license.save();
-    return savedLicense.toObject();
+    return result;
   }
 
 
   async getExpressLicensesByOwner(owner) {
-    const licenses = await ExpressLicense.find({ owner });
-    return licenses.map(l => l.toObject());
+    const result = await this.findMany({ owner });
+    return result;
   }
 
 
   async getExpressLicensesByResearches(researchExternalIds) {
-    const licenses = await ExpressLicense.find({ researchExternalId: { $in: researchExternalIds } });
-    return licenses.map(l => l.toObject());
+    const result = await this.findMany({ researchExternalId: { $in: researchExternalIds } });
+    return result;
   }
 
 
   async getExpressLicensesByResearch(researchExternalId) {
-    const licenses = await ExpressLicense.find({ researchExternalId });
-    return licenses.map(l => l.toObject());
+    const result = await this.findMany({ researchExternalId });
+    return result;
   }
 
 
-  async getExpressLicensesByRequestId(requestId) {
-    const license = await ExpressLicense.findOne({ requestId });
-    return license.toObject();
+  async getExpressLicenseByRequest(requestId) {
+    const result = await this.findOne({ requestId });
+    return result;
   }
 
 
-  async getExpressLicensesById(_id) {
-    const license = await ExpressLicense.findOne({ _id });
-    return license.toObject();
+  async getExpressLicense(id) {
+    const result = await this.findOne({ _id: id });
+    return result;
   }
 
+  
 }
 
 export default ExpressLicensingService;
