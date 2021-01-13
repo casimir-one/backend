@@ -12,7 +12,6 @@ const deipRpc = require('@deip/rpc-client');
 const mongoose = require('mongoose');
 
 const AwardWithdrawalRequest = require('./../schemas/awardWithdrawalRequest');
-const ExpertiseClaim = require('./../schemas/expertiseClaim');
 const ExpressLicense = require('./../schemas/expressLicense');
 const InvestmentPortfolio = require('./../schemas/investmentPortfolio');
 const JoinRequest = require('./../schemas/joinRequest');
@@ -45,7 +44,6 @@ const run = async () => {
   const researches = Research.find({});
 
   await AwardWithdrawalRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ExpertiseClaim.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await ExpressLicense.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await InvestmentPortfolio.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await JoinRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });

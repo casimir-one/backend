@@ -652,22 +652,4 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW
 });
 
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.EXPERTISE_ALLOCATED, async (expertiseProposal) => {
-  const type = USER_NOTIFICATION_TYPE.EXPERTISE_ALLOCATED;
-  let { claimer } = expertiseProposal;
-
-  const usersService = new UserService();
-  const claimerProfile = await usersService.findUserProfileByOwner(claimer);
-
-  usersNotificationService.createUserNotification({
-    username: claimer,
-    status: 'unread',
-    type,
-    metadata: {
-      expertiseProposal,
-      claimerProfile
-    }
-  });
-});
-
 export default userNotificationHandler;

@@ -47,12 +47,7 @@ protected_route.post('/review-requests/:id/deny', reviewRequests.denyReviewReque
 protected_route.get('/review-requests/expert/:username', reviewRequests.getReviewRequestsByExpert);
 protected_route.get('/review-requests/requestor/:username', reviewRequests.getReviewRequestsByRequestor);
 
-protected_route.post('/expertise-claims', expertise.createExpertiseClaim)
-protected_route.post('/expertise-claims/vote', expertise.voteForExpertiseClaim)
-protected_route.get('/expertise-claims', expertise.getExpertiseClaims)
-protected_route.get('/expertise-claims/user/:username', expertise.getExpertiseClaimsByUser)
-protected_route.get('/expertise-claims/discipline/:disciplineId', expertise.getExpertiseClaimsByDiscipline)
-protected_route.get('/expertise-claims/user/:username/discipline/:disciplineId', expertise.getExpertiseClaimsByUserAndDiscipline)
+
 public_route.get('/expertise/user/:username/history', expertise.getAccountEciHistory)
 public_route.get('/expertise/user/:username/stats', expertise.getAccountEciStats)
 public_route.get('/expertise/users/stats', expertise.getAccountsEciStats)
