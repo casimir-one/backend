@@ -68,7 +68,7 @@ class UserService extends BaseReadModelService {
   }
 
 
-  async findResearchGroupMembershipUsers(researchGroupExternalId) {
+  async getUsersByResearchGroup(researchGroupExternalId) {
     const membershipTokens = await deipRpc.api.getResearchGroupMembershipTokensAsync(researchGroupExternalId);
     const profiles = await this.findMany({ _id: { $in: [...membershipTokens.map(rgt => rgt.owner)] }, status: USER_PROFILE_STATUS.APPROVED });
     const result = await this.mapUsers(profiles);

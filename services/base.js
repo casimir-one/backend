@@ -77,6 +77,32 @@ class BaseReadModelService {
   }
 
 
+  async createMany(objects) {
+    const payloads = [];
+    const tenant = await this.getTenantInstance();
+
+    for (let i = 0; i < objects.length; i++) {
+      const fields = objects[i];
+
+      const keys = Object.keys(fields);
+      const payload = {};
+      for (let i = 0; i < keys.length; i++) {
+        let key = keys[i];
+        let value = fields[key];
+        if (value !== undefined)
+          payload[key] = value;
+      }
+
+      payload.tenantId = tenant._id;
+      
+      payloads.push(payload);
+    }
+
+    const savedModels = await this._schema.create(payloads);
+    return [...savedModels.map(m => m.toObject())];
+  }
+
+
   async updateOne(searchQuery, fields) {
     const scopeQuery = await this.getBaseScopeQuery();
     const model = await this._schema.findOne({ ...searchQuery, ...scopeQuery });

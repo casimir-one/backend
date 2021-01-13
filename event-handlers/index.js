@@ -203,46 +203,23 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_REJECTED, (payload, repl
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchUpdatedEvent, tenant, emitter } = source;
+  const { event: researchUpdatedEvent } = source;
 
-  const usersService = new UserService();
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService();
-  const research = await wait(researchHandler, researchUpdatedEvent, null, tenant);
-
-  // legacy
-  const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
-  const updaterUser = await usersService.findUserProfileByOwner(emitter);
-  const isAcceptedByQuorum = research.research_group.external_id != emitter;
-
-  const payload = { researchGroup: researchGroup, research: research, creator: updaterUser, isAcceptedByQuorum };
-
-  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_UPDATED, payload);
+  await wait(researchHandler, researchUpdatedEvent);
+  fire(userNotificationsHandler, researchUpdatedEvent);
 
 }));
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchUpdateProposedEvent, tenant, emitter } = source;
-  const { researchExternalId, researchGroupExternalId } = researchUpdateProposedEvent.getSourceData();
+  const { event: researchUpdateProposedEvent } = source;
 
-  const usersService = new UserService();
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
-
-  await wait(researchHandler, researchUpdateProposedEvent, null, tenant);
-  await wait(proposalHandler, researchUpdateProposedEvent, null, tenant);
-
-  // legacy
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
-  const research = await researchService.getResearch(researchExternalId)
-  const proposerUser = await usersService.findUserProfileByOwner(emitter);
-
-  const payload = { researchGroup, research: research, proposer: proposerUser };
-
-  fire(userNotificationsHandler, APP_EVENTS.RESEARCH_UPDATE_PROPOSED, payload);
+  await wait(researchHandler, researchUpdateProposedEvent);
+  await wait(proposalHandler, researchUpdateProposedEvent);
+  fire(userNotificationsHandler, researchUpdateProposedEvent);
 
 }));
+
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposalSignedEvent, tenant } = source;

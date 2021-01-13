@@ -255,6 +255,7 @@ const addUserBookmark = async (ctx) => {
     }
 
     const bookmark = new UserBookmark({
+      tenantId: config.TENANT,
       username,
       type: data.type,
       ref,

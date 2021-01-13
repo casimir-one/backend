@@ -1,5 +1,4 @@
 import { APP_EVENTS } from './../constants';
-import UserInviteService from './../services/userInvites';
 import * as blockchainService from './../utils/blockchain';
 import AssetExchangeProposedEvent from './../events/assetExchangeProposedEvent';
 import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalSignedEvent';

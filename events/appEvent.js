@@ -21,6 +21,9 @@ class AppEvent {
       }
     };
   }
+
+  getEventEmitter() { return this.emitter || null };
+  setEventEmitter(emitter) { this.emitter = emitter };
 }
 
 module.exports = AppEvent;

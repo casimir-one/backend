@@ -7,14 +7,16 @@ function events(options) {
       let appEvent = ctx.state.events[i];
       
       if (Array.isArray(appEvent)) { // legacy
-        let [eventName, source] = appEvent;
+        const [eventName, source] = appEvent;
         chain = chain.then(() => {
           return new Promise((success, failure) => {
             appEventHandler.emit(eventName, { ...source, tenant: ctx.state.tenant }, { success, failure });
           });
         });
       } else {
-        let eventName = appEvent.getAppEventName();
+        const eventName = appEvent.getAppEventName();
+        appEvent.setEventEmitter(ctx.state.user.username); // TODO: move this to event constructor
+
         chain = chain.then(() => {
           return new Promise((success, failure) => {
             appEventHandler.emit(eventName, { event: appEvent, tenant: ctx.state.tenant, emitter: ctx.state.user.username }, { success, failure });
