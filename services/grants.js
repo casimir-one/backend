@@ -8,8 +8,8 @@ class GrantService extends BaseReadModelService {
   }
 
   async findAwardWithdrawalRequest(awardNumber, paymentNumber) {
-    const withdrawal = await this.findOne({ awardNumber, paymentNumber });
-    return withdrawal;
+    const result = await this.findOne({ awardNumber, paymentNumber });
+    return result;
   }
 
 }
