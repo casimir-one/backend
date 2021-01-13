@@ -6,9 +6,9 @@ import deipRpc from '@deip/rpc-client';
 import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
 import { hashElement } from 'folder-hash';
 import send from 'koa-send';
-import grantsService from './../services/grants';
 import { awardWithdrawalRequestForm } from './../forms/grantForms';
 import ResearchGroupService from './../services/researchGroup';
+import GrantService from './../services/grants';
 import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
@@ -27,6 +27,7 @@ const getAwardWithdrawalRequestRefByHash = async (ctx) => {
   const paymentNumber = ctx.params.paymentNumber;
 
   try {
+    const grantsService = new GrantService();
     const ref = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
     ctx.status = 200;
     ctx.body = ref;
@@ -42,6 +43,8 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
   const awardNumber = ctx.params.awardNumber;
   const paymentNumber = ctx.params.paymentNumber;
   const isDownload = ctx.query.download === 'true';
+
+  const grantsService = new GrantService();
 
   const withdrawal = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
   if (withdrawal == null) {
@@ -77,6 +80,7 @@ const uploadAwardWithdrawalRequestBulkAttachments = async (ctx) => {
   try {
 
     const researchGroupService = new ResearchGroupService();
+    const grantsService = new GrantService();
 
     if (researchId == undefined) {
       ctx.status = 400;

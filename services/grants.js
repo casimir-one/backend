@@ -1,10 +1,17 @@
+import BaseReadModelService from './base';
 import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
 
-async function findAwardWithdrawalRequest(awardNumber, paymentNumber) {
-  const withdrawal = await AwardWithdrawalRequest.findOne({ awardNumber, paymentNumber });
-  return withdrawal;
+class GrantService extends BaseReadModelService {
+
+  constructor() { 
+    super(AwardWithdrawalRequest);
+  }
+
+  async findAwardWithdrawalRequest(awardNumber, paymentNumber) {
+    const withdrawal = await this.findOne({ awardNumber, paymentNumber });
+    return withdrawal;
+  }
+
 }
 
-export default {
-  findAwardWithdrawalRequest
-}
+export default GrantService;
