@@ -1,168 +1,138 @@
-import JoinRequest from './../schemas/joinRequest'
 import deipRpc from '@deip/rpc-client';
+import UserJoinRequestService from './../services/userJoinRequests';
+import ResearchGroupService from './../services/researchGroup';
+import * as blockchainService from './../utils/blockchain';
 
 const getJoinRequestsByGroup = async (ctx) => {
-    const groupId = parseInt(ctx.params.groupId);
-    const jwtUsername = ctx.state.user.username;
+  const researchGroupExternalId = ctx.params.researchGroupExternalId;
+  const jwtUsername = ctx.state.user.username;
 
-    if (isNaN(groupId)) {
-        ctx.status = 400;
-        ctx.body = `"${ctx.params.groupId}" is invalid group id`;
-        return;
-    }
+  try {
 
-    try {
-        const requests = await JoinRequest.find({'groupId': groupId})
-        ctx.status = 200
-        ctx.body = requests;
+    const userJoinRequestService = new UserJoinRequestService();
+    const requests = await userJoinRequestService.getJoinRequestsByResearchGroup(researchGroupExternalId);
+    ctx.status = 200;
+    ctx.body = requests;
 
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
-    }
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
 }
 
 
 const getJoinRequestsByUser = async (ctx) => {
-    const username = ctx.params.username;
-    const jwtUsername = ctx.state.user.username;
+  const username = ctx.params.username;
+  const jwtUsername = ctx.state.user.username;
 
-    try {
-        const requests = await JoinRequest.find({'username': username})
-        ctx.status = 200
-        ctx.body = requests;
+  try {
 
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
-    }
+    const userJoinRequestService = new UserJoinRequestService();
+    const requests = await userJoinRequestService.getJoinRequestsByUser(username);
+    ctx.status = 200;
+    ctx.body = requests;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
 }
 
 
 const createJoinRequest = async (ctx) => {
-    const data = ctx.request.body;
-    const username = data.username;
-    const groupId = data.groupId !== undefined ? parseInt(data.groupId) : NaN;
-    const coverLetter = data.coverLetter;
-    const jwtUsername = ctx.state.user.username;
-    const isRequestEmitter = username === jwtUsername;
+  const jwtUsername = ctx.state.user.username;
+  const { username, researchGroupExternalId, coverLetter } = ctx.request.body;
+  const isRequestEmitter = username === jwtUsername;
 
-    if (!username || isNaN(groupId) || !coverLetter) {
-        ctx.status = 400;
-        ctx.body = `"username", "groupId" and "coverLetter" fields must be specified`
-        return;
+  try {
+
+    const researchGroupService = new ResearchGroupService();
+    const userJoinRequestService = new UserJoinRequestService();
+
+    if (!username || !coverLetter) {
+      ctx.status = 400;
+      ctx.body = `"username", "researchGroupExternalId" and "coverLetter" fields must be specified`
+      return;
     }
 
     if (!isRequestEmitter) {
-        ctx.status = 400;
-        ctx.body = `Join request should be sent by "${username} account owner`
-        return;
-    }
-    
-    const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(username);
-
-    if (rgtList.some(rgt => rgt.research_group_id == groupId)) {
-        ctx.status = 400;
-        ctx.body = `"${username}" is member of "${groupId}" group already`
-        return;
+      ctx.status = 400;
+      ctx.body = `Join request should be sent by "${username} account owner`
+      return;
     }
 
-    try {
-        const exists = await JoinRequest.findOne({'groupId': groupId, 'username': username, 'status': { $in: ['approved', 'pending'] }});
-        if (exists) {
-            ctx.status = 409
-            ctx.body = `"${username}" has active join request for "${groupId}" group already`
-            return;
-        }
-    
-        const joinRequest = new JoinRequest({
-            username: username,
-            groupId: groupId,
-            coverLetter: coverLetter,
-            status: 'pending'
-        });
-        const savedJoinRequest = await joinRequest.save()
-    
-        ctx.status = 200
-        ctx.body = savedJoinRequest;
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
+    const researchGroup = await researchGroupService.authorizeResearchGroupAccount(researchGroupExternalId, username);
+    if (researchGroup) {
+      ctx.status = 400;
+      ctx.body = `"${username}" is member of "${researchGroupExternalId}" group already`;
+      return;
     }
+
+    const activeJoinRequest = await userJoinRequestService.getActiveJoinRequestForUser(researchGroupExternalId, username);
+    if (activeJoinRequest) {
+      ctx.status = 409;
+      ctx.body = `"${username}" has active join request for "${researchGroupExternalId}" group already`;
+      return;
+    }
+
+    const joinRequest = await userJoinRequestService.createJoinRequest({
+      username,
+      researchGroupExternalId,
+      coverLetter,
+      status: 'pending'
+    });
+
+    ctx.status = 200;
+    ctx.body = joinRequest;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500
+    ctx.body = err;
+  }
 }
 
 
 
 const updateJoinRequest = async (ctx) => {
-    const jwtUsername = ctx.state.user.username;
-    const data = ctx.request.body;
-    const updatedJoinRequest = data.request;
-    const tx = data.tx;
+  const jwtUsername = ctx.state.user.username;
+  const data = ctx.request.body;
+  const updatedJoinRequest = data.request;
+  const tx = data.tx;
 
-    try {
+  try {
 
-        if (!updatedJoinRequest) {
-            ctx.status = 400;
-            ctx.body = `Expected updated Join Request object, but found ${updatedJoinRequest}`
-            return;
-        }
-
-        const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(jwtUsername);
-
-        if (!rgtList.some(rgt => rgt.research_group_id == updatedJoinRequest.groupId)){
-            ctx.status = 403;
-            ctx.body = `You have no permission to post proposals in '${updatedJoinRequest.groupId}' group`
-            return;
-        }
-
-        if (tx && updatedJoinRequest.status == 'approved') {
-            async function sendTransaction() {
-                let promise = new Promise((resolve) => {
-                    deipRpc.api.broadcastTransactionSynchronous(tx, function(err, result) {
-                        if (err) {
-                            console.log(err);
-                            resolve({isSuccess:false})
-                        } else {
-                            console.log(result);
-                            resolve({isSuccess:true})
-                        }
-                    });
-                });
-                return await promise;
-            }
-
-              const result = await sendTransaction();
-              console.log(result);
-
-              if (!result.isSuccess) {
-                ctx.status = 500
-                ctx.body = `Internal server error, please try again later`;
-                return;
-              }
-        }
-
-        const joinRequest = await JoinRequest.findOne({'groupId': updatedJoinRequest.groupId, 'username': updatedJoinRequest.username, 'status': 'pending'})
-        joinRequest.status = updatedJoinRequest.status;
-
-        const updated = await joinRequest.save()
-        ctx.status = 200;
-        ctx.body = updated
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
+    const userJoinRequestService = new UserJoinRequestService();
+    if (!updatedJoinRequest) {
+      ctx.status = 400;
+      ctx.body = `Expected updated Join Request object, but found ${updatedJoinRequest}`
+      return;
     }
+
+    if (tx && updatedJoinRequest.status == 'approved') {
+      await blockchainService.sendTransactionAsync(tx);
+    }
+
+    const result = await userJoinRequestService.updateJoinRequest(updatedJoinRequest._id, {
+      status: updatedJoinRequest.status
+    })
+
+    ctx.status = 200;
+    ctx.body = result;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
 }
 
 
 export default {
-    getJoinRequestsByGroup,
-    getJoinRequestsByUser,
-    createJoinRequest,
-    updateJoinRequest
+  createJoinRequest,
+  updateJoinRequest,
+  getJoinRequestsByGroup,
+  getJoinRequestsByUser
 }

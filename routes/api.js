@@ -39,7 +39,7 @@ protected_route.delete('/bookmarks/user/:username/remove/:bookmarkId', users.rem
 
 protected_route.post('/join-requests', joinRequests.createJoinRequest)
 protected_route.put('/join-requests', joinRequests.updateJoinRequest)
-protected_route.get('/join-requests/group/:groupId', joinRequests.getJoinRequestsByGroup)
+protected_route.get('/join-requests/group/:researchGroupExternalId', joinRequests.getJoinRequestsByGroup)
 protected_route.get('/join-requests/user/:username', joinRequests.getJoinRequestsByUser)
 
 protected_route.post('/review-requests', reviewRequests.createReviewRequest);
