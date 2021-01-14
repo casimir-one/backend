@@ -90,19 +90,19 @@ class ResearchApplicationService extends BaseReadModelService {
   }) {
 
     const result = await this.updateOne({ _id: applicationId }, {
-      status,
-      description,
-      disciplines,
-      problem,
-      solution,
-      funding,
-      eta,
-      location,
-      attributes,
-      budgetAttachment,
-      businessPlanAttachment,
-      cvAttachment,
-      marketResearchAttachment
+      status: status ? status : undefined,
+      description: description ? description : undefined,
+      disciplines: disciplines ? disciplines : undefined,
+      problem: problem ? problem : undefined,
+      solution: solution ? solution : undefined,
+      funding: funding ? funding : undefined,
+      eta: eta ? eta : undefined,
+      location: location ? location : undefined,
+      attributes: attributes ? attributes : undefined,
+      budgetAttachment: budgetAttachment ? budgetAttachment : undefined,
+      businessPlanAttachment: businessPlanAttachment ? businessPlanAttachment : undefined,
+      cvAttachment: cvAttachment ? cvAttachment : undefined,
+      marketResearchAttachment: marketResearchAttachment ? marketResearchAttachment : undefined
     });
 
     return result;
