@@ -2,7 +2,6 @@ import deipRpc from '@deip/rpc-client';
 import BaseReadModelService from './base';
 import Research from './../schemas/research';
 import ExpressLicense from './../schemas/expressLicense';
-import ResearchApplication from './../schemas/researchApplication';
 import mongoose from 'mongoose';
 import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS } from './../constants';
 
@@ -304,107 +303,6 @@ class ResearchService extends BaseReadModelService {
     }
   }
 
-
-
-  // TODO: move to separate service
-  
-  async findResearchApplicationById(applicationId) {
-    let researchApplication = await ResearchApplication.findOne({ _id: applicationId });
-    return researchApplication;
-  }
-
-  async createResearchApplication({
-    proposalId,
-    researchExternalId,
-    researcher,
-    status,
-    title,
-    description,
-    disciplines,
-    problem,
-    solution,
-    funding,
-    eta,
-    location,
-    attributes,
-    budgetAttachment,
-    businessPlanAttachment,
-    cvAttachment,
-    marketResearchAttachment,
-    tx
-  }) {
-
-    const researchApplication = new ResearchApplication({
-      _id: proposalId,
-      researchExternalId,
-      researcher,
-      status,
-      title,
-      description,
-      disciplines,
-      problem,
-      solution,
-      funding,
-      eta,
-      location,
-      attributes,
-      budgetAttachment,
-      businessPlanAttachment,
-      cvAttachment,
-      marketResearchAttachment,
-      tx
-    });
-
-    return researchApplication.save();
-  }
-
-
-  async updateResearchApplication(applicationId, {
-    status,
-    description,
-    disciplines,
-    problem,
-    solution,
-    funding,
-    eta,
-    location,
-    attributes,
-    budgetAttachment,
-    businessPlanAttachment,
-    cvAttachment,
-    marketResearchAttachment
-  }) {
-
-    const researchApplication = await this.findResearchApplicationById(applicationId);
-    researchApplication.description = description;
-    researchApplication.status = status;
-    researchApplication.disciplines = disciplines;
-    researchApplication.problem = problem;
-    researchApplication.solution = solution;
-    researchApplication.funding = funding;
-    researchApplication.eta = eta;
-    researchApplication.location = location;
-    researchApplication.attributes = attributes;
-    researchApplication.budgetAttachment = budgetAttachment;
-    researchApplication.businessPlanAttachment = businessPlanAttachment;
-    researchApplication.cvAttachment = cvAttachment;
-    researchApplication.marketResearchAttachment = marketResearchAttachment;
-
-    return researchApplication.save();
-  }
-
-
-  async getResearchApplications({ status, researcher }) {
-    const query = {};
-    if (status) {
-      query.status = status;
-    }
-    if (researcher) {
-      query.researcher = researcher;
-    }
-    const result = await ResearchApplication.find(query);
-    return result;
-  }
 }
 
 export default ResearchService;

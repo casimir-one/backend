@@ -10,6 +10,7 @@ import slug from 'limax';
 import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
+import ResearchApplicationService from './../services/researchApplication';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
 import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
@@ -229,9 +230,10 @@ const updateResearch = async (ctx, next) => {
 const createResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
 
   try {
+
+    const researchApplicationService = new ResearchApplicationService();
 
     const formUploader = researchApplicationForm.fields([
       { name: 'budgetAttachment', maxCount: 1 },
@@ -265,7 +267,7 @@ const createResearchApplication = async (ctx, next) => {
     const proposal = await deipRpc.api.getProposalAsync(form.proposalId);
     const isAccepted = proposal == null;
 
-    const researchApplicationRm = await researchService.createResearchApplication({
+    const researchApplicationRm = await researchApplicationService.createResearchApplication({
       proposalId: form.proposalId,
       researchExternalId: form.researchExternalId,
       researcher: form.researcher,
@@ -311,12 +313,13 @@ const createResearchApplication = async (ctx, next) => {
 const editResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
   const applicationId = ctx.params.proposalId;
 
   try {
 
-    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    const researchApplicationService = new ResearchApplicationService();
+
+    const researchApplication = await researchApplicationService.getResearchApplication(applicationId);
     if (!researchApplication) {
       ctx.status = 404;
       ctx.body = `Research application "${applicationId}" is not found`;
@@ -379,7 +382,7 @@ const editResearchApplication = async (ctx, next) => {
 
 
     const researchApplicationData = researchApplication.toObject();
-    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+    const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       ...update
     });
@@ -402,7 +405,6 @@ const editResearchApplication = async (ctx, next) => {
 const getResearchApplicationAttachmentFile = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
   const applicationId = ctx.params.proposalId;
   const filename = ctx.query.filename;
   const isDownload = ctx.query.download === 'true';
@@ -415,7 +417,8 @@ const getResearchApplicationAttachmentFile = async function (ctx) {
       return;
     }
 
-    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    const researchApplicationService = new ResearchApplicationService();
+    const researchApplication = await researchApplicationService.getResearchApplication(applicationId);
     if (!researchApplication) {
       ctx.status = 404;
       ctx.body = `Research application "${applicationId}" is not found`;
@@ -454,16 +457,16 @@ const approveResearchApplication = async (ctx, next) => {
   const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
-  const researchService = new ResearchService();
-  const researchGroupsService = new ResearchGroupService();
-
   try { 
+
+    const researchService = new ResearchService();
+    const researchApplicationService = new ResearchApplicationService();
 
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: applicationId } = payload;
 
-    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    const researchApplication = await researchApplicationService.getResearchApplication(applicationId);
     if (!researchApplication) {
       ctx.status = 404;
       ctx.body = `Research application "${applicationId}" is not found`;
@@ -489,7 +492,7 @@ const approveResearchApplication = async (ctx, next) => {
     ctx.state.events.push(researchCreatedEvent);
 
     const researchApplicationData = researchApplication.toObject();
-    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+    const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.APPROVED
     });
@@ -514,16 +517,17 @@ const approveResearchApplication = async (ctx, next) => {
 const rejectResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
   const { tx } = ctx.request.body;
 
   try { 
+
+    const researchApplicationService = new ResearchApplicationService();
 
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: applicationId } = payload;
 
-    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+    const researchApplication = await researchApplicationService.getResearchApplication(applicationId);
     if (!researchApplication) {
       ctx.status = 404;
       ctx.body = `Research application "${applicationId}" is not found`;
@@ -539,7 +543,7 @@ const rejectResearchApplication = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
     const researchApplicationData = researchApplication.toObject();
-    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+    const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.REJECTED
     });
@@ -562,16 +566,18 @@ const rejectResearchApplication = async (ctx, next) => {
 const deleteResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
   const { tx } = ctx.request.body;
 
   try {
+
+    const researchApplicationService = new ResearchApplicationService();
 
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: applicationId } = payload;
 
-    const researchApplication = await researchService.findResearchApplicationById(applicationId);
+
+    const researchApplication = await researchApplicationService.getResearchApplication(applicationId);
     if (!researchApplication) {
       ctx.status = 404;
       ctx.body = `Research application "${applicationId}" is not found`;
@@ -594,7 +600,7 @@ const deleteResearchApplication = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
     const researchApplicationData = researchApplication.toObject();
-    const updatedResearchApplication = await researchService.updateResearchApplication(applicationId, {
+    const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.DELETED
     });
@@ -616,14 +622,16 @@ const deleteResearchApplication = async (ctx, next) => {
 
 const getResearchApplications = async (ctx) => {
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
   const status = ctx.query.status;
   const researcher = ctx.query.researcher;
 
   try {
-    const result = await researchService.getResearchApplications({ status, researcher });
+
+    const researchApplicationService = new ResearchApplicationService();
+    const result = await researchApplicationService.getResearchApplications({ status, researcher });
     ctx.status = 200;
     ctx.body = result;
+    
   } catch (err) {
     console.log(err);
     ctx.status = 500;
