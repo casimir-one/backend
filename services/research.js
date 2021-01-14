@@ -2,12 +2,15 @@ import deipRpc from '@deip/rpc-client';
 import BaseReadModelService from './base';
 import Research from './../schemas/research';
 import ExpressLicense from './../schemas/expressLicense';
+import ExpressLicensingService from './expressLicensing'
 import mongoose from 'mongoose';
 import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS } from './../constants';
 
 class ResearchService extends BaseReadModelService {
 
-  constructor() { super(Research); }
+  constructor() { 
+    super(Research);
+  }
 
   async getResearchAttributes() {
     const tenant = await this.getTenantInstance();
@@ -15,6 +18,7 @@ class ResearchService extends BaseReadModelService {
   }
 
   async mapResearch(researches, filterObj) {
+    const expressLicensingService = new ExpressLicensingService();
 
     const filter =  {
       searchTerm: "",
@@ -23,14 +27,13 @@ class ResearchService extends BaseReadModelService {
     }
 
     const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id));
-    // TODO: replace with service call
-    const researchesExpressLicenses = await ExpressLicense.find({ researchExternalId: { $in: chainResearches.map(r => r.external_id) } });
+    const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
     const researchAttributes = await this.getResearchAttributes();
     
     return chainResearches
       .map((chainResearch) => {
         const researchRef = researches.find(r => r._id.toString() == chainResearch.external_id);
-        const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id).map(l => l.toObject());
+        const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id);
         const attributes = researchRef ? researchRef.attributes : [];
        
         const title = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())

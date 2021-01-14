@@ -1,20 +1,22 @@
 import deipRpc from '@deip/rpc-client';
+import BaseReadModelService from './base';
 import ResearchContent from './../schemas/researchContent';
-import config from './../config';
 import { RESEARCH_CONTENT_STATUS } from './../constants';
 
 
-class ResearchContentService {
+class ResearchContentService extends BaseReadModelService {
 
-  constructor() { }
+  constructor() { 
+    super(ResearchContent);
+  }
 
-  async mapResearchContents(chainResearchContents) {
-    const researchContents = await ResearchContent.find({ _id: { $in: chainResearchContents.map(r => r.external_id) } });
-
+  async mapResearchContents(researchContents) {
+    const chainResearchContents = await deipRpc.api.getResearchContentsAsync(researchContents.map(rc => rc._id));
+    
     return chainResearchContents
       .map((chainResearchContent) => {
-        const researchContentRef = researchContents.find(r => r._id.toString() == chainResearchContent.external_id);
-        return { ...chainResearchContent, researchContentRef: researchContentRef ? researchContentRef.toObject() : null };
+        const researchContentRef = researchContents.find(rc => rc._id == chainResearchContent.external_id);
+        return { ...chainResearchContent, researchContentRef: researchContentRef ? researchContentRef : null };
       })
       .map((researchContent) => {
         const override = researchContent.researchContentRef ? { title: researchContent.researchContentRef.title } : { title: "Not specified" };
@@ -23,52 +25,52 @@ class ResearchContentService {
   }
 
   async getResearchContent(researchContentExternalId) {
-    const chainResearchContent = await deipRpc.api.getResearchContentAsync(researchContentExternalId);
-    if (!chainResearchContent) return null;
-    const result = await this.mapResearchContents([chainResearchContent]);
-    const [researchContent] = result;
-    return researchContent;
+    const researchContent = await this.findOne({ _id: researchContentExternalId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    if (!researchContent) return null;
+    const [result] = await this.mapResearchContents([researchContent]);
+    return result;
   }
 
+
   async getResearchContents(researchContentExternalIds) {
-    const chainResearchContents = await deipRpc.api.getResearchContentsAsync(researchContentExternalIds);
-    const researchContents = await this.mapResearchContents(chainResearchContents);
-    return researchContents;
+    const researchContents = await this.findMany({ _id: { $in: [...researchContentExternalIds] }, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const result = await this.mapResearchContents(researchContents);
+    return result;
   }
 
   async getResearchContentsByResearch(researchExternalId) {
-    const chainResearchContents = await deipRpc.api.getResearchContentsByResearchAsync(researchExternalId);
-    const researchContents = await this.mapResearchContents(chainResearchContents);
-    return researchContents;
+    const researchContents = await this.findMany({ researchExternalId , status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const result = await this.mapResearchContents(researchContents);
+    return result;
   }
 
   async findPublishedResearchContentRefsByResearch(researchExternalId) {
-    let result = await ResearchContent.find({ researchExternalId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
-    return [...result.map(rc => rc.toObject())];
+    const result = await this.findMany({ researchExternalId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    return result;
   }
 
   async findDraftResearchContentRefsByResearch(researchExternalId) {
-    let result = await ResearchContent.find({ researchExternalId, $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
-    return [...result.map(rc => rc.toObject())];
+    const result = await this.findMany({ researchExternalId, $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
+    return result;
   }
 
   async findResearchContentRefById(externalId) {
-    let result = await ResearchContent.findOne({ _id: externalId });
+    const result = await this.findOne({ _id: externalId });
     return result;
   }
 
   async removeResearchContentRefById(externalId) {
-    let result = await ResearchContent.deleteOne({ _id: externalId });
+    const result = await this.deleteOne({ _id: externalId });
     return result;
   }
 
   async findResearchContentRefByHash(researchExternalId, hash) {
-    const rc = await ResearchContent.findOne({ researchExternalId, hash });
-    return rc;
+    const result = await this.findOne({ researchExternalId, hash });
+    return result;
   }
 
   async removeResearchContentRefByHash(researchExternalId, hash) {
-    const result = await ResearchContent.deleteOne({ researchExternalId, hash });
+    const result = await this.deleteOne({ researchExternalId, hash });
     return result;
   }
 
@@ -89,9 +91,8 @@ class ResearchContentService {
     foreignReferences
   }) {
 
-    const researchContent = new ResearchContent({
+    const result = await this.createOne({
       _id: externalId,
-      tenantId: config.TENANT,
       researchExternalId,
       researchGroupExternalId,
       folder,
@@ -107,7 +108,7 @@ class ResearchContentService {
       foreignReferences
     });
 
-    return researchContent.save();
+    return result;
   }
 
 
@@ -124,20 +125,20 @@ class ResearchContentService {
     foreignReferences
   }) {
 
-    const researchContent = await ResearchContent.findOne({ _id: externalId });
+    const result = await this.updateOne({ _id: externalId }, {
+      folder,
+      title,
+      hash,
+      algo,
+      type,
+      status,
+      packageFiles,
+      authors,
+      references,
+      foreignReferences
+    });
 
-    researchContent.folder = folder || researchContent.folder;
-    researchContent.title = title || researchContent.title;
-    researchContent.hash = hash || researchContent.hash;
-    researchContent.algo = algo || researchContent.algo;
-    researchContent.type = type || researchContent.type;
-    researchContent.status = status || researchContent.status;
-    researchContent.packageFiles = packageFiles || researchContent.packageFiles;
-    researchContent.authors = authors || researchContent.authors;
-    researchContent.references = references || researchContent.references;
-    researchContent.foreignReferences = foreignReferences || researchContent.foreignReferences;
-
-    return researchContent.save();
+    return result;
   }
 
 

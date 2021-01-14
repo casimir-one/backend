@@ -288,7 +288,7 @@ const createResearchApplication = async (ctx, next) => {
       tx: form.tx
     });
 
-    const researchApplication = researchApplicationRm.toObject();
+    const researchApplication = researchApplicationRm;
 
     ctx.status = 200;
     ctx.body = { txResult, tx: form.tx, rm: researchApplication };
@@ -381,7 +381,7 @@ const editResearchApplication = async (ctx, next) => {
     } catch(err){}
 
 
-    const researchApplicationData = researchApplication.toObject();
+    const researchApplicationData = researchApplication;
     const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       ...update
@@ -491,7 +491,7 @@ const approveResearchApplication = async (ctx, next) => {
     const researchCreatedEvent = new ResearchCreatedEvent(datums, { attributes: researchApplication.attributes || [] });
     ctx.state.events.push(researchCreatedEvent);
 
-    const researchApplicationData = researchApplication.toObject();
+    const researchApplicationData = researchApplication;
     const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.APPROVED
@@ -542,7 +542,7 @@ const rejectResearchApplication = async (ctx, next) => {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
-    const researchApplicationData = researchApplication.toObject();
+    const researchApplicationData = researchApplication;
     const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.REJECTED
@@ -599,7 +599,7 @@ const deleteResearchApplication = async (ctx, next) => {
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
 
-    const researchApplicationData = researchApplication.toObject();
+    const researchApplicationData = researchApplication;
     const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
       ...researchApplicationData,
       status: RESEARCH_APPLICATION_STATUS.DELETED

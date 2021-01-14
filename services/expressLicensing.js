@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import ExpressLicense from './../schemas/expressLicense';
 import BaseReadModelService from './base';
 

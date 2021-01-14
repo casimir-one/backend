@@ -347,8 +347,10 @@ const unlockContentDraft = async (ctx) => {
       return;
     }
 
-    rc.status = RESEARCH_CONTENT_STATUS.IN_PROGRESS;
-    const updatedRc = await rc.save();
+    const updatedRc = await researchContentService.updateResearchContentRef(rc._id, {
+      status: RESEARCH_CONTENT_STATUS.IN_PROGRESS
+    });
+
     ctx.status = 200;
     ctx.body = updatedRc;
   } catch (err) {
@@ -501,6 +503,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
       let title = "";
       let authors = [];
       let references = [];
+
       try {
         title = result['article']['front'][0]['article-meta'][0]['title-group'][0]['article-title'][0];
       } catch (err) { }
@@ -508,9 +511,6 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
         authors = result['article']['front'][0]['article-meta'][0]['contrib-group'][0]['contrib']
           .filter(p => p['string-name']).map(p => p['string-name'][0]['_'])
           .filter(username => username != null && username != '');
-      } catch (err) { }
-      try {
-        references = parseInternalReferences(result['article']['back'][0]['ref-list'][0]['ref']);
       } catch (err) { }
 
       resolve({ title, authors, references });
@@ -541,10 +541,6 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
     }
   }
 
-  rc.title = title || '';
-  rc.authors = accounts;
-  rc.references = contentRefs;
-
   const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
 
   const archiveDir = researchDarArchivePath(rc.researchExternalId, rc.folder);
@@ -552,47 +548,19 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   console.log(hashObj);
   const hashes = hashObj.children.map(f => f.hash);
   hashes.sort();
+
   const hash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
-  rc.hash = hash;
-  rc.algo = "sha256";
-  rc.packageFiles = hashObj.children.map((f) => {
-    return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
-  });
-  await rc.save()
-}
-
-const parseInternalReferences = (refList) => {
-  return [];
-  const webpageRefs = refList.filter(ref => {
-    try {
-      return ref['element-citation'][0]['$']['publication-type'] === 'webpage';
-    } catch (err) {
-      return false;
-    }
-  }).map(ref => {
-    return ref['element-citation'][0];
-  });
-  const deipRefs = webpageRefs
-    .filter(wref => wref.uri && wref.uri[0])
-    .map(wref => {
-      try {
-        const parsedUrl = url.parse(wref.uri[0]);
-        if (parsedUrl.href.indexOf(config.CLIENT_URL) === 0) {
-          const segments = parsedUrl.hash.split('/');
-          const researchGroupPermlink = decodeURIComponent(segments[1]);
-          const researchPermlink = decodeURIComponent(segments[3]);
-          const researchContentPermlink = decodeURIComponent(segments[4]);
-          return { researchGroupPermlink, researchPermlink, researchContentPermlink };
-        }
-      } catch (err) {
-        console.log(err);
-      }
-      return null;
+  await researchContentService.updateResearchContentRef(rc._id, {
+    title: title || '',
+    authors: accounts,
+    references: contentRefs,
+    hash: hash,
+    algo: "sha256",
+    packageFiles: hashObj.children.map((f) => {
+      return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
     })
-    .filter(r => r != null);
-
-  return deipRefs;
-};
+  });
+}
 
 // ############# files ######################
 
@@ -626,7 +594,6 @@ const uploadBulkResearchContent = async (ctx) => {
       return;
     }
 
-    const researchGroupInternalId = authorizedGroup.id;
     const researchGroupExternalId = authorizedGroup.external_id;
 
     const researchFilesTempStorage = researchFilesTempStoragePath(researchExternalId, uploadSession)
@@ -681,8 +648,11 @@ const uploadBulkResearchContent = async (ctx) => {
       await fsExtra.move(tempDestinationPath, packagePath, { overwrite: true });
 
       if (rc) {
-        rc.folder = packageHash;
-        const updatedRc = await rc.save();
+
+        const updatedRc = await researchContentService.updateResearchContentRef(rc._id, {
+          folder: packageHash
+        });
+
         ctx.status = 200;
         ctx.body = { rm: updatedRc };
       } else {
@@ -755,8 +725,8 @@ const getResearchPackageFile = async function (ctx) {
   }
 
   if (isDownload) {
-    let ext = file.filename.substr(file.filename.lastIndexOf('.') + 1);
-    let name = file.filename.substr(0, file.filename.lastIndexOf('.'));
+    const ext = file.filename.substr(file.filename.lastIndexOf('.') + 1);
+    const name = file.filename.substr(0, file.filename.lastIndexOf('.'));
     ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
     ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchExternalId, rc.hash, file.filename));
   } else {
@@ -777,7 +747,7 @@ const createResearchContent = async (ctx, next) => {
     const { content: hash, external_id: researchContentExternalId, research_external_id: researchExternalId } = opPayload;
     
     const rc = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
-    const draft = rc ? rc.toObject() : null;
+    const draft = rc ? rc : null;
     
     if (!draft) {
       ctx.status = 400;
