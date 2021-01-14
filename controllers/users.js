@@ -5,9 +5,9 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp';
 import config from './../config';
-import UserBookmark from './../schemas/userBookmark';
 import qs from 'qs';
 import UserService from './../services/users';
+import UserBookmarkService from './../services/userBookmark';
 import * as blockchainService from './../utils/blockchain';
 import { USER_PROFILE_STATUS } from './../constants';
 
@@ -204,24 +204,20 @@ const updateUserAccount = async (ctx) => {
 const getUserBookmarks = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const username = ctx.params.username;
+  const type = ctx.query.type;
+  const ref = ctx.query.ref;
 
   try {
 
+    const userBookmarkService = new UserBookmarkService();
+    
     if (username !== jwtUsername) {
       ctx.status = 403;
       ctx.body = `You have no permission to get '${username}' bookmarks`;
       return;
     }
 
-    const query = { username, };
-    if (ctx.query.type) {
-      query.type = ctx.query.type;
-    }
-    if (ctx.query.ref) {
-      query.ref = ctx.query.ref;
-    }
-    const bookmarks = await UserBookmark.find(query);
-
+    const bookmarks = await userBookmarkService.getUserBookmarks(username, type, ref);
     ctx.status = 200;
     ctx.body = bookmarks;
 
@@ -238,6 +234,7 @@ const addUserBookmark = async (ctx) => {
   
   try {
 
+    const userBookmarkService = new UserBookmarkService();
     if (username !== jwtUsername) {
       ctx.status = 403;
       ctx.body = `You have no permission to create '${username}' bookmarks`;
@@ -253,18 +250,15 @@ const addUserBookmark = async (ctx) => {
         ref = data.researchId;
         break;
     }
-
-    const bookmark = new UserBookmark({
-      tenantId: config.TENANT,
+    
+    const bookmark = await userBookmarkService.createUserBookmark({
       username,
       type: data.type,
-      ref,
+      ref
     });
     
-    const savedBookmark = await bookmark.save();
-
     ctx.status = 201;
-    ctx.body = savedBookmark;
+    ctx.body = bookmark;
 
   } catch (err) {
     console.log(err);
@@ -276,18 +270,18 @@ const addUserBookmark = async (ctx) => {
 const removeUserBookmark = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const username = ctx.params.username;
+  const bookmarkId = ctx.params.bookmarkId;
 
   try {
+
+    const userBookmarkService = new UserBookmarkService();
     if (username !== jwtUsername) {
       ctx.status = 403;
       ctx.body = `You have no permission to remove '${username}' bookmarks`;
       return;
     }
 
-    await UserBookmark.remove({
-      _id: ctx.params.bookmarkId,
-      username,
-    });
+    await userBookmarkService.removeUserBookmark(bookmarkId);
     ctx.status = 204;
 
   } catch (err) {
