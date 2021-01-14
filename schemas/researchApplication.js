@@ -11,13 +11,7 @@ const ResearchApplication = new Schema({
   "tenantId": { type: String, required: true },
   "researchExternalId": { type: String, trim: true, required: true },  
   "researcher": { type: String, trim: true, required: true },
-  "status": { type: String, enum: [
-      RESEARCH_APPLICATION_STATUS.PENDING, 
-      RESEARCH_APPLICATION_STATUS.APPROVED, 
-      RESEARCH_APPLICATION_STATUS.REJECTED,
-      RESEARCH_APPLICATION_STATUS.DELETED
-    ], required: true 
-  },
+  "status": { type: String, enum: [...Object.values(RESEARCH_APPLICATION_STATUS)], required: true },
   "title": { type: String, trim: true, required: true }, // Title
   "description": { type: String, trim: true, required: true }, // What is your idea, please describe
   "disciplines": [{ type: String, trim: true, required: true }], // Select your domain

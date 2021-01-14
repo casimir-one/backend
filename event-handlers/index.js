@@ -590,4 +590,11 @@ appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) 
 }));
 
 
+appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: reviewRequestedEvent } = source;
+  
+  fire(userNotificationsHandler, reviewRequestedEvent);
+}));
+
+
 export default appEventHandler;

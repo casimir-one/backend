@@ -1,106 +1,149 @@
-import deipRpc from '@deip/rpc-client';
-import ReviewRequest from './../schemas/reviewRequest';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
-import userNotificationHandler from './../event-handlers/userNotificationHandler';
+import ReviewRequestService from './../services/reviewRequest';
+import ReviewService from './../services/review';
+import ReviewRequestedEvent from './../events/reviewRequestedEvent';
+
 
 const getReviewRequestsByExpert = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const username = ctx.params.username;
+  const expert = ctx.params.username;
+  const status = ctx.query.status;
 
-  if (username !== jwtUsername) {
-    // ctx.status = 403;
-    // ctx.body = `You have no permission to get '${username}' review requests`;
-    // return;
+  try {
+
+    const reviewRequestService = new ReviewRequestService();
+    if (expert !== jwtUsername) {
+      // ctx.status = 403;
+      // ctx.body = `You have no permission to get '${username}' review requests`;
+      // return;
+      ctx.status = 200;
+      ctx.body = [];
+      return;
+    }
+
+    const reviewRequests = await reviewRequestService.getReviewRequestsByExpert(expert, status);
     ctx.status = 200;
-    ctx.body = [];
-    return;
+    ctx.body = reviewRequests;
+
+  } catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
   }
 
-  const query = { expert: username };
-  if (ctx.query.status) {
-    query.status = ctx.query.status;
-  }
-  const reviewRequests = await ReviewRequest.find(query);
-
-  ctx.status = 200;
-  ctx.body = reviewRequests;
 };
+
 
 const getReviewRequestsByRequestor = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const username = ctx.params.username;
+  const requestor = ctx.params.username;
+  const status = ctx.query.status;
 
-  if (username !== jwtUsername) {
-    // ctx.status = 403;
-    // ctx.body = `You have no permission to get '${username}' review requests`;
-    // return;
+  try {
+
+    const reviewRequestService = new ReviewRequestService();
+    if (requestor !== jwtUsername) {
+      // ctx.status = 403;
+      // ctx.body = `You have no permission to get '${username}' review requests`;
+      // return;
+      ctx.status = 200;
+      ctx.body = [];
+      return;
+    }
+
+    const reviewRequests = await reviewRequestService.getReviewRequestsByRequestor(requestor, status);
     ctx.status = 200;
-    ctx.body = [];
-    return;
+    ctx.body = reviewRequests;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
   }
-
-  const query = {
-    requestor: username,
-  };
-
-  if (ctx.query.status) {
-    query.status = ctx.query.status;
-  }
-  
-  const reviewRequests = await ReviewRequest.find(query);
-
-  ctx.status = 200;
-  ctx.body = reviewRequests;
 };
 
-const createReviewRequest = async (ctx) => {
+
+const createReviewRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-
   const { researchContentExternalId, expert } = ctx.request.body;
   const requestor = jwtUsername;
 
-  if (jwtUsername === expert) {
-    ctx.status = 400;
-    ctx.body = `You can't request review from yourself`;
-    return;
-  }
-  
-  const exists = await ReviewRequest.findOne({ expert, researchContentExternalId });
-  if (exists) {
-    ctx.status = 400;
-    ctx.body = 'Review with such params already requested';
-    return;
-  }
-  const contentReviews = await deipRpc.api.getReviewsByResearchContentAsync(researchContentExternalId);
-  const existingReview = contentReviews.find(r => r.author === expert);
-  if (existingReview) {
-    ctx.status = 400;
-    ctx.body = 'Expert already reviewed this content';
-    return;
+  try {
+    const reviewRequestService = new ReviewRequestService();
+    const reviewService = new ReviewService();
+
+    if (requestor === expert) {
+      ctx.status = 400;
+      ctx.body = `You can't request review from yourself`;
+      return;
+    }
+
+    const existingRequest = await reviewRequestService.getReviewRequestsByExpertAndResearchContent(expert, researchContentExternalId)
+    if (existingRequest) {
+      ctx.status = 400;
+      ctx.body = 'Review with such params already requested';
+      return;
+    }
+
+    const researchContentReviews = await reviewService.getReviewsByResearchContent(researchContentExternalId);
+    const existingReview = researchContentReviews.find(r => r.author === expert);
+    if (existingReview) {
+      ctx.status = 400;
+      ctx.body = 'Expert already reviewed this content';
+      return;
+    }
+
+    const reviewRequest = await reviewRequestService.createReviewRequest({
+      expert,
+      researchContentExternalId,
+      requestor,
+      status: 'pending'
+    });
+
+    const reviewRequestedEvent = new ReviewRequestedEvent([], { reviewRequest });
+    ctx.state.events.push(reviewRequestedEvent);
+
+    ctx.status = 200;
+    ctx.body = reviewRequest;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
   }
 
-  const reviewRequest = new ReviewRequest({
-    expert, 
-    researchContentExternalId,
-    requestor: requestor,
-    status: 'pending'
-  });
-  const savedReviewRequest = await reviewRequest.save();
+  await next();
   
-  userNotificationHandler.emit(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, { ...reviewRequest.toObject(), tenant});
-
-  ctx.status = 201;
-  ctx.body = savedReviewRequest;
 };
 
 
 const denyReviewRequest = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
+  const requestId = ctx.params.id;
 
-  await ReviewRequest.update({ _id: ctx.params.id, expert: jwtUsername }, { $set: { status: 'denied' } });
-  ctx.status = 200;
-  ctx.body = "";
+  try {
+    const reviewRequestService = new ReviewRequestService();
+
+    const reviewRequests = await reviewRequestService.getReviewRequestsByExpert(jwtUsername);
+    if (!reviewRequests.some(r => r._id == requestId)) {
+      ctx.status = 404;
+      ctx.body = `Review request ${requestId} for expert ${jwtUsername} is not found`;
+      return;
+    }
+
+    await reviewRequestService.updateReviewRequest(requestId, {
+      status: 'denied'
+    });
+
+    ctx.status = 201;
+    ctx.body = "";
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+
 };
 
 export default {

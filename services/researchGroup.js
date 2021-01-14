@@ -69,8 +69,8 @@ class ResearchGroupService extends BaseReadModelService {
   }) {
 
     const result = this.updateOne({ _id: externalId }, {
-      name: name ? name : undefined,
-      description: description ? description : undefined
+      name,
+      description
     });
 
     return result;

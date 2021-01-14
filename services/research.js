@@ -165,7 +165,7 @@ class ResearchService extends BaseReadModelService {
     }
 
     const result = this.updateOne({ _id: externalId }, {
-      status: status ? status : undefined, 
+      status,
       attributes: attributes ? mappedAttributes : undefined
     });
 

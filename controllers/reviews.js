@@ -1,10 +1,6 @@
-import deipRpc from '@deip/rpc-client';
 import * as blockchainService from './../utils/blockchain';
 import ReviewService from './../services/review';
-import ReviewRequest from './../schemas/reviewRequest';
-import userNotificationHandler from './../event-handlers/userNotificationHandler';
 import ReviewCreatedEvent from './../events/reviewCreatedEvent';
-import USER_NOTIFICATION_TYPE from '../constants/userNotificationType';
 
 
 const createReview = async (ctx, next) => {

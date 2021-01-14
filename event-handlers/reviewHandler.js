@@ -3,7 +3,7 @@ import { APP_EVENTS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ResearchContentService from './../services/researchContent';
 import ReviewService from './../services/review';
-import ReviewRequest from './../schemas/reviewRequest';
+import ReviewRequestService from './../services/reviewRequest';
 
 
 class ReviewHandler extends EventEmitter { }
@@ -15,6 +15,7 @@ reviewHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, re
 
   const reviewService = new ReviewService();
   const researchContentService = new ResearchContentService();
+  const reviewRequestService = new ReviewRequestService();
 
   const { reviewExternalId, researchContentExternalId, author, source: { offchain: { content } } } = reviewCreatedEvent.getSourceData();
 
@@ -28,9 +29,14 @@ reviewHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, re
     content: content
   });
 
-  // TODO: move to service
-  await ReviewRequest.update({ expert: author, researchContentExternalId: researchContentExternalId }, { $set: { status: 'approved' } });
-  
+  const expertReviewRequests = await reviewRequestService.getReviewRequestsByExpert(author, 'pending');
+  const reviewRequest = expertReviewRequests.find(r => r.researchContentExternalId == researchContentExternalId);
+  if (reviewRequest) {
+    await reviewRequestService.updateReviewRequest(reviewRequest._id, {
+      status: 'approved'
+    })
+  } 
+
   const review = await reviewService.getReview(reviewExternalId)
   return review;
   

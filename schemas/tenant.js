@@ -27,8 +27,8 @@ const BlockchainFieldMeta = new Schema({
 });
 
 const ResearchAttribute = new Schema({
-  "type": { 
-    type: String, 
+  "type": {
+    type: String,
     enum: [...Object.values(RESEARCH_ATTRIBUTE_TYPE)],
     required: true
   },
@@ -51,9 +51,6 @@ const ResearchAttribute = new Schema({
   "component": { type: Object, required: false } // temp for migration
 });
 
-const ResearchCategory = new Schema({
-  "text": { type: String, required: true }
-});
 
 const GlobalNetworkSettings = new Schema({
   "scope": [String],
@@ -61,45 +58,36 @@ const GlobalNetworkSettings = new Schema({
 });
 
 const TenantProfile = new Schema({
-    "_id": { type: String },
-    "name": { type: String },
-    "shortName": { type: String },
-    "description": { type: String },
-    "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
-    "logo": { type: String, default: "default_tenant_logo.png" },
-    "banner": { type: String, default: "default_banner_logo.png" },
-    "network": GlobalNetworkSettings,
-    "settings": {
-      "signUpPolicy": { 
-        type: String, 
-        enum: [
-          SIGN_UP_POLICY.FREE, 
-          SIGN_UP_POLICY.ADMIN_APPROVAL
-        ], 
-        required: true 
-      },
-      "newResearchPolicy": { 
-        type: String,
-        enum: [
-          NEW_RESEARCH_POLICY.FREE, 
-          NEW_RESEARCH_POLICY.ADMIN_APPROVAL
-        ], 
-        required: true 
-      },
-      "researchAttributes": [ResearchAttribute],
-      "researchLayouts": { type: Object },
-      "faq": [FAQ],
-      "researchBlacklist": [{ type: String, required: true, trim: true }],
-      "researchWhitelist": [{ type: String, required: true, trim: true }],
-      "theme": { type: Object },
-      "modules": {
-        "review": { type: Boolean, default: false },
-        "fundraising": { type: Boolean, default: false }
-      },
-
-      "researchCategories": [ResearchCategory], // temp for migration
-      "researchComponents": [ResearchAttribute], // temp for migration
+  "_id": { type: String },
+  "name": { type: String },
+  "shortName": { type: String },
+  "description": { type: String },
+  "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
+  "logo": { type: String, default: "default_tenant_logo.png" },
+  "banner": { type: String, default: "default_banner_logo.png" },
+  "network": GlobalNetworkSettings,
+  "settings": {
+    "signUpPolicy": {
+      type: String,
+      enum: [...Object.values(SIGN_UP_POLICY)],
+      required: true
+    },
+    "newResearchPolicy": {
+      type: String,
+      enum: [...Object.values(NEW_RESEARCH_POLICY)],
+      required: true
+    },
+    "researchAttributes": [ResearchAttribute],
+    "researchLayouts": { type: Object },
+    "faq": [FAQ],
+    "researchBlacklist": [{ type: String, required: true, trim: true }],
+    "researchWhitelist": [{ type: String, required: true, trim: true }],
+    "theme": { type: Object },
+    "modules": {
+      "review": { type: Boolean, default: false },
+      "fundraising": { type: Boolean, default: false }
     }
+  }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' }, minimize: false });
 
 const model = mongoose.model('tenants-profiles', TenantProfile);

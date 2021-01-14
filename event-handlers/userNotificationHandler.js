@@ -669,9 +669,9 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
 });
 
 
-userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST, async (payload) => {
-  const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST;
-  const { requestor, expert, researchContentExternalId, tenant } = payload;
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, async ({ event: reviewRequestedEvent }) => {
+  const { source: { offchain: { reviewRequest }}} = reviewRequestedEvent.getSourceData();
+  const { requestor, expert, researchContentExternalId } = reviewRequest;
 
   const usersService = new UserService();
   const researchContentService = new ResearchContentService();
@@ -689,7 +689,7 @@ userNotificationHandler.on(USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW
   userNotificationService.createUserNotification({
     username: expert,
     status: 'unread',
-    type,
+    type: USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST,
     metadata: {
       requestorProfile,
       expertProfile,

@@ -3,7 +3,6 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-
 const ResearchGroup = new Schema({
   "_id": { type: String, required: true },
   "tenantId": { type: String, required: true },

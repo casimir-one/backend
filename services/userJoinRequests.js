@@ -49,7 +49,7 @@ class UserJoinRequestService extends BaseReadModelService {
   }) {
 
     const result = await this.updateOne({ _id: id }, {
-      status: status ? status : status
+      status
     });
 
     return result;

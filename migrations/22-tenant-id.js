@@ -28,13 +28,6 @@ const UserInvite = require('./../schemas/userInvite');
 const UserNotification = require('./../schemas/userNotification');
 
 
-
-
-
-
-const TenantProfile = require('./../schemas/tenant');
-
-
 deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
 deipRpc.config.set('chain_id', config.blockchain.chainId);
 mongoose.connect(config.mongo['deip-server'].connection);

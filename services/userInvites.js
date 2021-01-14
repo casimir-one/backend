@@ -83,8 +83,8 @@ class UserInviteService extends BaseReadModelService {
   }) {
 
     const result = await this.updateOne({ _id: externalId }, {
-      status: status ? status : status,
-      failReason: failReason ? failReason : failReason
+      status,
+      failReason
     });
 
     return result;
