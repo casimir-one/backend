@@ -1,9 +1,9 @@
 import DisciplinesService from './../services/disciplines';
 
-const getAllDisciplines = async (ctx) => {
+const getDomainDisciplines = async (ctx) => {
     try {
         const disciplinesService = new DisciplinesService();
-        const disciplines = await disciplinesService.getDisciplines();
+        const disciplines = await disciplinesService.getDomainDisciplines();
         ctx.status = 200
         ctx.body = disciplines;
 
@@ -15,5 +15,5 @@ const getAllDisciplines = async (ctx) => {
 }
 
 export default {
-  getAllDisciplines
+    getDomainDisciplines
 }
