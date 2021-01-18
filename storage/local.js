@@ -6,6 +6,7 @@ import path from 'path';
 import fsExtra from 'fs-extra';
 import rimraf from "rimraf";
 import { FILE_STORAGE } from "./../constants";
+import { hashElement } from 'folder-hash';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -19,8 +20,6 @@ class LocalStorage extends BaseStorage {
     super(filesStoragePath);
     this._type = FILE_STORAGE.LOCAL_FILESYSTEM;
   }
-
-  getStorageType() { return this._type; }
 
   async mkdir(localPath, recursive = true) {
     return await ensureDir(localPath);
@@ -96,7 +95,14 @@ class LocalStorage extends BaseStorage {
     return buff;
   }
 
+  async move(src, dst) {
+    return await fsExtra.move(src, dst, { overwrite: true });
+  }
 
+  async calculateFolderHash(localPath, options) {
+    const hashObj = await hashElement(localPath, options);
+    return hashObj;
+  }
 
 }
 

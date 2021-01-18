@@ -13,14 +13,16 @@ import deipRpc from '@deip/rpc-client';
 import xml2js from 'xml2js';
 import { hashElement } from 'folder-hash';
 import config from './../config';
-import { researchContentForm } from './../forms/researchContentForms';
+import ResearchContent from './../forms/researchContent';
+import FileStorage from './../storage';
 import url from 'url';
 import crypto from 'crypto';
 import rimraf from "rimraf";
 import slug from 'limax';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
-import ResearchContentService from './../services/researchContent';
+import ResearchContentService from './../services/researchContent'
+import ResearchService from './../services/research';
 import { RESEARCH_CONTENT_STATUS, APP_EVENTS } from './../constants';
 import ResearchContentCreatedEvent from './../events/researchContentCreatedEvent';
 import ResearchContentProposedEvent from './../events/researchContentProposedEvent';
@@ -31,11 +33,7 @@ import ResearchContentProposalRejectedEvent from './../events/researchContentPro
 const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
 const blankDarPath = path.join(__dirname, `./../default/dar-blank`);
 
-const researchStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}`
 const researchFileStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}`
-const researchFilesTempStoragePath = (researchId, postfix) => `${researchFileStoragePath(researchId)}/temp-${postfix}`
-const researchFilesPackagePath = (researchId, packageHash) => `${researchFileStoragePath(researchId)}/${packageHash}`
-const researchFilesPackageFilePath = (researchId, packageHash, fileHash) => `${researchFilesPackagePath(researchId, packageHash)}/${fileHash}`
 const researchFileContentPath = (researchId, filename) => `${researchFileStoragePath(researchId)}/${filename}`
 const researchDarArchivePath = (researchId, archiveName) => `${researchFileStoragePath(researchId)}/${archiveName}`
 const researchDarArchiveFilePath = (researchId, archiveName, filename) => `${researchDarArchivePath(researchId, archiveName)}/${filename}`
@@ -360,20 +358,6 @@ const unlockContentDraft = async (ctx) => {
   }
 }
 
-// const clone = async (ctx) => {
-//     const originalPath = path.join(storagePath, ctx.params.dar);
-//     const newPath = path.join(storagePath, ctx.params.newdar);
-//     try {
-//         await cloneArchive(originalPath, newPath);
-//         ctx.status = 200;
-//         ctx.body = { status: 'ok' };
-//     } catch (err) {
-//         console.log(err);
-//         ctx.status = 500;
-//         ctx.body = err.message;
-//     }
-// }
-
 const createDarArchive = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.params.researchExternalId;
@@ -475,7 +459,7 @@ const deleteContentDraft = async (ctx) => {
     } else if (rc.type === 'file') {
       await unlink(researchFileContentPath(rc.researchExternalId, rc.folder));
     } else if (rc.type === 'package') {
-      await fsExtra.remove(researchFilesPackagePath(rc.researchExternalId, rc.hash));
+      await fsExtra.remove(FileStorage.getResearchContentPackageDirPath(rc.researchExternalId, rc.hash));
     }
 
     await researchContentService.removeResearchContentRefById(refId);
@@ -568,25 +552,20 @@ const uploadBulkResearchContent = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.request.header['research-external-id'];
   const referencesStr = ctx.request.header['research-content-references'];
-  const uploadSession = ctx.request.header['upload-session'];
 
   try {
 
     const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
+    const researchService = new ResearchService();
 
-    if (!researchExternalId) {
-      ctx.status = 400;
-      ctx.body = { error: `"research-external-id" header is required` };
+    const research = await researchService.getResearch(researchExternalId);
+    if (!research) {
+      ctx.status = 404;
+      ctx.body = `Research ${researchExternalId} is not found`;
       return;
     }
-
-    const stat = util.promisify(fs.stat);
-    const ensureDir = util.promisify(fsExtra.ensureDir);
-
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
-    const researchInternalId = research.id;
-
+    
     const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
       ctx.status = 401;
@@ -595,81 +574,54 @@ const uploadBulkResearchContent = async (ctx) => {
     }
 
     const researchGroupExternalId = authorizedGroup.external_id;
-
-    const researchFilesTempStorage = researchFilesTempStoragePath(researchExternalId, uploadSession)
-    await ensureDir(researchFilesTempStorage);
-
-    const researchContent = researchContentForm.any();
-    const tempDestinationPath = await researchContent(ctx, () => new Promise((resolve, reject) => {
-      if (!ctx.req.files[0] || !ctx.req.files[0].destination) {
-        reject(new Error(`No destination path found during bulk-uploading`))
-        return;
-      }
-      fs.stat(ctx.req.files[0].destination, (err, stats) => {
-        if (err || !stats.isDirectory()) {
-          console.error(err);
-          reject(err)
-        }
-        else {
-          resolve(ctx.req.files[0].destination);
-        }
-      });
-    }));
+    const { tempDestinationPath } = await ResearchContent(ctx);
 
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
-    const hashObj = await hashElement(tempDestinationPath, options);
+    const hashObj = await FileStorage.calculateFolderHash(tempDestinationPath, options);
     console.log(hashObj);
     const hashes = hashObj.children.map(f => f.hash);
     hashes.sort();
     const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
 
-    var exists = false;
-    const rc = await researchContentService.findResearchContentRefByHash(researchExternalId, packageHash);
-    const packagePath = researchFilesPackagePath(researchExternalId, packageHash);
-
-    if (rc) {
-      try {
-        const check = await stat(packagePath);
-        exists = true;
-      } catch (err) {
-        exists = false;
-      }
-    }
-
-    if (exists) {
+    const researchContentRef = await researchContentService.findResearchContentRefByHash(researchExternalId, packageHash);
+    const researchContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(researchExternalId, packageHash);
+    const researchContentRefExists = await FileStorage.exists(researchContentPackageDirPath);
+    
+    if (researchContentRefExists) {
 
       console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
-      rimraf(tempDestinationPath, function () { console.log(`${tempDestinationPath} removed`); });
+      await FileStorage.delete(tempDestinationPath, noErrorOK = false);
       ctx.status = 200;
-      ctx.body = { rm: rc };
+      ctx.body = { rm: researchContentRef };
 
     } else {
 
-      await fsExtra.move(tempDestinationPath, packagePath, { overwrite: true });
+      await FileStorage.move(tempDestinationPath, researchContentPackageDirPath);
 
-      if (rc) {
+      if (researchContentRef) {
 
-        const updatedRc = await researchContentService.updateResearchContentRef(rc._id, {
+        const updatedResearchContentRef = await researchContentService.updateResearchContentRef(researchContentRef._id, {
           folder: packageHash
         });
 
         ctx.status = 200;
-        ctx.body = { rm: updatedRc };
+        ctx.body = { rm: updatedResearchContentRef };
+
       } else {
 
-        const externalId = `draft-${researchExternalId}-${packageHash}`;
-        const researchContentRm = await researchContentService.createResearchContentRef({
-          externalId,
-          researchExternalId,
+        const draftId = `draft-${researchExternalId}-${packageHash}`;
+        const draft = await researchContentService.createResearchContentRef({
+          externalId: draftId,
+          researchExternalId: researchExternalId,
           researchGroupExternalId: researchGroupExternalId,
           folder: packageHash,
-          researchId: researchInternalId, // legacy internal id
+          researchId: research.id, // legacy internal id
           title: packageHash,
           hash: packageHash,
           algo: "sha256",
           type: "package",
           status: RESEARCH_CONTENT_STATUS.IN_PROGRESS,
-          "packageFiles": hashObj.children.map((f) => {
+          packageFiles: hashObj.children.map((f) => {
             return { filename: f.name, hash: f.hash, ext: path.extname(f.name) }
           }),
           authors: [jwtUsername],
@@ -678,7 +630,7 @@ const uploadBulkResearchContent = async (ctx) => {
         });
 
         ctx.status = 200;
-        ctx.body = { rm: researchContentRm };
+        ctx.body = { rm: draft };
       }
     }
 
@@ -698,9 +650,9 @@ const getResearchPackageFile = async function (ctx) {
 
   const researchContentService = new ResearchContentService();
   const researchGroupService = new ResearchGroupService();
+  const researchService = new ResearchService();
 
-  const research = await deipRpc.api.getResearchAsync(researchExternalId);
-  
+  const research = await researchService.getResearch(researchExternalId);
   if (research.is_private) {
     const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
@@ -710,27 +662,50 @@ const getResearchPackageFile = async function (ctx) {
     }
   }
 
-  const rc = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
-  if (rc == null) {
+  const researchContentRef = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
+  if (!researchContentRef) {
     ctx.status = 404;
     ctx.body = `Package "${hash}" is not found`
     return;
   }
 
-  const file = rc.packageFiles.find(f => f.hash == fileHash);
+  const file = researchContentRef.packageFiles.find(f => f.hash == fileHash);
   if (!file) {
     ctx.status = 404;
     ctx.body = `File "${fileHash}" is not found`
     return;
   }
 
+  const filename = file.filename;
+  const filepath = FileStorage.getResearchContentPackageFilePath(researchContentRef.researchExternalId, researchContentRef.hash, filename);
+
+  const fileExists = await FileStorage.exists(filepath);
+  if (!fileExists) {
+    ctx.status = 404;
+    ctx.body = `${filepath} is not found`;
+    return;
+  }
+
+  const buff = await FileStorage.get(filepath);
+  const ext = filename.substr(filename.lastIndexOf('.') + 1);
+  const name = filename.substr(0, filename.lastIndexOf('.'));
+  const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
+  const isPdf = ['pdf'].some(e => e == ext);
+
   if (isDownload) {
-    const ext = file.filename.substr(file.filename.lastIndexOf('.') + 1);
-    const name = file.filename.substr(0, file.filename.lastIndexOf('.'));
-    ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
-    ctx.body = fs.createReadStream(researchFilesPackageFilePath(rc.researchExternalId, rc.hash, file.filename));
+    ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+    ctx.body = buff;
+  } else if (isImage) {
+    ctx.response.set('Content-Type', `image/${ext}`);
+    ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+    ctx.body = buff;
+  } else if (isPdf) {
+    ctx.response.set('Content-Type', `application/${ext}`);
+    ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+    ctx.body = buff;
   } else {
-    await send(ctx, researchFilesPackageFilePath(rc.researchExternalId, rc.hash, file.filename), { root: '/' });
+    ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+    ctx.body = buff;
   }
 }
 

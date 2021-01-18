@@ -16,7 +16,6 @@ import * as blockchainService from './../utils/blockchain';
 import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE, FILE_STORAGE } from './../constants';
 import  ResearchForm from './../forms/research';
 import FileStorage from './../storage';
-
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import ResearchCreatedEvent from './../events/researchCreatedEvent';
 import ResearchProposedEvent from './../events/researchProposedEvent';
@@ -48,7 +47,7 @@ const createResearch = async (ctx, next) => {
 
   try {
     
-    const { tx, offchainMeta, isProposal } = await ResearchForm(ctx, FILE_STORAGE.LOCAL_FILESYSTEM);
+    const { tx, offchainMeta, isProposal } = await ResearchForm(ctx);
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 

@@ -64,6 +64,7 @@ const filenameHandler = () => function () {
 
 
 const fileFilterHandler = (req, file, callback) => {
+  // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
   // if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
   //     return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
   // }

@@ -1,7 +1,9 @@
 import BaseStorage from './base';
 import SftpClient from 'ssh2-sftp-client';
 import { FILE_STORAGE } from "./../constants";
-
+import { hashElement } from 'folder-hash';
+import { v4 as uuidv4 } from 'uuid';
+import rimraf from "rimraf";
 
 class SftpStorage extends BaseStorage {
 
@@ -16,7 +18,6 @@ class SftpStorage extends BaseStorage {
     this._password = password;
     this._type = FILE_STORAGE.DEIP_REMOTE_SFTP;
   }
-
 
   // Don't Re-use SftpClient Objects
   // https://github.com/theophilusx/ssh2-sftp-client#sec-6-4
@@ -58,8 +59,37 @@ class SftpStorage extends BaseStorage {
 
   async get(remotePath, dst, options) {
     return await this.run(async (client) => {
-      return client.get(remotePath, dst, options);
+      return await client.get(remotePath, dst, options);
     });
+  }
+
+  async move(src, dst) {
+    return await this.run(async (client) => {
+      return await client.rename(src, dst);
+    });  
+  }
+
+  async calculateFolderHash(remotePath, options) {
+    return await this.run(async (client) => {
+      const session = uuidv4();
+      const localPath = this.getTempDirPath(session);
+      await client.downloadDir(remotePath, localPath);
+      const hashObj = await hashElement(localPath, options);
+
+      const rmPromise = new Promise((resolve, reject) => {
+        rimraf(localPath, function (err) {
+          if (err) {
+            console.log(err);
+            reject(err)
+          } else {
+            resolve();
+          }
+        });
+      });
+
+      await rmPromise;
+      return hashObj;
+    });  
   }
 
 }
