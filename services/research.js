@@ -1,7 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import BaseReadModelService from './base';
 import Research from './../schemas/research';
-import ExpressLicense from './../schemas/expressLicense';
 import ExpressLicensingService from './expressLicensing'
 import mongoose from 'mongoose';
 import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS } from './../constants';

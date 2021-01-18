@@ -34,9 +34,12 @@
         "koa-static": "^3.0.0",
         "limax": "^1.7.0",
         "mongoose": "^5.1.5",
+        "multer-sftp": "^1.1.1",
         "parse-formdata": "^1.0.2",
         "qs": "^6.5.2",
+        "queue": "^6.0.2",
         "sharp": "^0.20.3",
+        "ssh2-sftp-client": "^6.0.1",
         "substance": "^1.0.0-preview.53",
         "xml2js": "^0.4.19"
     },

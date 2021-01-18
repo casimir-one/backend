@@ -13,8 +13,11 @@ import ResearchService from './../services/research';
 import ResearchApplicationService from './../services/researchApplication';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE } from './../constants';
-import { researchForm, researchAttributeFilePath, researchFilePath } from './../forms/research';
+import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE, FILE_STORAGE } from './../constants';
+import  ResearchForm from './../forms/research';
+import SftpStorage from './../storage/sftp';
+import LocalStorage from './../storage/local';
+
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import ResearchCreatedEvent from './../events/researchCreatedEvent';
 import ResearchProposedEvent from './../events/researchProposedEvent';
@@ -43,35 +46,11 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 const createResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
-  const researchGroupsService = new ResearchGroupService();
 
   try {
     
-    const formUploader = researchForm.any();
-    const { tx, offchainMeta, isProposal } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
-      try {
-
-        const tx = JSON.parse(ctx.req.body.tx);
-        const onchainData = JSON.parse(ctx.req.body.onchainData);
-        const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
-        const isProposal = ctx.req.body.isProposal === 'true';
-        console.log(ctx.req.files);
-
-        const txResult = await blockchainService.sendTransactionAsync(tx);
-
-        resolve({
-          tx,
-          offchainMeta,
-          onchainData,
-          isProposal
-        });
-
-      } catch (err) {
-        reject(err);
-      } 
-    }));
-
+    const { tx, offchainMeta, isProposal } = await ResearchForm(ctx, FILE_STORAGE.LOCAL_FILESYSTEM);
+    const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
     if (datums.some(([opName]) => opName == 'create_account')) {
@@ -710,9 +689,12 @@ const getResearchAttributeFile = async (ctx) => {
   const filename = ctx.params.filename;
   const tenant = ctx.state.tenant;
 
-  const isResearchRootFolder = researchExternalId == researchAttributeId;
-  const filepath = isResearchRootFolder ? researchFilePath(researchExternalId, filename) : researchAttributeFilePath(researchExternalId, researchAttributeId, filename);
+  // const fileStorage = new SftpStorage();
+  const fileStorage = new LocalStorage();
 
+  const isResearchRootFolder = researchExternalId == researchAttributeId;
+  const filepath = isResearchRootFolder ? fileStorage.getResearchFilePath(researchExternalId, filename) : fileStorage.getResearchAttributeFilePath(researchExternalId, researchAttributeId, filename);
+  
   try {
 
     const isImage = ctx.query.image === 'true';
