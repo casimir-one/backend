@@ -14,7 +14,7 @@ import ResearchApplicationService from './../services/researchApplication';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
 import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE, FILE_STORAGE } from './../constants';
-import  ResearchForm from './../forms/research';
+import ResearchForm from './../forms/research';
 import FileStorage from './../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import ResearchCreatedEvent from './../events/researchCreatedEvent';
@@ -120,34 +120,11 @@ const createResearch = async (ctx, next) => {
 const updateResearch = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
 
   try {
 
-    const formUploader = researchForm.any();
-    const { tx, offchainMeta, isProposal } = await formUploader(ctx, () => new Promise(async (resolve, reject) => {
-      try {
-
-        const tx = JSON.parse(ctx.req.body.tx);
-        const onchainData = JSON.parse(ctx.req.body.onchainData);
-        const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
-        const isProposal = ctx.req.body.isProposal === 'true';
-        console.log(ctx.req.files);
-
-        const txResult = await blockchainService.sendTransactionAsync(tx);
-
-        resolve({
-          tx,
-          offchainMeta,
-          onchainData,
-          isProposal
-        });
-
-      } catch (err) {
-        reject(err);
-      }
-    }));
-
+    const { tx, offchainMeta, isProposal } = await ResearchForm(ctx);
+    const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
     if (isProposal) {
