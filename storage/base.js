@@ -19,6 +19,7 @@ const researchAttributeFilePath = (baseDir, researchExternalId, researchAttribut
 class BaseStorage {
 
   _baseDirPath = null;
+  _type = null;
 
   constructor(baseDirPath) {
     this._baseDirPath = baseDirPath;

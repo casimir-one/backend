@@ -15,8 +15,7 @@ import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
 import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE, FILE_STORAGE } from './../constants';
 import  ResearchForm from './../forms/research';
-import SftpStorage from './../storage/sftp';
-import LocalStorage from './../storage/local';
+import FileStorage from './../storage';
 
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
 import ResearchCreatedEvent from './../events/researchCreatedEvent';
@@ -687,30 +686,33 @@ const getResearchAttributeFile = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
   const researchAttributeId = ctx.params.researchAttributeId;
   const filename = ctx.params.filename;
-  const tenant = ctx.state.tenant;
-
-  // const fileStorage = new SftpStorage();
-  const fileStorage = new LocalStorage();
 
   const isResearchRootFolder = researchExternalId == researchAttributeId;
-  const filepath = isResearchRootFolder ? fileStorage.getResearchFilePath(researchExternalId, filename) : fileStorage.getResearchAttributeFilePath(researchExternalId, researchAttributeId, filename);
+  const filepath = isResearchRootFolder ? FileStorage.getResearchFilePath(researchExternalId, filename) : FileStorage.getResearchAttributeFilePath(researchExternalId, researchAttributeId, filename);
   
+  const fileExists = await FileStorage.exists(filepath);
+  if (!fileExists) {
+    ctx.status = 404;
+    ctx.body = `${filepath} is not found`;
+    return;
+  }
+
+  const buff = await FileStorage.get(filepath);
+
   try {
 
-    const isImage = ctx.query.image === 'true';
-
-    if (isImage) {
+    const imageQuery = ctx.query.image === 'true';
+    if (imageQuery) {
 
       const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
       const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
       const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
       const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
 
-      const check = await stat(filepath);
       const resize = (w, h) => {
         return new Promise((resolve) => {
           sharp.cache(!noCache);
-          sharp(filepath)
+          sharp(buff)
             .rotate()
             .resize(w, h)
             .png()
@@ -725,7 +727,6 @@ const getResearchAttributeFile = async (ctx) => {
       }
 
       let image = await resize(width, height);
-
       if (isRound) {
         let round = (w) => {
           let r = w / 2;
@@ -754,13 +755,26 @@ const getResearchAttributeFile = async (ctx) => {
     } else {
 
       const isDownload = ctx.query.download === 'true';
+
+      const ext = filename.substr(filename.lastIndexOf('.') + 1);
+      const name = filename.substr(0, filename.lastIndexOf('.'));
+      const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
+      const isPdf = ['pdf'].some(e => e == ext);
+
       if (isDownload) {
-        let ext = filename.substr(filename.lastIndexOf('.') + 1);
-        let name = filename.substr(0, filename.lastIndexOf('.'));
-        ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
-        ctx.body = fs.createReadStream(filepath);
+        ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
+      } else if (isImage) {
+        ctx.response.set('Content-Type', `image/${ext}`);
+        ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
+      } else if (isPdf) {
+        ctx.response.set('Content-Type', `application/${ext}`);
+        ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
       } else {
-        await send(ctx, filepath, { root: '/' });
+        ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
       }
     }
 
@@ -770,7 +784,6 @@ const getResearchAttributeFile = async (ctx) => {
     ctx.body = err;
   }
 }
-
 
 const getPublicResearchListing = async (ctx) => {
   const tenant = ctx.state.tenant;

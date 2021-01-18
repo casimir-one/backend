@@ -5,6 +5,7 @@ import fs from 'fs';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import rimraf from "rimraf";
+import { FILE_STORAGE } from "./../constants";
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -16,24 +17,27 @@ class LocalStorage extends BaseStorage {
   constructor() {
     const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
     super(filesStoragePath);
+    this._type = FILE_STORAGE.LOCAL_FILESYSTEM;
   }
 
-  async mkdir(remotePath, recursive = true) {
-    return await ensureDir(remotePath);
+  getStorageType() { return this._type; }
+
+  async mkdir(localPath, recursive = true) {
+    return await ensureDir(localPath);
   }
 
-  async exists(remotePath) {
+  async exists(localPath) {
     try {
-      const info = await stat(remotePath);
+      const info = await stat(localPath);
       return true;
     } catch (err) {
       return false;
     }
   }
 
-  async delete(remotePath, noErrorOK = false) {
+  async delete(localPath, noErrorOK = false) {
     const promise = new Promise((resolve, reject) => {
-      rimraf(remotePath, function (err) {
+      rimraf(localPath, function (err) {
         if (err) {
           console.log(err);
           reject(err)
@@ -54,6 +58,45 @@ class LocalStorage extends BaseStorage {
       }
     }
   }
+
+  async get(localPath, dst, options) {
+
+    const promise = new Promise((resolve, reject) => {
+      // Store file data chunks in this array
+      let chunks = [];
+      // We can use this variable to store the final data
+      let fileBuffer;
+
+      // Read file into stream.Readable
+      let fileStream = fs.createReadStream(localPath);
+
+      // An error occurred with the stream
+      fileStream.once('error', (err) => {
+        // Be sure to handle this properly!
+        console.error(err);
+        reject(err);
+      });
+
+      // File is done being read
+      fileStream.once('end', () => {
+        // create the final data Buffer from data chunks;
+        fileBuffer = Buffer.concat(chunks);
+        resolve(fileBuffer);
+      });
+
+      // Data is flushed from fileStream in chunks,
+      // this callback will be executed for each chunk
+      fileStream.on('data', (chunk) => {
+        chunks.push(chunk); // push data chunk to array
+      });
+
+    });
+
+    const buff = await promise;
+    return buff;
+  }
+
+
 
 }
 

@@ -71,10 +71,10 @@ const fileFilterHandler = (req, file, callback) => {
 }
 
 
-const ResearchForm = async (ctx, storageType = FILE_STORAGE.DEIP_REMOTE_SFTP) => {
+const ResearchForm = async (ctx) => {
 
   const filesUploader = multer({
-    storage: getFileStorageUploader(storageType, destinationHandler, filenameHandler),
+    storage: getFileStorageUploader(destinationHandler, filenameHandler),
     fileFilter: fileFilterHandler
   });
 

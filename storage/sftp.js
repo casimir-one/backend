@@ -1,5 +1,6 @@
 import BaseStorage from './base';
 import SftpClient from 'ssh2-sftp-client';
+import { FILE_STORAGE } from "./../constants";
 
 
 class SftpStorage extends BaseStorage {
@@ -13,6 +14,7 @@ class SftpStorage extends BaseStorage {
     this._host = host;
     this._username = username;
     this._password = password;
+    this._type = FILE_STORAGE.DEIP_REMOTE_SFTP;
   }
 
 
@@ -26,8 +28,9 @@ class SftpStorage extends BaseStorage {
         username: this._username,
         password: this._password
       });
-      await cmd(sftp);
+      const result = await cmd(sftp);
       await sftp.end();
+      return result;
     } catch(err) {
       console.log(err);
       throw err;
@@ -42,13 +45,20 @@ class SftpStorage extends BaseStorage {
 
   async exists(remotePath) {
     return await this.run(async (client) => {
-      return await client.exists(remotePath);
+      const res = await client.exists(remotePath);
+      return res !== false;
     });
   }
   
   async delete(remotePath, noErrorOK = false) {
     return await this.run(async (client) => {
       return await client.delete(remotePath, noErrorOK);
+    });
+  }
+
+  async get(remotePath, dst, options) {
+    return await this.run(async (client) => {
+      return client.get(remotePath, dst, options);
     });
   }
 
