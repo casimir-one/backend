@@ -23,6 +23,12 @@ const researchDarArchiveFilePath = (baseDir, researchExternalId, archiveName, fi
 
 const researchContentPackageTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
 
+
+const accountsDir = 'accounts';
+const accountsDirPath = (baseDir, username) => `${baseDir}/${accountsDir}/${username}`;
+const accountsAvatarFilePath = (baseDir, username, picture) => `${accountsDirPath(baseDir, username)}/${picture}`
+
+
 class BaseStorage {
 
   _baseDirPath = null;
@@ -87,8 +93,18 @@ class BaseStorage {
     return researchContentPackageTempDirPath(this._baseDirPath, researchExternalId, sessionId);
   }
 
+  getAccountsDirPath(username) {
+    return accountsDirPath(this._baseDirPath, username);
+  }
 
-  
+  getAccountsAvatarFilePath(username, picture) {
+    return accountsAvatarFilePath(this._baseDirPath, username, picture);
+  }
+
+  getAccountsDefaultAvatarFilePath() {
+    return path.join(__dirname, `./../default/default-avatar.png`);
+  }
+
 
 }
 

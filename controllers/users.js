@@ -7,6 +7,8 @@ import sharp from 'sharp';
 import config from './../config';
 import qs from 'qs';
 import UserService from './../services/users';
+import FileStorage from './../storage';
+import UserForm from './../forms/user';
 import UserBookmarkService from './../services/userBookmark';
 import * as blockchainService from './../utils/blockchain';
 import { USER_PROFILE_STATUS } from './../constants';
@@ -292,36 +294,6 @@ const removeUserBookmark = async (ctx) => {
 }
 
 
-const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
-const accountsStoragePath = (username) => `${filesStoragePath}/accounts/${username}`;
-const avatarPath = (username, picture) => `${accountsStoragePath(username)}/${picture}`;
-const defaultAvatarPath = () => path.join(__dirname, `./../default/default-avatar.png`);
-
-const allowedAvatarMimeTypes = ['image/png', 'image/jpeg']
-const avatarStorage = multer.diskStorage({
-  destination: async function (req, file, callback) {
-    const ensureDir = util.promisify(fsExtra.ensureDir);
-    await ensureDir(accountsStoragePath(req.headers['username']));
-    const dest = accountsStoragePath(req.headers['username']);
-    callback(null, dest)
-  },
-  filename: function (req, file, callback) {
-    let ext = file.originalname.substr(file.originalname.lastIndexOf('.') + 1);
-    callback(null, `${req.headers['username']}.${ext}`);
-  }
-})
-
-const avatarUploader = multer({
-  storage: avatarStorage,
-  fileFilter: function (req, file, callback) {
-    if (allowedAvatarMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-      return callback(new Error('Only the following mime types are allowed: ' + allowedAvatarMimeTypes.join(', ')), false);
-    }
-    callback(null, true);
-  }
-})
-
-
 const uploadAvatar = async (ctx) => {
   const username = ctx.request.header['username'];
   const jwtUsername = ctx.state.user.username;
@@ -342,31 +314,12 @@ const uploadAvatar = async (ctx) => {
       return;
     }
 
-    const stat = util.promisify(fs.stat);
-    const unlink = util.promisify(fs.unlink);
-    const ensureDir = util.promisify(fsExtra.ensureDir);
-
-    try {
-      const filepath = accountsStoragePath(username);
-      await stat(filepath);
-      await unlink(filepath);
-    } catch (err) {
-      await ensureDir(accountsStoragePath(username))
-    }
-
     const oldFilename = userProfile.avatar;
-    const userAvatar = avatarUploader.single('user-avatar');
-    const { filename } = await userAvatar(ctx, () => new Promise((resolve, reject) => {
-      resolve({ 'filename': ctx.req.file.filename });
-    }));
-
+    const { filename } = await UserForm(ctx);
     const updatedUserProfile = await usersService.updateUserProfile(username, { avatar: filename });
 
-
     if (oldFilename != filename) {
-      try {
-        await unlink(avatarPath(username, oldFilename));
-      } catch(err) {}
+      await FileStorage.delete(FileStorage.getAccountsAvatarFilePath(username, oldFilename))
     }
 
     ctx.status = 200;
@@ -390,20 +343,27 @@ const getAvatar = async (ctx) => {
 
     const usersService = new UserService();
     const user = await usersService.getUser(username);
-    let src = user && user.profile ? avatarPath(user.account.name, user.profile.avatar) : defaultAvatarPath();
+    const defaultAvatar = FileStorage.getAccountsDefaultAvatarFilePath();
 
-    try {
+    let src;
+    let buff;
 
-      const stat = util.promisify(fs.stat);
-      const check = await stat(src);
-    } catch (err) {
-      src = defaultAvatarPath();
+    if (user && user.profile) {
+      const dest = FileStorage.getAccountsAvatarFilePath(user.account.name, user.profile.avatar);
+      const exists = await FileStorage.exists(dest);
+      if (exists) {
+        buff = await FileStorage.get(dest);
+      } else {
+        src = defaultAvatar;
+      }
+    } else {
+      src = defaultAvatar;
     }
 
     let resize = (w, h) => {
       return new Promise((resolve, reject) => {
         sharp.cache(!noCache);
-        sharp(src)
+        sharp(buff || src)
           .rotate()
           .resize(w, h)
           .png()
