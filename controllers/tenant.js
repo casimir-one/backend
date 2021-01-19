@@ -5,7 +5,7 @@ import path from 'path';
 import sharp from 'sharp';
 import deipRpc from '@deip/rpc-client';
 import UserService from './../services/users';
-import tenantService from './../services/tenant';
+import TenantService from './../services/tenant';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import FileStorage from './../storage';
@@ -22,11 +22,13 @@ const uploadTenantBanner = async (ctx) => {
 
   try {
 
+    const tenantService = new TenantService();
     const researchGroupService = new ResearchGroupService();
+
     const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(tenantExternalId, jwtUsername);
     if (!authorizedGroup) {
       ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${tenantExternalId}" research`;
+      ctx.body = `"${jwtUsername}" is not permitted to edit "${tenantExternalId}" tenant`;
       return;
     }
 
@@ -39,9 +41,7 @@ const uploadTenantBanner = async (ctx) => {
 
     const oldFilename = tenantProfile.banner;
     const { filename } = await TeantBannerForm(ctx);
-    tenantProfile.banner = filename;
-
-    const updatedTenantProfile = await tenantProfile.save();
+    const updatedTenantProfile = await tenantService.updateTenantProfile(tenantExternalId, { banner: filename }, {});
 
     if (oldFilename != filename) {
       const oldFilepath = FileStorage.getTenantBannerFilePath(tenantExternalId, oldFilename);
@@ -71,6 +71,7 @@ const getTenantBanner = async (ctx) => {
 
   try {
 
+    const tenantService = new TenantService();
     const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
     const defaultBanner = FileStorage.getTenantDefaultBannerFilePath();
 
@@ -149,6 +150,7 @@ const getTenantLogo = async (ctx) => {
 
   try {
 
+    const tenantService = new TenantService();
     const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
     const defaultLogo = FileStorage.getTenantDefaultLogoFilePath();
 
@@ -223,6 +225,7 @@ const getTenantProfile = async (ctx) => {
 
   try {
 
+    const tenantService = new TenantService();
     const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
     if (!tenantProfile) {
       ctx.status = 404;
@@ -230,10 +233,8 @@ const getTenantProfile = async (ctx) => {
       return;
     }
 
-    const tenant = tenantProfile.toObject();
-
     ctx.status = 200;
-    ctx.body = tenant;
+    ctx.body = tenantProfile;
 
   } catch (err) {
     console.log(err);
@@ -246,11 +247,11 @@ const getTenantProfile = async (ctx) => {
 const updateTenantProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
-  const researchService = new ResearchService();
   const update = ctx.request.body;
 
   try {
 
+    const tenantService = new TenantService();
     const tenantExternalId = tenant.id;
     const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
     if (!tenantProfile) {
@@ -259,11 +260,10 @@ const updateTenantProfile = async (ctx) => {
       return;
     }
 
-    const profileData = tenantProfile.toObject();
     const updatedTenantProfile = await tenantService.updateTenantProfile(
       tenantExternalId, 
-      { ...profileData, ...update }, 
-      { ...profileData.settings, ...update.settings }
+      { ...tenantProfile, ...update }, 
+      { ...tenantProfile.settings, ...update.settings }
     );
 
     ctx.status = 200;
@@ -284,13 +284,14 @@ const createTenantResearchAttribute = async (ctx) => {
 
   try {
     const researchService = new ResearchService();
+    const tenantService = new TenantService();
 
     const researchAttributeId = mongoose.Types.ObjectId();
     const updatedTenantProfile = await tenantService.addTenantResearchAttribute(tenant.id, { ...researchAttribute, _id: researchAttributeId.toString() });
     const newResearchAttribute = updatedTenantProfile.settings.researchAttributes.find(a => a._id.toString() === researchAttributeId.toString());
 
     ctx.status = 200;
-    ctx.body = updatedTenantProfile.toObject();
+    ctx.body = updatedTenantProfile;
 
   } catch (err) {
     console.log(err);
@@ -307,6 +308,7 @@ const deleteTenantResearchAttribute = async (ctx) => {
 
   try {
     const researchService = new ResearchService();
+    const tenantService = new TenantService();
 
     const updatedTenantProfile = await tenantService.removeTenantResearchAttribute(tenant.id, { _id: researchAttributeId });
 
@@ -315,7 +317,7 @@ const deleteTenantResearchAttribute = async (ctx) => {
     });
 
     ctx.status = 200;
-    ctx.body = updatedTenantProfile.toObject();
+    ctx.body = updatedTenantProfile;
 
   } catch (err) {
     console.log(err);
@@ -332,6 +334,7 @@ const updateTenantResearchAttribute = async (ctx) => {
 
   try {
     const researchService = new ResearchService();
+    const tenantService = new TenantService();
 
     const updatedTenantProfile = await tenantService.updateTenantResearchAttribute(tenant.id, { ...researchAttribute });
     
@@ -343,7 +346,7 @@ const updateTenantResearchAttribute = async (ctx) => {
     });
 
     ctx.status = 200;
-    ctx.body = updatedTenantProfile.toObject();
+    ctx.body = updatedTenantProfile;
 
   } catch (err) {
     console.log(err);

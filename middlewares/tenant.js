@@ -1,15 +1,16 @@
 import config from './../config'
-import tenantsService from './../services/tenant';
+import TenantService from './../services/tenant';
 import deipRpc from '@deip/rpc-client';
 
 
 function tenant(options) {
   return async function (ctx, next) {
-    const tenantProfile = await tenantsService.findTenantProfile(config.TENANT);
+    const tenantService = new TenantService();
+    const tenantProfile = await tenantService.findTenantProfile(config.TENANT);
     const [tenantAccount] = await deipRpc.api.getAccountsAsync([config.TENANT]);
 
-    let ownerAuth = tenantAccount.active.account_auths.map(([name, threshold]) => name);
-    let activeAuth = tenantAccount.owner.account_auths.map(([name, threshold]) => name);
+    const ownerAuth = tenantAccount.active.account_auths.map(([name, threshold]) => name);
+    const activeAuth = tenantAccount.owner.account_auths.map(([name, threshold]) => name);
 
     const admins = [...ownerAuth, ...activeAuth].reduce((acc, name) => {
       if (!acc.some(n => n == name)) {
@@ -18,7 +19,7 @@ function tenant(options) {
       return [...acc];
     }, [])
 
-    ctx.state.tenant = { ...tenantProfile.toObject(), id: tenantAccount.name, account: tenantAccount, admins };
+    ctx.state.tenant = { ...tenantProfile, id: tenantAccount.name, account: tenantAccount, admins };
 
     await next();
   };
