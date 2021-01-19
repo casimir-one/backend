@@ -67,7 +67,7 @@ class TenantService {
 
     const tenantProfile = await TenantProfile.findOne({ _id: tenantExternalId });
     if (!tenantProfile) {
-      throw new Error(`User profile ${us} does not exist`);
+      throw new Error(`Tenant ${tenantExternalId} does not exist`);
     }
 
     tenantProfile.name = name !== undefined ? name : tenantProfile.name;
