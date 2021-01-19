@@ -735,9 +735,23 @@ const createResearchContent = async (ctx, next) => {
     }
     
     const txResult = await blockchainService.sendTransactionAsync(tx);
-    await researchContentService.removeResearchContentRefByHash(researchExternalId, hash); // remove draft
+    
+    const draftPath = draft.type == 'package' 
+      ? FileStorage.getResearchContentPackageDirPath(researchExternalId, draft.folder)
+      : /* 'dar' */ FileStorage.getResearchDarArchiveDirPath(researchExternalId, draft.folder);
 
-    offchainMeta.researchContent.folder = draft.folder;
+    const publishedContentPath = draft.type == 'package' 
+      ? FileStorage.getResearchContentPackageDirPath(researchExternalId, hash)
+      : /* 'dar' */ FileStorage.getResearchDarArchiveDirPath(researchExternalId, hash);
+
+    if (draftPath != publishedContentPath) {
+      await FileStorage.move(draftPath, publishedContentPath)
+    }
+
+    // remove draft
+    await researchContentService.removeResearchContentRefByHash(researchExternalId, hash);
+
+    offchainMeta.researchContent.folder = hash;
     offchainMeta.researchContent.packageFiles = draft.packageFiles;
     offchainMeta.researchContent.algo = draft.algo;
     offchainMeta.researchContent.type = draft.type;
