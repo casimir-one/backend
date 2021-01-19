@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+import path from 'path';
+import FileStorage from './../storage';
 
 const DOT = '.'.charCodeAt(0)
 
@@ -15,34 +15,50 @@ module.exports = async function listDir(dir, opts = {}) {
   })
 }
 
-function _list(dir, opts, done) {
+
+async function _list(dir, opts, done) {
   let results = []
-  fs.readdir(dir, (err, list) => {
-    if (err) return done(err)
+
+  try {
+
+    const list = await FileStorage.listDir(dir);
     let pending = list.length
     if (!pending) return done(null, results)
+
     function _continue() {
-      if (!--pending) done(null, results)
+      if (!--pending) {
+        done(null, results);
+      } 
     }
-    list.forEach((name) => {
+  
+    for (const name of list) {
+      
       if (opts.ignoreDotFiles && name.charCodeAt(0) === DOT) {
-        return _continue()
+        _continue();
+        continue;
       }
-      let absPath = path.resolve(dir, name)
-      fs.stat(absPath, (err, stat) => {
-        if (stat && stat.isDirectory()) {
-          _list(name, opts, (err, res) => {
-            results = results.concat(res)
-            _continue()
-          })
-        } else {
-          results.push(Object.assign({}, stat, {
-            name,
-            path: absPath,
-          }))
-          _continue()
-        }
-      })
-    })
-  })
+
+      const absPath = `${dir}/${name}`;
+      const stat = await FileStorage.stat(absPath);
+
+      if (stat && (typeof stat.isDirectory === 'function' ? stat.isDirectory() : stat.isDirectory)) {
+        await _list(name, opts, (err, res) => {
+          results = results.concat(res);
+          _continue();
+        });
+      } else {
+        results.push(Object.assign({}, stat, {
+          name,
+          path: absPath
+        }))
+        _continue();
+      }
+
+    }
+
+  } catch(err) {
+    console.error(err);
+    return done(err);
+  }
+ 
 }

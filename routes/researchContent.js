@@ -6,7 +6,6 @@ import config from './../config';
 const protected_route = koa_router()
 const public_route = koa_router()
 
-// router.get('/list', dar.listDarArchives)
 protected_route.get('/:dar', researchContent.readDarArchive)
 protected_route.get('/:dar/assets/:file', researchContent.readDarArchiveStaticFiles)
 protected_route.put('/:dar', researchContent.updateDarArchive)

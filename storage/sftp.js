@@ -1,4 +1,5 @@
 import BaseStorage from './base';
+import fs from 'fs';
 import SftpClient from 'ssh2-sftp-client';
 import { FILE_STORAGE } from "./../constants";
 import { hashElement } from 'folder-hash';
@@ -44,6 +45,12 @@ class SftpStorage extends BaseStorage {
     });
   }
 
+  async rmdir(remotePath, recursive = true) {
+    return await this.run(async (client) => {
+      return await client.rmdir(remotePath, recursive);
+    });
+  }
+
   async exists(remotePath) {
     return await this.run(async (client) => {
       const res = await client.exists(remotePath);
@@ -57,9 +64,44 @@ class SftpStorage extends BaseStorage {
     });
   }
 
-  async get(remotePath, dst, options) {
+  async get(remotePath, dst, options = {}) {
     return await this.run(async (client) => {
       return await client.get(remotePath, dst, options);
+    });
+  }
+
+  async put(remotePath, data, options = {}){
+    return await this.run(async (client) => {
+      return await client.put(data, remotePath, options);
+    });
+  }
+
+  async putPassThroughStream(remotePath, passThroughSteam, options = {}) {
+    return await this.run(async (client) => {
+
+      const promise = new Promise((resolve, reject) => {
+
+        const session = uuidv4();
+        const tempLocalPath = this.getTempDirPath(session);
+        const file = fs.createWriteStream(tempLocalPath);
+        passThroughSteam.pipe(file);
+
+        file.on('close', async () => {
+          try {
+            const result = await client.put(tempLocalPath, remotePath, options);
+            resolve(result);
+          } catch (err) {
+            reject(err);
+          }
+          rimraf(tempLocalPath, (err) => { if (err) { console.log(err); } });
+        });
+
+        file.on('error', async (err) => {
+          reject(err);
+        })
+      });
+
+      return await promise;
     });
   }
 
@@ -69,29 +111,37 @@ class SftpStorage extends BaseStorage {
     });  
   }
 
-  async calculateFolderHash(remotePath, options) {
+  async calculateDirHash(remotePath, options) {
     return await this.run(async (client) => {
       const session = uuidv4();
-      const localPath = this.getTempDirPath(session);
-      await client.downloadDir(remotePath, localPath);
-      const hashObj = await hashElement(localPath, options);
-
-      const rmPromise = new Promise((resolve, reject) => {
-        rimraf(localPath, function (err) {
-          if (err) {
-            console.log(err);
-            reject(err)
-          } else {
-            resolve();
-          }
-        });
-      });
-
-      await rmPromise;
+      const tempLocalPath = this.getTempDirPath(session);
+      await client.downloadDir(remotePath, tempLocalPath);
+      const hashObj = await hashElement(tempLocalPath, options);
+      rimraf(tempLocalPath, (err) => { if (err) { console.log(err); } });
       return hashObj;
     });  
   }
 
+  async uploadDir(localPath, remotePath) {
+    return await this.run(async (client) => {
+      const result = await client.uploadDir(localPath, remotePath);
+      return result;
+    });
+  }
+
+  async listDir(remoteDir) {
+    return await this.run(async (client) => {
+      const items = await client.list(remoteDir);
+      return items.map(item => item.name);
+    });
+  }
+
+  async stat(remoteDir) {
+    return await this.run(async (client) => {
+      const result = await client.stat(remoteDir);
+      return result;
+    });
+  }
 }
 
 

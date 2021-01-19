@@ -1,5 +1,5 @@
-const fs = require('fs')
-const path = require('path')
+import path from 'path';
+import FileStorage from './../storage';
 
 /*
   TODO: Implement versioning backed by Git
@@ -10,7 +10,7 @@ const path = require('path')
 module.exports = async function writeArchive(archiveDir, rawArchive, opts = {}) {
   let resourceNames = Object.keys(rawArchive.resources)
   let newVersion = "0"
-
+  
   if (opts.versioning) {
     console.warn('Git based versioning is not yet implemented.')
   }
@@ -34,18 +34,20 @@ module.exports = async function writeArchive(archiveDir, rawArchive, opts = {}) 
 }
 
 function _writeFile(p, data, encoding) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
+    const opts = encoding ? { encoding } : {};
     if (typeof data.pipe === 'function') {
-      let file = fs.createWriteStream(p)
-      data.pipe(file)
-      file.on('close', () => {
-        resolve()
-      })
+      await FileStorage.putPassThroughStream(p, data, opts);
+      resolve();
     } else {
-      fs.writeFile(p, data, encoding, (err) => {
-        if (err) reject()
-        else resolve()
-      })
+      const buff = encoding ? Buffer.from(data, encoding) : Buffer.from(data);
+      try {
+        await FileStorage.put(p, buff, opts);
+        resolve();
+      } catch (err) {
+        console.error(err);
+        reject(err);
+      }
     }
   })
 }

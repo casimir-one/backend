@@ -1,4 +1,4 @@
-const { DefaultDOMElement } = require('substance')
+import DefaultDOMElement from 'substance';
 
 module.exports = function extractMetadata(manifestXMLStr) {
   let result = {

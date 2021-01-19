@@ -19,6 +19,7 @@ const researchContentPackageFilePath = (baseDir, researchExternalId, packageHash
 const researchDarArchiveDirPath = (baseDir, researchExternalId, archiveName) => `${researchDirPath(baseDir, researchExternalId)}/${archiveName}`;
 const researchDarArchiveFilePath = (baseDir, researchExternalId, archiveName, filename) => `${researchDarArchiveDirPath(baseDir, researchExternalId, archiveName)}/${filename}`;
 const researchContentPackageTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
+const researchBlankDarArchiveDirPath = () => path.join(__dirname, `./../default/dar-blank`);
 
 
 const accountDir = 'accounts';
@@ -51,7 +52,9 @@ class BaseStorage {
     this._baseDirPath = baseDirPath;
   }
 
-  getStorageType() { return this._type; }
+  getStorageType() { 
+    return this._type; 
+  }
 
   getBaseDirPath() {
     return this._baseDirPath;
@@ -62,11 +65,14 @@ class BaseStorage {
   }
   
   async mkdir(remotePath, recursive = true) { throw new Error("Not implemented"); }
+  async rmdir(localPath, recursive = true) { throw new Error("Not implemented"); }
   async exists(remotePath) { throw new Error("Not implemented"); }
   async delete(remotePath, noErrorOK = false) { throw new Error("Not implemented"); }
   async get(remotePath, dst, options) { throw new Error("Not implemented"); }
   async move(src, dst) { throw new Error("Not implemented"); }
-  async calculateFolderHash(remotePath, options) { throw new Error("Not implemented"); }
+  async calculateDirHash(remotePath, options) { throw new Error("Not implemented"); }
+  async put(remotePath, buff, options = {}) { throw new Error("Not implemented"); }
+  async putPassThroughStream(remotePath, passThroughSteam, options = {}) { throw new Error("Not implemented"); }
 
 
   getResearchDirPath(researchExternalId) {
@@ -101,6 +107,10 @@ class BaseStorage {
     return researchDarArchiveFilePath(this._baseDirPath, researchExternalId, archiveName, filename);
   }
 
+  getResearchBlankDarArchiveDirPath() {
+    return researchBlankDarArchiveDirPath();
+  }
+  
   getResearchContentPackageTempDirPath(researchExternalId, sessionId) {
     return researchContentPackageTempDirPath(this._baseDirPath, researchExternalId, sessionId);
   }

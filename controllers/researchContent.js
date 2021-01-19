@@ -1,23 +1,16 @@
-import fs from 'fs'
-import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util';
-import send from 'koa-send';
-import multer from 'koa-multer';
 import parseFormdata from 'parse-formdata'
 import readArchive from './../dar/readArchive'
 import writeArchive from './../dar/writeArchive'
 import cloneArchive from './../dar/cloneArchive'
-import listArchives from './../dar/listArchives'
 import deipRpc from '@deip/rpc-client';
 import xml2js from 'xml2js';
-import { hashElement } from 'folder-hash';
+import { v4 as uuidv4 } from 'uuid';
 import config from './../config';
 import ResearchContent from './../forms/researchContent';
 import FileStorage from './../storage';
-import url from 'url';
 import crypto from 'crypto';
-import rimraf from "rimraf";
 import slug from 'limax';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
@@ -30,31 +23,7 @@ import ResearchContentProposalSignedEvent from './../events/researchContentPropo
 import ResearchContentProposalRejectedEvent from './../events/researchContentProposalRejectedEvent';
 
 
-const storagePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
-const blankDarPath = path.join(__dirname, `./../default/dar-blank`);
-
-const researchFileStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}`
-const researchFileContentPath = (researchId, filename) => `${researchFileStoragePath(researchId)}/${filename}`
-const researchDarArchivePath = (researchId, archiveName) => `${researchFileStoragePath(researchId)}/${archiveName}`
-const researchDarArchiveFilePath = (researchId, archiveName, filename) => `${researchDarArchivePath(researchId, archiveName)}/${filename}`
-
-
-const opts = {}
-
 // ############ Read actions ############
-
-const listDarArchives = async (ctx) => {
-  try {
-    const records = await listArchives(storagePath)
-    ctx.status = 200;
-    ctx.body = records;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-}
-
 
 const getResearchContent = async (ctx) => {
   let researchContentExternalId = ctx.params.researchContentExternalId;
@@ -161,10 +130,15 @@ const readDarArchive = async (ctx) => {
       return;
     }
 
-    const archiveDir = researchDarArchivePath(rc.researchExternalId, rc.folder);
-    const stat = util.promisify(fs.stat);
-    const check = await stat(archiveDir);
+    const archiveDir = FileStorage.getResearchDarArchiveDirPath(rc.researchExternalId, rc.folder);
+    const exists = await FileStorage.exists(archiveDir);
+    if (!exists) {
+      ctx.status = 404;
+      ctx.body = `Dar "${archiveDir}" is not found`;
+      return;
+    }
 
+    const opts = {}
     const rawArchive = await readArchive(archiveDir, {
       noBinaryContent: true,
       ignoreDotFiles: true,
@@ -190,15 +164,33 @@ const readDarArchive = async (ctx) => {
 
 const readDarArchiveStaticFiles = async (ctx) => {
   const darId = ctx.params.dar;
+  const filename = ctx.params.file;
+
   try {
     const researchContentService = new ResearchContentService();
 
     const rc = await researchContentService.findResearchContentRefById(darId);
-    const archivePath = researchDarArchivePath(rc.researchExternalId, rc.folder);
+    const filepath = FileStorage.getResearchDarArchiveFilePath(rc.researchExternalId, rc.folder, filename);
 
-    const stat = util.promisify(fs.stat);
-    const check = await stat(archivePath);
-    await send(ctx, researchDarArchiveFilePath(rc.researchExternalId, rc.folder, ctx.params.file), { root: '/' });
+    const buff = await FileStorage.get(filepath);
+    const ext = filename.substr(filename.lastIndexOf('.') + 1);
+    const name = filename.substr(0, filename.lastIndexOf('.'));
+    const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
+    const isPdf = ['pdf'].some(e => e == ext);
+
+    if (isImage) {
+      ctx.response.set('Content-Type', `image/${ext}`);
+      ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+      ctx.body = buff;
+    } else if (isPdf) {
+      ctx.response.set('Content-Type', `application/${ext}`);
+      ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+      ctx.body = buff;
+    } else {
+      ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+      ctx.body = buff;
+    }
+
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -284,9 +276,14 @@ const updateDarArchive = async (ctx) => {
       return;
     }
 
-    const archiveDir = researchDarArchivePath(rc.researchExternalId, rc.folder);
-    const stat = util.promisify(fs.stat);
-    const check = await stat(archiveDir);
+    const archiveDir = FileStorage.getResearchDarArchiveDirPath(rc.researchExternalId, rc.folder);
+    const exists = await FileStorage.exists(archiveDir);
+    if (!exists) {
+      ctx.status = 404;
+      ctx.body = `Dar "${archiveDir}" is not found`;
+      return;
+    }
+
     const archive = JSON.parse(result.formData.fields._archive)
 
     result.formData.parts.forEach((part) => {
@@ -299,6 +296,8 @@ const updateDarArchive = async (ctx) => {
         record.data = part.stream
       }
     })
+
+    const opts = {}
     const version = await writeArchive(archiveDir, archive, {
       versioning: opts.versioning
     })
@@ -385,10 +384,11 @@ const createDarArchive = async (ctx) => {
       return;
     }
 
-    const now = new Date().getTime();
-    const externalId = `draft-${researchExternalId}-${now}`;
-    const darPath = researchDarArchivePath(researchExternalId, externalId);
-    await cloneArchive(blankDarPath, darPath);
+    const externalId = `draft-${researchExternalId}-${uuidv4()}`;
+    const darPath = FileStorage.getResearchDarArchiveDirPath(researchExternalId, externalId);
+    const blankDarPath = FileStorage.getResearchBlankDarArchiveDirPath();
+    
+    await cloneArchive(blankDarPath, darPath, true);
 
     const folder = externalId;
     const researchContentRm = await researchContentService.createResearchContentRef({
@@ -452,14 +452,12 @@ const deleteContentDraft = async (ctx) => {
       return;
     }
 
-    const unlink = util.promisify(fs.unlink);
-
     if (rc.type === 'dar') {
-      await fsExtra.remove(path.join(storagePath, rc.folder));
-    } else if (rc.type === 'file') {
-      await unlink(researchFileContentPath(rc.researchExternalId, rc.folder));
+      const darPath = FileStorage.getResearchDarArchiveDirPath(rc.researchExternalId, rc.folder);
+      await FileStorage.rmdir(darPath);
     } else if (rc.type === 'package') {
-      await fsExtra.remove(FileStorage.getResearchContentPackageDirPath(rc.researchExternalId, rc.hash));
+      const packagePath = FileStorage.getResearchContentPackageDirPath(rc.researchExternalId, rc.hash);
+      await FileStorage.rmdir(packagePath);
     }
 
     await researchContentService.removeResearchContentRefById(refId);
@@ -527,8 +525,8 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
 
   const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
 
-  const archiveDir = researchDarArchivePath(rc.researchExternalId, rc.folder);
-  const hashObj = await hashElement(archiveDir, options);
+  const archiveDir = FileStorage.getResearchDarArchiveDirPath(rc.researchExternalId, rc.folder);
+  const hashObj = await FileStorage.calculateDirHash(archiveDir, options);
   console.log(hashObj);
   const hashes = hashObj.children.map(f => f.hash);
   hashes.sort();
@@ -577,7 +575,7 @@ const uploadBulkResearchContent = async (ctx) => {
     const { tempDestinationPath } = await ResearchContent(ctx);
 
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
-    const hashObj = await FileStorage.calculateFolderHash(tempDestinationPath, options);
+    const hashObj = await FileStorage.calculateDirHash(tempDestinationPath, options);
     console.log(hashObj);
     const hashes = hashObj.children.map(f => f.hash);
     hashes.sort();
@@ -783,7 +781,6 @@ const createResearchContent = async (ctx, next) => {
 
 export default {
   // dar
-  listDarArchives,
   readDarArchive,
   readDarArchiveStaticFiles,
   createDarArchive,

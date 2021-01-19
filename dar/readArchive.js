@@ -1,7 +1,6 @@
-const fs = require('fs')
-const listDir = require('./listDir')
-const { isDocumentArchive } = require('./util')
-
+import listDir from './listDir';
+import { isDocumentArchive } from './util';
+import FileStorage from './../storage';
 // these extensions are considered to have text content
 const TEXTISH = ['txt', 'html', 'xml', 'json']
 
@@ -15,7 +14,8 @@ const TEXTISH = ['txt', 'html', 'xml', 'json']
 */
 module.exports = async function readArchive(archiveDir, opts = {}) {
   // make sure that the given path is a dar
-  if (await isDocumentArchive(archiveDir)) {
+  const isArchive = await isDocumentArchive(archiveDir);
+  if (isArchive) {
     // first get a list of stats
     const entries = await listDir(archiveDir, opts)
     // then get file records as specified TODO:link
@@ -56,41 +56,48 @@ module.exports = async function readArchive(archiveDir, opts = {}) {
 async function _getFileRecord(fileEntry, opts) {
   // for text files load content
   // for binaries use a url
+
   let record = {
     path: fileEntry.name,
     encoding: null,
     size: fileEntry.size,
-    createdAt: fileEntry.birthtime.getTime(),
-    updatedAt: fileEntry.mtime.getTime()
+    createdAt: fileEntry.modifyTime || fileEntry.birthtime.getTime(),
+    updatedAt: fileEntry.modifyTime || fileEntry.mtime.getTime()
   }
-  if(_isTextFile(fileEntry.name)) {
-    return new Promise((resolve, reject) => {
-      fs.readFile(fileEntry.path, 'utf8', (err, content) => {
-        if (err) return reject(err)
-        record.encoding = 'utf8'
-        record.data = content
-        resolve(record)
-      })
+
+  if (_isTextFile(fileEntry.name)) {
+    return new Promise(async (resolve, reject) => {
+      try {
+        const buff = await FileStorage.get(fileEntry.path, undefined, { encoding: "utf8" });
+        record.encoding = 'utf8';
+        record.data = buff.toString('utf8');
+        resolve(record);
+      } catch(err) {
+        console.error(err);
+        reject(err);
+      }
     })
+
   } else {
     // used internally only
-    record._binary = true
+    record._binary = true;
     if (opts.noBinaryContent) {
       return Promise.resolve(record)
     } else {
-      return new Promise((resolve, reject) => {
-        fs.readFile(fileEntry.path, 'hex', (err, content) => {
-          if (err) return reject(err)
-          record.encoding = 'hex'
-          record.data = content
-          resolve(record)
-        })
+      return new Promise(async (resolve, reject) => {
+        try {
+          const buff = await FileStorage.get(fileEntry.path, undefined, { encoding: "hex" });
+          record.encoding = 'hex';
+          record.data = buff.toString('hex');
+          resolve(record);
+        } catch (err) {
+          console.error(err);
+          reject(err);
+        }
       })
     }
   }
 }
-
-
 
 function _isTextFile(f) {
   return new RegExp(`\\.(${TEXTISH.join('|')})$`).exec(f)
