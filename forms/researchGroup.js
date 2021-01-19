@@ -1,28 +1,32 @@
+import fs from 'fs';
+import util from 'util';
+import path from 'path';
+import sharp from 'sharp';
+import deipRpc from '@deip/rpc-client';
 import config from './../config';
 import multer from 'koa-multer';
 import { getFileStorageUploader } from './files';
 
-const USERNAME_HEADER = "username";
+const RESEARCH_GROUP_HEADER = "research-group-external-id";
+
 
 const destinationHandler = (fileStorage) => function () {
   return async function (req, file, callback) {
-    const username = req.headers[USERNAME_HEADER];
-    const accountsDirPath = fileStorage.getAccountDirPath(username);
+    const researchGroupExternalId = req.headers[RESEARCH_GROUP_HEADER];
+    const researchGroupDirPath = fileStorage.getResearchGroupDirPath(researchGroupExternalId);
 
-    const exists = await fileStorage.exists(accountsDirPath);
+    const exists = await fileStorage.exists(researchGroupDirPath);
     if (!exists) {
-      await fileStorage.mkdir(accountsDirPath);
+      await fileStorage.mkdir(researchGroupDirPath);
     }
-    callback(null, accountsDirPath)
+    callback(null, researchGroupDirPath)
   };
 }
 
 
 const filenameHandler = () => function () {
   return function (req, file, callback) {
-    const username = req.headers[USERNAME_HEADER];
-    const ext = file.originalname.substr(file.originalname.lastIndexOf('.') + 1);
-    callback(null, `${username}.${ext}`);
+    callback(null, `logo.png`);
   }
 }
 
@@ -36,8 +40,8 @@ const fileFilterHandler = (req, file, callback) => {
 }
 
 
-// TODO: Move all user fields here after UI form refactoring
-const UserForm = async (ctx) => {
+// TODO: Move all research group fields here after UI form refactoring
+const ResearchGroupForm = async (ctx) => {
 
   const filesUploader = multer({
     storage: getFileStorageUploader(destinationHandler, filenameHandler),
@@ -47,15 +51,15 @@ const UserForm = async (ctx) => {
   const formHandler = filesUploader.any();
   return formHandler(ctx, () => new Promise((resolve, reject) => {
     try {
-      resolve({ 
+      resolve({
         filename: ctx.req.files[0].filename
       });
     } catch (err) {
       reject(err);
     }
   }));
-  
+
 }
 
 
-export default UserForm;
+export default ResearchGroupForm;

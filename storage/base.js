@@ -24,9 +24,17 @@ const researchDarArchiveFilePath = (baseDir, researchExternalId, archiveName, fi
 const researchContentPackageTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
 
 
-const accountsDir = 'accounts';
-const accountsDirPath = (baseDir, username) => `${baseDir}/${accountsDir}/${username}`;
-const accountsAvatarFilePath = (baseDir, username, picture) => `${accountsDirPath(baseDir, username)}/${picture}`
+const accountDir = 'accounts';
+const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
+const accountAvatarFilePath = (baseDir, username, picture) => `${accountDirPath(baseDir, username)}/${picture}`
+const accountDefaultAvatarFilePath = () => path.join(__dirname, `./../default/default-avatar.png`);
+
+
+const researchGroupDir = 'research-groups';
+const researchGroupDirPath = (baseDir, researchGroupExternalId) => `${baseDir}/${researchGroupDir}/${researchGroupExternalId}`;
+const researchGroupLogoFilePath = (baseDir, researchGroupExternalId) => `${researchGroupDirPath(baseDir, researchGroupExternalId)}/logo.png`;
+const researchGroupDefaultLogoFilePath = () => path.join(__dirname, `./../default/default-research-group-logo.png`);
+
 
 
 class BaseStorage {
@@ -93,16 +101,28 @@ class BaseStorage {
     return researchContentPackageTempDirPath(this._baseDirPath, researchExternalId, sessionId);
   }
 
-  getAccountsDirPath(username) {
-    return accountsDirPath(this._baseDirPath, username);
+  getAccountDirPath(username) {
+    return accountDirPath(this._baseDirPath, username);
   }
 
-  getAccountsAvatarFilePath(username, picture) {
-    return accountsAvatarFilePath(this._baseDirPath, username, picture);
+  getAccountAvatarFilePath(username, picture) {
+    return accountAvatarFilePath(this._baseDirPath, username, picture);
   }
 
-  getAccountsDefaultAvatarFilePath() {
-    return path.join(__dirname, `./../default/default-avatar.png`);
+  getAccountDefaultAvatarFilePath() {
+    return accountDefaultAvatarFilePath();
+  }
+
+  getResearchGroupDirPath(researchGroupExternalId) {
+    return researchGroupDirPath(this._baseDirPath, researchGroupExternalId);
+  }
+
+  getResearchGroupLogoFilePath(researchGroupExternalId) {
+    return researchGroupLogoFilePath(this._baseDirPath, researchGroupExternalId);
+  }
+
+  getResearchGroupDefaultLogoFilePath() {
+    return researchGroupDefaultLogoFilePath();
   }
 
 

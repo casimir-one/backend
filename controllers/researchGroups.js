@@ -7,8 +7,9 @@ import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
 import * as blockchainService from './../utils/blockchain';
+import FileStorage from './../storage';
 import ResearchGroupService from './../services/researchGroup';
-import { researchGroupLogoForm } from './../forms/researchGroupForms';
+import ResearchGroupForm from './../forms/researchGroup';
 import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
 import ResearchGroupUpdatedEvent from './../events/researchGroupUpdatedEvent';
 import ResearchGroupUpdateProposedEvent from './../events/researchGroupUpdateProposedEvent';
@@ -113,106 +114,107 @@ const leaveResearchGroup = async (ctx, next) => {
 };
 
 
-const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
-const researchGroupStoragePath = (researchGroupExternalId) => `${filesStoragePath}/research-groups/${researchGroupExternalId}`;
-const researchGroupLogoImagePath = (researchGroupExternalId, ext = 'png') => `${researchGroupStoragePath(researchGroupExternalId)}/logo.${ext}`;
-const defaultResearchGroupLogoPath = () => path.join(__dirname, `./../default/default-research-group-logo.png`);
-
 
 const uploadResearchGroupLogo = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const researchGroupExternalId = ctx.request.headers['research-group-external-id'];
-  const researchGroupService = new ResearchGroupService();
-  
-  const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
-  if (!authorizedGroup) {
-    ctx.status = 401;
-    ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupExternalId}" research`;
-    return;
-  }
-
-  const stat = util.promisify(fs.stat);
-  const unlink = util.promisify(fs.unlink);
-  const ensureDir = util.promisify(fsExtra.ensureDir);
-
   try {
-    const filepath = researchGroupLogoImagePath(researchGroupExternalId);
 
-    await stat(filepath);
-    await unlink(filepath);
+    const jwtUsername = ctx.state.user.username;
+    const researchGroupExternalId = ctx.request.headers['research-group-external-id'];
+    const researchGroupService = new ResearchGroupService();
+
+    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
+    if (!authorizedGroup) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupExternalId}" research`;
+      return;
+    }
+
+    const { filename } = await ResearchGroupForm(ctx);
+    ctx.status = 200;
+    ctx.body = filename;
   } catch (err) {
-    await ensureDir(researchGroupStoragePath(researchGroupExternalId))
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
   }
-
-  const logoImage = researchGroupLogoForm.single('research-background');
-  const result = await logoImage(ctx, () => new Promise((resolve, reject) => {
-    resolve({ 'filename': ctx.req.file.filename });
-  }));
-
-  ctx.status = 200;
-  ctx.body = result;
 }
 
+
 const getResearchGroupLogo = async (ctx) => {
-  const researchGroupExternalId = ctx.params.researchGroupExternalId;
-  const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
-  const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
-  const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
-  const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
-
-
-  let src = researchGroupLogoImagePath(researchGroupExternalId);
-  const stat = util.promisify(fs.stat);
 
   try {
-    const check = await stat(src);
-  } catch (err) {
-    src = defaultResearchGroupLogoPath();
-  }
+    const researchGroupExternalId = ctx.params.researchGroupExternalId;
+    const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
+    const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
+    const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
+    const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
 
-  const resize = (w, h) => {
-    return new Promise((resolve) => {
-      sharp.cache(!noCache);
-      sharp(src)
-        .rotate()
-        .resize(w, h)
-        .png()
-        .toBuffer()
-        .then(data => {
-          resolve(data)
-        })
-        .catch(err => {
-          resolve(err)
-        });
-    })
-  }
+    let src = FileStorage.getResearchGroupLogoFilePath(researchGroupExternalId);
+    const defaultResearchGroupLogo = FileStorage.getResearchGroupDefaultLogoFilePath();
 
-  let logo = await resize(width, height);
+    let buff;
 
-  if (isRound) {
-    let round = (w) => {
-      let r = w / 2;
-      let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
-      return new Promise((resolve, reject) => {
-        logo = sharp(logo)
-          .overlayWith(circleShape, { cutout: true })
+    if (src != defaultResearchGroupLogo) {
+      const filepath = FileStorage.getResearchGroupLogoFilePath(researchGroupExternalId);
+      const exists = await FileStorage.exists(filepath);
+      if (exists) {
+        buff = await FileStorage.get(filepath);
+      } else {
+        src = defaultResearchGroupLogo;
+      }
+    } else {
+      src = defaultResearchGroupLogo;
+    }
+
+    const resize = (w, h) => {
+      return new Promise((resolve) => {
+        sharp.cache(!noCache);
+        sharp(buff || src)
+          .rotate()
+          .resize(w, h)
           .png()
           .toBuffer()
           .then(data => {
             resolve(data)
           })
           .catch(err => {
-            reject(err)
+            resolve(err)
           });
-      });
+      })
     }
 
-    logo = await round(width);
-  }
+    let logo = await resize(width, height);
 
-  ctx.type = 'image/png';
-  ctx.body = logo;
+    if (isRound) {
+      let round = (w) => {
+        let r = w / 2;
+        let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
+        return new Promise((resolve, reject) => {
+          logo = sharp(logo)
+            .overlayWith(circleShape, { cutout: true })
+            .png()
+            .toBuffer()
+            .then(data => {
+              resolve(data)
+            })
+            .catch(err => {
+              reject(err)
+            });
+        });
+      }
+
+      logo = await round(width);
+    }
+
+    ctx.type = 'image/png';
+    ctx.body = logo;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
 }
+
 
 const getResearchGroup = async (ctx) => {
   let researchGroupExternalId = ctx.params.researchGroupExternalId;

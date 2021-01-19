@@ -319,7 +319,7 @@ const uploadAvatar = async (ctx) => {
     const updatedUserProfile = await usersService.updateUserProfile(username, { avatar: filename });
 
     if (oldFilename != filename) {
-      await FileStorage.delete(FileStorage.getAccountsAvatarFilePath(username, oldFilename))
+      await FileStorage.delete(FileStorage.getAccountAvatarFilePath(username, oldFilename))
     }
 
     ctx.status = 200;
@@ -343,16 +343,16 @@ const getAvatar = async (ctx) => {
 
     const usersService = new UserService();
     const user = await usersService.getUser(username);
-    const defaultAvatar = FileStorage.getAccountsDefaultAvatarFilePath();
+    const defaultAvatar = FileStorage.getAccountDefaultAvatarFilePath();
 
     let src;
     let buff;
 
     if (user && user.profile) {
-      const dest = FileStorage.getAccountsAvatarFilePath(user.account.name, user.profile.avatar);
-      const exists = await FileStorage.exists(dest);
+      const filepath = FileStorage.getAccountAvatarFilePath(user.account.name, user.profile.avatar);
+      const exists = await FileStorage.exists(filepath);
       if (exists) {
-        buff = await FileStorage.get(dest);
+        buff = await FileStorage.get(filepath);
       } else {
         src = defaultAvatar;
       }
