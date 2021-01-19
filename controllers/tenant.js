@@ -8,68 +8,47 @@ import UserService from './../services/users';
 import tenantService from './../services/tenant';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
+import FileStorage from './../storage';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
-import { tenantBannerForm } from './../forms/tenantForms';
+import TeantBannerForm from './../forms/tenantBanner';
 import * as blockchainService from './../utils/blockchain';
 import mongoose from 'mongoose';
 
 
-const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
-const tenantStoragePath = (tenantId) => `${filesStoragePath}/tenants/${tenantId}`;
-const tenantBannerPath = (tenantId, picture) => `${tenantStoragePath(tenantId)}/${picture}`;
-const tenantLogoPath = (tenantId, logo) => `${tenantStoragePath(tenantId)}/${logo}`;
-const defaultTenantBannerPath = () => path.join(__dirname, `./../default/default-tenant-banner.png`);
-const defaultTenantLogoPath = () => path.join(__dirname, `./../default/default-tenant-logo.png`);
-
-
 const uploadTenantBanner = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const tenantId = ctx.request.headers['tenant-id'];
+  const tenantExternalId = ctx.request.headers['tenant-id'];
 
   try {
 
     const researchGroupService = new ResearchGroupService();
-    
-    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(tenantId, jwtUsername);
+    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(tenantExternalId, jwtUsername);
     if (!authorizedGroup) {
       ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${tenantId}" research`;
+      ctx.body = `"${jwtUsername}" is not permitted to edit "${tenantExternalId}" research`;
       return;
     }
 
-    const tenantProfile = await tenantService.findTenantProfile(tenantId);
+    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
     if (!tenantProfile) {
       ctx.status = 404;
-      ctx.body = `Tenant Profile for "${tenantId}" does not exist!`;
+      ctx.body = `Tenant Profile for "${tenantExternalId}" does not exist!`;
       return;
-    }
-
-    const stat = util.promisify(fs.stat);
-    const unlink = util.promisify(fs.unlink);
-    const ensureDir = util.promisify(fsExtra.ensureDir);
-
-    try {
-      const filepath = tenantStoragePath(tenantId);
-      await stat(filepath);
-      // await unlink(filepath);
-    } catch (err) {
-      await ensureDir(tenantStoragePath(tenantId))
     }
 
     const oldFilename = tenantProfile.banner;
-    const tenantBanner = tenantBannerForm.single('tenant-banner');
-    const { filename } = await tenantBanner(ctx, () => new Promise((resolve, reject) => {
-      resolve({ 'filename': ctx.req.file.filename });
-    }));
-
+    const { filename } = await TeantBannerForm(ctx);
     tenantProfile.banner = filename;
+
     const updatedTenantProfile = await tenantProfile.save();
 
     if (oldFilename != filename) {
-      try {
-        await unlink(tenantBannerPath(tenantId, oldFilename));
-      } catch (err) { }
+      const oldFilepath = FileStorage.getTenantBannerFilePath(tenantExternalId, oldFilename);
+      const exists = await FileStorage.get(oldFilepath);
+      if (exists) {
+        await FileStorage.delete(oldFilepath);
+      }
     }
 
     ctx.status = 200;
@@ -84,7 +63,7 @@ const uploadTenantBanner = async (ctx) => {
 
 
 const getTenantBanner = async (ctx) => {
-  const tenantId = ctx.params.tenant;
+  const tenantExternalId = ctx.params.tenant;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
@@ -92,21 +71,28 @@ const getTenantBanner = async (ctx) => {
 
   try {
 
-    let tenantProfile = await tenantService.findTenantProfile(tenantId);
-    let src = tenantBannerPath(tenantId, tenantProfile.banner);
+    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
+    const defaultBanner = FileStorage.getTenantDefaultBannerFilePath();
 
-    try {
+    let src;
+    let buff;
 
-      const stat = util.promisify(fs.stat);
-      const check = await stat(src);
-    } catch (err) {
-      src = defaultTenantBannerPath();
+    if (tenantProfile.banner) {
+      const filepath = FileStorage.getTenantBannerFilePath(tenantExternalId, tenantProfile.banner);
+      const exists = await FileStorage.exists(filepath);
+      if (exists) {
+        buff = await FileStorage.get(filepath);
+      } else {
+        src = defaultBanner;
+      }
+    } else {
+      src = defaultBanner;
     }
 
     let resize = (w, h) => {
       return new Promise((resolve, reject) => {
         sharp.cache(!noCache);
-        sharp(src)
+        sharp(buff || src)
           .rotate()
           .resize(w, h)
           .png()
@@ -155,7 +141,7 @@ const getTenantBanner = async (ctx) => {
 
 
 const getTenantLogo = async (ctx) => {
-  const tenantId = ctx.params.tenant;
+  const tenantExternalId = ctx.params.tenant;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
@@ -163,21 +149,28 @@ const getTenantLogo = async (ctx) => {
 
   try {
 
-    let tenantProfile = await tenantService.findTenantProfile(tenantId);
-    let src = tenantLogoPath(tenantId, tenantProfile.logo);
+    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
+    const defaultLogo = FileStorage.getTenantDefaultLogoFilePath();
 
-    try {
+    let src;
+    let buff;
 
-      const stat = util.promisify(fs.stat);
-      const check = await stat(src);
-    } catch (err) {
-      src = defaultTenantLogoPath();
+    if (tenantProfile.banner) {
+      const filepath = FileStorage.getTenantLogoFilePath(tenantExternalId, tenantProfile.logo);
+      const exists = await FileStorage.exists(filepath);
+      if (exists) {
+        buff = await FileStorage.get(filepath);
+      } else {
+        src = defaultLogo;
+      }
+    } else {
+      src = defaultLogo;
     }
 
     let resize = (w, h) => {
       return new Promise((resolve, reject) => {
         sharp.cache(!noCache);
-        sharp(src)
+        sharp(buff || src)
           .rotate()
           // .resize(w, h)
           .png()
@@ -226,14 +219,14 @@ const getTenantLogo = async (ctx) => {
 
 
 const getTenantProfile = async (ctx) => {
-  const tenantId = ctx.params.tenant;
+  const tenantExternalId = ctx.params.tenant;
 
   try {
 
-    const tenantProfile = await tenantService.findTenantProfile(tenantId);
+    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
     if (!tenantProfile) {
       ctx.status = 404;
-      ctx.body = `Tenant Profile for '${tenantId}' does not exist`
+      ctx.body = `Tenant Profile for '${tenantExternalId}' does not exist`
       return;
     }
 
@@ -258,17 +251,17 @@ const updateTenantProfile = async (ctx) => {
 
   try {
 
-    const tenantId = tenant.id;
-    const tenantProfile = await tenantService.findTenantProfile(tenantId);
+    const tenantExternalId = tenant.id;
+    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
     if (!tenantProfile) {
       ctx.status = 404;
-      ctx.body = `Tenant Profile for '${tenantId}' does not exist`
+      ctx.body = `Tenant Profile for '${tenantExternalId}' does not exist`
       return;
     }
 
     const profileData = tenantProfile.toObject();
     const updatedTenantProfile = await tenantService.updateTenantProfile(
-      tenantId, 
+      tenantExternalId, 
       { ...profileData, ...update }, 
       { ...profileData.settings, ...update.settings }
     );

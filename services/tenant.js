@@ -7,7 +7,7 @@ async function findTenantProfile(id) {
 }
 
 async function createTenantProfile({
-  tenantId,
+  tenantExternalId,
   name,
   shortName,
   description,
@@ -25,7 +25,7 @@ async function createTenantProfile({
 }) {
 
   const tenantProfile = new TenantProfile({
-    _id: tenantId,
+    _id: tenantExternalId,
     name: name,
     shortName: shortName,
     description: description,
@@ -46,7 +46,7 @@ async function createTenantProfile({
   return tenantProfile.save();
 }
 
-async function updateTenantProfile(tenantId, {
+async function updateTenantProfile(tenantExternalId, {
   name,
   shortName,
   description,
@@ -60,7 +60,7 @@ async function updateTenantProfile(tenantId, {
   researchLayouts
 }) {
 
-  let tenantProfile = await findTenantProfile(tenantId);
+  let tenantProfile = await findTenantProfile(tenantExternalId);
 
   if (!tenantProfile) {
     throw new Error(`User profile ${us} does not exist`);
@@ -81,7 +81,7 @@ async function updateTenantProfile(tenantId, {
 }
 
 
-async function addTenantResearchAttribute(tenantId, {
+async function addTenantResearchAttribute(tenantExternalId, {
   _id: researchAttributeId,
   type,
   isPublished,
@@ -95,7 +95,7 @@ async function addTenantResearchAttribute(tenantId, {
   defaultValue
 }) {
 
-  const tenantProfile = await findTenantProfile(tenantId);
+  const tenantProfile = await findTenantProfile(tenantExternalId);
   tenantProfile.settings.researchAttributes.push({
     _id: mongoose.Types.ObjectId(researchAttributeId),
     type,
@@ -116,18 +116,18 @@ async function addTenantResearchAttribute(tenantId, {
 }
 
 
-async function removeTenantResearchAttribute(tenantId, {
+async function removeTenantResearchAttribute(tenantExternalId, {
   _id: researchAttributeId
 }) {
 
-  const tenantProfile = await findTenantProfile(tenantId);
+  const tenantProfile = await findTenantProfile(tenantExternalId);
   tenantProfile.settings.researchAttributes = tenantProfile.settings.researchAttributes.filter(a => a._id.toString() !== mongoose.Types.ObjectId(researchAttributeId).toString());
 
   return tenantProfile.save();
 }
 
 
-async function updateTenantResearchAttribute(tenantId, {
+async function updateTenantResearchAttribute(tenantExternalId, {
   _id: researchAttributeId,
   type,
   isPublished,
@@ -141,7 +141,7 @@ async function updateTenantResearchAttribute(tenantId, {
   defaultValue
 }) {
 
-  const tenantProfile = await findTenantProfile(tenantId);
+  const tenantProfile = await findTenantProfile(tenantExternalId);
 
   const researchAttribute = tenantProfile.settings.researchAttributes.find(a => a._id.toString() === mongoose.Types.ObjectId(researchAttributeId).toString());
   

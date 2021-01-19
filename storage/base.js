@@ -14,13 +14,10 @@ const researchDirPath = (baseDir, researchExternalId) => `${baseDir}/${researchD
 const researchFilePath = (baseDir, researchExternalId, filename) => `${researchDirPath(baseDir, researchExternalId)}/${filename}`;
 const researchAttributeDirPath = (baseDir, researchExternalId, researchAttributeId) => `${researchDirPath(baseDir, researchExternalId)}/${researchAttributeId}`;
 const researchAttributeFilePath = (baseDir, researchExternalId, researchAttributeId, filename) => `${researchAttributeDirPath(baseDir, researchExternalId, researchAttributeId)}/${filename}`;
-
 const researchContentPackageDirPath = (baseDir, researchExternalId, packageHash) => `${researchDirPath(baseDir, researchExternalId)}/${packageHash}`;
 const researchContentPackageFilePath = (baseDir, researchExternalId, packageHash, fileHash) => `${researchContentPackageDirPath(baseDir, researchExternalId, packageHash)}/${fileHash}`;
-
 const researchDarArchiveDirPath = (baseDir, researchExternalId, archiveName) => `${researchDirPath(baseDir, researchExternalId)}/${archiveName}`;
 const researchDarArchiveFilePath = (baseDir, researchExternalId, archiveName, filename) => `${researchDarArchiveDirPath(baseDir, researchExternalId, archiveName)}/${filename}`;
-
 const researchContentPackageTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
 
 
@@ -35,6 +32,13 @@ const researchGroupDirPath = (baseDir, researchGroupExternalId) => `${baseDir}/$
 const researchGroupLogoFilePath = (baseDir, researchGroupExternalId) => `${researchGroupDirPath(baseDir, researchGroupExternalId)}/logo.png`;
 const researchGroupDefaultLogoFilePath = () => path.join(__dirname, `./../default/default-research-group-logo.png`);
 
+
+const tenantDir = 'tenants';
+const tenantDirPath = (baseDir, tenantExternalId) => `${baseDir}/${tenantDir}/${tenantExternalId}`;
+const tenantBannerFilePath = (baseDir, tenantExternalId, filename) => `${tenantDirPath(baseDir, tenantExternalId)}/${filename}`;
+const tenantLogoFilePath = (baseDir, tenantExternalId, filename) => `${tenantDirPath(baseDir, tenantExternalId)}/${filename}`;
+const tenantDefaultBannerFilePath = () => path.join(__dirname, `./../default/default-tenant-banner.png`);
+const tenantDefaultLogoFilePath = () => path.join(__dirname, `./../default/default-tenant-logo.png`);
 
 
 class BaseStorage {
@@ -125,6 +129,25 @@ class BaseStorage {
     return researchGroupDefaultLogoFilePath();
   }
 
+  getTenantDirPath(tenantExternalId) {
+    return tenantDirPath(this._baseDirPath, tenantExternalId);
+  }
+
+  getTenantBannerFilePath(tenantExternalId, filename) {
+    return tenantBannerFilePath(this._baseDirPath, tenantExternalId, filename);
+  }
+
+  getTenantLogoFilePath(tenantExternalId, filename) {
+    return tenantLogoFilePath(this._baseDirPath, tenantExternalId, filename);
+  }
+
+  getTenantDefaultBannerFilePath() {
+    return tenantDefaultBannerFilePath();
+  }
+
+  getTenantDefaultLogoFilePath() {
+    return tenantDefaultLogoFilePath();
+  }
 
 }
 
