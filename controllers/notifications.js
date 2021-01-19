@@ -1,105 +1,102 @@
-import UserNotification from './../schemas/userNotification';
-import deipRpc from '@deip/rpc-client';
+import UserNotificationService from './../services/userNotification';
 
 const getNotificationsByUser = async (ctx) => {
-    const username = ctx.params.username;
-    const jwtUsername = ctx.state.user.username;
-    const unreadOnly = ctx.query.unreadOnly === undefined ? true : ctx.query.unreadOnly;
+  const username = ctx.params.username;
+  const jwtUsername = ctx.state.user.username;
+  const unreadOnly = ctx.query.unreadOnly === undefined ? true : ctx.query.unreadOnly;
+
+  try {
+    const userNotificationService = new UserNotificationService();
 
     if (username != jwtUsername) {
-        // ctx.status = 403;
-        // ctx.body = `You have no permission to make this action`
-        // return;
-        ctx.status = 200;
-        ctx.body = [];
-        return;
+      // ctx.status = 403;
+      // ctx.body = `You have no permission to make this action`
+      // return;
+      ctx.status = 200;
+      ctx.body = [];
+      return;
     }
 
-    try {
-        const query = { username: username };
-        if (unreadOnly) {
-            query.status = 'unread';
-        }
-        const notifications = await UserNotification.find(query).sort({ created_at: -1 })
-        ctx.status = 200
-        ctx.body = notifications;
+    const notifications = await userNotificationService.getUserNotifications(username, unreadOnly ? 'unread' : undefined);
+    ctx.status = 200;
+    ctx.body = notifications;
 
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
-    }
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
 }
+
 
 const markUserNotificationAsRead = async (ctx) => {
-    const username = ctx.params.username;
-    const jwtUsername = ctx.state.user.username;
-    const notificationId = ctx.params.notificationId;
+  const username = ctx.params.username;
+  const jwtUsername = ctx.state.user.username;
+  const notificationId = ctx.params.notificationId;
+
+  try {
+    const userNotificationService = new UserNotificationService();
 
     if (username != jwtUsername) {
-        // ctx.status = 403;
-        // ctx.body = `You have no permission to make this action`
-        // return;
-        ctx.status = 200;
-        ctx.body = [];
-        return;
+      // ctx.status = 403;
+      // ctx.body = `You have no permission to make this action`
+      // return;
+      ctx.status = 200;
+      ctx.body = [];
+      return;
     }
 
-    try {
-        const notification = await UserNotification.findOne({'_id': notificationId});
-        if (!notification) {
-            ctx.status = 404;
-            ctx.body = `UserNotification is not found`
-            return;
-        }
-
-        notification.status = 'read';
-        const updatedNotification = await notification.save()
-        ctx.status = 200
-        ctx.body = updatedNotification;
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
+    const notification = await userNotificationService.getUserNotification(notificationId);
+    if (!notification) {
+      ctx.status = 404;
+      ctx.body = `User notification  ${notificationId} is not found`
+      return;
     }
+
+    const updatedNotification = await userNotificationService.updateUserNotification(notificationId, {
+      status: 'read'
+    });
+
+    ctx.status = 200;
+    ctx.body = updatedNotification;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
 }
 
+
 const markAllUserNotificationAsRead = async (ctx) => {
-    const username = ctx.params.username;
-    const jwtUsername = ctx.state.user.username;
+  const username = ctx.params.username;
+  const jwtUsername = ctx.state.user.username;
+
+  try {
+    const userNotificationService = new UserNotificationService();
 
     if (username != jwtUsername) {
-        // ctx.status = 403;
-        // ctx.body = `You have no permission to make this action`
-        // return;
-        ctx.status = 200;
-        ctx.body = [];
-        return;
+      // ctx.status = 403;
+      // ctx.body = `You have no permission to make this action`
+      // return;
+      ctx.status = 200;
+      ctx.body = [];
+      return;
     }
 
-    try {
-        const updatedNotifications = [];
-        const notifications = await UserNotification.find({'username': jwtUsername});
-        for (let i = 0; i < notifications.length; i++) {
-            const notification = notifications[i];
-            notification.status = 'read';
-            const updatedNotification = await notification.save();
-            updatedNotifications.push(updatedNotification);
-        }
+    const updateStat = await userNotificationService.updateUserNotifications(jwtUsername, { status: 'read' });
+    ctx.status = 200;
+    ctx.body = updateStat;
 
-        ctx.status = 200
-        ctx.body = updatedNotifications;
-
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
-    }
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500
+    ctx.body = err;
+  }
 }
 
 export default {
-    getNotificationsByUser,
-    markUserNotificationAsRead,
-    markAllUserNotificationAsRead
+  getNotificationsByUser,
+  markUserNotificationAsRead,
+  markAllUserNotificationAsRead
 }

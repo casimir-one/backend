@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import BaseReadModelService from './base';
 import UserNotification from './../schemas/userNotification';
 
@@ -6,6 +5,42 @@ import UserNotification from './../schemas/userNotification';
 class UserNotificationService extends BaseReadModelService {
 
   constructor() { super(UserNotification); }
+
+  async getUserNotification(id) {
+    const result = await this.findOne({ _id: id });
+    return result;
+  }
+
+  async getUserNotifications(username, status) {
+    const q = { username };
+    if (status) {
+      q.status = status;
+    }
+    const result = await this.findMany(q);
+    result.sort(function (a, b) { return new Date(b.created_at) - new Date(a.created_at); });
+    return result;
+  }
+
+  async updateUserNotification(id, {
+    status
+  }) {
+    const result = await this.updateOne({ _id: id }, {
+      status
+    });
+    return result;
+  }
+
+  async updateUserNotifications(username, {
+    status
+  }) {
+
+    const result = await this.updateMany(
+      { username },
+      { $set: { 'status': status } }
+    );
+
+    return result;
+  }
 
   async createUserNotification({
     username,
