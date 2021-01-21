@@ -1,20 +1,33 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, USER_NOTIFICATION_TYPE, USER_INVITE_STATUS } from './../constants';
+import { APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../constants';
 import UserService from './../services/users';
 import UserNotificationService from './../services/userNotification';
 import ResearchContentService from './../services/researchContent';
 import ReviewService from '../services/review';
 import ResearchService from '../services/research';
 import ResearchGroupService from '../services/researchGroup';
+import ProposalService from './../services/proposal';
+
+const userService = new UserService();
+const researchGroupService = new ResearchGroupService();
+const researchService = new ResearchService();
+const userNotificationService = new UserNotificationService();
 
 class UserNotificationHandler extends EventEmitter { }
 
 const userNotificationHandler = new UserNotificationHandler();
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
-  const { researchGroup, proposer, researchTitle } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researchProposedEvent }) => {
+  const { researchGroupExternalId, source: { offchain: { attributes } } } = researchProposedEvent.getSourceData();
+  const eventEmitter = researchProposedEvent.getEventEmitter();
+
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const emitterUser = await userService.getUser(eventEmitter);
+
+  const researchTitle = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+    ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+    : "Not Specified";
   
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -32,7 +45,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
         proposal: { action: deipRpc.operations.getOperationTag("create_research"), data }, // legacy
         researchGroup,
         research: null, // legacy
-        creatorProfile: proposer
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(promise);
@@ -42,9 +55,15 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async (payload) => {
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
-  const { researchGroup, research, creator, isAcceptedByQuorum } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async ({ event: researchCreatedEvent }) => {
+  const { researchExternalId, researchGroupExternalId } = researchCreatedEvent.getSourceData();
+  const eventEmitter = researchCreatedEvent.getEventEmitter();
+
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const research = await researchService.getResearch(researchExternalId)
+  const emitterUser = await userService.getUser(eventEmitter);
+
+  const isAcceptedByQuorum = researchGroupExternalId != eventEmitter;
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -62,7 +81,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
         proposal: { action: deipRpc.operations.getOperationTag("create_research"), data, is_completed: true }, // legacy
         researchGroup,
         research,
-        creatorProfile: creator
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(promise);
@@ -72,9 +91,14 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async (payload) => {
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async (payload) => {
-  const { researchGroup, research, proposer, title } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event: researchContentProposedEvent }) => {
+  const { researchGroupExternalId, researchExternalId, source: { offchain: { title } } } = researchContentProposedEvent.getSourceData();
+  const eventEmitter = researchContentProposedEvent.getEventEmitter();
+
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const research = await researchService.getResearch(researchExternalId);
+
+  const emitterUser = await userService.getUser(eventEmitter);
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -93,7 +117,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async (payload)
         researchGroup,
         research,
         researchContent: null, // legacy
-        creatorProfile: proposer
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(promise);
@@ -103,9 +127,17 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async (payload)
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async (payload) => {
-  const { researchGroup, research, researchContent, creator, isAcceptedByQuorum } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: researchContentCreatedEvent }) => {
+  const researchContentService = new ResearchContentService();
+
+  const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getSourceData();
+  const eventEmitter = researchContentCreatedEvent.getEventEmitter();
+
+  const researchContent = await researchContentService.getResearchContent(researchContentExternalId);
+  const research = await researchService.getResearch(researchExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
+  const emitterUser = await userService.getUser(eventEmitter);
+  const isAcceptedByQuorum = researchGroup.external_id != eventEmitter;
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -124,7 +156,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async (payload) 
         researchGroup,
         research,
         researchContent,
-        creatorProfile: creator
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(promise);
@@ -135,11 +167,6 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async (payload) 
 
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: researchUpdateProposedEvent }) => {
-  const userNotificationService = new UserNotificationService();
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
-  const userService = new UserService();
-
   const { researchExternalId, researchGroupExternalId } = researchUpdateProposedEvent.getSourceData();
   const eventEmitter = researchUpdateProposedEvent.getEventEmitter();
 
@@ -173,18 +200,13 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: 
 
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async ({ event: researchUpdatedEvent }) => {
-  const userNotificationService = new UserNotificationService();
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
-  const userService = new UserService();
-
   const { researchExternalId, researchGroupExternalId } = researchUpdatedEvent.getSourceData();
   const eventEmitter = researchUpdatedEvent.getEventEmitter();
 
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
-  
+
   const members = await userService.getUsersByResearchGroup(researchGroup.external_id);
 
   const notifications = [];
@@ -210,10 +232,12 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async ({ event: research
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async (payload) => {
-  const { researchGroup, proposer } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async ({ event: researchGroupUpdateProposedEvent }) => {
+  const { researchGroupExternalId } = researchGroupUpdateProposedEvent.getSourceData();
+  const eventEmitter = researchGroupUpdateProposedEvent.getEventEmitter();
 
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const emitterUser = await userService.getUser(eventEmitter);
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
   const notificationsPromises = [];
@@ -228,7 +252,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async (pay
         isProposalAutoAccepted: false, // legacy
         proposal: { action: deipRpc.operations.getOperationTag("update_account") }, // legacy
         researchGroup,
-        creatorProfile: proposer
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(promise);
@@ -238,9 +262,12 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async (pay
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (payload) => {
-  const { researchGroup, creator, isAcceptedByQuorum } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ event: researchGroupUpdatedEvent }) => {
+  const { researchGroupExternalId } = researchGroupUpdatedEvent.getSourceData();
+  const eventEmitter = researchGroupUpdatedEvent.getEventEmitter();
+
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const emitterUser = await userService.getUser(eventEmitter);
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -256,7 +283,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (payload) =>
         isProposalAutoAccepted: true, // legacy
         proposal: { action: deipRpc.operations.getOperationTag("update_account"), is_completed: true }, // legacy
         researchGroup,
-        creatorProfile: creator
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(promise);
@@ -268,9 +295,6 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async (payload) =>
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_CREATED, async (payload) => {
   const { research, requester, tenant, proposal } = payload;
-  const userNotificationService = new UserNotificationService();
-
-
   const notificationsPromises = [];
 
   for (let i = 0; i < tenant.admins.length; i++) {
@@ -294,8 +318,6 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_CREATED, async (paylo
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, async (payload) => {
   const { research, researchGroup, requester, approver, tenant } = payload;
-  const userNotificationService = new UserNotificationService();
-
   userNotificationService.createUserNotification({
     username: requester.account.name,
     status: 'unread',
@@ -312,8 +334,6 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, async (payl
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (payload) => {
   const { research, requester, rejecter, tenant } = payload;
-  const userNotificationService = new UserNotificationService();
-
   userNotificationService.createUserNotification({
     username: requester.account.name,
     status: 'unread',
@@ -329,8 +349,6 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (payl
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_EDITED, async (payload) => {
   const { research, requester, proposal, tenant } = payload;
-  const userNotificationService = new UserNotificationService();
-
   const notificationsPromises = [];
 
   for (let i = 0; i < tenant.admins.length; i++) {
@@ -352,8 +370,6 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_EDITED, async (payloa
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (payload) => {
   const { research, requester, tenant } = payload;
-  const userNotificationService = new UserNotificationService();
-
   const notificationsPromises = [];
 
   for (let i = 0; i < tenant.admins.length; i++) {
@@ -372,9 +388,12 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (paylo
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async (payload) => {
-  const { researchGroup, creator, invitee } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async ({ event: userInvitationProposedEvent }) => {
+  const proposalsService = new ProposalService(userService, researchGroupService,researchService);
+  const proposalId = userInvitationProposedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
+
+  const { extendedDetails: { researchGroup, invitee }, proposer: emitterUser } = proposal;
 
   const notificationsPromises = [];
 
@@ -390,14 +409,14 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async (payload) 
         proposal: { // legacy
           research_group_id: researchGroup.id,
           action: deipRpc.operations.getOperationTag("join_research_group_membership"),
-          creator: creator._id,
+          creator: emitterUser.account.name,
           data: {
-            name: invitee._id
+            name: invitee.account.name
           }
         },
         researchGroup,
-        inviteeProfile: invitee,
-        creatorProfile: creator
+        invitee: invitee,
+        emitter: emitterUser
       }
     });
 
@@ -408,61 +427,29 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async (payload) 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async (payload) => {
-  const { researchGroup, invite, creator, invitee } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async ({ event: userInvitationProposalSignedEvent }) => {
+  const proposalsService = new ProposalService(userService, researchGroupService,researchService);
 
-  if (invite.status == USER_INVITE_STATUS.SENT) {
+  const proposalId = userInvitationProposalSignedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
 
-    const notificationsPromises = [];
-    const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const { extendedDetails: { researchGroup, invitee }, proposer: emitterUser } = proposal;
 
-    for (let i = 0; i < rgtList.length; i++) {
-      let rgt = rgtList[i];
-      let memberNotificationPromise = userNotificationService.createUserNotification({
-        username: rgt.owner,
-        status: 'unread',
-        type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
-        metadata: {
-          proposal: { action: deipRpc.operations.getOperationTag("join_research_group_membership"), is_completed: true }, // legacy
-          researchGroup,
-          inviteeProfile: invitee,
-          creatorProfile: creator
-        }
-      });
-
-      notificationsPromises.push(memberNotificationPromise);
-    }
-
-    const inviteeNotificationPromise = userNotificationService.createUserNotification({
-      username: invitee,
-      status: 'unread',
-      type: USER_NOTIFICATION_TYPE.INVITATION,
-      metadata: {
-        researchGroup,
-        inviteeProfile: invitee
-      }
-    });
-
-    notificationsPromises.push(inviteeNotificationPromise);
-
-    Promise.all(notificationsPromises);
-
-  } else if (invite.status == USER_INVITE_STATUS.APPROVED) {
+  if (proposal.proposal.status == PROPOSAL_STATUS.APPROVED) {
 
     const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
     const notificationsPromises = [];
 
     for (let i = 0; i < rgtList.length; i++) {
       let rgt = rgtList[i];
-      if (rgt.owner != invite.invitee) {
+      if (rgt.owner != invitee.account.name) {
         let memberNotificationPromise = userNotificationService.createUserNotification({
           username: rgt.owner,
           status: 'unread',
           type: USER_NOTIFICATION_TYPE.INVITATION_APPROVED,
           metadata: {
             researchGroup,
-            inviteeProfile: invitee
+            invitee: invitee
           }
         });
         notificationsPromises.push(memberNotificationPromise);
@@ -470,14 +457,53 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async (pa
     }
 
     Promise.all(notificationsPromises);
+} else {
+  const notificationsPromises = [];
+  const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+
+  for (let i = 0; i < rgtList.length; i++) {
+    let rgt = rgtList[i];
+    let memberNotificationPromise = userNotificationService.createUserNotification({
+      username: rgt.owner,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        proposal: { action: deipRpc.operations.getOperationTag("join_research_group_membership"), is_completed: true }, // legacy
+        researchGroup,
+        invitee: invitee,
+        emitter: emitterUser
+      }
+    });
+
+    notificationsPromises.push(memberNotificationPromise);
   }
+
+  const inviteeNotificationPromise = userNotificationService.createUserNotification({
+    username: invitee.account.name,
+    status: 'unread',
+    type: USER_NOTIFICATION_TYPE.INVITATION,
+    metadata: {
+      researchGroup,
+      invitee: invitee
+    }
+  });
+
+  notificationsPromises.push(inviteeNotificationPromise);
+
+  Promise.all(notificationsPromises);
+
+}
 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async (payload) => {
-  const { researchGroup, invite, creator, invitee, approver } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async ({ event: userInvitationProposalRejectedEvent }) => {
+  const proposalsService = new ProposalService(userService, researchGroupService, researchService);
+
+  const proposalId = userInvitationProposalRejectedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
+
+  const { extendedDetails: { researchGroup, invitee }} = proposal;
 
   const notificationsPromises = [];
   const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
@@ -490,7 +516,7 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async (
       type: USER_NOTIFICATION_TYPE.INVITATION_REJECTED,
       metadata: {
         researchGroup,
-        inviteeProfile: invitee
+        invitee: invitee
       }
     });
     notificationsPromises.push(memberNotificationPromise);
@@ -500,10 +526,12 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async (
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async (event) => {
-  const { researchGroup, member, creator } = event;
-  const userNotificationService = new UserNotificationService();
-
+userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event: userResignationProposedEvent }) => {
+  const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
+  const eventEmitter = userResignationProposedEvent.getEventEmitter();
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const emitterUser = await userService.getUser(eventEmitter);
+  const excludedUser = await userService.getUser(member);
   const notificationsPromises = [];
   const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -515,10 +543,10 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async (event) =
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
-        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: member._id } }, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: excludedUser.account.name } }, // legacy
         researchGroup,
-        excludedProfile: member,
-        creatorProfile: creator
+        excluded: excludedUser,
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(memberNotificationPromise);
@@ -527,10 +555,11 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async (event) =
   Promise.all(notificationsPromises);
 });
 
-
-userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async (event) => {
-  const { researchGroup, member, creator } = event;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({ event: userResignationProposalSignedEvent }) => {
+  const proposalsService = new ProposalService(userService, researchGroupService, researchService);
+  const proposalId = userResignationProposalSignedEvent.getProposalId();
+  const proposal = await proposalsService.getProposal(proposalId);
+  const { extendedDetails: { researchGroup, member: excludedUser }, proposer: emitterUser } = proposal;
 
   const notificationsPromises = [];
   const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
@@ -543,10 +572,10 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async (e
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         isProposalAutoAccepted: true, // legacy
-        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: member._id } }, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: excludedUser.account.name } }, // legacy
         researchGroup,
-        excludedProfile: member,
-        creatorProfile: creator
+        excluded: excludedUser,
+        emitter: emitterUser
       }
     });
 
@@ -554,12 +583,12 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async (e
   }
 
   notificationsPromises.push(userNotificationService.createUserNotification({
-    username: member._id,
+    username: excludedUser.account.name,
     status: 'unread',
     type: USER_NOTIFICATION_TYPE.EXCLUSION_APPROVED,
     metadata: {
       researchGroup,
-      excludedProfile: member
+      excluded: excludedUser
     }
   }));
 
@@ -567,9 +596,13 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async (e
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async (payload) => {
-  const { researchGroup, research, proposer, tokenSale } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async ({ event: researchTokenSaleProposedEvent }) => {
+  const { researchExternalId, researchGroupExternalId } = researchTokenSaleProposedEvent.getSourceData();
+  const eventEmitter = researchTokenSaleProposedEvent.getEventEmitter();
+
+  const research = await researchService.getResearch(researchExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const emitterUser = await userService.getUser(eventEmitter);
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -585,8 +618,8 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async (paylo
         proposal: { action: deipRpc.operations.getOperationTag("create_research_token_sale"), data: { research_id: research.id } }, // legacy
         researchGroup,
         research,
-        tokenSale,
-        creatorProfile: proposer
+        tokenSale: null,
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(memberNotificationPromise);
@@ -596,10 +629,14 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async (paylo
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async (payload) => {
-  const { researchGroup, research, creator, tokenSale } = payload;
-  const userNotificationService = new UserNotificationService();
+userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async ({ event: researchTokenSaleCreatedEvent }) => {
+  const { researchTokenSaleExternalId, researchExternalId, researchGroupExternalId } = researchTokenSaleCreatedEvent.getSourceData();
+  const eventEmitter = researchTokenSaleCreatedEvent.getEventEmitter();
 
+  const research = await researchService.getResearch(researchExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const emitterUser = await userService.getUser(eventEmitter);
+  const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(researchTokenSaleExternalId);
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
   const notificationsPromises = [];
@@ -614,7 +651,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async (payloa
         researchGroup,
         research,
         tokenSale,
-        creatorProfile: creator
+        emitter: emitterUser
       }
     });
     notificationsPromises.push(memberNotificationPromise);
@@ -627,18 +664,11 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async (payloa
 userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, async (source) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
   const { event: reviewCreatedEvent, tenant } = source;
-
-  const usersService = new UserService();
   const researchContentService = new ResearchContentService();
-  const researchService = new ResearchService(); 
   const reviewService = new ReviewService();
-  const researchGroupService = new ResearchGroupService(); 
-  const userNotificationService = new UserNotificationService();
-
-
   const { reviewExternalId, researchContentExternalId, author } = reviewCreatedEvent.getSourceData();
 
-  let reviewerProfile = await usersService.findUserProfileByOwner(author);
+  let reviewer = await userService.getUser(author);
   let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
   let research = await researchService.getResearch(researchContent.research_external_id);
@@ -659,7 +689,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
         researchContent,
         research,
         researchGroup,
-        reviewerProfile
+        reviewer
       }
     });
     notificationsPromises.push(promise);
@@ -671,28 +701,22 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, async ({ event: reviewRequestedEvent }) => {
   const { source: { offchain: { reviewRequest }}} = reviewRequestedEvent.getSourceData();
-  const { requestor, expert, researchContentExternalId } = reviewRequest;
-
-  const usersService = new UserService();
+  const { requestor: requestorId, expert: expertId, researchContentExternalId } = reviewRequest;
   const researchContentService = new ResearchContentService();
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService(); 
-  const userNotificationService = new UserNotificationService();
-
-  let requestorProfile = await usersService.findUserProfileByOwner(requestor);
-  let expertProfile = await usersService.findUserProfileByOwner(expert);
+  let requestor = await userService.getUser(requestorId);
+  let expert = await userService.getUser(expertId);
   let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
   let research = await researchService.getResearch(researchContent.research_external_id);
   let researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
 
   userNotificationService.createUserNotification({
-    username: expert,
+    username: expert.account.name,
     status: 'unread',
     type: USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST,
     metadata: {
-      requestorProfile,
-      expertProfile,
+      requestor,
+      expert,
       researchGroup,
       research,
       researchContent
