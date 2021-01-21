@@ -125,7 +125,7 @@ protected_route.post('/express-licensing', expressLicensing.createExpressLicense
 protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
 protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
 
-public_route.get('/disciplines', disciplines.getAllDisciplines)
+public_route.get('/disciplines', disciplines.getDomainDisciplines)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),
