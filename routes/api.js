@@ -27,6 +27,7 @@ public_route.get('/user/active', users.getActiveUsersProfiles)
 public_route.get('/user/name/:username', users.getUser)
 public_route.get('/user/email/:email', users.getUserByEmail)
 public_route.get('/users', users.getUsers)
+public_route.get('/users/group/:researchGroupExternalId', users.getUsersByResearchGroup)
 
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', users.updateUserProfile)
@@ -80,6 +81,8 @@ public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchG
 public_route.get('/groups/logo/:researchGroupExternalId', researchGroups.getResearchGroupLogo)
 protected_route.post('/groups/logo', researchGroups.uploadResearchGroupLogo)
 protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
+public_route.get('/groups/member/:username', researchGroups.getResearchGroupsByUser)
+
 
 protected_route.get('/invites/:username', invites.getUserInvites)
 protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)

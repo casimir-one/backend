@@ -10,10 +10,13 @@ class ResearchGroupService extends BaseReadModelService {
   async mapResearchGroups(researchGroups) {
     
     const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroups.map(r => r._id));
+    const membershipTokens = await Promise.all(chainResearchGroups.map(rg => deipRpc.api.getResearchGroupMembershipTokensAsync(rg.external_id)));
     return chainResearchGroups
       .map((chainResearchGroup) => {
+        const researchGroupMembershipTokens = membershipTokens.find(members => members[0] && members[0].research_group.external_id == chainResearchGroup.external_id);
+        const members = researchGroupMembershipTokens ? researchGroupMembershipTokens.map(rgt => rgt.owner) : [];
         const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.external_id);
-        return { ...chainResearchGroup, researchGroupRef: researchGroupRef ? researchGroupRef : null };
+        return { ...chainResearchGroup, researchGroupRef: researchGroupRef ? { ...researchGroupRef, members } : null };
       })
       .map((researchGroup) => {
         const override = researchGroup.researchGroupRef ? { name: researchGroup.researchGroupRef.name, description: researchGroup.researchGroupRef.description } : { name: "Not specified", description: "Not specified" };
@@ -79,11 +82,18 @@ class ResearchGroupService extends BaseReadModelService {
 
   async authorizeResearchGroupAccount(account, member) {
     // TODO: check account authorities
-    const rgtList = await deipRpc.api.getResearchGroupTokensByAccountAsync(member);
-    const rgt = rgtList.find(rgt => rgt.research_group.external_id == account);
+    const rgts = await deipRpc.api.getResearchGroupTokensByAccountAsync(member);
+    const rgt = rgts.find(rgt => rgt.research_group.external_id == account);
     if (!rgt) return null;
     const researchGroup = await this.getResearchGroup(rgt.research_group.external_id);
     return researchGroup;
+  }
+
+
+  async getResearchGroupsByUser(member) {
+    const rgts = await deipRpc.api.getResearchGroupTokensByAccountAsync(member);
+    const researchGroups = await this.getResearchGroups(rgts.map(rgt => rgt.research_group.external_id));
+    return researchGroups;
   }
   
 
