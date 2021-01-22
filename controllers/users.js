@@ -230,6 +230,22 @@ const getUserBookmarks = async (ctx) => {
   }
 }
 
+
+const getUsersByResearchGroup = async (ctx) => {
+  const researchGroupExternalId = ctx.params.researchGroupExternalId;
+  try {
+    const usersService = new UserService();
+    const members = await usersService.getUsersByResearchGroup(researchGroupExternalId);
+    ctx.status = 200;
+    ctx.body = members;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 const addUserBookmark = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const username = ctx.params.username;
@@ -415,6 +431,7 @@ export default {
   getUser,
   getUsers,
   getUserByEmail,
+  getUsersByResearchGroup,
 
   getUserProfile,
   getUsersProfiles,

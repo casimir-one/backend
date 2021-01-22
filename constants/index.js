@@ -16,6 +16,7 @@ import RESEARCH_STATUS from './researchStatus';
 import PROPOSAL_STATUS from './proposalStatus';
 import RESEARCH_ATTRIBUTE from './researchAttributes';
 import FILE_STORAGE from './fileStorage';
+import DISCIPLINES from './disciplines';
 
 
 export {
@@ -35,5 +36,6 @@ export {
   RESEARCH_STATUS,
   PROPOSAL_STATUS,
   RESEARCH_ATTRIBUTE,
-  FILE_STORAGE
+  FILE_STORAGE,
+  DISCIPLINES
 } 

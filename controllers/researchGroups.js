@@ -217,7 +217,7 @@ const getResearchGroupLogo = async (ctx) => {
 
 
 const getResearchGroup = async (ctx) => {
-  let researchGroupExternalId = ctx.params.researchGroupExternalId;
+  const researchGroupExternalId = ctx.params.researchGroupExternalId;
   const researchGroupsService = new ResearchGroupService();
 
   try {
@@ -234,7 +234,22 @@ const getResearchGroup = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchGroupsByUser = async (ctx) => {
+  const member = ctx.params.username;
+  try {
+    const researchGroupsService = new ResearchGroupService();
+    const researchGroups = await researchGroupsService.getResearchGroupsByUser(member);
+    ctx.status = 200;
+    ctx.body = researchGroups;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
   }
 }
 
@@ -242,6 +257,7 @@ const getResearchGroup = async (ctx) => {
 export default {
   getResearchGroup,
   createResearchGroup,
+  getResearchGroupsByUser,
   updateResearchGroup,
   getResearchGroupLogo,
   uploadResearchGroupLogo,
