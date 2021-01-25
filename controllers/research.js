@@ -26,14 +26,9 @@ import ResearchUpdateProposedEvent from './../events/researchUpdateProposedEvent
 import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
 import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
 import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
-import ResearchTokenSaleCreatedEvent from './../events/researchTokenSaleCreatedEvent';
-import ResearchTokenSaleProposedEvent from './../events/researchTokenSaleProposedEvent';
-import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleProposalSignedEvent';
-import ResearchTokenSaleProposalRejectedEvent from './../events/researchTokenSaleProposalRejectedEvent';
 import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
 import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
 import UserInvitationProposalRejectedEvent from './../events/userInvitationProposalRejectedEvent';
-import ResearchTokenSaleContributedEvent from './../events/researchTokenSaleContributedEvent';
 
 
 const stat = util.promisify(fs.stat);
@@ -594,70 +589,6 @@ const getResearchApplications = async (ctx) => {
 }
 
 
-const createResearchTokenSale = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx, isProposal } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    if (isProposal) {
-      const researchTokenSaleProposedEvent = new ResearchTokenSaleProposedEvent(datums);
-      ctx.state.events.push(researchTokenSaleProposedEvent);
-
-      const researchTokenSaleApprovals = researchTokenSaleProposedEvent.getProposalApprovals();
-      for (let i = 0; i < researchTokenSaleApprovals.length; i++) {
-        const approval = researchTokenSaleApprovals[i];
-        const researchTokenSaleProposalSignedEvent = new ResearchTokenSaleProposalSignedEvent([approval]);
-        ctx.state.events.push(researchTokenSaleProposalSignedEvent);
-      }
-
-    } else {
-      const researchTokenSaleCreatedEvent = new ResearchTokenSaleCreatedEvent(datums);
-      ctx.state.events.push(researchTokenSaleCreatedEvent);
-    }
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
-const createResearchTokenSaleContribution = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx, isProposal } = ctx.request.body;
-
-  try {
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const researchTokenSaleContributedEvent = new ResearchTokenSaleContributedEvent(datums);
-    ctx.state.events.push(researchTokenSaleContributedEvent);
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
-
 const getResearchAttributeFile = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
   const researchAttributeId = ctx.params.researchAttributeId;
@@ -782,7 +713,7 @@ const getPublicResearchListing = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 };
 
@@ -807,7 +738,7 @@ const getUserResearchListing = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 };
 
@@ -832,7 +763,7 @@ const getResearchGroupResearchListing = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 };
 
@@ -855,7 +786,7 @@ const getResearch = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 };
 
@@ -883,9 +814,13 @@ const getResearches = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 };
+
+
+
+
 
 
 export default {
@@ -903,7 +838,5 @@ export default {
   rejectResearchApplication,
   deleteResearchApplication,
   getResearchApplicationAttachmentFile,
-  getResearchApplications,
-  createResearchTokenSale,
-  createResearchTokenSaleContribution
+  getResearchApplications
 }

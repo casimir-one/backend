@@ -16,6 +16,7 @@ import grants from '../controllers/grants'
 import expressLicensing from '../controllers/expressLicensing'
 import userTransactions from '../controllers/userTransactions'
 import disciplines from '../controllers/disciplines'
+import fundraising from '../controllers/fundraising'
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -105,8 +106,12 @@ protected_route.get('/research/user/listing/:username', research.getUserResearch
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 protected_route.post('/research', research.createResearch)
 protected_route.put('/research', research.updateResearch)
-protected_route.post('/research/token-sale', research.createResearchTokenSale)
-protected_route.post('/research/token-sale/contribution', research.createResearchTokenSaleContribution)
+
+public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
+protected_route.post('/fundraising', fundraising.createResearchTokenSale)
+protected_route.post('/fundraising/contributions', fundraising.createResearchTokenSaleContribution)
+protected_route.get('/fundraising/:researchTokenSaleExternalId/contributions', fundraising.getResearchTokenSaleContributions)
+protected_route.get('/fundraising/research/:researchExternalId/contributions', fundraising.getResearchTokenSaleContributionsByResearch)
 
 protected_route.post('/research/application', research.createResearchApplication)
 protected_route.put('/research/application/:proposalId', research.editResearchApplication)
