@@ -244,6 +244,21 @@ const getUsersByResearchGroup = async (ctx) => {
 }
 
 
+const getUsersListing = async (ctx) => {
+  const query = qs.parse(ctx.query);
+  try {
+    const usersService = new UserService();
+    const users = await usersService.getUsersListing(query.status);
+    ctx.status = 200;
+    ctx.body = users;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 const addUserBookmark = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const username = ctx.params.username;
@@ -472,6 +487,7 @@ export default {
   getUsers,
   getUserByEmail,
   getUsersByResearchGroup,
+  getUsersListing,
 
   getUserProfile,
   getUsersProfiles,

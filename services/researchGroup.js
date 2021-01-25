@@ -25,9 +25,12 @@ class ResearchGroupService extends BaseReadModelService {
   }
 
 
-  async lookupResearchGroups() {
-    const researchGroups = await this.findMany();
+  async getResearchGroupsListing(personal) {
+    const researchGroups = await this.findMany({});
     const result = await this.mapResearchGroups(researchGroups);
+    if (!personal || personal === 'false') {
+      return result.filter(rg => !rg.is_personal);
+    }
     return result;
   }
 

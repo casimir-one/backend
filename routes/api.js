@@ -28,6 +28,7 @@ public_route.get('/user/name/:username', users.getUser)
 public_route.get('/user/email/:email', users.getUserByEmail)
 public_route.get('/users', users.getUsers)
 public_route.get('/users/group/:researchGroupExternalId', users.getUsersByResearchGroup)
+public_route.get('/users/list', users.getUsersListing)
 
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', users.updateUserProfile)
@@ -77,6 +78,7 @@ protected_route.get('/proposals/:username/:status', proposals.getAccountProposal
 
 protected_route.post('/groups', researchGroups.createResearchGroup)
 protected_route.put('/groups', researchGroups.updateResearchGroup)
+public_route.get('/groups/listing', researchGroups.getResearchGroupsListing)
 public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchGroup)
 public_route.get('/groups/logo/:researchGroupExternalId', researchGroups.getResearchGroupLogo)
 protected_route.post('/groups/logo', researchGroups.uploadResearchGroupLogo)
