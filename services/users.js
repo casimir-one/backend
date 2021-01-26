@@ -74,6 +74,13 @@ class UserService extends BaseReadModelService {
     const result = await this.mapUsers(profiles);
     return result;
   }
+
+
+  async getUsersListing(status) {
+    const profiles = await this.findMany({ status: status ? status : USER_PROFILE_STATUS.APPROVED });
+    const result = await this.mapUsers(profiles);
+    return result;
+  }
   
 
   async createUserProfile({

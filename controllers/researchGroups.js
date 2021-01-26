@@ -6,6 +6,7 @@ import util from 'util';
 import path from 'path';
 import sharp from 'sharp'
 import config from './../config'
+import qs from 'qs';
 import * as blockchainService from './../utils/blockchain';
 import FileStorage from './../storage';
 import ResearchGroupService from './../services/researchGroup';
@@ -254,8 +255,26 @@ const getResearchGroupsByUser = async (ctx) => {
 }
 
 
+const getResearchGroupsListing = async (ctx) => {
+  const query = qs.parse(ctx.query);
+
+  try {
+    const researchGroupsService = new ResearchGroupService();
+    const researchGroups = await researchGroupsService.getResearchGroupsListing(query.personal);
+    ctx.status = 200;
+    ctx.body = researchGroups;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+
 export default {
   getResearchGroup,
+  getResearchGroupsListing,
   createResearchGroup,
   getResearchGroupsByUser,
   updateResearchGroup,
