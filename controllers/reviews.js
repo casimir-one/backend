@@ -18,9 +18,9 @@ const createReview = async (ctx, next) => {
     ctx.body = [...ctx.state.events];
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 
   await next();
@@ -44,9 +44,9 @@ const getReview = async (ctx) => {
     ctx.body = review;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
 
@@ -61,9 +61,9 @@ const getReviewsByResearch = async (ctx) => {
     ctx.body = reviews;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
 
@@ -78,26 +78,39 @@ const getReviewsByResearchContent = async (ctx) => {
     ctx.body = reviews;
 
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
 
 
 const getReviewsByAuthor = async (ctx) => {
   const author = ctx.params.author;
-
   try {
     const reviewService = new ReviewService();
     const reviews = await reviewService.getReviewsByAuthor(author);
     ctx.status = 200;
     ctx.body = reviews;
-
   } catch (err) {
-    console.log(err);
+    console.error(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
+  }
+}
+
+
+const getReviewVotes = async (ctx) => {
+  const reviewExternalId = ctx.params.reviewExternalId;
+  try {
+    const reviewService = new ReviewService();
+    const reviews = await reviewService.getReviewVotes(reviewExternalId);
+    ctx.status = 200;
+    ctx.body = reviews;
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err;
   }
 }
 
@@ -106,5 +119,6 @@ export default {
   getReview,
   getReviewsByResearch,
   getReviewsByResearchContent,
-  getReviewsByAuthor
+  getReviewsByAuthor,
+  getReviewVotes
 }

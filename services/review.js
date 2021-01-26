@@ -65,6 +65,17 @@ class ReviewService extends BaseReadModelService {
 
     return result;
   }
+
+
+  async getReviewVotes(reviewExternalId) {
+    const review = await this.getReview(reviewExternalId);
+    if (!review) {
+      return [];
+    }
+    const result = await deipRpc.api.getReviewVotesByReviewIdAsync(review.id)
+    return result;
+  }
+
   
 }
 

@@ -97,6 +97,7 @@ protected_route.post('/invites', invites.createUserInvite)
 
 
 public_route.get('/reviews/:reviewExternalId', reviews.getReview)
+public_route.get('/reviews/votes/:reviewExternalId', reviews.getReviewVotes)
 public_route.get('/reviews/research/:researchExternalId', reviews.getReviewsByResearch)
 public_route.get('/reviews/research-content/:researchContentExternalId', reviews.getReviewsByResearchContent)
 public_route.get('/reviews/author/:author', reviews.getReviewsByAuthor)
