@@ -51,7 +51,9 @@ protected_route.get('/review-requests/expert/:username', reviewRequests.getRevie
 protected_route.get('/review-requests/requestor/:username', reviewRequests.getReviewRequestsByRequestor);
 
 
-public_route.get('/expertise/user/:username/disciplines', expertise.getAccountExpertiseTokens)
+public_route.get('/expertise/user/:username/tokens', expertise.getAccountExpertiseTokens)
+public_route.get('/expertise/discipline/:disciplineExternalId/tokens', expertise.getDisciplineExpertiseTokens)
+
 public_route.get('/expertise/user/:username/history', expertise.getAccountEciHistory)
 public_route.get('/expertise/user/:username/stats', expertise.getAccountEciStats)
 public_route.get('/expertise/users/stats', expertise.getAccountsEciStats)

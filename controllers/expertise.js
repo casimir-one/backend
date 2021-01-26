@@ -344,6 +344,21 @@ const getAccountExpertiseTokens = async (ctx) => {
 }
 
 
+const getDisciplineExpertiseTokens = async (ctx) => {
+  const disciplineExternalId = ctx.params.disciplineExternalId;
+  try {
+    const result = await deipRpc.api.getExpertTokensByDisciplineAsync(disciplineExternalId);
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+
 export default {
 
   getAccountEciHistory,
@@ -362,5 +377,6 @@ export default {
   getDisciplinesEciStatsHistory,
   getDisciplinesEciLastStats,
 
-  getAccountExpertiseTokens
+  getAccountExpertiseTokens,
+  getDisciplineExpertiseTokens
 }
