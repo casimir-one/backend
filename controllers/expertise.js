@@ -318,14 +318,10 @@ const getDisciplinesEciStatsHistory = async (ctx) => {
 
 
 const getDisciplinesEciLastStats = async (ctx) => {
-
   try {
-
     const result = await deipRpc.api.getDisciplinesEciLastStatsAsync();
-
     ctx.status = 200;
     ctx.body = result;
-
   } catch (err) {
     console.error(err);
     ctx.status = 500;
@@ -334,22 +330,37 @@ const getDisciplinesEciLastStats = async (ctx) => {
 }
 
 
+const getAccountExpertiseTokens = async (ctx) => {
+  const username = ctx.params.username;
+  try {
+    const result = await deipRpc.api.getExpertTokensByAccountNameAsync(username);
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
 
 export default {
 
-    getAccountEciHistory,
-    getAccountEciStats,
-    getAccountsEciStats,
+  getAccountEciHistory,
+  getAccountEciStats,
+  getAccountsEciStats,
 
-    getResearchEciHistory,
-    getResearchEciStats,
-    getResearchesEciStats,
+  getResearchEciHistory,
+  getResearchEciStats,
+  getResearchesEciStats,
 
-    getResearchContentEciHistory,
-    getResearchContentEciStats,
-    getResearchContentsEciStats,
+  getResearchContentEciHistory,
+  getResearchContentEciStats,
+  getResearchContentsEciStats,
 
-    getDisciplineEciHistory,
-    getDisciplinesEciStatsHistory,
-    getDisciplinesEciLastStats
+  getDisciplineEciHistory,
+  getDisciplinesEciStatsHistory,
+  getDisciplinesEciLastStats,
+
+  getAccountExpertiseTokens
 }

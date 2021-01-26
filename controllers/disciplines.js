@@ -1,19 +1,36 @@
 import DisciplinesService from './../services/disciplines';
+import ResearchService from './../services/research';
 
 const getDomainDisciplines = async (ctx) => {
-    try {
-        const disciplinesService = new DisciplinesService();
-        const disciplines = await disciplinesService.getDomainDisciplines();
-        ctx.status = 200
-        ctx.body = disciplines;
+  try {
+    const disciplinesService = new DisciplinesService();
+    const disciplines = await disciplinesService.getDomainDisciplines();
+    ctx.status = 200
+    ctx.body = disciplines;
 
-    } catch (err) {
-        console.log(err);
-        ctx.status = 500
-        ctx.body = `Internal server error, please try again later`;
-    }
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getDisciplinesByResearch = async (ctx) => {
+  const researchExternalId = ctx.params.researchExternalId;
+  try {
+    const disciplinesService = new DisciplinesService();
+    const disciplines = await disciplinesService.getDisciplinesByResearch(researchExternalId);
+    ctx.status = 200;
+    ctx.body = disciplines;
+
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
 }
 
 export default {
-    getDomainDisciplines
+  getDomainDisciplines,
+  getDisciplinesByResearch
 }

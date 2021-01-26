@@ -50,6 +50,7 @@ protected_route.get('/review-requests/expert/:username', reviewRequests.getRevie
 protected_route.get('/review-requests/requestor/:username', reviewRequests.getReviewRequestsByRequestor);
 
 
+public_route.get('/expertise/user/:username/disciplines', expertise.getAccountExpertiseTokens)
 public_route.get('/expertise/user/:username/history', expertise.getAccountEciHistory)
 public_route.get('/expertise/user/:username/stats', expertise.getAccountEciStats)
 public_route.get('/expertise/users/stats', expertise.getAccountsEciStats)
@@ -134,6 +135,8 @@ protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
 protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
 
 public_route.get('/disciplines', disciplines.getDomainDisciplines)
+public_route.get('/disciplines/research/:researchExternalId', disciplines.getDisciplinesByResearch)
+
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),
