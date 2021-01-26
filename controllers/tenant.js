@@ -32,14 +32,14 @@ const uploadTenantBanner = async (ctx) => {
       return;
     }
 
-    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
-    if (!tenantProfile) {
+    const tenant = await tenantService.getTenant(tenantExternalId);
+    if (!tenant) {
       ctx.status = 404;
       ctx.body = `Tenant Profile for "${tenantExternalId}" does not exist!`;
       return;
     }
 
-    const oldFilename = tenantProfile.banner;
+    const oldFilename = tenant.profile.banner;
     const { filename } = await TeantBannerForm(ctx);
     const updatedTenantProfile = await tenantService.updateTenantProfile(tenantExternalId, { banner: filename }, {});
 
@@ -72,14 +72,14 @@ const getTenantBanner = async (ctx) => {
   try {
 
     const tenantService = new TenantService();
-    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
+    const tenant = await tenantService.getTenant(tenantExternalId);
     const defaultBanner = FileStorage.getTenantDefaultBannerFilePath();
 
     let src;
     let buff;
 
-    if (tenantProfile.banner) {
-      const filepath = FileStorage.getTenantBannerFilePath(tenantExternalId, tenantProfile.banner);
+    if (tenant.profile.banner) {
+      const filepath = FileStorage.getTenantBannerFilePath(tenantExternalId, tenant.profile.banner);
       const exists = await FileStorage.exists(filepath);
       if (exists) {
         buff = await FileStorage.get(filepath);
@@ -151,14 +151,14 @@ const getTenantLogo = async (ctx) => {
   try {
 
     const tenantService = new TenantService();
-    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
+    const tenant = await tenantService.getTenant(tenantExternalId);
     const defaultLogo = FileStorage.getTenantDefaultLogoFilePath();
 
     let src;
     let buff;
 
-    if (tenantProfile.banner) {
-      const filepath = FileStorage.getTenantLogoFilePath(tenantExternalId, tenantProfile.logo);
+    if (tenant.profile.logo) {
+      const filepath = FileStorage.getTenantLogoFilePath(tenantExternalId, tenant.profile.logo);
       const exists = await FileStorage.exists(filepath);
       if (exists) {
         buff = await FileStorage.get(filepath);
@@ -220,22 +220,18 @@ const getTenantLogo = async (ctx) => {
 }
 
 
-const getTenantProfile = async (ctx) => {
+const getTenant = async (ctx) => {
   const tenantExternalId = ctx.params.tenant;
-
   try {
-
     const tenantService = new TenantService();
-    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
-    if (!tenantProfile) {
+    const tenant = await tenantService.getTenant(tenantExternalId);
+    if (!tenant) {
       ctx.status = 404;
-      ctx.body = `Tenant Profile for '${tenantExternalId}' does not exist`
+      ctx.body = `Tenant '${tenantExternalId}' does not exist`
       return;
     }
-
     ctx.status = 200;
-    ctx.body = tenantProfile;
-
+    ctx.body = tenant;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -253,8 +249,8 @@ const updateTenantProfile = async (ctx) => {
 
     const tenantService = new TenantService();
     const tenantExternalId = tenant.id;
-    const tenantProfile = await tenantService.findTenantProfile(tenantExternalId);
-    if (!tenantProfile) {
+    const tenant = await tenantService.getTenant(tenantExternalId);
+    if (!tenant) {
       ctx.status = 404;
       ctx.body = `Tenant Profile for '${tenantExternalId}' does not exist`
       return;
@@ -262,8 +258,8 @@ const updateTenantProfile = async (ctx) => {
 
     const updatedTenantProfile = await tenantService.updateTenantProfile(
       tenantExternalId, 
-      { ...tenantProfile, ...update }, 
-      { ...tenantProfile.settings, ...update.settings }
+      { ...tenant.profile, ...update }, 
+      { ...tenant.profile.settings, ...update.settings }
     );
 
     ctx.status = 200;
@@ -494,7 +490,7 @@ export default {
   updateTenantResearchAttribute,
   deleteTenantResearchAttribute,
 
-  getTenantProfile,
+  getTenant,
   getTenantBanner,
   getTenantLogo,
   getSignUpRequests,

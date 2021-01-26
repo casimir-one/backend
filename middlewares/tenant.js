@@ -6,8 +6,9 @@ import deipRpc from '@deip/rpc-client';
 function tenant(options) {
   return async function (ctx, next) {
     const tenantService = new TenantService();
-    const tenantProfile = await tenantService.findTenantProfile(config.TENANT);
-    const [tenantAccount] = await deipRpc.api.getAccountsAsync([config.TENANT]);
+    const tenant = await tenantService.getTenant(config.TENANT);
+    const tenantAccount = tenant.account;
+    const tenantProfile = tenant.profile;
 
     const ownerAuth = tenantAccount.active.account_auths.map(([name, threshold]) => name);
     const activeAuth = tenantAccount.owner.account_auths.map(([name, threshold]) => name);

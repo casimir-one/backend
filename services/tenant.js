@@ -1,3 +1,4 @@
+import deipRpc from '@deip/rpc-client';
 import TenantProfile from './../schemas/tenant';
 import mongoose from 'mongoose';
 
@@ -5,9 +6,11 @@ class TenantService {
 
   constructor() { };
 
-  async findTenantProfile(id) {
-    const tenant = await TenantProfile.findOne({ _id: id });
-    return tenant ? tenant.toObject() : null;
+  async getTenant(id) {
+    const profile = await TenantProfile.findOne({ _id: id });
+    if (!profile) return null;
+    const account = await deipRpc.api.getResearchGroupAsync(id);
+    return { profile: profile.toObject(), account: account.account };
   }
 
   async createTenantProfile({
