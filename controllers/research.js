@@ -819,10 +819,6 @@ const getResearches = async (ctx) => {
 };
 
 
-
-
-
-
 export default {
   getResearch,
   getResearches,
