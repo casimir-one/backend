@@ -15,9 +15,9 @@ const TenantProfile = require('./../schemas/tenant');
 
 const deipRpc = require('@deip/rpc-client');
 
-deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
-deipRpc.config.set('chain_id', config.blockchain.chainId);
-mongoose.connect(config.mongo['deip-server'].connection);
+deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
+deipRpc.config.set('chain_id', config.CHAIN_ID);
+mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const run = async () => {

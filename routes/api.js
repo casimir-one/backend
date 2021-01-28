@@ -17,6 +17,7 @@ import expressLicensing from '../controllers/expressLicensing'
 import userTransactions from '../controllers/userTransactions'
 import disciplines from '../controllers/disciplines'
 import fundraising from '../controllers/fundraising'
+import tenant from '../controllers/tenant';
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -142,6 +143,7 @@ protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
 public_route.get('/disciplines', disciplines.getDomainDisciplines)
 public_route.get('/disciplines/research/:researchExternalId', disciplines.getDisciplinesByResearch)
 
+public_route.get('/network/info', tenant.getNetworkInfo)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

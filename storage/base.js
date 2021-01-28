@@ -46,7 +46,7 @@ class BaseStorage {
 
   _baseDirPath = null;
   _type = null;
-  _tempDirPath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}/temp`);
+  _tempDirPath = path.join(__dirname, `./../${config.TENANT_LOCAL_DIR}/temp`);
 
   constructor(baseDirPath) {
     this._baseDirPath = baseDirPath;

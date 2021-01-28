@@ -10,7 +10,7 @@ const getFileStorageUploader = (destinationHandler, filenameHandler) => {
     case FILE_STORAGE.LOCAL_FILESYSTEM: {
       return localStorageUploader(destinationHandler, filenameHandler);
     }
-    case FILE_STORAGE.DEIP_REMOTE_SFTP: {
+    case FILE_STORAGE.REMOTE_SFTP: {
       return sftpStorageUploader(destinationHandler, filenameHandler);
     }
     default:

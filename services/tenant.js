@@ -13,6 +13,18 @@ class TenantService {
     return { profile: profile.toObject(), account: account.account };
   }
 
+  async getNetworkInfo() {
+    const profiles = await TenantProfile.find({});
+    const result = profiles.reduce((map, tenant) => {
+      map[tenant._id] = {
+        tenant: tenant._id,
+        serverUrl: tenant.serverUrl
+      };
+      return map;
+    }, {});
+    return result;
+  }
+
   async createTenantProfile({
     tenantExternalId,
     name,

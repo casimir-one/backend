@@ -90,9 +90,9 @@ app.use(require('./routes/tenant.js').protected.routes());
 
 app.use(require('./middlewares/events.js')());
 
-mongoose.connect(config.mongo['deip-server'].connection);
+mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 mongoose.connection.on('connected', () => {
-    console.log(`Mongoose default connection open to ${config.mongo['deip-server'].connection}`);
+  console.log(`Mongoose default connection open to ${config.DEIP_MONGO_STORAGE_CONNECTION_URL}`);
 });
 mongoose.connection.on('error',  (err) => {
     console.log(`Mongoose default connection error: ${err}`);

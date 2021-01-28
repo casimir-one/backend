@@ -239,6 +239,19 @@ const getTenant = async (ctx) => {
   }
 }
 
+const getNetworkInfo = async (ctx) => {
+  try {
+    const tenantService = new TenantService();
+    const map = await tenantService.getNetworkInfo();
+    ctx.status = 200;
+    ctx.body = map;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 
 const updateTenantProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -489,6 +502,8 @@ export default {
   createTenantResearchAttribute,
   updateTenantResearchAttribute,
   deleteTenantResearchAttribute,
+
+  getNetworkInfo,
 
   getTenant,
   getTenantBanner,

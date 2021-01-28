@@ -12,10 +12,14 @@ class UserService extends BaseReadModelService {
 
   async mapUsers(profiles) {
     const chainAccounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));
+    const chainMembershipTokens = await Promise.all(chainAccounts.map(a => deipRpc.api.getResearchGroupTokensByAccountAsync(a.name)));
+
     return chainAccounts
       .map((chainAccount) => {
         const profileRef = profiles.find(r => r._id == chainAccount.name);
-        return { account: chainAccount, profile: profileRef ? profileRef : null };
+        const membershipTokens = chainMembershipTokens.find(teams => teams.length && teams[0].owner == chainAccount.name) || [];
+        const teams = membershipTokens.map(mt => mt.research_group.external_id);
+        return { username: chainAccount.name, account: chainAccount, profile: profileRef ? profileRef : null, teams };
       });
   }
 
@@ -163,7 +167,7 @@ class UserService extends BaseReadModelService {
 
 
   async createUserAccount({ username, pubKey }) {
-    const registrar = config.blockchain.accountsCreator;
+    const registrar = config.FAUCET_ACCOUNT;
     // const chainConfig = await deipRpc.api.getConfigAsync();
     // const chainProps = await deipRpc.api.getChainPropertiesAsync();
     // const ratio = chainConfig['DEIP_CREATE_ACCOUNT_DELEGATION_RATIO'];

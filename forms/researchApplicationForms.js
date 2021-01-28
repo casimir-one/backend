@@ -13,7 +13,7 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 
 const PROPOSAL_ID_HEADER = "proposal-id";
 
-const filesStoragePath = path.join(__dirname, `./../${config.FILE_STORAGE_DIR}`);
+const filesStoragePath = path.join(__dirname, `./../${config.TENANT_LOCAL_DIR}`);
 export const researchApplicationStoragePath = (proposalId) => `${filesStoragePath}/research-projects-applications/${proposalId}`;
 
 export const researchApplicationAttachmentFolderPath = (proposalId) => `${researchApplicationStoragePath(proposalId)}`;

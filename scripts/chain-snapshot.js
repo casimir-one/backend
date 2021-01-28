@@ -19,9 +19,8 @@ const CHAIN_CONSTANTS = require('./../constants/chainConstants').default;
 const RESEARCH_CONTENT_TYPES = require('./../constants/researchContentType').default;
 
 
-deipRpc.api.setOptions({ url: config.blockchain.rpcEndpoint });
-deipRpc.config.set('chain_id', config.blockchain.chainId);
-// mongoose.connect(config.mongo['deip-server'].connection);
+deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
+deipRpc.config.set('chain_id', config.CHAIN_ID);
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);

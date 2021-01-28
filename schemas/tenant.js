@@ -60,6 +60,7 @@ const GlobalNetworkSettings = new Schema({
 const TenantProfile = new Schema({
   "_id": { type: String },
   "name": { type: String },
+  "serverUrl": { type: String, required: true },
   "shortName": { type: String },
   "description": { type: String },
   "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },

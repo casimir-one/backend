@@ -5,6 +5,7 @@ import { FILE_STORAGE } from "./../constants";
 import { hashElement } from 'folder-hash';
 import { v4 as uuidv4 } from 'uuid';
 import rimraf from "rimraf";
+import config from "./../config";
 
 class SftpStorage extends BaseStorage {
 
@@ -12,12 +13,12 @@ class SftpStorage extends BaseStorage {
   _username = null;
   _password = null;
 
-  constructor(host = '18.157.181.74', username = 'tenant-b63e7871', password = 'deipdev') {
+  constructor(host = config.TENANT_SFTP_HOST, username = config.TENANT_SFTP_USER, password = config.TENANT_SFTP_PASSWORD) {
     super('storage');
     this._host = host;
     this._username = username;
     this._password = password;
-    this._type = FILE_STORAGE.DEIP_REMOTE_SFTP;
+    this._type = FILE_STORAGE.REMOTE_SFTP;
   }
 
   // Don't Re-use SftpClient Objects

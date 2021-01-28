@@ -128,8 +128,8 @@ async function usernameExistsInGlobalNetwork(username, tenant) {
   const requestPromise = util.promisify(request);
   const endpoints = tenant && tenant.network && tenant.network.nodes ? tenant.network.nodes : [];
 
-  if (!endpoints.some(endpoint => endpoint == config.blockchain.rpcEndpoint)) {
-    endpoints.push(config.blockchain.rpcEndpoint);
+  if (!endpoints.some(endpoint => endpoint == config.DEIP_FULL_NODE_URL)) {
+    endpoints.push(config.DEIP_FULL_NODE_URL);
   }
 
   const promises = [];
