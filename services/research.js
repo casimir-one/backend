@@ -43,7 +43,7 @@ class ResearchService extends BaseReadModelService {
           ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
           : "Not Specified";
 
-        return { ...chainResearch, title, abstract, researchRef: researchRef ? { ...researchRef, expressLicenses } : { attributes: [], expressLicenses: []} };
+        return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, researchRef: researchRef ? { ...researchRef, expressLicenses } : { attributes: [], expressLicenses: []} };
       })
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         

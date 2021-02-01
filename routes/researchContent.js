@@ -1,7 +1,8 @@
-import researchContent from './../controllers/researchContent'
-
-import koa_router from 'koa-router'
+import researchContent from './../controllers/researchContent';
+import koa_router from 'koa-router';
 import config from './../config';
+import compose from 'koa-compose';
+import tenantResearchContentAccess from './../middlewares/tenantResearchContentAccess';
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -17,7 +18,8 @@ public_route.get('/research-contents', researchContent.getResearchContents)
 public_route.get('/refs/research/content-id/:refId', researchContent.getContentRef)
 public_route.get('/refs/research/:researchExternalId/content-hash/:hash', researchContent.getContentRefByHash)
 
-protected_route.get('/refs/research/package/:researchExternalId/:hash/:fileHash', researchContent.getResearchPackageFile)
+// TODO: replace with protected_route
+public_route.get('/refs/research/package/:researchExternalId/:hash/:fileHash', compose([tenantResearchContentAccess]), researchContent.getResearchPackageFile)
 
 protected_route.delete('/refs/:refId', researchContent.deleteContentDraft)
 protected_route.put('/refs/unlock/:refId', researchContent.unlockContentDraft)

@@ -1,5 +1,6 @@
 import path from 'path'
 import util from 'util';
+import request from 'request';
 import parseFormdata from 'parse-formdata'
 import readArchive from './../dar/readArchive'
 import writeArchive from './../dar/writeArchive'
@@ -644,7 +645,8 @@ const getResearchPackageFile = async function (ctx) {
   const researchExternalId = ctx.params.researchExternalId;
   const fileHash = ctx.params.fileHash;
   const isDownload = ctx.query.download === 'true';
-  const jwtUsername = ctx.state.user.username;
+  const requestedTenant = ctx.state.requestedTenant;
+  const currentTenant = ctx.state.tenant;
 
   const researchContentService = new ResearchContentService();
   const researchGroupService = new ResearchGroupService();
@@ -652,6 +654,13 @@ const getResearchPackageFile = async function (ctx) {
 
   const research = await researchService.getResearch(researchExternalId);
   if (research.is_private) {
+    if (!ctx.state.user) {
+      ctx.status = 401;
+      ctx.body = `Not authorized`;
+      return;
+    }
+
+    const jwtUsername = ctx.state.user.username;
     const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
       ctx.status = 401;
@@ -676,34 +685,38 @@ const getResearchPackageFile = async function (ctx) {
 
   const filename = file.filename;
   const filepath = FileStorage.getResearchContentPackageFilePath(researchContentRef.researchExternalId, researchContentRef.hash, filename);
-
-  const fileExists = await FileStorage.exists(filepath);
-  if (!fileExists) {
-    ctx.status = 404;
-    ctx.body = `${filepath} is not found`;
-    return;
-  }
-
-  const buff = await FileStorage.get(filepath);
   const ext = filename.substr(filename.lastIndexOf('.') + 1);
   const name = filename.substr(0, filename.lastIndexOf('.'));
   const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
   const isPdf = ['pdf'].some(e => e == ext);
 
   if (isDownload) {
-    ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-    ctx.body = buff;
+    ctx.response.set('content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
   } else if (isImage) {
-    ctx.response.set('Content-Type', `image/${ext}`);
-    ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-    ctx.body = buff;
+    ctx.response.set('content-type', `image/${ext}`);
+    ctx.response.set('content-disposition', `inline; filename="${slug(name)}.${ext}"`);
   } else if (isPdf) {
-    ctx.response.set('Content-Type', `application/${ext}`);
-    ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-    ctx.body = buff;
+    ctx.response.set('content-type', `application/${ext}`);
+    ctx.response.set('content-disposition', `inline; filename="${slug(name)}.${ext}"`);
   } else {
-    ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+    ctx.response.set('content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
+  }
+
+  if (requestedTenant.id == currentTenant.id) {
+
+    const fileExists = await FileStorage.exists(filepath);
+    if (!fileExists) {
+      ctx.status = 404;
+      ctx.body = `${filepath} is not found`;
+      return;
+    }
+
+    const buff = await FileStorage.get(filepath);
     ctx.body = buff;
+
+  } else {
+    // TODO: chunk jwt from tenant pubKey to request other tenant's server
+    ctx.body = request(`${requestedTenant.serverUrl}/content/refs/research/package/${researchExternalId}/${hash}/${fileHash}`);
   }
 }
 
