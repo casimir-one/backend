@@ -7,4 +7,4 @@ yarn-error.log*
 test/unit/coverage
 files/*
 local-files/*
-/config/environment/.local.env
+/config/environment/.local*.env
