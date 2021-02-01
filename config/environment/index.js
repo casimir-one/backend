@@ -1,7 +1,7 @@
 const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
-const FILE_STORAGE = require('./../../constants/fileStorage').default;
+// const FILE_STORAGE = require('./../../constants/fileStorage').default;
 
 const env = (process.env.USE_LOCAL_CONFIG || process.env.USE_CONFIG || process.env.NODE_ENV == 'local')
   ? 'local'
@@ -16,7 +16,7 @@ const config = {
   ENVIRONMENT: env,
 
   TENANT: process.env.TENANT || '0000000000000000000000000000000000000000',
-  TENANT_FILE_STORAGE_TYPE: process.env.TENANT_FILE_STORAGE_TYPE || FILE_STORAGE.LOCAL_FILESYSTEM,
+  // TENANT_FILE_STORAGE_TYPE: process.env.TENANT_FILE_STORAGE_TYPE || FILE_STORAGE.LOCAL_FILESYSTEM,
   TENANT_SFTP_HOST: process.env.TENANT_SFTP_HOST,
   TENANT_SFTP_USER: process.env.TENANT_SFTP_USER,
   TENANT_SFTP_PASSWORD: process.env.TENANT_SFTP_PASSWORD,
