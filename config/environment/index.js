@@ -3,14 +3,14 @@ const path = require('path');
 const fs = require('fs');
 const FILE_STORAGE = require('./../../constants/fileStorage').default;
 
-const env = (process.env.USE_LOCAL_CONFIG || process.env.NODE_ENV == 'local')
+const env = (process.env.USE_LOCAL_CONFIG || process.env.USE_CONFIG || process.env.NODE_ENV == 'local')
   ? 'local'
   : process.env.NODE_ENV || 'development';
 
 require('dotenv').config({
   path: __dirname + '/' +
-    (env == 'production' ? '.prod.env' : env == 'development' ? '.dev.env' : '.local.env')
-})
+    (env == 'production' ? '.prod.env' : env == 'development' ? '.dev.env' : process.env.USE_CONFIG ? ('.' + process.env.USE_CONFIG + '.env') : '.local.env')
+});
 
 const config = {
   ENVIRONMENT: env,
