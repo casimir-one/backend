@@ -8,3 +8,4 @@ test/unit/coverage
 files/*
 local-files/*
 /config/environment/.local*.env
+/config/environment/.demo.env
