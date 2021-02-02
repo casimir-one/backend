@@ -19,7 +19,7 @@ public_route.get('/refs/research/content-id/:refId', researchContent.getContentR
 public_route.get('/refs/research/:researchExternalId/content-hash/:hash', researchContent.getContentRefByHash)
 
 // TODO: replace with protected_route
-public_route.get('/refs/research/package/:researchExternalId/:hash/:fileHash', compose([tenantResearchContentAccess]), researchContent.getResearchPackageFile)
+public_route.get('/refs/research/package/:researchContentExternalId/:fileHash', compose([tenantResearchContentAccess]), researchContent.getResearchPackageFile)
 
 protected_route.delete('/refs/:refId', researchContent.deleteContentDraft)
 protected_route.put('/refs/unlock/:refId', researchContent.unlockContentDraft)

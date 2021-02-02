@@ -25,6 +25,25 @@ class TenantService {
     return result;
   }
 
+  /* [DEPRECATED] */
+  async getLegacyTenant(id) {
+    const researchTenant = await this.getTenant(id);
+    const tenantAccount = researchTenant.account;
+    const tenantProfile = researchTenant.profile;
+
+    const ownerAuth = tenantAccount.active.account_auths.map(([name, threshold]) => name);
+    const activeAuth = tenantAccount.owner.account_auths.map(([name, threshold]) => name);
+
+    const admins = [...ownerAuth, ...activeAuth].reduce((acc, name) => {
+      if (!acc.some(n => n == name)) {
+        return [...acc, name];
+      }
+      return [...acc];
+    }, []);
+
+    return { ...tenantProfile, id: tenantAccount.name, account: tenantAccount, admins };
+  }
+
   async createTenantProfile({
     tenantExternalId,
     name,

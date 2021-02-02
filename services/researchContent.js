@@ -54,7 +54,7 @@ class ResearchContentService extends BaseReadModelService {
     return result;
   }
 
-  async findResearchContentRefById(externalId) {
+  async getResearchContentRef(externalId) {
     const result = await this.findOne({ _id: externalId });
     return result;
   }

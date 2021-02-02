@@ -1,34 +1,30 @@
-import ResearchService from './../services/research';
+import ResearchContentService from './../services/researchContent';
 import TenantService from './../services/tenant';
-import util from 'util';
-
+import request from 'request';
 
 async function tenantResearchContentAccess(ctx, next) {
-  const researchService = new ResearchService();
   const tenantService = new TenantService();
-  const researchExternalId = ctx.params.researchExternalId;
+  const researchContentService = new ResearchContentService();
+  const currentTenant = ctx.state.tenant;
 
-  const research = await researchService.getResearch(researchExternalId);
-  ctx.assert(!!research, 404);
+  const researchContentExternalId = ctx.params.researchContentExternalId;
+  const fileHash = ctx.params.fileHash;
 
-  if (research.tenantId == ctx.state.tenant._id) {
-    ctx.state.requestedTenant = ctx.state.tenant;
+  const researchContent = await researchContentService.getResearchContentRef(researchContentExternalId);
+  ctx.assert(!!researchContent, 404);
+
+  if (researchContent.tenantId == currentTenant._id) {
     await next();
   } else {
-    const researchTenant = await tenantService.getTenant(research.tenantId);
-
-    const tenantAccount = researchTenant.account;
-    const tenantProfile = researchTenant.profile;
-    ctx.state.requestedTenant = { ...tenantProfile, id: tenantAccount.name, account: tenantAccount, admins: [] };
-
+    const requestedTenant = await tenantService.getLegacyTenant(researchContent.tenantId);
     if (false) {
       /* TODO: check access for requested file */
-    } else {
       await next();
+    } else {
+      ctx.redirect(`${requestedTenant.serverUrl}${ctx.request.originalUrl}`);
+      return;
     }
-
   }
-
 }
 
 module.exports = tenantResearchContentAccess;

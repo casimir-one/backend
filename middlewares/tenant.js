@@ -1,27 +1,12 @@
 import config from './../config'
 import TenantService from './../services/tenant';
-import deipRpc from '@deip/rpc-client';
 
 
 function tenant(options) {
   return async function (ctx, next) {
     const tenantService = new TenantService();
-    const tenant = await tenantService.getTenant(config.TENANT);
-    const tenantAccount = tenant.account;
-    const tenantProfile = tenant.profile;
-
-    const ownerAuth = tenantAccount.active.account_auths.map(([name, threshold]) => name);
-    const activeAuth = tenantAccount.owner.account_auths.map(([name, threshold]) => name);
-
-    const admins = [...ownerAuth, ...activeAuth].reduce((acc, name) => {
-      if (!acc.some(n => n == name)) {
-        return [...acc, name];
-      }
-      return [...acc];
-    }, [])
-
-    ctx.state.tenant = { ...tenantProfile, id: tenantAccount.name, account: tenantAccount, admins };
-
+    const tenant = await tenantService.getLegacyTenant(config.TENANT);
+    ctx.state.tenant = tenant;
     await next();
   };
 }

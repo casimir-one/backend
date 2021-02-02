@@ -124,7 +124,7 @@ const readDarArchive = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentRefById(darId);
+    const rc = await researchContentService.getResearchContentRef(darId);
     if (!rc) {
       ctx.status = 404;
       ctx.body = `Dar for "${darId}" id is not found`;
@@ -170,7 +170,7 @@ const readDarArchiveStaticFiles = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentRefById(darId);
+    const rc = await researchContentService.getResearchContentRef(darId);
     const filepath = FileStorage.getResearchDarArchiveFilePath(rc.researchExternalId, rc.folder, filename);
 
     const buff = await FileStorage.get(filepath);
@@ -204,7 +204,7 @@ const getContentRef = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const ref = await researchContentService.findResearchContentRefById(refId);
+    const ref = await researchContentService.getResearchContentRef(refId);
     ctx.status = 200;
     ctx.body = ref;
   } catch (err) {
@@ -249,7 +249,7 @@ const updateDarArchive = async (ctx) => {
     const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentRefById(darId);
+    const rc = await researchContentService.getResearchContentRef(darId);
     if (!rc || rc.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
       ctx.status = 405;
       ctx.body = `Research "${darId}" is locked for updates or does not exist`;
@@ -322,7 +322,7 @@ const unlockContentDraft = async (ctx) => {
   try {
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentRefById(refId);
+    const rc = await researchContentService.getResearchContentRef(refId);
     if (!rc || (rc.status != RESEARCH_CONTENT_STATUS.PROPOSED && rc.status != RESEARCH_CONTENT_STATUS.PUBLISHED)) {
       ctx.status = 405;
       ctx.body = `Proposed "${refId}" content archive is not found`;
@@ -430,7 +430,7 @@ const deleteContentDraft = async (ctx) => {
     const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
 
-    const rc = await researchContentService.findResearchContentRefById(refId);
+    const rc = await researchContentService.getResearchContentRef(refId);
     if (!rc) {
       ctx.status = 404;
       ctx.body = `Dar for "${refId}" id is not found`;
@@ -501,7 +501,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   })
 
   const { title, authors, references } = await parseDraftMetaAsync();
-  const rc = await researchContentService.findResearchContentRefById(researchContentId);
+  const rc = await researchContentService.getResearchContentRef(researchContentId);
 
   const accounts = [];
   for (let i = 0; i < authors.length; i++) {
@@ -641,8 +641,7 @@ const uploadBulkResearchContent = async (ctx) => {
 }
 
 const getResearchPackageFile = async function (ctx) {
-  const hash = ctx.params.hash;
-  const researchExternalId = ctx.params.researchExternalId;
+  const researchContentExternalId = ctx.params.researchContentExternalId;
   const fileHash = ctx.params.fileHash;
   const isDownload = ctx.query.download === 'true';
   const requestedTenant = ctx.state.requestedTenant;
@@ -652,7 +651,14 @@ const getResearchPackageFile = async function (ctx) {
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService();
 
-  const research = await researchService.getResearch(researchExternalId);
+  const researchContentRef = await researchContentService.getResearchContentRef(researchContentExternalId);
+  if (!researchContentRef) {
+    ctx.status = 404;
+    ctx.body = `Package "${researchContentExternalId}" is not found`
+    return;
+  }
+
+  const research = await researchService.getResearch(researchContentRef.researchExternalId);
   if (research.is_private) {
     if (!ctx.state.user) {
       ctx.status = 401;
@@ -667,13 +673,6 @@ const getResearchPackageFile = async function (ctx) {
       ctx.body = `"${jwtUsername}" is not permitted to get "${research.external_id}" research content`;
       return;
     }
-  }
-
-  const researchContentRef = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
-  if (!researchContentRef) {
-    ctx.status = 404;
-    ctx.body = `Package "${hash}" is not found`
-    return;
   }
 
   const file = researchContentRef.packageFiles.find(f => f.hash == fileHash);
@@ -702,22 +701,16 @@ const getResearchPackageFile = async function (ctx) {
     ctx.response.set('content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
   }
 
-  if (requestedTenant.id == currentTenant.id) {
 
-    const fileExists = await FileStorage.exists(filepath);
-    if (!fileExists) {
-      ctx.status = 404;
-      ctx.body = `${filepath} is not found`;
-      return;
-    }
-
-    const buff = await FileStorage.get(filepath);
-    ctx.body = buff;
-
-  } else {
-    // TODO: chunk jwt from tenant pubKey to request other tenant's server
-    ctx.body = request(`${requestedTenant.serverUrl}/content/refs/research/package/${researchExternalId}/${hash}/${fileHash}`);
+  const fileExists = await FileStorage.exists(filepath);
+  if (!fileExists) {
+    ctx.status = 404;
+    ctx.body = `${filepath} is not found`;
+    return;
   }
+
+  const buff = await FileStorage.get(filepath);
+  ctx.body = buff;
 }
 
 
