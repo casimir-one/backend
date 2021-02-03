@@ -121,7 +121,7 @@ const readResearchContentDarArchive = async (ctx) => {
       if (record._binary) {
         delete record._binary
         record.encoding = 'url'
-        record.data = `${config.DEIP_SERVER_URL}/content/${darId}/assets/${record.path}?authorization=${jwt}`;
+        record.data = `${config.DEIP_SERVER_URL}/api/research-content/texture/${darId}/assets/${record.path}?authorization=${jwt}`;
       }
     })
     ctx.status = 200;

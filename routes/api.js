@@ -137,9 +137,9 @@ public_route.get('/research-content/ref/:refId', researchContent.getResearchCont
 protected_route.post('/research-content/ref/publish', researchContent.createResearchContent)
 protected_route.put('/research-content/ref/unlock/:refId', researchContent.unlockResearchContentDraft)
 protected_route.delete('/research-content/ref/:refId', researchContent.deleteResearchContentDraft)
-protected_route.get('/research-content/texture/:researchContentExternalId', researchContent.readResearchContentDarArchive)
-protected_route.get('/research-content/texture/:researchContentExternalId/assets/:file', researchContent.readResearchContentDarArchiveStaticFiles)
-protected_route.put('/research-content/texture/:researchContentExternalId', researchContent.updateResearchContentDarArchive)
+protected_route.get('/research-content/texture/:researchContentExternalId', compose([researchContentFileStorageAuth]), researchContent.readResearchContentDarArchive)
+protected_route.get('/research-content/texture/:researchContentExternalId/assets/:file', compose([researchContentFileStorageAuth]), researchContent.readResearchContentDarArchiveStaticFiles)
+protected_route.put('/research-content/texture/:researchContentExternalId', compose([researchContentFileStorageAuth]), researchContent.updateResearchContentDarArchive)
 protected_route.post('/research-content/texture/:researchExternalId', researchContent.createResearchContentDarArchive)
 protected_route.post('/research-content/package', researchContent.uploadResearchContentPackage)
 // TODO: replace with protected_route
