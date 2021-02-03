@@ -1,4 +1,5 @@
 import koa_router from 'koa-router'
+import compose from 'koa-compose';
 import users from '../controllers/users'
 import joinRequests from '../controllers/joinRequests'
 import reviewRequests from '../controllers/reviewRequests'
@@ -18,6 +19,8 @@ import userTransactions from '../controllers/userTransactions'
 import disciplines from '../controllers/disciplines'
 import fundraising from '../controllers/fundraising'
 import tenant from '../controllers/tenant';
+import researchContent from './../controllers/researchContent';
+import researchContentFileStorageAuth from './../middlewares/researchContentFileStorageAuth';
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -127,6 +130,20 @@ protected_route.get('/research/application/:proposalId/attachment', research.get
 protected_route.post('/research/application/approve', research.approveResearchApplication)
 protected_route.post('/research/application/reject', research.rejectResearchApplication)
 protected_route.post('/research/application/delete', research.deleteResearchApplication)
+
+public_route.get('/research-content/:researchContentExternalId', researchContent.getResearchContent)
+public_route.get('/research-content/research/:researchExternalId', researchContent.getResearchContentByResearch)
+public_route.get('/research-content/ref/:refId', researchContent.getResearchContentRef)
+protected_route.post('/research-content/ref/publish', researchContent.createResearchContent)
+protected_route.put('/research-content/ref/unlock/:refId', researchContent.unlockResearchContentDraft)
+protected_route.delete('/research-content/ref/:refId', researchContent.deleteResearchContentDraft)
+protected_route.get('/research-content/texture/:researchContentExternalId', researchContent.readResearchContentDarArchive)
+protected_route.get('/research-content/texture/:researchContentExternalId/assets/:file', researchContent.readResearchContentDarArchiveStaticFiles)
+protected_route.put('/research-content/texture/:researchContentExternalId', researchContent.updateResearchContentDarArchive)
+protected_route.post('/research-content/texture/:researchExternalId', researchContent.createResearchContentDarArchive)
+protected_route.post('/research-content/package', researchContent.uploadResearchContentPackage)
+// TODO: replace with protected_route
+public_route.get('/research-content/package/:researchContentExternalId/:fileHash', compose([researchContentFileStorageAuth]), researchContent.getResearchContentPackageFile)
 
 protected_route.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 protected_route.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

@@ -65,7 +65,6 @@ app.use(require('./middlewares/tenant.js')());
 app.use(serve('files/static'));
 app.use(require('./routes/auth.js').public.routes());
 app.use(require('./routes/api.js').public.routes());
-app.use(require('./routes/researchContent.js').public.routes());
 app.use(require('./routes/tenant.js').public.routes());
 
 
@@ -85,7 +84,6 @@ app.use(require('./middlewares/tenantAuth.js')());
 
 // protected routes layer
 app.use(require('./routes/api.js').protected.routes());
-app.use(require('./routes/researchContent.js').protected.routes());
 app.use(require('./routes/tenant.js').protected.routes());
 
 app.use(require('./middlewares/events.js')());

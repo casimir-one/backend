@@ -48,35 +48,6 @@ const getResearchContent = async (ctx) => {
   }
 }
 
-
-
-const getResearchContents = async (ctx) => {
-  const tenant = ctx.state.tenant;
-  const query = qs.parse(ctx.query);
-  const researchContentsExternalIds = query.researchContents;
-
-  try {
-
-    if (!Array.isArray(researchContentsExternalIds)) {
-      ctx.status = 400;
-      ctx.body = `Bad request (${JSON.stringify(query)})`;
-      return;
-    }
-
-    const researchContentService = new ResearchContentService();
-    const result = await researchContentService.getResearchContents(researchContentsExternalIds);
-
-    ctx.status = 200;
-    ctx.body = result;
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-};
-
-
 const getResearchContentByResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
   const tenant = ctx.state.tenant;
@@ -116,8 +87,8 @@ const getResearchContentByResearch = async (ctx) => {
 }
 
 
-const readDarArchive = async (ctx) => {
-  const darId = ctx.params.dar;
+const readResearchContentDarArchive = async (ctx) => {
+  const darId = ctx.params.researchContentExternalId;
   const authorization = ctx.request.header['authorization'];
   const jwt = authorization.substring(authorization.indexOf("Bearer ") + "Bearer ".length, authorization.length);
 
@@ -163,8 +134,8 @@ const readDarArchive = async (ctx) => {
   }
 }
 
-const readDarArchiveStaticFiles = async (ctx) => {
-  const darId = ctx.params.dar;
+const readResearchContentDarArchiveStaticFiles = async (ctx) => {
+  const darId = ctx.params.researchContentExternalId;
   const filename = ctx.params.file;
 
   try {
@@ -199,27 +170,11 @@ const readDarArchiveStaticFiles = async (ctx) => {
   }
 }
 
-const getContentRef = async (ctx) => {
+const getResearchContentRef = async (ctx) => {
   const refId = ctx.params.refId;
   try {
     const researchContentService = new ResearchContentService();
-
     const ref = await researchContentService.getResearchContentRef(refId);
-    ctx.status = 200;
-    ctx.body = ref;
-  } catch (err) {
-    ctx.status = 500;
-    ctx.body = err.message;
-  }
-}
-
-const getContentRefByHash = async (ctx) => {
-  const hash = ctx.params.hash;
-  const researchExternalId = ctx.params.researchExternalId;
-  try {
-    const researchContentService = new ResearchContentService();
-
-    const ref = await researchContentService.findResearchContentRefByHash(researchExternalId, hash);
     ctx.status = 200;
     ctx.body = ref;
   } catch (err) {
@@ -230,9 +185,9 @@ const getContentRefByHash = async (ctx) => {
 
 // ############ Write actions ############
 
-const updateDarArchive = async (ctx) => {
+const updateResearchContentDarArchive = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const darId = ctx.params.dar;
+  const darId = ctx.params.researchContentExternalId;
 
   try {
 
@@ -315,7 +270,7 @@ const updateDarArchive = async (ctx) => {
 }
 
 
-const unlockContentDraft = async (ctx) => {
+const unlockResearchContentDraft = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const refId = ctx.params.refId;
 
@@ -358,7 +313,7 @@ const unlockContentDraft = async (ctx) => {
   }
 }
 
-const createDarArchive = async (ctx) => {
+const createResearchContentDarArchive = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.params.researchExternalId;
 
@@ -421,7 +376,7 @@ const createDarArchive = async (ctx) => {
   }
 }
 
-const deleteContentDraft = async (ctx) => {
+const deleteResearchContentDraft = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const refId = ctx.params.refId;
 
@@ -547,7 +502,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
 
 // ############# files ######################
 
-const uploadBulkResearchContent = async (ctx) => {
+const uploadResearchContentPackage = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchExternalId = ctx.request.header['research-external-id'];
   const referencesStr = ctx.request.header['research-content-references'];
@@ -640,7 +595,7 @@ const uploadBulkResearchContent = async (ctx) => {
   }
 }
 
-const getResearchPackageFile = async function (ctx) {
+const getResearchContentPackageFile = async function (ctx) {
   const researchContentExternalId = ctx.params.researchContentExternalId;
   const fileHash = ctx.params.fileHash;
   const isDownload = ctx.query.download === 'true';
@@ -801,26 +756,24 @@ const createResearchContent = async (ctx, next) => {
 
 export default {
   // dar
-  readDarArchive,
-  readDarArchiveStaticFiles,
-  createDarArchive,
-  updateDarArchive,
+  readResearchContentDarArchive,
+  readResearchContentDarArchiveStaticFiles,
+  createResearchContentDarArchive,
+  updateResearchContentDarArchive,
 
   // files
-  uploadBulkResearchContent,
-  getResearchPackageFile,
+  uploadResearchContentPackage,
+  getResearchContentPackageFile,
 
   // refs
-  getContentRef,
-  getContentRefByHash,
+  getResearchContentRef,
 
   getResearchContent,
-  getResearchContents,
   getResearchContentByResearch,
 
   // drafts
-  deleteContentDraft,
-  unlockContentDraft,
+  deleteResearchContentDraft,
+  unlockResearchContentDraft,
 
   createResearchContent
 }

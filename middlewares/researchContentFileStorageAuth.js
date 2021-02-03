@@ -1,15 +1,13 @@
 import ResearchContentService from './../services/researchContent';
 import TenantService from './../services/tenant';
-import request from 'request';
 
-async function tenantResearchContentAccess(ctx, next) {
+
+async function researchContentFileStorageAuth(ctx, next) {
   const tenantService = new TenantService();
   const researchContentService = new ResearchContentService();
   const currentTenant = ctx.state.tenant;
 
   const researchContentExternalId = ctx.params.researchContentExternalId;
-  const fileHash = ctx.params.fileHash;
-
   const researchContent = await researchContentService.getResearchContentRef(researchContentExternalId);
   ctx.assert(!!researchContent, 404);
 
@@ -27,4 +25,4 @@ async function tenantResearchContentAccess(ctx, next) {
   }
 }
 
-module.exports = tenantResearchContentAccess;
+module.exports = researchContentFileStorageAuth;
