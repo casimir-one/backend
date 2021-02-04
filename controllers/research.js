@@ -113,11 +113,9 @@ const createResearch = async (ctx, next) => {
 
 
 const updateResearch = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
   const tenant = ctx.state.tenant;
 
   try {
-
     const { tx, offchainMeta, isProposal } = await ResearchForm(ctx);
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);

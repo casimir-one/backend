@@ -4,6 +4,13 @@ import USER_PROFILE_STATUS from './../constants/userProfileStatus';
 
 const Schema = mongoose.Schema;
 
+
+const UserLocation = new Schema({
+  "city": { type: String, trim: true, default: null },
+  "country": { type: String, trim: true, default: null },
+  "address": { type: String, trim: true, default: null }
+});
+
 const UserProfile = new Schema({
   "_id": { type: String },
   "tenantId": { type: String, required: true },
@@ -24,9 +31,8 @@ const UserProfile = new Schema({
     "metadata": { type: Object, default: null }
   }],
   "location": {
-    "city": { type: String, trim: true, default: null },
-    "country": { type: String, trim: true, default: null },
-    "address": { type: String, trim: true, default: null }
+    type: UserLocation, 
+    default: {}
   },
   "webPages": [{
     "_id": false,

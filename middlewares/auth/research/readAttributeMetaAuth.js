@@ -2,13 +2,13 @@ import ResearchService from './../../../services/research';
 import TenantService from './../../../services/tenant';
 
 
-function researchContentFileCreateAuth(options = {}) {
+function researchAttributeMetaReadAuth(options = {}) {
   return async function (ctx, next) {
     const tenantService = new TenantService();
     const researchService = new ResearchService();
     const currentTenant = ctx.state.tenant;
 
-    const researchExternalId = options.researchEnitytId 
+    const researchExternalId = options.researchEnitytId
       ? typeof options.researchEnitytId === 'string' ? ctx.params[options.researchEnitytId] : options.researchEnitytId(ctx)
       : ctx.params.researchExternalId;
 
@@ -21,7 +21,6 @@ function researchContentFileCreateAuth(options = {}) {
     } else {
       const requestedTenant = await tenantService.getTenant(research.tenantId);
       if (true) { /* TODO: check access for the requested source and chunk an access token to request the different tenant's server */
-        ctx.status = 307;
         ctx.redirect(`${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`);
         return;
       } else {
@@ -31,4 +30,5 @@ function researchContentFileCreateAuth(options = {}) {
   }
 }
 
-module.exports = researchContentFileCreateAuth;
+
+module.exports = researchAttributeMetaReadAuth;

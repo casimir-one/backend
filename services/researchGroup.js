@@ -16,7 +16,7 @@ class ResearchGroupService extends BaseReadModelService {
         const researchGroupMembershipTokens = membershipTokens.find(members => members[0] && members[0].research_group.external_id == chainResearchGroup.external_id);
         const members = researchGroupMembershipTokens ? researchGroupMembershipTokens.map(rgt => rgt.owner) : [];
         const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.external_id);
-        return { ...chainResearchGroup, researchGroupRef: researchGroupRef ? { ...researchGroupRef, members } : null };
+        return { ...chainResearchGroup, tenantId: researchGroupRef ? researchGroupRef.tenantId : null, researchGroupRef: researchGroupRef ? { ...researchGroupRef, members } : null };
       })
       .map((researchGroup) => {
         const override = researchGroup.researchGroupRef ? { name: researchGroup.researchGroupRef.name, description: researchGroup.researchGroupRef.description } : { name: "Not specified", description: "Not specified" };

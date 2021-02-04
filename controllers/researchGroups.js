@@ -118,18 +118,7 @@ const leaveResearchGroup = async (ctx, next) => {
 
 const uploadResearchGroupLogo = async (ctx) => {
   try {
-
-    const jwtUsername = ctx.state.user.username;
-    const researchGroupExternalId = ctx.request.headers['research-group-external-id'];
     const researchGroupService = new ResearchGroupService();
-
-    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(researchGroupExternalId, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${researchGroupExternalId}" research`;
-      return;
-    }
-
     const { filename } = await ResearchGroupForm(ctx);
     ctx.status = 200;
     ctx.body = filename;

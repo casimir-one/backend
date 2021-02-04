@@ -30,10 +30,19 @@ import researchContentFileCreateAuth from './../middlewares/auth/researchContent
 import researchContentFileDeleteAuth from './../middlewares/auth/researchContent/deleteFileAuth';
 import researchContentFilePublishAuth from './../middlewares/auth/researchContent/publishFileAuth';
 
+import researchAttributeMetaReadAuth from './../middlewares/auth/research/readAttributeMetaAuth';
+import researchAttributeMetaUpdateAuth from './../middlewares/auth/research/updateAttributeMetaAuth';
+
+import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
+import userAvatarFileUpdateAuth from './../middlewares/auth/user/updateAvatarFileAuth';
+
+import researchGroupLogoFileReadAuth from './../middlewares/auth/researchGroup/readLogoFileAuth';
+import researchGroupLogoFileUpdateAuth from './../middlewares/auth/researchGroup/updateLogoFileAuth';
+
 const protected_route = koa_router()
 const public_route = koa_router()
 
-protected_route.post('/user/upload-avatar', users.uploadAvatar)
+protected_route.post('/user/upload-avatar', compose([userAvatarFileUpdateAuth({ userEntityId: (ctx) => ctx.request.header['username'] })]), users.uploadAvatar)
 public_route.get('/user/profile/:username', users.getUserProfile)
 public_route.get('/user/profiles', users.getUsersProfiles)
 public_route.get('/user/active', users.getActiveUsersProfiles)
@@ -45,7 +54,7 @@ public_route.get('/users/list', users.getUsersListing)
 
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', users.updateUserProfile)
-public_route.get('/user/avatar/:username', users.getAvatar)
+public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), users.getAvatar)
 protected_route.get('/user/transactions/:status', userTransactions.getUserTransactions)
 
 protected_route.get('/bookmarks/user/:username', users.getUserBookmarks)
@@ -96,8 +105,8 @@ protected_route.post('/groups', researchGroups.createResearchGroup)
 protected_route.put('/groups', researchGroups.updateResearchGroup)
 public_route.get('/groups/listing', researchGroups.getResearchGroupsListing)
 public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchGroup)
-public_route.get('/groups/logo/:researchGroupExternalId', researchGroups.getResearchGroupLogo)
-protected_route.post('/groups/logo', researchGroups.uploadResearchGroupLogo)
+public_route.get('/groups/logo/:researchGroupExternalId', compose([researchGroupLogoFileReadAuth()]), researchGroups.getResearchGroupLogo)
+/* protected_route */ public_route.post('/groups/logo', compose([researchGroupLogoFileUpdateAuth({ researchGroupEnitytId: (ctx) => ctx.request.headers['research-group-external-id'] } )]), researchGroups.uploadResearchGroupLogo)
 protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
 public_route.get('/groups/member/:username', researchGroups.getResearchGroupsByUser)
 
@@ -119,12 +128,11 @@ protected_route.post('/reviews', reviews.createReview)
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
 public_route.get('/researches', research.getResearches)
-public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', research.getResearchAttributeFile)
+public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', compose([researchAttributeMetaReadAuth()]), research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 protected_route.post('/research', research.createResearch)
-protected_route.put('/research', research.updateResearch)
-
+/* protected_route */ public_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
 public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
 protected_route.post('/fundraising', fundraising.createResearchTokenSale)
 protected_route.post('/fundraising/contributions', fundraising.createResearchTokenSaleContribution)

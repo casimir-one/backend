@@ -20,7 +20,7 @@ function researchContentFilePublishAuth(options = {}) {
       await next();
     } else {
       const requestedTenant = await tenantService.getTenant(research.tenantId);
-      if (true) { /* TODO: check access for the requested file and chunk an access token to request the different tenant's server */
+      if (true) { /* TODO: check access for the requested source and chunk an access token to request the different tenant's server */
         ctx.status = 307;
         ctx.redirect(`${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`);
         return;

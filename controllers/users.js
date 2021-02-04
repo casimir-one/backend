@@ -327,24 +327,10 @@ const removeUserBookmark = async (ctx) => {
 
 const uploadAvatar = async (ctx) => {
   const username = ctx.request.header['username'];
-  const jwtUsername = ctx.state.user.username;
-  
+
   try {
-
     const usersService = new UserService();
-    if (username != jwtUsername) {
-      ctx.status = 403;
-      ctx.body = `You have no permission to upload avatar for '${username}' profile`;
-      return;
-    }
-
     const userProfile = await usersService.findUserProfileByOwner(username);
-    if (!userProfile) {
-      ctx.status = 404;
-      ctx.body = `Profile for "${username}" does not exist!`;
-      return;
-    }
-
     const oldFilename = userProfile.avatar;
     const { filename } = await UserForm(ctx);
     const updatedUserProfile = await usersService.updateUserProfile(username, { avatar: filename });
