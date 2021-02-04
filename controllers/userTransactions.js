@@ -17,7 +17,6 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 
 
 const getUserTransactions = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const jwtUsername = ctx.state.user.username;
   const status = ctx.params.status;
 

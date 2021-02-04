@@ -31,7 +31,6 @@ import UserResignationProposalRejectedEvent from './../events/userResignationPro
 
 const createProposal = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try {
@@ -53,7 +52,6 @@ const createProposal = async (ctx) => {
 
 const updateProposal = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try {
@@ -137,7 +135,6 @@ const updateProposal = async (ctx, next) => {
 
 const deleteProposal = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try {
@@ -220,7 +217,6 @@ const deleteProposal = async (ctx, next) => {
 
 
 const getAccountProposals = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const status = ctx.params.status;
   const username = ctx.params.username;
 
@@ -244,7 +240,6 @@ const getAccountProposals = async (ctx) => {
 
 
 const getProposalById = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const externalId = ctx.params.proposalExternalId;
 
   try {

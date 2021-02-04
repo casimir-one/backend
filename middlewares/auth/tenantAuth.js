@@ -1,6 +1,4 @@
-import config from './../config'
-import deipRpc from '@deip/rpc-client';
-
+import config from './../../config';
 
 function tenantAuth(options) {
   return async function (ctx, next) {

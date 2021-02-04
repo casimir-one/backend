@@ -178,7 +178,6 @@ const updateResearch = async (ctx, next) => {
 
 const createResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
 
   try {
 
@@ -261,7 +260,6 @@ const createResearchApplication = async (ctx, next) => {
 
 const editResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const applicationId = ctx.params.proposalId;
 
   try {
@@ -353,7 +351,6 @@ const editResearchApplication = async (ctx, next) => {
 
 const getResearchApplicationAttachmentFile = async function (ctx) {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const applicationId = ctx.params.proposalId;
   const filename = ctx.query.filename;
   const isDownload = ctx.query.download === 'true';
@@ -403,7 +400,6 @@ const getResearchApplicationAttachmentFile = async function (ctx) {
 
 const approveResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try { 
@@ -465,7 +461,6 @@ const approveResearchApplication = async (ctx, next) => {
 
 const rejectResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try { 
@@ -514,7 +509,6 @@ const rejectResearchApplication = async (ctx, next) => {
 
 const deleteResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const { tx } = ctx.request.body;
 
   try {
@@ -570,7 +564,6 @@ const deleteResearchApplication = async (ctx, next) => {
 
 
 const getResearchApplications = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const status = ctx.query.status;
   const researcher = ctx.query.researcher;
 
@@ -769,7 +762,6 @@ const getResearchGroupResearchListing = async (ctx) => {
 
 
 const getResearch = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const researchExternalId = ctx.params.researchExternalId;
 
   try {
@@ -792,7 +784,6 @@ const getResearch = async (ctx) => {
 
 
 const getResearches = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const query = qs.parse(ctx.query);
   const researchesExternalIds = query.researches;
 

@@ -64,7 +64,6 @@ const getReviewRequestsByRequestor = async (ctx) => {
 
 const createReviewRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const { researchContentExternalId, expert } = ctx.request.body;
   const requestor = jwtUsername;
 

@@ -80,7 +80,7 @@ app.use(jwt({
 );
 
 // tenant auth layer
-app.use(require('./middlewares/tenantAuth.js')());
+app.use(require('./middlewares/auth/tenantAuth.js')());
 
 // protected routes layer
 app.use(require('./routes/api.js').protected.routes());

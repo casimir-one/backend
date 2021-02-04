@@ -255,7 +255,6 @@ const getNetworkInfo = async (ctx) => {
 
 const updateTenantProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const update = ctx.request.body;
 
   try {

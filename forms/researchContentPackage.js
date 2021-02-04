@@ -4,20 +4,18 @@ import path from 'path';
 import util from 'util';
 import multer from 'koa-multer';
 import config from './../config';
-import deipRpc from '@deip/rpc-client';
 import { getFileStorageUploader } from './files';
-import { FILE_STORAGE } from './../constants';
+import { v4 as uuidv4 } from 'uuid';
 
 const RESEARCH_ID_HEADER = "research-external-id";
-const RESEARCH_CONTENT_UPLOAD_SESSION_HEADER = "upload-session";
 
 
 const destinationHandler = (fileStorage) => function () {
+  const sessionId = uuidv4();
 
   return async function (req, file, callback) {
     const researchExternalId = req.headers[RESEARCH_ID_HEADER];
-    const sessionId = req.headers[RESEARCH_CONTENT_UPLOAD_SESSION_HEADER];
-    
+
     const researchFilesTempStorage = fileStorage.getResearchContentPackageTempDirPath(researchExternalId, sessionId);
     const exists = await fileStorage.exists(researchFilesTempStorage);
     if (!exists) {
@@ -45,7 +43,7 @@ const fileFilterHandler = (req, file, callback) => {
 }
 
 
-const ResearchContentForm = async (ctx) => {
+const ResearchContentPackageForm = async (ctx) => {
 
   const filesUploader = multer({
     storage: getFileStorageUploader(destinationHandler, filenameHandler),
@@ -56,7 +54,13 @@ const ResearchContentForm = async (ctx) => {
   return formHandler(ctx, () => new Promise((resolve, reject) => {
     try {
       console.log(ctx.req.files);
+
       resolve({
+        researchExternalId: ctx.request.headers[RESEARCH_ID_HEADER],
+        title: ctx.req.body.title,
+        type: ctx.req.body.type,
+        authors: JSON.parse(ctx.req.body.authors),
+        references: JSON.parse(ctx.req.body.references),
         tempDestinationPath: ctx.req.files[0].destination
       });
 
@@ -67,4 +71,4 @@ const ResearchContentForm = async (ctx) => {
 }
 
 
-export default ResearchContentForm;
+export default ResearchContentPackageForm;
