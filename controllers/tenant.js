@@ -33,12 +33,6 @@ const uploadTenantBanner = async (ctx) => {
     }
 
     const tenant = await tenantService.getTenant(tenantExternalId);
-    if (!tenant) {
-      ctx.status = 404;
-      ctx.body = `Tenant Profile for "${tenantExternalId}" does not exist!`;
-      return;
-    }
-
     const oldFilename = tenant.profile.banner;
     const { filename } = await TeantBannerForm(ctx);
     const updatedTenantProfile = await tenantService.updateTenantProfile(tenantExternalId, { banner: filename }, {});
