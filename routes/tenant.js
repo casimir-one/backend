@@ -23,6 +23,7 @@ async function tenantAdminGuard(ctx, next) {
 }
 
 protected_route.put('/profile', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantProfile);
+protected_route.put('/network-settings', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantNetworkSettings);
 
 protected_route.post('/research-attributes', compose([tenantRoute, tenantAdminGuard]), tenant.createTenantResearchAttribute);
 protected_route.put('/research-attributes', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantResearchAttribute);

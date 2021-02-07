@@ -250,22 +250,40 @@ const getNetworkInfo = async (ctx) => {
 const updateTenantProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const update = ctx.request.body;
+  const tenantExternalId = ctx.state.tenant.id;
 
   try {
 
     const tenantService = new TenantService();
-    const tenantExternalId = tenant.id;
     const tenant = await tenantService.getTenant(tenantExternalId);
-    if (!tenant) {
-      ctx.status = 404;
-      ctx.body = `Tenant Profile for '${tenantExternalId}' does not exist`
-      return;
-    }
-
     const updatedTenantProfile = await tenantService.updateTenantProfile(
       tenantExternalId, 
       { ...tenant.profile, ...update }, 
       { ...tenant.profile.settings, ...update.settings }
+    );
+
+    ctx.status = 200;
+    ctx.body = updatedTenantProfile;
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const updateTenantNetworkSettings = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const update = ctx.request.body;
+  const tenantExternalId = ctx.state.tenant.id;
+
+  try {
+
+    const tenantService = new TenantService();
+    const updatedTenantProfile = await tenantService.updateTenantNetworkSettings(
+      tenantExternalId,
+      update
     );
 
     ctx.status = 200;
@@ -505,6 +523,7 @@ export default {
   approveSignUpRequest,
   rejectSignUpRequest,
   updateTenantProfile,
+  updateTenantNetworkSettings,
   uploadTenantBanner,
   addTenantAdmin,
   removeTenantAdmin

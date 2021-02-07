@@ -120,6 +120,16 @@ class TenantService {
   }
 
 
+  async updateTenantNetworkSettings(tenantExternalId, {
+    globalNetworkIsVisible
+  }) {
+    const tenantProfile = await TenantProfile.findOne({ _id: tenantExternalId });
+    tenantProfile.network.scope = globalNetworkIsVisible ? ['all'] : [];
+    const savedTenantProfile = await tenantProfile.save();
+    return savedTenantProfile.toObject();
+  }
+
+  
   async addTenantResearchAttribute(tenantExternalId, {
     _id: researchAttributeId,
     type,
