@@ -6,11 +6,9 @@ import config from './../config';
 import multer from 'koa-multer';
 import { getFileStorageUploader } from './files';
 
-const TENANT_ID_HEADER = "tenant-id";
-
 const destinationHandler = (fileStorage) => function () {
   return async function (req, file, callback) {
-    const tenantExternalId = req.headers[TENANT_ID_HEADER];
+    const tenantExternalId = config.TENANT
     const tenantsDirPath = fileStorage.getTenantDirPath(tenantExternalId);
 
     const exists = await fileStorage.exists(tenantsDirPath);
@@ -39,19 +37,31 @@ const fileFilterHandler = (req, file, callback) => {
 
 
 // TODO: Move all tenant fields to Tenant form after UI form refactoring
-const TeantBannerForm = async (ctx) => {
+const TeantSettingsForm = async (ctx) => {
 
   const filesUploader = multer({
     storage: getFileStorageUploader(destinationHandler, filenameHandler),
     fileFilter: fileFilterHandler
   });
 
-  const formHandler = filesUploader.any();
+  const formHandler = filesUploader.fields([
+    { name: 'banner', maxCount: 1 },
+    { name: 'logo', maxCount: 1 },
+  ]);
+
   return formHandler(ctx, () => new Promise((resolve, reject) => {
+
     try {
+
+      const [banner] = ctx.req.files.banner ? ctx.req.files.banner : [null];
+      const [logo] = ctx.req.files.logo ? ctx.req.files.logo : [null];
+
       resolve({
-        filename: ctx.req.files[0].filename
+        title: ctx.req.body.title,
+        banner: banner ? banner.filename : null,
+        logo: logo ? logo.filename : null
       });
+
     } catch (err) {
       reject(err);
     }
@@ -59,4 +69,4 @@ const TeantBannerForm = async (ctx) => {
 }
 
 
-export default TeantBannerForm;
+export default TeantSettingsForm;

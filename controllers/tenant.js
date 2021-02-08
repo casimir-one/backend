@@ -11,35 +11,42 @@ import ResearchGroupService from './../services/researchGroup';
 import FileStorage from './../storage';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
-import TeantBannerForm from './../forms/tenantBanner';
+import TeantSettingsForm from './../forms/tenantSettings';
 import * as blockchainService from './../utils/blockchain';
 import mongoose from 'mongoose';
 
 
-const uploadTenantBanner = async (ctx) => {
+const updateTenantSettings = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const tenantExternalId = ctx.request.headers['tenant-id'];
+  const tenantExternalId = ctx.state.tenant.id;
 
   try {
 
     const tenantService = new TenantService();
-    const researchGroupService = new ResearchGroupService();
+    const tenant = await tenantService.getTenant(tenantExternalId);
+    const oldBanner = tenant.profile.banner;
+    const oldLogo = tenant.profile.logo;
+    const { banner, logo, title } = await TeantSettingsForm(ctx);
 
-    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(tenantExternalId, jwtUsername);
-    if (!authorizedGroup) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to edit "${tenantExternalId}" tenant`;
-      return;
+    const update = {
+      banner: banner ? banner : tenant.profile.banner,
+      logo: logo ? logo : tenant.profile.logo,
+      name: title ? title : tenant.profile.name
     }
 
-    const tenant = await tenantService.getTenant(tenantExternalId);
-    const oldFilename = tenant.profile.banner;
-    const { filename } = await TeantBannerForm(ctx);
-    const updatedTenantProfile = await tenantService.updateTenantProfile(tenantExternalId, { banner: filename }, {});
+    const updatedTenantProfile = await tenantService.updateTenantProfile(tenantExternalId, update, {});
 
-    if (oldFilename != filename) {
-      const oldFilepath = FileStorage.getTenantBannerFilePath(tenantExternalId, oldFilename);
-      const exists = await FileStorage.get(oldFilepath);
+    if (banner && oldBanner != banner) {
+      const oldFilepath = FileStorage.getTenantBannerFilePath(tenantExternalId, oldBanner);
+      const exists = await FileStorage.exists(oldFilepath);
+      if (exists) {
+        await FileStorage.delete(oldFilepath);
+      }
+    }
+
+    if (logo && oldLogo != logo) {
+      const oldFilepath = FileStorage.getTenantLogoFilePath(tenantExternalId, oldLogo);
+      const exists = await FileStorage.exists(oldFilepath);
       if (exists) {
         await FileStorage.delete(oldFilepath);
       }
@@ -524,7 +531,7 @@ export default {
   rejectSignUpRequest,
   updateTenantProfile,
   updateTenantNetworkSettings,
-  uploadTenantBanner,
+  updateTenantSettings,
   addTenantAdmin,
   removeTenantAdmin
 }
