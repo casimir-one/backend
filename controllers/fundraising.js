@@ -18,7 +18,7 @@ import ResearchTokenSaleProposedEvent from './../events/researchTokenSalePropose
 import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleProposalSignedEvent';
 import ResearchTokenSaleContributedEvent from './../events/researchTokenSaleContributedEvent';
 
-
+const fundraisingService = new FundraisingService();
 
 const createResearchTokenSale = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
@@ -86,7 +86,6 @@ const createResearchTokenSaleContribution = async (ctx, next) => {
 const getResearchTokenSalesByResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
   try {
-    const fundraisingService = new FundraisingService();
     const tokenSales = await fundraisingService.getResearchTokenSalesByResearch(researchExternalId);
     ctx.status = 200;
     ctx.body = tokenSales;
@@ -101,7 +100,6 @@ const getResearchTokenSalesByResearch = async (ctx) => {
 const getResearchTokenSaleContributions = async (ctx) => {
   const researchTokenSaleExternalId = ctx.params.researchTokenSaleExternalId;
   try {
-    const fundraisingService = new FundraisingService();
     const contributions = await fundraisingService.getResearchTokenSaleContributions(researchTokenSaleExternalId);
     ctx.status = 200;
     ctx.body = contributions;
@@ -116,7 +114,6 @@ const getResearchTokenSaleContributions = async (ctx) => {
 const getResearchTokenSaleContributionsByResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
   try {
-    const fundraisingService = new FundraisingService();
     const contributions = await fundraisingService.getResearchTokenSaleContributionsByResearch(researchExternalId);
     ctx.status = 200;
     ctx.body = contributions;
@@ -127,7 +124,81 @@ const getResearchTokenSaleContributionsByResearch = async (ctx) => {
   }
 };
 
+const getAccountRevenueHistoryByAsset = async (ctx) => {
+  const { account, symbol, step, cursor, targetAsset } = ctx.params;
+  try {
+    const history = await fundraisingService.getAccountRevenueHistoryByAsset(account, symbol, step, cursor, targetAsset);
+    if (!history) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = history;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
+const getAccountRevenueHistory = async (ctx) => {
+  const { account, cursor } = ctx.params;
+  try {
+    const history = await fundraisingService.getAccountRevenueHistory(account, cursor);
+    if (!history) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = history;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getAssetRevenueHistory = async (ctx) => {
+  const { symbol, cursor } = ctx.params;
+  try {
+    const history = await fundraisingService.getAssetRevenueHistory(symbol, cursor);
+    if (!history) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = history;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getCurrentTokenSaleByResearch = async (ctx) => {
+  const researchId = ctx.params.researchId;
+  try {
+    const history = await fundraisingService.getCurrentTokenSaleByResearch(researchId);
+    if (!history) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = history;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
 
 export default {
@@ -135,5 +206,9 @@ export default {
   getResearchTokenSalesByResearch,
   createResearchTokenSaleContribution,
   getResearchTokenSaleContributions,
-  getResearchTokenSaleContributionsByResearch
+  getResearchTokenSaleContributionsByResearch,
+  getAccountRevenueHistoryByAsset,
+  getAccountRevenueHistory,
+  getAssetRevenueHistory,
+  getCurrentTokenSaleByResearch
 }

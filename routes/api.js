@@ -87,6 +87,11 @@ public_route.get('/expertise/research-content/stats', expertise.getResearchConte
 public_route.get('/expertise/disciplines/history', expertise.getDisciplineEciHistory)
 public_route.get('/expertise/disciplines/stats-history', expertise.getDisciplinesEciStatsHistory)
 public_route.get('/expertise/disciplines/stats', expertise.getDisciplinesEciLastStats)
+public_route.get('/expertise/content/:contentId/discipline/:disciplineId/history', expertise.getEciHistoryByResearchContentAndDiscipline)
+public_route.get('/expertise/research/:researchId', expertise.getExpertiseContributionsByResearch)
+public_route.get('/expertise/research/:researchId/discipline/:disciplineId', expertise.getExpertiseContributionsByResearchAndDiscipline)
+public_route.get('/expertise/content/:contentId/discipline/:disciplineId', expertise.getExpertiseContributionByResearchContentAndDiscipline)
+public_route.get('/expertise/content/:contentId', expertise.getExpertiseContributionsByResearchContent)
 
 public_route.get('/search/contents/all', search.getAllResearchContents)
 
@@ -139,6 +144,11 @@ protected_route.post('/fundraising/contributions', fundraising.createResearchTok
 protected_route.get('/fundraising/:researchTokenSaleExternalId/contributions', fundraising.getResearchTokenSaleContributions)
 protected_route.get('/fundraising/research/:researchExternalId/contributions', fundraising.getResearchTokenSaleContributionsByResearch)
 
+protected_route.get('/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', fundraising.getAccountRevenueHistoryByAsset)
+protected_route.get('/history/account/:account/:cursor', fundraising.getAccountRevenueHistory)
+protected_route.get('/history/symbol/:symbol/:cursor', fundraising.getAssetRevenueHistory)
+protected_route.get('/contributions/researchId/:researchId', fundraising.getCurrentTokenSaleByResearch)
+
 protected_route.post('/research/application', research.createResearchApplication)
 protected_route.put('/research/application/:proposalId', research.editResearchApplication)
 protected_route.get('/research/application/list', research.getResearchApplications)
@@ -173,9 +183,23 @@ protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fil
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.uploadAwardWithdrawalRequestBulkAttachments)
 
 protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
+protected_route.get('/express-licensing/externalId/:externalId', expressLicensing.getResearchLicense)
+protected_route.get('/express-licensing/licensee/:licensee', expressLicensing.getResearchLicensesByLicensee)
+protected_route.get('/express-licensing/licenser/:licenser', expressLicensing.getResearchLicensesByLicenser)
+protected_route.get('/express-licensing/researchId/:researchId', expressLicensing.getResearchLicensesByResearch)
+protected_route.get('/express-licensing/licensee/:licensee/researchId/:researchId', expressLicensing.getResearchLicensesByLicenseeAndResearch)
+protected_route.get('/express-licensing/licensee/:licensee/licenser/:licenser', expressLicensing.getResearchLicensesByLicenseeAndLicenser)
 
 protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
 protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
+public_route.get('/assets/id/:assetId', assets.getAssetById)
+public_route.get('/assets/symbol/:symbol', assets.getAssetBySymbol)
+public_route.get('/assets/type/:type', assets.getAssetsByType)
+public_route.get('/assets/issuer/:issuer', assets.getAssetsByIssuer)
+public_route.get(['/assets/limit/:limit/', '/assets/limit/:limit/:lowerBoundSymbol'], assets.lookupAssets)
+protected_route.get('/assets/owner/:owner/symbol/:symbol', assets.getAccountAssetBalance)
+protected_route.get('/assets/owner/:owner', assets.getAccountAssetsBalancesByOwner)
+public_route.get('/assets/accounts/symbol/:symbol', assets.getAccountsAssetBalancesByAsset)
 
 public_route.get('/disciplines', disciplines.getDomainDisciplines)
 public_route.get('/disciplines/research/:researchExternalId', disciplines.getDisciplinesByResearch)

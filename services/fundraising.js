@@ -26,6 +26,25 @@ class FundraisingService {
     return result;
   }
 
+  async getAccountRevenueHistoryByAsset(account, symbol, step=0, cursor=0, targetAsset) {
+    const history = await deipRpc.api.getAccountRevenueHistoryBySecurityTokenAsync(account, symbol, cursor, step, targetAsset);
+    return history;
+  }
+  
+  async getAccountRevenueHistory(account, cursor=0) {
+    const history = await deipRpc.api.getAccountRevenueHistoryAsync(account, cursor);
+    return history;
+  }
+  
+  async getAssetRevenueHistory(symbol, cursor=0) {
+    const history = await deipRpc.api.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
+    return history;
+  }
+  
+  async getCurrentTokenSaleByResearch(researchExternalId) {
+    const tokenSales = await deipRpc.api.getResearchTokenSalesByResearchAsync(researchExternalId)
+    return tokenSales;
+  }
   
 }
 

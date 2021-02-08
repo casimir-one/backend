@@ -1,5 +1,6 @@
 import ExpressLicense from './../schemas/expressLicense';
 import BaseReadModelService from './base';
+import deipRpc from '@deip/rpc-client';
 
 
 class ExpressLicensingService extends BaseReadModelService {
@@ -57,7 +58,35 @@ class ExpressLicensingService extends BaseReadModelService {
     return result;
   }
 
-  
+  async getResearchLicense(externalId) {
+    const license = await deipRpc.api.getResearchLicenseAsync(externalId);
+    return license;
+  }
+
+  async getResearchLicensesByLicensee(licensee) {
+    const licenses = await deipRpc.api.getResearchLicensesByLicenseeAsync(licensee);
+    return licenses;
+  }
+
+  async getResearchLicensesByLicenser(licenser) {
+    const licenses = await deipRpc.api.getResearchLicensesByLicenserAsync(licenser);
+    return licenses;
+  }
+
+  async getResearchLicensesByResearch(researchId) {
+    const licenses = await deipRpc.api.getResearchLicensesByResearchAsync(researchId);
+    return licenses;
+  }
+
+  async getResearchLicensesByLicenseeAndResearch(licensee, researchId) {
+    const licenses = await deipRpc.api.getResearchLicensesByLicenseeAndResearchAsync(licensee, researchId);
+    return licenses;
+  }
+
+  async getResearchLicensesByLicenseeAndLicenser(licensee, licenser) {
+    const licenses = await deipRpc.api.getResearchLicensesByLicenseeAndLicenserAsync(licensee, licenser);
+    return licenses;
+  }
 }
 
 export default ExpressLicensingService;

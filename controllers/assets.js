@@ -6,8 +6,10 @@ import AssetExchangeProposalRejectedEvent from './../events/assetExchangeProposa
 import AssetTransferredEvent from './../events/assetTransferredEvent';
 import AssetTransferProposedEvent from './../events/assetTransferProposedEvent';
 import AssetTransferProposalSignedEvent from './../events/assetTransferProposalSignedEvent';
+import AssetService from './../services/asset';
 import AssetTransferProposalRejectedEvent from './../events/assetTransferProposalRejectedEvent';
 
+const assetService = new AssetService();
 
 const createAssetTransferRequest = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
@@ -78,8 +80,167 @@ const createAssetExchangeRequest = async (ctx, next) => {
 
 };
 
+const getAssetById = async (ctx) => {
+  const assetId = ctx.params.assetId;
+  try {
+    const asset = await assetService.getAssetById(assetId);
+    if (!asset) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = asset;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getAssetBySymbol = async (ctx) => {
+  const symbol = ctx.params.symbol;
+  try {
+    const assets = await assetService.getAssetBySymbol(symbol);
+    if (!assets) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = assets;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getAssetsByType = async (ctx) => {
+  const type = ctx.params.type;
+  try {
+    const assets = await assetService.getAssetsByType(type);
+    if (!assets) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = assets;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getAssetsByIssuer = async (ctx) => {
+  const issuer = ctx.params.issuer;
+  try {
+    const assets = await assetService.getAssetsByIssuer(issuer);
+    if (!assets) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = assets;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const lookupAssets = async (ctx) => {
+  const { lowerBoundSymbol, limit } = ctx.params;
+  try {
+    const assets = await assetService.lookupAssets(lowerBoundSymbol, limit);
+    if (!assets) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = assets;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getAccountAssetBalance = async (ctx) => {
+  const { owner, symbol } = ctx.params;
+  try {
+    const asset = await assetService.getAccountAssetBalance(owner, symbol);
+    if (!asset) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = asset;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getAccountAssetsBalancesByOwner = async (ctx) => {
+  const owner = ctx.params.owner;
+  try {
+    const asset = await assetService.getAccountAssetsBalancesByOwner(owner);
+    if (!asset) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = asset;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getAccountsAssetBalancesByAsset = async (ctx) => {
+  const symbol = ctx.params.symbol;
+  try {
+    const assets = await assetService.getAccountsAssetBalancesByAsset(symbol);
+    if (!assets) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = assets;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
 export default {
   createAssetExchangeRequest,
-  createAssetTransferRequest
+  createAssetTransferRequest,
+  getAssetById,
+  getAssetBySymbol,
+  getAssetsByType,
+  getAssetsByIssuer,
+  lookupAssets,
+  getAccountAssetBalance,
+  getAccountAssetsBalancesByOwner,
+  getAccountsAssetBalancesByAsset
 }

@@ -5,7 +5,9 @@ import deipRpc from '@deip/rpc-client';
 import * as blockchainService from './../utils/blockchain';
 import ResearchExpressLicenseProposedEvent from './../events/researchExpressLicenseProposedEvent';
 import ResearchExpressLicenseProposalSignedEvent from './../events/researchExpressLicenseProposalSignedEvent';
+import ExpressLicensingService from './../services/expressLicensing';
 
+const expressLicensingService = new ExpressLicensingService();
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -43,7 +45,132 @@ const createExpressLicenseRequest = async (ctx, next) => {
   await next();
 };
 
+const getResearchLicense = async (ctx) => {
+  const externalId = ctx.params.externalId;
+  try {
+    const expertise = await expressLicensingService.getResearchLicense(externalId);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchLicensesByLicensee = async (ctx) => {
+  const licensee = ctx.params.licensee;
+  try {
+    const expertise = await expressLicensingService.getResearchLicensesByLicensee(licensee);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchLicensesByLicenser = async (ctx) => {
+  const licenser = ctx.params.licenser;
+  try {
+    const expertise = await expressLicensingService.getResearchLicensesByLicenser(licenser);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchLicensesByResearch = async (ctx) => {
+  const researchId = ctx.params.researchId;
+  try {
+    const expertise = await expressLicensingService.getResearchLicensesByResearch(researchId);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchLicensesByLicenseeAndResearch = async (ctx) => {
+  const { licensee, researchId } = ctx.params;
+  try {
+    const expertise = await expressLicensingService.getResearchLicensesByLicenseeAndResearch(licensee, researchId);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchLicensesByLicenseeAndLicenser = async (ctx) => {
+  const { licensee, licenser } = ctx.params;
+  try {
+    const expertise = await expressLicensingService.getResearchLicensesByLicenseeAndLicenser(licensee, licenser);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 
 export default {
-  createExpressLicenseRequest
+  createExpressLicenseRequest,
+  getResearchLicense,
+  getResearchLicensesByLicensee,
+  getResearchLicensesByLicenser,
+  getResearchLicensesByResearch,
+  getResearchLicensesByLicenseeAndResearch,
+  getResearchLicensesByLicenseeAndLicenser
 }
