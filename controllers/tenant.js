@@ -11,7 +11,7 @@ import ResearchGroupService from './../services/researchGroup';
 import FileStorage from './../storage';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
-import TeantSettingsForm from './../forms/tenantSettings';
+import TenantSettingsForm from './../forms/tenantSettings';
 import * as blockchainService from './../utils/blockchain';
 import mongoose from 'mongoose';
 
@@ -26,7 +26,7 @@ const updateTenantSettings = async (ctx) => {
     const tenant = await tenantService.getTenant(tenantExternalId);
     const oldBanner = tenant.profile.banner;
     const oldLogo = tenant.profile.logo;
-    const { banner, logo, title } = await TeantSettingsForm(ctx);
+    const { banner, logo, title } = await TenantSettingsForm(ctx);
 
     const update = {
       banner: banner ? banner : tenant.profile.banner,

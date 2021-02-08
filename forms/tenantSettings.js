@@ -37,7 +37,7 @@ const fileFilterHandler = (req, file, callback) => {
 
 
 // TODO: Move all tenant fields to Tenant form after UI form refactoring
-const TeantSettingsForm = async (ctx) => {
+const TenantSettingsForm = async (ctx) => {
 
   const filesUploader = multer({
     storage: getFileStorageUploader(destinationHandler, filenameHandler),
@@ -69,4 +69,4 @@ const TeantSettingsForm = async (ctx) => {
 }
 
 
-export default TeantSettingsForm;
+export default TenantSettingsForm;
