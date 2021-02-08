@@ -1,7 +1,9 @@
 import deipRpc from '@deip/rpc-client';
 import qs from 'qs';
 import UserService from './../services/users';
+import ExpertiseService from './../services/expertise';
 
+const expertiseService = new ExpertiseService();
 
 const getAccountEciHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
@@ -357,6 +359,101 @@ const getDisciplineExpertiseTokens = async (ctx) => {
   }
 }
 
+const getEciHistoryByResearchContentAndDiscipline = async (ctx) => {
+  const { contentId, disciplineId } = ctx.params;
+  try {
+    const history = await expertiseService.getEciHistoryByResearchContentAndDiscipline(contentId, disciplineId);
+    if (!history) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = history;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getExpertiseContributionsByResearch = async (ctx) => {
+  const researchId = ctx.params.researchId;
+  try {
+    const expertise = await expertiseService.getExpertiseContributionsByResearch(researchId);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getExpertiseContributionsByResearchAndDiscipline = async (ctx) => {
+  const { researchId, disciplineId } = ctx.params;
+  try {
+    const expertise = await expertiseService.getExpertiseContributionsByResearchAndDiscipline(researchId, disciplineId);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getExpertiseContributionByResearchContentAndDiscipline = async (ctx) => {
+  const { contentId, disciplineId } = ctx.params;
+  try {
+    const expertise = await expertiseService.getExpertiseContributionByResearchContentAndDiscipline(contentId, disciplineId);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getExpertiseContributionsByResearchContent = async (ctx) => {
+  const contentId = ctx.params.contentId;
+  try {
+    const expertise = await expertiseService.getExpertiseContributionsByResearchContent(contentId);
+    if (!expertise) {
+      ctx.status = 404;
+      ctx.body = null;
+      return;
+    }
+    ctx.body = expertise;
+    ctx.status = 200;
+  }
+  catch(err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 
 
 export default {
@@ -378,5 +475,10 @@ export default {
   getDisciplinesEciLastStats,
 
   getAccountExpertiseTokens,
-  getDisciplineExpertiseTokens
+  getDisciplineExpertiseTokens,
+  getEciHistoryByResearchContentAndDiscipline,
+  getExpertiseContributionsByResearch,
+  getExpertiseContributionsByResearchAndDiscipline,
+  getExpertiseContributionByResearchContentAndDiscipline,
+  getExpertiseContributionsByResearchContent
 }
