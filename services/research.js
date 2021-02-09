@@ -132,6 +132,14 @@ class ResearchService extends BaseReadModelService {
   }
 
 
+  async getResearchesByTenant(tenantId) {
+    const available = await this.findMany({});
+    const researches = available.filter(r => r.tenantId == tenantId);
+    const result = await this.mapResearch(researches);
+    return result;
+  }
+
+
   async getResearchesForMember(member) {
     const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
     const researches = await this.findMany({ _id: { $in: [...chainResearches.map(r => r.external_id)] }, status: RESEARCH_STATUS.APPROVED });

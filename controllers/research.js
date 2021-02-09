@@ -808,6 +808,33 @@ const getResearches = async (ctx) => {
 };
 
 
+const getTenantResearchListing = async (ctx) => {
+  const tenantId = ctx.params.tenantId;
+  const jwtUsername = ctx.state.user.username;
+  const tenant = ctx.state.tenant;
+
+  try {
+
+    const researchService = new ResearchService();
+    const result = await researchService.getResearchesByTenant(tenantId);
+
+    const researchWhitelist = tenant.settings.researchWhitelist || [];
+    const researchBlacklist = tenant.settings.researchBlacklist || [];
+
+    ctx.status = 200;
+    ctx.body = result
+      .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
+      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
+      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
+
 export default {
   getResearch,
   getResearches,
@@ -815,6 +842,7 @@ export default {
   getPublicResearchListing,
   getUserResearchListing,
   getResearchGroupResearchListing,
+  getTenantResearchListing,
   updateResearch,
   createResearch,
   createResearchApplication,
