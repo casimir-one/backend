@@ -246,6 +246,21 @@ const getUsersByResearchGroup = async (ctx) => {
 }
 
 
+const getUsersByTenant = async (ctx) => {
+  const tenantId = ctx.params.tenantId;
+  try {
+    const usersService = new UserService();
+    const users = await usersService.getUsersByTenant(tenantId);
+    ctx.status = 200;
+    ctx.body = users;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 const getUsersListing = async (ctx) => {
   const query = qs.parse(ctx.query);
   try {
@@ -432,8 +447,9 @@ export default {
   getUser,
   getUsers,
   getUserByEmail,
-  getUsersByResearchGroup,
   getUsersListing,
+  getUsersByTenant,
+  getUsersByResearchGroup,
 
   getUserProfile,
   getUsersProfiles,

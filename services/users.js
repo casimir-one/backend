@@ -80,6 +80,14 @@ class UserService extends BaseReadModelService {
   }
 
 
+  async getUsersByTenant(tenantId) {
+    const available = await this.findMany({ status: USER_PROFILE_STATUS.APPROVED });
+    const profiles = available.filter(p => p.tenantId == tenantId);
+    const result = await this.mapUsers(profiles);
+    return result;
+  }
+
+  
   async getUsersListing(status) {
     const profiles = await this.findMany({ status: status ? status : USER_PROFILE_STATUS.APPROVED });
     const result = await this.mapUsers(profiles);
