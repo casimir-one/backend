@@ -21,10 +21,10 @@ const signIn = async function (ctx) {
 
     const usersService = new UserService();
     const user = await usersService.getUser(username);
-    if (!user) {
+    if (!user || user.tenantId != tenant.id) {
       ctx.body = {
         success: false,
-        error: `User "${username}" does not exist!`
+        error: `User '${username}' is not a member of '${tenant.name}'`
       };
       return;
     }

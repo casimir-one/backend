@@ -19,7 +19,7 @@ class UserService extends BaseReadModelService {
         const profileRef = profiles.find(r => r._id == chainAccount.name);
         const membershipTokens = chainMembershipTokens.find(teams => teams.length && teams[0].owner == chainAccount.name) || [];
         const teams = membershipTokens.map(mt => mt.research_group.external_id);
-        return { username: chainAccount.name, account: chainAccount, profile: profileRef ? profileRef : null, teams };
+        return { username: chainAccount.name, tenantId: profileRef ? profileRef.tenantId : null, account: chainAccount, profile: profileRef ? profileRef : null, teams };
       });
   }
 
