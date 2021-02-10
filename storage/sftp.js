@@ -106,7 +106,7 @@ class SftpStorage extends BaseStorage {
     });
   }
 
-  async move(src, dst) {
+  async rename(src, dst) {
     return await this.run(async (client) => {
       return await client.rename(src, dst);
     });  

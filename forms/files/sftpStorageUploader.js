@@ -4,7 +4,7 @@ import sftpStorage from 'multer-sftp';
 import SftpStorage from './../../storage/sftp';
 
 
-const sftpStorageUploader = (destinationHandler, filenameHandler) => {
+const sftpStorageUploader = (destinationHandler, filenameHandler, sessionId) => {
   return sftpStorage({
     sftp: {
       host: config.TENANT_SFTP_HOST,
@@ -12,8 +12,8 @@ const sftpStorageUploader = (destinationHandler, filenameHandler) => {
       username: config.TENANT_SFTP_USER,
       password: config.TENANT_SFTP_PASSWORD
     },
-    destination: destinationHandler(new SftpStorage())(),
-    filename: filenameHandler()()
+    destination: destinationHandler(new SftpStorage(), sessionId)(),
+    filename: filenameHandler(sessionId)()
   })
 };
 

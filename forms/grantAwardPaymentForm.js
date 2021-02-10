@@ -1,6 +1,6 @@
-import fs from 'fs';
-import fsExtra from 'fs-extra';
-import path from 'path';
+import fs from 'fs'
+import fsExtra from 'fs-extra'
+import path from 'path'
 import util from 'util';
 import multer from 'koa-multer';
 import config from './../config';
@@ -11,11 +11,10 @@ const RESEARCH_ID_HEADER = "research-external-id";
 
 
 const destinationHandler = (fileStorage, sessionId) => function () {
-
   return async function (req, file, callback) {
     const researchExternalId = req.headers[RESEARCH_ID_HEADER];
 
-    const researchFilesTempStorage = fileStorage.getResearchContentPackageTempDirPath(researchExternalId, sessionId);
+    const researchFilesTempStorage = fileStorage.getResearchAwardWithdrawalRequestsTempDirPath(researchExternalId, sessionId);
     const exists = await fileStorage.exists(researchFilesTempStorage);
     if (!exists) {
       await fileStorage.mkdir(researchFilesTempStorage);
@@ -34,15 +33,11 @@ const filenameHandler = () => function () {
 
 
 const fileFilterHandler = (req, file, callback) => {
-  // const allowedContentMimeTypes = ['application/pdf', 'image/png', 'image/jpeg']
-  // if (allowedContentMimeTypes.find(mime => mime === file.mimetype) === undefined) {
-  //     return callback(new Error('Only the following mime types are allowed: ' + allowedContentMimeTypes.join(', ')), false);
-  // }
   callback(null, true);
 }
 
 
-const ResearchContentPackageForm = async (ctx) => {
+const GrantAwardPaymentForm = async (ctx) => {
   const sessionId = uuidv4();
 
   const filesUploader = multer({
@@ -56,12 +51,13 @@ const ResearchContentPackageForm = async (ctx) => {
       console.log(ctx.req.files);
 
       resolve({
-        researchExternalId: ctx.request.headers[RESEARCH_ID_HEADER],
-        title: ctx.req.body.title,
-        type: ctx.req.body.type,
-        authors: JSON.parse(ctx.req.body.authors),
-        references: JSON.parse(ctx.req.body.references),
-        tempDestinationPath: ctx.req.files[0].destination
+        tempDestinationPath: ctx.req.files[0].destination,
+        paymentNumber: ctx.req.body.paymentNumber,
+        awardNumber: ctx.req.body.awardNumber,
+        subawardNumber: ctx.req.body.subawardNumber,
+        requester: ctx.req.body.requester,
+        amount: ctx.req.body.amount,
+        description: ctx.req.body.description
       });
 
     } catch (err) {
@@ -71,4 +67,4 @@ const ResearchContentPackageForm = async (ctx) => {
 }
 
 
-export default ResearchContentPackageForm;
+export default GrantAwardPaymentForm;

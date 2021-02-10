@@ -2,30 +2,19 @@ import fs from 'fs'
 import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util';
-import deipRpc from '@deip/rpc-client';
 import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
-import { hashElement } from 'folder-hash';
-import send from 'koa-send';
-import { awardWithdrawalRequestForm } from './../forms/grantForms';
+import GrantAwardPaymentForm from './../forms/grantAwardPaymentForm';
 import ResearchGroupService from './../services/researchGroup';
+import ResearchService from './../services/research';
 import GrantService from './../services/grants';
 import crypto from 'crypto';
-import rimraf from "rimraf";
 import slug from 'limax';
-import config from './../config';
-
-const storagePath = path.join(__dirname, `./../${config.TENANT_LOCAL_DIR}`);
-
-const researchAwardWithdrawalRequestsFilesStoragePath = (researchId) => `${storagePath}/research-projects/${researchId}/award-withdrawal-requests-attachments`
-const researchAwardWithdrawalRequestsFilesTempStoragePath = (researchId, postfix) => `${researchAwardWithdrawalRequestsFilesStoragePath(researchId)}/temp-${postfix}`
-const researchAwardWithdrawalRequestsFilesPackagePath = (researchId, packageHash) => `${researchAwardWithdrawalRequestsFilesStoragePath(researchId)}/${packageHash}`
-const researchAwardWithdrawalRequestsFilesPackageFilePath = (researchId, packageHash, fileHash) => `${researchAwardWithdrawalRequestsFilesPackagePath(researchId, packageHash)}/${fileHash}`
+import FileStorage from './../storage';
 
 
 const getAwardWithdrawalRequestRefByHash = async (ctx) => {
   const awardNumber = ctx.params.awardNumber;
   const paymentNumber = ctx.params.paymentNumber;
-
   try {
     const grantsService = new GrantService();
     const ref = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
@@ -47,7 +36,7 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
   const grantsService = new GrantService();
 
   const withdrawal = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
-  if (withdrawal == null) {
+  if (!withdrawal) {
     ctx.status = 404;
     ctx.body = `File "${fileHash}" is not found`
     return;
@@ -60,115 +49,83 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
     return;
   }
 
+
+  const filename = file.filename;
+  const filepath = FileStorage.getResearchAwardWithdrawalRequestsPackageFilePath(withdrawal.researchId, withdrawal.hash, filename);
+  const ext = filename.substr(filename.lastIndexOf('.') + 1);
+  const name = filename.substr(0, filename.lastIndexOf('.'));
+  const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
+  const isPdf = ['pdf'].some(e => e == ext);
+
   if (isDownload) {
-    let ext = file.filename.substr(file.filename.lastIndexOf('.') + 1);
-    let name = file.filename.substr(0, file.filename.lastIndexOf('.'));
-    ctx.response.set('Content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
-    ctx.body = fs.createReadStream(researchAwardWithdrawalRequestsFilesPackageFilePath(withdrawal.researchId, withdrawal.hash, file.filename));
+    ctx.response.set('content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
+  } else if (isImage) {
+    ctx.response.set('content-type', `image/${ext}`);
+    ctx.response.set('content-disposition', `inline; filename="${slug(name)}.${ext}"`);
+  } else if (isPdf) {
+    ctx.response.set('content-type', `application/${ext}`);
+    ctx.response.set('content-disposition', `inline; filename="${slug(name)}.${ext}"`);
   } else {
-    await send(ctx, researchAwardWithdrawalRequestsFilesPackageFilePath(withdrawal.researchId, withdrawal.hash, file.filename), { root: '/' });
-  }  
+    ctx.response.set('content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
+  }
+
+  const fileExists = await FileStorage.exists(filepath);
+  if (!fileExists) {
+    ctx.status = 404;
+    ctx.body = `${filepath} is not found`;
+    return;
+  }
+
+  const buff = await FileStorage.get(filepath);
+  ctx.body = buff;
 }
 
 
-const uploadAwardWithdrawalRequestBulkAttachments = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const researchId = ctx.request.header['research-id'];
-  const awardNumber = ctx.request.header['award-number'];
-  const subawardNumber = ctx.request.header['subaward-number'];
-  const paymentNumber = ctx.request.header['payment-number'];
-  try {
+const createAwardWithdrawalRequest = async (ctx) => {
+  const researchId = ctx.request.header['research-external-id'];
+  const tenant = ctx.state.tenant;
 
-    const researchGroupService = new ResearchGroupService();
+  try {
+    const researchService = new ResearchService();
     const grantsService = new GrantService();
 
-    if (researchId == undefined) {
-      ctx.status = 400;
-      ctx.body = { error: `"research-id" header is required` };
-      return;
-    }
+    const research = await researchService.getResearch(researchId);
 
-    if (!awardNumber || !subawardNumber || !paymentNumber) {
-      ctx.status = 400;
-      ctx.body = { error: `"award-number", "subaward-number", "payment-number" headers are required` };
-      return;
-    }
-
-    const stat = util.promisify(fs.stat);
-    const ensureDir = util.promisify(fsExtra.ensureDir);
-
-    const researchFilesTempStorage = researchAwardWithdrawalRequestsFilesTempStoragePath(ctx.request.header['research-id'], ctx.request.header['upload-session'])
-    await ensureDir(researchFilesTempStorage);
-
-    const research = await deipRpc.api.getResearchByIdAsync(researchId);
-    const authorized = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername);
-    if (!authorized) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to post to "${researchId}" research`;
-      return;
-    }
-
-
-    const attachmentsContent = awardWithdrawalRequestForm.any();
-    const tempDestinationPath = await attachmentsContent(ctx, () => new Promise((resolve, reject) => {
-      if (!ctx.req.files[0] || !ctx.req.files[0].destination) {
-        reject(new Error(`No destination path found during bulk-uploading`))
-        return;
-      }
-      fs.stat(ctx.req.files[0].destination, (err, stats) => {
-        if (err || !stats.isDirectory()) {
-          console.error(err);
-          reject(err)
-        }
-        else {
-          resolve(ctx.req.files[0].destination);
-        }
-      });
-    }));
-
+    const { tempDestinationPath, awardNumber, subawardNumber, paymentNumber } = await GrantAwardPaymentForm(ctx);
 
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
-    const hashObj = await hashElement(tempDestinationPath, options);
+    const hashObj = await FileStorage.calculateDirHash(tempDestinationPath, options);
     console.log(hashObj);
     const hashes = hashObj.children.map(f => f.hash);
     hashes.sort();
     const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
 
-    var exists = false;
     const withdrawal = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
-    const packagePath = researchAwardWithdrawalRequestsFilesPackagePath(researchId, packageHash);
+    const researchAwardWithdrawalRequestsPackageDirPath = FileStorage.getResearchAwardWithdrawalRequestsPackageDirPath(researchId, packageHash);
+    const researchAwardWithdrawalRequestsPackageDirExists = await FileStorage.exists(researchAwardWithdrawalRequestsPackageDirPath);
 
-
-    if (withdrawal) {
-      try {
-        const check = await stat(packagePath);
-        exists = true;
-      } catch (err) {
-        exists = false;
-      }
-    }
-
-
-    if (exists) {
+    if (researchAwardWithdrawalRequestsPackageDirExists) {
       console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
-      rimraf(tempDestinationPath, function () { console.log(`${tempDestinationPath} removed`); });
+      await FileStorage.delete(tempDestinationPath);
       ctx.status = 200;
       ctx.body = withdrawal;
     } else {
-
-      await fsExtra.move(tempDestinationPath, packagePath, { overwrite: true });
+      await FileStorage.rename(tempDestinationPath, researchAwardWithdrawalRequestsPackageDirPath);
 
       if (withdrawal) {
-        withdrawal.filename = `package: [${packageHash}]`
+        withdrawal.filename = `package [${packageHash}]`;
+        withdrawal.folder = packageHash;
         const updatedWithdrawal = await withdrawal.save();
         ctx.status = 200;
         ctx.body = updatedWithdrawal;
       } else {
         const withdrawal = new AwardWithdrawalRequest({
+          "tenantId": tenant.id,
           "filename": `package [${packageHash}]`,
-          "title": `${packageHash}`,
+          "folder": packageHash,
+          "title": packageHash,
           "researchId": researchId,
-          "researchGroupId": research.research_group_id,
+          "researchGroupId": research.research_group.external_id,
           "paymentNumber": paymentNumber,
           "awardNumber": awardNumber,
           "subawardNumber": subawardNumber,
@@ -191,7 +148,7 @@ const uploadAwardWithdrawalRequestBulkAttachments = async (ctx) => {
 }
 
 export default {
-  uploadAwardWithdrawalRequestBulkAttachments,
+  createAwardWithdrawalRequest,
   getAwardWithdrawalRequestRefByHash,
   getAwardWithdrawalRequestAttachmentFile
 }

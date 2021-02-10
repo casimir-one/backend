@@ -33,6 +33,8 @@ import researchContentFilePublishAuth from './../middlewares/auth/researchConten
 import researchAttributeMetaReadAuth from './../middlewares/auth/research/readAttributeMetaAuth';
 import researchAttributeMetaUpdateAuth from './../middlewares/auth/research/updateAttributeMetaAuth';
 
+import readGrantAwardWithdrawalRequestAuth from './../middlewares/auth/grantAwardWithdrawalRequest/readGrantAwardWithdrawalRequestAuth';
+
 import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
 import userAvatarFileUpdateAuth from './../middlewares/auth/user/updateAvatarFileAuth';
 
@@ -182,8 +184,8 @@ protected_route.get('/investment-portfolio/:username', investmentPortfolio.getUs
 protected_route.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)
 
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
-protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', grants.getAwardWithdrawalRequestAttachmentFile)
-protected_route.post('/award-withdrawal-requests/upload-attachments', grants.uploadAwardWithdrawalRequestBulkAttachments)
+public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
+protected_route.post('/award-withdrawal-requests/upload-attachments', grants.createAwardWithdrawalRequest)
 
 protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
 protected_route.get('/express-licensing/externalId/:externalId', expressLicensing.getResearchLicense)

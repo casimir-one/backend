@@ -503,18 +503,17 @@ const uploadResearchContentPackage = async (ctx) => {
 
     const researchContentRef = await researchContentService.findResearchContentRefByHash(researchExternalId, packageHash);
     const researchContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(researchExternalId, packageHash);
-    const researchContentRefExists = await FileStorage.exists(researchContentPackageDirPath);
+    const researchContentPackageDirExists = await FileStorage.exists(researchContentPackageDirPath);
     
-    if (researchContentRefExists) {
-
+    if (researchContentPackageDirExists) {
       console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
-      await FileStorage.delete(tempDestinationPath, noErrorOK = false);
+      await FileStorage.delete(tempDestinationPath);
       ctx.status = 200;
       ctx.body = researchContentRef;
 
     } else {
 
-      await FileStorage.move(tempDestinationPath, researchContentPackageDirPath);
+      await FileStorage.rename(tempDestinationPath, researchContentPackageDirPath);
 
       if (researchContentRef) {
         const updatedResearchContentRef = await researchContentService.updateResearchContentRef(researchContentRef._id, {
@@ -666,7 +665,7 @@ const createResearchContent = async (ctx, next) => {
       : /* 'dar' */ FileStorage.getResearchDarArchiveDirPath(researchExternalId, hash);
 
     if (draftPath != publishedContentPath) {
-      await FileStorage.move(draftPath, publishedContentPath)
+      await FileStorage.rename(draftPath, publishedContentPath)
     }
 
     // remove draft

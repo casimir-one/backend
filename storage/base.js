@@ -21,6 +21,10 @@ const researchDarArchiveFilePath = (baseDir, researchExternalId, archiveName, fi
 const researchContentPackageTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
 const researchBlankDarArchiveDirPath = () => path.join(__dirname, `./../default/dar-blank`);
 
+const researchAwardWithdrawalRequestsDirPath = (baseDir, researchExternalId) => `${researchDirPath(baseDir, researchExternalId)}`;
+const researchAwardWithdrawalRequestsTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchAwardWithdrawalRequestsDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
+const researchAwardWithdrawalRequestsPackageDirPath = (baseDir, researchExternalId, packageHash) => `${researchAwardWithdrawalRequestsDirPath(baseDir, researchExternalId)}/award-withdrawal-${packageHash}`
+const researchAwardWithdrawalRequestsPackageFilePath = (baseDir, researchExternalId, packageHash, fileHash) => `${researchAwardWithdrawalRequestsPackageDirPath(baseDir, researchExternalId, packageHash)}/${fileHash}`
 
 const accountDir = 'accounts';
 const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
@@ -69,7 +73,7 @@ class BaseStorage {
   async exists(remotePath) { throw new Error("Not implemented"); }
   async delete(remotePath, noErrorOK = false) { throw new Error("Not implemented"); }
   async get(remotePath, dst, options) { throw new Error("Not implemented"); }
-  async move(src, dst) { throw new Error("Not implemented"); }
+  async rename(src, dst) { throw new Error("Not implemented"); }
   async calculateDirHash(remotePath, options) { throw new Error("Not implemented"); }
   async put(remotePath, buff, options = {}) { throw new Error("Not implemented"); }
   async putPassThroughStream(remotePath, passThroughSteam, options = {}) { throw new Error("Not implemented"); }
@@ -157,6 +161,18 @@ class BaseStorage {
 
   getTenantDefaultLogoFilePath() {
     return tenantDefaultLogoFilePath();
+  }
+
+  getResearchAwardWithdrawalRequestsPackageDirPath(researchExternalId, packageHash) {
+    return researchAwardWithdrawalRequestsPackageDirPath(this._baseDirPath, researchExternalId, packageHash);
+  }
+
+  getResearchAwardWithdrawalRequestsTempDirPath(researchExternalId, sessionId) {
+    return researchAwardWithdrawalRequestsTempDirPath(this._baseDirPath, researchExternalId, sessionId);
+  }
+
+  getResearchAwardWithdrawalRequestsPackageFilePath(researchExternalId, packageHash, fileHash) {
+    return researchAwardWithdrawalRequestsPackageFilePath(this._baseDirPath, researchExternalId, packageHash, fileHash);
   }
 
 }

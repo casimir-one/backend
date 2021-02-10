@@ -6,8 +6,9 @@ const Schema = mongoose.Schema;
 const AwardWithdrawalRequest = new Schema({
   "tenantId": { type: String, required: true },
   "filename": { type: String, required: true },
-  "researchId": { type: Number, required: true },
-  "researchGroupId": { type: Number, required: true },
+  "folder": { type: String, required: false },
+  "researchId": { type: String, required: true },
+  "researchGroupId": { type: String, required: true },
   "paymentNumber": { type: String, required: true },
   "awardNumber": { type: String, required: true },
   "subawardNumber": { type: String, required: true },

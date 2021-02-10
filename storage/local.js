@@ -154,7 +154,7 @@ class LocalStorage extends BaseStorage {
   }
 
 
-  async move(src, dst) {
+  async rename(src, dst) {
     return await fsExtra.move(src, dst, { overwrite: true });
   }
 
