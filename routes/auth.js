@@ -5,6 +5,7 @@ const public_route = koa_router()
 
 public_route.post('/sign-in', auth.signIn)
 public_route.post('/sign-up', auth.signUp)
+public_route.post('/tenant/sign-in', auth.chunkTenantAccessToken)
 
 
 const routes = {

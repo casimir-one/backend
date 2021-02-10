@@ -32,7 +32,7 @@ expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, 
       owner: proposal.details.licensee,
       licenser: proposal.details.licenser,
       researchExternalId: proposal.details.researchExternalId,
-      licencePlan: proposal.details.licencePlan
+      licensePlan: proposal.details.licensePlan
     });
   }
 

@@ -10,7 +10,7 @@ class TenantService {
     const profile = await TenantProfile.findOne({ _id: id });
     if (!profile) return null;
     const account = await deipRpc.api.getResearchGroupAsync(id);
-    return { profile: profile.toObject(), account: account.account };
+    return { id: id, profile: profile.toObject(), account: account.account };
   }
 
   async getNetworkInfo() {

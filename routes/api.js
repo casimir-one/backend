@@ -112,7 +112,7 @@ protected_route.put('/groups', researchGroups.updateResearchGroup)
 public_route.get('/groups/listing', researchGroups.getResearchGroupsListing)
 public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchGroup)
 public_route.get('/groups/logo/:researchGroupExternalId', compose([researchGroupLogoFileReadAuth()]), researchGroups.getResearchGroupLogo)
-/* protected_route */ public_route.post('/groups/logo', compose([researchGroupLogoFileUpdateAuth({ researchGroupEnitytId: (ctx) => ctx.request.headers['research-group-external-id'] } )]), researchGroups.uploadResearchGroupLogo)
+protected_route.post('/groups/logo', compose([researchGroupLogoFileUpdateAuth({ researchGroupEnitytId: (ctx) => ctx.request.headers['research-group-external-id'] } )]), researchGroups.uploadResearchGroupLogo)
 protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
 public_route.get('/groups/member/:username', researchGroups.getResearchGroupsByUser)
 
@@ -140,7 +140,7 @@ protected_route.get('/research/group/listing/:researchGroupExternalId', research
 protected_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
 
 protected_route.post('/research', research.createResearch)
-/* protected_route */ public_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
+protected_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
 public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
 protected_route.post('/fundraising', fundraising.createResearchTokenSale)
 protected_route.post('/fundraising/contributions', fundraising.createResearchTokenSaleContribution)
@@ -164,7 +164,7 @@ public_route.get('/research-content/:researchContentExternalId', researchContent
 public_route.get('/research-content/research/:researchExternalId', researchContent.getResearchContentByResearch)
 public_route.get('/research-content/ref/:refId', researchContent.getResearchContentRef)
 
-/* protected_route */ public_route.post('/research-content/ref/publish', compose([researchContentFilePublishAuth({ researchEnitytId: (ctx) => {  // TODO: replace with protected_route
+protected_route.post('/research-content/ref/publish', compose([researchContentFilePublishAuth({ researchEnitytId: (ctx) => {  // TODO: replace with protected_route
   const researchContentProposedEvent = new ResearchContentProposedEvent(blockchainService.extractOperations(ctx.request.body.tx), {});
   const { researchExternalId } = researchContentProposedEvent.getSourceData();
   return researchExternalId;
@@ -174,9 +174,9 @@ protected_route.delete('/research-content/ref/:refId', compose([researchContentF
 protected_route.get('/research-content/texture/:researchContentExternalId', compose([researchContentFileReadAuth()]), researchContent.readResearchContentDarArchive)
 protected_route.get('/research-content/texture/:researchContentExternalId/assets/:file', compose([researchContentFileReadAuth()]), researchContent.readResearchContentDarArchiveStaticFiles)
 protected_route.put('/research-content/texture/:researchContentExternalId', compose([researchContentFileUpdateAuth()]), researchContent.updateResearchContentDarArchive)
-/* protected_route */ public_route.post('/research-content/texture/:researchExternalId', compose([researchContentFileCreateAuth()]), researchContent.createResearchContentDarArchive)
-/* protected_route */ public_route.post('/research-content/package', compose([researchContentFileCreateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id'] })]), researchContent.uploadResearchContentPackage)
-/* protected_route */ public_route.get('/research-content/package/:researchContentExternalId/:fileHash', compose([researchContentFileReadAuth()]), researchContent.getResearchContentPackageFile)
+protected_route.post('/research-content/texture/:researchExternalId', compose([researchContentFileCreateAuth()]), researchContent.createResearchContentDarArchive)
+protected_route.post('/research-content/package', compose([researchContentFileCreateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id'] })]), researchContent.uploadResearchContentPackage)
+protected_route.get('/research-content/package/:researchContentExternalId/:fileHash', compose([researchContentFileReadAuth()]), researchContent.getResearchContentPackageFile)
 
 protected_route.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
 protected_route.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)

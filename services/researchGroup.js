@@ -8,7 +8,6 @@ class ResearchGroupService extends BaseReadModelService {
   constructor() { super(ResearchGroup); }
 
   async mapResearchGroups(researchGroups) {
-    
     const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroups.map(r => r._id));
     const membershipTokens = await Promise.all(chainResearchGroups.map(rg => deipRpc.api.getResearchGroupMembershipTokensAsync(rg.external_id)));
     return chainResearchGroups

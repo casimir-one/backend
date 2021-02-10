@@ -9,12 +9,21 @@ class ExpressLicensingService extends BaseReadModelService {
     super(ExpressLicense);
   }
 
+  async mapExpressLicenses(expressLicenses) {
+    const researchLicenses = await deipRpc.api.getResearchLicensesAsync(expressLicenses.map(l => l._id));
+    return researchLicenses
+      .map((chainLicense) => {
+        const license = expressLicenses.find(l => l._id == chainLicense.external_id);
+        return { ...license, chainLicense };
+      });
+  }
+
   async createExpressLicense({
     externalId,
     owner,
     requestId,
     researchExternalId,
-    licencePlan
+    licensePlan
   }) {
 
     const result = await this.createOne({
@@ -22,70 +31,56 @@ class ExpressLicensingService extends BaseReadModelService {
       owner,
       requestId,
       researchExternalId,
-      licencePlan
+      licensePlan
     });
 
     return result;
   }
 
-
-  async getExpressLicensesByOwner(owner) {
-    const result = await this.findMany({ owner });
-    return result;
-  }
-
-
   async getExpressLicensesByResearches(researchExternalIds) {
-    const result = await this.findMany({ researchExternalId: { $in: researchExternalIds } });
-    return result;
-  }
-
-
-  async getExpressLicensesByResearch(researchExternalId) {
-    const result = await this.findMany({ researchExternalId });
-    return result;
-  }
-
-
-  async getExpressLicenseByRequest(requestId) {
-    const result = await this.findOne({ requestId });
-    return result;
-  }
-
-
-  async getExpressLicense(id) {
-    const result = await this.findOne({ _id: id });
+    const expressLicenses = await this.findMany({ researchExternalId: { $in: researchExternalIds } });
+    const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }
 
   async getResearchLicense(externalId) {
-    const license = await deipRpc.api.getResearchLicenseAsync(externalId);
-    return license;
+    const expressLicenses = await this.findOne({ _id: externalId });
+    const result = await this.mapExpressLicenses(expressLicenses);
+    return result;
   }
 
   async getResearchLicensesByLicensee(licensee) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenseeAsync(licensee);
-    return licenses;
+    const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    const result = await this.mapExpressLicenses(expressLicenses);
+    return result;
   }
 
   async getResearchLicensesByLicenser(licenser) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenserAsync(licenser);
-    return licenses;
+    const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    const result = await this.mapExpressLicenses(expressLicenses);
+    return result;
   }
 
-  async getResearchLicensesByResearch(researchId) {
-    const licenses = await deipRpc.api.getResearchLicensesByResearchAsync(researchId);
-    return licenses;
+  async getResearchLicensesByResearch(researchExternalId) {
+    const expressLicenses = await this.findMany({ researchExternalId: researchExternalId });
+    const result = await this.mapExpressLicenses(expressLicenses);
+    return result;
   }
 
   async getResearchLicensesByLicenseeAndResearch(licensee, researchId) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenseeAndResearchAsync(licensee, researchId);
-    return licenses;
+    const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    const result = await this.mapExpressLicenses(expressLicenses);
+    return result;
   }
 
   async getResearchLicensesByLicenseeAndLicenser(licensee, licenser) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenseeAndLicenserAsync(licensee, licenser);
-    return licenses;
+    const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    const result = await this.mapExpressLicenses(expressLicenses);
+    return result;
   }
 }
 

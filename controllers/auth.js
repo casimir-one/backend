@@ -6,6 +6,7 @@ import { TextEncoder } from 'util';
 import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
 import UserService from './../services/users';
+import TenantService from './../services/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../constants';
 
 function Encodeuint8arr(seed) {
@@ -161,7 +162,50 @@ const signUp = async function (ctx) {
   }
 }
 
+const chunkTenantAccessToken = async function (ctx) {
+  const { clientTenantId, secretSigHex } = ctx.request.body;
+  const { id: currentTenantId } = ctx.state.tenant;
+
+  try {
+    const tenantService = new TenantService();
+    const clientTenant = await tenantService.getTenant(clientTenantId);
+    
+    const pubWif = clientTenant.account.owner.key_auths.map(([key, threshold]) => key)[0];
+    const publicKey = crypto.PublicKey.from(pubWif);
+
+    let isValidSig;
+    try {
+      // SIG_SEED should be uint8 array with length = 32
+      isValidSig = publicKey.verify(Encodeuint8arr(config.SIG_SEED).buffer, crypto.unhexify(secretSigHex).buffer);
+    } catch (err) {
+      isValidSig = false;
+    }
+
+    if (!isValidSig) {
+      ctx.status = 401;
+      ctx.body = `Signature from '${clientTenantId}' tenant is not valid`;
+      return;
+    }
+
+    const jwtToken = jwt.sign({
+      username: clientTenantId, 
+      tenant: currentTenantId,
+      isTenant: true,
+      exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
+    }, config.JWT_SECRET);
+
+    ctx.status = 200;
+    ctx.body = { jwtToken };
+    
+  } catch (err) {
+    console.error(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 export default {
   signIn,
-  signUp
+  signUp,
+  chunkTenantAccessToken
 }
