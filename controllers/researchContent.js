@@ -5,7 +5,6 @@ import parseFormdata from 'parse-formdata'
 import readArchive from './../dar/readArchive'
 import writeArchive from './../dar/writeArchive'
 import cloneArchive from './../dar/cloneArchive'
-import deipRpc from '@deip/rpc-client';
 import xml2js from 'xml2js';
 import { v4 as uuidv4 } from 'uuid';
 import config from './../config';
@@ -27,33 +26,32 @@ import ResearchContentProposalRejectedEvent from './../events/researchContentPro
 // ############ Read actions ############
 
 const getResearchContent = async (ctx) => {
-  let researchContentExternalId = ctx.params.researchContentExternalId;
+  const researchContentExternalId = ctx.params.researchContentExternalId;
 
   try {
     const researchContentService = new ResearchContentService();
     const researchContent = await researchContentService.getResearchContent(researchContentExternalId);
-    
     if (!researchContent) {
       ctx.status = 404;
       ctx.body = null;
       return;
     }
-    
     ctx.status = 200;
     ctx.body = researchContent;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
 
-const getResearchContentByResearch = async (ctx) => {
+const getResearchContentAndDraftsByResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
 
   try {
     const researchContentService = new ResearchContentService()
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const researchService = new ResearchService();
+    const research = await researchService.getResearch(researchExternalId);
     if (!research) {
       ctx.status = 404;
       ctx.body = `${researchExternalId} research is not found`;
@@ -80,7 +78,48 @@ const getResearchContentByResearch = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
+  }
+}
+
+
+const getResearchContentsByTenant = async (ctx) => {
+  const tenantId = ctx.params.tenantId;
+  try {
+    const researchContentService = new ResearchContentService()
+    const result = await researchContentService.getResearchContentsByTenant(tenantId)
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
+const getPublicResearchContentListing = async (ctx) => {
+  try {
+    const researchContentService = new ResearchContentService();
+    const researchService = new ResearchService();
+    const researchContents = await researchContentService.lookupResearchContents();
+    const researchExternalIds = researchContents.reduce((acc, researchContent) => {
+      if (!acc.some(researchExternalId => researchExternalId == researchContent.research_external_id)) {
+        acc.push(researchContent.research_external_id);
+      }
+      return acc;
+    }, []);
+
+    const researches = await researchService.getResearches(researchExternalIds);
+    const publicResearchesIds = researches.filter(r => !r.isPrivate).map(r => r.external_id);
+    const result = researchContents.filter(researchContent => publicResearchesIds.some(id => id == researchContent.research_external_id))
+
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
   }
 }
 
@@ -164,7 +203,7 @@ const readResearchContentDarArchiveStaticFiles = async (ctx) => {
   } catch (err) {
     console.log(err);
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
 
@@ -177,7 +216,7 @@ const getResearchContentRef = async (ctx) => {
     ctx.body = ref;
   } catch (err) {
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
 
@@ -307,7 +346,7 @@ const unlockResearchContentDraft = async (ctx) => {
   } catch (err) {
     console.log(err)
     ctx.status = 500;
-    ctx.body = err.message;
+    ctx.body = err;
   }
 }
 
@@ -318,8 +357,9 @@ const createResearchContentDarArchive = async (ctx) => {
 
     const researchGroupService = new ResearchGroupService();
     const researchContentService = new ResearchContentService();
+    const researchService = new ResearchService();
 
-    const research = await deipRpc.api.getResearchAsync(researchExternalId);
+    const research = await researchService.getResearch(researchExternalId);
     const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
 
     const externalId = `draft-${researchExternalId}-${uuidv4()}`;
@@ -407,6 +447,7 @@ const deleteResearchContentDraft = async (ctx) => {
   }
 }
 
+// DEPRECATED
 const updateDraftMetaAsync = async (researchContentId, archive) => {
 
   const researchGroupService = new ResearchGroupService();
@@ -448,17 +489,6 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   }
 
   const contentRefs = [];
-  for (let i = 0; i < references.length; i++) {
-    const ref = references[i];
-    const content = await deipRpc.api.getResearchContentByAbsolutePermlinkAsync(ref.researchGroupPermlink, ref.researchPermlink, ref.researchContentPermlink);
-    const researchContent = await researchContentService.getResearchContent(content.external_id);
-
-    if (researchContent.research_external_id != rc.researchExternalId) {
-      // exclude references to the same research
-      contentRefs.push(researchContent.external_id);
-    }
-  }
-
   const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
 
   const archiveDir = FileStorage.getResearchDarArchiveDirPath(rc.researchExternalId, rc.folder);
@@ -574,13 +604,7 @@ const getResearchContentPackageFile = async function (ctx) {
   }
 
   const research = await researchService.getResearch(researchContentRef.researchExternalId);
-  if (research.is_private) {
-    if (!ctx.state.user) {
-      ctx.status = 401;
-      ctx.body = `Not authorized`;
-      return;
-    }
-
+  if (research.isPrivate) {
     const jwtUsername = ctx.state.user.username;
     const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
@@ -615,7 +639,6 @@ const getResearchContentPackageFile = async function (ctx) {
   } else {
     ctx.response.set('content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
   }
-
 
   const fileExists = await FileStorage.exists(filepath);
   if (!fileExists) {
@@ -728,8 +751,10 @@ export default {
   getResearchContentRef,
 
   getResearchContent,
-  getResearchContentByResearch,
+  getPublicResearchContentListing,
+  getResearchContentsByTenant,
 
+  getResearchContentAndDraftsByResearch,
   // drafts
   deleteResearchContentDraft,
   unlockResearchContentDraft,

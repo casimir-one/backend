@@ -8,7 +8,6 @@ import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';
 import qs from 'qs';
-import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import FundraisingService from './../services/fundraising';

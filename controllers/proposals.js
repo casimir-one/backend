@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import * as blockchainService from './../utils/blockchain';
 import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE } from './../constants';
 import ResearchService from './../services/research';

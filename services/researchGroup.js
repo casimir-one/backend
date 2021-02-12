@@ -97,7 +97,13 @@ class ResearchGroupService extends BaseReadModelService {
     const researchGroups = await this.getResearchGroups(rgts.map(rgt => rgt.research_group.external_id));
     return researchGroups;
   }
-  
+
+  async getResearchGroupsByTenant(tenantId) {
+    const available = await this.findMany({});
+    const researchGroups = available.filter(p => p.tenantId == tenantId);
+    const result = await this.mapResearchGroups(researchGroups);
+    return result;
+  }
 
 }
 

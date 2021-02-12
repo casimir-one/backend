@@ -1,7 +1,6 @@
 import fs from 'fs';
 import fsExtra from 'fs-extra'
 import util from 'util';
-import deipRpc from '@deip/rpc-client';
 import * as blockchainService from './../utils/blockchain';
 import ResearchExpressLicenseProposedEvent from './../events/researchExpressLicenseProposedEvent';
 import ResearchExpressLicenseProposalSignedEvent from './../events/researchExpressLicenseProposalSignedEvent';

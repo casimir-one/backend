@@ -3,7 +3,6 @@ import fsExtra from 'fs-extra'
 import util from 'util';
 import path from 'path';
 import sharp from 'sharp';
-import deipRpc from '@deip/rpc-client';
 import UserService from './../services/users';
 import TenantService from './../services/tenant';
 import ResearchService from './../services/research';

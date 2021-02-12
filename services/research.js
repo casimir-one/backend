@@ -19,9 +19,10 @@ class ResearchService extends BaseReadModelService {
   async mapResearch(researches, filterObj) {
     const expressLicensingService = new ExpressLicensingService();
 
-    const filter =  {
+    const filter = {
       searchTerm: "",
-      researchAttributes: [], 
+      researchAttributes: [],
+      tenantIds: [],
       ...filterObj
     }
 
@@ -39,11 +40,15 @@ class ResearchService extends BaseReadModelService {
           ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value.toString()
           : "Not Specified";
 
-        const abstract = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+        const abstract = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString())
           ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
           : "Not Specified";
 
-        return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, researchRef: researchRef ? { ...researchRef, expressLicenses } : { attributes: [], expressLicenses: []} };
+        const isPrivate = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString())
+          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString()
+          : false;
+
+        return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, researchRef: researchRef ? { ...researchRef, expressLicenses } : { attributes: [], expressLicenses: [] } };
       })
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         
@@ -64,6 +69,9 @@ class ResearchService extends BaseReadModelService {
         }
  
         return false;
+      })))
+      .filter(r => !filter.tenantIds.length || (r.researchRef && filter.tenantIds.some(tenantId => {
+        return r.researchRef.tenantId == tenantId;
       })))
       .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.every(fAttr => {
 
@@ -133,7 +141,7 @@ class ResearchService extends BaseReadModelService {
 
 
   async getResearchesByTenant(tenantId) {
-    const available = await this.findMany({});
+    const available = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
     const researches = available.filter(r => r.tenantId == tenantId);
     const result = await this.mapResearch(researches);
     return result;

@@ -96,8 +96,6 @@ public_route.get('/expertise/research/:researchId/discipline/:disciplineId', exp
 public_route.get('/expertise/content/:contentId/discipline/:disciplineId', expertise.getExpertiseContributionByResearchContentAndDiscipline)
 public_route.get('/expertise/content/:contentId', expertise.getExpertiseContributionsByResearchContent)
 
-public_route.get('/search/contents/all', search.getAllResearchContents)
-
 protected_route.get('/notifications/user/:username', notifications.getNotificationsByUser)
 protected_route.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
 protected_route.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
@@ -117,6 +115,7 @@ public_route.get('/groups/logo/:researchGroupExternalId', compose([researchGroup
 protected_route.post('/groups/logo', compose([researchGroupLogoFileUpdateAuth({ researchGroupEnitytId: (ctx) => ctx.request.headers['research-group-external-id'] } )]), researchGroups.uploadResearchGroupLogo)
 protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
 public_route.get('/groups/member/:username', researchGroups.getResearchGroupsByUser)
+public_route.get('/groups/tenant/:tenantId', researchGroups.getResearchGroupsByTenant)
 
 
 protected_route.get('/invites/:username', invites.getUserInvites)
@@ -135,6 +134,7 @@ protected_route.post('/reviews', reviews.createReview)
 
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
+protected_route.delete('/research/:researchExternalId', research.deleteResearch)
 public_route.get('/researches', research.getResearches)
 public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', compose([researchAttributeMetaReadAuth()]), research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
@@ -162,8 +162,10 @@ protected_route.post('/research/application/approve', research.approveResearchAp
 protected_route.post('/research/application/reject', research.rejectResearchApplication)
 protected_route.post('/research/application/delete', research.deleteResearchApplication)
 
+public_route.get('/research-content/listing', researchContent.getPublicResearchContentListing)
 public_route.get('/research-content/:researchContentExternalId', researchContent.getResearchContent)
-public_route.get('/research-content/research/:researchExternalId', researchContent.getResearchContentByResearch)
+public_route.get('/research-content/research/:researchExternalId', researchContent.getResearchContentAndDraftsByResearch)
+public_route.get('/research-content/tenant/:tenantId', researchContent.getResearchContentsByTenant)
 public_route.get('/research-content/ref/:refId', researchContent.getResearchContentRef)
 
 protected_route.post('/research-content/ref/publish', compose([researchContentFilePublishAuth({ researchEnitytId: (ctx) => {  // TODO: replace with protected_route

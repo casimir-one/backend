@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import deipRpc from '@deip/rpc-client';
 import { APP_EVENTS, PROPOSAL_STATUS } from './../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';

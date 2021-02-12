@@ -56,8 +56,6 @@ class TenantService {
   }, {
     signUpPolicy,
     faq,
-    researchBlacklist,
-    researchWhitelist,
     researchAttributes,
     researchLayouts
   }) {
@@ -74,8 +72,6 @@ class TenantService {
       settings: {
         signUpPolicy,
         faq,
-        researchBlacklist,
-        researchWhitelist,
         researchAttributes: researchAttributes || [],
         researchLayouts: researchLayouts || {}
       }
@@ -94,8 +90,6 @@ class TenantService {
     banner
   }, {
     faq,
-    researchBlacklist,
-    researchWhitelist,
     researchLayouts
   }) {
 
@@ -111,8 +105,6 @@ class TenantService {
     tenantProfile.logo = logo !== undefined ? logo : tenantProfile.logo;
     tenantProfile.banner = banner !== undefined ? banner : tenantProfile.banner;
     tenantProfile.settings.faq = faq !== undefined ? faq : tenantProfile.settings.faq;
-    tenantProfile.settings.researchBlacklist = researchBlacklist !== undefined ? researchBlacklist : tenantProfile.settings.researchBlacklist;
-    tenantProfile.settings.researchWhitelist = researchWhitelist !== undefined ? researchWhitelist : tenantProfile.settings.researchWhitelist;
     tenantProfile.settings.researchLayouts = researchLayouts !== undefined ? researchLayouts : tenantProfile.settings.researchLayouts;
     
     const savedTenantProfile = await tenantProfile.save();

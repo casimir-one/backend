@@ -7,7 +7,6 @@ import sharp from 'sharp'
 import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';
-import deipRpc from '@deip/rpc-client';
 import qs from 'qs';
 
 

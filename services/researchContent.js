@@ -38,8 +38,21 @@ class ResearchContentService extends BaseReadModelService {
     return result;
   }
 
+  async lookupResearchContents() {
+    const researchContents = await this.findMany({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const result = await this.mapResearchContents(researchContents);
+    return result;
+  }
+
   async getResearchContentsByResearch(researchExternalId) {
     const researchContents = await this.findMany({ researchExternalId , status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const result = await this.mapResearchContents(researchContents);
+    return result;
+  }
+
+  async getResearchContentsByTenant(tenantId) {
+    const available = await this.findMany({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const researchContents = available.filter(r => r.tenantId == tenantId);
     const result = await this.mapResearchContents(researchContents);
     return result;
   }

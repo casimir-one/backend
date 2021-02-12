@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import UserJoinRequestService from './../services/userJoinRequests';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';

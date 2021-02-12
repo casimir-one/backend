@@ -13,7 +13,7 @@ import ResearchService from './../services/research';
 import ResearchApplicationService from './../services/researchApplication';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, CHAIN_CONSTANTS, RESEARCH_ATTRIBUTE_TYPE, FILE_STORAGE } from './../constants';
+import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS } from './../constants';
 import ResearchForm from './../forms/research';
 import FileStorage from './../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
@@ -688,19 +688,11 @@ const getPublicResearchListing = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
-  const researchService = new ResearchService();
-  const researchWhitelist = tenant.settings.researchWhitelist || [];
-  const researchBlacklist = tenant.settings.researchBlacklist || [];
-
-
   try {
+    const researchService = new ResearchService();
     const result = await researchService.lookupResearches(filter);
     ctx.status = 200;
-    ctx.body = result
-      .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
-      .filter(r => !r.is_private);
-
+    ctx.body = result.filter(r => !r.isPrivate);
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -715,16 +707,10 @@ const getUserResearchListing = async (ctx) => {
   const member = ctx.params.username;
 
   const researchService = new ResearchService();
-  const researchWhitelist = tenant.settings.researchWhitelist || [];
-  const researchBlacklist = tenant.settings.researchBlacklist || [];
-
   try {
     const result = await researchService.getResearchesForMember(member)
     ctx.status = 200;
-    ctx.body = result
-      .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
-      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+    ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
 
   } catch (err) {
     console.log(err);
@@ -739,17 +725,11 @@ const getResearchGroupResearchListing = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
 
-  const researchService = new ResearchService();
-  const researchWhitelist = tenant.settings.researchWhitelist || [];
-  const researchBlacklist = tenant.settings.researchBlacklist || [];
-
   try {
+    const researchService = new ResearchService();
     const result = await researchService.getResearchesByResearchGroup(researchGroupExternalId);
     ctx.status = 200;
-    ctx.body = result
-      .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
-      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+    ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
 
   } catch (err) {
     console.log(err);
@@ -811,21 +791,47 @@ const getResearches = async (ctx) => {
 const getTenantResearchListing = async (ctx) => {
   const tenantId = ctx.params.tenantId;
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
+
+  try {
+    const researchService = new ResearchService();
+    const result = await researchService.getResearchesByTenant(tenantId);
+    ctx.status = 200;
+    ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+};
+
+
+const deleteResearch = async (ctx) => {
+  const tenantId = ctx.state.tenant.id;
+  const researchExternalId = ctx.params.researchExternalId;
+  const jwtUsername = ctx.state.user.username;
+  const isTenantAdmin = ctx.state.isTenantAdmin;
 
   try {
 
     const researchService = new ResearchService();
-    const result = await researchService.getResearchesByTenant(tenantId);
+    const research = await researchService.getResearch(researchExternalId);
 
-    const researchWhitelist = tenant.settings.researchWhitelist || [];
-    const researchBlacklist = tenant.settings.researchBlacklist || [];
+    if (!research) {
+      ctx.status = 404;
+      ctx.body = `Research '${researchExternalId}' does not exist`;
+      return;
+    }
 
+    if (!isTenantAdmin || research.tenantId != tenantId) {
+      ctx.status = 401;
+      ctx.body = `"${jwtUsername}" is not permitted to delete "${researchExternalId}" research`;
+      return;
+    }
+
+    const updatedResearch = await researchService.updateResearchRef(researchExternalId, { status: RESEARCH_STATUS.DELETED })
     ctx.status = 200;
-    ctx.body = result
-      .filter(r => !researchWhitelist.length || researchWhitelist.some(id => r.external_id == id))
-      .filter(r => !researchBlacklist.length || !researchBlacklist.some(id => r.external_id == id))
-      .filter(r => !r.is_private || r.members.some(m => m == jwtUsername));
+    ctx.body = updatedResearch;
 
   } catch (err) {
     console.log(err);
@@ -843,8 +849,9 @@ export default {
   getUserResearchListing,
   getResearchGroupResearchListing,
   getTenantResearchListing,
-  updateResearch,
   createResearch,
+  updateResearch,
+  deleteResearch,
   createResearchApplication,
   editResearchApplication,
   approveResearchApplication,

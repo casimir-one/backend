@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import multer from 'koa-multer';
 import fs from 'fs';
 import fsExtra from 'fs-extra'
@@ -244,9 +243,23 @@ const getResearchGroupsByUser = async (ctx) => {
 }
 
 
+const getResearchGroupsByTenant = async (ctx) => {
+  const tenantId = ctx.params.tenantId;
+  try {
+    const researchGroupsService = new ResearchGroupService();
+    const researchGroups = await researchGroupsService.getResearchGroupsByTenant(tenantId);
+    ctx.status = 200;
+    ctx.body = researchGroups;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 const getResearchGroupsListing = async (ctx) => {
   const query = qs.parse(ctx.query);
-
   try {
     const researchGroupsService = new ResearchGroupService();
     const researchGroups = await researchGroupsService.getResearchGroupsListing(query.personal);
@@ -264,6 +277,7 @@ const getResearchGroupsListing = async (ctx) => {
 export default {
   getResearchGroup,
   getResearchGroupsListing,
+  getResearchGroupsByTenant,
   createResearchGroup,
   getResearchGroupsByUser,
   updateResearchGroup,
