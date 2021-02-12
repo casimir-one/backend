@@ -211,7 +211,7 @@ public_route.get('/assets/accounts/symbol/:symbol', assets.getAccountsAssetBalan
 public_route.get('/disciplines', disciplines.getDomainDisciplines)
 public_route.get('/disciplines/research/:researchExternalId', disciplines.getDisciplinesByResearch)
 
-public_route.get('/network/info', tenant.getNetworkInfo)
+public_route.get('/network/tenants', tenant.getNetworkTenants)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

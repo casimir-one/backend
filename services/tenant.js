@@ -13,15 +13,11 @@ class TenantService {
     return { id: id, profile: profile.toObject(), account: account.account };
   }
 
-  async getNetworkInfo() {
+  async getNetworkTenants() {
     const profiles = await TenantProfile.find({});
-    const result = profiles.reduce((map, tenant) => {
-      map[tenant._id] = {
-        tenant: tenant._id,
-        serverUrl: tenant.serverUrl
-      };
-      return map;
-    }, {});
+    const result = profiles.map((tenant) => {
+      return { ...tenant.toObject(), network: undefined, settings: undefined };
+    });
     return result;
   }
 

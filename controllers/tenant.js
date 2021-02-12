@@ -239,10 +239,10 @@ const getTenant = async (ctx) => {
   }
 }
 
-const getNetworkInfo = async (ctx) => {
+const getNetworkTenants = async (ctx) => {
   try {
     const tenantService = new TenantService();
-    const map = await tenantService.getNetworkInfo();
+    const map = await tenantService.getNetworkTenants();
     ctx.status = 200;
     ctx.body = map;
   } catch (err) {
@@ -519,9 +519,7 @@ export default {
   createTenantResearchAttribute,
   updateTenantResearchAttribute,
   deleteTenantResearchAttribute,
-
-  getNetworkInfo,
-
+  getNetworkTenants,
   getTenant,
   getTenantBanner,
   getTenantLogo,
