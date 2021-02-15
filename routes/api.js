@@ -167,6 +167,7 @@ public_route.get('/research-content/:researchContentExternalId', researchContent
 public_route.get('/research-content/research/:researchExternalId', researchContent.getResearchContentAndDraftsByResearch)
 public_route.get('/research-content/tenant/:tenantId', researchContent.getResearchContentsByTenant)
 public_route.get('/research-content/ref/:refId', researchContent.getResearchContentRef)
+public_route.get('/research-content/ref/graph/:contentId', researchContent.getResearchContentReferencesGraph)
 
 protected_route.post('/research-content/ref/publish', compose([researchContentFilePublishAuth({ researchEnitytId: (ctx) => {  // TODO: replace with protected_route
   const researchContentProposedEvent = new ResearchContentProposedEvent(blockchainService.extractOperations(ctx.request.body.tx), {});

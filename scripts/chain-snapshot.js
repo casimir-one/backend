@@ -16,7 +16,7 @@ const util = require('util');
 // const mongoose = require('mongoose');
 const deipRpc = require('@deip/rpc-client');
 const CHAIN_CONSTANTS = require('./../constants/chainConstants').default;
-const RESEARCH_CONTENT_TYPES = require('./../constants/researchContentType').default;
+const { RESEARCH_CONTENT_TYPES } = require('./../constants');
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });

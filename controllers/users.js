@@ -40,7 +40,7 @@ const getUser = async (ctx) => {
 
 const getUsers = async (ctx) => {
   const query = qs.parse(ctx.query);
-  const usernames = query.usernames;
+  const usernames = query.usernames ? Object.values(query.usernames) : [];
 
   try {
     const usersService = new UserService();
