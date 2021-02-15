@@ -7,16 +7,29 @@ class TenantService {
   constructor() { };
 
   async getTenant(id) {
-    const profile = await TenantProfile.findOne({ _id: id });
-    if (!profile) return null;
+    const doc = await TenantProfile.findOne({ _id: id });
+    if (!doc) return null;
+    const profile = doc.toObject();
     const account = await deipRpc.api.getResearchGroupAsync(id);
-    return { id: id, profile: profile.toObject(), account: account.account };
+    return { id: id, account: account.account, profile: profile };
+  }
+
+  async getNetworkTenant(id) {
+    const doc = await TenantProfile.findOne({ _id: id });
+    if (!doc) return null;
+    const profile = doc.toObject();
+    const account = await deipRpc.api.getResearchGroupAsync(id);
+    return { id: profile._id, account: account.account, profile: { ...profile, network: undefined, settings: undefined } };
   }
 
   async getNetworkTenants() {
-    const profiles = await TenantProfile.find({});
-    const result = profiles.map((tenant) => {
-      return { ...tenant.toObject(), network: undefined, settings: undefined };
+    const docs = await TenantProfile.find({});
+    const profiles = docs.map(doc => doc.toObject());
+    const accounts = await deipRpc.api.getResearchGroupsAsync(profiles.map(p => p._id));
+
+    const result = profiles.map((profile) => {
+      const account = accounts.find(a => a.account.name == profile._id);
+      return { id: profile._id, account: account.account, profile: { ...profile, network: undefined, settings: undefined } };
     });
     return result;
   }

@@ -239,12 +239,14 @@ const getTenant = async (ctx) => {
   }
 }
 
-const getNetworkTenants = async (ctx) => {
+
+const getNetworkTenant = async (ctx) => {
+  const tenantExternalId = ctx.params.tenant;
   try {
     const tenantService = new TenantService();
-    const map = await tenantService.getNetworkTenants();
+    const result = await tenantService.getNetworkTenant(tenantExternalId);
     ctx.status = 200;
-    ctx.body = map;
+    ctx.body = result;
   } catch (err) {
     console.log(err);
     ctx.status = 500;
@@ -252,6 +254,19 @@ const getNetworkTenants = async (ctx) => {
   }
 }
 
+
+const getNetworkTenants = async (ctx) => {
+  try {
+    const tenantService = new TenantService();
+    const result = await tenantService.getNetworkTenants();
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
 const updateTenantProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
@@ -519,6 +534,7 @@ export default {
   createTenantResearchAttribute,
   updateTenantResearchAttribute,
   deleteTenantResearchAttribute,
+  getNetworkTenant,
   getNetworkTenants,
   getTenant,
   getTenantBanner,
