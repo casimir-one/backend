@@ -13,6 +13,7 @@ const RESEARCH_GROUP = "research-group";
 const IMAGE = "image";
 const FILE = "file";
 const EXPRESS_LICENSING = "express-licensing";
+const NETWORK_CONTENT_ACCESS = "network-content-access";
 
 const ROADMAP = "roadmap";
 const PARTNERS = "partners";
@@ -33,6 +34,7 @@ const RESEARCH_ATTRIBUTE_TYPE = {
   FILE,
 
   EXPRESS_LICENSING,
+  NETWORK_CONTENT_ACCESS,
 
   ROADMAP,
   PARTNERS
