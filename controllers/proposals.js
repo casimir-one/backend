@@ -1,5 +1,6 @@
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE } from './../constants';
+import { SMART_CONTRACT_TYPE } from './../constants';
+import config from './../config';
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
@@ -53,7 +54,7 @@ const createProposal = async (ctx) => {
 
 const updateProposal = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
+  let { tx } = ctx.request.body;
 
   try {
 
@@ -65,11 +66,15 @@ const updateProposal = async (ctx, next) => {
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: proposalId } = payload;
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
+  
     const datums = blockchainService.extractOperations(tx);
-
     const updatedProposal = await proposalsService.getProposal(proposalId);
+
+    if (updatedProposal.type == SMART_CONTRACT_TYPE.RESEARCH_NDA) {
+      tx = blockchainService.signTransaction(tx, { active: config.TENANT_PRIV_KEY });
+    }
+
+    await blockchainService.sendTransactionAsync(tx);
 
     if (updatedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH) {
       const researchProposalSignedEvent = new ResearchProposalSignedEvent(datums);

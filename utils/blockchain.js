@@ -169,10 +169,16 @@ async function usernameExistsInGlobalNetwork(username, tenant) {
   return exists;
 }
 
+function signTransaction(tx, keys) {
+  const signedTx = deipRpc.auth.signTransaction(tx, keys);
+  return signedTx;
+}
+
 export {
   sendTransaction,
   getBlock,
   getTransaction,
+  signTransaction,
   sendTransactionAsync,
   signOperations,
   extractOperations,

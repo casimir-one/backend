@@ -9,10 +9,11 @@ const researchNdaService = new ResearchNdaService();
 
 const createResearchNonDisclosureAgreement = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta } = ctx.request.body;
+  let { tx, offchainMeta } = ctx.request.body;
 
   try {
-    
+
+    tx = blockchainService.signTransaction(tx, { active: config.TENANT_PRIV_KEY });
     const txInfo = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
@@ -25,21 +26,6 @@ const createResearchNonDisclosureAgreement = async (ctx, next) => {
       const researchNdaProposalSignedEvent = new ResearchNdaProposalSignedEvent([approval]);
       ctx.state.events.push(researchNdaProposalSignedEvent);
     }
-
-    const tenantApprovalTx = await blockchainService.signOperations([['update_proposal', {
-      external_id: researchNdaProposedEvent.getProposalId(),
-      active_approvals_to_add: [],
-      active_approvals_to_remove: [],
-      owner_approvals_to_add: [config.TENANT],
-      owner_approvals_to_remove: [],
-      key_approvals_to_add: [],
-      key_approvals_to_remove: [],
-      extensions: []
-    }]], config.TENANT_PRIV_KEY);
-
-    const txInfo2 = await blockchainService.sendTransactionAsync(tenantApprovalTx);
-    const researchNdaProposalSignedEvent = new ResearchNdaProposalSignedEvent(blockchainService.extractOperations(tenantApprovalTx));
-    ctx.state.events.push(researchNdaProposalSignedEvent);
 
     ctx.status = 200;
     ctx.body = [...ctx.state.events];
