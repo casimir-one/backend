@@ -172,6 +172,9 @@ class ProposalService extends BaseReadModelService {
     const userResignationProposals = await this.extendUserResignationProposals(grouped[SMART_CONTRACT_TYPE.EXCLUDE_MEMBER] || []);
     result.push(...userResignationProposals);
 
+    const researchNdaProposals = await this.extendResearchNdaProposals(grouped[SMART_CONTRACT_TYPE.RESEARCH_NDA] || []);
+    result.push(...researchNdaProposals);
+
     return result;
   }
 
@@ -467,6 +470,21 @@ class ProposalService extends BaseReadModelService {
 
   }
 
+  async extendResearchNdaProposals(proposals) {
+    const researchExternalIds = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.researchExternalId)) {
+        acc.push(proposal.details.researchExternalId);
+      }
+      return acc;
+    }, []);
+
+    const researches = await this.researchService.getResearches(researchExternalIds.map(rId => rId));
+
+    return proposals.map(proposal => {
+      const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
+      return { ...proposal, extendedDetails: { research } };
+    })
+  }
 
   async createProposalRef(externalId, {
     type,

@@ -91,4 +91,10 @@ proposalHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply) => han
   return proposalRef;
 }));
 
+proposalHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchNdaProposedEvent } = source;
+  const proposalRef = await createProposalRef(researchNdaProposedEvent, SMART_CONTRACT_TYPE.RESEARCH_NDA);
+  return proposalRef;
+}));
+
 export default proposalHandler;

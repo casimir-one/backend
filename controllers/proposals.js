@@ -15,6 +15,7 @@ import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalS
 import ResearchExpressLicenseProposalSignedEvent from './../events/researchExpressLicenseProposalSignedEvent';
 import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
 import UserResignationProposalSignedEvent from './../events/userResignationProposalSignedEvent';
+import ResearchNdaProposalSignedEvent from './../events/researchNdaProposalSignedEvent'
 
 import ResearchProposalRejectedEvent from './../events/researchProposalRejectedEvent';
 import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
@@ -26,6 +27,7 @@ import AssetExchangeProposalRejectedEvent from './../events/assetExchangeProposa
 import ResearchExpressLicenseProposalRejectedEvent from './../events/researchExpressLicenseProposalRejectedEvent';
 import UserInvitationProposalRejectedEvent from './../events/userInvitationProposalRejectedEvent';
 import UserResignationProposalRejectedEvent from './../events/userResignationProposalRejectedEvent';
+import ResearchNdaProposalRejectedEvent from './../events/researchNdaProposalRejectedEvent';
 
 
 const createProposal = async (ctx) => {
@@ -119,6 +121,11 @@ const updateProposal = async (ctx, next) => {
       ctx.state.events.push(userResignationProposalSignedEvent);
     }
 
+    if (updatedProposal.type == SMART_CONTRACT_TYPE.RESEARCH_NDA) {
+      const researchNdaProposalSignedEvent = new ResearchNdaProposalSignedEvent(datums);
+      ctx.state.events.push(researchNdaProposalSignedEvent);
+    }
+
     ctx.status = 200;
     ctx.body = [...ctx.state.events];
 
@@ -200,6 +207,11 @@ const deleteProposal = async (ctx, next) => {
     if (deletedProposal.type == SMART_CONTRACT_TYPE.EXCLUDE_MEMBER) {
       const userResignationProposalRejectedEvent = new UserResignationProposalRejectedEvent(datums);
       ctx.state.events.push(userResignationProposalRejectedEvent);
+    }
+
+    if (deletedProposal.type == SMART_CONTRACT_TYPE.RESEARCH_NDA) {
+      const researchNdaProposalRejectedEvent = new ResearchNdaProposalRejectedEvent(datums);
+      ctx.state.events.push(researchNdaProposalRejectedEvent);
     }
 
     ctx.status = 200;

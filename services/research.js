@@ -2,6 +2,9 @@ import deipRpc from '@deip/rpc-client';
 import BaseReadModelService from './base';
 import Research from './../schemas/research';
 import ExpressLicensingService from './expressLicensing'
+import ResearchNdaService from './researchNda'
+import UserService from './users'
+
 import mongoose from 'mongoose';
 import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS } from './../constants';
 
@@ -18,6 +21,8 @@ class ResearchService extends BaseReadModelService {
 
   async mapResearch(researches, filterObj) {
     const expressLicensingService = new ExpressLicensingService();
+    const researchNdaService = new ResearchNdaService();
+    const userService = new UserService();
 
     const filter = {
       searchTerm: "",
@@ -28,12 +33,21 @@ class ResearchService extends BaseReadModelService {
 
     const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id));
     const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
+    const chainResearchNdaList = await Promise.all(chainResearches.map(r => researchNdaService.getResearchNdaListByResearch(r.external_id)));
     const researchAttributes = await this.getResearchAttributes();
     
     return chainResearches
       .map((chainResearch) => {
         const researchRef = researches.find(r => r._id.toString() == chainResearch.external_id);
         const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id);
+        // TEMP
+        const grantedAccess = chainResearchNdaList
+          .reduce((acc, list) => { return [...acc, ...list] }, [])
+          .filter((nda) => nda.research_external_id == chainResearch.external_id)
+          .reduce((acc, nda) => {
+            return [...acc, ...nda.parties];
+          }, []);
+
         const attributes = researchRef ? researchRef.attributes : [];
        
         const title = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
@@ -48,7 +62,7 @@ class ResearchService extends BaseReadModelService {
           ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString()
           : false;
 
-        return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, researchRef: researchRef ? { ...researchRef, expressLicenses } : { attributes: [], expressLicenses: [] } };
+        return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
       })
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         

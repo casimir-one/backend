@@ -20,6 +20,7 @@ import disciplines from '../controllers/disciplines'
 import fundraising from '../controllers/fundraising'
 import tenant from '../controllers/tenant';
 import researchContent from './../controllers/researchContent';
+import researchNda from './../controllers/researchNda';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/researchContentProposedEvent';
@@ -101,7 +102,7 @@ protected_route.put('/notifications/:username/mark-read/:notificationId', notifi
 protected_route.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
 
 
-protected_route.post('/proposals/:proposalExternalId', proposals.getProposalById)
+protected_route.get('/proposals/:proposalExternalId', proposals.getProposalById)
 protected_route.post('/proposals', proposals.createProposal)
 protected_route.put('/proposals', proposals.updateProposal)
 protected_route.put('/proposals/delete', proposals.deleteProposal)
@@ -213,6 +214,12 @@ public_route.get('/disciplines/research/:researchExternalId', disciplines.getDis
 
 public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
 public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
+
+protected_route.post('/nda', researchNda.createResearchNonDisclosureAgreement);
+public_route.get('/nda/:ndaExternalId', researchNda.getResearchNonDisclosureAgreement);
+public_route.get('/nda/creator/:username', researchNda.getResearchNonDisclosureAgreementsByCreator);
+public_route.get('/nda/research/:researchExternalId', researchNda.getResearchNonDisclosureAgreementsByResearch);
+
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

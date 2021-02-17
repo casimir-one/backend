@@ -378,22 +378,32 @@ appEventHandler.on(APP_EVENTS.ASSET_TRANSFER_PROPOSAL_REJECTED, (payload, reply)
 appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: reviewCreatedEvent, tenant } = source;
   await wait(reviewHandler, reviewCreatedEvent, null, tenant);
-
   fire(userNotificationsHandler, APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, source);
 }));
-
 
 appEventHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchTokenSaleContributedEvent, tenant } = source;
   await wait(researchHandler, researchTokenSaleContributedEvent, null, tenant);
 }));
 
-
 appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: reviewRequestedEvent } = source;
-  
   fire(userNotificationsHandler, reviewRequestedEvent);
 }));
 
+appEventHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchNdaProposedEvent, tenant } = source;
+  await wait(proposalHandler, researchNdaProposedEvent, null, tenant);
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchNdaProposalSignedEvent, tenant } = source;
+  // register handlers
+}));
+
+appEventHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+  const { event: researchNdaProposalRejectedEvent, tenant } = source;
+  // register handlers
+}));
 
 export default appEventHandler;
