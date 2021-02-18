@@ -9,11 +9,10 @@ const researchNdaService = new ResearchNdaService();
 
 const createResearchNonDisclosureAgreement = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  let { tx, offchainMeta } = ctx.request.body;
+  const { tx, offchainMeta } = ctx.request.body;
 
   try {
 
-    tx = blockchainService.signTransaction(tx, { active: config.TENANT_PRIV_KEY });
     const txInfo = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 

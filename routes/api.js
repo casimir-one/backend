@@ -215,6 +215,8 @@ public_route.get('/disciplines/research/:researchExternalId', disciplines.getDis
 public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
 public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
 
+protected_route.post('/infrastructure/tenant/sign', tenant.signTxByTenant)
+
 protected_route.post('/nda', researchNda.createResearchNonDisclosureAgreement);
 public_route.get('/nda/:ndaExternalId', researchNda.getResearchNonDisclosureAgreement);
 public_route.get('/nda/creator/:username', researchNda.getResearchNonDisclosureAgreementsByCreator);
