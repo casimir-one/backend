@@ -198,8 +198,6 @@ class ResearchContentService extends BaseReadModelService {
     const innerReferences = [];
     await this.getResearchContentInnerReferences(researchContent, innerReferences);
 
-    // await this.researchHttp.getqwe(researchContent.external_id)
-
     const references = [...innerReferences, root, ...outerReferences];
     const nodes = references.reduce((acc, ref) => {
       if (acc.some((r) => r.researchContent.external_id === ref.researchContent.external_id)) {
@@ -306,7 +304,7 @@ class ResearchContentService extends BaseReadModelService {
       }
       
       const innerRefResearchGroup = await researchGroupService.getResearchGroup(innerRefResearch.research_group.external_id);
-      const innerRefResearchContent = await this.getResearchContent(research_content_reference_external_id);
+      const innerRefResearchContent = await this.getResearchContent(referenceResearchContentExternalId);
 
       const ref = await this.getResearchContentRef(innerRefResearchContent.external_id);
 
