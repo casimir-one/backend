@@ -220,6 +220,20 @@ const getResearchContentRef = async (ctx) => {
   }
 }
 
+const getResearchContentReferencesGraph = async (ctx) => {
+  const contentId = ctx.params.contentId;
+
+  try {
+    const researchContentService = new ResearchContentService();
+    const graph = await researchContentService.getResearchContentReferencesGraph(contentId);
+    ctx.status = 200;
+    ctx.body = graph;
+  } catch (err) {
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 // ############ Write actions ############
 
 const updateResearchContentDarArchive = async (ctx) => {
@@ -749,6 +763,8 @@ export default {
 
   // refs
   getResearchContentRef,
+
+  getResearchContentReferencesGraph,
 
   getResearchContent,
   getPublicResearchContentListing,

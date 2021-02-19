@@ -17,6 +17,7 @@ import PROPOSAL_STATUS from './proposalStatus';
 import RESEARCH_ATTRIBUTE from './researchAttributes';
 import FILE_STORAGE from './fileStorage';
 import DISCIPLINES from './disciplines';
+import { RESEARCH_CONTENT_TYPES, CONTENT_TYPES_MAP } from './researchContentType';
 
 
 export {
@@ -37,5 +38,7 @@ export {
   PROPOSAL_STATUS,
   RESEARCH_ATTRIBUTE,
   FILE_STORAGE,
-  DISCIPLINES
+  DISCIPLINES,
+  RESEARCH_CONTENT_TYPES,
+  CONTENT_TYPES_MAP
 } 
