@@ -551,6 +551,28 @@ const signTxByTenant = async (ctx) => {
 }
 
 
+const affirmTxByTenant = async (ctx) => {
+  const { tx } = ctx.request.body;
+  const isTenantAccessToken = ctx.state.user.isTenant;
+  try {
+
+    if (isTenantAccessToken) {
+      ctx.status = 403;
+      ctx.body = `Endpoint can be used only by ${ctx.state.tenant.id} tenant`;
+      return;
+    }
+
+    const result = deipRpc.auth.signTransaction(tx, {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY });
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+
 export default {
 
   createTenantResearchAttribute,
@@ -569,5 +591,6 @@ export default {
   updateTenantSettings,
   addTenantAdmin,
   removeTenantAdmin,
-  signTxByTenant
+  signTxByTenant,
+  affirmTxByTenant
 }

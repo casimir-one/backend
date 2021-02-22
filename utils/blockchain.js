@@ -17,20 +17,14 @@ async function signOperations(operations, ownerKey) {
 
           const unsignedTX = {
             expiration: expire,
-            extensions: [[
-              "tenant_marker",
-              {
-                tenant: config.TENANT,
-                extensions: []
-              }
-            ]],
+            extensions: [],
             operations: operations,
             ref_block_num: BlockNum,
             ref_block_prefix: BlockPrefix
           };
 
           try {
-            const signedTX = deipRpc.auth.signTransaction(unsignedTX, { owner: ownerKey });
+            const signedTX = deipRpc.auth.signTransaction(unsignedTX, { owner: ownerKey }, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY });
             resolve(signedTX);
           } catch (err) {
             reject(err);
