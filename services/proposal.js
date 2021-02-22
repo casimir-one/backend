@@ -83,13 +83,21 @@ class ProposalService extends BaseReadModelService {
             return [...acc];
           }, []);
 
-        const isApproved = chainAccount.is_research_group
-          ? members.some(member => chainProposal.approvals.some(([name,]) => name == member))
-          : chainProposal.approvals.some(([name,]) => name == party);
+        let isApproved = members.some(member => chainProposal.approvals.some(([name,]) => name == member)) || chainProposal.approvals.some(([name,]) => name == party);
 
-        const isRejected = chainAccount.is_research_group
-          ? members.some(member => chainProposal.rejectors.some(([name,]) => name == member))
-          : chainProposal.rejectors.some(([name,]) => name == party);
+        let isRejected = members.some(member => chainProposal.rejectors.some(([name,]) => name == member)) || chainProposal.rejectors.some(([name,]) => name == party);
+
+        /////////////// temp solution /////////////
+
+        if (!isApproved && !isRejected && proposalRef.type == SMART_CONTRACT_TYPE.RESEARCH_NDA && chainProposal.status != 1) {
+          const group = researchGroups.find(rg => rg.external_id == party);
+          if (group.external_id == group.tenantId) {
+            if (chainProposal.status == 3) isRejected = true;
+            if (chainProposal.status == 2) isApproved = true;
+          }
+        }
+
+        /////////////// end temp solution /////////////
 
         parties[key] = {
           isProposer: party == chainProposal.proposer,
