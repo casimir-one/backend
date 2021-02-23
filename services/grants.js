@@ -3,8 +3,8 @@ import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
 
 class GrantService extends BaseReadModelService {
 
-  constructor() { 
-    super(AwardWithdrawalRequest);
+  constructor(options = { scoped: true }) { 
+    super(AwardWithdrawalRequest, options);
   }
 
   async findAwardWithdrawalRequest(awardNumber, paymentNumber) {

@@ -5,8 +5,8 @@ import ReviewRequest from './../schemas/reviewRequest';
 
 class ReviewRequestService extends BaseReadModelService {
 
-  constructor() { 
-    super(ReviewRequest); 
+  constructor(options = { scoped: true }) { 
+    super(ReviewRequest, options); 
   }
 
 

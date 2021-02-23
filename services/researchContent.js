@@ -8,8 +8,8 @@ import UsersService from './users';
 
 class ResearchContentService extends BaseReadModelService {
 
-  constructor() { 
-    super(ResearchContent);
+  constructor(options = { scoped: true }) { 
+    super(ResearchContent, options);
   }
 
   async mapResearchContents(researchContents) {

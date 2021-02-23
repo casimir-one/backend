@@ -5,7 +5,9 @@ import Review from './../schemas/review';
 
 class ReviewService extends BaseReadModelService {
 
-  constructor() { super(Review); }
+  constructor(options = { scoped: true }) { 
+    super(Review, options); 
+  }
 
   async mapReviews(reviews) {
     const chainReviews = await deipRpc.api.getReviewsAsync(reviews.map(r => r._id));

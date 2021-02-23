@@ -15,10 +15,7 @@ const expressLicensingHandler = new ExpressLicensingHandler();
 expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposalSignedEvent, tenant } = source;
 
-  const usersService = new UserService();
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService();
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const proposalsService = new ProposalService();
   const expressLicensingService = new ExpressLicensingService();
 
   const proposalId = researchExpressLicenseProposalSignedEvent.getProposalId();

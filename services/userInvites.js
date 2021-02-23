@@ -7,7 +7,9 @@ import { USER_INVITE_STATUS } from './../constants';
 
 class UserInviteService extends BaseReadModelService {
 
-  constructor() { super(UserInvite); }
+  constructor(options = { scoped: true }) {
+    super(UserInvite, options); 
+  }
 
   async findUserInvite(externalId) {
     const result = await this.findOne({ _id: externalId });

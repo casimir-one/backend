@@ -7,6 +7,7 @@ const Schema = mongoose.Schema;
 const ProposalRef = new Schema({
   "_id": { type: String, required: true },
   "tenantId": { type: String, required: true },
+  "multiTenantIds": { type: [String] },
   "type": {
     type: Number,
     enum: [...Object.values(SMART_CONTRACT_TYPE)],

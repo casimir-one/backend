@@ -58,11 +58,7 @@ const updateProposal = async (ctx, next) => {
 
   try {
 
-    const usersService = new UserService();
-    const researchGroupService = new ResearchGroupService();
-    const researchService = new ResearchService();
-    const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-
+    const proposalsService = new ProposalService();
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: proposalId } = payload;
@@ -146,11 +142,7 @@ const deleteProposal = async (ctx, next) => {
 
   try {
 
-    const usersService = new UserService();
-    const researchGroupService = new ResearchGroupService();
-    const researchService = new ResearchService();
-    const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-
+    const proposalsService = new ProposalService();
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: proposalId } = payload;
@@ -233,11 +225,7 @@ const getAccountProposals = async (ctx) => {
   const username = ctx.params.username;
 
   try {
-    const usersService = new UserService();
-    const researchGroupService = new ResearchGroupService();
-    const researchService = new ResearchService();
-    const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-
+    const proposalsService = new ProposalService();
     let result = await proposalsService.getAccountProposals(username);
     result.sort(function (a, b) {
       return new Date(b.proposal.created_at) - new Date(a.proposal.created_at);
@@ -255,12 +243,7 @@ const getProposalById = async (ctx) => {
   const externalId = ctx.params.proposalExternalId;
 
   try {
-
-    const usersService = new UserService();
-    const researchGroupService = new ResearchGroupService();
-    const researchService = new ResearchService();
-    const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-
+    const proposalsService = new ProposalService();
     const result = await proposalsService.getProposal(externalId);
     ctx.body = result;
   } catch (err) {

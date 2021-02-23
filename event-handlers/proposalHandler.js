@@ -6,27 +6,43 @@ import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import ProposalService from './../services/proposal';
 import UserService from './../services/users';
+import config from './../config';
 
 class ProposalHandler extends EventEmitter { }
 
 const proposalHandler = new ProposalHandler();
 
+const usersService = new UserService({ scoped: false });
+const researchGroupService = new ResearchGroupService({ scoped: false });
+const proposalsService = new ProposalService({ scoped: false });
 
 async function createProposalRef(event, chainContractType) {
 
-  const usersService = new UserService();
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService();
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
-
   const proposalId = event.getProposalId();
   const eventModel = event.getSourceData();
+  const chainProposal = await deipRpc.api.getProposalStateAsync(proposalId);
 
+  const chainAccounts = await deipRpc.api.getAccountsAsync(chainProposal.required_approvals);
+
+  const researchGroupsNames = chainAccounts.filter(a => a.is_research_group).map(a => a.name);
+  const usersNames = chainAccounts.filter(a => !a.is_research_group).map(a => a.name);
+
+  const involvedUsers = await usersService.getUsers(usersNames);
+  const involvedResearchGroups = await researchGroupService.getResearchGroups(researchGroupsNames);
+
+  const multiTenantIds = [...involvedUsers, ...involvedResearchGroups].reduce((acc, item) => {
+    if (!acc.some(id => id == item.tenantId)) {
+      acc.push(item.tenantId);
+    }
+    return acc;
+  }, []);
+  
   const proposalRef = await proposalsService.createProposalRef(proposalId, {
     type: chainContractType,
     details: {
       ...eventModel
-    }
+    },
+    multiTenantIds: multiTenantIds
   });
 
   return proposalRef;

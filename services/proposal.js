@@ -2,14 +2,18 @@ import deipRpc from '@deip/rpc-client';
 import BaseReadModelService from './base';
 import ProposalRef from './../schemas/proposal';
 import { SMART_CONTRACT_TYPE } from './../constants';
+import ResearchService from './../services/research';
+import ResearchGroupService from './../services/researchGroup';
+import UserService from './../services/users';
+
+const usersService = new UserService({ scoped: false });
+const researchGroupService = new ResearchGroupService({ scoped: false });
+const researchService = new ResearchService({ scoped: false });
 
 class ProposalService extends BaseReadModelService {
 
-  constructor(usersService, researchGroupService, researchService) {
-    super(ProposalRef);
-    this.usersService = usersService;
-    this.researchService = researchService;
-    this.researchGroupService = researchGroupService;
+  constructor(options = { scoped: true }) {
+    super(ProposalRef, options);
   }
 
   
@@ -52,8 +56,8 @@ class ProposalService extends BaseReadModelService {
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
-    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
-    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
 
     const proposals = [];
 
@@ -201,8 +205,8 @@ class ProposalService extends BaseReadModelService {
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
     // currently we allow to buy the license only for user account
-    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researches = await this.researchService.getResearches(chainResearches.map(r => r.external_id));
+    const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researches = await researchService.getResearches(chainResearches.map(r => r.external_id));
 
     return requests.map((req) => {
       const extendedDetails = {
@@ -229,8 +233,8 @@ class ProposalService extends BaseReadModelService {
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
-    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
@@ -265,8 +269,8 @@ class ProposalService extends BaseReadModelService {
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
-    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
@@ -293,7 +297,7 @@ class ProposalService extends BaseReadModelService {
       return acc;
     }, []);
 
-    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -318,8 +322,8 @@ class ProposalService extends BaseReadModelService {
       return acc;
     }, []);
 
-    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
-    const researches = await this.researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -338,7 +342,7 @@ class ProposalService extends BaseReadModelService {
       return acc;
     }, []);
 
-    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -363,8 +367,8 @@ class ProposalService extends BaseReadModelService {
       return acc;
     }, []);
 
-    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
-    const researches = await this.researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -397,8 +401,8 @@ class ProposalService extends BaseReadModelService {
     }, []);
 
 
-    const researchGroups = await this.researchGroupService.getResearchGroups(accountNames.map(a => a));
-    const researches = await this.researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
     const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => deipRpc.api.getResearchTokenSaleAsync(id)));
 
 
@@ -429,8 +433,8 @@ class ProposalService extends BaseReadModelService {
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
-    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -458,8 +462,8 @@ class ProposalService extends BaseReadModelService {
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
-    const users = await this.usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await this.researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
+    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -478,7 +482,7 @@ class ProposalService extends BaseReadModelService {
       return acc;
     }, []);
 
-    const researches = await this.researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
 
     return proposals.map(proposal => {
       const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
@@ -488,13 +492,15 @@ class ProposalService extends BaseReadModelService {
 
   async createProposalRef(externalId, {
     type,
-    details
+    details,
+    multiTenantIds = []
   }) {
 
     const result = await this.createOne({
       _id: externalId,
       type: type,
-      details: details
+      details: details,
+      multiTenantIds: multiTenantIds
     });
 
     return result;

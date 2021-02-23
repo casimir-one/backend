@@ -8,10 +8,12 @@ class BaseReadModelService {
 
   _schema = undefined;
   _tenant = undefined;
+  _scoped = undefined;
 
-  constructor(schema) {
+  constructor(schema, options = { scoped: true }) {
     assert(schema != null, "Service read model schema is not defined");
     this._schema = schema;
+    this._scoped = options.scoped;
   }
 
 
@@ -30,17 +32,18 @@ class BaseReadModelService {
 
   async getBaseScopeQuery() {
     const tenant = await this.getTenantInstance();
+    if (!this._scoped) return {};
 
     if (tenant.network.scope.length) {
       const isAll = tenant.network.scope.some(s => s == 'all'); 
       if (isAll) { // temp solution until access management implementation
         const tenants = await TenantProfile.find({});
-        return { tenantId: { $in: [...tenants.map(t => t._id.toString())] } };
+        return { $or: [{ tenantId: { $in: [...tenants.map(t => t._id.toString())] } }, { multiTenantIds: { $in: [...tenants.map(t => t._id.toString())] } }] };
       } else {
-        return { tenantId: { $in: [...tenant.network.scope] } };
+        return { $or: [{ tenantId: { $in: [...tenant.network.scope] } }, { multiTenantIds: { $in: [...tenant.network.scope] } }] };
       }
     } else {
-      return { tenantId: { $in: [tenant._id] } };
+      return { $or: [{ tenantId: { $in: [tenant._id] } }, { multiTenantIds: { $in: [tenant._id] } }] };
     }
   }
 

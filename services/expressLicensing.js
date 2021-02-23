@@ -5,8 +5,8 @@ import deipRpc from '@deip/rpc-client';
 
 class ExpressLicensingService extends BaseReadModelService {
 
-  constructor() {
-    super(ExpressLicense);
+  constructor(options = { scoped: true }) {
+    super(ExpressLicense, options);
   }
 
   async mapExpressLicenses(expressLicenses) {

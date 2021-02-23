@@ -8,7 +8,9 @@ import * as blockchainService from './../utils/blockchain';
 
 class UserService extends BaseReadModelService {
 
-  constructor() { super(UserProfile); }
+  constructor(scoped = true) {
+    super(UserProfile, scoped); 
+  }
 
   async mapUsers(profiles) {
     const chainAccounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));

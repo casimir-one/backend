@@ -50,10 +50,8 @@ researchGroupHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => h
 researchGroupHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdateProposalSignedEvent, tenant } = source;
 
-  const usersService = new UserService();
-  const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const proposalsService = new ProposalService();
 
   const proposalId = researchGroupUpdateProposalSignedEvent.getProposalId();
 

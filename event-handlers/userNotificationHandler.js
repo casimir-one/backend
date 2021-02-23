@@ -9,9 +9,9 @@ import ResearchService from '../services/research';
 import ResearchGroupService from '../services/researchGroup';
 import ProposalService from './../services/proposal';
 
-const userService = new UserService();
-const researchGroupService = new ResearchGroupService();
-const researchService = new ResearchService();
+const userService = new UserService({ scoped: false });
+const researchGroupService = new ResearchGroupService({ scoped: false });
+const researchService = new ResearchService({ scoped: false });
 const userNotificationService = new UserNotificationService();
 
 class UserNotificationHandler extends EventEmitter { }
@@ -389,7 +389,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (paylo
 
 
 userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async ({ event: userInvitationProposedEvent }) => {
-  const proposalsService = new ProposalService(userService, researchGroupService,researchService);
+  const proposalsService = new ProposalService();
   const proposalId = userInvitationProposedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
 
@@ -428,7 +428,7 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async ({ event: 
 
 
 userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async ({ event: userInvitationProposalSignedEvent }) => {
-  const proposalsService = new ProposalService(userService, researchGroupService,researchService);
+  const proposalsService = new ProposalService();
 
   const proposalId = userInvitationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
@@ -498,7 +498,7 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async ({ 
 
 
 userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async ({ event: userInvitationProposalRejectedEvent }) => {
-  const proposalsService = new ProposalService(userService, researchGroupService, researchService);
+  const proposalsService = new ProposalService();
 
   const proposalId = userInvitationProposalRejectedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
@@ -556,7 +556,7 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event:
 });
 
 userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({ event: userResignationProposalSignedEvent }) => {
-  const proposalsService = new ProposalService(userService, researchGroupService, researchService);
+  const proposalsService = new ProposalService();
   const proposalId = userResignationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
   const { extendedDetails: { researchGroup, member: excludedUser }, proposer: emitterUser } = proposal;

@@ -5,7 +5,9 @@ import ResearchApplication from './../schemas/researchApplication';
 
 class ResearchApplicationService extends BaseReadModelService {
 
-  constructor() { super(ResearchApplication); }
+  constructor(options = { scoped: true }) { 
+    super(ResearchApplication, options); 
+  }
 
 
   async getResearchApplication(applicationId) {

@@ -4,8 +4,8 @@ import InvestmentPortfolio from './../schemas/investmentPortfolio';
 
 class InvestmentPortfolioService extends BaseReadModelService {
 
-  constructor() {
-    super(InvestmentPortfolio);
+  constructor(options = { scoped: true }) {
+    super(InvestmentPortfolio, options);
   }
 
 

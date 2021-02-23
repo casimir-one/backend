@@ -10,8 +10,8 @@ import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS } from './
 
 class ResearchService extends BaseReadModelService {
 
-  constructor() { 
-    super(Research);
+  constructor(options = { scoped: true }) { 
+    super(Research, options);
   }
 
   async getResearchAttributes() {

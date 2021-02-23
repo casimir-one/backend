@@ -5,7 +5,9 @@ import JoinRequest from './../schemas/joinRequest';
 
 class UserJoinRequestService extends BaseReadModelService {
 
-  constructor() { super(JoinRequest); }
+  constructor(options = { scoped: true }) {
+    super(JoinRequest, options); 
+  }
 
 
   async getJoinRequestsByResearchGroup(researchGroupExternalId) {

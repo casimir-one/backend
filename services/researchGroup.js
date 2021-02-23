@@ -5,7 +5,9 @@ import ResearchGroup from './../schemas/researchGroup';
 
 class ResearchGroupService extends BaseReadModelService {
 
-  constructor() { super(ResearchGroup); }
+  constructor(options = { scoped: true }) { 
+    super(ResearchGroup, options); 
+  }
 
   async mapResearchGroups(researchGroups) {
     const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroups.map(r => r._id));

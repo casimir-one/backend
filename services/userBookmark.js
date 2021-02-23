@@ -5,7 +5,9 @@ import UserBookmark from './../schemas/userBookmark';
 
 class UserBookmarkService extends BaseReadModelService {
 
-  constructor() { super(UserBookmark); }
+  constructor(options = { scoped: true }) { 
+    super(UserBookmark, options); 
+  }
 
 
   async getUserBookmarks(username, type, ref) {

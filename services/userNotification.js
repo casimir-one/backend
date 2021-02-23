@@ -4,7 +4,9 @@ import UserNotification from './../schemas/userNotification';
 
 class UserNotificationService extends BaseReadModelService {
 
-  constructor() { super(UserNotification); }
+  constructor(options = { scoped: true }) { 
+    super(UserNotification, options); 
+  }
 
   async getUserNotification(id) {
     const result = await this.findOne({ _id: id });

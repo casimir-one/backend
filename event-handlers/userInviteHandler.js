@@ -14,11 +14,8 @@ const userInviteHandler = new UserInviteHandler();
 userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userInvitationProposedEvent, emitter, tenant } = source;
 
-  const usersService = new UserService();
   const userInviteService = new UserInviteService();
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const proposalsService = new ProposalService();
 
   const { invitee, researchGroupExternalId, rewardShare, researches, notes } = userInvitationProposedEvent.getSourceData();
   const expiration = userInvitationProposedEvent.getProposalExpirationTime();
@@ -44,11 +41,8 @@ userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => ha
 userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userInvitationProposalSignedEvent, tenant } = source;
 
-  const usersService = new UserService();
   const userInviteService = new UserInviteService();
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
-  const proposalsService = new ProposalService(usersService, researchGroupService, researchService);
+  const proposalsService = new ProposalService();
 
   const proposalId = userInvitationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
