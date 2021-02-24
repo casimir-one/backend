@@ -93,7 +93,7 @@ const run = async ({
     }
   });
   
-  const snapshotDisciplines = [chainDisciplines, ...newDisciplines].filter(d => !genesisJSON.disciplines.some(discipline => discipline.external_id == d.external_id)).map((discipline) => {
+  const snapshotDisciplines = [...chainDisciplines, ...newDisciplines].filter(d => !genesisJSON.disciplines.some(discipline => discipline.external_id == d.external_id)).map((discipline) => {
     return {
       "name": discipline.name,
       "external_id": discipline.external_id,
