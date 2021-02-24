@@ -65,7 +65,7 @@ class ResearchContentService extends BaseReadModelService {
   }
 
   async findDraftResearchContentRefsByResearch(researchExternalId) {
-    const result = await this.findMany({ researchExternalId, $or: [{ status: RESEARCH_CONTENT_STATUS.IN_PROGRESS }, { status: RESEARCH_CONTENT_STATUS.PROPOSED }] });
+    const result = await this.findMany({ researchExternalId, status: { $in: [ RESEARCH_CONTENT_STATUS.IN_PROGRESS, RESEARCH_CONTENT_STATUS.PROPOSED ] } });
     return result;
   }
 
