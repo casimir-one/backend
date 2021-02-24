@@ -34,13 +34,10 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
 
-  const researches = Research.find({});
-
   await AwardWithdrawalRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await ExpressLicense.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await InvestmentPortfolio.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await JoinRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await Proposal.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Proposal.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Research.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await ResearchApplication.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });

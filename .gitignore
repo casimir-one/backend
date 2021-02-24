@@ -10,3 +10,5 @@ local-files/*
 /config/environment/.local*.env
 /config/environment/.demo.env
 /config/environment/.demo*.env
+/config/environment/.tto*.env
+/scripts/genesis-*.json
