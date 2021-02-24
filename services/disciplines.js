@@ -6,27 +6,30 @@ import Discipline from './../schemas/discipline';
 
 class DisciplinesService extends BaseReadModelService {
 
-  constructor() {
-    super(Discipline);
+  constructor(options = { scoped: true }) {
+    super(Discipline, options);
   }
 
   mapDisciplines(disciplines) {
     return disciplines.map(d => ({ ...d, externalId: d._id }))
   }
 
-  async getDomainDisciplines(disciplinesCount = CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT, excluded = DISCIPLINES.EXCLUDED) {
-    // const chainDisciplines = await deipRpc.api.lookupDisciplinesAsync(0, disciplinesCount);
+  async getDomainDisciplines(excluded = DISCIPLINES.EXCLUDED) {
     const disciplines = await this.findMany({});
-    const result = this.mapDisciplines(disciplines.filter(d => !excluded.includes(d._id)))
+    const filtered = disciplines.filter(d => !excluded.includes(d._id));
+    if (!filtered.length) return [];
+    const result = this.mapDisciplines(filtered);
     return result;
   }
 
   async getDisciplinesByResearch(researchExternalId) {
     const researchService = new ResearchService();
-    const disciplines = await this.findMany({});
     const research = await researchService.getResearch(researchExternalId);
     const researchDisciplines = await deipRpc.api.getDisciplinesByResearchAsync(research.id);
-    const result = this.mapDisciplines(disciplines.filter(d => researchDisciplines.find(({external_id}) => d._id === external_id)))
+    const disciplines = await this.findMany({});
+    const filtered = disciplines.filter(d => researchDisciplines.some(({ external_id }) => d._id === external_id));
+    if (!filtered.length) return [];
+    const result = this.mapDisciplines(filtered);
     return result;
   }
  

@@ -15,7 +15,7 @@ const queue = require('queue')
 
 
 const CHAIN_CONSTANTS = require('./../constants/chainConstants').default;
-const { RESEARCH_CONTENT_TYPES } = require('./../constants');
+const { RESEARCH_CONTENT_TYPES, RESEARCH_STATUS } = require('./../constants');
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
@@ -179,21 +179,24 @@ const run = async ({
   const mongoose = require('mongoose');
   await mongoose.connect(DEIP_MONGO_STORAGE_CONNECTION_URL);
   const collections = await mongoose.connection.db.collections();
-  const collectionsMap = collections.reduce((map, collection) => {
+  const collectionsDocsMap = collections.reduce((map, collection) => {
     map[collection.collectionName] = [];
     return map;
   }, {});
-  const collectionsNames = Object.keys(collectionsMap);
+  const collectionsNames = Object.keys(collectionsDocsMap);
 
   const tenantSettingsStr = await readFile('./tenant.settings.json', 'utf8');
   const tenantSettings = JSON.parse(tenantSettingsStr);
 
+  const oldTenantDoc = await mongoose.connection.db.collection('tenants-profiles').findOne({ _id: TENANT });
+  const oldSettings = oldTenantDoc.settings;
+
   const docs = await Promise.all(collections.map(collection => collection.find({}).toArray()));
   for (let i = 0; i < collectionsNames.length; i++) {
     let collectionName = collectionsNames[i];
-    collectionsMap[collectionName].push(...docs[i].map((doc) => {
+    collectionsDocsMap[collectionName].push(...docs[i].map((doc) => {
       if (collectionName == 'tenants-profiles') {
-        return { ...doc, tenantSettings, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+        return { ...doc, settings: { ...tenantSettings }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
       }
       else if (collectionName == 'proposals') {
         return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT] }
@@ -203,6 +206,9 @@ const run = async ({
           return null;
         }
         return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT] }
+      }
+      else if (collectionName == 'researches') {
+        return { ...doc, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? RESEARCH_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
       }
       else if (collectionName == 'research-contents') {
         return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)), }
@@ -253,7 +259,7 @@ const run = async ({
 
   await Promise.all(collections2.map(collection => collection.collectionName == 'tenants-profiles' ? collection.deleteOne({ _id: TENANT }) : collection.deleteMany({ tenantId: TENANT })));
   await Promise.all(collectionsNames.filter(collectionName => !collections2Names.some(name => name == collectionName)).map(collectionName => mongoose.connection.db.createCollection(collectionName)));
-  await Promise.all(collectionsNames.map(collectionName => collectionsMap[collectionName].length ? mongoose.connection.db.collection(collectionName).insertMany(collectionsMap[collectionName]) : Promise.resolve()));
+  await Promise.all(collectionsNames.map(collectionName => collectionsDocsMap[collectionName].length ? mongoose.connection.db.collection(collectionName).insertMany(collectionsDocsMap[collectionName]) : Promise.resolve()));
   await mongoose.disconnect();
 };
 

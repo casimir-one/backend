@@ -44,6 +44,7 @@ class UserService extends BaseReadModelService {
 
   async getUsers(usernames) {
     const profiles = await this.findMany({ _id: { $in: [...usernames] }, status: USER_PROFILE_STATUS.APPROVED });
+    if (!profiles.length) return [];
     const result = await this.mapUsers(profiles);
     return result;
   }
@@ -77,6 +78,7 @@ class UserService extends BaseReadModelService {
   async getUsersByResearchGroup(researchGroupExternalId) {
     const membershipTokens = await deipRpc.api.getResearchGroupMembershipTokensAsync(researchGroupExternalId);
     const profiles = await this.findMany({ _id: { $in: [...membershipTokens.map(rgt => rgt.owner)] }, status: USER_PROFILE_STATUS.APPROVED });
+    if (!profiles.length) return [];
     const result = await this.mapUsers(profiles);
     return result;
   }
@@ -85,6 +87,7 @@ class UserService extends BaseReadModelService {
   async getUsersByTenant(tenantId) {
     const available = await this.findMany({ status: USER_PROFILE_STATUS.APPROVED });
     const profiles = available.filter(p => p.tenantId == tenantId);
+    if (!profiles.length) return [];
     const result = await this.mapUsers(profiles);
     return result;
   }
@@ -92,6 +95,7 @@ class UserService extends BaseReadModelService {
   
   async getUsersListing(status) {
     const profiles = await this.findMany({ status: status ? status : USER_PROFILE_STATUS.APPROVED });
+    if (!profiles.length) return [];
     const result = await this.mapUsers(profiles);
     return result;
   }
@@ -206,7 +210,6 @@ class UserService extends BaseReadModelService {
 
     const signedTx = await blockchainService.signOperations([create_account_op], wif);
     const result = await blockchainService.sendTransactionAsync(signedTx);
-
     return result;
   }
   

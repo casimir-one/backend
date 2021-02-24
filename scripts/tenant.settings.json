@@ -27,10 +27,6 @@
       "isPublished": true
     }
   ],
-  "researchBlacklist": [
-    "25f4cae077b488a6bf28ac33fa011801a7356c59"
-  ],
-  "researchWhitelist": null,
   "researchAttributes": [
     {
       "isFilterable": false,
@@ -856,15 +852,6 @@
     "admin-panel-review-setup": true,
     "admin-panel-layouts-setup": true,
     "admin-panel-network-setup": true
-  },
-  "researchComponents": [],
-  "researchCategories": [],
-  "researchAttributesAreas": {
-    "researchForm": [],
-    "researchDetailsHeader": [],
-    "researchDetailsBody": [],
-    "researchDetailsRightSidebar": [],
-    "researchCard": []
   },
   "researchLayouts": {
     "projectDetails": {

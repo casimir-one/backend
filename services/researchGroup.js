@@ -47,6 +47,7 @@ class ResearchGroupService extends BaseReadModelService {
 
   async getResearchGroups(researchGroupExternalIds) {
     const researchGroups = await this.findMany({ _id: { $in: [...researchGroupExternalIds] } });
+    if (!researchGroups.length) return [];
     const result = await this.mapResearchGroups(researchGroups);
     return result;
   }
@@ -103,6 +104,7 @@ class ResearchGroupService extends BaseReadModelService {
   async getResearchGroupsByTenant(tenantId) {
     const available = await this.findMany({});
     const researchGroups = available.filter(p => p.tenantId == tenantId);
+    if (!researchGroups.length) return [];
     const result = await this.mapResearchGroups(researchGroups);
     return result;
   }

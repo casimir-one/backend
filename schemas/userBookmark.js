@@ -10,9 +10,7 @@ const UserBookmark = new Schema({
     enum: ['research'],
     required: true,
   },
-  "ref": { type: String, required: true },
-  "created": { type: Date, default: Date.now },
-  "updated": { type: Date, default: Date.now },
+  "ref": { type: String, required: true }
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 UserBookmark.index({ username: 1, type: 1, ref: 1 }, { unique: true });

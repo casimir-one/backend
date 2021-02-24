@@ -36,18 +36,21 @@ class ResearchContentService extends BaseReadModelService {
 
   async getResearchContents(researchContentExternalIds) {
     const researchContents = await this.findMany({ _id: { $in: [...researchContentExternalIds] }, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    if (!researchContents.length) return [];
     const result = await this.mapResearchContents(researchContents);
     return result;
   }
 
   async lookupResearchContents() {
     const researchContents = await this.findMany({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    if (!researchContents.length) return [];
     const result = await this.mapResearchContents(researchContents);
     return result;
   }
 
   async getResearchContentsByResearch(researchExternalId) {
     const researchContents = await this.findMany({ researchExternalId , status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    if (!researchContents.length) return [];
     const result = await this.mapResearchContents(researchContents);
     return result;
   }
@@ -55,6 +58,7 @@ class ResearchContentService extends BaseReadModelService {
   async getResearchContentsByTenant(tenantId) {
     const available = await this.findMany({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
     const researchContents = available.filter(r => r.tenantId == tenantId);
+    if (!researchContents.length) return [];
     const result = await this.mapResearchContents(researchContents);
     return result;
   }

@@ -126,6 +126,7 @@ class ResearchService extends BaseReadModelService {
 
   async lookupResearches(filter) {
     const researches = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
+    if (!researches.length) return [];
     const result = await this.mapResearch(researches, filter);
     return result;
   }
@@ -142,6 +143,7 @@ class ResearchService extends BaseReadModelService {
 
   async getResearches(researchesExternalIds) {
     const researches = await this.findMany({ _id: { $in: [...researchesExternalIds] }, status: RESEARCH_STATUS.APPROVED });
+    if (!researches.length) return [];
     const result = await this.mapResearch(researches);
     return result;
   }
@@ -149,6 +151,7 @@ class ResearchService extends BaseReadModelService {
 
   async getResearchesByResearchGroup(researchGroupExternalId) {
     const researches = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: RESEARCH_STATUS.APPROVED });
+    if (!researches.length) return [];
     const result = await this.mapResearch(researches);
     return result;
   }
@@ -157,6 +160,7 @@ class ResearchService extends BaseReadModelService {
   async getResearchesByTenant(tenantId) {
     const available = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
     const researches = available.filter(r => r.tenantId == tenantId);
+    if (!researches.length) return [];
     const result = await this.mapResearch(researches);
     return result;
   }
@@ -165,6 +169,7 @@ class ResearchService extends BaseReadModelService {
   async getResearchesForMember(member) {
     const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
     const researches = await this.findMany({ _id: { $in: [...chainResearches.map(r => r.external_id)] }, status: RESEARCH_STATUS.APPROVED });
+    if (!researches.length) return [];
     const result = await this.mapResearch(researches);
     return result;
   }

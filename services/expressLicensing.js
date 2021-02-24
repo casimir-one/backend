@@ -39,12 +39,14 @@ class ExpressLicensingService extends BaseReadModelService {
 
   async getExpressLicensesByResearches(researchExternalIds) {
     const expressLicenses = await this.findMany({ researchExternalId: { $in: researchExternalIds } });
+    if (!expressLicenses.length) return [];
     const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }
 
   async getResearchLicense(externalId) {
     const expressLicenses = await this.findOne({ _id: externalId });
+    if (!expressLicenses) return null;
     const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }
@@ -52,6 +54,7 @@ class ExpressLicensingService extends BaseReadModelService {
   async getResearchLicensesByLicensee(licensee) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenseeAsync(licensee);
     const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    if (!expressLicenses.length) return [];
     const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }
@@ -59,12 +62,14 @@ class ExpressLicensingService extends BaseReadModelService {
   async getResearchLicensesByLicenser(licenser) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenserAsync(licenser);
     const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    if (!expressLicenses.length) return [];
     const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }
 
   async getResearchLicensesByResearch(researchExternalId) {
     const expressLicenses = await this.findMany({ researchExternalId: researchExternalId });
+    if (!expressLicenses.length) return [];
     const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }
@@ -72,6 +77,7 @@ class ExpressLicensingService extends BaseReadModelService {
   async getResearchLicensesByLicenseeAndResearch(licensee, researchId) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenseeAndResearchAsync(licensee, researchId);
     const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    if (!expressLicenses.length) return [];
     const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }
@@ -79,6 +85,7 @@ class ExpressLicensingService extends BaseReadModelService {
   async getResearchLicensesByLicenseeAndLicenser(licensee, licenser) {
     const licenses = await deipRpc.api.getResearchLicensesByLicenseeAndLicenserAsync(licensee, licenser);
     const expressLicenses = await this.findMany({ _id: { $in: licenses.map(l => l._id) } });
+    if (!expressLicenses.length) return [];
     const result = await this.mapExpressLicenses(expressLicenses);
     return result;
   }

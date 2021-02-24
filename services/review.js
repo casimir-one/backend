@@ -33,18 +33,21 @@ class ReviewService extends BaseReadModelService {
 
   async getReviewsByResearch(researchExternalId) {
     const reviews = await this.findMany({ researchExternalId: researchExternalId });
+    if (!reviews.length) return [];
     const result = await this.mapReviews(reviews);
     return result;
   }
 
   async getReviewsByResearchContent(researchContentExternalId) {
-    const reviews = await this.findMany({ researchContentExternalId: researchContentExternalId });
+    const reviews = await this.findMany({ researchContentExternalId: researchContentExternalId })
+    if (!reviews.length) return [];
     const result = await this.mapReviews(reviews);
     return result;
   }
 
   async getReviewsByAuthor(author) {
     const reviews = await this.findMany({ author: author });
+    if (!reviews.length) return [];
     const result = await this.mapReviews(reviews);
     return result;
   }  
@@ -71,9 +74,7 @@ class ReviewService extends BaseReadModelService {
 
   async getReviewVotes(reviewExternalId) {
     const review = await this.getReview(reviewExternalId);
-    if (!review) {
-      return [];
-    }
+    if (!review) return [];
     const result = await deipRpc.api.getReviewVotesByReviewIdAsync(review.id)
     return result;
   }
