@@ -12,6 +12,7 @@ const config = require('./../config');
 const fs = require('fs');
 const util = require('util');
 const queue = require('queue')
+const CryptoJS = require("crypto-js");
 
 
 const CHAIN_CONSTANTS = require('./../constants/chainConstants').default;
@@ -108,14 +109,29 @@ const run = async ({
       "current_supply": asset.current_supply
     };
   });
+
+
   
   const snapshotResearchGroups = chainResearchGroups.filter(rg => !rg.is_personal && !genesisJSON.research_groups.some(researchGroup => researchGroup.account == rg.account)).map(rg => {
+    
+    function getKeys() {
+      const { owner: privKey, ownerPubkey: pubKey } = deipRpc.auth.getPrivateKeys(
+        CryptoJS.lib.WordArray.random(32),
+        CryptoJS.lib.WordArray.random(32),
+        ['owner']
+      );
+
+      // console.log("--->", { TENANT, privKey, pubKey });
+      return { privKey, pubKey };
+    }
+
     return {
       "account": rg.external_id,
       "creator": rg.creator,
       "description": rg.description,
       "members": chainResearchGroupMembershipTokensMap[rg.external_id],
-      "tenant": TENANT
+      "tenant": TENANT,
+      "public_key": rg.external_id == TENANT ? getKeys().pubKey : ""
     }
   });
 
