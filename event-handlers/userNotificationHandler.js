@@ -8,6 +8,7 @@ import ReviewService from '../services/review';
 import ResearchService from '../services/research';
 import ResearchGroupService from '../services/researchGroup';
 import ProposalService from './../services/proposal';
+import TenantService from './../services/tenant';
 
 const userService = new UserService({ scoped: false });
 const researchGroupService = new ResearchGroupService({ scoped: false });
@@ -724,5 +725,95 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, 
   });
 });
 
+userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSED, async ({ event: researchNdaProposedEvent }) => {
+  const tenantService = new TenantService()
+  const { researchExternalId } = researchNdaProposedEvent.getSourceData();
+  const eventEmitter = researchNdaProposedEvent.getEventEmitter()
+
+  const research = await researchService.getResearch(researchExternalId);
+  const emitter = await userService.getUser(eventEmitter);
+  const tenant = await tenantService.getTenant(emitter.tenantId);
+
+  const notificationsPromises = [];
+
+  for (let i = 0; i < research.members.length; i++) {
+    const username = research.members[i];
+    let promise = userNotificationService.createUserNotification({
+      username,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_PROPOSED,
+      metadata: {
+        research,
+        emitter,
+        tenant
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
+userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, async ({ event: researchNdaProposalSignedEvent }) => {
+  const tenantService = new TenantService()
+  const proposalsService = new ProposalService();
+
+  const proposalId = researchNdaProposalSignedEvent.getProposalId();
+  
+  const proposal = await proposalsService.getProposal(proposalId);
+  const research = await researchService.getResearch(proposal.details.researchExternalId);
+  const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
+  const creator = await userService.getUser(proposal.proposer.username);
+
+  const notificationsPromises = [];
+
+  for (let i = 0; i < [...research.members, proposal.proposer.username].length; i++) {
+    const username = research.members[i] || proposal.proposer.username;
+    let promise = userNotificationService.createUserNotification({
+      username,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_SIGNED,
+      metadata: {
+        research,
+        creator,
+        tenant
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
+});
+
+userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, async ({ event: researchNdaProposalRejectedEvent }) => {
+  const tenantService = new TenantService()
+  const proposalsService = new ProposalService();
+
+  const proposalId = researchNdaProposalRejectedEvent.getProposalId();
+  
+  const proposal = await proposalsService.getProposal(proposalId);
+  const research = await researchService.getResearch(proposal.details.researchExternalId);
+  const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
+  const creator = await userService.getUser(proposal.proposer.username);
+
+  const notificationsPromises = [];
+
+  for (let i = 0; i < [...research.members, proposal.proposer.username].length; i++) {
+    const username = research.members[i] || proposal.proposer.username;
+    let promise = userNotificationService.createUserNotification({
+      username,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_REJECTED,
+      metadata: {
+        research,
+        creator,
+        tenant
+      }
+    });
+    notificationsPromises.push(promise);
+  }
+
+  Promise.all(notificationsPromises);
+});
 
 export default userNotificationHandler;
