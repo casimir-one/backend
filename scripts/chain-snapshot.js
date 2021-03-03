@@ -282,7 +282,7 @@ const run = async ({
     collectionsDocsMap[collectionName].push(...docs[i].map((doc) => {
       if (collectionName == 'tenants-profiles') {
         if (doc._id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c") {
-          return { ...doc, name: "Ariel Scientific Innovations Ltd", shortName: "Ariel Scientific Innovations Ltd", settings: { ...tenantSettings, researchAttributes: [...tenantSettings.researchAttributes, networkAccess] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+          return { ...doc, name: "Ariel Scientific Innovations Ltd", shortName: "Ariel Scientific Innovations Ltd", settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes, networkAccess] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
         }
         return { ...doc, settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes, networkAccess ] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
       }
@@ -389,8 +389,8 @@ const network = [
     DEIP_FULL_NODE_URL: "http://127.0.0.1:9092",
     CHAIN_ID: "fdbdb6f9c06b03e53e4f1dc2b6cecc09807ac7a418a93a2bfd2b907a56df4c36",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:t5LMx2jHMTKk7kvX@jcu-web-server.deip.world:27017/deip-server?authSource=admin",
-    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
-    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
     // DEIP_SERVER_URL: "https://jcu-web-server.deip.world"
     DEIP_SERVER_URL: "https://jcu-testnet-web-server.deip.co"
   }, {
@@ -399,8 +399,8 @@ const network = [
     DEIP_FULL_NODE_URL: "http://127.0.0.1:9093",
     CHAIN_ID: "ef3e761d1489f7b954774d8f1429c49a1d5df9a8a1d0e058adf37abeb3bfcfd4",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:yDC3A76cTF@uni-lj-web-server.deip.world:27017/deip-server?authSource=admin",
-    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
-    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
     // DEIP_SERVER_URL: "https://uni-lj-web-server.deip.world"
     DEIP_SERVER_URL: "https://uni-lj-testnet-web-server.deip.co"
   }, {
@@ -409,8 +409,8 @@ const network = [
     DEIP_FULL_NODE_URL: "http://127.0.0.1:9091",
     CHAIN_ID: "62181dd6d9133ed981f62c0f1619371b1e510ff9f5b365416b00f2b6ca742aff",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:Qc3HzKtYmE@geiger-web-server.deip.world:27017/deip-server?authSource=admin",
-    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
-    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
     // DEIP_SERVER_URL: "https://geiger-web-server.deip.world"
     DEIP_SERVER_URL: "https://geiger-testnet-web-server.deip.co"
   }, {
@@ -419,8 +419,8 @@ const network = [
     DEIP_FULL_NODE_URL: "http://127.0.0.1:9090",
     CHAIN_ID: "6720f2f4bdd1dce1f8ec37de9b4cd383bf624aacdbdca5b8cf260d0ae55cd327",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:UBuw7WD3yy@ariel-web-server.deip.world:27017/deip-server?authSource=admin",
-    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
-    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
     // DEIP_SERVER_URL: "https://ariel-web-server.deip.world"
     DEIP_SERVER_URL: "https://ariel-testnet-web-server.deip.co"
   }
