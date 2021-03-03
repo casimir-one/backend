@@ -12,7 +12,7 @@ class ResearchNdaProposedEvent extends ProposalEvent(AppEvent) {
 
   getSourceData() {
     const [opName, opPayload] = this.onchainDatums.find(([opName]) => opName == 'create_research_nda');
-    const { external_id: ndaExternalId, research_external_id: researchExternalId, parties } = opPayload;
+    const { external_id: ndaExternalId, researches: [researchExternalId], parties } = opPayload;
     return { ...super.getSourceData(), ndaExternalId, researchExternalId, parties };
   }
 }
