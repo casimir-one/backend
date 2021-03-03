@@ -55,7 +55,7 @@ const run = async ({
   DEIP_FULL_NODE_URL, 
   CHAIN_ID, 
   DEIP_MONGO_STORAGE_CONNECTION_URL, 
-  NEW_DEIP_MONGO_STORAGE_CONNECTION_URL,
+  TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL,
   DEIP_SERVER_URL
 }) => {
   const deipRpc = require('@deip/rpc-client');
@@ -84,9 +84,11 @@ const run = async ({
 
   const chainAssets = await deipRpc.api.lookupAssetsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainDisciplines = await deipRpc.api.lookupDisciplinesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainProposalsStates = await deipRpc.api.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => deipRpc.api.getAccountsAssetBalancesByAssetAsync(chainAsset.string_symbol)));
 
   const snapshotUsers = chainUserAccounts.filter(a => !blackListUsers.some(name => name == a.name) && !genesisJSON.accounts.some(ac => ac.name == a.name)).map(a => {
-    const key = a.owner.key_auths[0][0];
+    const key = "DEIP7cqzf9qxb9NEkXCJQjNEsGCHG48ywEqkrcaT3owTynHr828mso"; // a.owner.key_auths[0][0];
     return {
       "name": a.name,
       "recovery_account": a.recovery_account,
@@ -102,7 +104,7 @@ const run = async ({
     };
   });
 
-  const snapshotAssets = chainAssets.filter(a => a.string_symbol != 'DEIP' && !genesisJSON.assets.some(asset => asset.symbol == a.string_symbol)).map((asset) => {
+  const snapshotAssets = chainAssets.filter(a => a.string_symbol != 'DEIP' && a.string_symbol != 'TESTS' && !genesisJSON.assets.some(asset => asset.symbol == a.string_symbol)).map((asset) => {
     return {
       "symbol": asset.string_symbol,
       "precision": asset.precision,
@@ -125,13 +127,20 @@ const run = async ({
       return { privKey, pubKey };
     }
 
+    // const public_key = rg.external_id == TENANT ? getKeys().pubKey : undefined;
+    const public_key = rg.external_id == "fa81a9ab079d34b383db5935ce18cafc96f36dc5" ? "DEIP8G25xQk3dPCdBqdihEppiZ4Rjw7Dcc5DbjGgX6tDgWFL29zepJ"
+      : rg.external_id == "00067e21d5b12b2393677e87d3fbbc52adcfbb28" ? "DEIP8FiSkbrAEHtk3GMLjEi23kdiG8QRNbUrjcC4vHasTM8FQmanNd"
+      : rg.external_id == "e7b3aabc542e77062b599d24a00b60ea6122850d" ? "DEIP8feUU1MigFXQtd5aebrrucQZx4QiaWn6WCJR5a2re1zZbDPzny"
+      : rg.external_id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c" ? "DEIP5f4JLkEhGVxzbkXVqcaYXRJ4o9C4GbBJyP3FYyyMn5EY2Trs5U" 
+      : undefined;
+
     return {
       "account": rg.external_id,
       "creator": rg.creator,
       "description": rg.description,
       "members": chainResearchGroupMembershipTokensMap[rg.external_id],
       "tenant": TENANT,
-      "public_key": rg.external_id == TENANT ? getKeys().pubKey : ""
+      "public_key": public_key
     }
   });
 
@@ -181,14 +190,53 @@ const run = async ({
       "scores": review.scores
     }
   });
-  
+
+  const snapshotProposals = chainProposalsStates.filter((p) => p.status == 1).map((p) => {
+    return {
+      external_id: p.external_id,
+      proposer: p.proposer,
+      review_period_seconds: p.review_period_seconds ? p.review_period_seconds : undefined,
+      expiration_time: p.expiration_time,
+      active_approvals: p.active_approvals,
+      owner_approvals: p.owner_approvals,
+      key_approvals: p.key_approvals,
+      serialized_proposed_transaction: p.serialized_proposed_transaction
+    }
+  }).filter(p => !!p);
+
+  const outdatedProposals = chainProposalsStates.filter((p) => p.status != 1).map((p) => p.external_id);
+
+  let init_supply = 0;
+  const snapshotAccountBallances = [].concat.apply([], chainAssetsBallances.map((chainAssetBallances) => {
+    const balances = chainAssetBallances.map((chainAssetBallance) => {
+      const [stringAmount, symbol] = chainAssetBallance.amount.split(' ');
+      const amount = parseInt(stringAmount.replace('.', ''));
+      const isCoreAsset = symbol == 'DEIP' || symbol == 'TESTS';
+      if (isCoreAsset) {
+        init_supply += amount;
+      }
+      return {
+        "owner": chainAssetBallance.owner,
+        "amount": amount,
+        "symbol": isCoreAsset ? undefined : symbol,
+        "tokenized_research": chainAssetBallance.tokenized_research || undefined
+      };
+    });
+
+    return balances;
+  })); 
+  snapshotAccountBallances.sort((a, b) => (a.owner > b.owner) ? 1 : ((b.owner > a.owner) ? -1 : 0))
+
+  genesisJSON.init_supply = init_supply;
   genesisJSON.accounts.push(...snapshotUsers);
   genesisJSON.disciplines.push(...snapshotDisciplines);
   genesisJSON.assets.push(...snapshotAssets);
+  genesisJSON.account_balances.push(...snapshotAccountBallances);
   genesisJSON.research_groups.push(...snapshotResearchGroups);
   genesisJSON.researches.push(...snapshotResearches);
   genesisJSON.research_contents.push(...snapshotResearchContents);
   genesisJSON.research_contents_reviews.push(...snapshotResearchContentReviews);
+  genesisJSON.proposals.push(...snapshotProposals);
 
 
   // OFFCHAIN DATA
@@ -215,6 +263,9 @@ const run = async ({
         return { ...doc, settings: { ...tenantSettings }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
       }
       else if (collectionName == 'proposals') {
+        if (outdatedProposals.some(id => doc._id == id)) {
+          return null;
+        }
         return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT] }
       }
       else if (collectionName == 'user-notifications') {
@@ -224,7 +275,25 @@ const run = async ({
         return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT] }
       }
       else if (collectionName == 'researches') {
-        return { ...doc, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? RESEARCH_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
+        const attributes = doc.attributes;
+        const disciplinesAttrId = "5f62d4fa98f46d2938dde1eb";
+
+        if (doc._id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
+          const disciplinesAttr = attributes.find(attr => attr.researchAttributeId == disciplinesAttrId);
+          disciplinesAttr.value = ["fd60bc92d9255aa27f356c3381ad84c6f29220a8"]; 
+        }
+
+        if (doc._id == "c1525afb6f39d76a094d8875c043cf6b00e4fb7d") {
+          const disciplinesAttr = attributes.find(attr => attr.researchAttributeId == disciplinesAttrId);
+          disciplinesAttr.value = ["bd2f73aa965f1b49da800656cd37abfade9898db"];
+        }
+
+        if (doc._id == "f22f619c1911c38a89c01df97fe2bf881b8edab3") {
+          const disciplinesAttr = attributes.find(attr => attr.researchAttributeId == disciplinesAttrId);
+          disciplinesAttr.value = ["073ac406ef75dc83d577add7e87488ff40b45848"];
+        }
+
+        return { ...doc, attributes: attributes, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? RESEARCH_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
       }
       else if (collectionName == 'research-contents') {
         return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)), }
@@ -269,7 +338,7 @@ const run = async ({
 
   await mongoose.disconnect();
 
-  await mongoose.connect(NEW_DEIP_MONGO_STORAGE_CONNECTION_URL);
+  await mongoose.connect(TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL);
   const collections2 = await mongoose.connection.db.collections();
   const collections2Names = collections2.map(collection => collection.collectionName);
 
@@ -285,34 +354,58 @@ const q = queue({ concurrency: 1 });
 const network = [
   {
     TENANT: "fa81a9ab079d34b383db5935ce18cafc96f36dc5",
-    DEIP_FULL_NODE_URL: "https://jcu-full-node.deip.world",
+    // DEIP_FULL_NODE_URL: "https://jcu-full-node.deip.world",
+    DEIP_FULL_NODE_URL: "http://127.0.0.1:9092",
     CHAIN_ID: "fdbdb6f9c06b03e53e4f1dc2b6cecc09807ac7a418a93a2bfd2b907a56df4c36",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:t5LMx2jHMTKk7kvX@jcu-web-server.deip.world:27017/deip-server?authSource=admin",
-    NEW_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-dev-server?authSource=admin",
-    DEIP_SERVER_URL: "https://jcu-web-server.deip.world"
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    // DEIP_SERVER_URL: "https://jcu-web-server.deip.world"
+    DEIP_SERVER_URL: "https://jcu-testnet-web-server.deip.co"
   }, {
     TENANT: "00067e21d5b12b2393677e87d3fbbc52adcfbb28",
-    DEIP_FULL_NODE_URL: "https://uni-lj-full-node.deip.world",
+    // DEIP_FULL_NODE_URL: "https://uni-lj-full-node.deip.world",
+    DEIP_FULL_NODE_URL: "http://127.0.0.1:9093",
     CHAIN_ID: "ef3e761d1489f7b954774d8f1429c49a1d5df9a8a1d0e058adf37abeb3bfcfd4",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:yDC3A76cTF@uni-lj-web-server.deip.world:27017/deip-server?authSource=admin",
-    NEW_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-dev-server?authSource=admin",
-    DEIP_SERVER_URL: "https://uni-lj-web-server.deip.world"
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    // DEIP_SERVER_URL: "https://uni-lj-web-server.deip.world"
+    DEIP_SERVER_URL: "https://uni-lj-testnet-web-server.deip.co"
   }, {
     TENANT: "e7b3aabc542e77062b599d24a00b60ea6122850d",
-    DEIP_FULL_NODE_URL: "https://geiger-full-node.deip.world",
+    // DEIP_FULL_NODE_URL: "https://geiger-full-node.deip.world",
+    DEIP_FULL_NODE_URL: "http://127.0.0.1:9091",
     CHAIN_ID: "62181dd6d9133ed981f62c0f1619371b1e510ff9f5b365416b00f2b6ca742aff",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:Qc3HzKtYmE@geiger-web-server.deip.world:27017/deip-server?authSource=admin",
-    NEW_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-dev-server?authSource=admin",
-    DEIP_SERVER_URL: "https://geiger-web-server.deip.world"
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    // DEIP_SERVER_URL: "https://geiger-web-server.deip.world"
+    DEIP_SERVER_URL: "https://geiger-testnet-web-server.deip.co"
   }, {
     TENANT: "8c5081e73c0af4c232a78417bc1b573ebe70c40c",
-    DEIP_FULL_NODE_URL: "https://ariel-full-node.deip.world",
+    // DEIP_FULL_NODE_URL: "https://ariel-full-node.deip.world",
+    DEIP_FULL_NODE_URL: "http://127.0.0.1:9090",
     CHAIN_ID: "6720f2f4bdd1dce1f8ec37de9b4cd383bf624aacdbdca5b8cf260d0ae55cd327",
     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:UBuw7WD3yy@ariel-web-server.deip.world:27017/deip-server?authSource=admin",
-    NEW_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-dev-server?authSource=admin",
-    DEIP_SERVER_URL: "https://ariel-web-server.deip.world"
+    // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+    TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-wip?authSource=admin",
+    // DEIP_SERVER_URL: "https://ariel-web-server.deip.world"
+    DEIP_SERVER_URL: "https://ariel-testnet-web-server.deip.co"
   }
 ];
+
+// const network = [
+//   {
+//     TENANT: "0000000000000000000000000000000000000000",
+//     DEIP_FULL_NODE_URL: "http://127.0.0.1:8090",
+//     CHAIN_ID: "432a5a35755ca4d37f42d55485bf0757f1146e1a3ea560d2e366fd0826417aba",
+//     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-dev-server?authSource=admin",
+//     // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
+//     TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-tto-migration?authSource=admin",
+//     DEIP_SERVER_URL: "http://127.0.0.1:8081"
+//   }
+// ];
 
 q.push(
 

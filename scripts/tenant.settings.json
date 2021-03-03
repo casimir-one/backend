@@ -1,32 +1,7 @@
 {
   "signUpPolicy": "free",
   "newResearchPolicy": "free",
-  "faq": [
-    {
-      "_id": "5eb359b9e7e5cebd7d4fc5aa",
-      "question": "What is TRL, MaRL, SRL?",
-      "answer": "TRL: Technology Readiness Levels, MaRL: Marketing Readiness Levels, SRL: Sales Readiness Levels.",
-      "isPublished": true
-    },
-    {
-      "_id": "5eb359b9e7e5cebd7d4fc5ab",
-      "question": "How can I become a contractor?",
-      "answer": "You can sign up with us at ar3c.com/signup. Once we receive your application, we will review it and add you to our contractor list. You or your company will be invited on an as-needed basis by our project participants to complete their projects.",
-      "isPublished": true
-    },
-    {
-      "_id": "5eb359b9e7e5cebd7d4fc5ac",
-      "question": "How can I become an investor?",
-      "answer": "You can sign up with us at ar3c.com/signup and select your category as “Investor”. Your application will be reviewed by our team and you will be added to our investor list. You can select the projects you want to invest in (using tokens) from your profile dashboard.",
-      "isPublished": true
-    },
-    {
-      "_id": "5eb359b9e7e5cebd7d4fc6ac",
-      "question": "How is an investor/project funder getting rewarded?",
-      "answer": "An investor/ project funder gets rewarded once the project goes into production. For every sale or the product or service or SaaS, you will receive tokens. Being an investor in the ACRDF, ARCF, AESIF and WECO2 Fund, you will receive dividends as well.",
-      "isPublished": true
-    }
-  ],
+  "faq": [],
   "researchAttributes": [
     {
       "isFilterable": false,
@@ -309,47 +284,6 @@
     {
       "isFilterable": false,
       "isEditable": true,
-      "isRequired": false,
-      "isHidden": false,
-      "isMultiple": true,
-      "defaultValue": null,
-      "isBlockchainMeta": false,
-      "valueOptions": [
-        {
-          "value": "5eced07956951e00205be637",
-          "title": "WECO2 Platform",
-          "shortTitle": "WECO2 Platform",
-          "description": ""
-        },
-        {
-          "value": "5eced06f56951e00205be62b",
-          "title": "Technology Partners Needed",
-          "shortTitle": "Technology Partners Needed",
-          "description": ""
-        },
-        {
-          "value": "5eced06656951e00205be620",
-          "title": "Internal Research & Development",
-          "shortTitle": "Internal Research & Development",
-          "description": ""
-        },
-        {
-          "value": "5eced05956951e00205be616",
-          "title": "Technology Partners – Research & Development",
-          "shortTitle": "Technology Partners – Research & Development",
-          "description": ""
-        }
-      ],
-      "_id": "5f68be1d54f1da26e538b996",
-      "type": "select",
-      "title": "WECHAIN Categories",
-      "shortTitle": "WECHAIN Categories",
-      "description": "",
-      "blockchainFieldMeta": null
-    },
-    {
-      "isFilterable": false,
-      "isEditable": true,
       "isRequired": true,
       "isHidden": false,
       "isMultiple": false,
@@ -434,8 +368,8 @@
       "valueOptions": [],
       "_id": "5f68d4fa98f36d2938dde5ed",
       "type": "user",
-      "title": "Project manager",
-      "shortTitle": "Project manager",
+      "title": "Licensing associate",
+      "shortTitle": "Licensing associate",
       "description": "",
       "blockchainFieldMeta": {
         "isPartial": true,
@@ -804,53 +738,27 @@
       "description": "",
       "valueOptions": [],
       "isPublished": true
-    },
-    {
-      "isFilterable": false,
-      "isEditable": true,
-      "isRequired": false,
-      "isHidden": false,
-      "isMultiple": false,
-      "defaultValue": null,
-      "isBlockchainMeta": false,
-      "_id": "5fae9a9ace42ab001f9f8393",
-      "type": "select",
-      "title": "Applied for grant",
-      "shortTitle": "Applied for grant",
-      "description": "",
-      "valueOptions": [
-        {
-          "value": "5fae9a9ace42ab001f9f8394",
-          "title": "Capacity-Building in Technology Transfer",
-          "shortTitle": "Capacity-Building in Technology Transfer"
-        },
-        {
-          "value": "5fae9a9ace42ab001f9f8395",
-          "title": "Greening the economy in line with the Sustainable Development Goals",
-          "shortTitle": "Greening the economy in line with the Sustainable Development Goals"
-        }
-      ]
     }
   ],
   "modules": {
-    "app-eci": true,
+    "app-eci": false,
     "app-crowdfunding": true,
     "app-expert-review": true,
     "app-assets-management": true,
-    "app-assets-withdrawal": true,
-    "app-assets-deposit": true,
+    "app-assets-withdrawal": false,
+    "app-assets-deposit": false,
     "app-grants-management": false,
-    "app-blockchain-explorer": true,
-    "app-user-personal-workspace": true,
+    "app-blockchain-explorer": false,
+    "app-user-personal-workspace": false,
     "admin-panel-members-management": true,
     "admin-panel-members-registration": false,
     "admin-panel-projects-management": true,
     "admin-panel-projects-registration": true,
     "admin-panel-attributes-management": true,
-    "admin-panel-attributes-registration": true,
-    "admin-panel-faq-setup": true,
-    "admin-panel-review-setup": true,
-    "admin-panel-layouts-setup": true,
+    "admin-panel-attributes-registration": false,
+    "admin-panel-faq-setup": false,
+    "admin-panel-review-setup": false,
+    "admin-panel-layouts-setup": false,
     "admin-panel-network-setup": true
   },
   "researchLayouts": {
@@ -1677,6 +1585,37 @@
               "name": "Sidebar",
               "icon": "mdi-view-split-vertical",
               "children": [
+                {
+                  "component": "DBlockWidget",
+                  "name": "Widget",
+                  "icon": "mdi-subtitles-outline",
+                  "availableAttrs": {
+                    "title": {
+                      "type": "string",
+                      "value": null
+                    }
+                  },
+                  "attrs": {
+                    "title": "Institution"
+                  },
+                  "children": [
+                    {
+                      "component": "TenantBadge",
+                      "name": "Tenant",
+                      "icon": "mdi-account-network-outline",
+                      "props": {
+                        "tenantId": "@research.tenantId"
+                      },
+                      "moduleId": "d9c6732145cd7c9e31cb860b",
+                      "type": "attribute",
+                      "id$": "35c371f7d247fb9570c47db"
+                    }
+                  ],
+                  "moduleId": "5206c9e9ac8b83884fdfb868",
+                  "type": "common",
+                  "id$": "7d33f1e642f88f73e16ea73f",
+                  "props": {}
+                },
                 {
                   "icon": "mdi-account-key-outline",
                   "name": "Network content access",
