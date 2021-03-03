@@ -48,6 +48,24 @@ const newDisciplines = [
 ];
 
 
+const networkAccess = {
+  "isFilterable": false,
+  "isEditable": false,
+  "isRequired": true,
+  "isHidden": false,
+  "isMultiple": false,
+  "defaultValue": true,
+  "isBlockchainMeta": false,
+  "valueOptions": [],
+  "_id": "5f69be12ae115a26e475fb96",
+  "type": "network-content-access",
+  "title": "Network content access",
+  "shortTitle": "Network content access",
+  "description": "",
+  "blockchainFieldMeta": null
+};
+
+
 var genesisJSON;
 
 const run = async ({ 
@@ -191,20 +209,23 @@ const run = async ({
     }
   });
 
-  const snapshotProposals = chainProposalsStates.filter((p) => p.status == 1).map((p) => {
+  const plus3years = new Date(new Date().getTime() + 86400000 * 365 * 3).toISOString().split('.')[0]; // 3 years
+  const expirationTime = `${plus3years.split('T')[0]}T00:00:00`;
+  
+  const snapshotProposals = chainProposalsStates.filter((p) => p.status == 1 || p.status == 5).map((p) => {
     return {
       external_id: p.external_id,
       proposer: p.proposer,
       review_period_seconds: p.review_period_seconds ? p.review_period_seconds : undefined,
-      expiration_time: p.expiration_time,
+      expiration_time: expirationTime,
       active_approvals: p.active_approvals,
       owner_approvals: p.owner_approvals,
       key_approvals: p.key_approvals,
       serialized_proposed_transaction: p.serialized_proposed_transaction
     }
-  }).filter(p => !!p);
+  });
 
-  const outdatedProposals = chainProposalsStates.filter((p) => p.status != 1).map((p) => p.external_id);
+  const outdatedProposals = chainProposalsStates.filter((p) => p.status != 1 && p.status != 5).map((p) => p.external_id);
 
   let init_supply = 0;
   const snapshotAccountBallances = [].concat.apply([], chainAssetsBallances.map((chainAssetBallances) => {
@@ -260,7 +281,10 @@ const run = async ({
     let collectionName = collectionsNames[i];
     collectionsDocsMap[collectionName].push(...docs[i].map((doc) => {
       if (collectionName == 'tenants-profiles') {
-        return { ...doc, settings: { ...tenantSettings }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+        if (doc._id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c") {
+          return { ...doc, name: "Ariel Scientific Innovations Ltd", shortName: "Ariel Scientific Innovations Ltd", settings: { ...tenantSettings, researchAttributes: [...tenantSettings.researchAttributes, networkAccess] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+        }
+        return { ...doc, settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes, networkAccess ] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
       }
       else if (collectionName == 'proposals') {
         if (outdatedProposals.some(id => doc._id == id)) {
@@ -296,7 +320,7 @@ const run = async ({
         return { ...doc, attributes: attributes, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? RESEARCH_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
       }
       else if (collectionName == 'research-contents') {
-        return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)), }
+        return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)) }
       }
       else if (collectionName == 'user-profiles') {
         if (blackListUsers.some(name => doc._id == name)) {
@@ -306,6 +330,9 @@ const run = async ({
       else if (collectionName == 'research-groups') {
         if (blackListUsers.some(name => doc._id == name)) {
           return null;
+        }
+        if (doc._id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c") {
+          return { ...doc, name: "Ariel Scientific Innovations Ltd", tenantId: TENANT };
         }
       }
       else if (collectionName == 'reviews') {
@@ -324,6 +351,10 @@ const run = async ({
         if (blackListUsers.some(name => doc.invitee == name || doc.creator == name)) {
           return null;
         }
+        if (outdatedProposals.some(id => doc._id == id)) {
+          return null;
+        }
+        return { ...doc, tenantId: TENANT, expiration: new Date(new Date().getTime() + 86400000 * 365 * 3) }
       }
       else if (collectionName == 'user-bookmarks') {
         if (blackListUsers.some(name => doc.username == name)) {

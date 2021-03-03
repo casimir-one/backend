@@ -19,7 +19,7 @@ class TenantService {
     if (!doc) return null;
     const profile = doc.toObject();
     const account = await deipRpc.api.getResearchGroupAsync(id);
-    return { id: profile._id, account: account.account, profile: { ...profile, network: undefined, settings: undefined } };
+    return { id: profile._id, account: account.account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
   }
 
   async getNetworkTenants() {
@@ -29,7 +29,7 @@ class TenantService {
 
     const result = profiles.map((profile) => {
       const account = accounts.find(a => a.account.name == profile._id);
-      return { id: profile._id, account: account.account, profile: { ...profile, network: undefined, settings: undefined } };
+      return { id: profile._id, account: account.account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
     });
     return result;
   }
