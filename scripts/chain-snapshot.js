@@ -48,7 +48,8 @@ const newDisciplines = [
 ];
 
 
-const networkAccess = {
+const networkAccessAttr = {
+  "_id": "5f69be12ae115a26e475fb96",
   "isFilterable": false,
   "isEditable": false,
   "isRequired": true,
@@ -57,7 +58,6 @@ const networkAccess = {
   "defaultValue": true,
   "isBlockchainMeta": false,
   "valueOptions": [],
-  "_id": "5f69be12ae115a26e475fb96",
   "type": "network-content-access",
   "title": "Network content access",
   "shortTitle": "Network content access",
@@ -65,6 +65,26 @@ const networkAccess = {
   "blockchainFieldMeta": null
 };
 
+
+const privateAttr = {
+  "_id": "5f68d4fa98f36d2938dde5ec",
+  "isFilterable": false,
+  "isEditable": true,
+  "isRequired": true,
+  "isHidden": false,
+  "isMultiple": false,
+  "defaultValue": true,
+  "isBlockchainMeta": false,
+  "valueOptions": [],
+  "type": "switch",
+  "title": "Private project",
+  "shortTitle": "Private project",
+  "description": "",
+  "blockchainFieldMeta": {
+    "isPartial": false,
+    "field": "is_private"
+  }
+};
 
 var genesisJSON;
 
@@ -282,9 +302,9 @@ const run = async ({
     collectionsDocsMap[collectionName].push(...docs[i].map((doc) => {
       if (collectionName == 'tenants-profiles') {
         if (doc._id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c") {
-          return { ...doc, name: "Ariel Scientific Innovations Ltd", shortName: "Ariel Scientific Innovations Ltd", settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes, networkAccess] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+          return { ...doc, name: "Ariel Scientific Innovations Ltd", shortName: "Ariel Scientific Innovations Ltd", settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes.filter(attr => attr._id != privateAttr._id), networkAccessAttr, privateAttr] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
         }
-        return { ...doc, settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes, networkAccess ] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+        return { ...doc, settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes.filter(attr => attr._id != privateAttr._id), networkAccessAttr, privateAttr ] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
       }
       else if (collectionName == 'proposals') {
         if (outdatedProposals.some(id => doc._id == id)) {
@@ -302,6 +322,13 @@ const run = async ({
         const attributes = doc.attributes;
         const disciplinesAttrId = "5f62d4fa98f46d2938dde1eb";
 
+        if (!attributes.some(attr => attr.researchAttributeId == privateAttr._id)) {
+          attributes.push({
+            researchAttributeId: privateAttr._id,
+            value: false
+          });
+        }
+        
         if (doc._id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
           const disciplinesAttr = attributes.find(attr => attr.researchAttributeId == disciplinesAttrId);
           disciplinesAttr.value = ["fd60bc92d9255aa27f356c3381ad84c6f29220a8"]; 
@@ -434,17 +461,6 @@ const network = [
   }
 ];
 
-// const network = [
-//   {
-//     TENANT: "0000000000000000000000000000000000000000",
-//     DEIP_FULL_NODE_URL: "http://127.0.0.1:8090",
-//     CHAIN_ID: "432a5a35755ca4d37f42d55485bf0757f1146e1a3ea560d2e366fd0826417aba",
-//     DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-dev-server?authSource=admin",
-//     // TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://deip:XTFEaoBKqYr@dev-mongodb.deip.world:27017/deip-tto-network?authSource=admin",
-//     TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL: "mongodb://127.0.0.1:27017/deip-tto-migration?authSource=admin",
-//     DEIP_SERVER_URL: "http://127.0.0.1:8081"
-//   }
-// ];
 
 q.push(
 

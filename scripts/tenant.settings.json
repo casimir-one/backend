@@ -1192,7 +1192,7 @@
                     }
                   },
                   "attrs": {
-                    "title": "Private or Public "
+                    "title": ""
                   },
                   "children": [
                     {
@@ -1328,6 +1328,20 @@
               "moduleId": "1b65947026c14dd6848df88b",
               "type": "common",
               "id$": "9706d216a8cdac83b5b84cf"
+            },
+            {
+              "icon": "mdi-toggle-switch-outline",
+              "name": "Private project",
+              "isRequired": true,
+              "isHidden": false,
+              "component": "AttributesSet",
+              "model": "researchRef.attributes.5f68d4fa98f36d2938dde5ec",
+              "props": {
+                "attribute": "@attributes.5f68d4fa98f36d2938dde5ec"
+              },
+              "moduleId": "a57373b3d4aa86f6fbe22a35",
+              "type": "attribute",
+              "id$": "bc33b9a6c24bf100e863c962"
             },
             {
               "component": "DStack",
