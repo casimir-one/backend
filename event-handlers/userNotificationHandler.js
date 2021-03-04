@@ -761,28 +761,30 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, async ({ eve
   const proposalId = researchNdaProposalSignedEvent.getProposalId();
   
   const proposal = await proposalsService.getProposal(proposalId);
-  const research = await researchService.getResearch(proposal.details.researchExternalId);
-  const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
-  const creator = await userService.getUser(proposal.proposer.username);
+  if (proposal.proposal.status != 1) {
+    const research = await researchService.getResearch(proposal.details.researchExternalId);
+    const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
+    const creator = await userService.getUser(proposal.proposer.username);
 
-  const notificationsPromises = [];
+    const notificationsPromises = [];
 
-  for (let i = 0; i < [...research.members, proposal.proposer.username].length; i++) {
-    const username = research.members[i] || proposal.proposer.username;
-    let promise = userNotificationService.createUserNotification({
-      username,
-      status: 'unread',
-      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_SIGNED,
-      metadata: {
-        research,
-        creator,
-        tenant
-      }
-    });
-    notificationsPromises.push(promise);
+    for (let i = 0; i < [...research.members, proposal.proposer.username].length; i++) {
+      const username = research.members[i] || proposal.proposer.username;
+      let promise = userNotificationService.createUserNotification({
+        username,
+        status: 'unread',
+        type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_SIGNED,
+        metadata: {
+          research,
+          creator,
+          tenant
+        }
+      });
+      notificationsPromises.push(promise);
+    }
+
+    Promise.all(notificationsPromises);
   }
-
-  Promise.all(notificationsPromises);
 });
 
 userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, async ({ event: researchNdaProposalRejectedEvent }) => {
@@ -792,28 +794,30 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, async ({ e
   const proposalId = researchNdaProposalRejectedEvent.getProposalId();
   
   const proposal = await proposalsService.getProposal(proposalId);
-  const research = await researchService.getResearch(proposal.details.researchExternalId);
-  const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
-  const creator = await userService.getUser(proposal.proposer.username);
+  if (proposal.proposal.status != 1) {
+    const research = await researchService.getResearch(proposal.details.researchExternalId);
+    const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
+    const creator = await userService.getUser(proposal.proposer.username);
 
-  const notificationsPromises = [];
+    const notificationsPromises = [];
 
-  for (let i = 0; i < [...research.members, proposal.proposer.username].length; i++) {
-    const username = research.members[i] || proposal.proposer.username;
-    let promise = userNotificationService.createUserNotification({
-      username,
-      status: 'unread',
-      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_REJECTED,
-      metadata: {
-        research,
-        creator,
-        tenant
-      }
-    });
-    notificationsPromises.push(promise);
+    for (let i = 0; i < [...research.members, proposal.proposer.username].length; i++) {
+      const username = research.members[i] || proposal.proposer.username;
+      let promise = userNotificationService.createUserNotification({
+        username,
+        status: 'unread',
+        type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_REJECTED,
+        metadata: {
+          research,
+          creator,
+          tenant
+        }
+      });
+      notificationsPromises.push(promise);
+    }
+
+    Promise.all(notificationsPromises);
   }
-
-  Promise.all(notificationsPromises);
 });
 
 export default userNotificationHandler;
