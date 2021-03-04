@@ -59,7 +59,7 @@ class ResearchService extends BaseReadModelService {
           : "Not Specified";
 
         const isPrivate = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString())
-          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString()
+          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
           : false;
 
         return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
