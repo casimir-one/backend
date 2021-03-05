@@ -91,13 +91,17 @@ class ProposalService extends BaseReadModelService {
 
         let isRejected = members.some(member => chainProposal.rejectors.some(([name,]) => name == member)) || chainProposal.rejectors.some(([name,]) => name == party);
 
-        /////////////// temp solution /////////////
+        let isHidden = false;
 
-        if (!isApproved && !isRejected && proposalRef.type == SMART_CONTRACT_TYPE.RESEARCH_NDA && chainProposal.status != 1) {
-          const group = researchGroups.find(rg => rg.external_id == party);
-          if (group.external_id == group.tenantId) {
-            if (chainProposal.status == 3) isRejected = true;
-            if (chainProposal.status == 2) isApproved = true;
+        /////////////// temp solution /////////////
+        if (proposalRef.type == SMART_CONTRACT_TYPE.RESEARCH_NDA) {
+          isHidden = researchGroups.some(({ tenantId }) => chainAccount.name === tenantId);
+          if (!isApproved && !isRejected && chainProposal.status != 1) {
+            const group = researchGroups.find(rg => rg.external_id == party);
+            if (group.external_id == group.tenantId) {
+              if (chainProposal.status == 3) isRejected = true;
+              if (chainProposal.status == 2) isApproved = true;
+            }
           }
         }
 
@@ -107,6 +111,7 @@ class ProposalService extends BaseReadModelService {
           isProposer: party == chainProposal.proposer,
           status: isApproved ? 2 : isRejected ? 3 : 1,
           account: chainAccount.is_research_group ? researchGroups.find(rg => rg.external_id == party) : users.find(user => user.account.name == party),
+          isHidden,
           signers: [
             ...users.filter((u) => possibleSigners.some(member => u.account.name == member) || u.account.name == party),
             ...researchGroups.filter((rg) => possibleSigners.some(member => rg.external_id == member) || rg.external_id == party),
