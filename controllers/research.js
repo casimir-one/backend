@@ -790,13 +790,12 @@ const getResearches = async (ctx) => {
 
 const getTenantResearchListing = async (ctx) => {
   const tenantId = ctx.params.tenantId;
-  const jwtUsername = ctx.state.user.username;
 
   try {
     const researchService = new ResearchService();
     const result = await researchService.getResearchesByTenant(tenantId);
     ctx.status = 200;
-    ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
+    ctx.body = result.filter(r => !r.isPrivate);
 
   } catch (err) {
     console.log(err);

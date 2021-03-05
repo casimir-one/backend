@@ -140,7 +140,7 @@ public_route.get('/researches', research.getResearches)
 public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', compose([researchAttributeMetaReadAuth()]), research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
-protected_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
+public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
 
 protected_route.post('/research', research.createResearch)
 protected_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
