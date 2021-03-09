@@ -120,7 +120,8 @@ class ResearchService extends BaseReadModelService {
           return rAttr.value.toString() === v.toString();
         });
 
-      })));
+      })))
+      .sort((a, b) => b.researchRef.created_at - a.researchRef.created_at);
   }
 
 
