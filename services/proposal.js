@@ -10,6 +10,8 @@ const usersService = new UserService({ scoped: false });
 const researchGroupService = new ResearchGroupService({ scoped: false });
 const researchService = new ResearchService({ scoped: false });
 
+const blackList = ["cb044bb7ad58b1d47abfdf9904f97b11a100e963"]; // temp
+
 class ProposalService extends BaseReadModelService {
 
   constructor(options = { scoped: true }) {
@@ -19,7 +21,8 @@ class ProposalService extends BaseReadModelService {
   
   async mapProposals(proposalsRefs, extended = true) {
 
-    const chainProposals = await deipRpc.api.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
+    const allChainProposals = await deipRpc.api.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
+    const chainProposals = allChainProposals.filter(p => !blackList.some(id => id == p.external_id));
 
     const names = chainProposals.reduce((names, chainProposal) => {
 
