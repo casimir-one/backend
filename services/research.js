@@ -142,8 +142,8 @@ class ResearchService extends BaseReadModelService {
   }
 
 
-  async getResearches(researchesExternalIds) {
-    const researches = await this.findMany({ _id: { $in: [...researchesExternalIds] }, status: RESEARCH_STATUS.APPROVED });
+  async getResearches(researchesExternalIds, statuses = [ RESEARCH_STATUS.APPROVED ]) {
+    const researches = await this.findMany({ _id: { $in: [...researchesExternalIds] }, status: { $in: [...statuses] } });
     if (!researches.length) return [];
     const result = await this.mapResearch(researches);
     return result;
