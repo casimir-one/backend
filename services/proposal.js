@@ -5,6 +5,7 @@ import { SMART_CONTRACT_TYPE } from './../constants';
 import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import UserService from './../services/users';
+import { RESEARCH_STATUS } from './../constants';
 
 const usersService = new UserService({ scoped: false });
 const researchGroupService = new ResearchGroupService({ scoped: false });
@@ -219,7 +220,7 @@ class ProposalService extends BaseReadModelService {
 
     // currently we allow to buy the license only for user account
     const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researches = await researchService.getResearches(chainResearches.map(r => r.external_id));
+    const researches = await researchService.getResearches(chainResearches.map(r => r.external_id), Object.values(RESEARCH_STATUS));
 
     return requests.map((req) => {
       const extendedDetails = {
@@ -336,7 +337,7 @@ class ProposalService extends BaseReadModelService {
     }, []);
 
     const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
-    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -381,7 +382,7 @@ class ProposalService extends BaseReadModelService {
     }, []);
 
     const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
-    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -415,7 +416,7 @@ class ProposalService extends BaseReadModelService {
 
 
     const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
-    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
     const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => deipRpc.api.getResearchTokenSaleAsync(id)));
 
 
@@ -495,7 +496,7 @@ class ProposalService extends BaseReadModelService {
       return acc;
     }, []);
 
-    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId));
+    const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
 
     return proposals.map(proposal => {
       const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
