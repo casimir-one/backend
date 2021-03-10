@@ -77,9 +77,9 @@ class ProposalService extends BaseReadModelService {
         let key = `party${j + 1}`;
 
         let chainAccount = chainAccounts.find(chainAccount => chainAccount.name == party);
-        let ownerAuth = chainAccount.active.account_auths.map(([name, threshold]) => name);
-        let activeAuth = chainAccount.owner.account_auths.map(([name, threshold]) => name);
-        let members = [...ownerAuth, ...activeAuth];
+
+        const allAuth = await this.getAllAuth(chainAccount);
+        let members = [...allAuth];
         let possibleSigners = members
           .reduce((acc, name) => {
             if (!acc.some(n => n == name) && !chainProposal.required_approvals.some(a => a == name)) {
@@ -149,6 +149,28 @@ class ProposalService extends BaseReadModelService {
 
     const extendedProposals = await this.extendProposalsDetails(proposals);
     return extendedProposals;
+  }
+
+  async getAllAuth(account, checkAccounts = []) {
+    const accounts = [];
+    const activeAuth = account.active.account_auths.map(([name, threshold]) => name);
+    const ownerAuth = account.owner.account_auths.map(([name, threshold]) => name);
+    let members = [...activeAuth, ...ownerAuth];
+    members = members.filter(acc => !checkAccounts.includes(acc));
+    if (members.length === 0) {
+      return [];
+    }
+
+    const chainAccounts = await deipRpc.api.getAccountsAsync(members);
+    accounts.push(...members)
+
+    for(let i = 0; i < chainAccounts.length; i++) {
+      if (chainAccounts[i].is_research_group) {
+        const accountsNames = await this.getAllAuth(chainAccounts[i], accounts)
+        accounts.push(...accountsNames);
+      }
+    }
+    return [...accounts];
   }
 
   
