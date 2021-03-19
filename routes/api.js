@@ -21,6 +21,7 @@ import fundraising from '../controllers/fundraising'
 import tenant from '../controllers/tenant';
 import researchContent from './../controllers/researchContent';
 import researchNda from './../controllers/researchNda';
+import attributes from './../controllers/attributes';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/researchContentProposedEvent';
@@ -44,6 +45,16 @@ import researchGroupLogoFileUpdateAuth from './../middlewares/auth/researchGroup
 
 const protected_route = koa_router()
 const public_route = koa_router()
+
+async function tenantRoute(ctx, next) {
+  ctx.state.isTenantRoute = true;
+  await next();
+}
+
+async function tenantAdminGuard(ctx, next) {
+  ctx.assert(ctx.state.isTenantAdmin, 401);
+  await next();
+}
 
 protected_route.post('/user/upload-avatar', compose([userAvatarFileUpdateAuth({ userEntityId: (ctx) => ctx.request.header['username'] })]), users.uploadAvatar)
 public_route.get('/user/profile/:username', users.getUserProfile)
@@ -224,6 +235,15 @@ public_route.get('/nda/:ndaExternalId', researchNda.getResearchNonDisclosureAgre
 public_route.get('/nda/creator/:username', researchNda.getResearchNonDisclosureAgreementsByCreator);
 public_route.get('/nda/research/:researchExternalId', researchNda.getResearchNonDisclosureAgreementsByResearch);
 
+public_route.get('/attributes', attributes.getAttributes);
+public_route.get('/attributes/scope/:scope', attributes.getAttributesByScope);
+public_route.get('/attributes/scope/network/:scope', attributes.getNetworkAttributesByScope);
+public_route.get('/attribute/:id', attributes.getAttribute);
+public_route.get('/attributes/network', attributes.getNetworkAttributes);
+public_route.get('/attributes/system', attributes.getSystemAttributes);
+protected_route.post('/attribute', compose([tenantRoute, tenantAdminGuard]), attributes.createAttribute);
+protected_route.put('/attribute', compose([tenantRoute, tenantAdminGuard]), attributes.updateAttribute);
+protected_route.delete('/attribute/:id', compose([tenantRoute, tenantAdminGuard]), attributes.deleteAttribute);
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

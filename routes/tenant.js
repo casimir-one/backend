@@ -26,10 +26,6 @@ protected_route.put('/profile', compose([tenantRoute, tenantAdminGuard]), tenant
 protected_route.put('/settings', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantSettings);
 protected_route.put('/network-settings', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantNetworkSettings);
 
-protected_route.post('/research-attributes', compose([tenantRoute, tenantAdminGuard]), tenant.createTenantResearchAttribute);
-protected_route.put('/research-attributes', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantResearchAttribute);
-protected_route.delete('/research-attributes/:id', compose([tenantRoute, tenantAdminGuard]), tenant.deleteTenantResearchAttribute);
-
 protected_route.get('/registry/sign-ups', compose([tenantRoute, tenantAdminGuard]), tenant.getSignUpRequests);
 protected_route.put('/registry/sign-ups/approve', compose([tenantRoute, tenantAdminGuard]), tenant.approveSignUpRequest);
 protected_route.put('/registry/sign-ups/reject', compose([tenantRoute, tenantAdminGuard]), tenant.rejectSignUpRequest);

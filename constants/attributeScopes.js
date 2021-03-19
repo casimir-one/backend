@@ -1,0 +1,11 @@
+const RESEARCH = 1;
+const USER = 2;
+const RESEARCHGROUP = 3;
+
+const ATTRIBUTE_SCOPE = {
+  RESEARCH,
+  USER,
+  RESEARCHGROUP
+};
+
+export default ATTRIBUTE_SCOPE;

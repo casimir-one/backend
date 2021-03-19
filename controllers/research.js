@@ -11,9 +11,10 @@ import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
 import ResearchService from './../services/research';
 import ResearchApplicationService from './../services/researchApplication';
+import AttributesService from './../services/attributes';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS } from './../constants';
+import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../constants';
 import ResearchForm from './../forms/research';
 import FileStorage from './../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
@@ -41,6 +42,7 @@ const createResearch = async (ctx, next) => {
   const tenant = ctx.state.tenant;
 
   try {
+    const attributesService = new AttributesService();  
     
     const { tx, offchainMeta, isProposal } = await ResearchForm(ctx);
     const txResult = await blockchainService.sendTransactionAsync(tx);
@@ -74,6 +76,7 @@ const createResearch = async (ctx, next) => {
       entityExternalId = researchExternalId;
     }
 
+    const tenantResearchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
     const invitesDatums = datums.filter(([opName]) => opName == 'join_research_group_membership');
     
     for (let i = 0; i < invitesDatums.length; i++) {
@@ -81,7 +84,7 @@ const createResearch = async (ctx, next) => {
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
       const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenant.profile.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
@@ -116,6 +119,8 @@ const updateResearch = async (ctx, next) => {
   const tenant = ctx.state.tenant;
 
   try {
+    const attributesService = new AttributesService();  
+
     const { tx, offchainMeta, isProposal } = await ResearchForm(ctx);
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
@@ -136,13 +141,14 @@ const updateResearch = async (ctx, next) => {
       ctx.state.events.push(researchUpdatedEvent);
     }
 
+    const tenantResearchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
     const invitesDatums = datums.filter(([opName]) => opName == 'join_research_group_membership');
     for (let i = 0; i < invitesDatums.length; i++) {
       const inviteDatum = invitesDatums[i];
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
       const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenant.profile.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
