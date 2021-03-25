@@ -1,5 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import TenantProfile from './../schemas/tenant';
+import UserService from './../services/users';
 import mongoose from 'mongoose';
 
 class TenantService {
@@ -7,11 +8,14 @@ class TenantService {
   constructor() { };
 
   async getTenant(id) {
+    const userService = new UserService();
     const doc = await TenantProfile.findOne({ _id: id });
     if (!doc) return null;
     const profile = doc.toObject();
     const account = await deipRpc.api.getResearchGroupAsync(id);
-    return { id: id, account: account.account, profile: profile };
+    const tenantUsers = await userService.getUsersByTenant(id);
+    const admins = tenantUsers.filter(user => userService.hasRole(user, 'admin')).map(user => user.username);
+    return { id: id, account: account.account, profile: profile, admins };
   }
 
   async getNetworkTenant(id) {
@@ -34,25 +38,6 @@ class TenantService {
     return result;
   }
 
-  /* [DEPRECATED] */
-  async getLegacyTenant(id) {
-    const researchTenant = await this.getTenant(id);
-    const tenantAccount = researchTenant.account;
-    const tenantProfile = researchTenant.profile;
-
-    const ownerAuth = tenantAccount.active.account_auths.map(([name, threshold]) => name);
-    const activeAuth = tenantAccount.owner.account_auths.map(([name, threshold]) => name);
-
-    const admins = [...ownerAuth, ...activeAuth].reduce((acc, name) => {
-      if (!acc.some(n => n == name)) {
-        return [...acc, name];
-      }
-      return [...acc];
-    }, []);
-
-    return { ...tenantProfile, id: tenantAccount.name, account: tenantAccount, admins };
-  }
-
   async createTenantProfile({
     tenantExternalId,
     name,
@@ -60,8 +45,7 @@ class TenantService {
     description,
     email,
     logo,
-    banner,
-    admins
+    banner
   }, {
     signUpPolicy,
     faq,
@@ -77,7 +61,6 @@ class TenantService {
       email: email,
       logo: logo,
       banner: banner,
-      admins: admins,
       settings: {
         signUpPolicy,
         faq,

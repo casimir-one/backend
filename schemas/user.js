@@ -6,9 +6,17 @@ const Schema = mongoose.Schema;
 
 
 const UserLocation = new Schema({
+  "_id": false,
   "city": { type: String, trim: true, default: null },
   "country": { type: String, trim: true, default: null },
   "address": { type: String, trim: true, default: null }
+});
+
+const UserRole = new Schema({
+  "_id": false,
+  "role": { type: String, required: true, trim: true },
+  "label": { type: String, trim: true },
+  "researchGroupExternalId": { type: String, required: true }
 });
 
 const UserProfile = new Schema({
@@ -25,11 +33,7 @@ const UserProfile = new Schema({
   "birthdate": { type: Date, default: null },
   "category": { type: String, default: null, trim: true },
   "occupation": { type: String, default: null, trim: true },
-  "roles": [{
-    "role": { type: String, required: true, trim: true },
-    "researchGroupExternalId": { type: String, required: true },
-    "metadata": { type: Object, default: null }
-  }],
+  "roles": [UserRole],
   "location": {
     type: UserLocation, 
     default: {}

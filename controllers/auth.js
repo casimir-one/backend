@@ -24,7 +24,7 @@ const signIn = async function (ctx) {
     if (!user || user.tenantId != tenant.id) {
       ctx.body = {
         success: false,
-        error: `User '${username}' is not a member of '${tenant.name}'`
+        error: `User '${username}' is not a member of '${tenant.profile.name}'`
       };
       return;
     }
@@ -91,7 +91,8 @@ const signUp = async function (ctx) {
     occupation,
     birthdate,
     bio,
-    foreignIds
+    foreignIds,
+    role
   } = ctx.request.body;
 
   try {
@@ -105,10 +106,9 @@ const signUp = async function (ctx) {
       return;
     }
 
-    const accountExists = await blockchainService.usernameExistsInGlobalNetwork(username, tenant);
-    if (accountExists) {
-      ctx.status = 409;
-      ctx.body = `Account '${username}' already exists in the network`;
+    if (role && !tenant.profile.settings.roles.some((appRole) => appRole.role == role)) {
+      ctx.status = 400;
+      ctx.body = `'${role}' role is not valid for ${tenant.id} tenant`;
       return;
     }
 
@@ -119,7 +119,7 @@ const signUp = async function (ctx) {
       return;
     }
 
-    const status = tenant.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
+    const status = tenant.profile.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
       ? USER_PROFILE_STATUS.APPROVED
       : USER_PROFILE_STATUS.PENDING;
 
@@ -138,7 +138,11 @@ const signUp = async function (ctx) {
       occupation,
       foreignIds,
       birthdate,
-      bio
+      bio,
+      roles: role ? [{
+        role: role,
+        researchGroupExternalId: tenant.id
+      }] : undefined
     });
 
     let account = null;

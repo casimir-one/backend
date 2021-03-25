@@ -9,19 +9,21 @@ import * as blockchainService from './../utils/blockchain';
 class UserService extends BaseReadModelService {
 
   constructor(scoped = true) {
-    super(UserProfile, scoped); 
+    super(UserProfile, scoped);
   }
 
   async mapUsers(profiles) {
     const chainAccounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));
     const chainMembershipTokens = await Promise.all(chainAccounts.map(a => deipRpc.api.getResearchGroupTokensByAccountAsync(a.name)));
-
+    const tenant = await this.getTenantInstance();
     return chainAccounts
       .map((chainAccount) => {
-        const profileRef = profiles.find(r => r._id == chainAccount.name);
-        const membershipTokens = chainMembershipTokens.find(teams => teams.length && teams[0].owner == chainAccount.name) || [];
-        const teams = membershipTokens.map(mt => mt.research_group.external_id);
-        return { username: chainAccount.name, tenantId: profileRef ? profileRef.tenantId : null, account: chainAccount, profile: profileRef ? profileRef : null, teams };
+        const profile = profiles.find((r) => r._id == chainAccount.name);
+        const membershipTokens = chainMembershipTokens.find((teams) => teams.length && teams[0].owner == chainAccount.name) || [];
+        const teams = membershipTokens.map((mt) => mt.research_group.external_id);
+        const appModules = tenant.settings.modules;
+        const roleModules = tenant.settings.roles.find((appRole) => profile.roles.some((userRole) => tenant._id == userRole.researchGroupExternalId && appRole.role == userRole.role));
+        return { username: chainAccount.name, tenantId: profile.tenantId, account: chainAccount, profile: { ...profile, modules: roleModules ? roleModules.modules : appModules }, teams };
       });
   }
 
@@ -116,7 +118,8 @@ class UserService extends BaseReadModelService {
     location,
     foreignIds,
     bio,
-    birthdate
+    birthdate,
+    roles
   }) {
 
     const result = await this.createOne({
@@ -134,7 +137,8 @@ class UserService extends BaseReadModelService {
       foreignIds: foreignIds,
       bio: bio,
       birthdate: birthdate,
-      tenant: tenant
+      tenant: tenant,
+      roles: roles
     });
 
     return result;
@@ -211,6 +215,11 @@ class UserService extends BaseReadModelService {
     const signedTx = await blockchainService.signOperations([create_account_op], wif);
     const result = await blockchainService.sendTransactionAsync(signedTx);
     return result;
+  }
+
+  hasRole(user, role, tenantId = config.TENANT) {
+    return user.profile.roles
+      .some((userRole) => tenantId == userRole.researchGroupExternalId && role == userRole.role);
   }
   
 }

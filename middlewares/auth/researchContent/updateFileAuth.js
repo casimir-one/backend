@@ -15,7 +15,7 @@ function researchContentFileUpdateAuth(options = {}) {
     const researchContent = await researchContentService.getResearchContentRef(researchContentExternalId);
     ctx.assert(!!researchContent, 404);
 
-    if (researchContent.tenantId == currentTenant._id) {
+    if (researchContent.tenantId == currentTenant.id) {
       /* TODO: check access for requested file */
       await next();
     } else {

@@ -15,7 +15,7 @@ function researchGroupLogoFileReadAuth(options = {}) {
     const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
     ctx.assert(!!researchGroup, 404);
 
-    if (researchGroup.tenantId == currentTenant._id) {
+    if (researchGroup.tenantId == currentTenant.id) {
       /* TODO: check access for requested file */
       await next();
     } else {

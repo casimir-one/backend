@@ -15,7 +15,7 @@ function researchContentFilePublishAuth(options = {}) {
     const research = await researchService.getResearch(researchExternalId);
     ctx.assert(!!research, 404);
 
-    if (research.tenantId == currentTenant._id) {
+    if (research.tenantId == currentTenant.id) {
       /* TODO: check access for requested file */
       await next();
     } else {

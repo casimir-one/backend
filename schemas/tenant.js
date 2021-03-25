@@ -51,6 +51,35 @@ const ResearchAttribute = new Schema({
   "component": { type: Object, required: false } // temp for migration
 });
 
+const AppModuleMap = new Schema({
+  "_id": false,
+  "app-eci": { type: Boolean, default: true },
+  "app-crowdfunding": { type: Boolean, default: true },
+  "app-expert-review": { type: Boolean, default: true },
+  "app-assets-management": { type: Boolean, default: true },
+  "app-assets-withdrawal": { type: Boolean, default: true },
+  "app-assets-deposit": { type: Boolean, default: true },
+  "app-grants-management": { type: Boolean, default: true },
+  "app-blockchain-explorer": { type: Boolean, default: true },
+  "app-user-personal-workspace": { type: Boolean, default: true },
+  "admin-panel-members-management": { type: Boolean, default: true },
+  "admin-panel-members-registration": { type: Boolean, default: true },
+  "admin-panel-projects-management": { type: Boolean, default: true },
+  "admin-panel-projects-registration": { type: Boolean, default: true },
+  "admin-panel-attributes-management": { type: Boolean, default: true },
+  "admin-panel-attributes-registration": { type: Boolean, default: true },
+  "admin-panel-faq-setup": { type: Boolean, default: true },
+  "admin-panel-review-setup": { type: Boolean, default: true },
+  "admin-panel-layouts-setup": { type: Boolean, default: true },
+  "admin-panel-network-setup": { type: Boolean, default: true }
+});
+
+const UserRoleModuleMap = new Schema({
+  "_id": false,
+  "label": { type: String, required: true, trim: true },
+  "role": { type: String, required: true, trim: true },
+  "modules": AppModuleMap
+});
 
 const GlobalNetworkSettings = new Schema({
   "scope": [String],
@@ -82,7 +111,8 @@ const TenantProfile = new Schema({
     "researchLayouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },
-    "modules": { type: Object }
+    "modules": AppModuleMap,
+    "roles": [UserRoleModuleMap]
   }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' }, minimize: false });
 

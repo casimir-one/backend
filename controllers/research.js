@@ -81,7 +81,7 @@ const createResearch = async (ctx, next) => {
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
       const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const usersAttributes = tenant.profile.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
@@ -142,7 +142,7 @@ const updateResearch = async (ctx, next) => {
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
       const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenant.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const usersAttributes = tenant.profile.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
@@ -684,7 +684,6 @@ const getResearchAttributeFile = async (ctx) => {
 }
 
 const getPublicResearchListing = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
@@ -703,7 +702,6 @@ const getPublicResearchListing = async (ctx) => {
 
 const getUserResearchListing = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
   const member = ctx.params.username;
 
   const researchService = new ResearchService();
@@ -721,7 +719,6 @@ const getUserResearchListing = async (ctx) => {
 
 
 const getResearchGroupResearchListing = async (ctx) => {
-  const tenant = ctx.state.tenant;
   const jwtUsername = ctx.state.user.username;
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
 

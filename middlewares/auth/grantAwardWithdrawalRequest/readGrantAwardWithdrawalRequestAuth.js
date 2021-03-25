@@ -15,7 +15,7 @@ function grantAwardWithdrawalRequestReadAuth(options = {}) {
 
     ctx.assert(!!withdrawal, 404);
 
-    if (withdrawal.tenantId == currentTenant._id) {
+    if (withdrawal.tenantId == currentTenant.id) {
       /* TODO: check access for requested file */
       await next();
     } else {

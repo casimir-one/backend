@@ -15,7 +15,7 @@ function userAvatarFileReadAuth(options = {}) {
     const user = await userService.getUser(username);
     ctx.assert(!!user, 404);
 
-    if (user.profile.tenantId == currentTenant._id) {
+    if (user.profile.tenantId == currentTenant.id) {
       /* TODO: check access for requested file */
       await next();
     } else {
