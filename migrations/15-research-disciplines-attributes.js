@@ -26,12 +26,12 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 const run = async () => {
   const DISCIPLINES_LIST = "disciplines-list";
 
-  const tenant = await TenantProfile.findOne({ _id: "0000000000000000000000000000000000000000" });
+  const tenantProfile = await TenantProfile.findOne({ _id: "0000000000000000000000000000000000000000" });
 
-  if (tenant) {
+  if (tenantProfile) {
 
-    let categoriesAttr = tenant.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "TTO Categories");
-    let disciplinesAttr = tenant.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "ORIP Disciplines");
+    let categoriesAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "TTO Categories");
+    let disciplinesAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "ORIP Disciplines");
 
     const researchPromises = [];
     const researches = await Research.find({});
@@ -50,7 +50,7 @@ const run = async () => {
         })
       }
 
-      let researchGroupAttr = tenant.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP);
+      let researchGroupAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP);
       let researchGroupA = research.attributes.find(a => a.researchAttributeId.toString() == researchGroupAttr._id.toString());
 
       if (researchGroupA) {
@@ -64,9 +64,9 @@ const run = async () => {
       researchPromises.push(research.save());
     }
 
-    tenant.settings.researchAttributes = tenant.settings.researchAttributes.filter(attr => attr.title != "ORIP Disciplines");
+    tenantProfile.settings.researchAttributes = tenantProfile.settings.researchAttributes.filter(attr => attr.title != "ORIP Disciplines");
 
-    await tenant.save();
+    await tenantProfile.save();
     await Promise.all(researchPromises);
   }
 };

@@ -15,8 +15,8 @@ class ResearchService extends BaseReadModelService {
   }
 
   async getResearchAttributes() {
-    const tenant = await this.getTenantInstance();
-    return tenant.settings.researchAttributes || [];
+    const tenantProfile = await this.getTenantInstance();
+    return tenantProfile.settings.researchAttributes || [];
   }
 
   async mapResearch(researches, filterObj) {

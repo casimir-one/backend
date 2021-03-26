@@ -61,12 +61,12 @@ const run = async () => {
 
 
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
-    tenant.settings.researchAttributes.push(researchTitleAttribute);
-    tenant.settings.researchAttributes.push(researchDescriptionAttribute);
+    tenantProfile.settings.researchAttributes.push(researchTitleAttribute);
+    tenantProfile.settings.researchAttributes.push(researchDescriptionAttribute);
     
-    tenantPromises.push(tenant.save());
+    tenantPromises.push(tenantProfile.save());
   }
   
   

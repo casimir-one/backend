@@ -7,7 +7,7 @@ import TenantProfile from './../schemas/tenant';
 class BaseReadModelService {
 
   _schema = undefined;
-  _tenant = undefined;
+  _tenantProfile = undefined;
   _scoped = undefined;
 
   constructor(schema, options = { scoped: true }) {
@@ -18,32 +18,32 @@ class BaseReadModelService {
 
 
   async getTenantInstance() {
-    if (this._tenant === undefined) {
-      const tenant = await TenantProfile.findOne({ _id: config.TENANT });
-      if (!tenant) {
+    if (this._tenantProfile === undefined) {
+      const tenantProfile = await TenantProfile.findOne({ _id: config.TENANT });
+      if (!tenantProfile) {
         throw new Error(`Tenant ${config.TENANT} is not found`);
       }
-      this._tenant = tenant.toObject();
+      this._tenantProfile = tenantProfile.toObject();
     }
 
-    return this._tenant;
+    return this._tenantProfile;
   }
 
 
   async getBaseScopeQuery() {
-    const tenant = await this.getTenantInstance();
+    const tenantProfile = await this.getTenantInstance();
     if (!this._scoped) return {};
 
-    if (tenant.network.scope.length) {
-      const isAll = tenant.network.scope.some(s => s == 'all'); 
+    if (tenantProfile.network.scope.length) {
+      const isAll = tenantProfile.network.scope.some(s => s == 'all');
       if (isAll) { // temp solution until access management implementation
         const tenants = await TenantProfile.find({});
         return { $or: [{ tenantId: { $in: [...tenants.map(t => t._id.toString())] } }, { multiTenantIds: { $in: [...tenants.map(t => t._id.toString())] } }] };
       } else {
-        return { $or: [{ tenantId: { $in: [...tenant.network.scope] } }, { multiTenantIds: { $in: [...tenant.network.scope] } }] };
+        return { $or: [{ tenantId: { $in: [...tenantProfile.network.scope] } }, { multiTenantIds: { $in: [...tenantProfile.network.scope] } }] };
       }
     } else {
-      return { $or: [{ tenantId: { $in: [tenant._id] } }, { multiTenantIds: { $in: [tenant._id] } }] };
+      return { $or: [{ tenantId: { $in: [tenantProfile._id] } }, { multiTenantIds: { $in: [tenantProfile._id] } }] };
     }
   }
 
@@ -72,8 +72,8 @@ class BaseReadModelService {
         payload[key] = value;
     }
 
-    const tenant = await this.getTenantInstance();
-    payload.tenantId = tenant._id;
+    const tenantProfile = await this.getTenantInstance();
+    payload.tenantId = tenantProfile._id;
 
     const savedModel = await this._schema.create(payload);
     return savedModel.toObject();
@@ -82,7 +82,7 @@ class BaseReadModelService {
 
   async createMany(objects) {
     const payloads = [];
-    const tenant = await this.getTenantInstance();
+    const tenantProfile = await this.getTenantInstance();
 
     for (let i = 0; i < objects.length; i++) {
       const fields = objects[i];
@@ -96,7 +96,7 @@ class BaseReadModelService {
           payload[key] = value;
       }
 
-      payload.tenantId = tenant._id;
+      payload.tenantId = tenantProfile._id;
       
       payloads.push(payload);
     }
@@ -118,8 +118,8 @@ class BaseReadModelService {
         model[key] = value;
     }
 
-    const tenant = await this.getTenantInstance();
-    model.tenantId = tenant._id;
+    const tenantProfile = await this.getTenantInstance();
+    model.tenantId = tenantProfile._id;
 
     const updatedModel = await model.save();
     return updatedModel.toObject();

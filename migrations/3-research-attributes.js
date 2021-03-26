@@ -34,11 +34,11 @@ const run = async () => {
   const tenants = await TenantProfile.find({});
   
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
     let researchAttributes = [];
-    for (let j = 0; j < tenant.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenant.settings.researchAttributes[j];
+    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
+      let researchAttribute = tenantProfile.settings.researchAttributes[j];
       let attribute = {
         _id: researchAttribute._id,
         type: researchAttribute.type,
@@ -61,8 +61,8 @@ const run = async () => {
       researchAttributes.push(attribute);
     }
 
-    tenant.settings.researchAttributes = researchAttributes;
-    tenantPromises.push(tenant.save());
+    tenantProfile.settings.researchAttributes = researchAttributes;
+    tenantPromises.push(tenantProfile.save());
     allResearchAttributes.push(...researchAttributes)
   }
 

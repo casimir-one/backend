@@ -117,52 +117,6 @@ function extractOperationsFromProposal(proposal, result) {
   }
 }
 
-// temporary solution until we unite all tenants into global network
-async function usernameExistsInGlobalNetwork(username, tenant) {
-  const requestPromise = util.promisify(request);
-  const endpoints = tenant && tenant.network && tenant.network.nodes ? tenant.network.nodes : [];
-
-  if (!endpoints.some(endpoint => endpoint == config.DEIP_FULL_NODE_URL)) {
-    endpoints.push(config.DEIP_FULL_NODE_URL);
-  }
-
-  const promises = [];
-  for (let i = 0; i < endpoints.length; i++) {
-    let endpoint = endpoints[i];
-    const options = {
-      url: endpoint,
-      method: "post",
-      headers: {
-        "content-type": "text/plain"
-      },
-      body: JSON.stringify({ "jsonrpc": "2.0", "method": "get_accounts", "params": [[username]], "id": 1 })
-    };
-
-    promises.push(
-      requestPromise(options)
-        .then((res) => {
-          return res;
-        })
-        .catch((err) => {
-          return { error: "Request failed", body: '{}' };
-        })
-    )
-  }
-
-  const results = await Promise.all(promises);
-
-  const usernames = results
-    .reduce((acc, { error, body }) => {
-      if (error) return acc;
-      const bodyJson = JSON.parse(body);
-      const usernames = bodyJson.result.filter(a => a != null).map(a => a.name);
-      return [...acc, ...usernames];
-    }, []);
-
-  const exists = usernames.some(name => name == username);
-  return exists;
-}
-
 function signTransaction(tx, keys) {
   const signedTx = deipRpc.auth.signTransaction(tx, keys);
   return signedTx;
@@ -175,6 +129,5 @@ export {
   signTransaction,
   sendTransactionAsync,
   signOperations,
-  extractOperations,
-  usernameExistsInGlobalNetwork
+  extractOperations
 }

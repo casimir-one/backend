@@ -27,10 +27,10 @@ const run = async () => {
   
 
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
     
-    for (let j = 0; j < tenant.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenant.settings.researchAttributes[j];
+    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
+      let researchAttribute = tenantProfile.settings.researchAttributes[j];
       if (researchAttribute.isBlockchainMeta) {
         researchAttribute.isRequired = true;
       } else {
@@ -38,7 +38,7 @@ const run = async () => {
       }
     }
 
-    tenantPromises.push(tenant.save());
+    tenantPromises.push(tenantProfile.save());
   }
 
   await Promise.all(tenantPromises);

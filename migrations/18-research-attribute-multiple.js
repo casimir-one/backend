@@ -32,10 +32,10 @@ const run = async () => {
   const tenants = await TenantProfile.find({});
 
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
-    for (let j = 0; j < tenant.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenant.settings.researchAttributes[j];
+    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
+      let researchAttribute = tenantProfile.settings.researchAttributes[j];
 
       if (researchAttribute.type == RESEARCH_GROUPS_LIST ||
         researchAttribute.type == DISCIPLINES_LIST ||
@@ -62,7 +62,7 @@ const run = async () => {
       researchAttribute.isPublished = undefined;
     }
 
-    tenantPromises.push(tenant.save());
+    tenantPromises.push(tenantProfile.save());
   }
 
   await Promise.all(tenantPromises);

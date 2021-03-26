@@ -72,13 +72,13 @@ const run = async () => {
 
   let allTenantsAttributesIds = [];
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
-    tenant.settings.researchAttributes.push(roadmapAttribute);
-    tenant.settings.researchAttributes.push(partnersAttribute);
-    tenant.settings.researchAttributes.push(videoSrcAttribute);
-    tenantPromises.push(tenant.save());
+    let tenantProfile = tenants[i];
+    tenantProfile.settings.researchAttributes.push(roadmapAttribute);
+    tenantProfile.settings.researchAttributes.push(partnersAttribute);
+    tenantProfile.settings.researchAttributes.push(videoSrcAttribute);
+    tenantPromises.push(tenantProfile.save());
 
-    allTenantsAttributesIds.push(...tenant.settings.researchAttributes.map(a => a._id));
+    allTenantsAttributesIds.push(...tenantProfile.settings.researchAttributes.map(a => a._id));
   }
 
   await Promise.all(tenantPromises);

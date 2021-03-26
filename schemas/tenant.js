@@ -53,25 +53,32 @@ const ResearchAttribute = new Schema({
 
 const AppModuleMap = new Schema({
   "_id": false,
-  "app-eci": { type: Boolean, default: true },
-  "app-crowdfunding": { type: Boolean, default: true },
-  "app-expert-review": { type: Boolean, default: true },
-  "app-assets-management": { type: Boolean, default: true },
-  "app-assets-withdrawal": { type: Boolean, default: true },
-  "app-assets-deposit": { type: Boolean, default: true },
-  "app-grants-management": { type: Boolean, default: true },
-  "app-blockchain-explorer": { type: Boolean, default: true },
-  "app-user-personal-workspace": { type: Boolean, default: true },
-  "admin-panel-members-management": { type: Boolean, default: true },
-  "admin-panel-members-registration": { type: Boolean, default: true },
-  "admin-panel-projects-management": { type: Boolean, default: true },
-  "admin-panel-projects-registration": { type: Boolean, default: true },
-  "admin-panel-attributes-management": { type: Boolean, default: true },
-  "admin-panel-attributes-registration": { type: Boolean, default: true },
-  "admin-panel-faq-setup": { type: Boolean, default: true },
-  "admin-panel-review-setup": { type: Boolean, default: true },
-  "admin-panel-layouts-setup": { type: Boolean, default: true },
-  "admin-panel-network-setup": { type: Boolean, default: true }
+  "app-eci": { type: Boolean, default: false },
+  "app-crowdfunding": { type: Boolean, default: false },
+  "app-expert-review": { type: Boolean, default: false },
+  "app-assets-management": { type: Boolean, default: false },
+  "app-assets-withdrawal": { type: Boolean, default: false },
+  "app-assets-deposit": { type: Boolean, default: false },
+  "app-grants-management": { type: Boolean, default: false },
+  "app-blockchain-explorer": { type: Boolean, default: false },
+  "app-user-personal-workspace": { type: Boolean, default: false },
+
+  "app-page-sign-up": { type: Boolean, default: false },
+  "app-page-eci-overview": { type: Boolean, default: false },
+  "app-page-eci-participiants": { type: Boolean, default: false },
+  "app-page-assets": { type: Boolean, default: false },
+  "app-page-multisig-transactions": { type: Boolean, default: false },
+
+  "admin-panel-members-management": { type: Boolean, default: false },
+  "admin-panel-members-registration": { type: Boolean, default: false },
+  "admin-panel-projects-management": { type: Boolean, default: false },
+  "admin-panel-projects-registration": { type: Boolean, default: false },
+  "admin-panel-attributes-management": { type: Boolean, default: false },
+  "admin-panel-attributes-registration": { type: Boolean, default: false },
+  "admin-panel-faq-setup": { type: Boolean, default: false },
+  "admin-panel-review-setup": { type: Boolean, default: false },
+  "admin-panel-layouts-setup": { type: Boolean, default: false },
+  "admin-panel-network-setup": { type: Boolean, default: false }
 });
 
 const UserRoleModuleMap = new Schema({

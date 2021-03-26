@@ -46,9 +46,9 @@ const run = async () => {
 
   
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
-    tenant.settings.researchAttributes.push(researchCoverImageAttribute);
-    tenantPromises.push(tenant.save());
+    let tenantProfile = tenants[i];
+    tenantProfile.settings.researchAttributes.push(researchCoverImageAttribute);
+    tenantPromises.push(tenantProfile.save());
   }
   
   const researchPromises = [];

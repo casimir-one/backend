@@ -31,13 +31,13 @@ const run = async () => {
   const tenants = await TenantProfile.find({});
 
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
-    tenant.researchCategories = undefined;
-    tenant.researchComponents = undefined;
+    tenantProfile.researchCategories = undefined;
+    tenantProfile.researchComponents = undefined;
 
-    for (let j = 0; j < tenant.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenant.settings.researchAttributes[j];
+    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
+      let researchAttribute = tenantProfile.settings.researchAttributes[j];
 
       researchAttribute.isPublished = researchAttribute.isVisible;
 
@@ -58,13 +58,13 @@ const run = async () => {
       }
     }
 
-    for (let j = 0; j < tenant.settings.faq.length; j++) {
-      let qa = tenant.settings.faq[j];
+    for (let j = 0; j < tenantProfile.settings.faq.length; j++) {
+      let qa = tenantProfile.settings.faq[j];
       qa.isPublished = qa.isVisible;
       qa.isVisible = undefined;
     }
 
-    tenantPromises.push(tenant.save());
+    tenantPromises.push(tenantProfile.save());
   }
 
   await Promise.all(tenantPromises);

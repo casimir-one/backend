@@ -121,15 +121,15 @@ const run = async () => {
 
   
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
-    tenant.settings.researchAttributes.push(researchDisciplinesAttribute);
-    tenant.settings.researchAttributes.push(researchGroupAttribute);
-    tenant.settings.researchAttributes.push(researchVisibilityAttribute);
-    tenant.settings.researchAttributes.push(researchInventorsAttribute);
-    tenant.settings.researchAttributes.push(researchLicensingAssociateAttribute);
+    tenantProfile.settings.researchAttributes.push(researchDisciplinesAttribute);
+    tenantProfile.settings.researchAttributes.push(researchGroupAttribute);
+    tenantProfile.settings.researchAttributes.push(researchVisibilityAttribute);
+    tenantProfile.settings.researchAttributes.push(researchInventorsAttribute);
+    tenantProfile.settings.researchAttributes.push(researchLicensingAssociateAttribute);
 
-    tenantPromises.push(tenant.save());
+    tenantPromises.push(tenantProfile.save());
   }
   
   const researchPromises = [];

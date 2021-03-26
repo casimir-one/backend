@@ -30,10 +30,10 @@ const run = async () => {
   const tenants = await TenantProfile.find({});
 
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
-    for (let j = 0; j < tenant.settings.researchAttributes.length; j++) {
-      let attr = tenant.settings.researchAttributes[j];
+    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
+      let attr = tenantProfile.settings.researchAttributes[j];
 
       if (attr.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER) {
         attr.areas = [RESEARCH_ATTRIBUTE_AREA.SIDEBAR, RESEARCH_ATTRIBUTE_AREA.CARD];
@@ -46,7 +46,7 @@ const run = async () => {
       attr.order = j + 1;
     }
 
-    tenantPromises.push(tenant.save());
+    tenantPromises.push(tenantProfile.save());
   }
   
   await Promise.all(tenantPromises);

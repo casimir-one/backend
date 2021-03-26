@@ -44,10 +44,10 @@ const run = async () => {
 
 
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
-    for (let j = 0; j < tenant.settings.researchCategories.length; j++) {
-      let cat = tenant.settings.researchCategories[j];
+    for (let j = 0; j < tenantProfile.settings.researchCategories.length; j++) {
+      let cat = tenantProfile.settings.researchCategories[j];
 
       categoriesAttribute.valueOptions.push({
         "value" : cat._id,
@@ -57,8 +57,8 @@ const run = async () => {
       });
     }
 
-    tenant.settings.researchAttributes.push(categoriesAttribute);
-    tenantPromises.push(tenant.save());
+    tenantProfile.settings.researchAttributes.push(categoriesAttribute);
+    tenantPromises.push(tenantProfile.save());
   }
   
   

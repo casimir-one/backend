@@ -29,14 +29,14 @@ const run = async () => {
   const tenants = await TenantProfile.find({});
 
   for (let i = 0; i < tenants.length; i++) {
-    let tenant = tenants[i];
+    let tenantProfile = tenants[i];
 
     let researchDetailsRightSidebar = [];
     let researchCard = [];
     let researchDetailsMain = [];
 
-    for (let j = 0; j < tenant.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenant.settings.researchAttributes[j];
+    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
+      let researchAttribute = tenantProfile.settings.researchAttributes[j];
 
       if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER) {
         researchDetailsRightSidebar.push(researchAttribute._id);
@@ -77,8 +77,8 @@ const run = async () => {
       researchForm: []
     }
 
-    tenant.settings.researchAttributesAreas = researchAttributesAreas;
-    tenantsPromises.push(tenant.save());
+    tenantProfile.settings.researchAttributesAreas = researchAttributesAreas;
+    tenantsPromises.push(tenantProfile.save());
   }
 
   await Promise.all(tenantsPromises);
