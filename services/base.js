@@ -101,6 +101,9 @@ class BaseReadModelService {
       payloads.push(payload);
     }
 
+    if (!payloads.length)
+      return [];
+
     const savedModels = await this._schema.create(payloads);
     return [...savedModels.map(m => m.toObject())];
   }
