@@ -83,6 +83,7 @@ const AppModuleMap = new Schema({
 
 const UserRoleModuleMap = new Schema({
   "_id": false,
+  "roleGroupExternalId": { type: String, required: false, default: null },
   "label": { type: String, required: true, trim: true },
   "role": { type: String, required: true, trim: true },
   "modules": AppModuleMap

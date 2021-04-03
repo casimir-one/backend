@@ -6,11 +6,6 @@ import config from './../config';
 import * as blockchainService from './../utils/blockchain';
 
 
-const rolesMap = {
-  'admin': "3333333333333333333333333333333333333333",
-  'team-member': "4444444444444444444444444444444444444444"
-}
-
 class UserService extends BaseReadModelService {
 
   constructor(scoped = true) {
@@ -226,9 +221,9 @@ class UserService extends BaseReadModelService {
     }
 
     let signedTx = await blockchainService.signOperations(ops, regaccPrivKey, refBlock);
+    
     if (role) {
       signedTx = deipRpc.auth.signTransaction(signedTx, { owner: config.TENANT_PRIV_KEY });
-      // signedTx = await blockchainService.signOperations(ops, config.TENANT_PRIV_KEY, refBlock);
     }
 
     await blockchainService.sendTransactionAsync(signedTx);
@@ -238,13 +233,18 @@ class UserService extends BaseReadModelService {
 
   async _addUserRole(inviter, invitee, role, refBlock, ops = []) {
 
-    const roleResearchGroupId = rolesMap[role];
-    if (!roleResearchGroupId) 
+    const tenantProfile = await this.getTenantInstance();
+    const roleInfo = tenantProfile.settings.roles.find((appRole) => appRole.role == role);
+
+    if (!roleInfo)
+      throw new Error(`Role ${role} is not valid for ${tenantProfile._id} tenant`);
+
+    if (!roleInfo.roleGroupExternalId)
       return ops;
 
     const join_research_group_membership_op = ['join_research_group_membership', {
       member: invitee,
-      research_group: roleResearchGroupId,
+      research_group: roleInfo.roleGroupExternalId,
       reward_share: '0.00 %',
       researches: [],
       extensions: []
