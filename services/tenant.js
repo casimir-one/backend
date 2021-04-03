@@ -2,6 +2,8 @@ import deipRpc from '@deip/rpc-client';
 import TenantProfile from './../schemas/tenant';
 import UserService from './../services/users';
 import mongoose from 'mongoose';
+import config from './../config';
+
 
 class TenantService {
 
@@ -14,7 +16,7 @@ class TenantService {
     const profile = doc.toObject();
     const account = await deipRpc.api.getResearchGroupAsync(id);
     const tenantUsers = await userService.getUsersByTenant(id);
-    const admins = tenantUsers.filter(user => userService.hasRole(user, 'admin')).map(user => user.username);
+    const admins = tenantUsers.filter(user => userService.hasRole(user, 'admin') && user.teams.includes(config.TENANT)).map(user => user.username);
     return { id: id, account: account.account, profile: profile, admins };
   }
 
