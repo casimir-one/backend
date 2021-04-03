@@ -14,6 +14,8 @@ import { USER_PROFILE_STATUS } from './../constants';
 import TenantSettingsForm from './../forms/tenantSettings';
 import * as blockchainService from './../utils/blockchain';
 import mongoose from 'mongoose';
+import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
 
 
 const updateTenantSettings = async (ctx) => {
@@ -412,8 +414,8 @@ const getSignUpRequests = async (ctx) => {
 }
 
 
-const approveSignUpRequest = async (ctx) => {
-  const { username } = ctx.request.body;
+const approveSignUpRequest = async (ctx, next) => {
+  const { username, role } = ctx.request.body;
 
   try {
 
@@ -434,13 +436,26 @@ const approveSignUpRequest = async (ctx) => {
       return;
     }
 
-    await usersService.createUserAccount({ username, pubKey: userProfile.signUpPubKey });
+    const tx = await usersService.createUserAccount({ username, pubKey: userProfile.signUpPubKey, role });
     await researchGroupService.createResearchGroupRef({
       externalId: username,
       creator: username,
       name: username,
       description: username
     });
+
+    const datums = blockchainService.extractOperations(tx);
+    if (datums.length > 1) {
+      const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
+      ctx.state.events.push(userInvitationProposedEvent);
+
+      const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
+      for (let i = 0; i < userInvitationApprovals.length; i++) {
+        const approval = userInvitationApprovals[i];
+        const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+        ctx.state.events.push(userInvitationProposalSignedEvent);
+      }
+    }
 
     const approvedProfile = await usersService.updateUserProfile(username, { status: USER_PROFILE_STATUS.APPROVED });
 
@@ -452,6 +467,8 @@ const approveSignUpRequest = async (ctx) => {
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 

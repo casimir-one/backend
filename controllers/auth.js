@@ -8,6 +8,8 @@ import ResearchGroupService from './../services/researchGroup';
 import UserService from './../services/users';
 import TenantService from './../services/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../constants';
+import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -76,7 +78,7 @@ const signIn = async function (ctx) {
   }
 }
 
-const signUp = async function (ctx) {
+const signUp = async function (ctx, next) {
   const tenant = ctx.state.tenant;
   const { 
     username, 
@@ -145,25 +147,40 @@ const signUp = async function (ctx) {
       }] : undefined
     });
 
-    let account = null;
+
     if (status == USER_PROFILE_STATUS.APPROVED) {
-      account = await usersService.createUserAccount({ username, pubKey });
+      const tx = await usersService.createUserAccount({ username, pubKey, role });
       await researchGroupService.createResearchGroupRef({
         externalId: username,
         creator: username,
         name: username,
         description: username
       });
+
+      const datums = blockchainService.extractOperations(tx);
+      if (datums.length > 1) {
+        const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
+        ctx.state.events.push(userInvitationProposedEvent);
+
+        const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
+        for (let i = 0; i < userInvitationApprovals.length; i++) {
+          const approval = userInvitationApprovals[i];
+          const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+          ctx.state.events.push(userInvitationProposalSignedEvent);
+        }
+      }
     }
 
     ctx.status = 200;
-    ctx.body = { profile: userProfile, account };
+    ctx.body = { profile: userProfile };
 
   } catch (err) {
     console.error(err);
     ctx.status = 500;
     ctx.body = err;
   }
+
+  await next();
 }
 
 const chunkTenantAccessToken = async function (ctx) {

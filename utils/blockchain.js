@@ -4,35 +4,46 @@ import config from './../config';
 import request from 'request';
 import util from 'util';
 
-async function signOperations(operations, ownerKey) {
-  return new Promise((resolve, reject) => {
-    deipRpc.api.getDynamicGlobalProperties((err, result) => {
-      if (!err) {
-        const BlockNum = (result.last_irreversible_block_num - 1) & 0xFFFF;
-        deipRpc.api.getBlockHeader(result.last_irreversible_block_num, (e, res) => {
-          // TODO: switch to Buffer.from()
-          const BlockPrefix = new Buffer(res.previous, 'hex').readUInt32LE(4);
-          const nowPlus1Hour = new Date().getTime() + 3e6;
-          const expire = new Date(nowPlus1Hour).toISOString().split('.')[0];
+async function signOperations(operations, privKey, refBlock = {}) {
+  const { refBlockNum, refBlockPrefix } = refBlock;
+  
+  const refBlockPromise = refBlockNum && refBlockPrefix
+    ? Promise.resolve({ refBlockNum, refBlockPrefix })
+    : getRefBlockSummary();
 
-          const unsignedTX = {
-            expiration: expire,
-            extensions: [],
-            operations: operations,
-            ref_block_num: BlockNum,
-            ref_block_prefix: BlockPrefix
-          };
+  return refBlockPromise
+    .then(({ refBlockNum, refBlockPrefix }) => {
+      const nowPlus1Hour = new Date().getTime() + 3e6;
+      const expire = new Date(nowPlus1Hour).toISOString().split('.')[0];
 
-          try {
-            const signedTX = deipRpc.auth.signTransaction(unsignedTX, { owner: ownerKey }, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY });
-            resolve(signedTX);
-          } catch (err) {
-            reject(err);
-          }
-        });
-      }
-    });
-  });
+      const tx = {
+        expiration: expire,
+        extensions: [],
+        operations: operations,
+        ref_block_num: refBlockNum,
+        ref_block_prefix: refBlockPrefix
+      };
+
+      const signedTx = deipRpc.auth.signTransaction(tx, { owner: privKey }, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY });
+      return signedTx;
+    })
+}
+
+async function getRefBlockSummary() {
+  let refBlockNum;
+  let refBlockPrefix;
+
+  return deipRpc.api.getDynamicGlobalPropertiesAsync()
+    .then((res, err) => {
+      if (err) throw new Error(err);
+      refBlockNum = (res.last_irreversible_block_num - 1) & 0xFFFF;
+      return deipRpc.api.getBlockHeaderAsync(res.last_irreversible_block_num);
+    })
+    .then((res, err) => {
+      if (err) throw new Error(err);
+      refBlockPrefix = new Buffer(res.previous, 'hex').readUInt32LE(4);
+      return { refBlockNum, refBlockPrefix };
+    })
 }
 
 async function sendTransactionAsync(tx) {
@@ -49,22 +60,6 @@ async function sendTransactionAsync(tx) {
   return promise;
 }
 
-
-// TODO: remove this
-async function sendTransaction(tx) {
-  const promise = new Promise((resolve) => {
-    deipRpc.api.broadcastTransactionSynchronous(tx, function (err, result) {
-      if (err) {
-        console.log(err);
-        resolve({ isSuccess: false, txInfo: null })
-      } else {
-        console.log(result);
-        resolve({ isSuccess: true, txInfo: result })
-      }
-    });
-  });
-  return promise;
-}
 
 async function getBlock(blockNum) {
   return new Promise((resolve, reject) => {
@@ -117,16 +112,10 @@ function extractOperationsFromProposal(proposal, result) {
   }
 }
 
-function signTransaction(tx, keys) {
-  const signedTx = deipRpc.auth.signTransaction(tx, keys);
-  return signedTx;
-}
-
 export {
-  sendTransaction,
   getBlock,
   getTransaction,
-  signTransaction,
+  getRefBlockSummary,
   sendTransactionAsync,
   signOperations,
   extractOperations
