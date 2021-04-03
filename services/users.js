@@ -221,7 +221,7 @@ class UserService extends BaseReadModelService {
     }
 
     let signedTx = await blockchainService.signOperations(ops, regaccPrivKey, refBlock);
-    
+
     if (role) {
       signedTx = deipRpc.auth.signTransaction(signedTx, { owner: config.TENANT_PRIV_KEY });
     }
@@ -255,7 +255,7 @@ class UserService extends BaseReadModelService {
       proposed_ops: [
         { "op": join_research_group_membership_op }
       ],
-      expiration_time: new Date(new Date().getTime() + 86400000 * 365 * 3).toISOString().split('.')[0], // 3 years
+      expiration_time: new Date(new Date().getTime() + 86400000 * 364 * 3).toISOString().split('.')[0], // 3 years
       review_period_seconds: undefined,
       extensions: []
     }], refBlock);
