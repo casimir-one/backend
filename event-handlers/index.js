@@ -24,7 +24,7 @@ const appEventHandler = new AppEventHandler();
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchProposedEvent, tenant } = source;
   await wait(researchHandler, researchProposedEvent, null, tenant);
-  await wait(proposalHandler, researchProposedEvent);
+  await wait(proposalHandler, researchProposedEvent, null, tenant);
   fire(userNotificationsHandler, researchProposedEvent)
 }));
 
@@ -32,7 +32,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
 appEventHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchCreatedEvent, tenant } = source;
   await wait(researchHandler, researchCreatedEvent, null, tenant);
-  fire(userNotificationsHandler, researchCreatedEvent);
+  fire(userNotificationsHandler, researchCreatedEvent, null, tenant);
 }));
 
 appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
@@ -70,17 +70,17 @@ appEventHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchContentProposedEvent } = source;
-  await wait(researchContentHandler, researchContentProposedEvent);
-  await wait(proposalHandler, researchContentProposedEvent);
-  fire(userNotificationsHandler, researchContentProposedEvent)
+  const { event: researchContentProposedEvent, tenant } = source;
+  await wait(researchContentHandler, researchContentProposedEvent, null, tenant);
+  await wait(proposalHandler, researchContentProposedEvent, null, tenant);
+  fire(userNotificationsHandler, researchContentProposedEvent, null, tenant)
 }));
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchContentCreatedEvent } = source;
-  await wait(researchContentHandler, researchContentCreatedEvent);
-  fire(userNotificationsHandler, researchContentCreatedEvent);
+  const { event: researchContentCreatedEvent, tenant } = source;
+  await wait(researchContentHandler, researchContentCreatedEvent, null, tenant);
+  fire(userNotificationsHandler, researchContentCreatedEvent, null, tenant);
 }));
 
 
@@ -98,17 +98,17 @@ appEventHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_REJECTED, (payload, repl
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchUpdatedEvent } = source;
-  await wait(researchHandler, researchUpdatedEvent);
-  fire(userNotificationsHandler, researchUpdatedEvent);
+  const { event: researchUpdatedEvent, tenant } = source;
+  await wait(researchHandler, researchUpdatedEvent, null, tenant);
+  fire(userNotificationsHandler, researchUpdatedEvent, null, tenant);
 }));
 
 
 appEventHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchUpdateProposedEvent } = source;
-  await wait(researchHandler, researchUpdateProposedEvent);
-  await wait(proposalHandler, researchUpdateProposedEvent);
-  fire(userNotificationsHandler, researchUpdateProposedEvent);
+  const { event: researchUpdateProposedEvent, tenant } = source;
+  await wait(researchHandler, researchUpdateProposedEvent, null, tenant);
+  await wait(proposalHandler, researchUpdateProposedEvent, null, tenant);
+  fire(userNotificationsHandler, researchUpdateProposedEvent, null, tenant);
 }));
 
 

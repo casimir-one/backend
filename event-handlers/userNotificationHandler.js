@@ -19,7 +19,7 @@ class UserNotificationHandler extends EventEmitter { }
 
 const userNotificationHandler = new UserNotificationHandler();
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researchProposedEvent }) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researchProposedEvent, tenant }) => {
   const { researchGroupExternalId, source: { offchain: { attributes } } } = researchProposedEvent.getSourceData();
   const eventEmitter = researchProposedEvent.getEventEmitter();
 
@@ -30,15 +30,15 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researc
     ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
     : "Not Specified";
   
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const members = await userService.getUsers(tenant.admins);
 
   const notificationsPromises = [];
   const data = { title: researchTitle };
 
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let promise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member.username,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
@@ -56,7 +56,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researc
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async ({ event: researchCreatedEvent }) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async ({ event: researchCreatedEvent, tenant }) => {
   const { researchExternalId, researchGroupExternalId } = researchCreatedEvent.getSourceData();
   const eventEmitter = researchCreatedEvent.getEventEmitter();
 
@@ -66,15 +66,15 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async ({ event: research
 
   const isAcceptedByQuorum = researchGroupExternalId != eventEmitter;
 
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const members = await userService.getUsers(tenant.admins);
 
   const notificationsPromises = [];
   const data = isAcceptedByQuorum ? { title: research.title } : undefined;
 
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let promise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member.username,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
@@ -92,7 +92,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async ({ event: research
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event: researchContentProposedEvent }) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event: researchContentProposedEvent, tenant }) => {
   const { researchGroupExternalId, researchExternalId, source: { offchain: { title } } } = researchContentProposedEvent.getSourceData();
   const eventEmitter = researchContentProposedEvent.getEventEmitter();
 
@@ -101,15 +101,15 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event:
 
   const emitterUser = await userService.getUser(eventEmitter);
 
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const members = await userService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notificationsPromises = [];
   const data = { title };
 
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let promise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member.username,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
@@ -128,7 +128,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event:
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: researchContentCreatedEvent }) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: researchContentCreatedEvent, tenant }) => {
   const researchContentService = new ResearchContentService();
 
   const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getSourceData();
@@ -140,15 +140,15 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: 
   const emitterUser = await userService.getUser(eventEmitter);
   const isAcceptedByQuorum = researchGroup.external_id != eventEmitter;
 
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const members = await userService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notificationsPromises = [];
   const data = isAcceptedByQuorum ? { title: researchContent.title } : undefined;
 
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let promise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member.username,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
@@ -167,7 +167,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: researchUpdateProposedEvent }) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: researchUpdateProposedEvent, tenant }) => {
   const { researchExternalId, researchGroupExternalId } = researchUpdateProposedEvent.getSourceData();
   const eventEmitter = researchUpdateProposedEvent.getEventEmitter();
 
@@ -175,14 +175,14 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: 
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
   
-  const members = await userService.getUsersByResearchGroup(researchGroup.external_id);
+  const members = await userService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notifications = [];
   for (let i = 0; i < members.length; i++) {
     const member = members[i];
 
     notifications.push({
-      username: member.account.name,
+      username: member.username,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
@@ -200,7 +200,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async ({ event: researchUpdatedEvent }) => {
+userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async ({ event: researchUpdatedEvent, tenant }) => {
   const { researchExternalId, researchGroupExternalId } = researchUpdatedEvent.getSourceData();
   const eventEmitter = researchUpdatedEvent.getEventEmitter();
 
@@ -208,14 +208,14 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async ({ event: research
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
 
-  const members = await userService.getUsersByResearchGroup(researchGroup.external_id);
+  const members = await userService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notifications = [];
   for (let i = 0; i < members.length; i++) {
     const member = members[i];
 
     notifications.push({
-      username: member.account.name,
+      username: member.username,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
