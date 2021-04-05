@@ -25,7 +25,7 @@ appEventHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
   const { event: researchProposedEvent, tenant } = source;
   await wait(researchHandler, researchProposedEvent, null, tenant);
   await wait(proposalHandler, researchProposedEvent, null, tenant);
-  fire(userNotificationsHandler, researchProposedEvent)
+  fire(userNotificationsHandler, researchProposedEvent, null, tenant)
 }));
 
 
