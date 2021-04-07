@@ -22,8 +22,8 @@ class UserService extends BaseReadModelService {
         const membershipTokens = chainMembershipTokens.find((teams) => teams.length && teams[0].owner == chainAccount.name) || [];
         const teams = membershipTokens.map((mt) => mt.research_group.external_id);
         const appModules = tenantProfile.settings.modules;
-        const roleModules = tenantProfile.settings.roles.find((appRole) => profile.roles.some((userRole) => tenantProfile._id == userRole.researchGroupExternalId && appRole.role == userRole.role));
-        return { username: chainAccount.name, tenantId: profile.tenantId, account: chainAccount, profile: { ...profile, modules: roleModules ? roleModules.modules : appModules }, teams };
+        const roleInfo = tenantProfile.settings.roles.find((appRole) => profile.roles.some((userRole) => appRole.role == userRole.role));
+        return { username: chainAccount.name, tenantId: profile.tenantId, account: chainAccount, profile: { ...profile, modules: roleInfo && roleInfo.modules ? roleInfo.modules : appModules }, teams };
       });
   }
 
