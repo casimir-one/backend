@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE_AREA, NEW_RESEARCH_POLICY } from './../constants';
+import { SIGN_UP_POLICY, RESEARCH_ATTRIBUTE_TYPE, NEW_RESEARCH_POLICY, ASSESSMENT_CRITERIA_TYPE, RESEARCH_CONTENT_TYPES } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -94,6 +94,24 @@ const GlobalNetworkSettings = new Schema({
   "nodes": [String]
 });
 
+const ReviewQuestion = new Schema({
+  "question": { type: String, required: true },
+  "contentTypes": [Number]
+});
+
+const ResearchContentAssessmentCriteria = new Schema({
+  "_id": false,
+  "id": { type: Number, required: true },
+  "title": { type: String, required: true },
+  "max": { type: Number, required: true }
+});
+
+const ResearchContentAssessmentCriterias = new Schema({
+  "_id": false,
+  "contentType": { type: Number, required: true },
+  "values": [ResearchContentAssessmentCriteria]
+});
+
 const TenantProfile = new Schema({
   "_id": { type: String },
   "name": { type: String },
@@ -116,6 +134,25 @@ const TenantProfile = new Schema({
       required: true
     },
     "researchAttributes": [ResearchAttribute],
+    "reviewQuestions": {
+      type: [ReviewQuestion],
+      default: [
+        { "question": "Do you recommend the submission for funding?", "contentTypes": [] },
+        { "question": "Describe the strength or weaknesses of the submissions", "contentTypes": [] },
+        { "question": "How well does the submission align with the mission?", "contentTypes": [] }
+      ]
+    },
+    "assesmentCriterias": {
+      type: [ResearchContentAssessmentCriterias],
+      default: [{
+        contentType: RESEARCH_CONTENT_TYPES.UNKNOWN,
+        values: [
+          { id: ASSESSMENT_CRITERIA_TYPE.NOVELTY, title: 'Novelty', max: 5 },
+          { id: ASSESSMENT_CRITERIA_TYPE.TECHNICAL_QUALITY, title: 'Technical Quality', max: 5 },
+          { id: ASSESSMENT_CRITERIA_TYPE.COMMERCIALIZATION, title: 'Commercialization', max: 5 }
+        ]
+      }]
+    },
     "researchLayouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },
