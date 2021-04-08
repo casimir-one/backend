@@ -37,6 +37,11 @@ app.use(async function (ctx, next) {
   try {
     await next();
   } catch (err) {
+
+    if (ctx._matchedRoute == "/auth/sign-up") { // Get rid of this ASAP !
+      return;
+    }
+
     if (401 === err.status) {
       ctx.status = 401;
       ctx.body = {
@@ -86,7 +91,7 @@ app.use(require('./middlewares/auth/tenantAuth.js')());
 app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/tenant.js').protected.routes());
 
-app.use(require('./middlewares/events.js')());
+app.use(require('./middlewares/events.js')()); // Replace it with a base controller ASAP !
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 mongoose.connection.on('connected', () => {
