@@ -3,7 +3,6 @@ import fs from 'fs';
 import fsExtra from 'fs-extra'
 import util from 'util';
 import path from 'path';
-import sharp from 'sharp'
 import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';

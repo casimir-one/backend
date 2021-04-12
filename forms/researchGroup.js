@@ -1,7 +1,6 @@
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import sharp from 'sharp';
 import config from './../config';
 import multer from 'koa-multer';
 import { getFileStorageUploader } from './files';
