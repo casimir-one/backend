@@ -12,43 +12,13 @@ const FAQ = new Schema({
   "isVisible": { type: Boolean, required: false } // temp for migration
 });
 
-const ResearchAttributeValueOption = new Schema({
-  "_id": false,
+const attributeOverwrite = new Schema({
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
-  "value": { type: Schema.Types.ObjectId, default: null }
-});
-
-const BlockchainFieldMeta = new Schema({
-  "_id": false,
-  "field": { type: String, required: true },
-  "isPartial": { type: Boolean, required: false, default: false }
-});
-
-const ResearchAttribute = new Schema({
-  "type": {
-    type: String,
-    enum: [...Object.values(RESEARCH_ATTRIBUTE_TYPE)],
-    required: true
-  },
-  "isFilterable": { type: Boolean, default: false },
-  "isEditable": { type: Boolean, default: true },
-  "isRequired": { type: Boolean, default: false },
-  "isHidden": { type: Boolean, default: false },
-  "isMultiple": { type: Boolean, default: false },
-  "title": { type: String, required: false },
-  "shortTitle": { type: String, required: false },
-  "description": { type: String, required: false },
-  "valueOptions": [ResearchAttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
-  "blockchainFieldMeta": BlockchainFieldMeta,
-
-
-  "isPublished": { type: Boolean, required: false }, // temp for migration
-  "isVisible": { type: Boolean, required: false }, // temp for migration
-  "isBlockchainMeta": { type: Boolean, default: false }, // temp for migration
-  "component": { type: Object, required: false } // temp for migration
+  "isFilterable": { type: Boolean, default: false },
+  "isHidden": { type: Boolean, default: false }
 });
 
 const AppModuleMap = new Schema({
@@ -133,7 +103,6 @@ const TenantProfile = new Schema({
       enum: [...Object.values(NEW_RESEARCH_POLICY)],
       required: true
     },
-    "researchAttributes": [ResearchAttribute],
     "reviewQuestions": {
       type: [ReviewQuestion],
       default: [
@@ -153,6 +122,7 @@ const TenantProfile = new Schema({
         ]
       }]
     },
+    "attributeOverwrites": [attributeOverwrite],
     "researchLayouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },

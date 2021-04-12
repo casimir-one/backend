@@ -1,12 +1,13 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../services/research';
 import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
 import UserService from './../services/users';
 import UserInviteService from './../services/userInvites';
+import AttributesService from './../services/attributes'
 
 
 class ResearchHandler extends EventEmitter { }
@@ -18,8 +19,11 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 
   const researchService = new ResearchService();
   const researchGroupService = new ResearchGroupService();
+  const attributesService = new AttributesService();
 
   const { researchExternalId, researchGroupExternalId, source: { offchain: { attributes } } } = researchCreatedEvent.getSourceData();
+
+  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
 
   const researchRef = await researchService.createResearchRef({
     externalId: researchExternalId,
@@ -29,7 +33,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
   });
   
   let hasUpdate = false;
-  const researchGroupAttribute = tenant.profile.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
+  const researchGroupAttribute = researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
   if (researchGroupAttribute && researchGroupAttribute.isHidden) {
     const rAttr = attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchGroupAttribute._id.toString());
     if (!rAttr.value) {
@@ -53,8 +57,11 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
 
   const researchGroupService = new ResearchGroupService();
   const researchService = new ResearchService();
+  const attributesService = new AttributesService();
 
   const { researchExternalId, researchGroupExternalId, source: { offchain: { attributes } } } = researchProposedEvent.getSourceData();
+
+  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
 
   const researchRef = await researchService.createResearchRef({
     externalId: researchExternalId,
@@ -64,7 +71,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
   });
 
   let hasUpdate = false;
-  const researchGroupAttribute = tenant.profile.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
+  const researchGroupAttribute = researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
   if (researchGroupAttribute && researchGroupAttribute.isHidden) {
     const rAttr = attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchGroupAttribute._id.toString());
     if (!rAttr.value) {
@@ -252,10 +259,13 @@ researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply)
 
   const researchService = new ResearchService();
   const proposalsService = new ProposalService();
+  const attributesService = new AttributesService();
 
   const proposalId = userResignationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
   const { member, researchGroupExternalId } = proposal.details;
+
+  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
 
   const researches = await researchService.getResearchesByResearchGroup(researchGroupExternalId);
 
@@ -265,7 +275,7 @@ researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply)
 
     let hasUpdate = false;
 
-    const membersAttributes = tenant.profile.settings.researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+    const membersAttributes = researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
     for (let j = 0; j < membersAttributes.length; j++) {
       const membersAttribute = membersAttributes[j];
       const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == membersAttribute._id.toString());
