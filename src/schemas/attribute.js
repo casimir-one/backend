@@ -18,7 +18,7 @@ const BlockchainFieldMeta = new Schema({
   "isPartial": { type: Boolean, required: false, default: false }
 });
 
-const attribute = new Schema({
+const Attribute = new Schema({
   "tenantId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
@@ -41,14 +41,9 @@ const attribute = new Schema({
     type: Number,
     enum: [...Object.values(ATTRIBUTE_SCOPE)],
     required: true
-  },
-
-  "isPublished": { type: Boolean, required: false }, // temp for migration
-  "isVisible": { type: Boolean, required: false }, // temp for migration
-  "isBlockchainMeta": { type: Boolean, default: false }, // temp for migration
-  "component": { type: Object, required: false } // temp for migration
+  }
 });
 
-const model = mongoose.model('attribute', attribute);
+const model = mongoose.model('attribute', Attribute);
 
 module.exports = model;

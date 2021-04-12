@@ -1,10 +1,13 @@
-require("babel-core/register")({
+require("@babel/register")({
   "presets": [
-    ["env", {
-      "targets": {
-        "node": true
+    [
+      "@babel/env",
+      {
+        "targets": {
+          "node": "current"
+        }
       }
-    }]
+    ]
   ]
 });
 
@@ -13,8 +16,9 @@ const systemAttributes = ['5f68be39c579c726e93a3006','5f68be39c579c726e93a3007',
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const ResearchAttribute = require('./../schemas/researchAttribute');
+const Attribute = require('./../schemas/attribute');
 const TenantProfile = require('./../schemas/tenant');
+const ATTRIBUTE_SCOPE = require('../constants').ATTRIBUTE_SCOPE;
 
 const deipRpc = require('@deip/rpc-client');
 
@@ -29,9 +33,10 @@ const run = async () => {
 
   tenantProfiles[0].settings.researchAttributes.forEach(attr => {
     if(systemAttributes.includes(attr._id.toString())) {
-      const researchAttribute = new ResearchAttribute({
+      const researchAttribute = new Attribute({
         tenantId: null,
         isSystem: true,
+        scope: ATTRIBUTE_SCOPE.RESEARCH,
         ...attr
       });
       
@@ -43,9 +48,10 @@ const run = async () => {
     [...tenantProfiles[i].settings.researchAttributes].forEach((attr) => {
       if(!systemAttributes.includes(attr._id.toString())) {
         delete attr._id;
-        const researchAttribute = new ResearchAttribute({
+        const researchAttribute = new Attribute({
           tenantId: tenantProfiles[i]._id,
           isSystem: false,
+          scope: ATTRIBUTE_SCOPE.RESEARCH,
           ...attr
         });
         

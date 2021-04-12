@@ -7,9 +7,7 @@ const Schema = mongoose.Schema;
 const FAQ = new Schema({
   "question": { type: String, required: true },
   "answer": { type: String, required: true },
-  "isPublished": { type: Boolean, required: false },
-
-  "isVisible": { type: Boolean, required: false } // temp for migration
+  "isPublished": { type: Boolean, required: false }
 });
 
 const attributeOverwrite = new Schema({

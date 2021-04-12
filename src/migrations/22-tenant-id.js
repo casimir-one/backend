@@ -1,12 +1,16 @@
-require("babel-core/register")({
+require("@babel/register")({
   "presets": [
-    ["env", {
-      "targets": {
-        "node": true
+    [
+      "@babel/env",
+      {
+        "targets": {
+          "node": "current"
+        }
       }
-    }]
+    ]
   ]
 });
+
 const config = require('./../config');
 const deipRpc = require('@deip/rpc-client');
 const mongoose = require('mongoose');
