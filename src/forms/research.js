@@ -6,7 +6,7 @@ import config from './../config';
 import multer from 'koa-multer';
 import mongoose from 'mongoose';
 import { getFileStorageUploader } from './files';
-import { FILE_STORAGE } from './../constants';
+import { CreateProposalCmd } from '@deip/project-service';
 
 const RESEARCH_ID_HEADER = "research-external-id";
 const RESEARCH_ATTRIBUTE_ID_SPLITTER = '-';
