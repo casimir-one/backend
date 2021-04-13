@@ -26,8 +26,8 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSED, async ({ event: 
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
 
-  const researchTitle = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
-    ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+  const researchTitle = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+    ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
     : "Not Specified";
   
   const members = await userService.getUsers(tenant.admins);

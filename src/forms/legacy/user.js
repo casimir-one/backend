@@ -27,10 +27,10 @@ const filenameHandler = () => function () {
 
 
 const fileFilterHandler = (req, file, callback) => {
-  const allowedAvatarMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-  if (!allowedAvatarMimeTypes.some(mime => mime === file.mimetype)) {
-    return callback(new Error('Only the following mime types are allowed: ' + allowedAvatarMimeTypes.join(', ')), false);
-  }
+  // const allowedAvatarMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+  // if (!allowedAvatarMimeTypes.some(mime => mime === file.mimetype)) {
+  //   return callback(new Error('Only the following mime types are allowed: ' + allowedAvatarMimeTypes.join(', ')), false);
+  // }
   callback(null, true);
 }
 
@@ -46,8 +46,11 @@ const UserForm = async (ctx) => {
   const formHandler = filesUploader.any();
   return formHandler(ctx, () => new Promise((resolve, reject) => {
     try {
-      resolve({ 
-        filename: ctx.req.files[0].filename
+      const filename = ctx.req.files.length ? ctx.req.files[0].filename : '';
+      const profile = JSON.parse(ctx.req.body.profile);
+      resolve({
+        profile,
+        filename
       });
     } catch (err) {
       reject(err);

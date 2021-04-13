@@ -24,7 +24,7 @@
     "admin-panel-layouts-setup": false,
     "admin-panel-network-setup": true
   },
-  "researchLayouts": {
+  "layouts": {
     "projectDetails": {
       "name": "Project details",
       "icon": "mdi-format-float-left",

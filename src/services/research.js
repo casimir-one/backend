@@ -47,27 +47,27 @@ class ResearchService extends BaseReadModelService {
 
         const attributes = researchRef ? researchRef.attributes : [];
        
-        const title = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
-          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value.toString()
+        const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+          ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value.toString()
           : "Not Specified";
 
-        const abstract = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString())
-          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
+        const abstract = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString())
+          ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
           : "Not Specified";
 
-        const isPrivate = attributes.some(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString())
-          ? attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
+        const isPrivate = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString())
+          ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
           : false;
 
         return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
       })
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         
-        const attribute = researchAttributes.find(attr => attr._id.toString() === rAttr.researchAttributeId.toString());
+        const attribute = researchAttributes.find(attr => attr._id.toString() === rAttr.attributeId.toString());
         if (!attribute || !rAttr.value)
           return false;
         
-        if (rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString() || rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()) {
+        if (rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString() || rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()) {
           return `${rAttr.value}`.toLowerCase().includes(filter.searchTerm.toLowerCase());
         }
 
@@ -86,12 +86,12 @@ class ResearchService extends BaseReadModelService {
       })))
       .filter(r => !filter.researchAttributes.length || (r.researchRef && filter.researchAttributes.every(fAttr => {
 
-        const attribute = researchAttributes.find(attr => attr._id.toString() === fAttr.researchAttributeId.toString());
+        const attribute = researchAttributes.find(attr => attr._id.toString() === fAttr.attributeId.toString());
         if (!attribute) {
           return false;
         }
 
-        const rAttr = r.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() === fAttr.researchAttributeId.toString());
+        const rAttr = r.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() === fAttr.attributeId.toString());
         return fAttr.values.some((v) => {
 
           if (!rAttr || !rAttr.value) {
@@ -213,7 +213,7 @@ class ResearchService extends BaseReadModelService {
     const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
 
     return attributes.map(rAttr => {
-      const rAttrId = mongoose.Types.ObjectId(rAttr.researchAttributeId.toString());
+      const rAttrId = mongoose.Types.ObjectId(rAttr.attributeId.toString());
 
       const attribute = researchAttributes.find(a => a._id.toString() == rAttrId);
       let rAttrValue = null;
@@ -224,7 +224,7 @@ class ResearchService extends BaseReadModelService {
 
       if (!attribute || rAttr.value == null) {
         return {
-          researchAttributeId: rAttrId,
+          attributeId: rAttrId,
           value: rAttrValue
         };
       }
@@ -302,31 +302,31 @@ class ResearchService extends BaseReadModelService {
       }
 
       return {
-        researchAttributeId: rAttrId,
+        attributeId: rAttrId,
         value: rAttrValue
       }
     })
   }
 
 
-  async addAttributeToResearches({ researchAttributeId, type, defaultValue }) {
-    const result = await this.updateMany({}, { $push: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId), type, value: defaultValue } } });
+  async addAttributeToResearches({ attributeId, type, defaultValue }) {
+    const result = await this.updateMany({}, { $push: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId), type, value: defaultValue } } });
     return result;
   }
 
 
-  async removeAttributeFromResearches({ researchAttributeId }) {
-    const result = await this.updateMany({}, { $pull: { attributes: { researchAttributeId: mongoose.Types.ObjectId(researchAttributeId) } } });
+  async removeAttributeFromResearches({ attributeId }) {
+    const result = await this.updateMany({}, { $pull: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId) } } });
     return result;
   }
 
 
-  async updateAttributeInResearches({ researchAttributeId, type, valueOptions, defaultValue }) {
+  async updateAttributeInResearches({ attributeId, type, valueOptions, defaultValue }) {
     if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
       const result = await this.updateMany(
         {
           $and: [
-            { 'attributes.researchAttributeId': mongoose.Types.ObjectId(researchAttributeId) },
+            { 'attributes.attributeId': mongoose.Types.ObjectId(attributeId) },
             { 'attributes.value': { $nin: [...valueOptions.map(opt => mongoose.Types.ObjectId(opt.value))] } }
           ]
         },

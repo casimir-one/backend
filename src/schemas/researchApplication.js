@@ -2,7 +2,7 @@
 import mongoose from 'mongoose';
 import { RESEARCH_APPLICATION_STATUS } from './../constants';
 
-import ResearchAttributeValue from './researchAttributeValue';
+import AttributeValue from './attributeValue';
 
 const Schema = mongoose.Schema;
 
@@ -24,14 +24,14 @@ const ResearchApplication = new Schema({
     "country": { type: String, trim: true, default: null },
     "address": { type: String, trim: true, default: null }
   },
-  "attributes": [ResearchAttributeValue],
+  "attributes": [AttributeValue],
   "budgetAttachment": { type: String, required: false, default: null }, // Submit your budget files, if any
   "businessPlanAttachment": { type: String, required: false, default: null }, // Submit your business plan, if any
   "cvAttachment": { type: String, required: false, default: null }, // Submit your resume/CV
   "marketResearchAttachment": { type: String, required: false, default: null }, // Submit all relevant market research documents
   "tx": { type: Object, required: true },
 
-  "tenantCriterias": [ResearchAttributeValue], // temp for migration
+  "tenantCriterias": [AttributeValue], // temp for migration
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research-applications', ResearchApplication);

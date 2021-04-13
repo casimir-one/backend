@@ -18,6 +18,9 @@ const NETWORK_CONTENT_ACCESS = "network-content-access";
 const ROADMAP = "roadmap";
 const PARTNERS = "partners";
 
+const EDUCATION = "education";
+const EMPLOYMENT = "employment";
+
 const RESEARCH_ATTRIBUTE_TYPE = {
   STEPPER,
   TEXT,
@@ -37,7 +40,9 @@ const RESEARCH_ATTRIBUTE_TYPE = {
   NETWORK_CONTENT_ACCESS,
 
   ROADMAP,
-  PARTNERS
+  PARTNERS,
+  EDUCATION,
+  EMPLOYMENT
 };
 
 export default RESEARCH_ATTRIBUTE_TYPE;

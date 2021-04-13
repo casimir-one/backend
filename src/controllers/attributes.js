@@ -112,7 +112,7 @@ const updateAttribute = async (ctx) => {
     const updatedResearchAttr = await attributesService.updateAttribute(tenant.id, { ...attribute });
     
     await researchService.updateAttributeInResearches({
-      researchAttributeId: attribute._id,
+      attributeId: attribute._id,
       type: attribute.type,
       valueOptions: attribute.valueOptions,
       defaultValue: attribute.defaultValue || null
@@ -137,7 +137,7 @@ const deleteAttribute = async (ctx) => {
     const deletedAttr = await attributesService.deleteAttribute(tenant.id, { _id: attributeId });
 
     await researchService.removeAttributeFromResearches({
-      researchAttributeId: attributeId
+      attributeId
     });
 
     ctx.status = 200;
