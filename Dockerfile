@@ -11,11 +11,11 @@ COPY package*.json ./
 COPY .npmrc ./
 
 RUN npm install
-RUN npm run build
 
 # Bundle app source
 COPY . .
 
+RUN npm run build
 EXPOSE 80
 
 CMD [ "npm", "run", "serve" ]
