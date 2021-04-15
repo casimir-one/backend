@@ -1,4 +1,4 @@
-import BaseCmdHandler from './base/BaseCmdHandler'
+import BaseCmdHandler from './../base/BaseCmdHandler'
 import { APP_CMD } from '@deip/command-models';
 
 
@@ -14,10 +14,10 @@ const projectCmdHandler = new ProjectCmdHandler();
 
 
 projectCmdHandler.register(APP_CMD.CREATE_PROJECT, async (cmd, ctx) => {
-  console.log(cmd);
-  console.log(ctx.state.user.username);
+  // TODO: create project model
+  ctx.state.appEvents.push({ name: "ProjectCreated", payload: cmd.getCmdPayload() });
   return cmd.getProtocolEntityId();
-})
+});
 
 
-export default projectCmdHandler;
+module.exports = projectCmdHandler;

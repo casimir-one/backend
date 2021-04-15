@@ -1,10 +1,6 @@
 import BaseController from './base/BaseController';
 import ProjectForm from './../forms/projectForm';
-import { CreateProposalCmd, APP_CMD_INFO } from '@deip/command-models';
-import { GrapheneTx } from '@deip/command-models';
-import { MultipartFormDataRequest, ApplicationJsonRequest } from '@deip/request-models';
-import projectCmdHandler from './../command-handlers/ProjectCmdHandler';
-import protocolTxCmdHandler from './../command-handlers/ProtocolTxCmdHandler';
+import protocolTxCmdHandler from './../command-handlers/impl/ProtocolTxCmdHandler';
 
 
 class ProjectsController extends BaseController {
@@ -22,4 +18,4 @@ class ProjectsController extends BaseController {
 
 const projectsCtrl = new ProjectsController();
 
-export default projectsCtrl;
+module.exports = projectsCtrl;

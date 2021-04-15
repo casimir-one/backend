@@ -91,7 +91,7 @@ app.use(require('./middlewares/auth/tenantAuth.js')());
 app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/tenant.js').protected.routes());
 
-app.use(require('./middlewares/events.js')()); // Replace it with a base controller ASAP !
+app.use(require('./middlewares/events.js')()); // Replace it with appEvents ASAP !
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 mongoose.connection.on('connected', () => {

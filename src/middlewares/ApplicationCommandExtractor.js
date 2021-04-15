@@ -17,6 +17,7 @@ class ApplicationCommandExtractor {
       const { CMD_NUM } = appCmd;
       const CmdClass = APP_CMD_INFO[CMD_NUM].class;
       ctx.state.appCmd = CmdClass.Deserialize(appCmd);
+      ctx.state.appEvents = [];
     }
 
     if (nextHandler.length === 2) {

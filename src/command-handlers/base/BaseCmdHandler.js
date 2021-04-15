@@ -9,7 +9,7 @@ class BaseCmdHandler extends EventEmitter {
 
   register(cmdNum, handler) {
     this.on(cmdNum, (cmd, ctx, reply) => {
-      return this.promisfyHandler(cmd, ctx, reply, handler)
+      return BaseCmdHandler.PromisfyHandler(cmd, ctx, reply, handler)
     });
   }
 
@@ -19,7 +19,7 @@ class BaseCmdHandler extends EventEmitter {
     });
   }
 
-  async promisfyHandler(cmd, ctx, reply, handler) {
+  static async PromisfyHandler(cmd, ctx, reply, handler) {
     if (reply) {
       const { success, failure } = reply;
       try {
@@ -32,6 +32,24 @@ class BaseCmdHandler extends EventEmitter {
       handler(cmd, ctx);
     }
   }
+
+  static async HandleChain(cmds, ctx) {
+    const CMD_HANDLERS = require('./../../command-handlers/index');
+
+    let chain = new Promise((start, stop) => { start() });
+
+    for (let i = 0; i < cmds.length; i++) {
+      const cmd = cmds[i];
+      const cmdHandler = CMD_HANDLERS[cmd.getCmdNum()];
+      if (!cmdHandler) continue;
+      chain = chain.then(() => cmdHandler.handle(cmd, ctx));
+    }
+
+    chain = chain.then(() => { console.info("App commands pipe passed") });
+    chain = chain.catch((err) => { console.error("App commands pipe failed", err) });
+    await chain;
+  };
+
 
 }
 
