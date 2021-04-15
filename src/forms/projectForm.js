@@ -5,6 +5,7 @@ import path from 'path';
 import config from './../config';
 import multer from 'koa-multer';
 import mongoose from 'mongoose';
+import BaseForm from './base/BaseForm';
 import { getFileStorageUploader } from './files';
 
 
@@ -71,38 +72,30 @@ const fileFilterHandler = (req, file, callback) => {
 }
 
 
-const ResearchForm = async (ctx) => {
+class ProjectForm extends BaseForm {
 
-  const filesUploader = multer({
-    storage: getFileStorageUploader(destinationHandler, filenameHandler),
-    fileFilter: fileFilterHandler
-  });
+  constructor(nextHandler) {
 
-  const formHandler = filesUploader.any();
+    const filesUploader = multer({
+      storage: getFileStorageUploader(destinationHandler, filenameHandler),
+      fileFilter: fileFilterHandler
+    });
 
-  return formHandler(ctx, () => new Promise((resolve, reject) => {
+    const multerHandler = filesUploader.any();
 
-    try {
+    const formHandler = (ctx) => multerHandler(ctx, () => new Promise((resolve, reject) => {
+      try {
+        resolve({ files: ctx.req.files });
+      } catch (err) {
+        reject(err);
+      }
+    }));
 
-      const tx = JSON.parse(ctx.req.body.tx);
-      const onchainData = JSON.parse(ctx.req.body.onchainData);
-      const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
-      const isProposal = ctx.req.body.isProposal === 'true';
-      console.log(ctx.req.files);
+    return super(formHandler, nextHandler);
+  }
 
-      resolve({
-        tx,
-        offchainMeta,
-        onchainData,
-        isProposal
-      });
-
-    } catch (err) {
-      reject(err);
-    }
-
-  }));
 }
 
 
-export default ResearchForm;
+
+export default ProjectForm;

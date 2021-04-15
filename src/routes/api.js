@@ -12,6 +12,7 @@ import invites from '../controllers/invites'
 import assets from '../controllers/assets'
 import reviews from '../controllers/reviews'
 import research from '../controllers/research'
+import projectsCtrl from '../controllers/projects'
 import investmentPortfolio from '../controllers/investmentPortfolio'
 import grants from '../controllers/grants'
 import expressLicensing from '../controllers/expressLicensing'
@@ -154,7 +155,7 @@ protected_route.get('/research/group/listing/:researchGroupExternalId', research
 public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
 
 protected_route.post('/research', research.createResearch)
-protected_route.post('/project', research.createResearch)
+protected_route.post('/project', projectsCtrl.createProject)
 protected_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
 public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
 protected_route.post('/fundraising', fundraising.createResearchTokenSale)
