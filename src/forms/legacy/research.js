@@ -1,12 +1,6 @@
-import fs from 'fs';
-import fsExtra from 'fs-extra'
-import util from 'util';
-import path from 'path';
-import config from './../config';
 import multer from 'koa-multer';
 import mongoose from 'mongoose';
-import BaseForm from './base/BaseForm';
-import { getFileStorageUploader } from './files';
+import { getFileStorageUploader } from './../storage';
 
 
 const RESEARCH_ID_HEADER = "research-external-id";
@@ -72,30 +66,38 @@ const fileFilterHandler = (req, file, callback) => {
 }
 
 
-class ProjectForm extends BaseForm {
+const ResearchForm = async (ctx) => {
 
-  constructor(nextHandler) {
+  const filesUploader = multer({
+    storage: getFileStorageUploader(destinationHandler, filenameHandler),
+    fileFilter: fileFilterHandler
+  });
 
-    const filesUploader = multer({
-      storage: getFileStorageUploader(destinationHandler, filenameHandler),
-      fileFilter: fileFilterHandler
-    });
+  const formHandler = filesUploader.any();
 
-    const multerHandler = filesUploader.any();
+  return formHandler(ctx, () => new Promise((resolve, reject) => {
 
-    const formHandler = (ctx) => multerHandler(ctx, () => new Promise((resolve, reject) => {
-      try {
-        resolve({ files: ctx.req.files });
-      } catch (err) {
-        reject(err);
-      }
-    }));
+    try {
 
-    return super(formHandler, nextHandler);
-  }
+      const tx = JSON.parse(ctx.req.body.tx);
+      const onchainData = JSON.parse(ctx.req.body.onchainData);
+      const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+      const isProposal = ctx.req.body.isProposal === 'true';
+      console.log(ctx.req.files);
 
+      resolve({
+        tx,
+        offchainMeta,
+        onchainData,
+        isProposal
+      });
+
+    } catch (err) {
+      reject(err);
+    }
+
+  }));
 }
 
 
-
-export default ProjectForm;
+export default ResearchForm;

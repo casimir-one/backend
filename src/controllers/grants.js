@@ -3,8 +3,7 @@ import fsExtra from 'fs-extra'
 import path from 'path'
 import util from 'util';
 import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
-import GrantAwardPaymentForm from './../forms/grantAwardPaymentForm';
-import ResearchGroupService from './../services/researchGroup';
+import GrantAwardPaymentForm from './../forms/legacy/grantAwardPaymentForm';
 import ResearchService from './../services/research';
 import GrantService from './../services/grants';
 import crypto from 'crypto';

@@ -1,5 +1,5 @@
 import BaseController from './base/BaseController';
-import ProjectForm from './../forms/ProjectForm';
+import ProjectForm from './../forms/impl/ProjectForm';
 import protocolTxCmdHandler from './../command-handlers/impl/ProtocolTxCmdHandler';
 
 

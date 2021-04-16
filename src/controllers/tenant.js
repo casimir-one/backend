@@ -11,7 +11,7 @@ import ResearchGroupService from './../services/researchGroup';
 import FileStorage from './../storage';
 import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
-import TenantSettingsForm from './../forms/tenantSettings';
+import TenantSettingsForm from './../forms/legacy/tenantSettings';
 import * as blockchainService from './../utils/blockchain';
 import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
 import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';

@@ -2,8 +2,7 @@ import fs from 'fs';
 import fsExtra from 'fs-extra'
 import util from 'util';
 import path from 'path';
-import deipRpc from '@deip/rpc-client';
-import config from './../config';
+import config from './../../config';
 import multer from 'koa-multer';
 
 const stat = util.promisify(fs.stat);

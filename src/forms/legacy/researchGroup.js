@@ -1,9 +1,5 @@
-import fs from 'fs';
-import util from 'util';
-import path from 'path';
-import config from './../config';
 import multer from 'koa-multer';
-import { getFileStorageUploader } from './files';
+import { getFileStorageUploader } from './../storage';
 
 const RESEARCH_GROUP_HEADER = "research-group-external-id";
 

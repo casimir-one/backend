@@ -1,6 +1,5 @@
-import config from './../config';
 import multer from 'koa-multer';
-import { getFileStorageUploader } from './files';
+import { getFileStorageUploader } from './../storage';
 
 const USERNAME_HEADER = "username";
 

@@ -8,7 +8,7 @@ import cloneArchive from './../dar/cloneArchive'
 import xml2js from 'xml2js';
 import { v4 as uuidv4 } from 'uuid';
 import config from './../config';
-import ResearchContentPackageForm from './../forms/researchContentPackage';
+import ResearchContentPackageForm from './../forms/legacy/researchContentPackage';
 import FileStorage from './../storage';
 import crypto from 'crypto';
 import slug from 'limax';

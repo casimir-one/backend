@@ -8,7 +8,7 @@ import config from './../config';
 import qs from 'qs';
 import UserService from './../services/users';
 import FileStorage from './../storage';
-import UserForm from './../forms/user';
+import UserForm from './../forms/legacy/user';
 import UserBookmarkService from './../services/userBookmark';
 import * as blockchainService from './../utils/blockchain';
 import { USER_PROFILE_STATUS } from './../constants';
