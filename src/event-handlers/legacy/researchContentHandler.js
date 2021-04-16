@@ -1,12 +1,10 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, PROPOSAL_STATUS, SMART_CONTRACT_TYPE, RESEARCH_CONTENT_STATUS } from './../constants';
-import deipRpc from '@deip/rpc-client';
+import { APP_EVENTS, PROPOSAL_STATUS, RESEARCH_CONTENT_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchService from './../services/research';
-import ProposalService from './../services/proposal';
-import ResearchGroupService from './../services/researchGroup';
-import ResearchContentService from './../services/researchContent';
-import UserService from './../services/users';
+import ResearchService from './../../services/research';
+import ProposalService from './../../services/proposal';
+import ResearchGroupService from './../../services/researchGroup';
+import ResearchContentService from './../../services/researchContent';
 
 
 class ResearchContentHandler extends EventEmitter { }

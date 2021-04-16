@@ -1,9 +1,9 @@
 import EventEmitter from 'events';
-import { APP_EVENTS } from './../constants';
+import { APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchContentService from './../services/researchContent';
-import ReviewService from './../services/review';
-import ReviewRequestService from './../services/reviewRequest';
+import ResearchContentService from './../../services/researchContent';
+import ReviewService from './../../services/review';
+import ReviewRequestService from './../../services/reviewRequest';
 
 
 class ReviewHandler extends EventEmitter { }

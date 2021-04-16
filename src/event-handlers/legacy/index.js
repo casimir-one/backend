@@ -2,7 +2,7 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { handle, fire, wait } from './utils';
-import { APP_EVENTS } from './../constants';
+import { APP_EVENTS } from './../../constants';
 import userNotificationsHandler from './userNotificationHandler';
 import researchHandler from './researchHandler';
 import researchGroupHandler from './researchGroupHandler';
@@ -12,9 +12,9 @@ import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
 import reviewHandler from './reviewHandler';
 
-import UserService from './../services/users';
-import ResearchService from './../services/research';
-import ResearchGroupService from './../services/researchGroup';
+import UserService from './../../services/users';
+import ResearchService from './../../services/research';
+import ResearchGroupService from './../../services/researchGroup';
 
 class AppEventHandler extends EventEmitter { }
 

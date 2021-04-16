@@ -1,14 +1,14 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../constants';
-import UserService from './../services/users';
-import UserNotificationService from './../services/userNotification';
-import ResearchContentService from './../services/researchContent';
-import ReviewService from '../services/review';
-import ResearchService from '../services/research';
-import ResearchGroupService from '../services/researchGroup';
-import ProposalService from './../services/proposal';
-import TenantService from './../services/tenant';
+import { APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
+import UserService from './../../services/users';
+import UserNotificationService from './../../services/userNotification';
+import ResearchContentService from './../../services/researchContent';
+import ReviewService from './../../services/review';
+import ResearchService from './../../services/research';
+import ResearchGroupService from './../../services/researchGroup';
+import ProposalService from './../../services/proposal';
+import TenantService from './../../services/tenant';
 
 const userService = new UserService({ scoped: false });
 const researchGroupService = new ResearchGroupService({ scoped: false });

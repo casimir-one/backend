@@ -1,11 +1,8 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, PROPOSAL_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchService from './../services/research';
-import ExpressLicensingService from './../services/expressLicensing';
-import ResearchGroupService from './../services/researchGroup';
-import ProposalService from './../services/proposal';
-import UserService from './../services/users';
+import ExpressLicensingService from './../../services/expressLicensing';
+import ProposalService from './../../services/proposal';
 
 class ExpressLicensingHandler extends EventEmitter { }
 

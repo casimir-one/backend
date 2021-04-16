@@ -1,11 +1,8 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, USER_INVITE_STATUS, PROPOSAL_STATUS } from './../constants';
+import { APP_EVENTS, USER_INVITE_STATUS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import UserInviteService from './../services/userInvites';
-import ResearchService from './../services/research';
-import ResearchGroupService from './../services/researchGroup';
-import ProposalService from './../services/proposal';
-import UserService from './../services/users';
+import UserInviteService from './../../services/userInvites';
+import ProposalService from './../../services/proposal';
 
 class UserInviteHandler extends EventEmitter { }
 

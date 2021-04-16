@@ -1,11 +1,8 @@
 import EventEmitter from 'events';
-import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_STATUS } from './../constants';
+import { APP_EVENTS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchService from './../services/research';
-import ResearchGroupService from './../services/researchGroup';
-import ProposalService from './../services/proposal';
-import UserService from './../services/users';
+import ResearchGroupService from './../../services/researchGroup';
+import ProposalService from './../../services/proposal';
 
 class ResearchGroupHandler extends EventEmitter { }
 

@@ -1,12 +1,11 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, SMART_CONTRACT_TYPE } from './../constants';
+import { APP_EVENTS, SMART_CONTRACT_TYPE } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchService from './../services/research';
-import ResearchGroupService from './../services/researchGroup';
-import ProposalService from './../services/proposal';
-import UserService from './../services/users';
-import config from './../config';
+import ResearchGroupService from './../../services/researchGroup';
+import ProposalService from './../../services/proposal';
+import UserService from './../../services/users';
+
 
 class ProposalHandler extends EventEmitter { }
 
