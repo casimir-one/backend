@@ -11,10 +11,10 @@ import ResearchService from './../services/research';
 import ResearchGroupService from './../services/researchGroup';
 import FundraisingService from './../services/fundraising';
 import * as blockchainService from './../utils/blockchain';
-import ResearchTokenSaleCreatedEvent from './../events/researchTokenSaleCreatedEvent';
-import ResearchTokenSaleProposedEvent from './../events/researchTokenSaleProposedEvent';
-import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleProposalSignedEvent';
-import ResearchTokenSaleContributedEvent from './../events/researchTokenSaleContributedEvent';
+import ResearchTokenSaleCreatedEvent from './../events/legacy/researchTokenSaleCreatedEvent';
+import ResearchTokenSaleProposedEvent from './../events/legacy/researchTokenSaleProposedEvent';
+import ResearchTokenSaleProposalSignedEvent from './../events/legacy/researchTokenSaleProposalSignedEvent';
+import ResearchTokenSaleContributedEvent from './../events/legacy/researchTokenSaleContributedEvent';
 
 const fundraisingService = new FundraisingService();
 

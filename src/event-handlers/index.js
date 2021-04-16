@@ -5,10 +5,11 @@ import userNotificationEventHandler from './impl/UserNotificationEventHandler';
 
 /* Priority is defined by the order of handlers */
 
-const MAP = {
+
+module.exports = {
 
   [EVENT.PROJECT_CREATED]: [
-    { h: projectEventHandler, await: true }, 
+    { h: projectEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
   ],
 
@@ -16,6 +17,4 @@ const MAP = {
     { h: proposalEventHandler, await: true }
   ]
 
-}
-
-module.exports = MAP;
+};

@@ -10,12 +10,12 @@ import * as blockchainService from './../utils/blockchain';
 import FileStorage from './../storage';
 import ResearchGroupService from './../services/researchGroup';
 import ResearchGroupForm from './../forms/researchGroup';
-import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
-import ResearchGroupUpdatedEvent from './../events/researchGroupUpdatedEvent';
-import ResearchGroupUpdateProposedEvent from './../events/researchGroupUpdateProposedEvent';
-import ResearchGroupUpdateProposalSignedEvent from './../events/researchGroupUpdateProposalSignedEvent';
-import UserResignationProposedEvent from './../events/userResignationProposedEvent';
-import UserResignationProposalSignedEvent from './../events/userResignationProposalSignedEvent';
+import ResearchGroupCreatedEvent from './../events/legacy/researchGroupCreatedEvent';
+import ResearchGroupUpdatedEvent from './../events/legacy/researchGroupUpdatedEvent';
+import ResearchGroupUpdateProposedEvent from './../events/legacy/researchGroupUpdateProposedEvent';
+import ResearchGroupUpdateProposalSignedEvent from './../events/legacy/researchGroupUpdateProposalSignedEvent';
+import UserResignationProposedEvent from './../events/legacy/userResignationProposedEvent';
+import UserResignationProposalSignedEvent from './../events/legacy/userResignationProposalSignedEvent';
 
 
 const createResearchGroup = async (ctx, next) => {

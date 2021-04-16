@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler'
-import ProjectCreatedEvent from './../../events/impl/ProjectCreatedEvent';
+import { ProjectCreatedEvent } from './../../events';
 
 
 class ProjectCmdHandler extends BaseCmdHandler {

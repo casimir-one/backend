@@ -1,7 +1,7 @@
 import config from './../config';
 import * as blockchainService from './../utils/blockchain';
-import ResearchNdaProposedEvent from './../events/researchNdaProposedEvent';
-import ResearchNdaProposalSignedEvent from './../events/researchNdaProposalSignedEvent';
+import ResearchNdaProposedEvent from './../events/legacy/researchNdaProposedEvent';
+import ResearchNdaProposalSignedEvent from './../events/legacy/researchNdaProposalSignedEvent';
 import ResearchNdaService from './../services/researchNda';
 
 const researchNdaService = new ResearchNdaService();

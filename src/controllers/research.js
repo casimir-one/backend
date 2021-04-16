@@ -18,18 +18,15 @@ import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEA
 import ResearchForm from './../forms/research';
 import FileStorage from './../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/researchApplicationForms';
-import ResearchCreatedEvent from './../events/researchCreatedEvent';
-import ResearchProposedEvent from './../events/researchProposedEvent';
-import ResearchProposalSignedEvent from './../events/researchProposalSignedEvent';
-import ResearchProposalRejectedEvent from './../events/researchProposalRejectedEvent';
-import ResearchUpdatedEvent from './../events/researchUpdatedEvent';
-import ResearchUpdateProposedEvent from './../events/researchUpdateProposedEvent';
-import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
-import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
-import ResearchGroupCreatedEvent from './../events/researchGroupCreatedEvent';
-import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
-import UserInvitationProposalRejectedEvent from './../events/userInvitationProposalRejectedEvent';
+import ResearchCreatedEvent from './../events/legacy/researchCreatedEvent';
+import ResearchProposedEvent from './../events/legacy/researchProposedEvent';
+import ResearchProposalSignedEvent from './../events/legacy/researchProposalSignedEvent';
+import ResearchUpdatedEvent from './../events/legacy/researchUpdatedEvent';
+import ResearchUpdateProposedEvent from './../events/legacy/researchUpdateProposedEvent';
+import ResearchUpdateProposalSignedEvent from './../events/legacy/researchUpdateProposalSignedEvent';
+import ResearchGroupCreatedEvent from './../events/legacy/researchGroupCreatedEvent';
+import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
 
 
 const stat = util.promisify(fs.stat);

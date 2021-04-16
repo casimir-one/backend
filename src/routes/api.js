@@ -25,7 +25,7 @@ import researchNda from './../controllers/researchNda';
 import attributes from './../controllers/attributes';
 
 import * as blockchainService from './../utils/blockchain';
-import ResearchContentProposedEvent from './../events/researchContentProposedEvent';
+import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
 
 import researchContentFileReadAuth from './../middlewares/auth/researchContent/readFileAuth';
 import researchContentFileUpdateAuth from './../middlewares/auth/researchContent/updateFileAuth';

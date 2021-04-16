@@ -8,8 +8,8 @@ import ResearchGroupService from './../services/researchGroup';
 import UserService from './../services/users';
 import TenantService from './../services/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../constants';
-import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
+import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);

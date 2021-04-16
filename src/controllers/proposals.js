@@ -6,29 +6,29 @@ import ProposalService from './../services/proposal';
 import ResearchGroupService from './../services/researchGroup';
 import UserService from './../services/users';
 
-import ResearchProposalSignedEvent from './../events/researchProposalSignedEvent';
-import ResearchUpdateProposalSignedEvent from './../events/researchUpdateProposalSignedEvent';
-import ResearchContentProposalSignedEvent from './../events/researchContentProposalSignedEvent';
-import ResearchTokenSaleProposalSignedEvent from './../events/researchTokenSaleProposalSignedEvent';
-import ResearchGroupUpdateProposalSignedEvent from './../events/researchGroupUpdateProposalSignedEvent';
-import AssetTransferProposalSignedEvent from './../events/assetTransferProposalSignedEvent';
-import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalSignedEvent';
-import ResearchExpressLicenseProposalSignedEvent from './../events/researchExpressLicenseProposalSignedEvent';
-import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
-import UserResignationProposalSignedEvent from './../events/userResignationProposalSignedEvent';
-import ResearchNdaProposalSignedEvent from './../events/researchNdaProposalSignedEvent'
+import ResearchProposalSignedEvent from './../events/legacy/researchProposalSignedEvent';
+import ResearchUpdateProposalSignedEvent from './../events/legacy/researchUpdateProposalSignedEvent';
+import ResearchContentProposalSignedEvent from './../events/legacy/researchContentProposalSignedEvent';
+import ResearchTokenSaleProposalSignedEvent from './../events/legacy/researchTokenSaleProposalSignedEvent';
+import ResearchGroupUpdateProposalSignedEvent from './../events/legacy/researchGroupUpdateProposalSignedEvent';
+import AssetTransferProposalSignedEvent from './../events/legacy/assetTransferProposalSignedEvent';
+import AssetExchangeProposalSignedEvent from './../events/legacy/assetExchangeProposalSignedEvent';
+import ResearchExpressLicenseProposalSignedEvent from './../events/legacy/researchExpressLicenseProposalSignedEvent';
+import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
+import UserResignationProposalSignedEvent from './../events/legacy/userResignationProposalSignedEvent';
+import ResearchNdaProposalSignedEvent from './../events/legacy/researchNdaProposalSignedEvent'
 
-import ResearchProposalRejectedEvent from './../events/researchProposalRejectedEvent';
-import ResearchUpdateProposalRejectedEvent from './../events/researchUpdateProposalRejectedEvent';
-import ResearchContentProposalRejectedEvent from './../events/researchContentProposalRejectedEvent';
-import ResearchTokenSaleProposalRejectedEvent from './../events/researchTokenSaleProposalRejectedEvent';
-import ResearchGroupUpdateProposalRejectedEvent from './../events/researchGroupUpdateProposalRejectedEvent';
-import AssetTransferProposalRejectedEvent from './../events/assetTransferProposalRejectedEvent';
-import AssetExchangeProposalRejectedEvent from './../events/assetExchangeProposalRejectedEvent';
-import ResearchExpressLicenseProposalRejectedEvent from './../events/researchExpressLicenseProposalRejectedEvent';
-import UserInvitationProposalRejectedEvent from './../events/userInvitationProposalRejectedEvent';
-import UserResignationProposalRejectedEvent from './../events/userResignationProposalRejectedEvent';
-import ResearchNdaProposalRejectedEvent from './../events/researchNdaProposalRejectedEvent';
+import ResearchProposalRejectedEvent from './../events/legacy/researchProposalRejectedEvent';
+import ResearchUpdateProposalRejectedEvent from './../events/legacy/researchUpdateProposalRejectedEvent';
+import ResearchContentProposalRejectedEvent from './../events/legacy/researchContentProposalRejectedEvent';
+import ResearchTokenSaleProposalRejectedEvent from './../events/legacy/researchTokenSaleProposalRejectedEvent';
+import ResearchGroupUpdateProposalRejectedEvent from './../events/legacy/researchGroupUpdateProposalRejectedEvent';
+import AssetTransferProposalRejectedEvent from './../events/legacy/assetTransferProposalRejectedEvent';
+import AssetExchangeProposalRejectedEvent from './../events/legacy/assetExchangeProposalRejectedEvent';
+import ResearchExpressLicenseProposalRejectedEvent from './../events/legacy/researchExpressLicenseProposalRejectedEvent';
+import UserInvitationProposalRejectedEvent from './../events/legacy/userInvitationProposalRejectedEvent';
+import UserResignationProposalRejectedEvent from './../events/legacy/userResignationProposalRejectedEvent';
+import ResearchNdaProposalRejectedEvent from './../events/legacy/researchNdaProposalRejectedEvent';
 
 
 const createProposal = async (ctx) => {

@@ -1,6 +1,6 @@
 import ReviewRequestService from './../services/reviewRequest';
 import ReviewService from './../services/review';
-import ReviewRequestedEvent from './../events/reviewRequestedEvent';
+import ReviewRequestedEvent from './../events/legacy/reviewRequestedEvent';
 
 
 const getReviewRequestsByExpert = async (ctx) => {

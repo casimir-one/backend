@@ -1,13 +1,10 @@
-import { APP_EVENTS } from './../constants';
 import * as blockchainService from './../utils/blockchain';
-import AssetExchangeProposedEvent from './../events/assetExchangeProposedEvent';
-import AssetExchangeProposalSignedEvent from './../events/assetExchangeProposalSignedEvent';
-import AssetExchangeProposalRejectedEvent from './../events/assetExchangeProposalRejectedEvent';
-import AssetTransferredEvent from './../events/assetTransferredEvent';
-import AssetTransferProposedEvent from './../events/assetTransferProposedEvent';
-import AssetTransferProposalSignedEvent from './../events/assetTransferProposalSignedEvent';
+import AssetExchangeProposedEvent from './../events/legacy/assetExchangeProposedEvent';
+import AssetExchangeProposalSignedEvent from './../events/legacy/assetExchangeProposalSignedEvent';
+import AssetTransferredEvent from './../events/legacy/assetTransferredEvent';
+import AssetTransferProposedEvent from './../events/legacy/assetTransferProposedEvent';
+import AssetTransferProposalSignedEvent from './../events/legacy/assetTransferProposalSignedEvent';
 import AssetService from './../services/asset';
-import AssetTransferProposalRejectedEvent from './../events/assetTransferProposalRejectedEvent';
 
 const assetService = new AssetService();
 

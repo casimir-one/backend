@@ -13,9 +13,8 @@ import config from './../config';
 import { USER_PROFILE_STATUS } from './../constants';
 import TenantSettingsForm from './../forms/tenantSettings';
 import * as blockchainService from './../utils/blockchain';
-import mongoose from 'mongoose';
-import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
+import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
 
 
 const updateTenantSettings = async (ctx) => {

@@ -1,8 +1,8 @@
 import { APP_EVENTS } from './../constants';
 import UserInviteService from './../services/userInvites';
 import * as blockchainService from './../utils/blockchain';
-import UserInvitationProposedEvent from './../events/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../events/userInvitationProposalSignedEvent';
+import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
 
 
 const getUserInvites = async (ctx) => {

@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler'
-import ProposalCreatedEvent from './../../events/impl/ProposalCreatedEvent';
+import { ProposalCreatedEvent } from './../../events';
 
 
 class ProposalCmdHandler extends BaseCmdHandler {
