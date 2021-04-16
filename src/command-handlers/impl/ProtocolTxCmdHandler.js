@@ -27,5 +27,4 @@ protocolTxCmdHandler.register(APP_CMD.SEND_PROTOCOL_TX, async (cmd, ctx) => {
 });
 
 
-
 module.exports = protocolTxCmdHandler;
