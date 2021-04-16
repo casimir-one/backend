@@ -1,4 +1,4 @@
-import appEventHandler from './../event-handlers/legacy'
+import appEventHandler from './../../event-handlers/legacy'
 
 function events(options) {
   return async function (ctx, next) {

@@ -9,7 +9,7 @@ class BaseCmdHandler extends EventEmitter {
 
   register(cmdNum, handler) {
     this.on(cmdNum, (cmd, ctx, reply) => {
-      return BaseCmdHandler.PromisfyHandler(cmd, ctx, reply, handler)
+      return BaseCmdHandler.PromisfyCmdHandler(cmd, ctx, reply, handler)
     });
   }
 
@@ -19,7 +19,7 @@ class BaseCmdHandler extends EventEmitter {
     });
   }
 
-  static async PromisfyHandler(cmd, ctx, reply, handler) {
+  static async PromisfyCmdHandler(cmd, ctx, reply, handler) {
     if (reply) {
       const { success, failure } = reply;
       try {

@@ -46,7 +46,7 @@ app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/tenant.js').protected.routes());
 
 // event handlers
-app.use(require('./middlewares/events.js')()); // legacy
+app.use(require('./middlewares/legacy/events.js')()); // legacy
 app.use(require('./middlewares/appEvents.js')());
 
 app.listen(PORT, HOST, () => {

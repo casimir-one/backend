@@ -8,6 +8,7 @@ import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
 import RESEARCH_ATTRIBUTE_TYPE from './researchAttributeTypes';
 import APP_EVENTS from './appEvents';
+import EVENT from './event';
 import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 import NEW_RESEARCH_POLICY from './newResearchPolicy';
@@ -41,5 +42,6 @@ export {
   RESEARCH_CONTENT_TYPES,
   CONTENT_TYPES_MAP,
   ASSESSMENT_CRITERIA_TYPE,
-  ATTRIBUTE_SCOPE
+  ATTRIBUTE_SCOPE,
+  EVENT
 }

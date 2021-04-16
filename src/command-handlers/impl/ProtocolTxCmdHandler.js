@@ -19,8 +19,6 @@ const protocolTxCmdHandler = new ProtocolTxCmdHandler();
 protocolTxCmdHandler.register(APP_CMD.SEND_PROTOCOL_TX, async (cmd, ctx) => {
   const tx = deipRpc.auth.signTransaction(cmd.getTx().finalize(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY });
   const txInfo = await protocolService.sendTransactionAsync(tx);
-  ctx.state.appEvents.push({ name: "ProtocolTransactionSent", payload: cmd.getCmdPayload() });
-
   const appCmds = cmd.getCmds();
   await ProtocolTxCmdHandler.HandleChain(appCmds, ctx);
   return txInfo;
