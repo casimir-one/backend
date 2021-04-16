@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, PROPOSAL_STATUS, RESEARCH_CONTENT_STATUS } from './../../constants';
+import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, RESEARCH_CONTENT_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../../services/research';
 import ProposalService from './../../services/proposal';
@@ -11,7 +11,7 @@ class ResearchContentHandler extends EventEmitter { }
 
 const researchContentHandler = new ResearchContentHandler();
 
-researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+researchContentHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentCreatedEvent, tenant } = source;
 
   const researchService = new ResearchService();
@@ -42,7 +42,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) 
 }));
 
 
-researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+researchContentHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentCreatedEvent, tenant } = source;
 
   const researchService = new ResearchService();
@@ -73,7 +73,7 @@ researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply)
 }));
 
 
-researchContentHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+researchContentHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentProposalSignedEvent, tenant } = source;
 
   const proposalsService = new ProposalService();

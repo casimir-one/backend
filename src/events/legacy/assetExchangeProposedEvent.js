@@ -1,10 +1,10 @@
 import assert from 'assert';
-import { APP_EVENTS } from './../../constants';
+import { LEGACY_APP_EVENTS } from './../../constants';
 import AppEvent from './appEvent';
 import ProposalEvent from './proposalEvent';
 
 class AssetExchangeProposedEvent extends ProposalEvent(AppEvent) {
-  constructor(onchainDatums, offchainMeta, eventName = APP_EVENTS.ASSET_EXCHANGE_PROPOSED) {
+  constructor(onchainDatums, offchainMeta, eventName = LEGACY_APP_EVENTS.ASSET_EXCHANGE_PROPOSED) {
     assert(onchainDatums.filter(([opName]) => opName == 'transfer').length == 2, "transfer_operation(s) are not provided");
     super(onchainDatums, offchainMeta, eventName);
   }

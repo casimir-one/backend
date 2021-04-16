@@ -1,5 +1,5 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import { EVENT } from './../../constants';
+import { APP_EVENT } from './../../constants';
 
 
 class ProjectEventHandler extends BaseEventHandler {
@@ -13,7 +13,7 @@ class ProjectEventHandler extends BaseEventHandler {
 const projectEventHandler = new ProjectEventHandler();
 
 
-projectEventHandler.register(EVENT.PROJECT_CREATED, async (event, ctx) => {
+projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
   // TODO: handle project read schema 
   console.log(event);
 });

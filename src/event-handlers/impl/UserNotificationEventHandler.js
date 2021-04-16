@@ -1,5 +1,5 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import { EVENT } from './../../constants';
+import { APP_EVENT } from './../../constants';
 
 
 class UserNotificationEventHandler extends BaseEventHandler {
@@ -13,7 +13,7 @@ class UserNotificationEventHandler extends BaseEventHandler {
 const userNotificationEventHandler = new UserNotificationEventHandler();
 
 
-userNotificationEventHandler.register(EVENT.PROJECT_CREATED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
   // TODO: send notifications about new project
   console.log(event);
 });

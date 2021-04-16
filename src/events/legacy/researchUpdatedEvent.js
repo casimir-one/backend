@@ -1,9 +1,9 @@
 import assert from 'assert';
-import { APP_EVENTS } from './../../constants';
+import { LEGACY_APP_EVENTS } from './../../constants';
 import AppEvent from './appEvent';
 
 class ResearchUpdatedEvent extends AppEvent {
-  constructor(onchainDatums, offchainMeta, eventName = APP_EVENTS.RESEARCH_UPDATED) {
+  constructor(onchainDatums, offchainMeta, eventName = LEGACY_APP_EVENTS.RESEARCH_UPDATED) {
     assert(onchainDatums.some(([opName]) => opName == 'update_research'), "update_research_operation is not provided");
     super(onchainDatums, offchainMeta, eventName);
   }

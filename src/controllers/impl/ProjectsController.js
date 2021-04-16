@@ -1,6 +1,6 @@
-import BaseController from './base/BaseController';
-import ProjectForm from './../forms/impl/ProjectForm';
-import protocolTxCmdHandler from './../command-handlers/impl/ProtocolTxCmdHandler';
+import BaseController from './../base/BaseController';
+import { ProjectForm } from './../../forms';
+import protocolTxCmdHandler from './../../command-handlers/impl/ProtocolTxCmdHandler';
 
 
 class ProjectsController extends BaseController {

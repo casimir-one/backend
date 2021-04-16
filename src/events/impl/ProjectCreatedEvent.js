@@ -1,11 +1,11 @@
 import BaseEvent from './../base/BaseEvent';
-import { EVENT } from './../../constants';
+import { APP_EVENT } from './../../constants';
 
 
 class ProjectCreatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
-    super(EVENT.PROJECT_CREATED, eventPayload);
+    super(APP_EVENT.PROJECT_CREATED, eventPayload);
   }
 
 }

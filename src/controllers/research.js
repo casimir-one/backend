@@ -14,7 +14,7 @@ import ResearchApplicationService from './../services/researchApplication';
 import AttributesService from './../services/attributes';
 import ResearchGroupService from './../services/researchGroup';
 import * as blockchainService from './../utils/blockchain';
-import { APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../constants';
+import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../constants';
 import ResearchForm from './../forms/legacy/research';
 import FileStorage from './../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/legacy/researchApplicationForms';
@@ -243,7 +243,7 @@ const createResearchApplication = async (ctx, next) => {
     ctx.body = { txResult, tx: form.tx, rm: researchApplication };
 
     if (!isAccepted) {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
+      ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
     } else {
       const researchCreatedEvent = new ResearchCreatedEvent(datums, { attributes: researchApplication.attributes || []});
       ctx.state.events.push(researchCreatedEvent);
@@ -338,7 +338,7 @@ const editResearchApplication = async (ctx, next) => {
     ctx.status = 200;
     ctx.body = { rm: updatedResearchApplication };
 
-    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_EDITED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+    ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_EDITED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
 
   } catch (err) {
     console.log(err);
@@ -447,7 +447,7 @@ const approveResearchApplication = async (ctx, next) => {
     ctx.body = { tx, txResult, rm: researchCreatedEvent.getSourceData() };
 
     if (isAccepted) {
-      ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_APPROVED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+      ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
     }
     
   } catch (err) {
@@ -496,7 +496,7 @@ const rejectResearchApplication = async (ctx, next) => {
     ctx.status = 200;
     ctx.body = { tx, txResult };
 
-    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_REJECTED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+    ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_REJECTED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
     
   } catch (err) {
     console.log(err);
@@ -552,7 +552,7 @@ const deleteResearchApplication = async (ctx, next) => {
     ctx.status = 200;
     ctx.body = { tx, txResult };
 
-    ctx.state.events.push([APP_EVENTS.RESEARCH_APPLICATION_DELETED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
+    ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
     
   } catch (err) {
     console.log(err);

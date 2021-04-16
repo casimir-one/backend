@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, PROPOSAL_STATUS } from './../../constants';
+import { LEGACY_APP_EVENTS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ExpressLicensingService from './../../services/expressLicensing';
 import ProposalService from './../../services/proposal';
@@ -9,7 +9,7 @@ class ExpressLicensingHandler extends EventEmitter { }
 const expressLicensingHandler = new ExpressLicensingHandler();
 
 
-expressLicensingHandler.on(APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+expressLicensingHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposalSignedEvent, tenant } = source;
 
   const proposalsService = new ProposalService();

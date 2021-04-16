@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
+import { LEGACY_APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
 import UserService from './../../services/users';
 import UserNotificationService from './../../services/userNotification';
 import ResearchContentService from './../../services/researchContent';
@@ -19,7 +19,7 @@ class UserNotificationHandler extends EventEmitter { }
 
 const userNotificationHandler = new UserNotificationHandler();
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researchProposedEvent, tenant }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researchProposedEvent, tenant }) => {
   const { researchGroupExternalId, source: { offchain: { attributes } } } = researchProposedEvent.getSourceData();
   const eventEmitter = researchProposedEvent.getEventEmitter();
 
@@ -56,7 +56,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_PROPOSED, async ({ event: researc
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async ({ event: researchCreatedEvent, tenant }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CREATED, async ({ event: researchCreatedEvent, tenant }) => {
   const { researchExternalId, researchGroupExternalId } = researchCreatedEvent.getSourceData();
   const eventEmitter = researchCreatedEvent.getEventEmitter();
 
@@ -92,7 +92,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CREATED, async ({ event: research
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event: researchContentProposedEvent, tenant }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event: researchContentProposedEvent, tenant }) => {
   const { researchGroupExternalId, researchExternalId, source: { offchain: { title } } } = researchContentProposedEvent.getSourceData();
   const eventEmitter = researchContentProposedEvent.getEventEmitter();
 
@@ -128,7 +128,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event:
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: researchContentCreatedEvent, tenant }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: researchContentCreatedEvent, tenant }) => {
   const researchContentService = new ResearchContentService();
 
   const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getSourceData();
@@ -167,7 +167,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: researchUpdateProposedEvent, tenant }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: researchUpdateProposedEvent, tenant }) => {
   const { researchExternalId, researchGroupExternalId } = researchUpdateProposedEvent.getSourceData();
   const eventEmitter = researchUpdateProposedEvent.getEventEmitter();
 
@@ -200,7 +200,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, async ({ event: 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async ({ event: researchUpdatedEvent, tenant }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATED, async ({ event: researchUpdatedEvent, tenant }) => {
   const { researchExternalId, researchGroupExternalId } = researchUpdatedEvent.getSourceData();
   const eventEmitter = researchUpdatedEvent.getEventEmitter();
 
@@ -233,7 +233,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_UPDATED, async ({ event: research
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async ({ event: researchGroupUpdateProposedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async ({ event: researchGroupUpdateProposedEvent }) => {
   const { researchGroupExternalId } = researchGroupUpdateProposedEvent.getSourceData();
   const eventEmitter = researchGroupUpdateProposedEvent.getEventEmitter();
 
@@ -263,7 +263,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async ({ e
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ event: researchGroupUpdatedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ event: researchGroupUpdatedEvent }) => {
   const { researchGroupExternalId } = researchGroupUpdatedEvent.getSourceData();
   const eventEmitter = researchGroupUpdatedEvent.getEventEmitter();
 
@@ -294,7 +294,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ event: re
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_CREATED, async (payload) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_CREATED, async (payload) => {
   const { research, requester, tenant, proposal } = payload;
   const notificationsPromises = [];
 
@@ -317,7 +317,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_CREATED, async (paylo
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, async (payload) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, async (payload) => {
   const { research, researchGroup, requester, approver, tenant } = payload;
   userNotificationService.createUserNotification({
     username: requester.account.name,
@@ -333,7 +333,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_APPROVED, async (payl
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (payload) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (payload) => {
   const { research, requester, rejecter, tenant } = payload;
   userNotificationService.createUserNotification({
     username: requester.account.name,
@@ -348,7 +348,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_REJECTED, async (payl
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_EDITED, async (payload) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_EDITED, async (payload) => {
   const { research, requester, proposal, tenant } = payload;
   const notificationsPromises = [];
 
@@ -369,7 +369,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_EDITED, async (payloa
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (payload) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (payload) => {
   const { research, requester, tenant } = payload;
   const notificationsPromises = [];
 
@@ -389,7 +389,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_APPLICATION_DELETED, async (paylo
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async ({ event: userInvitationProposedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSED, async ({ event: userInvitationProposedEvent }) => {
   const proposalsService = new ProposalService();
   const proposalId = userInvitationProposedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
@@ -428,7 +428,7 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, async ({ event: 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async ({ event: userInvitationProposalSignedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async ({ event: userInvitationProposalSignedEvent }) => {
   const proposalsService = new ProposalService();
 
   const proposalId = userInvitationProposalSignedEvent.getProposalId();
@@ -498,7 +498,7 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, async ({ 
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async ({ event: userInvitationProposalRejectedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async ({ event: userInvitationProposalRejectedEvent }) => {
   const proposalsService = new ProposalService();
 
   const proposalId = userInvitationProposalRejectedEvent.getProposalId();
@@ -527,7 +527,7 @@ userNotificationHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, async (
 });
 
 
-userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event: userResignationProposedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event: userResignationProposedEvent }) => {
   const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
   const eventEmitter = userResignationProposedEvent.getEventEmitter();
   const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
@@ -556,7 +556,7 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event:
   Promise.all(notificationsPromises);
 });
 
-userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({ event: userResignationProposalSignedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({ event: userResignationProposalSignedEvent }) => {
   const proposalsService = new ProposalService();
   const proposalId = userResignationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
@@ -597,7 +597,7 @@ userNotificationHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async ({ event: researchTokenSaleProposedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async ({ event: researchTokenSaleProposedEvent }) => {
   const { researchExternalId, researchGroupExternalId } = researchTokenSaleProposedEvent.getSourceData();
   const eventEmitter = researchTokenSaleProposedEvent.getEventEmitter();
 
@@ -630,7 +630,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async ({ eve
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async ({ event: researchTokenSaleCreatedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async ({ event: researchTokenSaleCreatedEvent }) => {
   const { researchTokenSaleExternalId, researchExternalId, researchGroupExternalId } = researchTokenSaleCreatedEvent.getSourceData();
   const eventEmitter = researchTokenSaleCreatedEvent.getEventEmitter();
 
@@ -662,7 +662,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async ({ even
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, async (source) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, async (source) => {
   const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
   const { event: reviewCreatedEvent, tenant } = source;
   const researchContentService = new ResearchContentService();
@@ -700,7 +700,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, as
 });
 
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, async ({ event: reviewRequestedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, async ({ event: reviewRequestedEvent }) => {
   const { source: { offchain: { reviewRequest }}} = reviewRequestedEvent.getSourceData();
   const { requestor: requestorId, expert: expertId, researchContentExternalId } = reviewRequest;
   const researchContentService = new ResearchContentService();
@@ -725,7 +725,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, 
   });
 });
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSED, async ({ event: researchNdaProposedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSED, async ({ event: researchNdaProposedEvent }) => {
   const tenantService = new TenantService()
   const { researchExternalId } = researchNdaProposedEvent.getSourceData();
   const eventEmitter = researchNdaProposedEvent.getEventEmitter()
@@ -754,7 +754,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSED, async ({ event: res
   Promise.all(notificationsPromises);
 });
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, async ({ event: researchNdaProposalSignedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, async ({ event: researchNdaProposalSignedEvent }) => {
   const tenantService = new TenantService()
   const proposalsService = new ProposalService();
 
@@ -787,7 +787,7 @@ userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, async ({ eve
   }
 });
 
-userNotificationHandler.on(APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, async ({ event: researchNdaProposalRejectedEvent }) => {
+userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, async ({ event: researchNdaProposalRejectedEvent }) => {
   const tenantService = new TenantService()
   const proposalsService = new ProposalService();
 

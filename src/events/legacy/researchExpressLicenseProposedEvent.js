@@ -1,11 +1,11 @@
 import assert from 'assert';
-import { APP_EVENTS } from './../../constants';
+import { LEGACY_APP_EVENTS } from './../../constants';
 import AppEvent from './appEvent';
 import ProposalEvent from './proposalEvent';
 
 
 class ResearchExpressLicenseProposedEvent extends ProposalEvent(AppEvent) {
-  constructor(onchainDatums, offchainMeta, eventName = APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED) {
+  constructor(onchainDatums, offchainMeta, eventName = LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED) {
     assert(onchainDatums.some(([opName]) => opName == 'create_research_license'), "create_research_license_operation is not provided");
     super(onchainDatums, offchainMeta, eventName);
   }

@@ -1,9 +1,10 @@
 import { createEnum } from '@deip/toolbox';
 
-const EVENT = createEnum({
+
+const APP_EVENT = createEnum({
   PROJECT_CREATED: 1,
   PROPOSAL_CREATED: 2
 });
 
 
-module.exports = EVENT;
+module.exports = APP_EVENT;

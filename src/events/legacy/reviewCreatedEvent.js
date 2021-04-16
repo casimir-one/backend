@@ -1,9 +1,9 @@
 import assert from 'assert';
-import { APP_EVENTS } from './../../constants';
+import { LEGACY_APP_EVENTS } from './../../constants';
 import AppEvent from './appEvent';
 
 class ReviewCreatedEvent extends AppEvent {
-  constructor(onchainDatums, offchainMeta, eventName = APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED) {
+  constructor(onchainDatums, offchainMeta, eventName = LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED) {
     assert(onchainDatums.some(([opName]) => opName == 'create_review'), "create_review_operation is not provided");
     super(onchainDatums, offchainMeta, eventName);
   }

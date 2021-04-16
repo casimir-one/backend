@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { APP_EVENTS, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
+import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../../services/research';
 import ProposalService from './../../services/proposal';
@@ -14,7 +14,7 @@ class ResearchHandler extends EventEmitter { }
 
 const researchHandler = new ResearchHandler();
 
-researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchCreatedEvent, tenant } = source;
 
   const researchService = new ResearchService();
@@ -52,7 +52,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(paylo
 }));
 
 
-researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchProposedEvent, tenant } = source;
 
   const researchGroupService = new ResearchGroupService();
@@ -88,7 +88,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payl
 }));
 
 
-researchHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdatedEvent } = source;
   
   const researchService = new ResearchService();
@@ -103,7 +103,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(paylo
 }));
 
 
-researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async ({ event: researchUpdateProposedEvent }) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async ({ event: researchUpdateProposedEvent }) => {
   const researchService = new ResearchService();
   const { researchExternalId } = researchUpdateProposedEvent.getSourceData();
   const updatedResearch = await researchService.getResearch(researchExternalId)
@@ -111,7 +111,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => hand
 }));
 
 
-researchHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchProposalSignedEvent } = source;
 
   const researchService = new ResearchService();
@@ -135,7 +135,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => hand
 }));
 
 
-researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposalSignedEvent } = source;
 
   const researchService = new ResearchService();
@@ -158,7 +158,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) 
 }));
 
 
-researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
+researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: userInvitationProposalSignedEvent } = event;
 
   const researchService = new ResearchService();
@@ -205,7 +205,7 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) 
 }));
 
 
-researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (event) => {
+researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: userInvitationProposalRejectedEvent } = event;
 
   const usersService = new UserService();
@@ -254,7 +254,7 @@ researchHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply
 
 
 
-researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
+researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: userResignationProposalSignedEvent, tenant } = event;
 
   const researchService = new ResearchService();
@@ -295,7 +295,7 @@ researchHandler.on(APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply)
 
 }));
 
-researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (event) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: researchTokenSaleCreatedEvent } = event;
   const researchService = new ResearchService();
 
@@ -324,7 +324,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => h
 
 
 
-researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: researchTokenSaleProposalSignedEvent } = event;
   
   const researchService = new ResearchService();
@@ -357,7 +357,7 @@ researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, rep
 }));
 
 
-researchHandler.on(APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) => handle(payload, reply, async (event) => {
+researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: researchTokenSaleContributedEvent } = event;
   const researchService = new ResearchService();
 

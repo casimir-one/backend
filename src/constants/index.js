@@ -7,8 +7,8 @@ import SMART_CONTRACT_TYPE from './smartContractType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
 import RESEARCH_ATTRIBUTE_TYPE from './researchAttributeTypes';
-import APP_EVENTS from './appEvents';
-import EVENT from './event';
+import LEGACY_APP_EVENTS from './legacyAppEvents';
+import APP_EVENT from './appEvent';
 import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 import NEW_RESEARCH_POLICY from './newResearchPolicy';
@@ -30,7 +30,7 @@ export {
   TOKEN_SALE_STATUS,
   USER_INVITE_STATUS,
   RESEARCH_ATTRIBUTE_TYPE,
-  APP_EVENTS,
+  LEGACY_APP_EVENTS,
   RESEARCH_APPLICATION_STATUS,
   RESEARCH_CONTENT_STATUS,
   NEW_RESEARCH_POLICY,
@@ -43,5 +43,5 @@ export {
   CONTENT_TYPES_MAP,
   ASSESSMENT_CRITERIA_TYPE,
   ATTRIBUTE_SCOPE,
-  EVENT
+  APP_EVENT
 }

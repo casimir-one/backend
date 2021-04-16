@@ -1,5 +1,5 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import { EVENT } from './../../constants';
+import { APP_EVENT } from './../../constants';
 
 
 class ProposalEventHandler extends BaseEventHandler {
@@ -13,7 +13,7 @@ class ProposalEventHandler extends BaseEventHandler {
 const proposalEventHandler = new ProposalEventHandler();
 
 
-proposalEventHandler.register(EVENT.PROPOSAL_CREATED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event, ctx) => {
   // TODO: handle proposal read schema 
   console.log(event);
 });

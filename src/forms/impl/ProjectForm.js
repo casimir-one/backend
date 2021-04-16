@@ -93,4 +93,4 @@ class ProjectForm extends BaseForm {
 
 
 
-export default ProjectForm;
+module.exports = ProjectForm;

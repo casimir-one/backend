@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_EVENTS } from './../../constants';
+import { LEGACY_APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ResearchContentService from './../../services/researchContent';
 import ReviewService from './../../services/review';
@@ -10,7 +10,7 @@ class ReviewHandler extends EventEmitter { }
 
 const reviewHandler = new ReviewHandler();
 
-reviewHandler.on(APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
+reviewHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: reviewCreatedEvent, tenant } = source;
 
   const reviewService = new ReviewService();

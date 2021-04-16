@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_EVENTS, USER_INVITE_STATUS, PROPOSAL_STATUS } from './../../constants';
+import { LEGACY_APP_EVENTS, USER_INVITE_STATUS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import UserInviteService from './../../services/userInvites';
 import ProposalService from './../../services/proposal';
@@ -8,7 +8,7 @@ class UserInviteHandler extends EventEmitter { }
 
 const userInviteHandler = new UserInviteHandler();
 
-userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
+userInviteHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userInvitationProposedEvent, emitter, tenant } = source;
 
   const userInviteService = new UserInviteService();
@@ -35,7 +35,7 @@ userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => ha
 }));
 
 
-userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
+userInviteHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userInvitationProposalSignedEvent, tenant } = source;
 
   const userInviteService = new UserInviteService();
@@ -56,7 +56,7 @@ userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply
 }));
 
 
-userInviteHandler.on(APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
+userInviteHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userInvitationProposalRejectedEvent, tenant } = source;
   const userInviteService = new UserInviteService();
 

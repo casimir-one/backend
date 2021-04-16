@@ -16,7 +16,7 @@ import * as blockchainService from './../utils/blockchain';
 import ResearchGroupService from './../services/researchGroup';
 import ResearchContentService from './../services/researchContent'
 import ResearchService from './../services/research';
-import { RESEARCH_CONTENT_STATUS, APP_EVENTS } from './../constants';
+import { RESEARCH_CONTENT_STATUS } from './../constants';
 import ResearchContentCreatedEvent from './../events/legacy/researchContentCreatedEvent';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
 import ResearchContentProposalSignedEvent from './../events/legacy/researchContentProposalSignedEvent';
