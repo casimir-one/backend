@@ -1,7 +1,7 @@
 import { APP_CMD_INFO } from '@deip/command-models';
 
 
-class ApplicationCommandExtractor {
+class ActionCommand {
 
   constructor(nextHandler, isMultipartForm) {
 
@@ -39,14 +39,29 @@ class ApplicationCommandExtractor {
 }
 
 
+class Action {
+  constructor(actionHandler) {
+    return async (ctx, next) => {
+      await actionHandler(ctx);
+      await next();
+    }
+  }
+}
+
+
 class BaseController {
 
-  action(actionHandler) {
-    return new ApplicationCommandExtractor(actionHandler, false);
+  constructor() {}
+
+  command({ form: ActionFormHandler, h: actionHandler }) {
+    if (!ActionFormHandler)
+      return new ActionCommand(new Action(actionHandler), false);
+      
+    return new ActionFormHandler(new ActionCommand(new Action(actionHandler), true));
   }
 
-  actionForm(FormHandler, actionHandler) {
-    return new FormHandler(new ApplicationCommandExtractor(actionHandler, true));
+  query({ h: actionHandler }) {
+    return new Action(actionHandler);
   }
 
 }
