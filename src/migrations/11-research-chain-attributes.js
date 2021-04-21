@@ -16,7 +16,7 @@ const config = require('./../config');
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
 const TenantProfile = require('./../schemas/tenant');
-const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
 
 const deipRpc = require('@deip/rpc-client');
 

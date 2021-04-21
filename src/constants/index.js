@@ -6,7 +6,7 @@ import USER_NOTIFICATION_TYPE from './userNotificationType';
 import SMART_CONTRACT_TYPE from './smartContractType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
-import ATTRIBUTE_TYPE from './researchAttributeTypes';
+import ATTRIBUTE_TYPE from './attributeTypes';
 import LEGACY_APP_EVENTS from './legacyAppEvents';
 import APP_EVENT from './appEvent';
 import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';

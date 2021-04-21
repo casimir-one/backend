@@ -4,7 +4,7 @@ import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from '../constants';
 
 const Schema = mongoose.Schema;
 
-const attributeValueOption = new Schema({
+const AttributeValueOption = new Schema({
   "_id": false,
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
@@ -34,7 +34,7 @@ const Attribute = new Schema({
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
-  "valueOptions": [attributeValueOption],
+  "valueOptions": [AttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
   "blockchainFieldMeta": BlockchainFieldMeta,
   "scope": {

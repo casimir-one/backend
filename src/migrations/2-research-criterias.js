@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const bluebird = require('bluebird');
 const Research = require('./../schemas/research');
 const deipRpc = require('@deip/rpc-client');
-const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
