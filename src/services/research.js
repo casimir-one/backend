@@ -7,7 +7,7 @@ import UserService from './users'
 import AttributesService from './attributes'
 
 import mongoose from 'mongoose';
-import { RESEARCH_ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../constants';
+import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../constants';
 
 class ResearchService extends BaseReadModelService {
 
@@ -71,11 +71,11 @@ class ResearchService extends BaseReadModelService {
           return `${rAttr.value}`.toLowerCase().includes(filter.searchTerm.toLowerCase());
         }
 
-        // if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+        // if (attribute.type == ATTRIBUTE_TYPE.RESEARCH_GROUP) {
         //   return r.research_group.name.toLowerCase().includes(filter.searchTerm.toLowerCase());
         // }
 
-        if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.USER) {
+        if (attribute.type == ATTRIBUTE_TYPE.USER) {
           return r.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
         }
  
@@ -98,7 +98,7 @@ class ResearchService extends BaseReadModelService {
             return !v || v === 'false';
           }
 
-          if (attribute.type == RESEARCH_ATTRIBUTE_TYPE.EXPRESS_LICENSING) {
+          if (attribute.type == ATTRIBUTE_TYPE.EXPRESS_LICENSING) {
             if (v == true || v === 'true') {
               return rAttr.value.length != 0;
             } else {
@@ -230,67 +230,67 @@ class ResearchService extends BaseReadModelService {
       }
 
       switch (attribute.type) {
-        case RESEARCH_ATTRIBUTE_TYPE.STEPPER: {
+        case ATTRIBUTE_TYPE.STEPPER: {
           rAttrValue = mongoose.Types.ObjectId(rAttr.value.toString()); // _id
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.TEXT: {
+        case ATTRIBUTE_TYPE.TEXT: {
           rAttrValue = rAttr.value.toString(); // text
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.TEXTAREA: {
+        case ATTRIBUTE_TYPE.TEXTAREA: {
           rAttrValue = rAttr.value.toString(); // text
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.SELECT: {
+        case ATTRIBUTE_TYPE.SELECT: {
           rAttrValue = rAttr.value.map(v => mongoose.Types.ObjectId(v.toString())); // _id
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.URL: {
+        case ATTRIBUTE_TYPE.URL: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.VIDEO_URL: {
+        case ATTRIBUTE_TYPE.VIDEO_URL: {
           rAttrValue = rAttr.value.toString(); // url
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.SWITCH: {
+        case ATTRIBUTE_TYPE.SWITCH: {
           rAttrValue = rAttr.value == true || rAttr.value === 'true';
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.CHECKBOX: {
+        case ATTRIBUTE_TYPE.CHECKBOX: {
           rAttrValue = rAttr.value == true || rAttr.value === 'true';
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.USER: {
+        case ATTRIBUTE_TYPE.USER: {
           rAttrValue = rAttr.value.map(v => v.toString()); // username / external_id
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.DISCIPLINE: {
+        case ATTRIBUTE_TYPE.DISCIPLINE: {
           rAttrValue = rAttr.value.map(v => v.toString()); // external_id
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP: {
+        case ATTRIBUTE_TYPE.RESEARCH_GROUP: {
           rAttrValue = rAttr.value.map(v => v.toString()); // external_id
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.IMAGE: {
+        case ATTRIBUTE_TYPE.IMAGE: {
           rAttrValue = rAttr.value.toString(); // image name
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.FILE: {
+        case ATTRIBUTE_TYPE.FILE: {
           rAttrValue = rAttr.value.toString(); // file name
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.EXPRESS_LICENSING: {
+        case ATTRIBUTE_TYPE.EXPRESS_LICENSING: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.ROADMAP: {
+        case ATTRIBUTE_TYPE.ROADMAP: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
-        case RESEARCH_ATTRIBUTE_TYPE.PARTNERS: {
+        case ATTRIBUTE_TYPE.PARTNERS: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
@@ -322,7 +322,7 @@ class ResearchService extends BaseReadModelService {
 
 
   async updateAttributeInResearches({ attributeId, type, valueOptions, defaultValue }) {
-    if (type == RESEARCH_ATTRIBUTE_TYPE.STEPPER || type == RESEARCH_ATTRIBUTE_TYPE.SELECT) {
+    if (type == ATTRIBUTE_TYPE.STEPPER || type == ATTRIBUTE_TYPE.SELECT) {
       const result = await this.updateMany(
         {
           $and: [

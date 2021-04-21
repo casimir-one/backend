@@ -19,7 +19,7 @@ const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
 const deipRpc = require('@deip/rpc-client');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
@@ -34,7 +34,7 @@ const run = async () => {
 
   const researchCoverImageAttribute = {
     _id: mongoose.Types.ObjectId("5f58d4fa97f36d3938dde1ed"),
-    type: RESEARCH_ATTRIBUTE_TYPE.IMAGE,
+    type: ATTRIBUTE_TYPE.IMAGE,
     isPublished: true,
     isHidden: false,
     isRequired: false,

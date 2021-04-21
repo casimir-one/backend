@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { RESEARCH_ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from '../constants';
+import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from '../constants';
 
 
 const Schema = mongoose.Schema;
@@ -23,7 +23,7 @@ const Attribute = new Schema({
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: String,
-    enum: [...Object.values(RESEARCH_ATTRIBUTE_TYPE)],
+    enum: [...Object.values(ATTRIBUTE_TYPE)],
     required: true
   },
   "isFilterable": { type: Boolean, default: false },

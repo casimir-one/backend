@@ -19,7 +19,7 @@ const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
 const deipRpc = require('@deip/rpc-client');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
@@ -49,10 +49,10 @@ const run = async () => {
         isVisible: researchAttribute.isVisible,
         isEditable: true,
         isFilterable: true,
-        title: researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelTitle : '',
-        shortTitle: researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelShortTitle : '',
+        title: researchAttribute.type == ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelTitle : '',
+        shortTitle: researchAttribute.type == ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelShortTitle : '',
         description: '',
-        valueOptions: researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevels.map(rl => {
+        valueOptions: researchAttribute.type == ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevels.map(rl => {
           return {
             title: rl.title,
             shortTitle: '',

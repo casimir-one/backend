@@ -16,7 +16,7 @@ const config = require('./../config');
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
 const TenantProfile = require('./../schemas/tenant');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 const deipRpc = require('@deip/rpc-client');
 
@@ -37,7 +37,7 @@ const run = async () => {
       let researchAttribute = tenantProfile.settings.researchAttributes[j];
       if (researchAttribute.isBlockchainMeta) {
         researchAttribute.blockchainFieldMeta = {
-          field: researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXT ? 'title' : 'abstract',
+          field: researchAttribute.type == ATTRIBUTE_TYPE.TEXT ? 'title' : 'abstract',
           isPartial: false
         }
       } else {

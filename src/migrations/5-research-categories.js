@@ -19,7 +19,7 @@ const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
 const deipRpc = require('@deip/rpc-client');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });

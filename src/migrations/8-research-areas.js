@@ -18,7 +18,7 @@ const bluebird = require('bluebird');
 const TenantProfile = require('./../schemas/tenant');
 
 const deipRpc = require('@deip/rpc-client');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
@@ -42,33 +42,33 @@ const run = async () => {
     for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
       let researchAttribute = tenantProfile.settings.researchAttributes[j];
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.STEPPER) {
+      if (researchAttribute.type == ATTRIBUTE_TYPE.STEPPER) {
         researchDetailsRightSidebar.push(researchAttribute._id);
         researchCard.push(researchAttribute._id)
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXT || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.TEXTAREA) {
+      if (researchAttribute.type == ATTRIBUTE_TYPE.TEXT || researchAttribute.type == ATTRIBUTE_TYPE.TEXTAREA) {
         researchDetailsMain.push(researchAttribute._id)
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.SELECT || researchAttribute.type == MULTI_SELECT) {
+      if (researchAttribute.type == ATTRIBUTE_TYPE.SELECT || researchAttribute.type == MULTI_SELECT) {
         researchDetailsRightSidebar.push(researchAttribute._id);
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.URL || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.VIDEO_URL) {
+      if (researchAttribute.type == ATTRIBUTE_TYPE.URL || researchAttribute.type == ATTRIBUTE_TYPE.VIDEO_URL) {
         researchDetailsMain.push(researchAttribute._id);
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.SWITCH || researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.CHECKBOX) {
+      if (researchAttribute.type == ATTRIBUTE_TYPE.SWITCH || researchAttribute.type == ATTRIBUTE_TYPE.CHECKBOX) {
         researchDetailsRightSidebar.push(researchAttribute._id);
         researchCard.push(researchAttribute._id)
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.ROADMAP) {
+      if (researchAttribute.type == ATTRIBUTE_TYPE.ROADMAP) {
         researchDetailsMain.push(researchAttribute._id);
       }
 
-      if (researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.PARTNERS) {
+      if (researchAttribute.type == ATTRIBUTE_TYPE.PARTNERS) {
         researchDetailsRightSidebar.push(researchAttribute._id);
       }
     }

@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
+import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ResearchService from './../../services/research';
 import ProposalService from './../../services/proposal';
@@ -33,7 +33,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handl
   });
   
   let hasUpdate = false;
-  const researchGroupAttribute = researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
+  const researchGroupAttribute = researchAttributes.find(attr => attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
   if (researchGroupAttribute && researchGroupAttribute.isHidden) {
     const rAttr = attributes.find(rAttr => rAttr.attributeId.toString() == researchGroupAttribute._id.toString());
     if (!rAttr.value) {
@@ -71,7 +71,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => hand
   });
 
   let hasUpdate = false;
-  const researchGroupAttribute = researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
+  const researchGroupAttribute = researchAttributes.find(attr => attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
   if (researchGroupAttribute && researchGroupAttribute.isHidden) {
     const rAttr = attributes.find(rAttr => rAttr.attributeId.toString() == researchGroupAttribute._id.toString());
     if (!rAttr.value) {
@@ -275,7 +275,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
 
     let hasUpdate = false;
 
-    const membersAttributes = researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+    const membersAttributes = researchAttributes.filter(attr => attr.type == ATTRIBUTE_TYPE.USER);
     for (let j = 0; j < membersAttributes.length; j++) {
       const membersAttribute = membersAttributes[j];
       const rAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == membersAttribute._id.toString());

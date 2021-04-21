@@ -16,7 +16,7 @@ const config = require('./../config');
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
 const TenantProfile = require('./../schemas/tenant');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 const deipRpc = require('@deip/rpc-client');
 
@@ -45,18 +45,18 @@ const run = async () => {
         researchAttribute.type == DISCIPLINES_LIST ||
         researchAttribute.type == USERS_LIST ||
         researchAttribute.type == MULTI_SELECT ||
-        researchAttribute.type == RESEARCH_ATTRIBUTE_TYPE.URL) {
+        researchAttribute.type == ATTRIBUTE_TYPE.URL) {
 
         researchAttribute.isMultiple = true;
 
         if (researchAttribute.type == RESEARCH_GROUPS_LIST) {
-          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP;
+          researchAttribute.type = ATTRIBUTE_TYPE.RESEARCH_GROUP;
         } else if (researchAttribute.type == DISCIPLINES_LIST) {
-          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.DISCIPLINE;
+          researchAttribute.type = ATTRIBUTE_TYPE.DISCIPLINE;
         } else if (researchAttribute.type == USERS_LIST) {
-          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.USER;
+          researchAttribute.type = ATTRIBUTE_TYPE.USER;
         } else if (researchAttribute.type == MULTI_SELECT) {
-          researchAttribute.type = RESEARCH_ATTRIBUTE_TYPE.SELECT;
+          researchAttribute.type = ATTRIBUTE_TYPE.SELECT;
         }
 
       } else {

@@ -20,8 +20,10 @@ const PARTNERS = "partners";
 
 const EDUCATION = "education";
 const EMPLOYMENT = "employment";
+const DATE = "date";
 
-const RESEARCH_ATTRIBUTE_TYPE = {
+
+const ATTRIBUTE_TYPE = {
   STEPPER,
   TEXT,
   TEXTAREA,
@@ -42,7 +44,8 @@ const RESEARCH_ATTRIBUTE_TYPE = {
   ROADMAP,
   PARTNERS,
   EDUCATION,
-  EMPLOYMENT
+  EMPLOYMENT,
+  DATE
 };
 
-export default RESEARCH_ATTRIBUTE_TYPE;
+export default ATTRIBUTE_TYPE;

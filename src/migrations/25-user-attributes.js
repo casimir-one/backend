@@ -11,86 +11,809 @@ require("@babel/register")({
   ]
 });
 
+require("@babel/register")({
+  "only": [
+    function (filepath) {
+      return filepath.includes("node_modules/@deip") || filepath.includes("node_modules/crc");
+    },
+  ]
+});
+
+
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const UserProfile = require('./../schemas/user');
-const Attribute = require('./../schemas/attribute');
-
-const deipRpc = require('@deip/rpc-client');
-
-deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
-deipRpc.config.set('chain_id', config.CHAIN_ID);
+const Schema = mongoose.Schema;
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
-const run = async () => {
-  const userProfiles = await UserProfile.find({tenantId: config.TENANT});
-  const attributes = await Attribute.find({ tenantId: { $in: [config.TENANT, null] }, scope: 2 });
+const Attribute = require('./../schemas/attribute');
+const AttributeValue = require('./../schemas/attributeValue');
 
-  // First Name
-  // Birthday
-  // Last Name
-  // Bio
-  // Country
-  // City
-  // Avatar
-  // Education
-  // Employment
+const USER_PROFILE_STATUS = require('./../constants').USER_PROFILE_STATUS;
+const ATTRIBUTE_SCOPE = require('./../constants').ATTRIBUTE_SCOPE;
+
+const UserLocation = new Schema({
+  "_id": false,
+  "city": { type: String, trim: true, default: null },
+  "country": { type: String, trim: true, default: null },
+  "address": { type: String, trim: true, default: null }
+});
+const UserRole = new Schema({
+  "_id": false,
+  "role": { type: String, required: true, trim: true },
+  "label": { type: String, trim: true },
+  "researchGroupExternalId": { type: String, required: true }
+});
+const UserProfileMigratingSchema = new Schema({
+  "_id": { type: String },
+  "tenantId": { type: String, required: true },
+  "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
+  "signUpPubKey": { type: String, default: null },
+  "status": { type: String, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
+  "tenant": { type: String, default: "deip" },
+  "avatar": { type: String, default: "default-avatar.png" },
+  "firstName": { type: String, default: null, trim: true },
+  "lastName": { type: String, default: null, trim: true },
+  "bio": { type: String, default: null, trim: true },
+  "birthdate": { type: Date, default: null },
+  "category": { type: String, default: null, trim: true },
+  "occupation": { type: String, default: null, trim: true },
+  "roles": [UserRole],
+  "location": {
+    type: UserLocation,
+    default: {}
+  },
+  "webPages": [{
+    "_id": false,
+    "type": {
+      type: String,
+      enum: ['webpage', 'facebook', 'linkedin', 'twitter', 'vk'],
+      required: true
+    },
+    "label": { type: String, default: null, required: true, trim: true },
+    "link": { type: String, default: "", trim: true },
+    "metadata": { type: Object, default: null }
+  }],
+  "phoneNumbers": [{
+    "_id": false,
+    "label": { type: String, default: null, required: true, trim: true },
+    "ext": { type: String, default: null, trim: true },
+    "number": { type: String, required: true, trim: true }
+  }],
+  "education": [{
+    "_id": false,
+    "educationalInstitution": { type: String, required: true, trim: true },
+    "period": {
+      "from": { type: Date, default: null },
+      "to": { type: Date, default: null }
+    },
+    "degree": { type: String, required: true },
+    "area": { type: String, required: true },
+    "description": { type: String, default: null },
+    "isActive": { type: Boolean, required: true, default: false }
+  }],
+  "employment": [{
+    "_id": false,
+    "company": { type: String, required: true, trim: true },
+    "location": {
+      "city": { type: String, trim: true, default: null },
+      "country": { type: String, trim: true, default: null }
+    },
+    "period": {
+      "from": { type: Date, default: null },
+      "to": { type: Date, default: null }
+    },
+    "position": { type: String, required: true },
+    "description": { type: String, default: null },
+    "isActive": { type: Boolean, required: true, default: false }
+  }],
+  "foreignIds": [{
+    "_id": false,
+    "label": { type: String, required: true, trim: true },
+    "id": { type: String, required: true, trim: true },
+  }],
+  "attributes": [AttributeValue]
+}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+
+const UserProfile = mongoose.model('user-profile', UserProfileMigratingSchema);
+
+
+const USER_SYSTEM_ATTRIBUTES = {
+  FIRST_NAME: {
+    "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f5"),
+    "tenantId": null,
+    "isSystem": true,
+    "isFilterable": false,
+    "isEditable": true,
+    "isRequired": true,
+    "isHidden": false,
+    "isMultiple": false,
+    "defaultValue": null,
+    "isBlockchainMeta": false,
+    "type": "text",
+    "title": "First Name",
+    "shortTitle": "First Name",
+    "description": "",
+    "valueOptions": [],
+    "scope": ATTRIBUTE_SCOPE.USER,
+    "isPublished": true,
+    "isVisible": true,
+    "component": false,
+    "__v": 0
+  },
+  LAST_NAME: {
+    "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f6"),
+    "tenantId": null,
+    "isSystem": true,
+    "isFilterable": false,
+    "isEditable": true,
+    "isRequired": true,
+    "isHidden": false,
+    "isMultiple": false,
+    "defaultValue": null,
+    "isBlockchainMeta": false,
+    "type": "text",
+    "title": "Last Name",
+    "shortTitle": "Last Name",
+    "description": "",
+    "valueOptions": [],
+    "scope": ATTRIBUTE_SCOPE.USER,
+    "isPublished": true,
+    "isVisible": true,
+    "component": false,
+    "__v": 0
+  }
+}
+
+const USER_CUSTOM_ATTRIBUTES = {
+
+  "0000000000000000000000000000000000000000": {
+    BIRTHDAY: {
+      "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b5"),
+      "tenantId": "0000000000000000000000000000000000000000",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "date",
+      "title": "Birthday",
+      "shortTitle": "Birthday",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    BIO: {
+      "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b6"),
+      "tenantId": "0000000000000000000000000000000000000000",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "textarea",
+      "title": "Bio",
+      "shortTitle": "Bio",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    COUNTRY: {
+      "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b7"),
+      "tenantId": "0000000000000000000000000000000000000000",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "text",
+      "title": "Country",
+      "shortTitle": "Country",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    CITY: {
+      "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b8"),
+      "tenantId": "0000000000000000000000000000000000000000",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "text",
+      "title": "City",
+      "shortTitle": "City",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    AVATAR: {
+      "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b9"),
+      "tenantId": "0000000000000000000000000000000000000000",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "image",
+      "title": "Avatar",
+      "shortTitle": "Avatar",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    EDUCATION: {
+      "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1ba"),
+      "tenantId": "0000000000000000000000000000000000000000",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "education",
+      "title": "Education",
+      "shortTitle": "Education",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    EMPLOYMENT: {
+      "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1bb"),
+      "tenantId": "0000000000000000000000000000000000000000",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "employment",
+      "title": "Employment",
+      "shortTitle": "Employment",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    }
+  },
+
+  "1169d704f8a908016033efe8cce6df93f618a265": {
+    BIRTHDAY: {
+      "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f7"),
+      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "isBlockchainMeta": false,
+      "type": "date",
+      "title": "Birthday",
+      "shortTitle": "Birthday",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "isPublished": true,
+      "isVisible": true,
+      "component": false,
+      "__v": 0
+    },
+    BIO: {
+      "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f8"),
+      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "isBlockchainMeta": false,
+      "type": "textarea",
+      "title": "Bio",
+      "shortTitle": "Bio",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "isPublished": true,
+      "isVisible": true,
+      "component": false,
+      "__v": 0
+    },
+    COUNTRY: {
+      "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8fa"),
+      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "isBlockchainMeta": false,
+      "type": "text",
+      "title": "Country",
+      "shortTitle": "Country",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "isPublished": true,
+      "isVisible": true,
+      "component": false,
+      "__v": 0
+    },
+    CITY: {
+      "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f9"),
+      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "isBlockchainMeta": false,
+      "type": "text",
+      "title": "City",
+      "shortTitle": "City",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "isPublished": true,
+      "isVisible": true,
+      "component": false,
+      "__v": 0
+    },
+    AVATAR: {
+      "_id": mongoose.Types.ObjectId("6068e6a95d09311a7845e32e"),
+      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "isBlockchainMeta": false,
+      "type": "image",
+      "title": "Avatar",
+      "shortTitle": "Avatar",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "isPublished": true,
+      "isVisible": true,
+      "component": false,
+      "__v": 0
+    },
+    EDUCATION: {
+      "_id": mongoose.Types.ObjectId("606e2a7a7c25dd3bf0207aca"),
+      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "isBlockchainMeta": false,
+      "type": "education",
+      "title": "Education",
+      "shortTitle": "Education",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "isPublished": true,
+      "isVisible": true,
+      "component": false,
+      "__v": 0
+    },
+    EMPLOYMENT: {
+      "_id": mongoose.Types.ObjectId("606e2a7a7c25dd3bf0207acb"),
+      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "isBlockchainMeta": false,
+      "type": "employment",
+      "title": "Employment",
+      "shortTitle": "Employment",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "isPublished": true,
+      "isVisible": true,
+      "component": false,
+      "__v": 0
+    }
+  },
+
+  "58e3bfd753fcb860a66b82635e43524b285ab708": {
+    BIRTHDAY: {
+      "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3da"),
+      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "date",
+      "title": "Birthday",
+      "shortTitle": "Birthday",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    BIO: {
+      "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3db"),
+      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "textarea",
+      "title": "Bio",
+      "shortTitle": "Bio",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    COUNTRY: {
+      "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3dc"),
+      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "text",
+      "title": "Country",
+      "shortTitle": "Country",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    CITY: {
+      "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3dd"),
+      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "text",
+      "title": "City",
+      "shortTitle": "City",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    AVATAR: {
+      "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3de"),
+      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "image",
+      "title": "Avatar",
+      "shortTitle": "Avatar",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    EDUCATION: {
+      "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3df"),
+      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "education",
+      "title": "Education",
+      "shortTitle": "Education",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    EMPLOYMENT: {
+      "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3e0"),
+      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "employment",
+      "title": "Employment",
+      "shortTitle": "Employment",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    }
+  },
+
+  "c8a87b12c23f53866acd397f43b591fd4e631419": {
+    BIRTHDAY: {
+      "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4c"),
+      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "date",
+      "title": "Birthday",
+      "shortTitle": "Birthday",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+
+    BIO: {
+      "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4d"),
+      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "textarea",
+      "title": "Bio",
+      "shortTitle": "Bio",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    COUNTRY: {
+      "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4e"),
+      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "text",
+      "title": "Country",
+      "shortTitle": "Country",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    CITY: {
+      "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4f"),
+      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "text",
+      "title": "City",
+      "shortTitle": "City",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    AVATAR: {
+      "_id": mongoose.Types.ObjectId("608066962fdde9352193bc50"),
+      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": false,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "image",
+      "title": "Avatar",
+      "shortTitle": "Avatar",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    EDUCATION: {
+      "_id": mongoose.Types.ObjectId("608066962fdde9352193bc51"),
+      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "education",
+      "title": "Education",
+      "shortTitle": "Education",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    },
+    EMPLOYMENT: {
+      "_id": mongoose.Types.ObjectId("608066962fdde9352193bc52"),
+      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "isSystem": false,
+      "isFilterable": false,
+      "isEditable": true,
+      "isRequired": true,
+      "isHidden": false,
+      "isMultiple": false,
+      "defaultValue": null,
+      "type": "employment",
+      "title": "Employment",
+      "shortTitle": "Employment",
+      "description": "",
+      "valueOptions": [],
+      "scope": ATTRIBUTE_SCOPE.USER,
+      "__v": 0
+    }
+  }
+
+}
+
+
+const run = async () => {
 
   const userAttributesPromises = [];
 
-  for(let i = 0; i<userProfiles.length; i++) {
-    const user = userProfiles[i].toObject();
+  userAttributesPromises.push((new Attribute(USER_SYSTEM_ATTRIBUTES.FIRST_NAME)).save());
+  userAttributesPromises.push((new Attribute(USER_SYSTEM_ATTRIBUTES.LAST_NAME)).save());
+
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].BIRTHDAY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].BIO).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].COUNTRY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].CITY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].AVATAR).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].EDUCATION).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].EMPLOYMENT).save());
+
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].BIRTHDAY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].BIO).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].COUNTRY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].CITY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].AVATAR).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].EDUCATION).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].EMPLOYMENT).save());
+
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].BIRTHDAY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].BIO).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].COUNTRY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].CITY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].AVATAR).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].EDUCATION).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].EMPLOYMENT).save());
+
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].BIRTHDAY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].BIO).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].COUNTRY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].CITY).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].AVATAR).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].EDUCATION).save());
+  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].EMPLOYMENT).save());
+
+  await Promise.all(userAttributesPromises);
+
+
+  const userProfiles = await UserProfile.find({});
+  const userProfilesPromises = [];
+
+  for (let i = 0; i < userProfiles.length; i++) {
+    const userProfileDoc = userProfiles[i];
+    const user = userProfileDoc.toObject();
 
     let userBirthdate = '';
 
-    if(user.birthdate) {
+    if (user.birthdate) {
       const d = new Date(user.birthdate)
       userBirthdate = `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${('0' + d.getDate()).slice(-2)}`
     }
 
-    userProfiles[i].attributes = [
+    userProfileDoc.attributes = [
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'First Name')._id),
+        attributeId: USER_SYSTEM_ATTRIBUTES.FIRST_NAME._id,
         value: user.firstName
       },
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'Birthday')._id),
-        value: userBirthdate
-      },
-      {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'Last Name')._id),
+        attributeId: USER_SYSTEM_ATTRIBUTES.LAST_NAME._id,
         value: user.lastName
       },
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'Bio')._id),
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].BIRTHDAY._id,
+        value: userBirthdate
+      },
+      {
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].BIO._id,
         value: user.bio
       },
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'Country')._id),
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].COUNTRY._id,
         value: user.location ? user.location.country : ''
       },
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'City')._id),
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].CITY._id,
         value: user.location ? user.location.city : ''
       },
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'Avatar')._id),
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].AVATAR._id,
         value: user.avatar
       },
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'Education')._id),
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].EDUCATION._id,
         value: user.education
       },
       {
-        attributeId: mongoose.Types.ObjectId(attributes.find(({title}) => title === 'Employment')._id),
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].EMPLOYMENT._id,
         value: user.employment
-      },
-    ]
+      }
+    ];
 
-    userAttributesPromises.push(userProfiles[i].save());
+    userProfilesPromises.push(userProfileDoc.save());
   }
-  await Promise.all(userAttributesPromises);
+
+  await Promise.all(userProfilesPromises);
 };
 
 run()

@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, RESEARCH_ATTRIBUTE_TYPE, NEW_RESEARCH_POLICY, ASSESSMENT_CRITERIA_TYPE, RESEARCH_CONTENT_TYPES } from './../constants';
+import { SIGN_UP_POLICY, ATTRIBUTE_TYPE, NEW_RESEARCH_POLICY, ASSESSMENT_CRITERIA_TYPE, RESEARCH_CONTENT_TYPES } from './../constants';
 
 const Schema = mongoose.Schema;
 

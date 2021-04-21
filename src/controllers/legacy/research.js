@@ -10,7 +10,7 @@ import ResearchService from './../../services/research';
 import ResearchApplicationService from './../../services/researchApplication';
 import AttributesService from './../../services/attributes';
 import * as blockchainService from './../../utils/blockchain';
-import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
+import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
 import ResearchForm from './../../forms/legacy/research';
 import FileStorage from './../../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../../forms/legacy/researchApplicationForms';
@@ -77,7 +77,7 @@ const createResearch = async (ctx, next) => {
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
       const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.attributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
@@ -141,7 +141,7 @@ const updateResearch = async (ctx, next) => {
       const [opName, opPayload, inviteProposal] = inviteDatum;
       const { member: invitee, researches } = opPayload;
       const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
+      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
           const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.attributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));

@@ -19,7 +19,7 @@ const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
 const deipRpc = require('@deip/rpc-client');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
@@ -56,7 +56,7 @@ const run = async () => {
 
   const researchGroupAttribute = {
     _id: mongoose.Types.ObjectId("5f690af5cdaaa53a27af4a30"),
-    type: RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP,
+    type: ATTRIBUTE_TYPE.RESEARCH_GROUP,
     isVisible: true,
     isRequired: true,
     isFilterable: true,
@@ -73,7 +73,7 @@ const run = async () => {
 
   const researchVisibilityAttribute = {
     _id: mongoose.Types.ObjectId("5f68d4fa98f36d2938dde5ec"),
-    type: RESEARCH_ATTRIBUTE_TYPE.SWITCH,
+    type: ATTRIBUTE_TYPE.SWITCH,
     isVisible: true,
     isRequired: true,
     isFilterable: false,
@@ -108,7 +108,7 @@ const run = async () => {
 
   const researchLicensingAssociateAttribute = {
     _id: mongoose.Types.ObjectId("5f68d4fa98f36d2938dde5ed"),
-    type: RESEARCH_ATTRIBUTE_TYPE.USER,
+    type: ATTRIBUTE_TYPE.USER,
     isVisible: true,
     isRequired: true,
     isFilterable: false,

@@ -19,7 +19,7 @@ const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
 const deipRpc = require('@deip/rpc-client');
-const RESEARCH_ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
+const ATTRIBUTE_TYPE = require('./../constants/researchAttributeTypes').default;
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
@@ -36,7 +36,7 @@ const run = async () => {
   
   const researchTitleAttribute = {
     _id: mongoose.Types.ObjectId("5f68be39c579c726e93a3006"),
-    type: RESEARCH_ATTRIBUTE_TYPE.TEXT,
+    type: ATTRIBUTE_TYPE.TEXT,
     isVisible: true,
     isEditable: false,
     isFilterable: false,
@@ -51,7 +51,7 @@ const run = async () => {
 
   const researchDescriptionAttribute = {
     _id: mongoose.Types.ObjectId("5f68be39c579c726e93a3007"),
-    type: RESEARCH_ATTRIBUTE_TYPE.TEXTAREA,
+    type: ATTRIBUTE_TYPE.TEXTAREA,
     isVisible: true,
     isEditable: false,
     isFilterable: false,
