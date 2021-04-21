@@ -146,22 +146,22 @@ const run = async () => {
     
     research.attributes.push({
       value: chainResearch.disciplines.map(d => d.external_id),
-      researchAttributeId: researchDisciplinesAttribute._id
+      attributeId: researchDisciplinesAttribute._id
     });
 
     research.attributes.push({
       value: chainResearch.research_group,
-      researchAttributeId: researchGroupAttribute._id
+      attributeId: researchGroupAttribute._id
     });
 
     research.attributes.push({
       value: chainResearch.is_private,
-      researchAttributeId: researchVisibilityAttribute._id
+      attributeId: researchVisibilityAttribute._id
     });
 
     research.attributes.push({
       value: chainResearch.members,
-      researchAttributeId: researchInventorsAttribute._id
+      attributeId: researchInventorsAttribute._id
     });
 
     researchPromises.push(research.save());

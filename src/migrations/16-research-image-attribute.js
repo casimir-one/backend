@@ -62,7 +62,7 @@ const run = async () => {
     
     research.attributes.push({
       value: "background.png",
-      researchAttributeId: researchCoverImageAttribute._id
+      attributeId: researchCoverImageAttribute._id
     });
 
     researchPromises.push(research.save());

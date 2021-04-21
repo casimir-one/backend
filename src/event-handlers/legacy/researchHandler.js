@@ -35,7 +35,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handl
   let hasUpdate = false;
   const researchGroupAttribute = researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
   if (researchGroupAttribute && researchGroupAttribute.isHidden) {
-    const rAttr = attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchGroupAttribute._id.toString());
+    const rAttr = attributes.find(rAttr => rAttr.attributeId.toString() == researchGroupAttribute._id.toString());
     if (!rAttr.value) {
       rAttr.value = [researchGroupExternalId];
       hasUpdate = true;
@@ -73,7 +73,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => hand
   let hasUpdate = false;
   const researchGroupAttribute = researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
   if (researchGroupAttribute && researchGroupAttribute.isHidden) {
-    const rAttr = attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchGroupAttribute._id.toString());
+    const rAttr = attributes.find(rAttr => rAttr.attributeId.toString() == researchGroupAttribute._id.toString());
     if (!rAttr.value) {
       rAttr.value = [researchGroupExternalId];
       hasUpdate = true;
@@ -185,8 +185,8 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, 
 
       if (researchInvite) {
         for (let j = 0; j < researchInvite.attributes.length; j++) {
-          const researchAttributeId = researchInvite.attributes[j];
-          const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchAttributeId.toString());
+          const attributeId = researchInvite.attributes[j];
+          const rAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == attributeId.toString());
           if (!rAttr.value.some(m => m == invite.invitee)) {
             rAttr.value.push(invite.invitee);
             hasUpdate = true;
@@ -234,8 +234,8 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload
 
       if (researchInvite) {
         for (let j = 0; j < researchInvite.attributes.length; j++) {
-          const researchAttributeId = researchInvite.attributes[j];
-          const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == researchAttributeId.toString());
+          const attributeId = researchInvite.attributes[j];
+          const rAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == attributeId.toString());
           if (rAttr.value.some(m => m == invite.invitee)) {
             rAttr.value = rAttr.value.filter(m => m != invite.invitee);
             hasUpdate = true;
@@ -278,7 +278,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
     const membersAttributes = researchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
     for (let j = 0; j < membersAttributes.length; j++) {
       const membersAttribute = membersAttributes[j];
-      const rAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == membersAttribute._id.toString());
+      const rAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == membersAttribute._id.toString());
 
       if (rAttr.value.some(m => m == member)) {
         rAttr.value = rAttr.value.filter(m => m != member);
@@ -302,12 +302,12 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, repl
   const { researchExternalId } = researchTokenSaleCreatedEvent.getSourceData();
 
   const research = await researchService.getResearch(researchExternalId);
-  const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+  const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
 
   let hasUpdate = false;
   if (!investmentOpportunityAttr) {
     research.researchRef.attributes.push({
-      researchAttributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+      attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
       value: true
     });
     hasUpdate = true;
@@ -335,13 +335,13 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (paylo
   const { researchExternalId } = proposal.details;
 
   const research = await researchService.getResearch(researchExternalId);
-  const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+  const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
 
   let hasUpdate = false;
 
   if (!investmentOpportunityAttr) {
     research.researchRef.attributes.push({
-      researchAttributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+      attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
       value: true
     });
     hasUpdate = true;
@@ -367,12 +367,12 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, 
   const research = await researchService.getResearch(researchTokenSale.research_external_id);
   
   if (researchTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
-    const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.researchAttributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+    const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
     let hasUpdate = false;
 
     if (!investmentOpportunityAttr) {
       research.researchRef.attributes.push({
-        researchAttributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+        attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
         value: false
       });
       hasUpdate = true;

@@ -38,14 +38,14 @@ const run = async () => {
     let chainResearch = chainResearches.find(r => r.external_id == research._id.toString());
     let disciplines = chainResearch.disciplines.map(d => d.external_id);
 
-    const attribute = research.attributes.find(attr => attr.researchAttributeId.toString() == disciplinesAttributeId);
+    const attribute = research.attributes.find(attr => attr.attributeId.toString() == disciplinesAttributeId);
 
     if (attribute) {
       attribute.value = disciplines;
     } else {
       research.attributes.push({
         value: disciplines,
-        researchAttributeId: mongoose.Types.ObjectId(disciplinesAttributeId),
+        attributeId: mongoose.Types.ObjectId(disciplinesAttributeId),
       });
     }
     

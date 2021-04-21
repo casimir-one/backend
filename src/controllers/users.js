@@ -164,7 +164,13 @@ const updateUserProfile = async (ctx) => {
       return;
     }
 
-    const updatedUserProfile = await usersService.updateUserProfile(username, { ...update });
+    const oldFilename = userProfile.avatar;
+    const { filename, profile } = await UserForm(ctx);
+    const updatedUserProfile = await usersService.updateUserProfile(username, { ...profile });
+
+    if (filename && oldFilename != filename) {
+      await FileStorage.delete(FileStorage.getAccountAvatarFilePath(username, oldFilename))
+    }
 
     ctx.status = 200;
     ctx.body = updatedUserProfile;

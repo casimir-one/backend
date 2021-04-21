@@ -109,16 +109,7 @@ class UserService extends BaseReadModelService {
     signUpPubKey,
     status,
     email,
-    firstName,
-    lastName,
-    category,
-    occupation,
-    phoneNumbers,
-    webPages,
-    location,
-    foreignIds,
-    bio,
-    birthdate,
+    attributes,
     roles
   }) {
 
@@ -127,16 +118,7 @@ class UserService extends BaseReadModelService {
       signUpPubKey: signUpPubKey,
       status: status,
       email: email,
-      firstName: firstName,
-      lastName: lastName,
-      category: category,
-      occupation: occupation,
-      phoneNumbers: phoneNumbers,
-      webPages: webPages,
-      location: location,
-      foreignIds: foreignIds,
-      bio: bio,
-      birthdate: birthdate,
+      attributes: attributes,
       tenant: tenant,
       roles: roles
     });
@@ -147,37 +129,13 @@ class UserService extends BaseReadModelService {
   async updateUserProfile(username, {
     status,
     email,
-    firstName,
-    lastName,
-    category,
-    occupation,
-    phoneNumbers,
-    webPages,
-    location,
-    foreignIds,
-    bio,
-    birthdate,
-    education,
-    employment,
-    avatar
+    attributes,
   }) {
 
     const result = await this.updateOne({ _id: username }, {
       status,
       email,
-      firstName,
-      lastName,
-      category,
-      occupation,
-      phoneNumbers,
-      webPages,
-      location,
-      foreignIds,
-      bio,
-      birthdate,
-      education,
-      employment,
-      avatar
+      attributes
     });
 
     return result;

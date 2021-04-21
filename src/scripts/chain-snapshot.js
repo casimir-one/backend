@@ -326,25 +326,25 @@ const run = async ({
         const attributes = doc.attributes;
         const disciplinesAttrId = "5f62d4fa98f46d2938dde1eb";
 
-        if (!attributes.some(attr => attr.researchAttributeId == privateAttr._id)) {
+        if (!attributes.some(attr => attr.attributeId == privateAttr._id)) {
           attributes.push({
-            researchAttributeId: privateAttr._id,
+            attributeId: privateAttr._id,
             value: false
           });
         }
         
         if (doc._id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
-          const disciplinesAttr = attributes.find(attr => attr.researchAttributeId == disciplinesAttrId);
+          const disciplinesAttr = attributes.find(attr => attr.attributeId == disciplinesAttrId);
           disciplinesAttr.value = ["fd60bc92d9255aa27f356c3381ad84c6f29220a8"]; 
         }
 
         if (doc._id == "c1525afb6f39d76a094d8875c043cf6b00e4fb7d") {
-          const disciplinesAttr = attributes.find(attr => attr.researchAttributeId == disciplinesAttrId);
+          const disciplinesAttr = attributes.find(attr => attr.attributeId == disciplinesAttrId);
           disciplinesAttr.value = ["bd2f73aa965f1b49da800656cd37abfade9898db"];
         }
 
         if (doc._id == "f22f619c1911c38a89c01df97fe2bf881b8edab3") {
-          const disciplinesAttr = attributes.find(attr => attr.researchAttributeId == disciplinesAttrId);
+          const disciplinesAttr = attributes.find(attr => attr.attributeId == disciplinesAttrId);
           disciplinesAttr.value = ["073ac406ef75dc83d577add7e87488ff40b45848"];
         }
 

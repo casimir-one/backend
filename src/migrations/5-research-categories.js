@@ -77,7 +77,7 @@ const run = async () => {
       
       research.attributes.push({
         value: [opt.value],
-        researchAttributeId: categoriesAttribute._id
+        attributeId: categoriesAttribute._id
       });
     }
 

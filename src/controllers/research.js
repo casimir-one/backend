@@ -84,8 +84,8 @@ const createResearch = async (ctx, next) => {
       const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
-          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
-          return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
+          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.attributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
+          return { externalId, attributes: attributes.map(rAttr => rAttr.attributeId) };
         }) : [];
 
       const userInvitationProposedEvent = new UserInvitationProposedEvent([inviteDatum, ['create_proposal', inviteProposal, null]], { notes: "", researches: inviteResearches });
@@ -148,8 +148,8 @@ const updateResearch = async (ctx, next) => {
       const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.USER);
       const inviteResearches = researches ? researches
         .map((externalId) => {
-          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.researchAttributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
-          return { externalId, attributes: attributes.map(rAttr => rAttr.researchAttributeId) };
+          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.attributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
+          return { externalId, attributes: attributes.map(rAttr => rAttr.attributeId) };
         }) : [];
 
       const userInvitationProposedEvent = new UserInvitationProposedEvent([inviteDatum, ['create_proposal', inviteProposal, null]], { notes: "", researches: inviteResearches });
@@ -585,11 +585,11 @@ const getResearchApplications = async (ctx) => {
 
 const getResearchAttributeFile = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
-  const researchAttributeId = ctx.params.researchAttributeId;
+  const attributeId = ctx.params.attributeId;
   const filename = ctx.params.filename;
 
-  const isResearchRootFolder = researchExternalId == researchAttributeId;
-  const filepath = isResearchRootFolder ? FileStorage.getResearchFilePath(researchExternalId, filename) : FileStorage.getResearchAttributeFilePath(researchExternalId, researchAttributeId, filename);
+  const isResearchRootFolder = researchExternalId == attributeId;
+  const filepath = isResearchRootFolder ? FileStorage.getResearchFilePath(researchExternalId, filename) : FileStorage.getResearchAttributeFilePath(researchExternalId, attributeId, filename);
   
   const fileExists = await FileStorage.exists(filepath);
   if (!fileExists) {

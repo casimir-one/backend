@@ -38,7 +38,7 @@ import researchAttributeMetaUpdateAuth from './../middlewares/auth/research/upda
 import readGrantAwardWithdrawalRequestAuth from './../middlewares/auth/grantAwardWithdrawalRequest/readGrantAwardWithdrawalRequestAuth';
 
 import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
-import userAvatarFileUpdateAuth from './../middlewares/auth/user/updateAvatarFileAuth';
+import userAttributeMetaUpdateAuth from '../middlewares/auth/user/updateAttributeMetaAuth';
 
 import researchGroupLogoFileReadAuth from './../middlewares/auth/researchGroup/readLogoFileAuth';
 import researchGroupLogoFileUpdateAuth from './../middlewares/auth/researchGroup/updateLogoFileAuth';
@@ -56,7 +56,6 @@ async function tenantAdminGuard(ctx, next) {
   await next();
 }
 
-protected_route.post('/user/upload-avatar', compose([userAvatarFileUpdateAuth({ userEntityId: (ctx) => ctx.request.header['username'] })]), users.uploadAvatar)
 public_route.get('/user/profile/:username', users.getUserProfile)
 public_route.get('/user/profiles', users.getUsersProfiles)
 public_route.get('/user/active', users.getActiveUsersProfiles)
@@ -68,7 +67,7 @@ public_route.get('/users/group/:researchGroupExternalId', users.getUsersByResear
 public_route.get('/users/tenant/:tenantId', users.getUsersByTenant)
 
 protected_route.put('/user/account/:username', users.updateUserAccount)
-protected_route.put('/user/profile/:username', users.updateUserProfile)
+protected_route.put('/user/profile/:username', compose([userAttributeMetaUpdateAuth({ userEntityId: (ctx) => ctx.request.header['username'] })]), users.updateUserProfile)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), users.getAvatar)
 protected_route.get('/user/transactions/:status', userTransactions.getUserTransactions)
 
@@ -148,7 +147,7 @@ public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
 protected_route.delete('/research/:researchExternalId', research.deleteResearch)
 public_route.get('/researches', research.getResearches)
-public_route.get('/research/:researchExternalId/attribute/:researchAttributeId/file/:filename', compose([researchAttributeMetaReadAuth()]), research.getResearchAttributeFile)
+public_route.get('/research/:researchExternalId/attribute/:attributeId/file/:filename', compose([researchAttributeMetaReadAuth()]), research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
