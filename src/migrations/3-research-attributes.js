@@ -90,15 +90,15 @@ const run = async () => {
     let attributes = [];
 
     if (trlAttribute && trlValue) {
-      attributes.push({ researchAttributeId: mongoose.Types.ObjectId(trlValue.component.toString()), value: trlValue.value ? trlAttribute.valueOptions[trlValue.value.index].value : null });
+      attributes.push({ attributeId: mongoose.Types.ObjectId(trlValue.component.toString()), value: trlValue.value ? trlAttribute.valueOptions[trlValue.value.index].value : null });
     }
 
     if (marlAttribute && marlValue) {
-      attributes.push({ researchAttributeId: mongoose.Types.ObjectId(marlValue.component.toString()), value: marlValue.value ? marlAttribute.valueOptions[marlValue.value.index].value : null });
+      attributes.push({ attributeId: mongoose.Types.ObjectId(marlValue.component.toString()), value: marlValue.value ? marlAttribute.valueOptions[marlValue.value.index].value : null });
     }
 
     if (srlAttribute && srlValue) {
-      attributes.push({ researchAttributeId: mongoose.Types.ObjectId(srlValue.component.toString()), value: srlValue.value ? srlAttribute.valueOptions[srlValue.value.index].value : null })
+      attributes.push({ attributeId: mongoose.Types.ObjectId(srlValue.component.toString()), value: srlValue.value ? srlAttribute.valueOptions[srlValue.value.index].value : null })
     }
 
     research.attributes = attributes;

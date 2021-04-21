@@ -121,7 +121,7 @@ const TenantProfile = new Schema({
       }]
     },
     "attributeOverwrites": [attributeOverwrite],
-    "researchLayouts": { type: Object },
+    "layouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },
     "modules": AppModuleMap,

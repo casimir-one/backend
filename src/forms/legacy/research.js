@@ -15,11 +15,11 @@ const destinationHandler = (fileStorage) => function () {
     let filePath = "";
 
     const parts = file.originalname.split(RESEARCH_ATTRIBUTE_ID_SPLITTER);
-    const researchAttributeId = parts[0];
-    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(researchAttributeId)) {
-      folderPath = fileStorage.getResearchAttributeDirPath(researchExternalId, researchAttributeId);
-      const name = file.originalname.substring(`${researchAttributeId}${RESEARCH_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
-      filePath = fileStorage.getResearchAttributeFilePath(researchExternalId, researchAttributeId, name);
+    const attributeId = parts[0];
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(attributeId)) {
+      folderPath = fileStorage.getResearchAttributeDirPath(researchExternalId, attributeId);
+      const name = file.originalname.substring(`${attributeId}${RESEARCH_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+      filePath = fileStorage.getResearchAttributeFilePath(researchExternalId, attributeId, name);
     } else {
       folderPath = fileStorage.getResearchDirPath(researchExternalId);
       filePath = fileStorage.getResearchFilePath(file.originalname);
@@ -45,9 +45,9 @@ const filenameHandler = () => function () {
   return function (req, file, callback) {
     let name = "";
     const parts = file.originalname.split(RESEARCH_ATTRIBUTE_ID_SPLITTER);
-    const researchAttributeId = parts[0];
-    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(researchAttributeId)) {
-      name = file.originalname.substring(`${researchAttributeId}${RESEARCH_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+    const attributeId = parts[0];
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(attributeId)) {
+      name = file.originalname.substring(`${attributeId}${RESEARCH_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
     } else {
       name = file.originalname;
     }

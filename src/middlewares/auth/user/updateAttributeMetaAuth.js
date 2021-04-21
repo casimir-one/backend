@@ -1,8 +1,8 @@
-import UserService from './../../../services/users';
-import TenantService from './../../../services/tenant';
+import UserService from '../../../services/users';
+import TenantService from '../../../services/tenant';
 
 
-function userAvatarFileUpdateAuth(options = {}) {
+function userAttributeMetaUpdateAuth(options = {}) {
   return async function (ctx, next) {
     const tenantService = new TenantService();
     const userService = new UserService();
@@ -26,4 +26,4 @@ function userAvatarFileUpdateAuth(options = {}) {
 }
 
 
-module.exports = userAvatarFileUpdateAuth;
+module.exports = userAttributeMetaUpdateAuth;

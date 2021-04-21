@@ -83,17 +83,8 @@ const signUp = async function (ctx, next) {
   const { 
     username, 
     email, 
-    firstName, 
-    lastName, 
+    attributes,
     pubKey,
-    phoneNumbers,
-    webPages,
-    location,
-    category,
-    occupation,
-    birthdate,
-    bio,
-    foreignIds,
     role
   } = ctx.request.body;
 
@@ -131,16 +122,7 @@ const signUp = async function (ctx, next) {
       signUpPubKey: pubKey,
       tenant: tenant.id,
       email,
-      firstName,
-      lastName,
-      phoneNumbers,
-      webPages,
-      location,
-      category,
-      occupation,
-      foreignIds,
-      birthdate,
-      bio,
+      attributes,
       roles: role ? [{
         role: role,
         researchGroupExternalId: tenant.id

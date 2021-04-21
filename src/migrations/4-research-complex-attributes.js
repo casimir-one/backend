@@ -93,11 +93,11 @@ const run = async () => {
   for (let i = 0; i < researches.length; i++) {
     let research = researches[i];
 
-    research.attributes.push({ researchAttributeId: roadmapAttribute._id, value: research.milestones.length ? research.milestones : null });
-    research.attributes.push({ researchAttributeId: partnersAttribute._id, value: research.partners.length ? research.partners : null });
-    research.attributes.push({ researchAttributeId: videoSrcAttribute._id, value: research.videoSrc ? research.videoSrc : null });
+    research.attributes.push({ attributeId: roadmapAttribute._id, value: research.milestones.length ? research.milestones : null });
+    research.attributes.push({ attributeId: partnersAttribute._id, value: research.partners.length ? research.partners : null });
+    research.attributes.push({ attributeId: videoSrcAttribute._id, value: research.videoSrc ? research.videoSrc : null });
 
-    research.attributes = research.attributes.filter(a => allTenantsAttributesIds.some(_id => _id.toString() == a.researchAttributeId.toString()));
+    research.attributes = research.attributes.filter(a => allTenantsAttributesIds.some(_id => _id.toString() == a.attributeId.toString()));
 
     researchPromises.push(research.save());
   }

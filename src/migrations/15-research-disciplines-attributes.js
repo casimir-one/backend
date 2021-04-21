@@ -43,25 +43,25 @@ const run = async () => {
     for (let i = 0; i < researches.length; i++) {
       let research = researches[i];
 
-      let categoriesA = research.attributes.find(a => a.researchAttributeId.toString() == categoriesAttr._id.toString());
-      let disciplinesA = research.attributes.find(a => a.researchAttributeId.toString() == disciplinesAttr._id.toString());
+      let categoriesA = research.attributes.find(a => a.attributeId.toString() == categoriesAttr._id.toString());
+      let disciplinesA = research.attributes.find(a => a.attributeId.toString() == disciplinesAttr._id.toString());
 
       if (disciplinesA && !categoriesA) {
-        research.attributes = research.attributes.filter(a => a.researchAttributeId.toString() != disciplinesAttr._id.toString());
+        research.attributes = research.attributes.filter(a => a.attributeId.toString() != disciplinesAttr._id.toString());
         research.attributes.push({
           value: disciplinesA.value.external_id,
-          researchAttributeId: categoriesAttr._id
+          attributeId: categoriesAttr._id
         })
       }
 
       let researchGroupAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == RESEARCH_ATTRIBUTE_TYPE.RESEARCH_GROUP);
-      let researchGroupA = research.attributes.find(a => a.researchAttributeId.toString() == researchGroupAttr._id.toString());
+      let researchGroupA = research.attributes.find(a => a.attributeId.toString() == researchGroupAttr._id.toString());
 
       if (researchGroupA) {
-        research.attributes = research.attributes.filter(a => a.researchAttributeId.toString() != researchGroupAttr._id.toString());
+        research.attributes = research.attributes.filter(a => a.attributeId.toString() != researchGroupAttr._id.toString());
         research.attributes.push({
           value: researchGroupA.value.external_id,
-          researchAttributeId: researchGroupAttr._id
+          attributeId: researchGroupAttr._id
         })
       }
       

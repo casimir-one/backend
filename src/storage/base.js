@@ -12,8 +12,8 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 const researchDir = 'research-projects';
 const researchDirPath = (baseDir, researchExternalId) => `${baseDir}/${researchDir}/${researchExternalId}`;
 const researchFilePath = (baseDir, researchExternalId, filename) => `${researchDirPath(baseDir, researchExternalId)}/${filename}`;
-const researchAttributeDirPath = (baseDir, researchExternalId, researchAttributeId) => `${researchDirPath(baseDir, researchExternalId)}/${researchAttributeId}`;
-const researchAttributeFilePath = (baseDir, researchExternalId, researchAttributeId, filename) => `${researchAttributeDirPath(baseDir, researchExternalId, researchAttributeId)}/${filename}`;
+const researchAttributeDirPath = (baseDir, researchExternalId, attributeId) => `${researchDirPath(baseDir, researchExternalId)}/${attributeId}`;
+const researchAttributeFilePath = (baseDir, researchExternalId, attributeId, filename) => `${researchAttributeDirPath(baseDir, researchExternalId, attributeId)}/${filename}`;
 const researchContentPackageDirPath = (baseDir, researchExternalId, packageHash) => `${researchDirPath(baseDir, researchExternalId)}/${packageHash}`;
 const researchContentPackageFilePath = (baseDir, researchExternalId, packageHash, fileHash) => `${researchContentPackageDirPath(baseDir, researchExternalId, packageHash)}/${fileHash}`;
 const researchDarArchiveDirPath = (baseDir, researchExternalId, archiveName) => `${researchDirPath(baseDir, researchExternalId)}/${archiveName}`;
@@ -87,12 +87,12 @@ class BaseStorage {
     return researchFilePath(this._baseDirPath, researchExternalId, filename);
   }
 
-  getResearchAttributeDirPath(researchExternalId, researchAttributeId) {
-    return researchAttributeDirPath(this._baseDirPath, researchExternalId, researchAttributeId);
+  getResearchAttributeDirPath(researchExternalId, attributeId) {
+    return researchAttributeDirPath(this._baseDirPath, researchExternalId, attributeId);
   }
 
-  getResearchAttributeFilePath(researchExternalId, researchAttributeId, filename) {
-    return researchAttributeFilePath(this._baseDirPath, researchExternalId, researchAttributeId, filename);
+  getResearchAttributeFilePath(researchExternalId, attributeId, filename) {
+    return researchAttributeFilePath(this._baseDirPath, researchExternalId, attributeId, filename);
   }
 
   getResearchContentPackageDirPath(researchExternalId, packageHash) {

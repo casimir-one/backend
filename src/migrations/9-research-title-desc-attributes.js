@@ -82,12 +82,12 @@ const run = async () => {
     
     research.attributes.push({
       value: research.title,
-      researchAttributeId: researchTitleAttribute._id
+      attributeId: researchTitleAttribute._id
     });
 
     research.attributes.push({
       value: research.abstract,
-      researchAttributeId: researchDescriptionAttribute._id
+      attributeId: researchDescriptionAttribute._id
     });
 
     researchPromises.push(research.save());

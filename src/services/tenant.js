@@ -52,7 +52,7 @@ class TenantService {
     signUpPolicy,
     faq,
     researchAttributes,
-    researchLayouts
+    layouts
   }) {
 
     const tenantProfile = new TenantProfile({
@@ -67,7 +67,7 @@ class TenantService {
         signUpPolicy,
         faq,
         researchAttributes: researchAttributes || [],
-        researchLayouts: researchLayouts || {}
+        layouts: layouts || {}
       }
     });
 
@@ -84,7 +84,7 @@ class TenantService {
     banner
   }, {
     faq,
-    researchLayouts
+    layouts
   }) {
 
     const tenantProfile = await TenantProfile.findOne({ _id: tenantExternalId });
@@ -99,7 +99,7 @@ class TenantService {
     tenantProfile.logo = logo !== undefined ? logo : tenantProfile.logo;
     tenantProfile.banner = banner !== undefined ? banner : tenantProfile.banner;
     tenantProfile.settings.faq = faq !== undefined ? faq : tenantProfile.settings.faq;
-    tenantProfile.settings.researchLayouts = researchLayouts !== undefined ? researchLayouts : tenantProfile.settings.researchLayouts;
+    tenantProfile.settings.layouts = layouts !== undefined ? layouts : tenantProfile.settings.layouts;
     
     const savedTenantProfile = await tenantProfile.save();
     return savedTenantProfile.toObject();

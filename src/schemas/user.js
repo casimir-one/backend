@@ -1,6 +1,7 @@
 
 import mongoose from 'mongoose';
 import USER_PROFILE_STATUS from './../constants/userProfileStatus';
+import AttributeValue from './attributeValue';
 
 const Schema = mongoose.Schema;
 
@@ -26,67 +27,8 @@ const UserProfile = new Schema({
   "signUpPubKey": { type: String, default: null },
   "status": { type: String, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
   "tenant": { type: String, default: "deip" },
-  "avatar": { type: String, default: "default-avatar.png" },
-  "firstName": { type: String, default: null, trim: true },
-  "lastName": { type: String, default: null, trim: true },
-  "bio": { type: String, default: null, trim: true },
-  "birthdate": { type: Date, default: null },
-  "category": { type: String, default: null, trim: true },
-  "occupation": { type: String, default: null, trim: true },
+  "attributes": [AttributeValue],
   "roles": [UserRole],
-  "location": {
-    type: UserLocation, 
-    default: {}
-  },
-  "webPages": [{
-    "_id": false,
-    "type": {
-      type: String,
-      enum: ['webpage', 'facebook', 'linkedin', 'twitter', 'vk'],
-      required: true
-    },
-    "label": { type: String, default: null, required: true, trim: true },
-    "link": { type: String, default: "", trim: true },
-    "metadata": { type: Object, default: null }
-  }],
-  "phoneNumbers": [{
-    "_id": false,
-    "label": { type: String, default: null, required: true, trim: true },
-    "ext": { type: String, default: null, trim: true },
-    "number": { type: String, required: true, trim: true }
-  }],
-  "education": [{
-    "_id": false,
-    "educationalInstitution": { type: String, required: true, trim: true },
-    "period": {
-      "from": { type: Date, default: null },
-      "to": { type: Date, default: null }
-    },
-    "degree": { type: String, required: true },
-    "area": { type: String, required: true },
-    "description": { type: String, default: null },
-    "isActive": { type: Boolean, required: true, default: false }
-  }],
-  "employment": [{
-    "_id": false,
-    "company": { type: String, required: true, trim: true },
-    "location": {
-      "city": { type: String, trim: true, default: null },
-      "country": { type: String, trim: true, default: null }
-    },
-    "period": {
-      "from": { type: Date, default: null },
-      "to": { type: Date, default: null }
-    },
-    "position": { type: String, required: true },
-    "description": { type: String, default: null },
-    "isActive": { type: Boolean, required: true, default: false }
-  }],
-  "foreignIds": [{
-    "_id": false,
-    "label": { type: String, required: true, trim: true },
-    "id": { type: String, required: true, trim: true },
-  }]
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('user-profile', UserProfile);
