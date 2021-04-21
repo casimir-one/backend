@@ -3,7 +3,7 @@ import fs from 'fs';
 import fsExtra from 'fs-extra'
 import util from 'util';
 import path from 'path';
-import config from './../config';
+import config from './../../config';
 
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
@@ -19,7 +19,7 @@ const researchContentPackageFilePath = (baseDir, researchExternalId, packageHash
 const researchDarArchiveDirPath = (baseDir, researchExternalId, archiveName) => `${researchDirPath(baseDir, researchExternalId)}/${archiveName}`;
 const researchDarArchiveFilePath = (baseDir, researchExternalId, archiveName, filename) => `${researchDarArchiveDirPath(baseDir, researchExternalId, archiveName)}/${filename}`;
 const researchContentPackageTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
-const researchBlankDarArchiveDirPath = () => path.join(__dirname, `./../default/dar-blank`);
+const researchBlankDarArchiveDirPath = () => path.join(__dirname, `./../../default/dar-blank`);
 
 const researchAwardWithdrawalRequestsDirPath = (baseDir, researchExternalId) => `${researchDirPath(baseDir, researchExternalId)}`;
 const researchAwardWithdrawalRequestsTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchAwardWithdrawalRequestsDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
@@ -29,28 +29,28 @@ const researchAwardWithdrawalRequestsPackageFilePath = (baseDir, researchExterna
 const accountDir = 'accounts';
 const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
 const accountAvatarFilePath = (baseDir, username, picture) => `${accountDirPath(baseDir, username)}/${picture}`
-const accountDefaultAvatarFilePath = () => path.join(__dirname, `./../default/default-avatar.png`);
+const accountDefaultAvatarFilePath = () => path.join(__dirname, `./../../default/default-avatar.png`);
 
 
 const researchGroupDir = 'research-groups';
 const researchGroupDirPath = (baseDir, researchGroupExternalId) => `${baseDir}/${researchGroupDir}/${researchGroupExternalId}`;
 const researchGroupLogoFilePath = (baseDir, researchGroupExternalId) => `${researchGroupDirPath(baseDir, researchGroupExternalId)}/logo.png`;
-const researchGroupDefaultLogoFilePath = () => path.join(__dirname, `./../default/default-research-group-logo.png`);
+const researchGroupDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-research-group-logo.png`);
 
 
 const tenantDir = 'tenants';
 const tenantDirPath = (baseDir, tenantExternalId) => `${baseDir}/${tenantDir}/${tenantExternalId}`;
 const tenantBannerFilePath = (baseDir, tenantExternalId, filename) => `${tenantDirPath(baseDir, tenantExternalId)}/${filename}`;
 const tenantLogoFilePath = (baseDir, tenantExternalId, filename) => `${tenantDirPath(baseDir, tenantExternalId)}/${filename}`;
-const tenantDefaultBannerFilePath = () => path.join(__dirname, `./../default/default-tenant-banner.png`);
-const tenantDefaultLogoFilePath = () => path.join(__dirname, `./../default/default-tenant-logo.png`);
+const tenantDefaultBannerFilePath = () => path.join(__dirname, `./../../default/default-tenant-banner.png`);
+const tenantDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-tenant-logo.png`);
 
 
-class BaseStorage {
+class BaseFileStorage {
 
   _baseDirPath = null;
   _type = null;
-  _tempDirPath = path.join(__dirname, `./../${config.TENANT_LOCAL_DIR}/temp`);
+  _tempDirPath = path.join(__dirname, `./../../${config.TENANT_LOCAL_DIR}/temp`);
 
   constructor(baseDirPath) {
     this._baseDirPath = baseDirPath;
@@ -178,4 +178,4 @@ class BaseStorage {
 }
 
 
-export default BaseStorage;
+export default BaseFileStorage;

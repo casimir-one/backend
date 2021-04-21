@@ -1,13 +1,14 @@
-import BaseStorage from './base';
+import BaseFileStorage from './../base/BaseFileStorage';
 import fs from 'fs';
 import SftpClient from 'ssh2-sftp-client';
-import { FILE_STORAGE } from "./../constants";
+import { FILE_STORAGE } from "./../../constants";
 import { hashElement } from 'folder-hash';
 import { v4 as uuidv4 } from 'uuid';
 import rimraf from "rimraf";
-import config from "./../config";
+import config from "./../../config";
 
-class SftpStorage extends BaseStorage {
+
+class SftpFileStorage extends BaseFileStorage {
 
   _host = null;
   _username = null;
@@ -146,4 +147,4 @@ class SftpStorage extends BaseStorage {
 }
 
 
-export default SftpStorage;
+export default SftpFileStorage;

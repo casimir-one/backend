@@ -1,9 +1,8 @@
-import config from './../../config';
 import multer from 'koa-multer';
-import LocalStorage from './../../storage/local';
+import LocalFileStorage from './../../storage/impl/LocalFileStorage';
 
 const localStorageUploader = (destinationHandler, filenameHandler, sessionId) => multer.diskStorage({
-  destination: destinationHandler(new LocalStorage(), sessionId)(),
+  destination: destinationHandler(new LocalFileStorage(), sessionId)(),
   filename: filenameHandler(sessionId)()
 });
 

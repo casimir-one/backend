@@ -1,7 +1,7 @@
 import config from './../../config';
 import multer from 'koa-multer';
 import sftpStorage from 'multer-sftp';
-import SftpStorage from './../../storage/sftp';
+import SftpFileStorage from './../../storage/impl/SftpFileStorage';
 
 
 const sftpStorageUploader = (destinationHandler, filenameHandler, sessionId) => {
@@ -12,7 +12,7 @@ const sftpStorageUploader = (destinationHandler, filenameHandler, sessionId) => 
       username: config.TENANT_SFTP_USER,
       password: config.TENANT_SFTP_PASSWORD
     },
-    destination: destinationHandler(new SftpStorage(), sessionId)(),
+    destination: destinationHandler(new SftpFileStorage(), sessionId)(),
     filename: filenameHandler(sessionId)()
   })
 };

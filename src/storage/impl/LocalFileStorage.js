@@ -1,11 +1,11 @@
-import config from './../config';
-import BaseStorage from './base';
+import config from './../../config';
+import BaseFileStorage from './../base/BaseFileStorage';
 import util from 'util';
 import fs from 'fs';
 import path from 'path';
 import fsExtra from 'fs-extra';
 import rimraf from "rimraf";
-import { FILE_STORAGE } from "./../constants";
+import { FILE_STORAGE } from "./../../constants";
 import { hashElement } from 'folder-hash';
 
 const stat = util.promisify(fs.stat);
@@ -13,10 +13,11 @@ const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
 const readdir = util.promisify(fs.readdir);
 
-class LocalStorage extends BaseStorage {
+
+class LocalFileStorage extends BaseFileStorage {
 
   constructor() {
-    const filesStoragePath = path.join(__dirname, `./../${config.TENANT_LOCAL_DIR}`);
+    const filesStoragePath = path.join(__dirname, `./../../${config.TENANT_LOCAL_DIR}`);
     super(filesStoragePath);
     this._type = FILE_STORAGE.LOCAL_FILESYSTEM;
   }
@@ -181,4 +182,4 @@ class LocalStorage extends BaseStorage {
 }
 
 
-export default LocalStorage;
+export default LocalFileStorage;
