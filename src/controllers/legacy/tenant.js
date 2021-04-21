@@ -1,20 +1,15 @@
-import fs from 'fs';
-import fsExtra from 'fs-extra'
-import util from 'util';
-import path from 'path';
 import deipRpc from '@deip/rpc-client';
 import sharp from 'sharp';
-import UserService from './../services/users';
-import TenantService from './../services/tenant';
-import ResearchService from './../services/research';
-import ResearchGroupService from './../services/researchGroup';
-import FileStorage from './../storage';
-import config from './../config';
-import { USER_PROFILE_STATUS } from './../constants';
-import TenantSettingsForm from './../forms/legacy/tenantSettings';
-import * as blockchainService from './../utils/blockchain';
-import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
+import UserService from './../../services/users';
+import TenantService from './../../services/tenant';
+import ResearchGroupService from './../../services/researchGroup';
+import FileStorage from './../../storage';
+import config from './../../config';
+import { USER_PROFILE_STATUS } from './../../constants';
+import TenantSettingsForm from './../../forms/legacy/tenantSettings';
+import * as blockchainService from './../../utils/blockchain';
+import UserInvitationProposedEvent from './../../events/legacy/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 
 
 const updateTenantSettings = async (ctx) => {

@@ -1,6 +1,6 @@
-import AttributesService from './../services/attributes';
+import AttributesService from './../../services/attributes';
 import mongoose from 'mongoose';
-import ResearchService from './../services/research';
+import ResearchService from './../../services/research';
 
 const getAttributes = async (ctx) => {
   try {

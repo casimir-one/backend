@@ -1,6 +1,6 @@
-import UserJoinRequestService from './../services/userJoinRequests';
-import ResearchGroupService from './../services/researchGroup';
-import * as blockchainService from './../utils/blockchain';
+import UserJoinRequestService from './../../services/userJoinRequests';
+import ResearchGroupService from './../../services/researchGroup';
+import * as blockchainService from './../../utils/blockchain';
 
 const getJoinRequestsByGroup = async (ctx) => {
   const researchGroupExternalId = ctx.params.researchGroupExternalId;

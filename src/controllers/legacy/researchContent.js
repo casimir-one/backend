@@ -1,25 +1,23 @@
 import path from 'path'
-import util from 'util';
-import request from 'request';
 import parseFormdata from 'parse-formdata'
-import readArchive from './../dar/readArchive'
-import writeArchive from './../dar/writeArchive'
-import cloneArchive from './../dar/cloneArchive'
+import readArchive from './../../dar/readArchive'
+import writeArchive from './../../dar/writeArchive'
+import cloneArchive from './../../dar/cloneArchive'
 import xml2js from 'xml2js';
 import { v4 as uuidv4 } from 'uuid';
-import config from './../config';
-import ResearchContentPackageForm from './../forms/legacy/researchContentPackage';
-import FileStorage from './../storage';
+import config from './../../config';
+import ResearchContentPackageForm from './../../forms/legacy/researchContentPackage';
+import FileStorage from './../../storage';
 import crypto from 'crypto';
 import slug from 'limax';
-import * as blockchainService from './../utils/blockchain';
-import ResearchGroupService from './../services/researchGroup';
-import ResearchContentService from './../services/researchContent'
-import ResearchService from './../services/research';
-import { RESEARCH_CONTENT_STATUS } from './../constants';
-import ResearchContentCreatedEvent from './../events/legacy/researchContentCreatedEvent';
-import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
-import ResearchContentProposalSignedEvent from './../events/legacy/researchContentProposalSignedEvent';
+import * as blockchainService from './../../utils/blockchain';
+import ResearchGroupService from './../../services/researchGroup';
+import ResearchContentService from './../../services/researchContent'
+import ResearchService from './../../services/research';
+import { RESEARCH_CONTENT_STATUS } from './../../constants';
+import ResearchContentCreatedEvent from './../../events/legacy/researchContentCreatedEvent';
+import ResearchContentProposedEvent from './../../events/legacy/researchContentProposedEvent';
+import ResearchContentProposalSignedEvent from './../../events/legacy/researchContentProposalSignedEvent';
 
 
 // ############ Read actions ############

@@ -1,6 +1,6 @@
-import * as blockchainService from './../utils/blockchain';
-import ReviewService from './../services/review';
-import ReviewCreatedEvent from './../events/legacy/reviewCreatedEvent';
+import * as blockchainService from './../../utils/blockchain';
+import ReviewService from './../../services/review';
+import ReviewCreatedEvent from './../../events/legacy/reviewCreatedEvent';
 
 
 const createReview = async (ctx, next) => {

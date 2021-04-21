@@ -1,32 +1,28 @@
-import multer from 'koa-multer';
 import fs from 'fs';
 import fsExtra from 'fs-extra'
 import util from 'util';
-import path from 'path';
 import sharp from 'sharp'
-import config from './../config'
 import send from 'koa-send';
 import slug from 'limax';
 import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
-import ResearchService from './../services/research';
-import ResearchApplicationService from './../services/researchApplication';
-import AttributesService from './../services/attributes';
-import ResearchGroupService from './../services/researchGroup';
-import * as blockchainService from './../utils/blockchain';
-import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../constants';
-import ResearchForm from './../forms/legacy/research';
-import FileStorage from './../storage';
-import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../forms/legacy/researchApplicationForms';
-import ResearchCreatedEvent from './../events/legacy/researchCreatedEvent';
-import ResearchProposedEvent from './../events/legacy/researchProposedEvent';
-import ResearchProposalSignedEvent from './../events/legacy/researchProposalSignedEvent';
-import ResearchUpdatedEvent from './../events/legacy/researchUpdatedEvent';
-import ResearchUpdateProposedEvent from './../events/legacy/researchUpdateProposedEvent';
-import ResearchUpdateProposalSignedEvent from './../events/legacy/researchUpdateProposalSignedEvent';
-import ResearchGroupCreatedEvent from './../events/legacy/researchGroupCreatedEvent';
-import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
+import ResearchService from './../../services/research';
+import ResearchApplicationService from './../../services/researchApplication';
+import AttributesService from './../../services/attributes';
+import * as blockchainService from './../../utils/blockchain';
+import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
+import ResearchForm from './../../forms/legacy/research';
+import FileStorage from './../../storage';
+import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../../forms/legacy/researchApplicationForms';
+import ResearchCreatedEvent from './../../events/legacy/researchCreatedEvent';
+import ResearchProposedEvent from './../../events/legacy/researchProposedEvent';
+import ResearchProposalSignedEvent from './../../events/legacy/researchProposalSignedEvent';
+import ResearchUpdatedEvent from './../../events/legacy/researchUpdatedEvent';
+import ResearchUpdateProposedEvent from './../../events/legacy/researchUpdateProposedEvent';
+import ResearchUpdateProposalSignedEvent from './../../events/legacy/researchUpdateProposalSignedEvent';
+import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';
+import UserInvitationProposedEvent from './../../events/legacy/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 
 
 const stat = util.promisify(fs.stat);

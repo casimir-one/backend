@@ -1,4 +1,4 @@
-import InvestmentPortfolioService from './../services/investmentPortfolio';
+import InvestmentPortfolioService from './../../services/investmentPortfolio';
 
 
 const getUserInvestmentPortfolio = async (ctx) => {

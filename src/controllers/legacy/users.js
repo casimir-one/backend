@@ -1,17 +1,11 @@
-import multer from 'koa-multer';
-import fs from 'fs';
-import fsExtra from 'fs-extra';
-import util from 'util';
-import path from 'path';
 import sharp from 'sharp';
-import config from './../config';
 import qs from 'qs';
-import UserService from './../services/users';
-import FileStorage from './../storage';
-import UserForm from './../forms/legacy/user';
-import UserBookmarkService from './../services/userBookmark';
-import * as blockchainService from './../utils/blockchain';
-import { USER_PROFILE_STATUS } from './../constants';
+import UserService from './../../services/users';
+import FileStorage from './../../storage';
+import UserForm from './../../forms/legacy/user';
+import UserBookmarkService from './../../services/userBookmark';
+import * as blockchainService from './../../utils/blockchain';
+import { USER_PROFILE_STATUS } from './../../constants';
 
 
 const getUser = async (ctx) => {

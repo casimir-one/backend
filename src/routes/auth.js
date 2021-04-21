@@ -1,4 +1,4 @@
-import auth from '../controllers/auth.js'
+import auth from '../controllers/legacy/auth.js'
 import koa_router from 'koa-router'
 
 const public_route = koa_router()

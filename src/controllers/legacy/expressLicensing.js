@@ -1,10 +1,10 @@
 import fs from 'fs';
 import fsExtra from 'fs-extra'
 import util from 'util';
-import * as blockchainService from './../utils/blockchain';
-import ResearchExpressLicenseProposedEvent from './../events/legacy/researchExpressLicenseProposedEvent';
-import ResearchExpressLicenseProposalSignedEvent from './../events/legacy/researchExpressLicenseProposalSignedEvent';
-import ExpressLicensingService from './../services/expressLicensing';
+import * as blockchainService from './../../utils/blockchain';
+import ResearchExpressLicenseProposedEvent from './../../events/legacy/researchExpressLicenseProposedEvent';
+import ResearchExpressLicenseProposalSignedEvent from './../../events/legacy/researchExpressLicenseProposalSignedEvent';
+import ExpressLicensingService from './../../services/expressLicensing';
 
 const expressLicensingService = new ExpressLicensingService();
 

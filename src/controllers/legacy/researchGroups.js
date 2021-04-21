@@ -1,21 +1,15 @@
-import multer from 'koa-multer';
-import fs from 'fs';
-import fsExtra from 'fs-extra'
-import util from 'util';
-import path from 'path';
 import sharp from 'sharp'
-import config from './../config'
 import qs from 'qs';
-import * as blockchainService from './../utils/blockchain';
-import FileStorage from './../storage';
-import ResearchGroupService from './../services/researchGroup';
-import ResearchGroupForm from './../forms/legacy/researchGroup';
-import ResearchGroupCreatedEvent from './../events/legacy/researchGroupCreatedEvent';
-import ResearchGroupUpdatedEvent from './../events/legacy/researchGroupUpdatedEvent';
-import ResearchGroupUpdateProposedEvent from './../events/legacy/researchGroupUpdateProposedEvent';
-import ResearchGroupUpdateProposalSignedEvent from './../events/legacy/researchGroupUpdateProposalSignedEvent';
-import UserResignationProposedEvent from './../events/legacy/userResignationProposedEvent';
-import UserResignationProposalSignedEvent from './../events/legacy/userResignationProposalSignedEvent';
+import * as blockchainService from './../../utils/blockchain';
+import FileStorage from './../../storage';
+import ResearchGroupService from './../../services/researchGroup';
+import ResearchGroupForm from './../../forms/legacy/researchGroup';
+import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';
+import ResearchGroupUpdatedEvent from './../../events/legacy/researchGroupUpdatedEvent';
+import ResearchGroupUpdateProposedEvent from './../../events/legacy/researchGroupUpdateProposedEvent';
+import ResearchGroupUpdateProposalSignedEvent from './../../events/legacy/researchGroupUpdateProposalSignedEvent';
+import UserResignationProposedEvent from './../../events/legacy/userResignationProposedEvent';
+import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
 
 
 const createResearchGroup = async (ctx, next) => {

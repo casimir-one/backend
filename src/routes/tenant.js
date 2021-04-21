@@ -1,7 +1,7 @@
 import koa_router from 'koa-router'
-import tenant from '../controllers/tenant'
-import auth from '../controllers/auth'
 import compose from 'koa-compose'
+import tenant from '../controllers/legacy/tenant'
+import auth from '../controllers/legacy/auth'
 
 const protected_route = koa_router();
 const public_route = koa_router();

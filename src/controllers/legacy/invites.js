@@ -1,7 +1,7 @@
-import UserInviteService from './../services/userInvites';
-import * as blockchainService from './../utils/blockchain';
-import UserInvitationProposedEvent from './../events/legacy/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../events/legacy/userInvitationProposalSignedEvent';
+import UserInviteService from './../../services/userInvites';
+import * as blockchainService from './../../utils/blockchain';
+import UserInvitationProposedEvent from './../../events/legacy/userInvitationProposedEvent';
+import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 
 
 const getUserInvites = async (ctx) => {
