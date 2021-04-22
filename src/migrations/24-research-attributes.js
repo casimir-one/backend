@@ -42,7 +42,7 @@ const FAQ = new Schema({
   "isPublished": { type: Boolean, required: false }
 });
 
-const attributeOverwrite = new Schema({
+const AttributeOverwrite = new Schema({
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
@@ -152,7 +152,7 @@ const TenantProfileMigratingSchema = new Schema({
         ]
       }]
     },
-    "attributeOverwrites": [attributeOverwrite],
+    "attributeOverwrites": [AttributeOverwrite],
     "layouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },
