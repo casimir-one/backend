@@ -44,74 +44,100 @@ const UserRole = new Schema({
   "label": { type: String, trim: true },
   "researchGroupExternalId": { type: String, required: true }
 });
+
+const WebPage = new Schema({
+  "_id": false,
+  "type": {
+    type: String,
+    enum: ['webpage', 'facebook', 'linkedin', 'twitter', 'vk'],
+    required: true
+  },
+  "label": { type: String, default: null, required: true, trim: true },
+  "link": { type: String, default: "", trim: true },
+  "metadata": { type: Object, default: null }
+});
+
+const PhoneNumber = new Schema({
+  "_id": false,
+  "label": { type: String, default: null, required: true, trim: true },
+  "ext": { type: String, default: null, trim: true },
+  "number": { type: String, required: true, trim: true }
+});
+
+const Education = new Schema({
+  "_id": false,
+  "educationalInstitution": { type: String, required: true, trim: true },
+  "period": {
+    "from": { type: Date, default: null },
+    "to": { type: Date, default: null }
+  },
+  "degree": { type: String, required: true },
+  "area": { type: String, required: true },
+  "description": { type: String, default: null },
+  "isActive": { type: Boolean, required: true, default: false }
+});
+
+const Employment = new Schema({
+  "_id": false,
+  "company": { type: String, required: true, trim: true },
+  "location": {
+    "city": { type: String, trim: true, default: null },
+    "country": { type: String, trim: true, default: null }
+  },
+  "period": {
+    "from": { type: Date, default: null },
+    "to": { type: Date, default: null }
+  },
+  "position": { type: String, required: true },
+  "description": { type: String, default: null },
+  "isActive": { type: Boolean, required: true, default: false }
+});
+
+const ForeignId = new Schema({
+  "_id": false,
+  "label": { type: String, required: true, trim: true },
+  "id": { type: String, required: true, trim: true },
+});
+
 const UserProfileMigratingSchema = new Schema({
   "_id": { type: String },
   "tenantId": { type: String, required: true },
   "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "signUpPubKey": { type: String, default: null },
   "status": { type: String, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
-  "tenant": { type: String, default: "deip" },
-  "avatar": { type: String, default: "default-avatar.png" },
-  "firstName": { type: String, default: null, trim: true },
-  "lastName": { type: String, default: null, trim: true },
-  "bio": { type: String, default: null, trim: true },
-  "birthdate": { type: Date, default: null },
-  "category": { type: String, default: null, trim: true },
-  "occupation": { type: String, default: null, trim: true },
+  "tenant": { type: String, default: undefined },
+  "avatar": { type: String, default: undefined },
+  "firstName": { type: String, default: undefined },
+  "lastName": { type: String, default: undefined },
+  "bio": { type: String, default: undefined},
+  "birthdate": { type: Date, default: undefined},
+  "category": { type: String, default: undefined },
+  "occupation": { type: String, default: undefined },
   "roles": [UserRole],
   "location": {
     type: UserLocation,
-    default: {}
+    default: undefined
   },
-  "webPages": [{
-    "_id": false,
-    "type": {
-      type: String,
-      enum: ['webpage', 'facebook', 'linkedin', 'twitter', 'vk'],
-      required: true
-    },
-    "label": { type: String, default: null, required: true, trim: true },
-    "link": { type: String, default: "", trim: true },
-    "metadata": { type: Object, default: null }
-  }],
-  "phoneNumbers": [{
-    "_id": false,
-    "label": { type: String, default: null, required: true, trim: true },
-    "ext": { type: String, default: null, trim: true },
-    "number": { type: String, required: true, trim: true }
-  }],
-  "education": [{
-    "_id": false,
-    "educationalInstitution": { type: String, required: true, trim: true },
-    "period": {
-      "from": { type: Date, default: null },
-      "to": { type: Date, default: null }
-    },
-    "degree": { type: String, required: true },
-    "area": { type: String, required: true },
-    "description": { type: String, default: null },
-    "isActive": { type: Boolean, required: true, default: false }
-  }],
-  "employment": [{
-    "_id": false,
-    "company": { type: String, required: true, trim: true },
-    "location": {
-      "city": { type: String, trim: true, default: null },
-      "country": { type: String, trim: true, default: null }
-    },
-    "period": {
-      "from": { type: Date, default: null },
-      "to": { type: Date, default: null }
-    },
-    "position": { type: String, required: true },
-    "description": { type: String, default: null },
-    "isActive": { type: Boolean, required: true, default: false }
-  }],
-  "foreignIds": [{
-    "_id": false,
-    "label": { type: String, required: true, trim: true },
-    "id": { type: String, required: true, trim: true },
-  }],
+  "webPages": {
+    type: [WebPage],
+    default: undefined
+  },
+  "phoneNumbers": {
+    type: [PhoneNumber],
+    default: undefined
+  },
+  "education": {
+    type: [Education],
+    default: undefined
+  },
+  "employment": {
+    type: [Employment],
+    default: undefined
+  },
+  "foreignIds": {
+    type: [ForeignId],
+    default: undefined
+  },
   "attributes": [AttributeValue]
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
@@ -809,6 +835,21 @@ const run = async () => {
         value: user.employment
       }
     ];
+
+    userProfileDoc.tenant = undefined;
+    userProfileDoc.avatar = undefined;
+    userProfileDoc.firstName = undefined;
+    userProfileDoc.lastName = undefined;
+    userProfileDoc.bio = undefined;
+    userProfileDoc.birthdate = undefined;
+    userProfileDoc.category = undefined;
+    userProfileDoc.occupation = undefined;
+    userProfileDoc.location = undefined;
+    userProfileDoc.webPages = undefined;
+    userProfileDoc.phoneNumbers = undefined;
+    userProfileDoc.education = undefined;
+    userProfileDoc.employment = undefined;
+    userProfileDoc.foreignIds = undefined;
 
     userProfilesPromises.push(userProfileDoc.save());
   }

@@ -34,7 +34,32 @@ const SIGN_UP_POLICY = require('../constants').SIGN_UP_POLICY;
 const NEW_RESEARCH_POLICY = require('../constants').NEW_RESEARCH_POLICY;
 const ASSESSMENT_CRITERIA_TYPE = require('../constants').ASSESSMENT_CRITERIA_TYPE;
 const RESEARCH_CONTENT_TYPES = require('../constants').RESEARCH_CONTENT_TYPES;
+const RESEARCH_STATUS = require('./../constants').RESEARCH_STATUS;
 
+
+const AttributeValue = new Schema({
+  "_id": false,
+  "attributeId": { type: Schema.Types.ObjectId, required: false },
+  "researchAttributeId": { type: Schema.Types.ObjectId, required: false, default: undefined },
+  "value": { type: Schema.Types.Mixed, default: null }
+});
+
+const ResearchMigratingSchema = new Schema({
+  "_id": { type: String, required: true },
+  "tenantId": { type: String, required: true },
+  "researchGroupExternalId": { type: String, required: true },
+  "attributes": [AttributeValue],
+  "status": { type: String, enum: [...Object.values(RESEARCH_STATUS)], required: false },
+
+  // To remove
+  "tenantCriterias": { type: [Object], default: undefined },
+  "milestones": { type: [Object], default: undefined },
+  "partners": { type: [Object], default: undefined },
+  "abstract": { type: String, default: undefined }
+
+}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+
+const Research = mongoose.model('research', ResearchMigratingSchema);
 
 const FAQ = new Schema({
   "question": { type: String, required: true },
@@ -154,11 +179,12 @@ const TenantProfileMigratingSchema = new Schema({
     },
     "attributeOverwrites": [AttributeOverwrite],
     "layouts": { type: Object },
+    "researchLayouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },
     "modules": AppModuleMap,
     "roles": [UserRoleModuleMap],
-    "researchAttributes": [Object]
+    "researchAttributes": { type: [Object], default: undefined }
   }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' }, minimize: false });
 
@@ -168,9 +194,11 @@ const TenantProfile = mongoose.model('tenants-profiles', TenantProfileMigratingS
 
 
 const run = async () => {
-  const tenantProfiles = await TenantProfile.find({}).lean();
+
+  const tenantProfiles = await TenantProfile.find({});
 
   const researchAttributesPromises = [];
+  const tenantProfilesPromises = [];
 
   tenantProfiles[0].settings.researchAttributes.forEach(attr => {
     if (systemAttributes.includes(attr._id.toString())) {
@@ -199,9 +227,40 @@ const run = async () => {
         researchAttributesPromises.push(researchAttribute.save());
       }
     })
+
+    tenantProfiles[i].settings.researchAttributes = undefined;
+    tenantProfiles[i].settings.layouts = tenantProfiles[i].settings.researchLayouts;
+    tenantProfiles[i].settings.researchLayouts = undefined;
+    
+    tenantProfilesPromises.push(tenantProfiles[i].save());
   }
 
+
+  const researchPromises = [];  
+  const researches = await Research.find({});
+  for (let i = 0; i < researches.length; i++) {
+    const research = researches[i];    
+    const attributes = research.attributes.map(attr => ({ attributeId: attr.researchAttributeId, value: attr.value }));
+    research.attributes = attributes;
+
+    for (let j = 0; j < research.attributes.length; j++) {
+      research.attributes[j].researchAttributeId = undefined;
+    }
+
+    research.tenantCriterias = undefined;
+    research.milestones = undefined;
+    research.partners = undefined;
+    research.abstract = undefined;
+
+    researchPromises.push(research.save());
+  }
+  
+
   await Promise.all(researchAttributesPromises);
+  await Promise.all(researchPromises);
+  await Promise.all(tenantProfilesPromises);
+  await TenantProfile.update({}, { $rename: { "settings.researchLayouts": "settings.layouts" } }, { multi: true });
+    
 };
 
 run()
