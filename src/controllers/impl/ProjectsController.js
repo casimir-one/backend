@@ -1,6 +1,6 @@
 import BaseController from './../base/BaseController';
 import { ProjectForm } from './../../forms';
-import protocolTxCmdHandler from './../../command-handlers/impl/ProtocolTxCmdHandler';
+import projectCmdHandler from './../../command-handlers/impl/ProjectCmdHandler';
 
 
 class ProjectsController extends BaseController {
@@ -8,9 +8,9 @@ class ProjectsController extends BaseController {
   createProject = this.command({
     form: ProjectForm, h: async (ctx) => {
       try {
-        const appCmd = ctx.state.appCmd;
-        const txInfo = await protocolTxCmdHandler.handle(appCmd, ctx);
-
+        const msg = ctx.state.msg;
+        await projectCmdHandler.process(msg, ctx);
+        
         ctx.status = 200;
         ctx.body = { model: "ok" };
 
@@ -20,7 +20,7 @@ class ProjectsController extends BaseController {
       }
     }
   });
-  
+
 }
 
 
