@@ -5,5 +5,6 @@ import proposalCmdHandler from './impl/ProposalCmdHandler';
 
 module.exports = {
   [APP_CMD.CREATE_PROJECT]: projectCmdHandler,
-  [APP_CMD.CREATE_PROPOSAL]: proposalCmdHandler
+  [APP_CMD.CREATE_PROPOSAL]: proposalCmdHandler,
+  [APP_CMD.JOIN_PROJECT]: projectCmdHandler
 };

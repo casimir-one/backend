@@ -3,7 +3,9 @@ import { createEnum } from '@deip/toolbox';
 
 const APP_EVENT = createEnum({
   PROJECT_CREATED: 1,
-  PROPOSAL_CREATED: 2
+  PROPOSAL_CREATED: 2,
+  PROJECT_MEMBER_JOINED: 3,
+  PROPOSAL_SIGNATURES_UPDATED: 4
 });
 
 

@@ -18,6 +18,11 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event, ctx) => 
   console.log(event);
 });
 
+proposalEventHandler.register(APP_EVENT.PROPOSAL_SIGNATURES_UPDATED, async (event, ctx) => {
+  // TODO: handle proposal read schema 
+  console.log(event);
+});
+
 
 
 module.exports = proposalEventHandler;

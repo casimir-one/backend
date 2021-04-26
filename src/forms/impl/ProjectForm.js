@@ -4,22 +4,22 @@ import BaseForm from './../base/BaseForm';
 import { getFileStorageUploader } from './../storage';
 
 
-const RESEARCH_ID_HEADER = "research-external-id";
-const RESEARCH_ATTRIBUTE_ID_SPLITTER = '-';
+const ENTITY_ID_HEADER = "entity-id";
+const PROJECT_ATTRIBUTE_ID_SPLITTER = '-';
 
 
 const destinationHandler = (fileStorage) => function () {
 
   return async function (req, file, callback) {
-    const researchExternalId = req.headers[RESEARCH_ID_HEADER];
+    const researchExternalId = req.headers[ENTITY_ID_HEADER];
     let folderPath = "";
     let filePath = "";
 
-    const parts = file.originalname.split(RESEARCH_ATTRIBUTE_ID_SPLITTER);
+    const parts = file.originalname.split(PROJECT_ATTRIBUTE_ID_SPLITTER);
     const researchAttributeId = parts[0];
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(researchAttributeId)) {
       folderPath = fileStorage.getResearchAttributeDirPath(researchExternalId, researchAttributeId);
-      const name = file.originalname.substring(`${researchAttributeId}${RESEARCH_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+      const name = file.originalname.substring(`${researchAttributeId}${PROJECT_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
       filePath = fileStorage.getResearchAttributeFilePath(researchExternalId, researchAttributeId, name);
     } else {
       folderPath = fileStorage.getResearchDirPath(researchExternalId);
@@ -45,10 +45,10 @@ const filenameHandler = () => function () {
 
   return function (req, file, callback) {
     let name = "";
-    const parts = file.originalname.split(RESEARCH_ATTRIBUTE_ID_SPLITTER);
+    const parts = file.originalname.split(PROJECT_ATTRIBUTE_ID_SPLITTER);
     const researchAttributeId = parts[0];
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(researchAttributeId)) {
-      name = file.originalname.substring(`${researchAttributeId}${RESEARCH_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+      name = file.originalname.substring(`${researchAttributeId}${PROJECT_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
     } else {
       name = file.originalname;
     }
