@@ -13,7 +13,7 @@ class BaseCmdHandler extends EventEmitter {
 
   register(cmdNum, handler) {
     this.on(cmdNum, (cmd, ctx, reply) => {
-      return BaseCmdHandler.PromisfyCmdHandler(cmd, ctx, reply, handler)
+      BaseCmdHandler.PromisfyCmdHandler(cmd, ctx, reply, handler);
     });
   }
 
@@ -32,7 +32,11 @@ class BaseCmdHandler extends EventEmitter {
   handle(cmd, ctx) {
     return new Promise((success, failure) => {
       this.emit(cmd.getCmdNum(), cmd, ctx, { success, failure });
-    });
+    })
+      .catch((err) => {
+        console.error(`Command ${cmd.getCmdNum()} failed with an error: `, err);
+        throw err;
+      });
   }
 
 
@@ -54,7 +58,7 @@ class BaseCmdHandler extends EventEmitter {
   static async HandleChain(cmds, ctx) {
     const CMD_HANDLERS = require('./../../command-handlers/index');
 
-    let chain = new Promise((start, stop) => { start() });
+    let chain = new Promise((start) => { start() });
 
     for (let i = 0; i < cmds.length; i++) {
       const cmd = cmds[i];

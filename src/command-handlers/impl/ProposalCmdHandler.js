@@ -29,7 +29,6 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
   // TODO: update proposal signatures
 
   ctx.state.appEvents.push(new ProposalSignaturesUpdatedEvent(cmd.getCmdPayload()));
-  return cmd.getProtocolEntityId();
 });
 
 

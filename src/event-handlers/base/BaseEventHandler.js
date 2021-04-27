@@ -22,7 +22,11 @@ class BaseEventHandler extends EventEmitter {
         this.emit(event.getEventNum(), event, ctx);
         success();
       }
-    });
+    })
+      .catch((err) => {
+        console.error(`Event ${event.getEventNum()} failed with an error: `, err);
+        throw err;
+      });
   }
 
 
