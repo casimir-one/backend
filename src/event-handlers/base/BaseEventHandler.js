@@ -52,7 +52,10 @@ class BaseEventHandler extends EventEmitter {
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
       const eventHandlers = APP_EVENT_HANDLERS[event.getEventNum()];
-      if (!eventHandlers) continue;
+      if (!eventHandlers || !eventHandlers.length) {
+        console.warn(`No event handlers registered for ${event.getEventNum()} event`);
+        continue;
+      } 
 
       for(let j = 0; j < eventHandlers.length; j++) {
         const { h: eventHandler, await: shouldAwait } = eventHandlers[j];

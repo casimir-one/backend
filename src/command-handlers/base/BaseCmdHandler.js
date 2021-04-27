@@ -63,7 +63,10 @@ class BaseCmdHandler extends EventEmitter {
     for (let i = 0; i < cmds.length; i++) {
       const cmd = cmds[i];
       const cmdHandler = CMD_HANDLERS[cmd.getCmdNum()];
-      if (!cmdHandler) continue;
+      if (!cmdHandler) {
+        console.warn(`No command handler registered for ${cmd.getCmdNum()} command`);
+        continue;
+      } 
       chain = chain.then(() => cmdHandler.handle(cmd, ctx));
     }
 
