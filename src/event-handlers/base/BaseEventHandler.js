@@ -56,8 +56,6 @@ class BaseEventHandler extends EventEmitter {
       }
     }
 
-    chain = chain.then(() => { console.info("App events pipe passed") });
-    chain = chain.catch((err) => { console.error("App events pipe failed", err) });
     await chain;
   };
 

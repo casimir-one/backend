@@ -63,8 +63,6 @@ class BaseCmdHandler extends EventEmitter {
       chain = chain.then(() => cmdHandler.handle(cmd, ctx));
     }
 
-    chain = chain.then(() => { console.info("App commands pipe passed") });
-    chain = chain.catch((err) => { console.error("App commands pipe failed", err) });
     await chain;
   };
 

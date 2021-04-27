@@ -16,7 +16,7 @@ class ProjectsController extends BaseController {
 
       } catch (err) {
         ctx.status = 500;
-        ctx.body = ["error1"];
+        ctx.body = err;
       }
     }
   });

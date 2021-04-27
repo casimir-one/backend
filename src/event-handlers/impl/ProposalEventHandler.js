@@ -14,12 +14,12 @@ const proposalEventHandler = new ProposalEventHandler();
 
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event, ctx) => {
-  // TODO: handle proposal read schema 
+  // TODO: handle proposalReadModel
   console.log(event);
 });
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_SIGNATURES_UPDATED, async (event, ctx) => {
-  // TODO: handle proposal read schema 
+  // TODO: handle proposalReadModel
   console.log(event);
 });
 

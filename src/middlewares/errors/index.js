@@ -6,6 +6,7 @@ function errorsHandler(options) {
       if (ctx._matchedRoute == "/auth/sign-up") { // Get rid of after removing legacy events !
         return;
       }
+      console.error(err);
       if (401 === err.status) {
         ctx.status = 401;
         ctx.body = {

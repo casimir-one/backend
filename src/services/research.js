@@ -295,7 +295,7 @@ class ResearchService extends BaseReadModelService {
           break;
         }
         default: {
-          console.warn(`Unknown attribute type ${attribute.type}`);
+          console.warn(`WARNING: Unknown attribute type ${attribute.type}`);
           rAttrValue = rAttr.value;
           break;
         }

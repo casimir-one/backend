@@ -1,4 +1,3 @@
-import BaseReadModelService from './base';
 import Attribute from '../schemas/attribute';
 import config from './../config';
 import TenantProfile from './../schemas/tenant';
@@ -81,7 +80,8 @@ class AttributesService{
   async getSystemAttributes() {
     const result = await Attribute.find({isSystem: true});
     if (!result.length) return [];
-    return result;
+    const mapAttributes = await this.mapAttributes(result);
+    return mapAttributes;
   }
 
   async createAttribute(tenantExternalId, {
