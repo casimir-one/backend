@@ -1,4 +1,3 @@
-import BaseReadModelService from './base';
 import deipRpc from '@deip/rpc-client';
 
 

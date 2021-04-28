@@ -1,9 +1,9 @@
 import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import Review from './../schemas/review';
 
 
-class ReviewService extends BaseReadModelService {
+class ReviewService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(Review, options); 

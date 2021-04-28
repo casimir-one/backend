@@ -1,9 +1,8 @@
-import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import JoinRequest from './../schemas/joinRequest';
 
 
-class UserJoinRequestService extends BaseReadModelService {
+class UserJoinRequestService extends BaseService {
 
   constructor(options = { scoped: true }) {
     super(JoinRequest, options); 

@@ -1,9 +1,9 @@
 import ExpressLicense from './../schemas/expressLicense';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import deipRpc from '@deip/rpc-client';
 
 
-class ExpressLicensingService extends BaseReadModelService {
+class ExpressLicensingService extends BaseService {
 
   constructor(options = { scoped: true }) {
     super(ExpressLicense, options);

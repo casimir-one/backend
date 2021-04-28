@@ -24,7 +24,6 @@ function events(options) {
         });
       }
     }
-    chain = chain.then(() => { console.info("Events pipe passed") });
     chain = chain.catch((err) => { console.error("Events pipe failed", err) });
     await chain;
     await next();

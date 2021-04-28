@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS, USER_INVITE_STATUS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import UserInviteService from './../../services/userInvites';
-import ProposalService from './../../services/proposal';
+import ProposalService from './../../services/impl/read/ProposalDtoService';
 
 class UserInviteHandler extends EventEmitter { }
 

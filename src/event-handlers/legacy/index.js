@@ -13,7 +13,7 @@ import researchContentHandler from './researchContentHandler';
 import reviewHandler from './reviewHandler';
 
 import UserService from './../../services/users';
-import ResearchService from './../../services/research';
+import ResearchService from './../../services/impl/read/ProjectDtoService';
 import ResearchGroupService from './../../services/researchGroup';
 
 class AppEventHandler extends EventEmitter { }

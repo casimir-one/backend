@@ -5,9 +5,9 @@ import UserService from './../../services/users';
 import UserNotificationService from './../../services/userNotification';
 import ResearchContentService from './../../services/researchContent';
 import ReviewService from './../../services/review';
-import ResearchService from './../../services/research';
+import ResearchService from './../../services/impl/read/ProjectDtoService';
 import ResearchGroupService from './../../services/researchGroup';
-import ProposalService from './../../services/proposal';
+import ProposalService from './../../services/impl/read/ProposalDtoService';
 import TenantService from './../../services/tenant';
 
 const userService = new UserService({ scoped: false });

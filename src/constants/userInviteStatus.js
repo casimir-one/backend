@@ -5,7 +5,7 @@ const REJECTED = "rejected";
 const EXPIRED = "expired";
 
 const USER_INVITE_STATUS = {
-  PROPOSED,
+  PROPOSED, // deprecated
   SENT,
   APPROVED,
   REJECTED,

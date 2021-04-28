@@ -1,9 +1,8 @@
-import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import ResearchApplication from './../schemas/researchApplication';
 
 
-class ResearchApplicationService extends BaseReadModelService {
+class ResearchApplicationService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(ResearchApplication, options); 

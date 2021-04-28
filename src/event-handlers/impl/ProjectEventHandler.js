@@ -1,5 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import { APP_EVENT } from './../../constants';
+import APP_EVENT from './../../events/base/AppEvent';
+import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 
 
 class ProjectEventHandler extends BaseEventHandler {
@@ -12,15 +13,14 @@ class ProjectEventHandler extends BaseEventHandler {
 
 const projectEventHandler = new ProjectEventHandler();
 
+const projectDtoService = new ProjectDtoService();
 
 projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
-  // TODO: handle projectReadModel
-  console.log(event);
+  // TODO: handle project read schema
 });
 
 projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event, ctx) => {
-  // TODO: handle projectReadModel
-  console.log(event);
+  // TODO: handle project read schema
 });
 
 

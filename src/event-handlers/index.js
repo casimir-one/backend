@@ -1,8 +1,9 @@
-import { APP_EVENT } from './../constants';
+import APP_EVENT from './../events/base/AppEvent';
 import projectEventHandler from './impl/ProjectEventHandler';
 import proposalEventHandler from './impl/ProposalEventHandler';
 import teamEventHandler from './impl/TeamEventHandler';
 import userNotificationEventHandler from './impl/UserNotificationEventHandler';
+import userInviteEventHandler from './impl/UserInviteEventHandler';
 
 
 /* Priority is defined by the order of handlers */
@@ -14,20 +15,30 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
+  [APP_EVENT.PROJECT_MEMBER_JOINED]: [
+    { h: projectEventHandler, await: true },
+    { h: userInviteEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_INVITE_CREATED]: [
+    { h: userInviteEventHandler, await: true },
+    { h: proposalEventHandler, await: false }
+  ],
+
+  [APP_EVENT.TEAM_CREATED]: [
+    { h: teamEventHandler, await: true }
+  ],
+
+  [APP_EVENT.PROJECT_PROPOSAL_CREATED]: [
+    { h: proposalEventHandler, await: false }
+  ],
+
   [APP_EVENT.PROPOSAL_CREATED]: [
     { h: proposalEventHandler, await: true }
   ],
 
   [APP_EVENT.PROPOSAL_SIGNATURES_UPDATED]: [
     { h: proposalEventHandler, await: true }
-  ],
-  
-  [APP_EVENT.PROJECT_MEMBER_JOINED]: [
-    { h: projectEventHandler, await: true }
-  ],
-
-  [APP_EVENT.TEAM_CREATED]: [
-    { h: teamEventHandler, await: true }
   ]
 
 };

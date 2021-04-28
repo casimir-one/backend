@@ -13,7 +13,7 @@ import slug from 'limax';
 import * as blockchainService from './../../utils/blockchain';
 import ResearchGroupService from './../../services/researchGroup';
 import ResearchContentService from './../../services/researchContent'
-import ResearchService from './../../services/research';
+import ResearchService from './../../services/impl/read/ProjectDtoService';
 import { RESEARCH_CONTENT_STATUS } from './../../constants';
 import ResearchContentCreatedEvent from './../../events/legacy/researchContentCreatedEvent';
 import ResearchContentProposedEvent from './../../events/legacy/researchContentProposedEvent';

@@ -3,12 +3,10 @@ import CHAIN_CONSTANTS from './chainConstants';
 import SIGN_UP_POLICY from './signUpPolicy';
 import USER_PROFILE_STATUS from './userProfileStatus';
 import USER_NOTIFICATION_TYPE from './userNotificationType';
-import SMART_CONTRACT_TYPE from './smartContractType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
 import ATTRIBUTE_TYPE from './attributeTypes';
 import LEGACY_APP_EVENTS from './legacyAppEvents';
-import APP_EVENT from './appEvent';
 import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 import NEW_RESEARCH_POLICY from './newResearchPolicy';
@@ -26,7 +24,6 @@ export {
   SIGN_UP_POLICY,
   USER_PROFILE_STATUS,
   USER_NOTIFICATION_TYPE,
-  SMART_CONTRACT_TYPE,
   TOKEN_SALE_STATUS,
   USER_INVITE_STATUS,
   ATTRIBUTE_TYPE,
@@ -42,6 +39,5 @@ export {
   RESEARCH_CONTENT_TYPES,
   CONTENT_TYPES_MAP,
   ASSESSMENT_CRITERIA_TYPE,
-  ATTRIBUTE_SCOPE,
-  APP_EVENT
+  ATTRIBUTE_SCOPE
 }

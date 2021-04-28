@@ -1,4 +1,10 @@
 import EventEmitter from 'events';
+import { APP_PROPOSAL } from '@deip/command-models';
+import {
+  logError,
+  logWarn,
+  logEventInfo
+ } from './../../utils/log';
 
 
 class BaseEventHandler extends EventEmitter {
@@ -23,8 +29,11 @@ class BaseEventHandler extends EventEmitter {
         success();
       }
     })
+      .then(() => {
+        logEventInfo(`Event ${event.getEventName()} is handled by ${this.constructor.name} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''}`);
+      })
       .catch((err) => {
-        console.error(`Event ${event.getEventNum()} failed with an error: `, err);
+        logError(`Event ${event.getEventName()} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''} failed with an error:`, err);
         throw err;
       });
   }
@@ -47,17 +56,17 @@ class BaseEventHandler extends EventEmitter {
   static async Broadcast(events, ctx) {
     const APP_EVENT_HANDLERS = require('./../../event-handlers');
 
-    let chain = new Promise((start, stop) => { start() });
+    let chain = new Promise((start) => { start() });
 
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
       const eventHandlers = APP_EVENT_HANDLERS[event.getEventNum()];
       if (!eventHandlers || !eventHandlers.length) {
-        console.warn(`No event handlers registered for ${event.getEventNum()} event`);
+        logWarn(`WARNING: No event handlers registered for ${event.getEventName()} event`);
         continue;
-      } 
+      }
 
-      for(let j = 0; j < eventHandlers.length; j++) {
+      for (let j = 0; j < eventHandlers.length; j++) {
         const { h: eventHandler, await: shouldAwait } = eventHandlers[j];
         chain = chain.then(() => eventHandler.handle(shouldAwait, event, ctx));
       }

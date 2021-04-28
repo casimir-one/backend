@@ -1,8 +1,8 @@
 import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, RESEARCH_CONTENT_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchService from './../../services/research';
-import ProposalService from './../../services/proposal';
+import ResearchService from './../../services/impl/read/ProjectDtoService';
+import ProposalService from './../../services/impl/read/ProposalDtoService';
 import ResearchGroupService from './../../services/researchGroup';
 import ResearchContentService from './../../services/researchContent';
 

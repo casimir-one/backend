@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ResearchGroupService from './../../services/researchGroup';
-import ProposalService from './../../services/proposal';
+import ProposalService from './../../services/impl/read/ProposalDtoService';
 
 class ResearchGroupHandler extends EventEmitter { }
 

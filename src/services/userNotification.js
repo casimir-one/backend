@@ -1,8 +1,8 @@
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import UserNotification from './../schemas/userNotification';
 
 
-class UserNotificationService extends BaseReadModelService {
+class UserNotificationService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(UserNotification, options); 

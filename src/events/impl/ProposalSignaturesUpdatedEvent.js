@@ -1,5 +1,5 @@
 import BaseEvent from './../base/BaseEvent';
-import { APP_EVENT } from './../../constants';
+import APP_EVENT from './../../events/base/AppEvent';
 
 
 class ProposalSignaturesUpdatedEvent extends BaseEvent {

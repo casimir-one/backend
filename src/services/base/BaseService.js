@@ -1,10 +1,9 @@
-import deipRpc from '@deip/rpc-client';
-import mongoose from 'mongoose';
 import assert from 'assert';
-import config from './../config';
-import TenantProfile from './../schemas/tenant';
+import config from './../../config';
+import TenantProfile from './../../schemas/tenant';
 
-class BaseReadModelService {
+
+class BaseService {
 
   _schema = undefined;
   _tenantProfile = undefined;
@@ -145,4 +144,4 @@ class BaseReadModelService {
 }
 
 
-export default BaseReadModelService;
+export default BaseService;

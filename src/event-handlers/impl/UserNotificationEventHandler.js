@@ -1,8 +1,9 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import { APP_EVENT, USER_NOTIFICATION_TYPE } from './../../constants';
+import { USER_NOTIFICATION_TYPE } from './../../constants';
+import APP_EVENT from './../../events/base/AppEvent';
 import TeamsService from './../../services/researchGroup';
 import UsersService from './../../services/users';
-import ProjectsService from './../../services/research';
+import ProjectsService from './../../services/impl/read/ProjectDtoService';
 import UserNotificationsService from './../../services/userNotification';
 
 

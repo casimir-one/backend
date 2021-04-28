@@ -1,18 +1,19 @@
 import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
-import Research from './../schemas/research';
-import ExpressLicensingService from './expressLicensing'
-import ResearchNdaService from './researchNda'
-import UserService from './users'
-import AttributesService from './attributes'
-
 import mongoose from 'mongoose';
-import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../constants';
+import BaseService from './../../base/BaseService';
+import ProjectDtoSchema from './../../../schemas/research'; // TODO: separate read/write schemas
+import ExpressLicensingService from './../../expressLicensing';
+import ResearchNdaService from './../../researchNda';
+import UserService from './../../users';
+import AttributesService from './../../attributes';
+import { logWarn } from './../../../utils/log';
+import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../../constants';
 
-class ResearchService extends BaseReadModelService {
+
+class ProjectDtoService extends BaseService {
 
   constructor(options = { scoped: true }) { 
-    super(Research, options);
+    super(ProjectDtoSchema, options);
   }
 
   async mapResearch(researches, filterObj) {
@@ -171,25 +172,6 @@ class ResearchService extends BaseReadModelService {
     const result = await this.mapResearch(researches);
     return result;
   }
-
-  
-  async createResearchRef({
-    externalId,
-    researchGroupExternalId,
-    attributes,
-    status
-  }) {
-
-    const mappedAttributes = await this.mapAttributes(attributes);
-    const result = await this.createOne({
-      _id: externalId,
-      researchGroupExternalId,
-      status,
-      attributes: mappedAttributes
-    })
-
-    return result;
-  }
   
 
   async updateResearchRef(externalId, { status, attributes }) {
@@ -219,7 +201,7 @@ class ResearchService extends BaseReadModelService {
       let rAttrValue = null;
 
       if (!attribute) {
-        console.warn(`${rAttrId} is obsolete attribute`);
+        console.warn(`WARNING: ${rAttrId} is an obsolete attribute`);
       }
 
       if (!attribute || rAttr.value == null) {
@@ -295,7 +277,7 @@ class ResearchService extends BaseReadModelService {
           break;
         }
         default: {
-          console.warn(`WARNING: Unknown attribute type ${attribute.type}`);
+          logWarn(`WARNING: Unknown attribute type ${attribute.type}`);
           rAttrValue = rAttr.value;
           break;
         }
@@ -341,4 +323,4 @@ class ResearchService extends BaseReadModelService {
 
 }
 
-export default ResearchService;
+export default ProjectDtoService;

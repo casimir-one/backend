@@ -26,9 +26,6 @@ app.use(require('./middlewares/errors')());
 // base app setup layer
 app.use(require('./middlewares/setup.js')());
 
-// tenant setup layer
-app.use(require('./middlewares/tenant.js')());
-
 // public routes layer
 app.use(serve('files/static'));
 app.use(require('./routes/auth.js').public.routes());

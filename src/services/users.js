@@ -1,12 +1,12 @@
 import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import UserProfile from './../schemas/user';
 import { USER_PROFILE_STATUS } from './../constants';
 import config from './../config';
 import * as blockchainService from './../utils/blockchain';
 
 
-class UserService extends BaseReadModelService {
+class UserService extends BaseService {
 
   constructor(scoped = true) {
     super(UserProfile, scoped);

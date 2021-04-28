@@ -17,7 +17,7 @@ const UserInvite = new Schema({
   "creator": { type: String },
   "researchGroupExternalId": { type: String, required: true, index: true },
   "notes": { type: String, required: false, trim: true },
-  "rewardShare": { type: String, default: null },
+  "rewardShare": { type: String, default: undefined },
   "failReason": { type: String },
   "researches": [ResearchInvite],
   "status": {

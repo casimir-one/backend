@@ -1,11 +1,10 @@
-import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import UserInvite from './../schemas/userInvite';
-import ResearchService from './../services/research';
+import ResearchService from './../services/impl/read/ProjectDtoService';
 import { USER_INVITE_STATUS } from './../constants';
 
 
-class UserInviteService extends BaseReadModelService {
+class UserInviteService extends BaseService {
 
   constructor(options = { scoped: true }) {
     super(UserInvite, options); 

@@ -1,7 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import TenantProfile from './../schemas/tenant';
 import UserService from './../services/users';
-import mongoose from 'mongoose';
 import config from './../config';
 
 

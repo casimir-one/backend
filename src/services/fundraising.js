@@ -1,5 +1,5 @@
 import deipRpc from '@deip/rpc-client';
-import ResearchService from './research';
+import ResearchService from './impl/read/ProjectDtoService';
 import mongoose from 'mongoose';
 
 class FundraisingService {

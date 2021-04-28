@@ -1,20 +1,22 @@
 import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
-import ProposalRef from './../schemas/proposal';
-import { SMART_CONTRACT_TYPE } from './../constants';
-import ResearchService from './../services/research';
-import ResearchGroupService from './../services/researchGroup';
-import UserService from './../services/users';
-import { RESEARCH_STATUS } from './../constants';
+import BaseService from './../../base/BaseService';
+import { APP_PROPOSAL } from '@deip/command-models';
+import ProposalDtoSchema from './../../../schemas/read/ProposalDtoSchema';
+import { RESEARCH_STATUS } from './../../../constants';
+import ResearchService from './../../../services/impl/read/ProjectDtoService';
+import ResearchGroupService from './../../../services/researchGroup';
+import UserService from './../../../services/users';
+
 
 const usersService = new UserService({ scoped: false });
 const researchGroupService = new ResearchGroupService({ scoped: false });
 const researchService = new ResearchService({ scoped: false });
 
-class ProposalService extends BaseReadModelService {
+
+class ProposalDtoService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(ProposalRef, options);
+    super(ProposalDtoSchema, options);
   }
 
   
@@ -95,7 +97,7 @@ class ProposalService extends BaseReadModelService {
         let isHidden = false;
 
         /////////////// temp solution /////////////
-        if (proposalRef.type == SMART_CONTRACT_TYPE.RESEARCH_NDA) {
+        if (proposalRef.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
           isHidden = researchGroups.some(({ tenantId }) => chainAccount.name === tenantId);
           if (!isApproved && !isRejected && chainProposal.status != 1) {
             const group = researchGroups.find(rg => rg.external_id == party);
@@ -182,37 +184,37 @@ class ProposalService extends BaseReadModelService {
       return acc;
     }, {});
 
-    const licenseRequests = await this.extendExpressLicenseRequests(grouped[SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST] || []);
+    const licenseRequests = await this.extendExpressLicenseRequests(grouped[APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL] || []);
     result.push(...licenseRequests);
 
-    const assetExchangesProposals = await this.extendAssetExchangeProposals(grouped[SMART_CONTRACT_TYPE.ASSET_EXCHANGE] || []);
+    const assetExchangesProposals = await this.extendAssetExchangeProposals(grouped[APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL] || []);
     result.push(...assetExchangesProposals);
 
-    const assetTransfersProposals = await this.extendAssetTransferProposals(grouped[SMART_CONTRACT_TYPE.ASSET_TRANSFER] || []);
+    const assetTransfersProposals = await this.extendAssetTransferProposals(grouped[APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL] || []);
     result.push(...assetTransfersProposals);
 
-    const researchProposals = await this.extendResearchProposals(grouped[SMART_CONTRACT_TYPE.CREATE_RESEARCH] || []);
+    const researchProposals = await this.extendResearchProposals(grouped[APP_PROPOSAL.PROJECT_PROPOSAL] || []);
     result.push(...researchProposals);
 
-    const researchUpdateProposals = await this.extendResearchUpdateProposals(grouped[SMART_CONTRACT_TYPE.UPDATE_RESEARCH] || []);
+    const researchUpdateProposals = await this.extendResearchUpdateProposals(grouped[APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL] || []);
     result.push(...researchUpdateProposals);
 
-    const researchGroupUpdateProposals = await this.extendResearchGroupUpdateProposals(grouped[SMART_CONTRACT_TYPE.UPDATE_RESEARCH_GROUP] || []);
+    const researchGroupUpdateProposals = await this.extendResearchGroupUpdateProposals(grouped[APP_PROPOSAL.TEAM_UPDATE_PROPOSAL] || []);
     result.push(...researchGroupUpdateProposals);
 
-    const researchContentProposals = await this.extendResearchContentProposals(grouped[SMART_CONTRACT_TYPE.CREATE_RESEARCH_CONTENT] || []);
+    const researchContentProposals = await this.extendResearchContentProposals(grouped[APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL] || []);
     result.push(...researchContentProposals);
 
-    const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[SMART_CONTRACT_TYPE.CREATE_RESEARCH_TOKEN_SALE] || []);
+    const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL] || []);
     result.push(...researchTokenSaleProposals);
 
-    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[SMART_CONTRACT_TYPE.INVITE_MEMBER] || []);
+    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.PROJECT_INVITE_PROPOSAL] || []);
     result.push(...userInvitationProposals);
 
-    const userResignationProposals = await this.extendUserResignationProposals(grouped[SMART_CONTRACT_TYPE.EXCLUDE_MEMBER] || []);
+    const userResignationProposals = await this.extendUserResignationProposals(grouped[APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL] || []);
     result.push(...userResignationProposals);
 
-    const researchNdaProposals = await this.extendResearchNdaProposals(grouped[SMART_CONTRACT_TYPE.RESEARCH_NDA] || []);
+    const researchNdaProposals = await this.extendResearchNdaProposals(grouped[APP_PROPOSAL.PROJECT_NDA_PROPOSAL] || []);
     result.push(...researchNdaProposals);
 
     return result;
@@ -458,8 +460,8 @@ class ProposalService extends BaseReadModelService {
       if (!acc.some(a => a == proposal.details.invitee)) {
         acc.push(proposal.details.invitee);
       }
-      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
-        acc.push(proposal.details.researchGroupExternalId);
+      if (!acc.some(a => a == proposal.details.teamId)) {
+        acc.push(proposal.details.teamId);
       }
       return acc;
     }, []);
@@ -473,7 +475,7 @@ class ProposalService extends BaseReadModelService {
     const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
       const invitee = users.find(a => a.account.name == proposal.details.invitee);
       const extendedDetails = { researchGroup, invitee };
       return { ...proposal, extendedDetails };
@@ -526,14 +528,14 @@ class ProposalService extends BaseReadModelService {
     })
   }
 
-  async createProposalRef(externalId, {
+  async createProposalDto(proposalId, {
     type,
     details,
     multiTenantIds = []
   }) {
 
     const result = await this.createOne({
-      _id: externalId,
+      _id: proposalId,
       type: type,
       details: details,
       multiTenantIds: multiTenantIds
@@ -576,4 +578,4 @@ class ProposalService extends BaseReadModelService {
 
 }
 
-export default ProposalService;
+export default ProposalDtoService;

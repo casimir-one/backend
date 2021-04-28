@@ -1,12 +1,12 @@
 import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import ResearchContent from './../schemas/researchContent';
 import { RESEARCH_CONTENT_STATUS, CONTENT_TYPES_MAP } from './../constants';
-import ResearchService from './research';
+import ResearchService from './impl/read/ProjectDtoService';
 import ResearchGroupService from './researchGroup';
 import UsersService from './users';
 
-class ResearchContentService extends BaseReadModelService {
+class ResearchContentService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(ResearchContent, options);

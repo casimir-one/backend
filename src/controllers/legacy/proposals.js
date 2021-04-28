@@ -1,6 +1,6 @@
 import * as blockchainService from './../../utils/blockchain';
-import { SMART_CONTRACT_TYPE } from './../../constants';
-import ProposalService from './../../services/proposal';
+import { APP_PROPOSAL } from '@deip/command-models';
+import ProposalService from './../../services/impl/read/ProposalDtoService';
 
 import ResearchProposalSignedEvent from './../../events/legacy/researchProposalSignedEvent';
 import ResearchUpdateProposalSignedEvent from './../../events/legacy/researchUpdateProposalSignedEvent';
@@ -64,57 +64,57 @@ const updateProposal = async (ctx, next) => {
     const updatedProposal = await proposalsService.getProposal(proposalId);
 
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH) {
+    if (updatedProposal.type == APP_PROPOSAL.PROJECT_PROPOSAL) {
       const researchProposalSignedEvent = new ResearchProposalSignedEvent(datums);
       ctx.state.events.push(researchProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.UPDATE_RESEARCH) {
+    if (updatedProposal.type == APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL) {
       const researchUpdateProposalSignedEvent = new ResearchUpdateProposalSignedEvent(datums);
       ctx.state.events.push(researchUpdateProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH_CONTENT) { // wip
+    if (updatedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
       const researchContentProposalSignedEvent = new ResearchContentProposalSignedEvent(datums);
       ctx.state.events.push(researchContentProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH_TOKEN_SALE) {
+    if (updatedProposal.type == APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL) {
       const researchTokenSaleProposalSignedEvent = new ResearchTokenSaleProposalSignedEvent(datums);
       ctx.state.events.push(researchTokenSaleProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.UPDATE_RESEARCH_GROUP) {
+    if (updatedProposal.type == APP_PROPOSAL.TEAM_UPDATE_PROPOSAL) {
       const researchGroupUpdateProposalSignedEvent = new ResearchGroupUpdateProposalSignedEvent(datums);
       ctx.state.events.push(researchGroupUpdateProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.ASSET_TRANSFER) {
+    if (updatedProposal.type == APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL) {
       const assetTransferProposalSignedEvent = new AssetTransferProposalSignedEvent(datums);
       ctx.state.events.push(assetTransferProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.ASSET_EXCHANGE) {
+    if (updatedProposal.type == APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL) {
       const assetExchangeProposalSignedEvent = new AssetExchangeProposalSignedEvent(datums);
       ctx.state.events.push(assetExchangeProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST) {
+    if (updatedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {
       const researchExpressLicenseProposalSignedEvent = new ResearchExpressLicenseProposalSignedEvent(datums);
       ctx.state.events.push(researchExpressLicenseProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.INVITE_MEMBER) {
+    if (updatedProposal.type == APP_PROPOSAL.PROJECT_INVITE_PROPOSAL) {
       const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent(datums);
       ctx.state.events.push(userInvitationProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.EXCLUDE_MEMBER) {
+    if (updatedProposal.type == APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL) {
       const userResignationProposalSignedEvent = new UserResignationProposalSignedEvent(datums);
       ctx.state.events.push(userResignationProposalSignedEvent);
     }
 
-    if (updatedProposal.type == SMART_CONTRACT_TYPE.RESEARCH_NDA) {
+    if (updatedProposal.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
       const researchNdaProposalSignedEvent = new ResearchNdaProposalSignedEvent(datums);
       ctx.state.events.push(researchNdaProposalSignedEvent);
     }
@@ -148,57 +148,57 @@ const deleteProposal = async (ctx, next) => {
 
     const deletedProposal = await proposalsService.getProposal(proposalId);
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH) {
+    if (deletedProposal.type == APP_PROPOSAL.PROJECT_PROPOSAL) {
       const researchProposalRejectedEvent = new ResearchProposalRejectedEvent(datums);
       ctx.state.events.push(researchProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.UPDATE_RESEARCH) {
+    if (deletedProposal.type == APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL) {
       const researchUpdateProposalRejectedEvent = new ResearchUpdateProposalRejectedEvent(datums);
       ctx.state.events.push(researchUpdateProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH_CONTENT) { // wip
+    if (deletedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
       const researchContentProposalRejectedEvent = new ResearchContentProposalRejectedEvent(datums);
       ctx.state.events.push(researchContentProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.CREATE_RESEARCH_TOKEN_SALE) {
+    if (deletedProposal.type == APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL) {
       const researchTokenSaleProposalRejectedEvent = new ResearchTokenSaleProposalRejectedEvent(datums);
       ctx.state.events.push(researchTokenSaleProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.UPDATE_RESEARCH_GROUP) {
+    if (deletedProposal.type == APP_PROPOSAL.TEAM_UPDATE_PROPOSAL) {
       const researchGroupUpdateProposalRejectedEvent = new ResearchGroupUpdateProposalRejectedEvent(datums);
       ctx.state.events.push(researchGroupUpdateProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.ASSET_TRANSFER) {
+    if (deletedProposal.type == APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL) {
       const assetTransferProposalRejectedEvent = new AssetTransferProposalRejectedEvent(datums);
       ctx.state.events.push(assetTransferProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.ASSET_EXCHANGE) {
+    if (deletedProposal.type == APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL) {
       const assetExchangeProposalRejectedEvent = new AssetExchangeProposalRejectedEvent(datums);
       ctx.state.events.push(assetExchangeProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.EXPRESS_LICENSE_REQUEST) {
+    if (deletedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {
       const researchExpressLicenseProposalRejectedEvent = new ResearchExpressLicenseProposalRejectedEvent(datums);
       ctx.state.events.push(researchExpressLicenseProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.INVITE_MEMBER) {
+    if (deletedProposal.type == APP_PROPOSAL.PROJECT_INVITE_PROPOSAL) {
       const userInvitationProposalRejectedEvent = new UserInvitationProposalRejectedEvent(datums);
       ctx.state.events.push(userInvitationProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.EXCLUDE_MEMBER) {
+    if (deletedProposal.type == APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL) {
       const userResignationProposalRejectedEvent = new UserResignationProposalRejectedEvent(datums);
       ctx.state.events.push(userResignationProposalRejectedEvent);
     }
 
-    if (deletedProposal.type == SMART_CONTRACT_TYPE.RESEARCH_NDA) {
+    if (deletedProposal.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
       const researchNdaProposalRejectedEvent = new ResearchNdaProposalRejectedEvent(datums);
       ctx.state.events.push(researchNdaProposalRejectedEvent);
     }

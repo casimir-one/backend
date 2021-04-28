@@ -1,5 +1,5 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import { APP_EVENT } from './../../constants';
+import APP_EVENT from './../../events/base/AppEvent';
 
 
 class TeamEventHandler extends BaseEventHandler {
@@ -14,8 +14,7 @@ const teamEventHandler = new TeamEventHandler();
 
 
 teamEventHandler.register(APP_EVENT.TEAM_CREATED, async (event, ctx) => {
-  // TODO: handle teamReadModel
-  console.log(event);
+  // TODO: handle team read schema
 });
 
 

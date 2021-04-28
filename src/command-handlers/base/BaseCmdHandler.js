@@ -2,6 +2,12 @@ import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import * as protocolService from './../../utils/blockchain';
 import config from './../../config';
+import { APP_PROPOSAL } from '@deip/command-models';
+import {
+  logError,
+  logWarn,
+  logCmdInfo
+} from './../../utils/log';
 
 
 class BaseCmdHandler extends EventEmitter {
@@ -33,8 +39,11 @@ class BaseCmdHandler extends EventEmitter {
     return new Promise((success, failure) => {
       this.emit(cmd.getCmdNum(), cmd, ctx, { success, failure });
     })
+      .then(() => {
+        logCmdInfo(`Command ${cmd.getCmdName()} is handled by ${this.constructor.name} ${ctx.state.proposalsStackFrame ? 'within ' + APP_PROPOSAL[ctx.state.proposalsStackFrame.type] + ' flow (' + ctx.state.proposalsStackFrame.proposalId +')' : ''}`);
+      })
       .catch((err) => {
-        console.error(`Command ${cmd.getCmdNum()} failed with an error: `, err);
+        logError(`Command ${cmd.getCmdName()} ${ctx.state.proposalsStackFrame ? 'within ' + APP_PROPOSAL[ctx.state.proposalsStackFrame.type] + ' flow (' + ctx.state.proposalsStackFrame.proposalId + ')' : ''} failed with an error:`, err);
         throw err;
       });
   }
@@ -64,9 +73,9 @@ class BaseCmdHandler extends EventEmitter {
       const cmd = cmds[i];
       const cmdHandler = CMD_HANDLERS[cmd.getCmdNum()];
       if (!cmdHandler) {
-        console.warn(`No command handler registered for ${cmd.getCmdNum()} command`);
+        logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command`);
         continue;
-      } 
+      }
       chain = chain.then(() => cmdHandler.handle(cmd, ctx));
     }
 

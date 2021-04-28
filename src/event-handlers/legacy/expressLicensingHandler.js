@@ -2,7 +2,7 @@ import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ExpressLicensingService from './../../services/expressLicensing';
-import ProposalService from './../../services/proposal';
+import ProposalService from './../../services/impl/read/ProposalDtoService';
 
 class ExpressLicensingHandler extends EventEmitter { }
 

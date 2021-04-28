@@ -1,4 +1,4 @@
-import ResearchService from './../../../services/research';
+import ResearchService from './../../../services/impl/read/ProjectDtoService';
 import TenantService from './../../../services/tenant';
 
 

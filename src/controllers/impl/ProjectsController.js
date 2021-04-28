@@ -13,7 +13,7 @@ class ProjectsController extends BaseController {
         
         ctx.status = 200;
         ctx.body = { model: "ok" };
-
+        
       } catch (err) {
         ctx.status = 500;
         ctx.body = err.message;

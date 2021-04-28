@@ -1,7 +1,7 @@
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import AwardWithdrawalRequest from './../schemas/awardWithdrawalRequest';
 
-class GrantService extends BaseReadModelService {
+class GrantService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(AwardWithdrawalRequest, options);

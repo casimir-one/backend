@@ -1,8 +1,8 @@
 import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import InvestmentPortfolio from './../schemas/investmentPortfolio';
 
-class InvestmentPortfolioService extends BaseReadModelService {
+class InvestmentPortfolioService extends BaseService {
 
   constructor(options = { scoped: true }) {
     super(InvestmentPortfolio, options);

@@ -1,9 +1,8 @@
-import deipRpc from '@deip/rpc-client';
-import BaseReadModelService from './base';
+import BaseService from './base/BaseService';
 import UserBookmark from './../schemas/userBookmark';
 
 
-class UserBookmarkService extends BaseReadModelService {
+class UserBookmarkService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(UserBookmark, options); 

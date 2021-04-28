@@ -1,10 +1,10 @@
 import deipRpc from '@deip/rpc-client';
-import ResearchService from './research';
-import BaseReadModelService from './base';
+import ResearchService from './impl/read/ProjectDtoService';
+import BaseService from './base/BaseService';
 import { CHAIN_CONSTANTS, DISCIPLINES } from './../constants';
 import Discipline from './../schemas/discipline';
 
-class DisciplinesService extends BaseReadModelService {
+class DisciplinesService extends BaseService {
 
   constructor(options = { scoped: true }) {
     super(Discipline, options);

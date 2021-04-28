@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import TeamsService from './../../services/researchGroup';
+import TeamDomainService from './../../services/researchGroup'; // TODO: separate read/write schema
 import { TeamCreatedEvent } from './../../events';
 
 
@@ -14,7 +14,7 @@ class AccountCmdHandler extends BaseCmdHandler {
 
 const accountCmdHandler = new AccountCmdHandler();
 
-const teamsService = new TeamsService();
+const teamDomainService = new TeamDomainService();
 
 
 accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, async (cmd, ctx) => {
@@ -29,7 +29,7 @@ accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, async (cmd, ctx) => {
 
   
   if (isTeamAccount) {
-    const teamWriteModel = await teamsService.createResearchGroupRef({
+    const team = await teamDomainService.createResearchGroupRef({
       externalId: accountId,
       creator: creator,
       name: description, // TODO: extract from attributes
@@ -38,9 +38,10 @@ accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, async (cmd, ctx) => {
     });
     
     ctx.state.appEvents.push(new TeamCreatedEvent({
-      accountId: teamWriteModel._id,
+      accountId: team._id,
+      attributes: team.attributes,
       isTeamAccount: isTeamAccount,
-      attributes: teamWriteModel.attributes
+      proposalCtx: ctx.state.proposalsStackFrame
     }));
   }
 

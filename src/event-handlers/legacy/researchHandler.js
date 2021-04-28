@@ -2,8 +2,8 @@ import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchService from './../../services/research';
-import ProposalService from './../../services/proposal';
+import ResearchService from './../../services/impl/read/ProjectDtoService';
+import ProposalService from './../../services/impl/read/ProposalDtoService';
 import ResearchGroupService from './../../services/researchGroup';
 import UserService from './../../services/users';
 import UserInviteService from './../../services/userInvites';
@@ -13,79 +13,6 @@ import AttributesService from './../../services/attributes'
 class ResearchHandler extends EventEmitter { }
 
 const researchHandler = new ResearchHandler();
-
-researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchCreatedEvent, tenant } = source;
-
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
-  const attributesService = new AttributesService();
-
-  const { researchExternalId, researchGroupExternalId, source: { offchain: { attributes } } } = researchCreatedEvent.getSourceData();
-
-  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
-
-  const researchRef = await researchService.createResearchRef({
-    externalId: researchExternalId,
-    researchGroupExternalId: researchGroupExternalId,
-    attributes: attributes,
-    status: RESEARCH_STATUS.APPROVED
-  });
-  
-  let hasUpdate = false;
-  const researchGroupAttribute = researchAttributes.find(attr => attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
-  if (researchGroupAttribute && researchGroupAttribute.isHidden) {
-    const rAttr = attributes.find(rAttr => rAttr.attributeId.toString() == researchGroupAttribute._id.toString());
-    if (!rAttr.value) {
-      rAttr.value = [researchGroupExternalId];
-      hasUpdate = true;
-    }
-  }
-
-  if (hasUpdate) {
-    await researchService.updateResearchRef(researchExternalId, { attributes: attributes });
-  }
-
-  const research = await researchService.getResearch(researchExternalId)
-  return research;
-  
-}));
-
-
-researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchProposedEvent, tenant } = source;
-
-  const researchGroupService = new ResearchGroupService();
-  const researchService = new ResearchService();
-  const attributesService = new AttributesService();
-
-  const { researchExternalId, researchGroupExternalId, source: { offchain: { attributes } } } = researchProposedEvent.getSourceData();
-
-  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
-
-  const researchRef = await researchService.createResearchRef({
-    externalId: researchExternalId,
-    researchGroupExternalId: researchGroupExternalId,
-    attributes: attributes,
-    status: RESEARCH_STATUS.PROPOSED
-  });
-
-  let hasUpdate = false;
-  const researchGroupAttribute = researchAttributes.find(attr => attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP && attr.blockchainFieldMeta && attr.blockchainFieldMeta.field == 'research_group');
-  if (researchGroupAttribute && researchGroupAttribute.isHidden) {
-    const rAttr = attributes.find(rAttr => rAttr.attributeId.toString() == researchGroupAttribute._id.toString());
-    if (!rAttr.value) {
-      rAttr.value = [researchGroupExternalId];
-      hasUpdate = true;
-    }
-  }
-
-  if (hasUpdate) {
-    await researchService.updateResearchRef(researchExternalId, { attributes: attributes });
-  }
-
-  return researchRef;
-}));
 
 
 researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
@@ -107,30 +34,6 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) 
   const researchService = new ResearchService();
   const { researchExternalId } = researchUpdateProposedEvent.getSourceData();
   const updatedResearch = await researchService.getResearch(researchExternalId)
-  return updatedResearch;
-}));
-
-
-researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchProposalSignedEvent } = source;
-
-  const researchService = new ResearchService();
-  const proposalsService = new ProposalService();
-
-  const proposalId = researchProposalSignedEvent.getProposalId();
-
-  const proposal = await proposalsService.getProposal(proposalId);
-  const { status } = proposal.proposal;
-  const { researchExternalId, source: { offchain: { attributes } } } = proposal.details;
-
-  if (status == PROPOSAL_STATUS.APPROVED) {
-    await researchService.updateResearchRef(researchExternalId, {
-      status: RESEARCH_STATUS.APPROVED,
-      attributes: attributes
-    });
-  }
-
-  const updatedResearch = await researchService.getResearch(researchExternalId);
   return updatedResearch;
 }));
 

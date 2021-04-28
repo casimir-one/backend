@@ -12,7 +12,7 @@ module.exports = async function writeArchive(archiveDir, rawArchive, opts = {}) 
   let newVersion = "0"
   
   if (opts.versioning) {
-    console.warn('Git based versioning is not yet implemented.')
+    console.warn('WARNING: Git based versioning is not yet implemented.')
   }
 
   return Promise.all(resourceNames.map(f => {
