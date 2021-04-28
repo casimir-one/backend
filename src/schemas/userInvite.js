@@ -10,7 +10,8 @@ const ResearchInvite = new Schema({
   "attributes": [{ type: mongoose.Types.ObjectId, required: true }],
 });
 
-const UserInvite = new Schema({
+
+const UserInviteDtoSchema = new Schema({
   "_id": { type: String },
   "tenantId": { type: String, required: true },
   "invitee": { type: String, required: true, index: true },
@@ -28,6 +29,6 @@ const UserInvite = new Schema({
   "expiration": { type: Date, required: true, index: true },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
-const model = mongoose.model('user-invites', UserInvite);
+const model = mongoose.model('rm-user-invites', UserInviteDtoSchema);
 
 module.exports = model;

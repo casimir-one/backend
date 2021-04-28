@@ -1,6 +1,6 @@
 import * as blockchainService from './../../utils/blockchain';
 import { APP_PROPOSAL } from '@deip/command-models';
-import ProposalService from './../../services/impl/read/ProposalDtoService';
+import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 
 import ResearchProposalSignedEvent from './../../events/legacy/researchProposalSignedEvent';
 import ResearchUpdateProposalSignedEvent from './../../events/legacy/researchUpdateProposalSignedEvent';
@@ -54,14 +54,14 @@ const updateProposal = async (ctx, next) => {
 
   try {
 
-    const proposalsService = new ProposalService();
+    const proposalDtoService = new ProposalDtoService();
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: proposalId } = payload;
   
     await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
-    const updatedProposal = await proposalsService.getProposal(proposalId);
+    const updatedProposal = await proposalDtoService.getProposal(proposalId);
 
 
     if (updatedProposal.type == APP_PROPOSAL.PROJECT_PROPOSAL) {
@@ -138,7 +138,7 @@ const deleteProposal = async (ctx, next) => {
 
   try {
 
-    const proposalsService = new ProposalService();
+    const proposalDtoService = new ProposalDtoService();
     const operation = tx['operations'][0];
     const payload = operation[1];
     const { external_id: proposalId } = payload;
@@ -146,7 +146,7 @@ const deleteProposal = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
-    const deletedProposal = await proposalsService.getProposal(proposalId);
+    const deletedProposal = await proposalDtoService.getProposal(proposalId);
 
     if (deletedProposal.type == APP_PROPOSAL.PROJECT_PROPOSAL) {
       const researchProposalRejectedEvent = new ResearchProposalRejectedEvent(datums);
@@ -221,8 +221,8 @@ const getAccountProposals = async (ctx) => {
   const username = ctx.params.username;
 
   try {
-    const proposalsService = new ProposalService();
-    let result = await proposalsService.getAccountProposals(username);
+    const proposalDtoService = new ProposalDtoService();
+    let result = await proposalDtoService.getAccountProposals(username);
     result.sort(function (a, b) {
       return new Date(b.proposal.created_at) - new Date(a.proposal.created_at);
     });
@@ -239,8 +239,8 @@ const getProposalById = async (ctx) => {
   const externalId = ctx.params.proposalExternalId;
 
   try {
-    const proposalsService = new ProposalService();
-    const result = await proposalsService.getProposal(externalId);
+    const proposalDtoService = new ProposalDtoService();
+    const result = await proposalDtoService.getProposal(externalId);
     ctx.body = result;
   } catch (err) {
     console.log(err);

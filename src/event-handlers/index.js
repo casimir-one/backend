@@ -22,7 +22,8 @@ module.exports = {
 
   [APP_EVENT.PROJECT_INVITE_CREATED]: [
     { h: userInviteEventHandler, await: true },
-    { h: proposalEventHandler, await: false }
+    { h: proposalEventHandler, await: false },
+    { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.TEAM_CREATED]: [
@@ -30,7 +31,8 @@ module.exports = {
   ],
 
   [APP_EVENT.PROJECT_PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: false }
+    { h: proposalEventHandler, await: false },
+    { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.PROPOSAL_CREATED]: [
