@@ -29,7 +29,7 @@ const ReviewRequest = require('./../schemas/reviewRequest');
 const UserProfile = require('./../schemas/user');
 const UserBookmark = require('./../schemas/userBookmark');
 const UserInviteDtoSchema = require('./../schemas/read/UserInviteDtoSchema');
-const UserNotification = require('./../schemas/userNotification');
+const UserNotification = require('./../schemas/read/UserNotificationDtoSchema');
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });

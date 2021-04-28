@@ -59,10 +59,13 @@ proposalEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event, 
   // TODO: create multisig transaction read schema
 });
 
-proposalEventHandler.register(APP_EVENT.PROPOSAL_SIGNATURES_UPDATED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROPOSAL_UPDATED, async (event, ctx) => {
   // TODO: handle proposal read schema
 });
 
+proposalEventHandler.register(APP_EVENT.PROPOSAL_DECLINED, async (event, ctx) => {
+  // TODO: handle proposal read schema
+});
 
 
 module.exports = proposalEventHandler;

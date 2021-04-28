@@ -116,8 +116,11 @@ protected_route.put('/notifications/:username/mark-all-read', notifications.mark
 protected_route.get('/proposals/:proposalExternalId', proposals.getProposalById)
 protected_route.post('/proposals', proposals.createProposal)
 protected_route.put('/proposals', proposals.updateProposal)
-protected_route.put('/v2/proposals', proposalsCtrl.updateProposal)
 protected_route.put('/proposals/delete', proposals.deleteProposal)
+
+protected_route.put('/v2/proposals/update', proposalsCtrl.updateProposal)
+protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
+
 protected_route.get('/proposals/:username/:status', proposals.getAccountProposals)
 
 protected_route.post('/groups', researchGroups.createResearchGroup)

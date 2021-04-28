@@ -1,10 +1,10 @@
 
 import mongoose from 'mongoose';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import USER_NOTIFICATION_TYPE from './../../constants/userNotificationType';
 
 const Schema = mongoose.Schema;
 
-const UserNotification = new Schema({
+const UserNotificationDtoSchema = new Schema({
   "tenantId": { type: String, required: true },
   "username": { type: String, required: true, index: true },
   "status": {
@@ -25,6 +25,6 @@ const UserNotification = new Schema({
   }
 });
 
-const model = mongoose.model('user-notifications', UserNotification);
+const model = mongoose.model('rm-user-notifications', UserNotificationDtoSchema);
 
 module.exports = model;

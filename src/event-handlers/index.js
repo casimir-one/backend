@@ -14,7 +14,11 @@ module.exports = {
     { h: proposalEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROPOSAL_SIGNATURES_UPDATED]: [
+  [APP_EVENT.PROPOSAL_UPDATED]: [
+    { h: proposalEventHandler, await: true }
+  ],
+
+  [APP_EVENT.PROPOSAL_DECLINED]: [
     { h: proposalEventHandler, await: true }
   ],
 
@@ -24,6 +28,7 @@ module.exports = {
 
   [APP_EVENT.PROJECT_CREATED]: [
     { h: projectEventHandler, await: true },
+    { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.PROJECT_MEMBER_JOINED]: [
@@ -48,6 +53,9 @@ module.exports = {
   [APP_EVENT.PROJECT_INVITE_ACCEPTED]: [
     { h: userInviteEventHandler, await: false },
     { h: userNotificationEventHandler, await: false }
-  ]
+  ],
 
+  [APP_EVENT.PROJECT_INVITE_DECLINED]: [
+    { h: userNotificationEventHandler, await: false }
+  ]
 };

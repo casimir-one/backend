@@ -1,11 +1,11 @@
 import BaseService from './base/BaseService';
-import UserNotification from './../schemas/userNotification';
+import UserNotificationDtoSchema from './../schemas/read/UserNotificationDtoSchema';
 
 
 class UserNotificationService extends BaseService {
 
   constructor(options = { scoped: true }) { 
-    super(UserNotification, options); 
+    super(UserNotificationDtoSchema, options);
   }
 
   async getUserNotification(id) {

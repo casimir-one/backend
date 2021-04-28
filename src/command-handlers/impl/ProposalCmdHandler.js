@@ -4,7 +4,7 @@ import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import ProposalDomainService from './../../services/impl/write/ProposalDomainService';
-import { ProposalCreatedEvent, ProposalSignaturesUpdatedEvent } from './../../events';
+import { ProposalCreatedEvent, ProposalUpdatedEvent, ProposalDeclinedEvent } from './../../events';
 
 
 class ProposalCmdHandler extends BaseCmdHandler {
@@ -60,7 +60,7 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
   const proposedCmds = proposalCmd.getProposedCmds();
   const type = proposalCmd.getProposalType();
 
-  ctx.state.appEvents.push(new ProposalSignaturesUpdatedEvent({
+  ctx.state.appEvents.push(new ProposalUpdatedEvent({
     proposalId: proposalId,
     proposalCtx: ctx.state.proposalsStackFrame
   }));
@@ -82,6 +82,41 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
       logWarn(`WARNING: No proposal hook event found for ${APP_PROPOSAL[type]} workflow at 'ACCEPTED' stage`);
     }
     
+    ctx.state.proposalsStack.pop();
+    ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1] || null;
+  }
+
+});
+
+
+proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, async (cmd, ctx) => {
+  const { entityId: proposalId } = cmd.getCmdPayload();
+
+  const proposal = await proposalDomainService.updateProposal(proposalId, {});
+  const proposalCmd = CreateProposalCmd.Deserialize(proposal.cmd);
+  const proposedCmds = proposalCmd.getProposedCmds();
+  const type = proposalCmd.getProposalType();
+
+  ctx.state.appEvents.push(new ProposalDeclinedEvent({
+    proposalId: proposalId,
+    proposalCtx: ctx.state.proposalsStackFrame
+  }));
+
+  if (proposal.status == PROPOSAL_STATUS.REJECTED) {
+
+    ctx.state.proposalsStack.push({ proposalId, type, proposedCmds });
+    ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1];
+
+    const ProposalDeclinedHookEvent = APP_PROPOSAL_EVENT[type]['DECLINED'];
+    if (ProposalDeclinedHookEvent) {
+      ctx.state.appEvents.push(new ProposalDeclinedHookEvent({
+        proposalCmd: proposalCmd,
+        proposalCtx: ctx.state.proposalsStackFrame
+      }));
+    } else {
+      logWarn(`WARNING: No proposal hook event found for ${APP_PROPOSAL[type]} workflow at 'DECLINED' stage`);
+    }
+
     ctx.state.proposalsStack.pop();
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1] || null;
   }

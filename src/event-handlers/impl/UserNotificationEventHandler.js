@@ -24,6 +24,45 @@ const projectDtoService = new ProjectDtoService();
 const userNotificationsDtoService = new UserNotificationsDtoService();
 
 
+userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
+  const {
+    projectId,
+    teamId,
+    attributes
+  } = event.getEventPayload();
+
+  const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
+  const team = await teamDtoService.getResearchGroup(teamId);
+  const notifiableUsers = await userDtoService.getUsers(ctx.state.tenant.admins);
+  const currentUser = await userDtoService.getUser(ctx.state.user.username);
+
+  // TODO: replace with a call to project read schema
+  const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
+    ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+    : "Not Specified";
+    
+  const notifications = [];
+  for (let i = 0; i < notifiableUsers.length; i++) {
+    let user = notifiableUsers[i];
+    notifications.push({
+      username: user.username,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        isProposalAutoAccepted: true, // legacy
+        proposal: { action: 14, data: { title }, is_completed: true }, // legacy
+        researchGroup: team,
+        research: project,
+        emitter: currentUser
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+
+});
+
+
 userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event, ctx) => {
   const { teamId, attributes } = event.getEventPayload();
 
@@ -60,7 +99,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async (event, ctx) => {
   const { projectId, teamId } = event.getEventPayload();
 
-  const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to projectReadModel
+  const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
   const team = await teamDtoService.getResearchGroup(teamId);
   const notifiableUsers = await userDtoService.getUsers(ctx.state.tenant.admins);
   const currentUser = await userDtoService.getUser(ctx.state.user.username);
@@ -160,6 +199,36 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (
   await userNotificationsDtoService.createUserNotifications(notifications);
 
 });
+
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (event, ctx) => {
+  const {
+    invitee,
+    teamId
+  } = event.getEventPayload();
+
+  const team = await teamDtoService.getResearchGroup(teamId);
+  const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
+  const inviteeUser = await userDtoService.getUser(invitee);
+
+  const notifications = [];
+  for (let i = 0; i < notifiableUsers.length; i++) {
+    let user = notifiableUsers[i];
+    notifications.push({
+      username: user.username,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.INVITATION_REJECTED,
+      metadata: {
+        researchGroup: team,
+        invitee: inviteeUser
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+
+});
+
 
 
 module.exports = userNotificationEventHandler;
