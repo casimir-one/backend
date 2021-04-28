@@ -27,7 +27,7 @@ class BaseCmdHandler extends EventEmitter {
   async process(msg, ctx) {
     const { tx, appCmds } = msg;
     if (tx) {
-      const signedTx = deipRpc.auth.signTransaction(tx.finalize(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY });
+      const signedTx = deipRpc.auth.signTransaction(tx.finalize(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
       const txInfo = await protocolService.sendTransactionAsync(signedTx);
     }
 

@@ -33,7 +33,7 @@ userInviteEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event, 
 
 });
 
-userInviteEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event, ctx) => {
+userInviteEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (event, ctx) => {
   const { proposalCtx: { proposalId } } = event.getEventPayload();
 
   await userInviteDtoService.updateUserInvite(proposalId, {

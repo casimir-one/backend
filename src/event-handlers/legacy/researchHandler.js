@@ -61,52 +61,6 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, 
 }));
 
 
-researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
-  const { event: userInvitationProposalSignedEvent } = event;
-
-  const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
-  const userInviteService = new UserInviteService();
-
-  const proposalId = userInvitationProposalSignedEvent.getProposalId();
-  const invite = await userInviteService.findUserInvite(proposalId);
-
-  if (invite.status == USER_INVITE_STATUS.SENT) {
-
-    const researches = [];
-    if (invite.researches != null) {
-      const result = await researchService.getResearches(invite.researches.map(r => r.externalId));
-      researches.push(...result);
-    }
-
-    const promises = [];
-    for (let i = 0; i < researches.length; i++) {
-      const research = researches[i];
-      const researchInvite = invite.researches.find(r => r.externalId == research.external_id);
-
-      let hasUpdate = false;
-
-      if (researchInvite) {
-        for (let j = 0; j < researchInvite.attributes.length; j++) {
-          const attributeId = researchInvite.attributes[j];
-          const rAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == attributeId.toString());
-          if (!rAttr.value.some(m => m == invite.invitee)) {
-            rAttr.value.push(invite.invitee);
-            hasUpdate = true;
-          }
-        }
-      }
-
-      if (hasUpdate) {
-        promises.push(researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes }));
-      }
-    }
-
-    await Promise.all(promises);
-  }
-
-}));
-
 
 researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: userInvitationProposalRejectedEvent } = event;

@@ -22,7 +22,7 @@ import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
 import attributes from './../controllers/legacy/attributes';
 
-import { projectsCtrl } from '../controllers'
+import { projectsCtrl, proposalsCtrl } from '../controllers';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
@@ -116,6 +116,7 @@ protected_route.put('/notifications/:username/mark-all-read', notifications.mark
 protected_route.get('/proposals/:proposalExternalId', proposals.getProposalById)
 protected_route.post('/proposals', proposals.createProposal)
 protected_route.put('/proposals', proposals.updateProposal)
+protected_route.put('/v2/proposals', proposalsCtrl.updateProposal)
 protected_route.put('/proposals/delete', proposals.deleteProposal)
 protected_route.get('/proposals/:username/:status', proposals.getAccountProposals)
 
@@ -154,7 +155,7 @@ protected_route.get('/research/group/listing/:researchGroupExternalId', research
 public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
 
 protected_route.post('/research', research.createResearch)
-protected_route.post('/project', projectsCtrl.createProject)
+protected_route.post('/v2/project', projectsCtrl.createProject)
 protected_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
 public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
 protected_route.post('/fundraising', fundraising.createResearchTokenSale)

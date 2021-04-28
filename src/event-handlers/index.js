@@ -10,24 +10,24 @@ import userInviteEventHandler from './impl/UserInviteEventHandler';
 
 module.exports = {
 
-  [APP_EVENT.PROJECT_CREATED]: [
-    { h: projectEventHandler, await: true },
-    { h: userNotificationEventHandler, await: false }
+  [APP_EVENT.PROPOSAL_CREATED]: [
+    { h: proposalEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_MEMBER_JOINED]: [
-    { h: projectEventHandler, await: true },
-    { h: userInviteEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_INVITE_CREATED]: [
-    { h: userInviteEventHandler, await: true },
-    { h: proposalEventHandler, await: false },
-    { h: userNotificationEventHandler, await: false }
+  [APP_EVENT.PROPOSAL_SIGNATURES_UPDATED]: [
+    { h: proposalEventHandler, await: true }
   ],
 
   [APP_EVENT.TEAM_CREATED]: [
     { h: teamEventHandler, await: true }
+  ],
+
+  [APP_EVENT.PROJECT_CREATED]: [
+    { h: projectEventHandler, await: true },
+  ],
+
+  [APP_EVENT.PROJECT_MEMBER_JOINED]: [
+    { h: projectEventHandler, await: true }
   ],
 
   [APP_EVENT.PROJECT_PROPOSAL_CREATED]: [
@@ -35,12 +35,19 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: true }
+  [APP_EVENT.PROJECT_PROPOSAL_ACCEPTED]: [
+    { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROPOSAL_SIGNATURES_UPDATED]: [
-    { h: proposalEventHandler, await: true }
+  [APP_EVENT.PROJECT_INVITE_CREATED]: [
+    { h: proposalEventHandler, await: true },
+    { h: userInviteEventHandler, await: false },
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_INVITE_ACCEPTED]: [
+    { h: userInviteEventHandler, await: false },
+    { h: userNotificationEventHandler, await: false }
   ]
 
 };

@@ -31,10 +31,10 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event, ctx) => 
   }, []);
 
   let details = {}; // TEMP support for legacy 'details' field, must be removed after schema separation
-  const ProposalTypedEvent = APP_PROPOSAL_EVENT[type];
-  if (ProposalTypedEvent) {
+  const ProposalCreatedHookEvent = APP_PROPOSAL_EVENT[type]['CREATED'];
+  if (ProposalCreatedHookEvent) {
     const proposedCmds = proposalCmd.getProposedCmds();
-    const typedEvent = new ProposalTypedEvent({
+    const typedEvent = new ProposalCreatedHookEvent({
       proposalCmd: proposalCmd,
       proposalCtx: { proposalId, type, proposedCmds }
     });

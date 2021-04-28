@@ -5,12 +5,12 @@ class ActionMessage {
   constructor(nextHandler, isMultipartForm) {
 
     function setMessage(ctx) {
-      if (!ctx.state.form.envelope && !ctx.body.envelope) {
+      if ((isMultipartForm && !ctx.state.form.envelope) && !ctx.request.body.envelope) {
         ctx.status = 400;
         throw new Error("Server accepts packed application commands only");
       }
 
-      const envelope = isMultipartForm ? JSON.parse(ctx.state.form.envelope) : ctx.body.envelope;
+      const envelope = isMultipartForm ? JSON.parse(ctx.state.form.envelope) : ctx.request.body.envelope;
       const EnvelopeClass = envelope.PROTOCOL ? TxEnvelope : CmdEnvelope;
       const msgEnvelope = EnvelopeClass.Deserialize(envelope);
       ctx.state.msg = msgEnvelope.unwrap();

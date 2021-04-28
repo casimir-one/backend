@@ -41,7 +41,7 @@ projectCmdHandler.register(APP_CMD.CREATE_PROJECT, async (cmd, ctx) => {
 
 projectCmdHandler.register(APP_CMD.JOIN_PROJECT, async (cmd, ctx) => {
   const { member, teamId, projectId } = cmd.getCmdPayload();
-
+  // TODO: add member to write schema
   ctx.state.appEvents.push(new ProjectMemberJoinedEvent({
     member: member,
     teamId: teamId,

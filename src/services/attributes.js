@@ -48,7 +48,7 @@ class AttributesService{
 
   async getAttributesByScope(scope = ATTRIBUTE_SCOPE.RESEARCH) {
     const tenant = await this.getTenantInstance();
-    const result = await Attribute.find({tenantId: { $in: [tenant._id, null] }, scope});
+    const result = await Attribute.find({ tenantId: { $in: [tenant._id, null] }, scope });
     if (!result.length) return [];
     const mapAttributes = await this.mapAttributes(result);
     return mapAttributes;

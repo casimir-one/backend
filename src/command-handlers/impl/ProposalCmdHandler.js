@@ -1,5 +1,6 @@
 import { APP_CMD, APP_PROPOSAL, CreateProposalCmd } from '@deip/command-models';
 import { PROPOSAL_STATUS } from './../../constants';
+import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import ProposalDomainService from './../../services/impl/write/ProposalDomainService';
@@ -38,14 +39,14 @@ proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, async (cmd, ctx) => {
   }));
 
   
-  const ProposalTypedEvent = APP_PROPOSAL_EVENT[proposal.type];
-  if (ProposalTypedEvent) {
-    ctx.state.appEvents.push(new ProposalTypedEvent({
+  const ProposalCreatedHookEvent = APP_PROPOSAL_EVENT[type]['CREATED'];
+  if (ProposalCreatedHookEvent) {
+    ctx.state.appEvents.push(new ProposalCreatedHookEvent({
       proposalCmd: cmd,
       proposalCtx: ctx.state.proposalsStackFrame
     }));
   } else {
-    console.warn(`WARNING: No proposal specific event found for ${APP_PROPOSAL[proposal.type]} workflow`);
+    logWarn(`WARNING: No proposal hook event found for ${APP_PROPOSAL[type]} workflow at 'CREATED' stage`);
   }
   
 });
@@ -70,6 +71,16 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1];
     
     await ProposalCmdHandler.HandleChain(proposedCmds, ctx);
+
+    const ProposalAcceptedHookEvent = APP_PROPOSAL_EVENT[type]['ACCEPTED'];
+    if (ProposalAcceptedHookEvent) {
+      ctx.state.appEvents.push(new ProposalAcceptedHookEvent({
+        proposalCmd: proposalCmd,
+        proposalCtx: ctx.state.proposalsStackFrame
+      }));
+    } else {
+      logWarn(`WARNING: No proposal hook event found for ${APP_PROPOSAL[type]} workflow at 'ACCEPTED' stage`);
+    }
     
     ctx.state.proposalsStack.pop();
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1] || null;

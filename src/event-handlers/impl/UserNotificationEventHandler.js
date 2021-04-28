@@ -57,7 +57,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async (event, ctx) => {
   const { projectId, teamId } = event.getEventPayload();
 
   const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to projectReadModel
@@ -130,6 +130,36 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (e
 
 });
 
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (event, ctx) => {
+  const {
+    teamId,
+    invitee,
+  } = event.getEventPayload();
+
+  const team = await teamDtoService.getResearchGroup(teamId);
+  const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
+  const inviteeUser = await userDtoService.getUser(invitee);
+
+  const notifications = [];
+  for (let i = 0; i < notifiableUsers.length; i++) {
+    let user = notifiableUsers[i];
+    if (user.username != invitee) {
+      notifications.push({
+        username: user.username,
+        status: 'unread',
+        type: USER_NOTIFICATION_TYPE.INVITATION_APPROVED,
+        metadata: {
+          researchGroup: team,
+          invitee: inviteeUser
+        }
+      });
+    }
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+
+});
 
 
 module.exports = userNotificationEventHandler;
