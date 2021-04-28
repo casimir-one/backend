@@ -28,7 +28,7 @@ const Review = require('./../schemas/review');
 const ReviewRequest = require('./../schemas/reviewRequest');
 const UserProfile = require('./../schemas/user');
 const UserBookmark = require('./../schemas/userBookmark');
-const UserInvite = require('./../schemas/userInvite');
+const UserInviteDtoSchema = require('./../schemas/read/UserInviteDtoSchema');
 const UserNotification = require('./../schemas/userNotification');
 
 
@@ -51,7 +51,7 @@ const run = async () => {
   await ReviewRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await UserProfile.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await UserBookmark.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserInvite.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await UserInviteDtoSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await UserNotification.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   
 };

@@ -1,5 +1,5 @@
 import BaseService from './base/BaseService';
-import UserInvite from './../schemas/userInvite';
+import UserInviteDtoSchema from './../schemas/read/UserInviteDtoSchema';
 import ResearchService from './../services/impl/read/ProjectDtoService';
 import { USER_INVITE_STATUS } from './../constants';
 
@@ -7,7 +7,7 @@ import { USER_INVITE_STATUS } from './../constants';
 class UserInviteService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(UserInvite, options); 
+    super(UserInviteDtoSchema, options);
   }
 
   async findUserInvite(externalId) {
