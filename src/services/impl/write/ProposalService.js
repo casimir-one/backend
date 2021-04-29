@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import { PROPOSAL_STATUS } from './../../../constants';
 import BaseService from './../../base/BaseService';
-import ProposalWriteModelSchema from './../../../schemas/write/domain/ProposalWriteModelSchema';
+import ProposalWriteModelSchema from './../../../schemas/write/ProposalWriteModelSchema';
 
 
 class ProposalService extends BaseService {
