@@ -8,8 +8,6 @@ import config from './../../config';
 import { USER_PROFILE_STATUS } from './../../constants';
 import TenantSettingsForm from './../../forms/legacy/tenantSettings';
 import * as blockchainService from './../../utils/blockchain';
-import UserInvitationProposedEvent from './../../events/legacy/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 
 
 const updateTenantSettings = async (ctx) => {
@@ -358,18 +356,20 @@ const approveSignUpRequest = async (ctx, next) => {
       description: username
     });
 
-    const datums = blockchainService.extractOperations(tx);
-    if (datums.length > 1) {
-      const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
-      ctx.state.events.push(userInvitationProposedEvent);
+    /* Temp solution for ACTION PROJECT roles setup flow */
 
-      const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
-      for (let i = 0; i < userInvitationApprovals.length; i++) {
-        const approval = userInvitationApprovals[i];
-        const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
-        ctx.state.events.push(userInvitationProposalSignedEvent);
-      }
-    }
+    // const datums = blockchainService.extractOperations(tx);
+    // if (datums.length > 1) {
+    //   const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
+    //   ctx.state.events.push(userInvitationProposedEvent);
+
+    //   const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
+    //   for (let i = 0; i < userInvitationApprovals.length; i++) {
+    //     const approval = userInvitationApprovals[i];
+    //     const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+    //     ctx.state.events.push(userInvitationProposalSignedEvent);
+    //   }
+    // }
 
     const approvedProfile = await usersService.updateUserProfile(username, { status: USER_PROFILE_STATUS.APPROVED });
 

@@ -2,27 +2,21 @@ import * as blockchainService from './../../utils/blockchain';
 import { APP_PROPOSAL } from '@deip/command-models';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 
-import ResearchProposalSignedEvent from './../../events/legacy/researchProposalSignedEvent';
-import ResearchUpdateProposalSignedEvent from './../../events/legacy/researchUpdateProposalSignedEvent';
 import ResearchContentProposalSignedEvent from './../../events/legacy/researchContentProposalSignedEvent';
 import ResearchTokenSaleProposalSignedEvent from './../../events/legacy/researchTokenSaleProposalSignedEvent';
 import ResearchGroupUpdateProposalSignedEvent from './../../events/legacy/researchGroupUpdateProposalSignedEvent';
 import AssetTransferProposalSignedEvent from './../../events/legacy/assetTransferProposalSignedEvent';
 import AssetExchangeProposalSignedEvent from './../../events/legacy/assetExchangeProposalSignedEvent';
 import ResearchExpressLicenseProposalSignedEvent from './../../events/legacy/researchExpressLicenseProposalSignedEvent';
-import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
 import ResearchNdaProposalSignedEvent from './../../events/legacy/researchNdaProposalSignedEvent'
 
-import ResearchProposalRejectedEvent from './../../events/legacy/researchProposalRejectedEvent';
-import ResearchUpdateProposalRejectedEvent from './../../events/legacy/researchUpdateProposalRejectedEvent';
 import ResearchContentProposalRejectedEvent from './../../events/legacy/researchContentProposalRejectedEvent';
 import ResearchTokenSaleProposalRejectedEvent from './../../events/legacy/researchTokenSaleProposalRejectedEvent';
 import ResearchGroupUpdateProposalRejectedEvent from './../../events/legacy/researchGroupUpdateProposalRejectedEvent';
 import AssetTransferProposalRejectedEvent from './../../events/legacy/assetTransferProposalRejectedEvent';
 import AssetExchangeProposalRejectedEvent from './../../events/legacy/assetExchangeProposalRejectedEvent';
 import ResearchExpressLicenseProposalRejectedEvent from './../../events/legacy/researchExpressLicenseProposalRejectedEvent';
-import UserInvitationProposalRejectedEvent from './../../events/legacy/userInvitationProposalRejectedEvent';
 import UserResignationProposalRejectedEvent from './../../events/legacy/userResignationProposalRejectedEvent';
 import ResearchNdaProposalRejectedEvent from './../../events/legacy/researchNdaProposalRejectedEvent';
 
@@ -64,16 +58,6 @@ const updateProposal = async (ctx, next) => {
     const updatedProposal = await proposalDtoService.getProposal(proposalId);
 
 
-    if (updatedProposal.type == APP_PROPOSAL.PROJECT_PROPOSAL) {
-      const researchProposalSignedEvent = new ResearchProposalSignedEvent(datums);
-      ctx.state.events.push(researchProposalSignedEvent);
-    }
-
-    if (updatedProposal.type == APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL) {
-      const researchUpdateProposalSignedEvent = new ResearchUpdateProposalSignedEvent(datums);
-      ctx.state.events.push(researchUpdateProposalSignedEvent);
-    }
-
     if (updatedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
       const researchContentProposalSignedEvent = new ResearchContentProposalSignedEvent(datums);
       ctx.state.events.push(researchContentProposalSignedEvent);
@@ -102,11 +86,6 @@ const updateProposal = async (ctx, next) => {
     if (updatedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {
       const researchExpressLicenseProposalSignedEvent = new ResearchExpressLicenseProposalSignedEvent(datums);
       ctx.state.events.push(researchExpressLicenseProposalSignedEvent);
-    }
-
-    if (updatedProposal.type == APP_PROPOSAL.PROJECT_INVITE_PROPOSAL) {
-      const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent(datums);
-      ctx.state.events.push(userInvitationProposalSignedEvent);
     }
 
     if (updatedProposal.type == APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL) {
@@ -148,15 +127,6 @@ const deleteProposal = async (ctx, next) => {
 
     const deletedProposal = await proposalDtoService.getProposal(proposalId);
 
-    if (deletedProposal.type == APP_PROPOSAL.PROJECT_PROPOSAL) {
-      const researchProposalRejectedEvent = new ResearchProposalRejectedEvent(datums);
-      ctx.state.events.push(researchProposalRejectedEvent);
-    }
-
-    if (deletedProposal.type == APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL) {
-      const researchUpdateProposalRejectedEvent = new ResearchUpdateProposalRejectedEvent(datums);
-      ctx.state.events.push(researchUpdateProposalRejectedEvent);
-    }
 
     if (deletedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
       const researchContentProposalRejectedEvent = new ResearchContentProposalRejectedEvent(datums);
@@ -186,11 +156,6 @@ const deleteProposal = async (ctx, next) => {
     if (deletedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {
       const researchExpressLicenseProposalRejectedEvent = new ResearchExpressLicenseProposalRejectedEvent(datums);
       ctx.state.events.push(researchExpressLicenseProposalRejectedEvent);
-    }
-
-    if (deletedProposal.type == APP_PROPOSAL.PROJECT_INVITE_PROPOSAL) {
-      const userInvitationProposalRejectedEvent = new UserInvitationProposalRejectedEvent(datums);
-      ctx.state.events.push(userInvitationProposalRejectedEvent);
     }
 
     if (deletedProposal.type == APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL) {

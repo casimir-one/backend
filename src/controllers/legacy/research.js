@@ -9,21 +9,11 @@ import deipRpc from '@deip/rpc-client';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
 import ResearchApplicationService from './../../services/researchApplication';
-import AttributesService from './../../services/attributes';
 import * as blockchainService from './../../utils/blockchain';
 import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
-import ResearchForm from './../../forms/legacy/research';
 import FileStorage from './../../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../../forms/legacy/researchApplicationForms';
-import ResearchCreatedEvent from './../../events/legacy/researchCreatedEvent';
-import ResearchProposedEvent from './../../events/legacy/researchProposedEvent';
-import ResearchProposalSignedEvent from './../../events/legacy/researchProposalSignedEvent';
-import ResearchUpdatedEvent from './../../events/legacy/researchUpdatedEvent';
-import ResearchUpdateProposedEvent from './../../events/legacy/researchUpdateProposedEvent';
-import ResearchUpdateProposalSignedEvent from './../../events/legacy/researchUpdateProposalSignedEvent';
 import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';
-import UserInvitationProposedEvent from './../../events/legacy/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 
 
 const stat = util.promisify(fs.stat);
@@ -32,149 +22,20 @@ const ensureDir = util.promisify(fsExtra.ensureDir);
 
 
 const createResearch = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const tenant = ctx.state.tenant;
-
-  try {
-    const attributesService = new AttributesService();  
-    
-    const { tx, offchainMeta, isProposal } = await ResearchForm(ctx);
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    if (datums.some(([opName]) => opName == 'create_account')) {
-      const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, offchainMeta.researchGroup);
-      ctx.state.events.push(researchGroupCreatedEvent);
-    }
-
-    let entityExternalId;
-    if (isProposal) {
-      const researchProposedEvent = new ResearchProposedEvent(datums, offchainMeta.research);
-      ctx.state.events.push(researchProposedEvent);
-      
-      const { researchExternalId } = researchProposedEvent.getSourceData();
-      entityExternalId = researchExternalId;
-
-      const researchApprovals = researchProposedEvent.getProposalApprovals();
-      for (let i = 0; i < researchApprovals.length; i++) {
-        const approval = researchApprovals[i];
-        const researchProposalSignedEvent = new ResearchProposalSignedEvent([approval]);
-        ctx.state.events.push(researchProposalSignedEvent);
-      }
-
-    } else {
-      const researchCreatedEvent = new ResearchCreatedEvent(datums, offchainMeta.research);
-      ctx.state.events.push(researchCreatedEvent);
-
-      const { researchExternalId } = researchCreatedEvent.getSourceData();
-      entityExternalId = researchExternalId;
-    }
-
-    const tenantResearchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
-    const invitesDatums = datums.filter(([opName]) => opName == 'join_research_group_membership');
-    
-    for (let i = 0; i < invitesDatums.length; i++) {
-      const inviteDatum = invitesDatums[i];
-      const [opName, opPayload, inviteProposal] = inviteDatum;
-      const { member: invitee, researches } = opPayload;
-      const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == ATTRIBUTE_TYPE.USER);
-      const inviteResearches = researches ? researches
-        .map((externalId) => {
-          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.attributeId == attr._id.toString()) && rAttr.value.some(v => v == invitee));
-          return { externalId, attributes: attributes.map(rAttr => rAttr.attributeId) };
-        }) : [];
-
-      const userInvitationProposedEvent = new UserInvitationProposedEvent([inviteDatum, ['create_proposal', inviteProposal, null]], { notes: "", researches: inviteResearches });
-      ctx.state.events.push(userInvitationProposedEvent);
-      
-      const inviteApprovals = datums.filter(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
-      for (let i = 0; i < inviteApprovals.length; i++) {
-        const approval = inviteApprovals[i];
-        const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
-        ctx.state.events.push(userInvitationProposalSignedEvent);
-      }
-    }
-
-    ctx.status = 200;
-    ctx.body = { external_id: entityExternalId };
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 };
 
 
 const updateResearch = async (ctx, next) => {
-  const tenant = ctx.state.tenant;
-
-  try {
-    const attributesService = new AttributesService();  
-
-    const { tx, offchainMeta, isProposal } = await ResearchForm(ctx);
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    if (isProposal) {
-      const researchUpdateProposedEvent = new ResearchUpdateProposedEvent(datums, offchainMeta.research);
-      ctx.state.events.push(researchUpdateProposedEvent);
-
-      const researchUpdateApprovals = researchUpdateProposedEvent.getProposalApprovals();
-      for (let i = 0; i < researchUpdateApprovals.length; i++) {
-        const approval = researchUpdateApprovals[i];
-        const researchUpdateProposalSignedEvent = new ResearchUpdateProposalSignedEvent([approval]);
-        ctx.state.events.push(researchUpdateProposalSignedEvent);
-      }
-
-    } else {
-      const researchUpdatedEvent = new ResearchUpdatedEvent(datums, offchainMeta.research);
-      ctx.state.events.push(researchUpdatedEvent);
-    }
-
-    const tenantResearchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
-    const invitesDatums = datums.filter(([opName]) => opName == 'join_research_group_membership');
-    for (let i = 0; i < invitesDatums.length; i++) {
-      const inviteDatum = invitesDatums[i];
-      const [opName, opPayload, inviteProposal] = inviteDatum;
-      const { member: invitee, researches } = opPayload;
-      const { attributes: researchAttributes } = offchainMeta.research;
-      const usersAttributes = tenantResearchAttributes.filter(attr => attr.type == ATTRIBUTE_TYPE.USER);
-      const inviteResearches = researches ? researches
-        .map((externalId) => {
-          const attributes = researchAttributes.filter(rAttr => usersAttributes.some(attr => rAttr.attributeId.toString() == attr._id.toString()) && rAttr.value.some(v => v == invitee));
-          return { externalId, attributes: attributes.map(rAttr => rAttr.attributeId) };
-        }) : [];
-
-      const userInvitationProposedEvent = new UserInvitationProposedEvent([inviteDatum, ['create_proposal', inviteProposal, null]], { notes: "", researches: inviteResearches });
-      ctx.state.events.push(userInvitationProposedEvent);
-
-      const inviteApprovals = datums.filter(([opName, opPayload]) => opName == 'update_proposal' && opPayload.external_id == inviteProposal.external_id);
-      for (let i = 0; i < inviteApprovals.length; i++) {
-        const approval = inviteApprovals[i];
-        const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
-        ctx.state.events.push(userInvitationProposalSignedEvent);
-      }
-    }
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 };
 
 
 
 const createResearchApplication = async (ctx, next) => {
+    // DEPRECATED
   const jwtUsername = ctx.state.user.username;
 
   try {
@@ -242,8 +103,7 @@ const createResearchApplication = async (ctx, next) => {
     if (!isAccepted) {
       ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_CREATED, { tx: form.tx, emitter: jwtUsername }]);
     } else {
-      const researchCreatedEvent = new ResearchCreatedEvent(datums, { attributes: researchApplication.attributes || []});
-      ctx.state.events.push(researchCreatedEvent);
+      // TODO: emit research created event
     }
 
   } catch (err) {
@@ -397,6 +257,7 @@ const getResearchApplicationAttachmentFile = async function (ctx) {
 
 
 const approveResearchApplication = async (ctx, next) => {
+  // DEPRECATED
   const jwtUsername = ctx.state.user.username;
   const { tx } = ctx.request.body;
 
@@ -430,8 +291,7 @@ const approveResearchApplication = async (ctx, next) => {
     const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, { name: "", description: "" });
     ctx.state.events.push(researchGroupCreatedEvent);
 
-    const researchCreatedEvent = new ResearchCreatedEvent(datums, { attributes: researchApplication.attributes || [] });
-    ctx.state.events.push(researchCreatedEvent);
+    // TODO: Emit 'project created' event
 
     const researchApplicationData = researchApplication;
     const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
@@ -440,7 +300,7 @@ const approveResearchApplication = async (ctx, next) => {
     });
     
     ctx.status = 200;
-    ctx.body = { tx, txResult, rm: researchCreatedEvent.getSourceData() };
+    ctx.body = { tx, txResult };
 
     if (isAccepted) {
       ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);

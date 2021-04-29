@@ -48,16 +48,6 @@ async function createProposalDto(event, chainContractType) {
   return proposalRef;
 }
 
-proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchProposedEvent } = source;
-  const proposalRef = await createProposalDto(researchProposedEvent, APP_PROPOSAL.PROJECT_PROPOSAL);
-  return proposalRef;
-}));
-
-proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async ({ event: researchUpdateProposedEvent }) => {
-  const proposalRef = await createProposalDto(researchUpdateProposedEvent, APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL);
-  return proposalRef;
-}));
 
 proposalHandler.on(LEGACY_APP_EVENTS.ASSET_EXCHANGE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetExchangeProposedEvent } = source;
@@ -95,11 +85,6 @@ proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload
   return proposalRef;
 }));
 
-proposalHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: userInvitationProposedEvent } = source;
-  const proposalRef = await createProposalDto(userInvitationProposedEvent, APP_PROPOSAL.PROJECT_INVITE_PROPOSAL);
-  return proposalRef;
-}));
 
 proposalHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userResignationProposedEvent } = source;

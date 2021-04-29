@@ -1,7 +1,4 @@
 import UserInviteService from './../../services/userInvites';
-import * as blockchainService from './../../utils/blockchain';
-import UserInvitationProposedEvent from './../../events/legacy/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 
 
 const getUserInvites = async (ctx) => {
@@ -68,26 +65,12 @@ const getResearchPendingInvites = async (ctx) => {
 
 
 const createUserInvite = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta } = ctx.request.body;
+  // DEPRECATED: Use APP_PROPOSAL.PROJECT_INVITE_PROPOSAL instead
 
   try {
 
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const userInvitationProposedEvent = new UserInvitationProposedEvent(datums, { researches: [], ...offchainMeta });
-    ctx.state.events.push(userInvitationProposedEvent);
-
-    const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
-    for (let i = 0; i < userInvitationApprovals.length; i++) {
-      const approval = userInvitationApprovals[i];
-      const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
-      ctx.state.events.push(userInvitationProposalSignedEvent);
-    }
-
     ctx.status = 200;
-    ctx.body = [...ctx.state.events];
+    ctx.body = "DEPRECATED: Use APP_PROPOSAL.PROJECT_INVITE_PROPOSAL flow instead";
 
   } catch (err) {
     console.log(err);

@@ -1,5 +1,4 @@
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs';
 import config from './../../config';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
@@ -8,8 +7,6 @@ import ResearchGroupService from './../../services/researchGroup';
 import UserService from './../../services/users';
 import TenantService from './../../services/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
-import UserInvitationProposedEvent from './../../events/legacy/userInvitationProposedEvent';
-import UserInvitationProposalSignedEvent from './../../events/legacy/userInvitationProposalSignedEvent';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -139,18 +136,20 @@ const signUp = async function (ctx, next) {
         description: username
       });
 
-      const datums = blockchainService.extractOperations(tx);
-      if (datums.length > 1) {
-        const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
-        ctx.state.events.push(userInvitationProposedEvent);
+      /* Temp solution for ACTION PROJECT roles setup flow */
 
-        const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
-        for (let i = 0; i < userInvitationApprovals.length; i++) {
-          const approval = userInvitationApprovals[i];
-          const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
-          ctx.state.events.push(userInvitationProposalSignedEvent);
-        }
-      }
+      // const datums = blockchainService.extractOperations(tx);
+      // if (datums.length > 1) {
+      //   const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
+      //   ctx.state.events.push(userInvitationProposedEvent);
+
+      //   const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
+      //   for (let i = 0; i < userInvitationApprovals.length; i++) {
+      //     const approval = userInvitationApprovals[i];
+      //     const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+      //     ctx.state.events.push(userInvitationProposalSignedEvent);
+      //   }
+      // }
     }
 
     ctx.status = 200;
