@@ -1,7 +1,7 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectUpdatedEvent } from './../../events';
-import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
+import ProjectService from './../../services/impl/write/ProjectService';
 import { RESEARCH_STATUS } from './../../constants';
 
 
@@ -15,13 +15,13 @@ class ProjectCmdHandler extends BaseCmdHandler {
 
 const projectCmdHandler = new ProjectCmdHandler();
 
-const projectDomainService = new ProjectDomainService();
+const projectService = new ProjectService();
 
 
 projectCmdHandler.register(APP_CMD.CREATE_PROJECT, async (cmd, ctx) => {
   const { entityId: projectId, teamId, attributes } = cmd.getCmdPayload();
 
-  const project = await projectDomainService.createProject({
+  const project = await projectService.createProject({
     projectId: projectId,
     teamId: teamId,
     attributes: attributes,
@@ -42,7 +42,7 @@ projectCmdHandler.register(APP_CMD.CREATE_PROJECT, async (cmd, ctx) => {
 projectCmdHandler.register(APP_CMD.UPDATE_PROJECT, async (cmd, ctx) => {
   const { entityId: projectId, attributes } = cmd.getCmdPayload();
 
-  const project = await projectDomainService.updateProject(projectId, {
+  const project = await projectService.updateProject(projectId, {
     attributes: attributes
   });
 

@@ -4,7 +4,7 @@ import BaseService from './../../base/BaseService';
 import ProposalWriteModelSchema from './../../../schemas/write/domain/ProposalWriteModelSchema';
 
 
-class ProposalDomainService extends BaseService {
+class ProposalService extends BaseService {
 
   constructor(options = { scoped: true }) {
     super(ProposalWriteModelSchema, options);
@@ -51,4 +51,4 @@ class ProposalDomainService extends BaseService {
 
 }
 
-export default ProposalDomainService;
+export default ProposalService;

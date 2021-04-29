@@ -1,12 +1,13 @@
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
-import ProjectSchema from './../../../schemas/write/ProjectSchema'; // TODO: separate read/write schemas
+// TODO: separate read/write schemas
+import ProjectSchema from './../../../schemas/write/ProjectSchema';
 import AttributesService from './../../legacy/attributes';
 import { logWarn } from './../../../utils/log';
 import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../../../constants';
 
 
-class ProjectDomainService extends BaseService {
+class ProjectService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(ProjectSchema, options);
@@ -160,4 +161,4 @@ class ProjectDomainService extends BaseService {
 
 }
 
-export default ProjectDomainService;
+export default ProjectService;

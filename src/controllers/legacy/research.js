@@ -7,7 +7,7 @@ import slug from 'limax';
 import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
-import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
+import ProjectService from './../../services/impl/write/ProjectService';
 import ResearchApplicationService from './../../services/legacy/researchApplication';
 import * as blockchainService from './../../utils/blockchain';
 import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
@@ -670,7 +670,7 @@ const deleteResearch = async (ctx) => {
   try {
 
     const projectDtoService = new ProjectDtoService();
-    const projectDomainService = new ProjectDomainService();
+    const projectService = new ProjectService();
     const research = await projectDtoService.getResearch(researchExternalId);
 
     if (!research) {
@@ -685,7 +685,7 @@ const deleteResearch = async (ctx) => {
       return;
     }
 
-    const updatedResearch = await projectDomainService.updateProject(researchExternalId, { status: RESEARCH_STATUS.DELETED })
+    const updatedResearch = await projectService.updateProject(researchExternalId, { status: RESEARCH_STATUS.DELETED })
     ctx.status = 200;
     ctx.body = updatedResearch;
 

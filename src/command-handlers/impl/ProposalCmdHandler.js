@@ -3,7 +3,7 @@ import { PROPOSAL_STATUS } from './../../constants';
 import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import ProposalDomainService from './../../services/impl/write/ProposalDomainService';
+import ProposalService from './../../services/impl/write/ProposalService';
 import { ProposalCreatedEvent, ProposalUpdatedEvent, ProposalDeclinedEvent } from './../../events';
 
 
@@ -17,12 +17,12 @@ class ProposalCmdHandler extends BaseCmdHandler {
 
 const proposalCmdHandler = new ProposalCmdHandler();
 
-const proposalDomainService = new ProposalDomainService();
+const proposalService = new ProposalService();
 
 proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, async (cmd, ctx) => {
   const { entityId: proposalId, creator, type } = cmd.getCmdPayload();
 
-  const proposal = await proposalDomainService.createProposal({
+  const proposal = await proposalService.createProposal({
     proposalId: proposalId,
     proposalCmd: cmd,
     type: type,
@@ -55,7 +55,7 @@ proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, async (cmd, ctx) => {
 proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
   const { entityId: proposalId } = cmd.getCmdPayload();
 
-  const proposal = await proposalDomainService.updateProposal(proposalId, {});
+  const proposal = await proposalService.updateProposal(proposalId, {});
   const proposalCmd = CreateProposalCmd.Deserialize(proposal.cmd);
   const proposedCmds = proposalCmd.getProposedCmds();
   const type = proposalCmd.getProposalType();
@@ -92,7 +92,7 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
 proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, async (cmd, ctx) => {
   const { entityId: proposalId } = cmd.getCmdPayload();
 
-  const proposal = await proposalDomainService.updateProposal(proposalId, {});
+  const proposal = await proposalService.updateProposal(proposalId, {});
   const proposalCmd = CreateProposalCmd.Deserialize(proposal.cmd);
   const proposedCmds = proposalCmd.getProposedCmds();
   const type = proposalCmd.getProposalType();

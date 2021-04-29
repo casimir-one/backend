@@ -3,8 +3,7 @@ import deipRpc from '@deip/rpc-client';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
-import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
-
+import ProjectService from './../../services/impl/write/ProjectService';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
 import AttributesService from './../../services/legacy/attributes'
 
@@ -13,7 +12,7 @@ class ResearchHandler extends EventEmitter { }
 
 const researchHandler = new ResearchHandler();
 
-const projectDomainService = new ProjectDomainService();
+const projectService = new ProjectService();
 
 
 researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
@@ -49,7 +48,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
     }
 
     if (hasUpdate) {
-      promises.push(projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes }));
+      promises.push(projectService.updateProject(research.external_id, { attributes: research.researchRef.attributes }));
     }
   }
 
@@ -79,7 +78,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, repl
   }
 
   if (hasUpdate) {
-    await projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
+    await projectService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
   }
 
 }));
@@ -113,7 +112,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (paylo
   }
 
   if (hasUpdate) {
-    await projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
+    await projectService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
   }
 
 }));
@@ -144,7 +143,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, 
     }
 
     if (hasUpdate) {
-      await projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
+      await projectService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
     }
   }
 
