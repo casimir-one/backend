@@ -347,15 +347,15 @@ class ProposalDtoService extends BaseService {
 
   async extendResearchUpdateProposals(proposals) {
     const accountNames = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
-        acc.push(proposal.details.researchGroupExternalId);
+      if (!acc.some(a => a == proposal.details.teamId)) {
+        acc.push(proposal.details.teamId);
       }
       return acc;
     }, []);
 
     const researchExternalIds = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.researchExternalId)) {
-        acc.push(proposal.details.researchExternalId);
+      if (!acc.some(a => a == proposal.details.projectId)) {
+        acc.push(proposal.details.projectId);
       }
       return acc;
     }, []);
@@ -364,8 +364,8 @@ class ProposalDtoService extends BaseService {
     const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
 
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
-      const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
+      const research = researches.find(r => r.external_id == proposal.details.projectId);
       const extendedDetails = { researchGroup, research };
       return { ...proposal, extendedDetails };
     });

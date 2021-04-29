@@ -16,7 +16,7 @@ class ProjectProposalCreatedEvent extends BaseEvent {
     
     const proposedCmds = proposalCmd.getProposedCmds();
     const createProjectCmd = proposedCmds[0];
-    const { entityId: proposalId, expirationTime, creator: inviter } = proposalCmd.getCmdPayload();
+    const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
     const { entityId: projectId, teamId, attributes } = createProjectCmd.getCmdPayload();
     
     assert(!!proposalId, `'proposalId' is required`);

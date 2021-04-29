@@ -125,13 +125,72 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
 });
 
 
+userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event, ctx) => {
+  const {
+    projectId,
+    teamId
+  } = event.getEventPayload();
+
+  const project = await projectDtoService.getResearch(projectId);
+  const team = await teamDtoService.getResearchGroup(teamId);
+  const currentUser = await userDtoService.getUser(ctx.state.user.username);
+
+  const notifiableUsers = await userDtoService.getUsers([...ctx.state.tenant.admins, ...project.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
+
+  const notifications = [];
+  for (let i = 0; i < notifiableUsers.length; i++) {
+    const user = notifiableUsers[i];
+    notifications.push({
+      username: user.username,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        isProposalAutoAccepted: true, // legacy
+        proposal: { action: 15, is_completed: true }, // legacy
+        researchGroup: team,
+        research: project,
+        emitter: currentUser
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event, ctx) => {
+  const { teamId, projectId } = event.getEventPayload();
+
+  const team = await teamDtoService.getResearchGroup(teamId);
+  const project = await projectDtoService.getResearch(projectId);
+  const currentUser = await userDtoService.getUser(ctx.state.user.username);
+  const notifiableUsers = await userDtoService.getUsers(ctx.state.tenant.admins);
+
+  const notifications = [];
+  for (let i = 0; i < notifiableUsers.length; i++) {
+    let user = notifiableUsers[i];
+    notifications.push({
+      username: user.username,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
+      metadata: {
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: 15, is_completed: false }, // legacy
+        researchGroup: team,
+        research: project,
+        emitter: currentUser
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event, ctx) => {
   const { 
     invitee,
-    teamId,
-    projectId,
-    inviter
+    teamId
   } = event.getEventPayload();
 
   const team = await teamDtoService.getResearchGroup(teamId);

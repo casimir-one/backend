@@ -32,7 +32,8 @@ module.exports = {
   ],
 
   [APP_EVENT.PROJECT_UPDATED]: [
-    { h: projectEventHandler, await: true }
+    { h: projectEventHandler, await: true },
+    { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.PROJECT_MEMBER_JOINED]: [
@@ -45,6 +46,11 @@ module.exports = {
   ],
 
   [APP_EVENT.PROJECT_PROPOSAL_ACCEPTED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED]: [
+    { h: proposalEventHandler, await: false },
     { h: userNotificationEventHandler, await: false }
   ],
 
