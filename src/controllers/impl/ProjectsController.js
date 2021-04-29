@@ -21,6 +21,23 @@ class ProjectsController extends BaseController {
     }
   });
 
+
+  updateProject = this.command({
+    form: ProjectForm, h: async (ctx) => {
+      try {
+        const msg = ctx.state.msg;
+        await projectCmdHandler.process(msg, ctx);
+
+        ctx.status = 200;
+        ctx.body = { model: "ok" };
+
+      } catch (err) {
+        ctx.status = 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+
 }
 
 

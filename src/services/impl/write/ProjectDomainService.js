@@ -40,8 +40,24 @@ class ProjectDomainService extends BaseService {
 
     return result;
   }
-  
 
+
+  async updateProject(projectId, { status, attributes }) {
+
+    let mappedAttributes;
+    if (attributes) {
+      mappedAttributes = await this.mapAttributes(attributes);
+    }
+
+    const result = await this.updateOne({ _id: projectId }, {
+      status,
+      attributes: attributes ? mappedAttributes : undefined
+    });
+
+    return result;
+  }
+
+  
   async mapAttributes(attributes) {
     const attributesService = new AttributesService();
     const projectAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);

@@ -2,9 +2,10 @@ import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchService from './../../services/impl/read/ProjectDtoService';
+import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
+import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
+
 import ProposalService from './../../services/impl/read/ProposalDtoService';
-import ResearchGroupService from './../../services/researchGroup';
 import UserService from './../../services/users';
 import UserInviteService from './../../services/userInvites';
 import AttributesService from './../../services/attributes'
@@ -14,26 +15,27 @@ class ResearchHandler extends EventEmitter { }
 
 const researchHandler = new ResearchHandler();
 
+const projectDomainService = new ProjectDomainService();
 
 researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdatedEvent } = source;
   
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
   const { researchExternalId, source: { offchain: { attributes } } } = researchUpdatedEvent.getSourceData();
 
   if (attributes) {
-    await researchService.updateResearchRef(researchExternalId, { attributes });
+    await projectDomainService.updateProject(researchExternalId, { attributes });
   }
 
-  const updatedResearch = await researchService.getResearch(researchExternalId)
+  const updatedResearch = await projectDtoService.getResearch(researchExternalId)
   return updatedResearch;
 }));
 
 
 researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async ({ event: researchUpdateProposedEvent }) => {
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
   const { researchExternalId } = researchUpdateProposedEvent.getSourceData();
-  const updatedResearch = await researchService.getResearch(researchExternalId)
+  const updatedResearch = await projectDtoService.getResearch(researchExternalId)
   return updatedResearch;
 }));
 
@@ -41,7 +43,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSED, (payload, reply) 
 researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchUpdateProposalSignedEvent } = source;
 
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
   const proposalsService = new ProposalService();
 
   const proposalId = researchUpdateProposalSignedEvent.getProposalId();
@@ -51,12 +53,12 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_UPDATE_PROPOSAL_SIGNED, (payload, 
   const { researchExternalId, source: { offchain: { attributes } } } = proposal.details;
 
   if (status == PROPOSAL_STATUS.APPROVED) {
-    await researchService.updateResearchRef(researchExternalId, {
+    await projectDomainService.updateProject(researchExternalId, {
       attributes: attributes
     });
   }
 
-  const updatedResearch = await researchService.getResearch(researchExternalId);
+  const updatedResearch = await projectDtoService.getResearch(researchExternalId);
   return updatedResearch;
 }));
 
@@ -66,7 +68,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload
   const { event: userInvitationProposalRejectedEvent } = event;
 
   const usersService = new UserService();
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
   const userInviteService = new UserInviteService();
 
   const proposalId = userInvitationProposalRejectedEvent.getProposalId();
@@ -77,7 +79,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload
 
     const researches = [];
     if (invite.researches != null) {
-      const result = await researchService.getResearches(invite.researches.map(r => r.externalId));
+      const result = await projectDtoService.getResearches(invite.researches.map(r => r.externalId));
       researches.push(...result);
     }
 
@@ -101,7 +103,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload
       }
 
       if (hasUpdate) {
-        promises.push(researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes }));
+        promises.push(projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes }));
       }
     }
 
@@ -114,7 +116,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_INVITATION_PROPOSAL_REJECTED, (payload
 researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: userResignationProposalSignedEvent, tenant } = event;
 
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
   const proposalsService = new ProposalService();
   const attributesService = new AttributesService();
 
@@ -124,7 +126,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
 
   const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
 
-  const researches = await researchService.getResearchesByResearchGroup(researchGroupExternalId);
+  const researches = await projectDtoService.getResearchesByResearchGroup(researchGroupExternalId);
 
   const promises = [];
   for (let i = 0; i < researches.length; i++) {
@@ -144,7 +146,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
     }
 
     if (hasUpdate) {
-      promises.push(researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes }));
+      promises.push(projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes }));
     }
   }
 
@@ -154,11 +156,11 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
 
 researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: researchTokenSaleCreatedEvent } = event;
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
 
   const { researchExternalId } = researchTokenSaleCreatedEvent.getSourceData();
 
-  const research = await researchService.getResearch(researchExternalId);
+  const research = await projectDtoService.getResearch(researchExternalId);
   const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
 
   let hasUpdate = false;
@@ -174,7 +176,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, repl
   }
 
   if (hasUpdate) {
-    await researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes });
+    await projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
   }
 
 }));
@@ -184,14 +186,14 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, repl
 researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: researchTokenSaleProposalSignedEvent } = event;
   
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
   const proposalsService = new ProposalService();
 
   const proposalId = researchTokenSaleProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
   const { researchExternalId } = proposal.details;
 
-  const research = await researchService.getResearch(researchExternalId);
+  const research = await projectDtoService.getResearch(researchExternalId);
   const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
 
   let hasUpdate = false;
@@ -208,7 +210,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (paylo
   }
 
   if (hasUpdate) {
-    await researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes });
+    await projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
   }
 
 }));
@@ -216,12 +218,12 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (paylo
 
 researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) => handle(payload, reply, async (event) => {
   const { event: researchTokenSaleContributedEvent } = event;
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
 
   const { tokenSaleExternalId } = researchTokenSaleContributedEvent.getSourceData();
   const researchTokenSale = await deipRpc.api.getResearchTokenSaleAsync(tokenSaleExternalId);
 
-  const research = await researchService.getResearch(researchTokenSale.research_external_id);
+  const research = await projectDtoService.getResearch(researchTokenSale.research_external_id);
   
   if (researchTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
     const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
@@ -239,7 +241,7 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, 
     }
 
     if (hasUpdate) {
-      await researchService.updateResearchRef(research.external_id, { attributes: research.researchRef.attributes });
+      await projectDomainService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
     }
   }
 

@@ -31,6 +31,10 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
+  [APP_EVENT.PROJECT_UPDATED]: [
+    { h: projectEventHandler, await: true }
+  ],
+
   [APP_EVENT.PROJECT_MEMBER_JOINED]: [
     { h: projectEventHandler, await: true }
   ],

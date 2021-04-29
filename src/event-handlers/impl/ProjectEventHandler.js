@@ -19,6 +19,10 @@ projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
   // TODO: handle project read schema
 });
 
+projectEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event, ctx) => {
+  // TODO: handle project read schema
+});
+
 projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event, ctx) => {
   // TODO: handle project read schema
 });

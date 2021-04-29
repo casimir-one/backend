@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { ProjectCreatedEvent, ProjectMemberJoinedEvent } from './../../events';
+import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectUpdatedEvent } from './../../events';
 import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
 import { RESEARCH_STATUS } from './../../constants';
 
@@ -37,6 +37,25 @@ projectCmdHandler.register(APP_CMD.CREATE_PROJECT, async (cmd, ctx) => {
   }));
 
 });
+
+
+projectCmdHandler.register(APP_CMD.UPDATE_PROJECT, async (cmd, ctx) => {
+  const { entityId: projectId, attributes } = cmd.getCmdPayload();
+
+  const project = await projectDomainService.updateProject(projectId, {
+    attributes: attributes
+  });
+
+  ctx.state.appEvents.push(new ProjectUpdatedEvent({
+    projectId: project._id,
+    teamId: project.researchGroupExternalId,
+    attributes: project.attributes,
+    status: project.status,
+    proposalCtx: ctx.state.proposalsStackFrame
+  }));
+
+});
+
 
 
 projectCmdHandler.register(APP_CMD.JOIN_PROJECT, async (cmd, ctx) => {

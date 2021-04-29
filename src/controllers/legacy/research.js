@@ -6,7 +6,8 @@ import send from 'koa-send';
 import slug from 'limax';
 import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
-import ResearchService from './../../services/impl/read/ProjectDtoService';
+import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
+import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
 import ResearchApplicationService from './../../services/researchApplication';
 import AttributesService from './../../services/attributes';
 import * as blockchainService from './../../utils/blockchain';
@@ -401,7 +402,6 @@ const approveResearchApplication = async (ctx, next) => {
 
   try { 
 
-    const researchService = new ResearchService();
     const researchApplicationService = new ResearchApplicationService();
 
     const operation = tx['operations'][0];
@@ -687,8 +687,8 @@ const getPublicResearchListing = async (ctx) => {
   const filter = query.filter;
 
   try {
-    const researchService = new ResearchService();
-    const result = await researchService.lookupResearches(filter);
+    const projectDtoService = new ProjectDtoService();
+    const result = await projectDtoService.lookupResearches(filter);
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate);
   } catch (err) {
@@ -703,9 +703,9 @@ const getUserResearchListing = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const member = ctx.params.username;
 
-  const researchService = new ResearchService();
+  const projectDtoService = new ProjectDtoService();
   try {
-    const result = await researchService.getResearchesForMember(member)
+    const result = await projectDtoService.getResearchesForMember(member)
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
 
@@ -722,8 +722,8 @@ const getResearchGroupResearchListing = async (ctx) => {
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
 
   try {
-    const researchService = new ResearchService();
-    const result = await researchService.getResearchesByResearchGroup(researchGroupExternalId);
+    const projectDtoService = new ProjectDtoService();
+    const result = await projectDtoService.getResearchesByResearchGroup(researchGroupExternalId);
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
 
@@ -739,8 +739,8 @@ const getResearch = async (ctx) => {
   const researchExternalId = ctx.params.researchExternalId;
 
   try {
-    const researchService = new ResearchService();
-    const research = await researchService.getResearch(researchExternalId);
+    const projectDtoService = new ProjectDtoService();
+    const research = await projectDtoService.getResearch(researchExternalId);
     if (!research) {
       ctx.status = 404;
       ctx.body = null;
@@ -769,8 +769,8 @@ const getResearches = async (ctx) => {
       return;
     }
 
-    const researchService = new ResearchService();
-    const researches = await researchService.getResearches(researchesExternalIds);
+    const projectDtoService = new ProjectDtoService();
+    const researches = await projectDtoService.getResearches(researchesExternalIds);
 
     const result = researches;
     ctx.status = 200;
@@ -788,8 +788,8 @@ const getTenantResearchListing = async (ctx) => {
   const tenantId = ctx.params.tenantId;
 
   try {
-    const researchService = new ResearchService();
-    const result = await researchService.getResearchesByTenant(tenantId);
+    const projectDtoService = new ProjectDtoService();
+    const result = await projectDtoService.getResearchesByTenant(tenantId);
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate);
 
@@ -809,8 +809,9 @@ const deleteResearch = async (ctx) => {
 
   try {
 
-    const researchService = new ResearchService();
-    const research = await researchService.getResearch(researchExternalId);
+    const projectDtoService = new ProjectDtoService();
+    const projectDomainService = new ProjectDomainService();
+    const research = await projectDtoService.getResearch(researchExternalId);
 
     if (!research) {
       ctx.status = 404;
@@ -824,7 +825,7 @@ const deleteResearch = async (ctx) => {
       return;
     }
 
-    const updatedResearch = await researchService.updateResearchRef(researchExternalId, { status: RESEARCH_STATUS.DELETED })
+    const updatedResearch = await projectDomainService.updateProject(researchExternalId, { status: RESEARCH_STATUS.DELETED })
     ctx.status = 200;
     ctx.body = updatedResearch;
 

@@ -7,7 +7,7 @@ class ActionMessage {
     function setMessage(ctx) {
       if ((isMultipartForm && !ctx.state.form.envelope) && !ctx.request.body.envelope) {
         ctx.status = 400;
-        throw new Error("Server accepts packed application commands only");
+        throw new Error("Server accepts messages with app commands only");
       }
 
       const envelope = isMultipartForm ? JSON.parse(ctx.state.form.envelope) : ctx.request.body.envelope;

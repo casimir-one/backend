@@ -1,4 +1,6 @@
 import ProjectCreatedEvent from './impl/ProjectCreatedEvent';
+import ProjectUpdatedEvent from './impl/ProjectUpdatedEvent';
+
 import ProjectMemberJoinedEvent from './impl/ProjectMemberJoinedEvent';
 import TeamCreatedEvent from './impl/TeamCreatedEvent';
 
@@ -10,6 +12,10 @@ import ProjectProposalCreatedEvent from './impl/ProjectProposalCreatedEvent';
 import ProjectProposalAcceptedEvent from './impl/ProjectProposalAcceptedEvent';
 import ProjectProposalDeclinedEvent from './impl/ProjectProposalDeclinedEvent';
 
+import ProjectUpdateProposalCreatedEvent from './impl/ProjectUpdateProposalCreatedEvent';
+import ProjectUpdateProposalAcceptedEvent from './impl/ProjectUpdateProposalAcceptedEvent';
+import ProjectUpdateProposalDeclinedEvent from './impl/ProjectUpdateProposalDeclinedEvent';
+
 import ProjectInviteCreatedEvent from './impl/ProjectInviteCreatedEvent';
 import ProjectInviteAcceptedEvent from './impl/ProjectInviteAcceptedEvent';
 import ProjectInviteDeclinedEvent from './impl/ProjectInviteDeclinedEvent';
@@ -17,6 +23,7 @@ import ProjectInviteDeclinedEvent from './impl/ProjectInviteDeclinedEvent';
 
 module.exports = {
   ProjectCreatedEvent,
+  ProjectUpdatedEvent,
   ProjectMemberJoinedEvent,
 
   TeamCreatedEvent,
@@ -29,6 +36,10 @@ module.exports = {
   ProjectProposalAcceptedEvent,
   ProjectProposalDeclinedEvent,
 
+  ProjectUpdateProposalCreatedEvent,
+  ProjectUpdateProposalAcceptedEvent,
+  ProjectUpdateProposalDeclinedEvent,
+  
   ProjectInviteCreatedEvent,
   ProjectInviteAcceptedEvent,
   ProjectInviteDeclinedEvent
