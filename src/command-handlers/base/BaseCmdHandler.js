@@ -16,8 +16,14 @@ class BaseCmdHandler extends EventEmitter {
     super();
   }
 
+  registered = [];
+
+  isRegistered(eventNum) {
+    return this.registered.includes(eventNum);
+  }
 
   register(cmdNum, handler) {
+    this.registered.push(cmdNum);
     this.on(cmdNum, (cmd, ctx, reply) => {
       BaseCmdHandler.PromisfyCmdHandler(cmd, ctx, reply, handler);
     });
@@ -76,7 +82,12 @@ class BaseCmdHandler extends EventEmitter {
         logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command`);
         continue;
       }
-      chain = chain.then(() => cmdHandler.handle(cmd, ctx));
+
+      if (cmdHandler.isRegistered(cmd.getCmdNum())) {
+        chain = chain.then(() => cmdHandler.handle(cmd, ctx));
+      } else {
+        logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command in ${cmdHandler.constructor.name}`);
+      }
     }
 
     await chain;

@@ -13,12 +13,18 @@ class BaseEventHandler extends EventEmitter {
     super();
   }
 
+  registered = [];
+
+  isRegistered(eventNum) {
+    return this.registered.includes(eventNum);
+  }
+
   register(eventNum, handler) {
+    this.registered.push(eventNum);
     this.on(eventNum, (event, ctx, reply) => {
       return BaseEventHandler.PromisfyEventHandler(event, ctx, reply, handler)
     });
   }
-
 
   handle(shouldAwait, event, ctx) {
     return new Promise((success, failure) => {
@@ -68,7 +74,11 @@ class BaseEventHandler extends EventEmitter {
 
       for (let j = 0; j < eventHandlers.length; j++) {
         const { h: eventHandler, await: shouldAwait } = eventHandlers[j];
-        chain = chain.then(() => eventHandler.handle(shouldAwait, event, ctx));
+        if (eventHandler.isRegistered(event.getEventNum())) {
+          chain = chain.then(() => eventHandler.handle(shouldAwait, event, ctx));
+        } else {
+          logWarn(`WARNING: No event handler registered for ${event.getEventName()} event in ${eventHandler.constructor.name}`);
+        }
       }
     }
 
