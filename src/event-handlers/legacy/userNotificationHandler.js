@@ -1,14 +1,14 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { LEGACY_APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
-import UserService from './../../services/users';
-import UserNotificationService from './../../services/userNotification';
-import ResearchContentService from './../../services/researchContent';
-import ReviewService from './../../services/review';
+import UserService from './../../services/legacy/users';
+import UserNotificationService from './../../services/legacy/userNotification';
+import ResearchContentService from './../../services/legacy/researchContent';
+import ReviewService from './../../services/legacy/review';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
-import ResearchGroupService from './../../services/researchGroup';
+import ResearchGroupService from './../../services/legacy/researchGroup';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
-import TenantService from './../../services/tenant';
+import TenantService from './../../services/legacy/tenant';
 
 const userService = new UserService({ scoped: false });
 const researchGroupService = new ResearchGroupService({ scoped: false });

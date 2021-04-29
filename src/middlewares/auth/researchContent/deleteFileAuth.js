@@ -1,5 +1,5 @@
-import ResearchContentService from './../../../services/researchContent';
-import TenantService from './../../../services/tenant';
+import ResearchContentService from './../../../services/legacy/researchContent';
+import TenantService from './../../../services/legacy/tenant';
 
 
 function researchContentFileDeleteAuth(options = {}) {

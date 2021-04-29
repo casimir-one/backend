@@ -1,11 +1,11 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL } from '@deip/command-models';
-import ProposalDtoSchema from './../../../schemas/read/ProposalDtoSchema';
+import ProposalReadModelSchema from './../../../schemas/read/ProposalReadModelSchema';
 import { RESEARCH_STATUS } from './../../../constants';
 import ResearchService from './../../../services/impl/read/ProjectDtoService';
-import ResearchGroupService from './../../../services/researchGroup';
-import UserService from './../../../services/users';
+import ResearchGroupService from './../../../services/legacy/researchGroup';
+import UserService from './../../../services/legacy/users';
 
 
 const usersService = new UserService({ scoped: false });
@@ -16,7 +16,7 @@ const researchService = new ResearchService({ scoped: false });
 class ProposalDtoService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(ProposalDtoSchema, options);
+    super(ProposalReadModelSchema, options);
   }
 
   

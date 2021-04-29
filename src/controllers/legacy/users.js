@@ -1,9 +1,9 @@
 import sharp from 'sharp';
 import qs from 'qs';
-import UserService from './../../services/users';
+import UserService from './../../services/legacy/users';
 import FileStorage from './../../storage';
 import UserForm from './../../forms/legacy/user';
-import UserBookmarkService from './../../services/userBookmark';
+import UserBookmarkService from './../../services/legacy/userBookmark';
 import * as blockchainService from './../../utils/blockchain';
 import { USER_PROFILE_STATUS } from './../../constants';
 

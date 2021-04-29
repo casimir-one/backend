@@ -1,4 +1,4 @@
-import UserInviteService from './../../services/userInvites';
+import UserInviteService from './../../services/legacy/userInvites';
 
 
 const getUserInvites = async (ctx) => {

@@ -37,7 +37,7 @@ const RESEARCH_CONTENT_TYPES = require('../constants').RESEARCH_CONTENT_TYPES;
 const RESEARCH_STATUS = require('./../constants').RESEARCH_STATUS;
 
 
-const AttributeValue = new Schema({
+const AttributeValueSchema = new Schema({
   "_id": false,
   "attributeId": { type: Schema.Types.ObjectId, required: false },
   "researchAttributeId": { type: Schema.Types.ObjectId, required: false, default: undefined },
@@ -48,7 +48,7 @@ const ResearchMigratingSchema = new Schema({
   "_id": { type: String, required: true },
   "tenantId": { type: String, required: true },
   "researchGroupExternalId": { type: String, required: true },
-  "attributes": [AttributeValue],
+  "attributes": [AttributeValueSchema],
   "status": { type: String, enum: [...Object.values(RESEARCH_STATUS)], required: false },
 
   // To remove

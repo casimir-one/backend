@@ -2,7 +2,7 @@ import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
-import TeamDtoService from './../../services/researchGroup'; // TODO: separate read/write schema
+import TeamDtoService from './../../services/legacy/researchGroup'; // TODO: separate read/write schema
 
 class ProposalEventHandler extends BaseEventHandler {
 

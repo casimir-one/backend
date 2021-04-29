@@ -8,7 +8,7 @@ import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
-import ResearchApplicationService from './../../services/researchApplication';
+import ResearchApplicationService from './../../services/legacy/researchApplication';
 import * as blockchainService from './../../utils/blockchain';
 import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
 import FileStorage from './../../storage';

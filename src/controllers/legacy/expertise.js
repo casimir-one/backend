@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import qs from 'qs';
-import UserService from './../../services/users';
-import ExpertiseService from './../../services/expertise';
+import UserService from './../../services/legacy/users';
+import ExpertiseService from './../../services/legacy/expertise';
 
 const expertiseService = new ExpertiseService();
 

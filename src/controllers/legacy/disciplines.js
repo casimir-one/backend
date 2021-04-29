@@ -1,4 +1,4 @@
-import DisciplinesService from './../../services/disciplines';
+import DisciplinesService from './../../services/legacy/disciplines';
 
 const getDomainDisciplines = async (ctx) => {
   try {

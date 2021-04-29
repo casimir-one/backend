@@ -1,6 +1,6 @@
 import assert from 'assert';
 import config from './../../config';
-import TenantProfile from './../../schemas/tenant';
+import TenantSchema from './../../schemas/write/TenantSchema';
 
 
 class BaseService {
@@ -18,7 +18,7 @@ class BaseService {
 
   async getTenantInstance() {
     if (this._tenantProfile === undefined) {
-      const tenantProfile = await TenantProfile.findOne({ _id: config.TENANT });
+      const tenantProfile = await TenantSchema.findOne({ _id: config.TENANT });
       if (!tenantProfile) {
         throw new Error(`Tenant ${config.TENANT} is not found`);
       }
@@ -36,7 +36,7 @@ class BaseService {
     if (tenantProfile.network.scope.length) {
       const isAll = tenantProfile.network.scope.some(s => s == 'all');
       if (isAll) { // temp solution until access management implementation
-        const tenants = await TenantProfile.find({});
+        const tenants = await TenantSchema.find({});
         return { $or: [{ tenantId: { $in: [...tenants.map(t => t._id.toString())] } }, { multiTenantIds: { $in: [...tenants.map(t => t._id.toString())] } }] };
       } else {
         return { $or: [{ tenantId: { $in: [...tenantProfile.network.scope] } }, { multiTenantIds: { $in: [...tenantProfile.network.scope] } }] };

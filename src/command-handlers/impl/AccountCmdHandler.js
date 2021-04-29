@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import TeamDomainService from './../../services/researchGroup'; // TODO: separate read/write schema
+import TeamDomainService from './../../services/legacy/researchGroup'; // TODO: separate read/write schema
 import { TeamCreatedEvent } from './../../events';
 
 

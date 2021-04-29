@@ -1,4 +1,4 @@
-import AttributesService from './../../services/attributes';
+import AttributesService from './../../services/legacy/attributes';
 import mongoose from 'mongoose';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 

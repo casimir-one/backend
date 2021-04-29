@@ -4,7 +4,7 @@ import AssetExchangeProposalSignedEvent from './../../events/legacy/assetExchang
 import AssetTransferredEvent from './../../events/legacy/assetTransferredEvent';
 import AssetTransferProposedEvent from './../../events/legacy/assetTransferProposedEvent';
 import AssetTransferProposalSignedEvent from './../../events/legacy/assetTransferProposalSignedEvent';
-import AssetService from './../../services/asset';
+import AssetService from './../../services/legacy/asset';
 
 const assetService = new AssetService();
 

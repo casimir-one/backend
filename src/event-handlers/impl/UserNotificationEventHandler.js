@@ -1,10 +1,10 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import { USER_NOTIFICATION_TYPE, RESEARCH_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
-import TeamDtoService from './../../services/researchGroup'; // TODO: separate read/write schema
-import UserDtoService from './../../services/users';
+import TeamDtoService from './../../services/legacy/researchGroup'; // TODO: separate read/write schema
+import UserDtoService from './../../services/legacy/users';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
-import UserNotificationsDtoService from './../../services/userNotification';
+import UserNotificationsDtoService from './../../services/legacy/userNotification';
 
 
 class UserNotificationEventHandler extends BaseEventHandler {

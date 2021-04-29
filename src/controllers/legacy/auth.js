@@ -2,10 +2,9 @@ import jwt from 'jsonwebtoken';
 import config from './../../config';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import * as blockchainService from './../../utils/blockchain';
-import ResearchGroupService from './../../services/researchGroup';
-import UserService from './../../services/users';
-import TenantService from './../../services/tenant';
+import ResearchGroupService from './../../services/legacy/researchGroup';
+import UserService from './../../services/legacy/users';
+import TenantService from './../../services/legacy/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
 
 function Encodeuint8arr(seed) {

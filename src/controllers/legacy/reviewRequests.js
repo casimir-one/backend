@@ -1,5 +1,5 @@
-import ReviewRequestService from './../../services/reviewRequest';
-import ReviewService from './../../services/review';
+import ReviewRequestService from './../../services/legacy/reviewRequest';
+import ReviewService from './../../services/legacy/review';
 import ReviewRequestedEvent from './../../events/legacy/reviewRequestedEvent';
 
 

@@ -44,7 +44,7 @@ app.use(require('./routes/tenant.js').protected.routes());
 
 // event handlers
 app.use(require('./middlewares/legacy/events.js')()); // legacy
-app.use(require('./middlewares/appEvents.js')());
+app.use(require('./middlewares/events')());
 
 app.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);

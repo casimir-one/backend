@@ -15,21 +15,21 @@ const config = require('./../config');
 const deipRpc = require('@deip/rpc-client');
 const mongoose = require('mongoose');
 
-const AwardWithdrawalRequest = require('./../schemas/awardWithdrawalRequest');
-const ExpressLicense = require('./../schemas/expressLicense');
-const InvestmentPortfolio = require('./../schemas/investmentPortfolio');
-const JoinRequest = require('./../schemas/joinRequest');
-const Proposal = require('./../schemas/proposal');
-const ResearchApplication = require('./../schemas/researchApplication');
-const Research = require('./../schemas/research');
-const ResearchContent = require('./../schemas/researchContent');
-const ResearchGroup = require('./../schemas/researchGroup');
-const Review = require('./../schemas/review');
-const ReviewRequest = require('./../schemas/reviewRequest');
-const UserProfile = require('./../schemas/user');
-const UserBookmark = require('./../schemas/userBookmark');
-const UserInviteDtoSchema = require('./../schemas/read/UserInviteDtoSchema');
-const UserNotification = require('./../schemas/read/UserNotificationDtoSchema');
+const AwardWithdrawalRequestSchema = require('./../schemas/write/AwardWithdrawalRequestSchema');
+const ProjectExpressLicenseSchema = require('./../schemas/write/ProjectExpressLicenseSchema');
+const InvestmentPortfolio = require('./../schemas/write/InvestmentPortfolioSchema');
+const JoinRequest = require('./../schemas/write/JoinRequestSchema');
+const Proposal = require('./../schemas/read/ProposalReadModelSchema');
+const ResearchApplication = require('./../schemas/write/ProjectExpressLicenseSchema');
+const Research = require('./../schemas/write/ProjectSchema');
+const ResearchContent = require('./../schemas/write/ProjectContentSchema');
+const ResearchGroup = require('./../schemas/write/TeamSchema');
+const Review = require('./../schemas/write/ReviewSchema');
+const ReviewRequest = require('./../schemas/write/ReviewRequestSchema');
+const UserSchema = require('./../schemas/write/UserSchema');
+const UserBookmarkSchema = require('./../schemas/write/UserBookmarkSchema');
+const UserInviteSchema = require('./../schemas/write/UserInviteSchema');
+const UserNotificationSchema = require('./../schemas/write/UserNotificationSchema');
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
@@ -38,8 +38,8 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
 
-  await AwardWithdrawalRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ExpressLicense.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await AwardWithdrawalRequestSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await ProjectExpressLicenseSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await InvestmentPortfolio.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await JoinRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Proposal.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
@@ -49,10 +49,10 @@ const run = async () => {
   await ResearchGroup.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Review.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await ReviewRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserProfile.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserBookmark.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserInviteDtoSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserNotification.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await UserSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await UserBookmarkSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await UserInviteSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await UserNotificationSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   
 };
 

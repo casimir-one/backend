@@ -11,9 +11,9 @@ import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
 import reviewHandler from './reviewHandler';
 
-import UserService from './../../services/users';
+import UserService from './../../services/legacy/users';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
-import ResearchGroupService from './../../services/researchGroup';
+import ResearchGroupService from './../../services/legacy/researchGroup';
 
 class AppEventHandler extends EventEmitter { }
 

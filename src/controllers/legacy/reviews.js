@@ -1,5 +1,5 @@
 import * as blockchainService from './../../utils/blockchain';
-import ReviewService from './../../services/review';
+import ReviewService from './../../services/legacy/review';
 import ReviewCreatedEvent from './../../events/legacy/reviewCreatedEvent';
 
 

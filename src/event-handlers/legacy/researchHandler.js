@@ -6,9 +6,7 @@ import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import ProjectDomainService from './../../services/impl/write/ProjectDomainService';
 
 import ProposalService from './../../services/impl/read/ProposalDtoService';
-import UserService from './../../services/users';
-import UserInviteService from './../../services/userInvites';
-import AttributesService from './../../services/attributes'
+import AttributesService from './../../services/legacy/attributes'
 
 
 class ResearchHandler extends EventEmitter { }

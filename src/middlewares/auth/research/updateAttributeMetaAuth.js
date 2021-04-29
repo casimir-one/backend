@@ -1,5 +1,5 @@
 import ResearchService from './../../../services/impl/read/ProjectDtoService';
-import TenantService from './../../../services/tenant';
+import TenantService from './../../../services/legacy/tenant';
 
 
 function updateAttributeMetaAuth(options = {}) {

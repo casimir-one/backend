@@ -1,9 +1,9 @@
 import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchContentService from './../../services/researchContent';
-import ReviewService from './../../services/review';
-import ReviewRequestService from './../../services/reviewRequest';
+import ResearchContentService from './../../services/legacy/researchContent';
+import ReviewService from './../../services/legacy/review';
+import ReviewRequestService from './../../services/legacy/reviewRequest';
 
 
 class ReviewHandler extends EventEmitter { }

@@ -2,7 +2,7 @@ import sharp from 'sharp'
 import qs from 'qs';
 import * as blockchainService from './../../utils/blockchain';
 import FileStorage from './../../storage';
-import ResearchGroupService from './../../services/researchGroup';
+import ResearchGroupService from './../../services/legacy/researchGroup';
 import ResearchGroupForm from './../../forms/legacy/researchGroup';
 import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';
 import ResearchGroupUpdatedEvent from './../../events/legacy/researchGroupUpdatedEvent';

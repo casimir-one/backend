@@ -1,5 +1,5 @@
-import GrantService from './../../../services/grants';
-import TenantService from './../../../services/tenant';
+import GrantService from './../../../services/legacy/grants';
+import TenantService from './../../../services/legacy/tenant';
 
 
 function grantAwardWithdrawalRequestReadAuth(options = {}) {

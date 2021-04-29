@@ -3,9 +3,9 @@ import deipRpc from '@deip/rpc-client';
 import { APP_PROPOSAL } from '@deip/command-models';
 import { LEGACY_APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchGroupService from './../../services/researchGroup';
+import ResearchGroupService from './../../services/legacy/researchGroup';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
-import UserService from './../../services/users';
+import UserService from './../../services/legacy/users';
 
 
 class ProposalHandler extends EventEmitter { }

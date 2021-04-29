@@ -1,13 +1,13 @@
 import deipRpc from '@deip/rpc-client';
 import { PROPOSAL_STATUS } from './../../../constants';
 import BaseService from './../../base/BaseService';
-import ProposalDomainSchema from './../../../schemas/write/ProposalDomainSchema';
+import ProposalWriteModelSchema from './../../../schemas/write/domain/ProposalWriteModelSchema';
 
 
 class ProposalDomainService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(ProposalDomainSchema, options);
+    super(ProposalWriteModelSchema, options);
   }
   
   async createProposal({

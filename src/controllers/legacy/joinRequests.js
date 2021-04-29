@@ -1,5 +1,5 @@
-import UserJoinRequestService from './../../services/userJoinRequests';
-import ResearchGroupService from './../../services/researchGroup';
+import UserJoinRequestService from './../../services/legacy/userJoinRequests';
+import ResearchGroupService from './../../services/legacy/researchGroup';
 import * as blockchainService from './../../utils/blockchain';
 
 const getJoinRequestsByGroup = async (ctx) => {

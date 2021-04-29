@@ -26,8 +26,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
-const Attribute = require('./../schemas/attribute');
-const AttributeValue = require('./../schemas/attributeValue');
+const Attribute = require('./../schemas/write/AttributeSchema');
+const AttributeValueSchema = require('./../schemas/write/AttributeValueSchema');
 
 const USER_PROFILE_STATUS = require('./../constants').USER_PROFILE_STATUS;
 const ATTRIBUTE_SCOPE = require('./../constants').ATTRIBUTE_SCOPE;
@@ -138,10 +138,10 @@ const UserProfileMigratingSchema = new Schema({
     type: [ForeignId],
     default: undefined
   },
-  "attributes": [AttributeValue]
+  "attributes": [AttributeValueSchema]
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
-const UserProfile = mongoose.model('user-profile', UserProfileMigratingSchema);
+const UserSchema = mongoose.model('user-profile', UserProfileMigratingSchema);
 
 
 const USER_SYSTEM_ATTRIBUTES = {
@@ -745,45 +745,45 @@ const run = async () => {
 
   const userAttributesPromises = [];
 
-  userAttributesPromises.push((new Attribute(USER_SYSTEM_ATTRIBUTES.FIRST_NAME)).save());
-  userAttributesPromises.push((new Attribute(USER_SYSTEM_ATTRIBUTES.LAST_NAME)).save());
+  userAttributesPromises.push((new AttributeSchema(USER_SYSTEM_ATTRIBUTES.FIRST_NAME)).save());
+  userAttributesPromises.push((new AttributeSchema(USER_SYSTEM_ATTRIBUTES.LAST_NAME)).save());
 
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].BIRTHDAY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].BIO).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].COUNTRY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].CITY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].AVATAR).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].EDUCATION).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].EMPLOYMENT).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].BIRTHDAY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].BIO).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].COUNTRY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].CITY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].AVATAR).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].EDUCATION).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["0000000000000000000000000000000000000000"].EMPLOYMENT).save());
 
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].BIRTHDAY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].BIO).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].COUNTRY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].CITY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].AVATAR).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].EDUCATION).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].EMPLOYMENT).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].BIRTHDAY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].BIO).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].COUNTRY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].CITY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].AVATAR).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].EDUCATION).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["1169d704f8a908016033efe8cce6df93f618a265"].EMPLOYMENT).save());
 
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].BIRTHDAY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].BIO).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].COUNTRY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].CITY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].AVATAR).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].EDUCATION).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].EMPLOYMENT).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].BIRTHDAY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].BIO).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].COUNTRY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].CITY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].AVATAR).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].EDUCATION).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["58e3bfd753fcb860a66b82635e43524b285ab708"].EMPLOYMENT).save());
 
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].BIRTHDAY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].BIO).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].COUNTRY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].CITY).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].AVATAR).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].EDUCATION).save());
-  userAttributesPromises.push(new Attribute(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].EMPLOYMENT).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].BIRTHDAY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].BIO).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].COUNTRY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].CITY).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].AVATAR).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].EDUCATION).save());
+  userAttributesPromises.push(new AttributeSchema(USER_CUSTOM_ATTRIBUTES["c8a87b12c23f53866acd397f43b591fd4e631419"].EMPLOYMENT).save());
 
   await Promise.all(userAttributesPromises);
 
 
-  const userProfiles = await UserProfile.find({});
+  const userProfiles = await UserSchema.find({});
   const userProfilesPromises = [];
 
   for (let i = 0; i < userProfiles.length; i++) {

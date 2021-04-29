@@ -1,5 +1,5 @@
 import config from './../config'
-import TenantService from './../services/tenant';
+import TenantService from './../services/legacy/tenant';
 
 const tenantService = new TenantService();
 

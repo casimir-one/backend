@@ -1,19 +1,18 @@
 import deipRpc from '@deip/rpc-client';
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
-import ProjectDtoSchema from './../../../schemas/research'; // TODO: separate read/write schemas
-import ExpressLicensingService from './../../expressLicensing';
-import ResearchNdaService from './../../researchNda';
-import UserService from './../../users';
-import AttributesService from './../../attributes';
-import { logWarn } from './../../../utils/log';
+import ProjectSchema from './../../../schemas/write/ProjectSchema'; // TODO: separate read/write schemas
+import ExpressLicensingService from './../../legacy/expressLicensing';
+import ResearchNdaService from './../../legacy/researchNda';
+import UserService from './../../legacy/users';
+import AttributesService from './../../legacy/attributes';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../../constants';
 
 
 class ProjectDtoService extends BaseService {
 
   constructor(options = { scoped: true }) { 
-    super(ProjectDtoSchema, options);
+    super(ProjectSchema, options);
   }
 
   async mapResearch(researches, filterObj) {

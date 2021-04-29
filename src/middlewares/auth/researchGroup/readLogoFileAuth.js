@@ -1,5 +1,5 @@
-import ResearchGroupService from './../../../services/researchGroup';
-import TenantService from './../../../services/tenant';
+import ResearchGroupService from './../../../services/legacy/researchGroup';
+import TenantService from './../../../services/legacy/tenant';
 
 
 function researchGroupLogoFileReadAuth(options = {}) {

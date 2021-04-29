@@ -1,6 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import { USER_INVITE_STATUS } from './../../constants';
-import UserInviteDtoService from './../../services/userInvites';
+import UserInviteDtoService from './../../services/legacy/userInvites';
 import APP_EVENT from './../../events/base/AppEvent';
 
 

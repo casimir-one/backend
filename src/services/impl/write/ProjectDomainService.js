@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
-import ProjectDomainSchema from './../../../schemas/research'; // TODO: separate read/write schemas
-import AttributesService from './../../attributes';
+import ProjectSchema from './../../../schemas/write/ProjectSchema'; // TODO: separate read/write schemas
+import AttributesService from './../../legacy/attributes';
 import { logWarn } from './../../../utils/log';
 import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../../../constants';
 
@@ -9,7 +9,7 @@ import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../../../constants';
 class ProjectDomainService extends BaseService {
 
   constructor(options = { scoped: true }) { 
-    super(ProjectDomainSchema, options);
+    super(ProjectSchema, options);
   }
 
 

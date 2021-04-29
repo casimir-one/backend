@@ -11,8 +11,8 @@ import FileStorage from './../../storage';
 import crypto from 'crypto';
 import slug from 'limax';
 import * as blockchainService from './../../utils/blockchain';
-import ResearchGroupService from './../../services/researchGroup';
-import ResearchContentService from './../../services/researchContent'
+import ResearchGroupService from './../../services/legacy/researchGroup';
+import ResearchContentService from './../../services/legacy/researchContent'
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import { RESEARCH_CONTENT_STATUS } from './../../constants';
 import ResearchContentCreatedEvent from './../../events/legacy/researchContentCreatedEvent';

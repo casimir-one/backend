@@ -1,6 +1,6 @@
-import ResearchContentService from './../../../services/researchContent';
-import TenantService from './../../../services/tenant';
-import ExpressLicensingService from './../../../services/expressLicensing';
+import ResearchContentService from './../../../services/legacy/researchContent';
+import TenantService from './../../../services/legacy/tenant';
+import ExpressLicensingService from './../../../services/legacy/expressLicensing';
 import { getTenantAccessToken } from './../../../utils/network';
 
 

@@ -1,4 +1,4 @@
-import UserNotificationService from './../../services/userNotification';
+import UserNotificationService from './../../services/legacy/userNotification';
 
 const getNotificationsByUser = async (ctx) => {
   const username = ctx.params.username;

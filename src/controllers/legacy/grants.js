@@ -1,8 +1,8 @@
 import path from 'path'
-import AwardWithdrawalRequest from './../../schemas/awardWithdrawalRequest';
+import AwardWithdrawalRequestSchema from './../../schemas/write/AwardWithdrawalRequestSchema';
 import GrantAwardPaymentForm from './../../forms/legacy/grantAwardPaymentForm';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
-import GrantService from './../../services/grants';
+import GrantService from './../../services/legacy/grants';
 import crypto from 'crypto';
 import slug from 'limax';
 import FileStorage from './../../storage';
@@ -115,7 +115,7 @@ const createAwardWithdrawalRequest = async (ctx) => {
         ctx.status = 200;
         ctx.body = updatedWithdrawal;
       } else {
-        const withdrawal = new AwardWithdrawalRequest({
+        const withdrawal = new AwardWithdrawalRequestSchema({
           "tenantId": tenant.id,
           "filename": `package [${packageHash}]`,
           "folder": packageHash,

@@ -1,8 +1,8 @@
 import deipRpc from '@deip/rpc-client';
 import sharp from 'sharp';
-import UserService from './../../services/users';
-import TenantService from './../../services/tenant';
-import ResearchGroupService from './../../services/researchGroup';
+import UserService from './../../services/legacy/users';
+import TenantService from './../../services/legacy/tenant';
+import ResearchGroupService from './../../services/legacy/researchGroup';
 import FileStorage from './../../storage';
 import config from './../../config';
 import { USER_PROFILE_STATUS } from './../../constants';

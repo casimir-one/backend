@@ -1,5 +1,5 @@
-import UserService from './../../../services/users';
-import TenantService from './../../../services/tenant';
+import UserService from './../../../services/legacy/users';
+import TenantService from './../../../services/legacy/tenant';
 
 
 function userAvatarFileReadAuth(options = {}) {

@@ -1,4 +1,4 @@
-import FundraisingService from './../../services/fundraising';
+import FundraisingService from './../../services/legacy/fundraising';
 import * as blockchainService from './../../utils/blockchain';
 import ResearchTokenSaleCreatedEvent from './../../events/legacy/researchTokenSaleCreatedEvent';
 import ResearchTokenSaleProposedEvent from './../../events/legacy/researchTokenSaleProposedEvent';

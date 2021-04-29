@@ -3,8 +3,8 @@ import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, RESEARCH_CONTENT_STATUS } from './.
 import { handle, fire, wait } from './utils';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
-import ResearchGroupService from './../../services/researchGroup';
-import ResearchContentService from './../../services/researchContent';
+import ResearchGroupService from './../../services/legacy/researchGroup';
+import ResearchContentService from './../../services/legacy/researchContent';
 
 
 class ResearchContentHandler extends EventEmitter { }
