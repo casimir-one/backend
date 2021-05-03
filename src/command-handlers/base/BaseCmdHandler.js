@@ -1,9 +1,11 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import PubSub from 'pubsub-js';
+import fs from 'fs';
+import util from 'util';
+import path from 'path';
 import * as protocolService from './../../utils/blockchain';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
-import util from 'util';
 import assert from 'assert';
 import config from './../../config';
 import { QUEUE_TOPIC } from './../../constants';
@@ -141,7 +143,9 @@ class BaseCmdHandler extends EventEmitter {
     }
 
     BaseCmdHandler.Dispatch(appCmds, ctx);
+
     // TODO: save and put events into persistent FIFO queue
+    this.logEvents(ctx.state.appEvents)
     PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
   };
 
@@ -170,6 +174,19 @@ class BaseCmdHandler extends EventEmitter {
     }
 
   };
+
+  logEvents(events) {
+    const EVENTS_LOG_FILE_PATH = path.join(__dirname, `./../../../${config.TENANT_LOG_DIR}/events.log`);
+
+    let log = '';
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+      log += `${event.toString()}\r\n`;
+    }
+    fs.writeFileSync(EVENTS_LOG_FILE_PATH, log, { flag: 'a' }, (err) => {
+      console.error(err);
+    });
+  }
 
 }
 

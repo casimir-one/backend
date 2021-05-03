@@ -6,6 +6,7 @@ class BaseEvent {
     this._eventNum = eventNum;
     this._eventPayload = eventPayload;
     this._proposalCtx = eventPayload.proposalCtx || null;
+    this._timestamp = Date.now();
   }
 
   getEventNum() {
@@ -26,6 +27,21 @@ class BaseEvent {
 
   hasProposalCtx() {
     return !!this._proposalCtx;
+  }
+
+  getTimestamp() {
+    return this._timestamp;
+  }
+
+  toString() {
+    return JSON.stringify({ 
+      timestamp: this.getTimestamp(), 
+      eventNum: this.getEventNum(), 
+      eventName: this.getEventName(), 
+      eventPayload: this.getEventPayload(), 
+      proposalCtx: this.getProposalCtx() 
+    });
+
   }
 
 }

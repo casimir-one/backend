@@ -11,3 +11,4 @@ src/config/environment/.demo.env
 src/config/environment/.demo*.env
 src/config/environment/.tto*.env
 src/scripts/genesis-*.json
+log/events.log
