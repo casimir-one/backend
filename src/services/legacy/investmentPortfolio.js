@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
-import InvestmentPortfolioSchema from './../../schemas/write/InvestmentPortfolioSchema';
+import InvestmentPortfolioSchema from './../../schemas/InvestmentPortfolioSchema';
 
 class InvestmentPortfolioService extends BaseService {
 

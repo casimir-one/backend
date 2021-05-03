@@ -1,5 +1,5 @@
 import BaseService from './../base/BaseService';
-import AwardWithdrawalRequestSchema from './../../schemas/write/AwardWithdrawalRequestSchema';
+import AwardWithdrawalRequestSchema from './../../schemas/AwardWithdrawalRequestSchema';
 
 class GrantService extends BaseService {
 

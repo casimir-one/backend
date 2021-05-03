@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
-import UserSchema from './../../schemas/write/UserSchema';
+import UserSchema from './../../schemas/UserSchema';
 import { USER_PROFILE_STATUS } from './../../constants';
 import config from './../../config';
 import * as blockchainService from './../../utils/blockchain';

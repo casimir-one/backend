@@ -1,5 +1,5 @@
 import BaseService from './../base/BaseService';
-import ProjectApplicationSchema from './../../schemas/write/ProjectApplicationSchema';
+import ProjectApplicationSchema from './../../schemas/ProjectApplicationSchema';
 
 
 class ResearchApplicationService extends BaseService {

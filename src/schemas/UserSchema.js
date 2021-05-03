@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import USER_PROFILE_STATUS from './../../constants/userProfileStatus';
+import USER_PROFILE_STATUS from './../constants/userProfileStatus';
 import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;

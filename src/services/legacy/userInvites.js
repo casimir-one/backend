@@ -1,5 +1,5 @@
 import BaseService from './../base/BaseService';
-import UserInviteSchema from './../../schemas/write/UserInviteSchema';
+import UserInviteSchema from './../../schemas/UserInviteSchema';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import { USER_INVITE_STATUS } from './../../constants';
 

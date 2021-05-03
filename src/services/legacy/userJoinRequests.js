@@ -1,5 +1,5 @@
 import BaseService from './../base/BaseService';
-import JoinRequestSchema from './../../schemas/write/JoinRequestSchema';
+import JoinRequestSchema from './../../schemas/JoinRequestSchema';
 
 
 class UserJoinRequestService extends BaseService {

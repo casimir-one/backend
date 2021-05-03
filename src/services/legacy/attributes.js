@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
-import AttributeSchema from './../../schemas/write/AttributeSchema';
+import AttributeSchema from './../../schemas/AttributeSchema';
 import config from './../../config';
-import TenantSchema from './../../schemas/write/TenantSchema';
+import TenantSchema from './../../schemas/TenantSchema';
 import { ATTRIBUTE_SCOPE } from './../../constants';
 
 class AttributesService {

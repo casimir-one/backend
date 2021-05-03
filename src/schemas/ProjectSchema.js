@@ -1,7 +1,7 @@
 
 import mongoose from 'mongoose';
 import AttributeValueSchema from './AttributeValueSchema';
-import { RESEARCH_STATUS } from './../../constants';
+import { RESEARCH_STATUS } from './../constants';
 
 const Schema = mongoose.Schema;
 

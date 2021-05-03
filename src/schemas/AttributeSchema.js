@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../../constants';
+import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../constants';
 
 
 const Schema = mongoose.Schema;

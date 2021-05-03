@@ -1,5 +1,5 @@
 import path from 'path'
-import AwardWithdrawalRequestSchema from './../../schemas/write/AwardWithdrawalRequestSchema';
+import AwardWithdrawalRequestSchema from './../../schemas/AwardWithdrawalRequestSchema';
 import GrantAwardPaymentForm from './../../forms/legacy/grantAwardPaymentForm';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import GrantService from './../../services/legacy/grants';

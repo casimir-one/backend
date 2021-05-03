@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { USER_INVITE_STATUS } from './../../constants';
+import { USER_INVITE_STATUS } from './../constants';
 
 const Schema = mongoose.Schema;
 

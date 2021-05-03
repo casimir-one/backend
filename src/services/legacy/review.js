@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
-import ReviewSchema from './../../schemas/write/ReviewSchema';
+import ReviewSchema from './../../schemas/ReviewSchema';
 
 
 class ReviewService extends BaseService {

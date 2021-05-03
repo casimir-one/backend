@@ -15,21 +15,21 @@ const config = require('./../config');
 const deipRpc = require('@deip/rpc-client');
 const mongoose = require('mongoose');
 
-const AwardWithdrawalRequestSchema = require('./../schemas/write/AwardWithdrawalRequestSchema');
-const ProjectExpressLicenseSchema = require('./../schemas/write/ProjectExpressLicenseSchema');
-const InvestmentPortfolio = require('./../schemas/write/InvestmentPortfolioSchema');
-const JoinRequest = require('./../schemas/write/JoinRequestSchema');
+const AwardWithdrawalRequestSchema = require('./../schemas/AwardWithdrawalRequestSchema');
+const ProjectExpressLicenseSchema = require('./../schemas/ProjectExpressLicenseSchema');
+const InvestmentPortfolio = require('./../schemas/InvestmentPortfolioSchema');
+const JoinRequest = require('./../schemas/JoinRequestSchema');
 const Proposal = require('./../schemas/read/ProposalReadModelSchema');
-const ResearchApplication = require('./../schemas/write/ProjectExpressLicenseSchema');
-const Research = require('./../schemas/write/ProjectSchema');
-const ResearchContent = require('./../schemas/write/ProjectContentSchema');
-const ResearchGroup = require('./../schemas/write/TeamSchema');
-const Review = require('./../schemas/write/ReviewSchema');
-const ReviewRequest = require('./../schemas/write/ReviewRequestSchema');
-const UserSchema = require('./../schemas/write/UserSchema');
-const UserBookmarkSchema = require('./../schemas/write/UserBookmarkSchema');
-const UserInviteSchema = require('./../schemas/write/UserInviteSchema');
-const UserNotificationSchema = require('./../schemas/write/UserNotificationSchema');
+const ResearchApplication = require('./../schemas/ProjectExpressLicenseSchema');
+const Research = require('./../schemas/ProjectSchema');
+const ResearchContent = require('./../schemas/ProjectContentSchema');
+const ResearchGroup = require('./../schemas/TeamSchema');
+const Review = require('./../schemas/ReviewSchema');
+const ReviewRequest = require('./../schemas/ReviewRequestSchema');
+const UserSchema = require('./../schemas/UserSchema');
+const UserBookmarkSchema = require('./../schemas/UserBookmarkSchema');
+const UserInviteSchema = require('./../schemas/UserInviteSchema');
+const UserNotificationSchema = require('./../schemas/UserNotificationSchema');
 
 
 deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });

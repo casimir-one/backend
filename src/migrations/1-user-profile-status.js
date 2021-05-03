@@ -15,7 +15,7 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 const bluebird = require('bluebird');
-const UserSchema = require('./../schemas/write/UserSchema');
+const UserSchema = require('./../schemas/UserSchema');
 const deipRpc = require('@deip/rpc-client');
 const USER_PROFILE_STATUS = require('./../constants/userProfileStatus').default;
 

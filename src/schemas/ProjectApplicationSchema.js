@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { RESEARCH_APPLICATION_STATUS } from './../../constants';
+import { RESEARCH_APPLICATION_STATUS } from './../constants';
 
 const Schema = mongoose.Schema;
 

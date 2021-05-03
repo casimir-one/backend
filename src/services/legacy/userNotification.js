@@ -1,5 +1,5 @@
 import BaseService from './../base/BaseService';
-import UserNotificationSchema from './../../schemas/write/UserNotificationSchema';
+import UserNotificationSchema from './../../schemas/UserNotificationSchema';
 
 
 class UserNotificationService extends BaseService {

@@ -1,5 +1,5 @@
 import BaseService from './../base/BaseService';
-import ReviewRequestSchema from './../../schemas/write/ReviewRequestSchema';
+import ReviewRequestSchema from './../../schemas/ReviewRequestSchema';
 
 
 class ReviewRequestService extends BaseService {

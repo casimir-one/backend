@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 // TODO: separate read/write schemas
-import ProjectSchema from './../../../schemas/write/ProjectSchema';
+import ProjectSchema from './../../../schemas/ProjectSchema';
 import AttributesService from './../../legacy/attributes';
 import { logWarn } from './../../../utils/log';
 import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../../../constants';

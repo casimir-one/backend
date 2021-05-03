@@ -1,6 +1,6 @@
 import assert from 'assert';
 import config from './../../config';
-import TenantSchema from './../../schemas/write/TenantSchema';
+import TenantSchema from './../../schemas/TenantSchema';
 
 
 class BaseService {

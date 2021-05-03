@@ -1,5 +1,5 @@
 import BaseService from './../base/BaseService';
-import UserBookmarkSchema from './../../schemas/write/UserBookmarkSchema';
+import UserBookmarkSchema from './../../schemas/UserBookmarkSchema';
 
 
 class UserBookmarkService extends BaseService {

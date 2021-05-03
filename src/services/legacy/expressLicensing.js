@@ -1,4 +1,4 @@
-import ProjectExpressLicenseSchema from './../../schemas/write/ProjectExpressLicenseSchema';
+import ProjectExpressLicenseSchema from './../../schemas/ProjectExpressLicenseSchema';
 import BaseService from './../base/BaseService';
 import deipRpc from '@deip/rpc-client';
 

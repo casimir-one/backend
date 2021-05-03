@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
-import ProjectContentSchema from './../../schemas/write/ProjectContentSchema';
+import ProjectContentSchema from './../../schemas/ProjectContentSchema';
 import { RESEARCH_CONTENT_STATUS, CONTENT_TYPES_MAP } from './../../constants';
 import ResearchService from './../impl/read/ProjectDtoService';
 import ResearchGroupService from './researchGroup';

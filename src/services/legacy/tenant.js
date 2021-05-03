@@ -1,5 +1,5 @@
 import deipRpc from '@deip/rpc-client';
-import TenantSchema from './../../schemas/write/TenantSchema';
+import TenantSchema from './../../schemas/TenantSchema';
 import UserService from './../../services/legacy/users';
 import config from './../../config';
 

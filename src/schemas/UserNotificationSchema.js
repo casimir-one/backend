@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import USER_NOTIFICATION_TYPE from './../../constants/userNotificationType';
+import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
 
 const Schema = mongoose.Schema;
 

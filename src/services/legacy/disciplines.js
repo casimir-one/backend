@@ -2,7 +2,7 @@ import deipRpc from '@deip/rpc-client';
 import ResearchService from './../impl/read/ProjectDtoService';
 import BaseService from './../base/BaseService';
 import { CHAIN_CONSTANTS, DISCIPLINES } from './../../constants';
-import DomainSchema from './../../schemas/write/DomainSchema';
+import DomainSchema from './../../schemas/DomainSchema';
 
 class DisciplinesService extends BaseService {
 

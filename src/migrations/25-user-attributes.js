@@ -26,8 +26,8 @@ const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
-const Attribute = require('./../schemas/write/AttributeSchema');
-const AttributeValueSchema = require('./../schemas/write/AttributeValueSchema');
+const Attribute = require('./../schemas/AttributeSchema');
+const AttributeValueSchema = require('./../schemas/AttributeValueSchema');
 
 const USER_PROFILE_STATUS = require('./../constants').USER_PROFILE_STATUS;
 const ATTRIBUTE_SCOPE = require('./../constants').ATTRIBUTE_SCOPE;

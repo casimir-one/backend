@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
-import ProjectSchema from './../../../schemas/write/ProjectSchema'; // TODO: separate read/write schemas
+import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import ExpressLicensingService from './../../legacy/expressLicensing';
 import ResearchNdaService from './../../legacy/researchNda';
 import UserService from './../../legacy/users';

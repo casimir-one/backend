@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
-import TeamSchema from './../../schemas/write/TeamSchema';
+import TeamSchema from './../../schemas/TeamSchema';
 
 
 class ResearchGroupService extends BaseService {

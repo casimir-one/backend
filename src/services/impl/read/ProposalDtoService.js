@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL } from '@deip/command-models';
-import ProposalSchema from './../../../schemas/write/ProposalSchema';
+import ProposalSchema from './../../../schemas/ProposalSchema';
 import { RESEARCH_STATUS } from './../../../constants';
 import ResearchService from './../../../services/impl/read/ProjectDtoService';
 import ResearchGroupService from './../../../services/legacy/researchGroup';
