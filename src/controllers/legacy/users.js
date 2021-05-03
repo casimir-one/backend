@@ -1,11 +1,12 @@
 import sharp from 'sharp';
 import qs from 'qs';
 import UserService from './../../services/legacy/users';
+import AttributesService from './../../services/legacy/attributes';
 import FileStorage from './../../storage';
 import UserForm from './../../forms/legacy/user';
 import UserBookmarkService from './../../services/legacy/userBookmark';
 import * as blockchainService from './../../utils/blockchain';
-import { USER_PROFILE_STATUS } from './../../constants';
+import { USER_PROFILE_STATUS, ATTRIBUTE_SCOPE, ATTRIBUTE_TYPE } from './../../constants';
 
 
 const getUser = async (ctx) => {
@@ -374,14 +375,21 @@ const getAvatar = async (ctx) => {
   try {
 
     const usersService = new UserService();
+    const attributesService = new AttributesService();
     const user = await usersService.getUser(username);
     const defaultAvatar = FileStorage.getAccountDefaultAvatarFilePath();
 
     let src;
     let buff;
 
-    if (user && user.profile) {
-      const filepath = FileStorage.getAccountAvatarFilePath(user.account.name, user.profile.avatar);
+    if (user && user.profile && user.profile.attributes) {
+      // temp solution //
+      const attrs = await attributesService.getNetworkAttributesByScope(ATTRIBUTE_SCOPE.USER);
+      const attr = attrs.find(
+        ({ type, title, tenantId }) => title === 'Avatar' && type === ATTRIBUTE_TYPE.IMAGE && tenantId === user.tenantId
+      );
+      const userAttr = user.profile.attributes.find(({ attributeId }) => attributeId.toString() === (attr ? attr._id.toString() : ''));
+      const filepath = FileStorage.getAccountAvatarFilePath(user.account.name, userAttr ? userAttr.value : 'default');
       const exists = await FileStorage.exists(filepath);
       if (exists) {
         buff = await FileStorage.get(filepath);
