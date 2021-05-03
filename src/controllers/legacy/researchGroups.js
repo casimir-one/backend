@@ -14,13 +14,14 @@ import UserResignationProposalSignedEvent from './../../events/legacy/userResign
 
 const createResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta } = ctx.request.body;
 
   try {
+    const { tx, offchainMeta } = await ResearchGroupForm(ctx);
+
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
-    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, offchainMeta.researchGroup);
+    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, offchainMeta);
     ctx.state.events.push(researchGroupCreatedEvent);
 
     const { researchGroupExternalId } = researchGroupCreatedEvent.getSourceData();
@@ -40,15 +41,15 @@ const createResearchGroup = async (ctx, next) => {
 
 const updateResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
-  const { tx, offchainMeta, isProposal } = ctx.request.body;
 
   try {
+    const { tx, offchainMeta, isProposal } = await ResearchGroupForm(ctx);
 
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
     if (isProposal) {
-      const researchGroupUpdateProposedEvent = new ResearchGroupUpdateProposedEvent(datums, offchainMeta.researchGroup);
+      const researchGroupUpdateProposedEvent = new ResearchGroupUpdateProposedEvent(datums, offchainMeta);
       ctx.state.events.push(researchGroupUpdateProposedEvent);
 
       const researchGroupUpdateApprovals = researchGroupUpdateProposedEvent.getProposalApprovals();
@@ -60,7 +61,7 @@ const updateResearchGroup = async (ctx, next) => {
       
     } else {
       const researchGroupUpdatedEvent = new ResearchGroupUpdatedEvent(datums);
-      ctx.state.events.push(researchGroupUpdatedEvent, offchainMeta.researchGroup);
+      ctx.state.events.push(researchGroupUpdatedEvent, offchainMeta);
     }
 
     ctx.status = 200;
@@ -201,11 +202,11 @@ const getResearchGroupLogo = async (ctx) => {
 
 const getResearchGroup = async (ctx) => {
   const researchGroupExternalId = ctx.params.researchGroupExternalId;
-  const researchGroupsService = new ResearchGroupService();
+  const researchGroupService = new ResearchGroupService();
 
   try {
 
-    const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
+    const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
     if (!researchGroup) {
       ctx.status = 404;
       ctx.body = null;
@@ -225,8 +226,8 @@ const getResearchGroup = async (ctx) => {
 const getResearchGroupsByUser = async (ctx) => {
   const member = ctx.params.username;
   try {
-    const researchGroupsService = new ResearchGroupService();
-    const researchGroups = await researchGroupsService.getResearchGroupsByUser(member);
+    const researchGroupService = new ResearchGroupService();
+    const researchGroups = await researchGroupService.getResearchGroupsByUser(member);
     ctx.status = 200;
     ctx.body = researchGroups;
   } catch (err) {
@@ -240,8 +241,8 @@ const getResearchGroupsByUser = async (ctx) => {
 const getResearchGroupsByTenant = async (ctx) => {
   const tenantId = ctx.params.tenantId;
   try {
-    const researchGroupsService = new ResearchGroupService();
-    const researchGroups = await researchGroupsService.getResearchGroupsByTenant(tenantId);
+    const researchGroupService = new ResearchGroupService();
+    const researchGroups = await researchGroupService.getResearchGroupsByTenant(tenantId);
     ctx.status = 200;
     ctx.body = researchGroups;
   } catch (err) {
@@ -255,8 +256,8 @@ const getResearchGroupsByTenant = async (ctx) => {
 const getResearchGroupsListing = async (ctx) => {
   const query = qs.parse(ctx.query);
   try {
-    const researchGroupsService = new ResearchGroupService();
-    const researchGroups = await researchGroupsService.getResearchGroupsListing(query.personal);
+    const researchGroupService = new ResearchGroupService();
+    const researchGroups = await researchGroupService.getResearchGroupsListing(query.personal);
     ctx.status = 200;
     ctx.body = researchGroups;
   } catch (err) {

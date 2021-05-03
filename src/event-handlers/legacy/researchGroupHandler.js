@@ -12,17 +12,16 @@ const researchGroupHandler = new ResearchGroupHandler();
 researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupCreatedEvent, tenant } = source;
 
-  const researchGroupsService = new ResearchGroupService();
-  const { researchGroupExternalId, creator, source: { offchain: { name, description } } } = researchGroupCreatedEvent.getSourceData();
+  const researchGroupService = new ResearchGroupService();
+  const { researchGroupExternalId, creator, source: { offchain: { attributes } } } = researchGroupCreatedEvent.getSourceData();
 
-  await researchGroupsService.createResearchGroupRef({
+  await researchGroupService.createResearchGroupRef({
     externalId: researchGroupExternalId,
     creator: creator,
-    name: name,
-    description: description
+    attributes: attributes
   });
 
-  const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   return researchGroup;
 }));
 
@@ -30,16 +29,15 @@ researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, repl
 researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdatedEvent, tenant } = source;
 
-  const researchGroupsService = new ResearchGroupService();
-  const { researchGroupExternalId, source: { offchain: { name, description } } } = researchGroupUpdatedEvent.getSourceData();
+  const researchGroupService = new ResearchGroupService();
+  const { researchGroupExternalId, source: { offchain: { attributes } } } = researchGroupUpdatedEvent.getSourceData();
 
-  await researchGroupsService.updateResearchGroupRef({
+  await researchGroupService.updateResearchGroupRef({
     externalId: researchGroupExternalId,
-    name: name,
-    description: description
+    attributes: attributes
   });
 
-  const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   return researchGroup;
 }));
 
@@ -54,16 +52,15 @@ researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED,
 
   const proposal = await proposalsService.getProposal(proposalId);
   const { status } = proposal.proposal;
-  const { researchGroupExternalId, source: { offchain: { name, description } } } = proposal.details;
+  const { researchGroupExternalId, source: { offchain: { attributes } } } = proposal.details;
 
   if (status == PROPOSAL_STATUS.APPROVED) {
     await researchGroupService.updateResearchGroupRef(researchGroupExternalId, {
-      name: name,
-      description: description
+      attributes
     });
   }
 
-  const researchGroup = await researchGroupsService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
   return researchGroup;
 }));
 
