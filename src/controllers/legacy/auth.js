@@ -6,6 +6,7 @@ import ResearchGroupService from './../../services/legacy/researchGroup';
 import UserService from './../../services/legacy/users';
 import TenantService from './../../services/legacy/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
+import AttributesService from './../../services/legacy/attributes';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -88,6 +89,7 @@ const signUp = async function (ctx, next) {
 
     const usersService = new UserService();
     const researchGroupService = new ResearchGroupService();
+    const attributesService = new AttributesService()
 
     if (!username || !pubKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
       ctx.status = 400;
@@ -128,11 +130,18 @@ const signUp = async function (ctx, next) {
 
     if (status == USER_PROFILE_STATUS.APPROVED) {
       const tx = await usersService.createUserAccount({ username, pubKey, role });
+
+      const attrs = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.TEAM);
+      const attr = attrs.find(
+        ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
+      );
+  
+      const attributes = attr ? [{attributeId: attr._id, value: username}] : [];
+  
       await researchGroupService.createResearchGroupRef({
         externalId: username,
         creator: username,
-        name: username,
-        description: username
+        attributes
       });
 
       /* Temp solution for ACTION PROJECT roles setup flow */

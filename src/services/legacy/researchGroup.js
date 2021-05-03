@@ -56,15 +56,13 @@ class ResearchGroupService extends BaseService {
   async createResearchGroupRef({
     externalId,
     creator,
-    name,
-    description
+    attributes
   }) {
 
     const result = await this.createOne({
       _id: externalId,
       creator,
-      name,
-      description
+      attributes
     });
 
     return result;
@@ -72,13 +70,11 @@ class ResearchGroupService extends BaseService {
 
 
   async updateResearchGroupRef(externalId, {
-    name,
-    description
+    attributes
   }) {
 
     const result = this.updateOne({ _id: externalId }, {
-      name,
-      description
+      attributes
     });
 
     return result;

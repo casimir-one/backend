@@ -26,10 +26,10 @@ const filenameHandler = () => function () {
 
 
 const fileFilterHandler = (req, file, callback) => {
-  const allowedAvatarMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-  if (!allowedAvatarMimeTypes.some(mime => mime === file.mimetype)) {
-    return callback(new Error('Only the following mime types are allowed: ' + allowedAvatarMimeTypes.join(', ')), false);
-  }
+  // const allowedAvatarMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
+  // if (!allowedAvatarMimeTypes.some(mime => mime === file.mimetype)) {
+  //   return callback(new Error('Only the following mime types are allowed: ' + allowedAvatarMimeTypes.join(', ')), false);
+  // }
   callback(null, true);
 }
 
@@ -44,9 +44,19 @@ const ResearchGroupForm = async (ctx) => {
 
   const formHandler = filesUploader.any();
   return formHandler(ctx, () => new Promise((resolve, reject) => {
+    const tx = JSON.parse(ctx.req.body.tx);
+    const onchainData = JSON.parse(ctx.req.body.onchainData);
+    const offchainMeta = JSON.parse(ctx.req.body.offchainMeta);
+    const isProposal = ctx.req.body.isProposal === 'true';
+    const filename = ctx.req.files.length ? ctx.req.files[0].filename : '';
+
     try {
       resolve({
-        filename: ctx.req.files[0].filename
+        tx,
+        onchainData,
+        offchainMeta,
+        isProposal,
+        filename
       });
     } catch (err) {
       reject(err);
