@@ -17,24 +17,21 @@ class ProposalCmdHandler extends BaseCmdHandler {
 
 const proposalCmdHandler = new ProposalCmdHandler();
 
-const proposalService = new ProposalService();
 
-proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, async (cmd, ctx) => {
-  const { entityId: proposalId, creator, type } = cmd.getCmdPayload();
+proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
+  const { entityId: proposalId, 
+    creator, 
+    type 
+  } = cmd.getCmdPayload();
 
-  const proposal = await proposalService.createProposal({
-    proposalId: proposalId,
-    proposalCmd: cmd,
-    type: type,
-    creator: creator
-  });
-  
+  const { status } = ctx.state.updatedProposals[proposalId];
+
   ctx.state.appEvents.push(new ProposalCreatedEvent({
-    proposalId: proposal._id,
-    status: proposal.status,
-    type: proposal.type,
-    requiredApprovals: proposal.requiredApprovals,
+    proposalId: proposalId,
+    status: status,
+    type: type,
     proposalCmd: cmd,
+    creator: creator,
     proposalCtx: ctx.state.proposalsStackFrame
   }));
 
@@ -52,25 +49,30 @@ proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, async (cmd, ctx) => {
 });
 
 
-proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
+proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, (cmd, ctx) => {
   const { entityId: proposalId } = cmd.getCmdPayload();
 
-  const proposal = await proposalService.updateProposal(proposalId, {});
-  const proposalCmd = CreateProposalCmd.Deserialize(proposal.cmd);
-  const proposedCmds = proposalCmd.getProposedCmds();
-  const type = proposalCmd.getProposalType();
+  const {
+    type,
+    status,
+    proposalCmd,
+    proposedCmds
+  } = ctx.state.updatedProposals[proposalId];
+
+  const proposalCtx = { proposalId, type, proposedCmds };
 
   ctx.state.appEvents.push(new ProposalUpdatedEvent({
     proposalId: proposalId,
-    proposalCtx: ctx.state.proposalsStackFrame
+    status: status,
+    proposalCtx: proposalCtx
   }));
 
-  if (proposal.status == PROPOSAL_STATUS.APPROVED) {
+  if (status == PROPOSAL_STATUS.APPROVED) {
     
-    ctx.state.proposalsStack.push({ proposalId, type, proposedCmds });
+    ctx.state.proposalsStack.push(proposalCtx);
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1];
     
-    await ProposalCmdHandler.HandleChain(proposedCmds, ctx);
+    ProposalCmdHandler.Dispatch(proposedCmds, ctx);
 
     const ProposalAcceptedHookEvent = APP_PROPOSAL_EVENT[type]['ACCEPTED'];
     if (ProposalAcceptedHookEvent) {
@@ -89,22 +91,27 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, async (cmd, ctx) => {
 });
 
 
-proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, async (cmd, ctx) => {
+proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, (cmd, ctx) => {
   const { entityId: proposalId } = cmd.getCmdPayload();
 
-  const proposal = await proposalService.updateProposal(proposalId, {});
-  const proposalCmd = CreateProposalCmd.Deserialize(proposal.cmd);
-  const proposedCmds = proposalCmd.getProposedCmds();
-  const type = proposalCmd.getProposalType();
+  const {
+    type,
+    status,
+    proposalCmd,
+    proposedCmds
+  } = ctx.state.updatedProposals[proposalId];
+
+  const proposalCtx = { proposalId, type, proposedCmds };
 
   ctx.state.appEvents.push(new ProposalDeclinedEvent({
     proposalId: proposalId,
-    proposalCtx: ctx.state.proposalsStackFrame
+    status: status,
+    proposalCtx: proposalCtx
   }));
 
-  if (proposal.status == PROPOSAL_STATUS.REJECTED) {
+  if (status == PROPOSAL_STATUS.REJECTED) {
 
-    ctx.state.proposalsStack.push({ proposalId, type, proposedCmds });
+    ctx.state.proposalsStack.push(proposalCtx);
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1];
 
     const ProposalDeclinedHookEvent = APP_PROPOSAL_EVENT[type]['DECLINED'];

@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL } from '@deip/command-models';
-import ProposalReadModelSchema from './../../../schemas/read/ProposalReadModelSchema';
+import ProposalSchema from './../../../schemas/write/ProposalSchema';
 import { RESEARCH_STATUS } from './../../../constants';
 import ResearchService from './../../../services/impl/read/ProjectDtoService';
 import ResearchGroupService from './../../../services/legacy/researchGroup';
@@ -16,7 +16,7 @@ const researchService = new ResearchService({ scoped: false });
 class ProposalDtoService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(ProposalReadModelSchema, options);
+    super(ProposalSchema, options);
   }
 
   
@@ -139,6 +139,8 @@ class ProposalDtoService extends BaseService {
       }
 
       proposals.push({
+        _id: proposalRef._id,
+        cmd: proposalRef.cmd,
         proposer: proposer,
         parties: parties,
         proposal: chainProposal,
@@ -528,21 +530,6 @@ class ProposalDtoService extends BaseService {
     })
   }
 
-  async createProposalDto(proposalId, {
-    type,
-    details,
-    multiTenantIds = []
-  }) {
-
-    const result = await this.createOne({
-      _id: proposalId,
-      type: type,
-      details: details,
-      multiTenantIds: multiTenantIds
-    });
-
-    return result;
-  }
 
 
   async getAccountProposals(username) {

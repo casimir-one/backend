@@ -1,6 +1,5 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import TeamDomainService from './../../services/legacy/researchGroup'; // TODO: separate read/write schema
 import { TeamCreatedEvent } from './../../events';
 
 
@@ -14,10 +13,9 @@ class AccountCmdHandler extends BaseCmdHandler {
 
 const accountCmdHandler = new AccountCmdHandler();
 
-const teamDomainService = new TeamDomainService();
 
 
-accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, async (cmd, ctx) => {
+accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, (cmd, ctx) => {
 
   const { 
     entityId: accountId, 
@@ -29,18 +27,13 @@ accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, async (cmd, ctx) => {
 
   
   if (isTeamAccount) {
-    const team = await teamDomainService.createResearchGroupRef({
-      externalId: accountId,
-      creator: creator,
-      name: description, // TODO: extract from attributes
-      description: description,
-      attributes
-    });
-    
+
     ctx.state.appEvents.push(new TeamCreatedEvent({
-      accountId: team._id,
-      attributes: team.attributes,
+      creator: creator,
+      accountId: accountId,
+      attributes: attributes,
       isTeamAccount: isTeamAccount,
+      description: description,
       proposalCtx: ctx.state.proposalsStackFrame
     }));
   }

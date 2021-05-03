@@ -4,16 +4,16 @@ import { APP_PROPOSAL } from '@deip/command-models';
 
 const Schema = mongoose.Schema;
 
-const ProposalWriteModelSchema = new Schema({
+const ProposalSchema = new Schema({
   "_id": { type: String, required: true },
   "tenantId": { type: String, required: true },
-  "creator": { type: String, required: true },
-  "cmd": { type: Object, required: true },
+  "creator": { type: String, required: false /* temp */ },
+  "cmd": { type: Object, required: false /* temp */ },
   "status": { type: Number, required: true },
   "type": { type: Number, required: true },
-  "requiredApprovals": { type: [String], required: true }
+  "details": { type: Object, required: true }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
-const writeModel = mongoose.model('wm-proposals', ProposalWriteModelSchema);
+const model = mongoose.model('proposals', ProposalSchema);
 
-module.exports = writeModel;
+module.exports = model;

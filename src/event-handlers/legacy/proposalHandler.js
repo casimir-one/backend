@@ -4,7 +4,7 @@ import { APP_PROPOSAL } from '@deip/command-models';
 import { LEGACY_APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ResearchGroupService from './../../services/legacy/researchGroup';
-import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
+import ProposalService from './../../services/impl/write/ProposalService';
 import UserService from './../../services/legacy/users';
 
 
@@ -14,9 +14,9 @@ const proposalHandler = new ProposalHandler();
 
 const usersService = new UserService({ scoped: false });
 const researchGroupService = new ResearchGroupService({ scoped: false });
-const proposalDtoService = new ProposalDtoService({ scoped: false });
+const proposalService = new ProposalService({ scoped: false });
 
-async function createProposalDto(event, chainContractType) {
+async function createProposal(event, chainContractType) {
 
   const proposalId = event.getProposalId();
   const eventModel = event.getSourceData();
@@ -37,7 +37,8 @@ async function createProposalDto(event, chainContractType) {
     return acc;
   }, []);
   
-  const proposalRef = await proposalDtoService.createProposalDto(proposalId, {
+  const proposalRef = await proposalService.createProposal({
+    proposalId: proposalId,
     type: chainContractType,
     details: {
       ...eventModel
@@ -51,50 +52,49 @@ async function createProposalDto(event, chainContractType) {
 
 proposalHandler.on(LEGACY_APP_EVENTS.ASSET_EXCHANGE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetExchangeProposedEvent } = source;
-  const proposalRef = await createProposalDto(assetExchangeProposedEvent, APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL);
+  const proposalRef = await createProposal(assetExchangeProposedEvent, APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL);
   return proposalRef;
 }));
 
 proposalHandler.on(LEGACY_APP_EVENTS.ASSET_TRANSFER_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: assetTransferProposedEvent } = source;
-  const proposalRef = await createProposalDto(assetTransferProposedEvent, APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL);
+  const proposalRef = await createProposal(assetTransferProposedEvent, APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL);
   return proposalRef;
 }));
 
 proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdateProposedEvent } = source;
-  const proposalRef = await createProposalDto(researchGroupUpdateProposedEvent, APP_PROPOSAL.TEAM_UPDATE_PROPOSAL);
+  const proposalRef = await createProposal(researchGroupUpdateProposedEvent, APP_PROPOSAL.TEAM_UPDATE_PROPOSAL);
   return proposalRef;
 }));
 
 proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchContentProposedEvent } = source;
-  const proposalRef = await createProposalDto(researchContentProposedEvent, APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL);
+  const proposalRef = await createProposal(researchContentProposedEvent, APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL);
   return proposalRef;
 }));
 
 proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchTokenSaleProposedEvent } = source;
-  const proposalRef = await createProposalDto(researchTokenSaleProposedEvent, APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL);
+  const proposalRef = await createProposal(researchTokenSaleProposedEvent, APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL);
   return proposalRef;
 }));
 
 proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposedEvent } = source;
-  const proposalRef = await createProposalDto(researchExpressLicenseProposedEvent, APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL);
+  const proposalRef = await createProposal(researchExpressLicenseProposedEvent, APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL);
   return proposalRef;
 }));
 
-
 proposalHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userResignationProposedEvent } = source;
-  const proposalRef = await createProposalDto(userResignationProposedEvent, APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL);
+  const proposalRef = await createProposal(userResignationProposedEvent, APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL);
   return proposalRef;
 }));
 
 proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchNdaProposedEvent } = source;
-  const proposalRef = await createProposalDto(researchNdaProposedEvent, APP_PROPOSAL.PROJECT_NDA_PROPOSAL);
+  const proposalRef = await createProposal(researchNdaProposedEvent, APP_PROPOSAL.PROJECT_NDA_PROPOSAL);
   return proposalRef;
 }));
 

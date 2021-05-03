@@ -1,6 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
-import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
+import ProjectService from './../../services/impl/write/ProjectService';
 
 
 class ProjectEventHandler extends BaseEventHandler {
@@ -13,14 +13,37 @@ class ProjectEventHandler extends BaseEventHandler {
 
 const projectEventHandler = new ProjectEventHandler();
 
-const projectDtoService = new ProjectDtoService();
+const projectService = new ProjectService();
 
 projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
-  // TODO: handle project read schema
+
+  const {
+    projectId,
+    teamId,
+    description,
+    attributes,
+    status
+  } = event.getEventPayload();
+
+  const project = await projectService.createProject({
+    projectId: projectId,
+    teamId: teamId,
+    attributes: attributes,
+    status: status
+  });
+
 });
 
 projectEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event, ctx) => {
-  // TODO: handle project read schema
+  const {
+    projectId,
+    attributes
+  } = event.getEventPayload();
+
+  const project = await projectService.updateProject(projectId, {
+    attributes: attributes
+  });
+
 });
 
 projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event, ctx) => {

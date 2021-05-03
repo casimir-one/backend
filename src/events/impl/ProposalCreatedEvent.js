@@ -10,14 +10,12 @@ class ProposalCreatedEvent extends BaseEvent {
       proposalId,
       type,
       status,
-      requiredApprovals,
       proposalCmd,
     } = eventPayload;
 
     assert(!!proposalId, "'proposalId' is required");
     assert(!!type, "'type' is required");
     assert(!!status, "'status' is required");
-    assert(!!requiredApprovals && requiredApprovals.length, "'requiredApprovals' list is required");
     assert(!!proposalCmd, "'proposalCmd' is required");
 
     super(APP_EVENT.PROPOSAL_CREATED, eventPayload);

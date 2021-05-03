@@ -7,6 +7,7 @@ function setup(options) {
   return async function (ctx, next) {
     ctx.state.msg = null;
     ctx.state.appEvents = [];
+    ctx.state.updatedProposals = {};
     ctx.state.proposalsStack = [];
     ctx.state.proposalsStackFrame = null;
     ctx.state.events = []; // legacy

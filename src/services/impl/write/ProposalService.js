@@ -1,33 +1,33 @@
 import deipRpc from '@deip/rpc-client';
 import { PROPOSAL_STATUS } from './../../../constants';
 import BaseService from './../../base/BaseService';
-import ProposalWriteModelSchema from './../../../schemas/write/ProposalWriteModelSchema';
+import ProposalSchema from './../../../schemas/write/ProposalSchema';
 
 
 class ProposalService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(ProposalWriteModelSchema, options);
+    super(ProposalSchema, options);
   }
   
   async createProposal({
     proposalId,
     proposalCmd,
+    status,
     type,
+    details,
+    multiTenantIds,
     creator
   }) {
 
-    // TODO: replace protocol api call with status resolver
-    const chainProposal = await deipRpc.api.getProposalStateAsync(proposalId);
-    const status = PROPOSAL_STATUS[chainProposal.status];
-
     const result = await this.createOne({
       _id: proposalId,
-      cmd: proposalCmd.serialize(),
+      cmd: proposalCmd ? proposalCmd.serialize() : null,
       type: type,
-      status: PROPOSAL_STATUS[status],
+      status: status,
       creator: creator,
-      requiredApprovals: chainProposal.required_approvals
+      details: details,
+      multiTenantIds: multiTenantIds
     });
 
     return result;
@@ -35,15 +35,11 @@ class ProposalService extends BaseService {
 
 
   async updateProposal(proposalId, {
-    // TODO: add write schema data
+    status
   }) {
 
-    // TODO: replace protocol api call with status resolver
-    const chainProposal = await deipRpc.api.getProposalStateAsync(proposalId);
-    const status = PROPOSAL_STATUS[chainProposal.status];
-
     const result = await this.updateOne({ _id: proposalId }, {
-      status: PROPOSAL_STATUS[status]
+      status: status
     });
 
     return result;
