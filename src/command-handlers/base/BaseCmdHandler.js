@@ -1,10 +1,12 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
+import PubSub from 'pubsub-js';
 import * as protocolService from './../../utils/blockchain';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 import util from 'util';
 import assert from 'assert';
 import config from './../../config';
+import { QUEUE_TOPIC } from './../../constants';
 import { APP_PROPOSAL, CreateProposalCmd, UpdateProposalCmd, DeclineProposalCmd } from '@deip/command-models';
 import {
   logError,
@@ -139,12 +141,8 @@ class BaseCmdHandler extends EventEmitter {
     }
 
     BaseCmdHandler.Dispatch(appCmds, ctx);
-
-    for (let i = 0; i < ctx.state.appEvents.length; i++) {
-      const event = ctx.state.appEvents[i];
-      // TODO: save and put events into FIFO queue
-      // console.log(event);
-    }
+    // TODO: save and put events into persistent FIFO queue
+    PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
   };
 
 

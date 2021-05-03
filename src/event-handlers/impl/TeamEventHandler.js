@@ -15,7 +15,7 @@ const teamEventHandler = new TeamEventHandler();
 const teamService = new TeamService();
 
 
-teamEventHandler.register(APP_EVENT.TEAM_CREATED, async (event, ctx) => {
+teamEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
 
   const {
     accountId,

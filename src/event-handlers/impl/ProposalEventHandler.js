@@ -19,7 +19,7 @@ const proposalService = new ProposalService();
 const teamDtoService = new TeamDtoService();
 
 
-proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   const { proposalId, creator, status, proposalCmd, type } = event.getEventPayload();
 
   // This handler should be replaced with handlers for multisig transactions below
@@ -55,29 +55,29 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event, ctx) => 
   
 });
 
-proposalEventHandler.register(APP_EVENT.PROPOSAL_UPDATED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROPOSAL_UPDATED, async (event) => {
   const { proposalId, status } = event.getEventPayload();
   const proposal = await proposalService.updateProposal(proposalId, {
     status: status
   });
 });
 
-proposalEventHandler.register(APP_EVENT.PROPOSAL_DECLINED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROPOSAL_DECLINED, async (event) => {
   const { proposalId, status } = event.getEventPayload();
   const proposal = await proposalService.updateProposal(proposalId, {
     status: status
   });
 });
 
-proposalEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event) => {
   // TODO: create multisig transaction read schema
 });
 
-proposalEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event) => {
   // TODO: create multisig transaction read schema
 });
 
-proposalEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event, ctx) => {
+proposalEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event) => {
   // TODO: create multisig transaction read schema
 });
 

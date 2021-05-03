@@ -13,7 +13,9 @@ const PORT = process.env.PORT || 80;
 const HOST = process.env.HOST || '0.0.0.0';
 
 const app = new Koa();
+
 require('./database');
+require('./queue');
 
 app.use(cors());
 app.use(koa_bodyparser());
@@ -42,9 +44,7 @@ app.use(require('./middlewares/auth/tenantAuth.js')());
 app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/tenant.js').protected.routes());
 
-// event handlers
-app.use(require('./middlewares/legacy/events.js')()); // legacy
-app.use(require('./middlewares/events')());
+app.use(require('./middlewares/legacy/events.js')()); // legacy event handlers
 
 app.listen(PORT, HOST, () => {
   console.log(`Running on http://${HOST}:${PORT}`);

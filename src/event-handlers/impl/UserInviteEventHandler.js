@@ -17,7 +17,7 @@ const userInviteEventHandler = new UserInviteEventHandler();
 const userInviteDtoService = new UserInviteDtoService();
 
 
-userInviteEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event, ctx) => {
+userInviteEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event) => {
   const { proposalId, expirationTime, invitee, inviter, teamId, notes, projectId } = event.getEventPayload();
 
   await userInviteDtoService.createUserInvite({
@@ -33,7 +33,7 @@ userInviteEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event, 
 
 });
 
-userInviteEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (event, ctx) => {
+userInviteEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (event) => {
   const { proposalCtx: { proposalId } } = event.getEventPayload();
 
   await userInviteDtoService.updateUserInvite(proposalId, {

@@ -18,6 +18,7 @@ import DISCIPLINES from './disciplines';
 import { RESEARCH_CONTENT_TYPES, CONTENT_TYPES_MAP } from './researchContentType';
 import ASSESSMENT_CRITERIA_TYPE from './assessmentCriteriaType';
 import ATTRIBUTE_SCOPE from './attributeScopes';
+import QUEUE_TOPIC from './queueTopic';
 
 export {
   CHAIN_CONSTANTS,
@@ -39,5 +40,6 @@ export {
   RESEARCH_CONTENT_TYPES,
   CONTENT_TYPES_MAP,
   ASSESSMENT_CRITERIA_TYPE,
-  ATTRIBUTE_SCOPE
+  ATTRIBUTE_SCOPE,
+  QUEUE_TOPIC
 }

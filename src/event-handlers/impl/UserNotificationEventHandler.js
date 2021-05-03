@@ -1,6 +1,8 @@
 import BaseEventHandler from './../base/BaseEventHandler';
+import config from './../../config';
 import { USER_NOTIFICATION_TYPE, RESEARCH_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
+import TenantService from './../../services/legacy/tenant';
 import TeamDtoService from './../../services/legacy/researchGroup'; // TODO: separate read/write schema
 import UserDtoService from './../../services/legacy/users';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
@@ -22,19 +24,21 @@ const teamDtoService = new TeamDtoService();
 const userDtoService = new UserDtoService();
 const projectDtoService = new ProjectDtoService();
 const userNotificationsDtoService = new UserNotificationsDtoService();
+const tenantService = new TenantService();
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
   const {
     projectId,
     teamId,
     attributes
   } = event.getEventPayload();
 
+  const tenant = await tenantService.getTenant(config.TENANT);
   const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
   const team = await teamDtoService.getResearchGroup(teamId);
-  const notifiableUsers = await userDtoService.getUsers(ctx.state.tenant.admins);
-  const currentUser = await userDtoService.getUser(ctx.state.user.username);
+  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const teamCreator = await userDtoService.getUser(team.creator);
 
   // TODO: replace with a call to project read schema
   const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
@@ -53,7 +57,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, c
         proposal: { action: 14, data: { title }, is_completed: true }, // legacy
         researchGroup: team,
         research: project,
-        emitter: currentUser
+        emitter: teamCreator
       }
     });
   }
@@ -63,12 +67,13 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event, c
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event) => {
   const { teamId, attributes } = event.getEventPayload();
 
+  const tenant = await tenantService.getTenant(config.TENANT);
   const team = await teamDtoService.getResearchGroup(teamId);
-  const currentUser = await userDtoService.getUser(ctx.state.user.username);
-  const notifiableUsers = await userDtoService.getUsers(ctx.state.tenant.admins);
+  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const teamCreator = await userDtoService.getUser(team.creator);
 
   // TODO: replace with a call to project read schema
   const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
@@ -87,7 +92,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
         proposal: { action: 14, data: { title } }, // legacy
         researchGroup: team,
         research: null, // legacy
-        emitter: currentUser
+        emitter: teamCreator
       }
     });
   }
@@ -96,13 +101,14 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async (event) => {
   const { projectId, teamId } = event.getEventPayload();
 
+  const tenant = await tenantService.getTenant(config.TENANT);
   const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
   const team = await teamDtoService.getResearchGroup(teamId);
-  const notifiableUsers = await userDtoService.getUsers(ctx.state.tenant.admins);
-  const currentUser = await userDtoService.getUser(ctx.state.user.username);
+  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const teamCreator = await userDtoService.getUser(team.creator);
 
   const notifications = [];
   for (let i = 0; i < notifiableUsers.length; i++) {
@@ -116,7 +122,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
         proposal: { action: 14, data: { title: project.title }, is_completed: true }, // legacy
         researchGroup: team,
         research: project,
-        emitter: currentUser
+        emitter: teamCreator
       }
     });
   }
@@ -125,17 +131,18 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) => {
   const {
     projectId,
     teamId
   } = event.getEventPayload();
 
+  const tenant = await tenantService.getTenant(config.TENANT);
   const project = await projectDtoService.getResearch(projectId);
   const team = await teamDtoService.getResearchGroup(teamId);
-  const currentUser = await userDtoService.getUser(ctx.state.user.username);
+  const teamCreator = await userDtoService.getUser(team.creator);
 
-  const notifiableUsers = await userDtoService.getUsers([...ctx.state.tenant.admins, ...project.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
+  const notifiableUsers = await userDtoService.getUsers([...tenant.admins, ...project.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notifications = [];
   for (let i = 0; i < notifiableUsers.length; i++) {
@@ -149,7 +156,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event, c
         proposal: { action: 15, is_completed: true }, // legacy
         researchGroup: team,
         research: project,
-        emitter: currentUser
+        emitter: teamCreator
       }
     });
   }
@@ -158,13 +165,14 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event, c
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event) => {
   const { teamId, projectId } = event.getEventPayload();
 
+  const tenant = await tenantService.getTenant(config.TENANT);
   const team = await teamDtoService.getResearchGroup(teamId);
   const project = await projectDtoService.getResearch(projectId);
-  const currentUser = await userDtoService.getUser(ctx.state.user.username);
-  const notifiableUsers = await userDtoService.getUsers(ctx.state.tenant.admins);
+  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const teamCreator = await userDtoService.getUser(team.creator);
 
   const notifications = [];
   for (let i = 0; i < notifiableUsers.length; i++) {
@@ -178,7 +186,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
         proposal: { action: 15, is_completed: false }, // legacy
         researchGroup: team,
         research: project,
-        emitter: currentUser
+        emitter: teamCreator
       }
     });
   }
@@ -187,14 +195,15 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event) => {
   const { 
     invitee,
-    teamId
+    teamId,
+    inviter
   } = event.getEventPayload();
 
   const team = await teamDtoService.getResearchGroup(teamId);
-  const currentUser = await userDtoService.getUser(ctx.state.user.username);
+  const currentUser = await userDtoService.getUser(inviter);
   const inviteeUser = await userDtoService.getUser(invitee);
   const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
 
@@ -229,7 +238,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (e
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (event) => {
   const {
     teamId,
     invitee,
@@ -260,7 +269,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (event, ctx) => {
+userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (event) => {
   const {
     invitee,
     teamId
