@@ -3,6 +3,7 @@ import BaseEventHandler from './../event-handlers/base/BaseEventHandler';
 import { QUEUE_TOPIC } from './../constants';
 
 
-PubSub.subscribe(QUEUE_TOPIC.APP_EVENT_TOPIC, function (topic, events) {
-  BaseEventHandler.Broadcast(events);
+PubSub.subscribe(QUEUE_TOPIC.APP_EVENT_TOPIC, async function (topic, events) {
+  // TODO: we should use FIFO queue with an acknowledgment mechanism instead
+  await BaseEventHandler.Broadcast(events);
 });
