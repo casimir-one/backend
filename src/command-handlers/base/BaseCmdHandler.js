@@ -132,9 +132,11 @@ class BaseCmdHandler extends EventEmitter {
 
 
 
-  async process(msg, ctx) {
+  async process(msg, ctx, validate = async (cmds) => {}) {
     const { tx, appCmds } = msg;
-
+    
+    await validate(appCmds);
+    
     if (tx) {
       const signedTx = deipRpc.auth.signTransaction(tx.finalize(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
       const txInfo = await protocolService.sendTransactionAsync(signedTx);
@@ -145,7 +147,7 @@ class BaseCmdHandler extends EventEmitter {
     BaseCmdHandler.Dispatch(appCmds, ctx);
 
     // TODO: save and put events into persistent FIFO queue
-    this.logEvents(ctx.state.appEvents)
+    this.logEvents(ctx.state.appEvents);
     PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
   };
 
