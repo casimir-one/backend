@@ -37,6 +37,8 @@ const TeamSchema = new Schema({
   "_id": { type: String, required: true },
   "tenantId": { type: String, required: true },
   "creator": { type: String, required: true },
+  "name": { type: String, required: false, default: undefined },
+  "description": { type: String, required: false, default: undefined },
   "attributes": [AttributeValueSchema],
   "researchAreas": [Object],
 
@@ -59,7 +61,10 @@ const run = async () => {
         attributeId: mongoose.Types.ObjectId("6082c4d594bce65929ea2ec3"),
         value: researchGroupRefObj.description
       }
-    ]
+    ];
+
+    researchGroupRef.name = undefined;
+    researchGroupRef.description = undefined;
 
     teamPromises.push(researchGroupRef.save());
   }

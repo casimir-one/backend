@@ -1,11 +1,3 @@
-const RESEARCH = 1;
-const USER = 2;
-const RESEARCHGROUP = 3;
-
-const ATTRIBUTE_SCOPE = {
-  RESEARCH,
-  USER,
-  RESEARCHGROUP
-};
+const { ATTRIBUTE_SCOPE } = require('@deip/attributes-service');
 
 export default ATTRIBUTE_SCOPE;
