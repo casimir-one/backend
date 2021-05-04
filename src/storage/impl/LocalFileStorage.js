@@ -17,7 +17,7 @@ const readdir = util.promisify(fs.readdir);
 class LocalFileStorage extends BaseFileStorage {
 
   constructor() {
-    const filesStoragePath = path.join(__dirname, `./../../${config.TENANT_LOCAL_DIR}`);
+    const filesStoragePath = path.join(__dirname, `./../../../${config.TENANT_FILES_DIR}`);
     super(filesStoragePath);
     this._type = FILE_STORAGE.LOCAL_FILESYSTEM;
   }

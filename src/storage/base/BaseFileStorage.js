@@ -50,7 +50,7 @@ class BaseFileStorage {
 
   _baseDirPath = null;
   _type = null;
-  _tempDirPath = path.join(__dirname, `./../../${config.TENANT_LOCAL_DIR}/temp`);
+  _tempDirPath = path.join(__dirname, `./../../../${config.TENANT_FILES_DIR}/temp`);
 
   constructor(baseDirPath) {
     this._baseDirPath = baseDirPath;

@@ -20,8 +20,8 @@ const config = {
   TENANT_SFTP_HOST: process.env.TENANT_SFTP_HOST,
   TENANT_SFTP_USER: process.env.TENANT_SFTP_USER,
   TENANT_SFTP_PASSWORD: process.env.TENANT_SFTP_PASSWORD,
-  TENANT_LOCAL_DIR: process.env.TENANT_LOCAL_DIR || 'files',
-  TENANT_LOG_DIR: process.env.TENANT_LOG_DIR || 'log',
+  TENANT_FILES_DIR: process.env.TENANT_FILES_DIR || 'files',
+  TENANT_LOG_DIR: process.env.TENANT_LOG_DIR || 'logs',
   
   DEIP_MONGO_STORAGE_CONNECTION_URL: process.env.DEIP_MONGO_STORAGE_CONNECTION_URL,
 
