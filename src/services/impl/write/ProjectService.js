@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
-// TODO: separate read/write schemas
 import ProjectSchema from './../../../schemas/ProjectSchema';
 import AttributesService from './../../legacy/attributes';
 import { logWarn } from './../../../utils/log';
@@ -23,7 +22,7 @@ class ProjectService extends BaseService {
 
     const attributesService = new AttributesService();
     const systemAttributes = await attributesService.getSystemAttributes();
-    const teamAttr = systemAttributes.find(attr => attr.scope == ATTRIBUTE_SCOPE.RESEARCH && attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
+    const teamAttr = systemAttributes.find(attr => attr.scope == ATTRIBUTE_SCOPE.PROJECT && attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
     if (teamAttr.isHidden) {
       const rAttr = attributes.find(rAttr => rAttr.attributeId === teamAttr._id.toString());
       if (rAttr.value === null) {
@@ -61,7 +60,7 @@ class ProjectService extends BaseService {
   
   async mapAttributes(attributes) {
     const attributesService = new AttributesService();
-    const projectAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
+    const projectAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
 
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.attributeId.toString());
@@ -146,7 +145,7 @@ class ProjectService extends BaseService {
           break;
         }
         default: {
-          logWarn(`WARNING: Unknown attribute type ${attribute.type}`);
+          logWarn(`WARNING: Unhandeled value '${rAttr.value}' for attribute type ${ATTRIBUTE_TYPE[attribute.type]}`);
           rAttrValue = rAttr.value;
           break;
         }

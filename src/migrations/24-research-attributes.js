@@ -205,7 +205,7 @@ const run = async () => {
       const researchAttribute = new Attribute({
         tenantId: null,
         isSystem: true,
-        scope: ATTRIBUTE_SCOPE.RESEARCH,
+        scope: ATTRIBUTE_SCOPE.PROJECT,
         ...attr
       });
       
@@ -220,7 +220,7 @@ const run = async () => {
         const researchAttribute = new Attribute({
           tenantId: tenantProfiles[i]._id,
           isSystem: false,
-          scope: ATTRIBUTE_SCOPE.RESEARCH,
+          scope: ATTRIBUTE_SCOPE.PROJECT,
           ...attr
         });
 

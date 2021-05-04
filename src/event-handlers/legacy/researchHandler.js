@@ -26,7 +26,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
   const proposal = await proposalsService.getProposal(proposalId);
   const { member, researchGroupExternalId } = proposal.details;
 
-  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
+  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
 
   const researches = await projectDtoService.getResearchesByResearchGroup(researchGroupExternalId);
 

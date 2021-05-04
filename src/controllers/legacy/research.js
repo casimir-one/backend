@@ -10,7 +10,7 @@ import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import ProjectService from './../../services/impl/write/ProjectService';
 import ResearchApplicationService from './../../services/legacy/researchApplication';
 import * as blockchainService from './../../utils/blockchain';
-import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
+import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_STATUS } from './../../constants';
 import FileStorage from './../../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../../forms/legacy/researchApplicationForms';
 import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';

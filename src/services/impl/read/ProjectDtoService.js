@@ -31,7 +31,7 @@ class ProjectDtoService extends BaseService {
     const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id));
     const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => researchNdaService.getResearchNdaListByResearch(r.external_id)));
-    const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.RESEARCH);
+    const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
     
     return chainResearches
       .map((chainResearch) => {

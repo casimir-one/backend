@@ -46,7 +46,7 @@ class AttributesService {
     return mapAttributes;
   }
 
-  async getAttributesByScope(scope = ATTRIBUTE_SCOPE.RESEARCH) {
+  async getAttributesByScope(scope = ATTRIBUTE_SCOPE.PROJECT) {
     const tenant = await this.getTenantInstance();
     const result = await AttributeSchema.find({ tenantId: { $in: [tenant._id, null] }, scope });
     if (!result.length) return [];
@@ -54,7 +54,7 @@ class AttributesService {
     return mapAttributes;
   }
 
-  async getNetworkAttributesByScope(scope = ATTRIBUTE_SCOPE.RESEARCH) {
+  async getNetworkAttributesByScope(scope = ATTRIBUTE_SCOPE.PROJECT) {
     const scopeQuery = await this.getBaseScopeQuery();
     const result = await AttributeSchema.find({...scopeQuery, scope});
     if (!result.length) return [];

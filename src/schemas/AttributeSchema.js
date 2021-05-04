@@ -23,7 +23,7 @@ const Attribute = new Schema({
   "tenantId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
-    type: String,
+    type: Number,
     enum: [...Object.values(ATTRIBUTE_TYPE)],
     required: true
   },
