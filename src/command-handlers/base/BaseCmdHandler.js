@@ -178,7 +178,7 @@ class BaseCmdHandler extends EventEmitter {
   };
 
   logEvents(events) {
-    const EVENTS_LOG_FILE_PATH = path.join(__dirname, `./../../${config.TENANT_LOG_DIR}/events.log`);
+    const EVENTS_LOG_FILE_PATH = path.join(__dirname, `./../../../${config.TENANT_LOG_DIR}/events.log`);
 
     let log = '';
     for (let i = 0; i < events.length; i++) {
