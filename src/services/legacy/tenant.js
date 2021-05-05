@@ -15,7 +15,15 @@ class TenantService {
     const profile = doc.toObject();
     const account = await deipRpc.api.getResearchGroupAsync(id);
     const tenantUsers = await userService.getUsersByTenant(id);
-    const admins = tenantUsers.filter(user => userService.hasRole(user, 'admin') && user.teams.includes(config.TENANT)).map(user => user.username);
+    const usersWithAdminRole = tenantUsers.filter(user => userService.hasRole(user, 'admin'));
+
+    const chainMembershipTokens = await Promise.all(usersWithAdminRole.map(u => deipRpc.api.getResearchGroupTokensByAccountAsync(u.username)));
+
+    const admins = usersWithAdminRole.filter(user => {
+      const membershipTokens = chainMembershipTokens.find((teams) => teams.length && teams[0].owner == user.username) || [];
+      const teams = membershipTokens.map((mt) => mt.research_group.external_id);
+      return teams.includes(config.TENANT);
+    }).map(user => user.username);
     return { id: id, account: account.account, profile: profile, admins };
   }
 

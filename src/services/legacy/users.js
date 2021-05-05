@@ -14,16 +14,13 @@ class UserService extends BaseService {
 
   async mapUsers(profiles) {
     const chainAccounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));
-    const chainMembershipTokens = await Promise.all(chainAccounts.map(a => deipRpc.api.getResearchGroupTokensByAccountAsync(a.name)));
     const tenantProfile = await this.getTenantInstance();
     return chainAccounts
       .map((chainAccount) => {
         const profile = profiles.find((r) => r._id == chainAccount.name);
-        const membershipTokens = chainMembershipTokens.find((teams) => teams.length && teams[0].owner == chainAccount.name) || [];
-        const teams = membershipTokens.map((mt) => mt.research_group.external_id);
         const appModules = tenantProfile.settings.modules;
         const roleInfo = tenantProfile.settings.roles.find((appRole) => profile.roles.some((userRole) => appRole.role == userRole.role));
-        return { username: chainAccount.name, tenantId: profile.tenantId, account: chainAccount, profile: { ...profile, modules: roleInfo && roleInfo.modules ? roleInfo.modules : appModules }, teams };
+        return { username: chainAccount.name, tenantId: profile.tenantId, account: chainAccount, profile: { ...profile, modules: roleInfo && roleInfo.modules ? roleInfo.modules : appModules } };
       });
   }
 
