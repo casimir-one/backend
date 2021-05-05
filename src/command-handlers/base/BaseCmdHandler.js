@@ -146,7 +146,7 @@ class BaseCmdHandler extends EventEmitter {
 
     BaseCmdHandler.Dispatch(appCmds, ctx);
 
-    // TODO: save and put events into persistent FIFO queue
+    // TODO: Use Kafka producer
     this.logEvents(ctx.state.appEvents);
     PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
   };
