@@ -1,0 +1,7 @@
+const APP_EVENT_TOPIC = "APP_EVENT_TOPIC";
+
+const QUEUE_TOPIC = {
+  APP_EVENT_TOPIC
+};
+
+export default QUEUE_TOPIC;
