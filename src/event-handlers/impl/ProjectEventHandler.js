@@ -15,6 +15,7 @@ const projectEventHandler = new ProjectEventHandler();
 
 const projectService = new ProjectService();
 
+
 projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
 
   const {
@@ -34,6 +35,7 @@ projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
 
 });
 
+
 projectEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) => {
   const {
     projectId,
@@ -45,6 +47,12 @@ projectEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) => {
   });
 
 });
+
+
+projectEventHandler.register(APP_EVENT.PROJECT_DELETED, async (event) => {
+  // TODO: handle project read schema
+});
+
 
 projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event) => {
   // TODO: handle project read schema

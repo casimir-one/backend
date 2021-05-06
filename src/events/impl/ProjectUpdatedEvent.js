@@ -9,13 +9,11 @@ class ProjectUpdatedEvent extends BaseEvent {
     const {
       projectId,
       teamId,
-      attributes,
-      status
+      attributes
     } = eventPayload;
 
     assert(!!projectId, "'projectId' is required");
     assert(!!teamId, "'teamId' is required");
-    assert(!!status, "'status' is required");
     assert(!!attributes && attributes.length, "'attributes' required");
 
     super(APP_EVENT.PROJECT_UPDATED, eventPayload);

@@ -1,7 +1,8 @@
 import ProjectCreatedEvent from './impl/ProjectCreatedEvent';
 import ProjectUpdatedEvent from './impl/ProjectUpdatedEvent';
-
+import ProjectDeletedEvent from './impl/ProjectDeletedEvent';
 import ProjectMemberJoinedEvent from './impl/ProjectMemberJoinedEvent';
+
 import TeamCreatedEvent from './impl/TeamCreatedEvent';
 
 import ProposalCreatedEvent from './impl/ProposalCreatedEvent';
@@ -24,6 +25,7 @@ import ProjectInviteDeclinedEvent from './impl/ProjectInviteDeclinedEvent';
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
+  ProjectDeletedEvent,
   ProjectMemberJoinedEvent,
 
   TeamCreatedEvent,

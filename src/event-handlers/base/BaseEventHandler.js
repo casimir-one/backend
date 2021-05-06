@@ -60,13 +60,13 @@ class BaseEventHandler extends EventEmitter {
   }
 
   static async Broadcast(events, ctx) {
-    const APP_EVENT_HANDLERS = require('./../../event-handlers');
+    const APP_EVENT_HANDLERS_MAP = require('./../../event-handlers/map');
 
     let chain = new Promise((start) => { start() });
 
     for (let i = 0; i < events.length; i++) {
       const event = events[i];
-      const eventHandlers = APP_EVENT_HANDLERS[event.getEventNum()];
+      const eventHandlers = APP_EVENT_HANDLERS_MAP[event.getEventNum()];
       if (!eventHandlers || !eventHandlers.length) {
         logWarn(`WARNING: No event handlers registered for ${event.getEventName()} event`);
         continue;

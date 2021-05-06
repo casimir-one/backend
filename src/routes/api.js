@@ -162,6 +162,7 @@ protected_route.put('/research', compose([researchAttributeMetaUpdateAuth({ rese
 
 protected_route.post('/v2/project', projectsCtrl.createProject)
 protected_route.put('/v2/project', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['entity-id'] })]), projectsCtrl.updateProject)
+protected_route.put('/v2/project/delete', projectsCtrl.deleteProject)
 
 public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
 protected_route.post('/fundraising', fundraising.createResearchTokenSale)

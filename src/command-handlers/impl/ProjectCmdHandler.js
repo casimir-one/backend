@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectUpdatedEvent } from './../../events';
+import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectUpdatedEvent, ProjectDeletedEvent } from './../../events';
 import { RESEARCH_STATUS } from './../../constants';
 
 
@@ -51,6 +51,17 @@ projectCmdHandler.register(APP_CMD.UPDATE_PROJECT, (cmd, ctx) => {
 
 });
 
+
+projectCmdHandler.register(APP_CMD.DELETE_PROJECT, (cmd, ctx) => {
+  const {
+    entityId: projectId,
+  } = cmd.getCmdPayload();
+
+  ctx.state.appEvents.push(new ProjectDeletedEvent({
+    projectId: projectId
+  }));
+
+});
 
 
 projectCmdHandler.register(APP_CMD.JOIN_PROJECT, (cmd, ctx) => {

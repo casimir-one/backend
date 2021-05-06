@@ -1,9 +1,8 @@
-import { APP_CMD, APP_PROPOSAL, CreateProposalCmd } from '@deip/command-models';
+import { APP_CMD, APP_PROPOSAL } from '@deip/command-models';
 import { PROPOSAL_STATUS } from './../../constants';
 import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import ProposalService from './../../services/impl/write/ProposalService';
 import { ProposalCreatedEvent, ProposalUpdatedEvent, ProposalDeclinedEvent } from './../../events';
 
 

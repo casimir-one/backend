@@ -203,6 +203,13 @@ class ProjectDtoService extends BaseService {
     }
   }
 
+
+  async getProjectView(projectId) {
+    const project = await this.findOne({ _id: projectId });
+    if (!project) return null;
+    return project;
+  }
+
 }
 
 export default ProjectDtoService;

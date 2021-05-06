@@ -44,10 +44,80 @@ class BaseCmdHandler extends EventEmitter {
     });
   }
 
+  async process(msg, ctx,
+    validate = async (appCmds, ctx) => {},
+    alterOffchainWriteModel = async (appCmds, ctx) => {},
+    alterOnchainWriteModel = async (tx, ctx) => {
+      const signedTx = deipRpc.auth.signTransaction(tx.finalize(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
+      const txInfo = await protocolService.sendTransactionAsync(signedTx);
+      return txInfo;
+    },
+  ) {
 
-  async extractUpdatedProposals(msg) {
     const { tx, appCmds } = msg;
+    
+    await validate(appCmds, ctx);
 
+    if (tx) { // Until we have blockchain-emitted events and a saga we have to validate write model separately
+      await alterOnchainWriteModel(tx, ctx);
+    } else {
+      await alterOffchainWriteModel(appCmds, ctx);
+    }
+
+    const { proposalsIds, newProposalsCmds } = this.extractAlteredProposals(appCmds);
+    if (proposalsIds.length) { // Until we have blockchain-emitted events and a saga we have to check proposal status manually
+      ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
+    }
+
+    BaseCmdHandler.Dispatch(appCmds, ctx);
+
+    // TODO: Use Kafka producer
+    this.logEvents(ctx.state.appEvents);
+    PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
+    return true;
+  };
+
+
+  handle(cmd, ctx) {
+    this.emit(cmd.getCmdNum(), cmd, ctx);
+  }
+
+
+  static Dispatch(cmds, ctx) {
+    const CMD_HANDLERS_MAP = require('./../../command-handlers/map');
+
+    for (let i = 0; i < cmds.length; i++) {
+      const cmd = cmds[i];
+      const cmdHandler = CMD_HANDLERS_MAP[cmd.getCmdNum()];
+      if (!cmdHandler) {
+        logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command`);
+        continue;
+      }
+
+      if (cmdHandler.isRegistered(cmd.getCmdNum())) {
+        cmdHandler.handle(cmd, ctx);
+      } else {
+        logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command in ${cmdHandler.constructor.name}`);
+      }
+    }
+  };
+
+
+  logEvents(events) {
+    const EVENTS_LOG_FILE_PATH = path.join(__dirname, `./../../../${config.TENANT_LOG_DIR}/events.log`);
+
+    let log = '';
+    for (let i = 0; i < events.length; i++) {
+      const event = events[i];
+      log += `${event.toString()}\r\n`;
+    }
+    fs.writeFileSync(EVENTS_LOG_FILE_PATH, log, { flag: 'a' }, (err) => {
+      console.error(err);
+    });
+  }
+
+
+  extractAlteredProposals(appCmds) {
     const newProposalsCmds = [];
     const proposalCmds = appCmds.filter(cmd => {
       return cmd instanceof CreateProposalCmd;
@@ -82,16 +152,21 @@ class BaseCmdHandler extends EventEmitter {
       }).map(cmd => ({ cmd, isNewProposal: newProposalsCmds.some((proposalCmd) => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()) })));
     }
 
-    const proposalIds = proposalUpdates.reduce((acc, item) => {
+    const proposalsIds = proposalUpdates.reduce((acc, item) => {
       let { cmd, isNewProposal } = item;
       let { entityId: proposalId } = cmd.getCmdPayload();
       return acc.some(p => p.proposalId === proposalId) ? acc : [...acc, { proposalId, isNewProposal }];
     }, []);
 
-    const proposalsStates = await deipRpc.api.getProposalsStatesAsync(proposalIds.map(({ proposalId }) => proposalId));
-    const proposalsDtos = await proposalDtoService.getProposals(proposalIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => proposalId));
+    return { proposalsIds, newProposalsCmds };
+  }
 
-    const existedProposals = proposalIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => {
+
+  async extractUpdatedProposals({ proposalsIds, newProposalsCmds }) {
+    const proposalsStates = await deipRpc.api.getProposalsStatesAsync(proposalsIds.map(({ proposalId }) => proposalId));
+    const proposalsDtos = await proposalDtoService.getProposals(proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => proposalId));
+
+    const existedProposals = proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => {
       const proposalDto = proposalsDtos.find(p => p._id === proposalId);
       const proposalsState = proposalsStates.find(p => p.external_id === proposalId);
       const proposalCmd = CreateProposalCmd.Deserialize(proposalDto.cmd);
@@ -107,7 +182,7 @@ class BaseCmdHandler extends EventEmitter {
       }
     })
 
-    const createdProposals = proposalIds.filter(({ isNewProposal }) => isNewProposal).map(({ proposalId }) => {
+    const createdProposals = proposalsIds.filter(({ isNewProposal }) => isNewProposal).map(({ proposalId }) => {
       const proposalsState = proposalsStates.find(p => p.external_id === proposalId);
       const proposalCmd = newProposalsCmds.find(cmd => cmd.getProtocolEntityId() === proposalId);
       const proposedCmds = proposalCmd.getProposedCmds();
@@ -130,65 +205,6 @@ class BaseCmdHandler extends EventEmitter {
     return result;
   }
 
-
-
-  async process(msg, ctx, validate = async (cmds) => {}) {
-    const { tx, appCmds } = msg;
-    
-    await validate(appCmds);
-    
-    if (tx) {
-      const signedTx = deipRpc.auth.signTransaction(tx.finalize(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
-      const txInfo = await protocolService.sendTransactionAsync(signedTx);
-      const updatedProposals = await this.extractUpdatedProposals(msg); // This async call must be removed after we have blockchain notifications up and running
-      ctx.state.updatedProposals = updatedProposals;
-    }
-
-    BaseCmdHandler.Dispatch(appCmds, ctx);
-
-    // TODO: Use Kafka producer
-    this.logEvents(ctx.state.appEvents);
-    PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
-  };
-
-
-  handle(cmd, ctx) {
-    this.emit(cmd.getCmdNum(), cmd, ctx);
-  }
-
-
-  static Dispatch(cmds, ctx) {
-    const CMD_HANDLERS = require('./../../command-handlers/index');
-
-    for (let i = 0; i < cmds.length; i++) {
-      const cmd = cmds[i];
-      const cmdHandler = CMD_HANDLERS[cmd.getCmdNum()];
-      if (!cmdHandler) {
-        logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command`);
-        continue;
-      }
-
-      if (cmdHandler.isRegistered(cmd.getCmdNum())) {
-        cmdHandler.handle(cmd, ctx);
-      } else {
-        logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command in ${cmdHandler.constructor.name}`);
-      }
-    }
-
-  };
-
-  logEvents(events) {
-    const EVENTS_LOG_FILE_PATH = path.join(__dirname, `./../../../${config.TENANT_LOG_DIR}/events.log`);
-
-    let log = '';
-    for (let i = 0; i < events.length; i++) {
-      const event = events[i];
-      log += `${event.toString()}\r\n`;
-    }
-    fs.writeFileSync(EVENTS_LOG_FILE_PATH, log, { flag: 'a' }, (err) => {
-      console.error(err);
-    });
-  }
 
 }
 
