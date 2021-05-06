@@ -19,7 +19,7 @@ const BlockchainFieldMeta = new Schema({
   "isPartial": { type: Boolean, required: false, default: false }
 });
 
-const Attribute = new Schema({
+const AttributeSchema = new Schema({
   "tenantId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
@@ -45,6 +45,6 @@ const Attribute = new Schema({
   }
 });
 
-const model = mongoose.model('attribute', Attribute);
+const model = mongoose.model('attribute', AttributeSchema);
 
 module.exports = model;

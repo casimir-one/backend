@@ -23,18 +23,64 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const Schema = mongoose.Schema;
-mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
-
-const systemAttributes = ['5f68be39c579c726e93a3006', '5f68be39c579c726e93a3007', '5f62d4fa98f46d2938dde1eb', '5f68d4fa98f36d2938dde5ec', '5f690af5cdaaa53a27af4a30', '5f6f34a0b1655909aba2398b', '5f7ec161fbb737001f1bacf1', '5f69be12ae115a26e475fb96', '5f690af5cdaaa53a27af4a31', '5f68d4fa98f36d2938dde5ed'];
-const Attribute = require('./../schemas/attribute');
 
 const ATTRIBUTE_SCOPE = require('../constants').ATTRIBUTE_SCOPE;
+const ATTRIBUTE_TYPE = require('../constants').ATTRIBUTE_TYPE;
 const SIGN_UP_POLICY = require('../constants').SIGN_UP_POLICY;
 const NEW_RESEARCH_POLICY = require('../constants').NEW_RESEARCH_POLICY;
 const ASSESSMENT_CRITERIA_TYPE = require('../constants').ASSESSMENT_CRITERIA_TYPE;
 const RESEARCH_CONTENT_TYPES = require('../constants').RESEARCH_CONTENT_TYPES;
 const RESEARCH_STATUS = require('./../constants').RESEARCH_STATUS;
+
+const Schema = mongoose.Schema;
+mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
+
+const systemAttributes = ['5f68be39c579c726e93a3006', '5f68be39c579c726e93a3007', '5f62d4fa98f46d2938dde1eb', '5f68d4fa98f36d2938dde5ec', '5f690af5cdaaa53a27af4a30', '5f6f34a0b1655909aba2398b', '5f7ec161fbb737001f1bacf1', '5f69be12ae115a26e475fb96', '5f690af5cdaaa53a27af4a31', '5f68d4fa98f36d2938dde5ed'];
+
+
+
+
+const AttributeValueOption = new Schema({
+  "_id": false,
+  "title": { type: String, required: false },
+  "shortTitle": { type: String, required: false },
+  "description": { type: String, required: false },
+  "value": { type: Schema.Types.ObjectId, default: null }
+});
+
+const BlockchainFieldMeta = new Schema({
+  "_id": false,
+  "field": { type: String, required: true },
+  "isPartial": { type: Boolean, required: false, default: false }
+});
+
+const AttributeSchema = new Schema({
+  "tenantId": { type: String, default: null },
+  "isSystem": { type: Boolean, default: false },
+  "type": {
+    type: Schema.Types.Mixed,
+    enum: [...Object.values(ATTRIBUTE_TYPE)],
+    required: true
+  },
+  "isFilterable": { type: Boolean, default: false },
+  "isEditable": { type: Boolean, default: true },
+  "isRequired": { type: Boolean, default: false },
+  "isHidden": { type: Boolean, default: false },
+  "isMultiple": { type: Boolean, default: false },
+  "title": { type: String, required: false },
+  "shortTitle": { type: String, required: false },
+  "description": { type: String, required: false },
+  "valueOptions": [AttributeValueOption],
+  "defaultValue": { type: Schema.Types.Mixed, default: null },
+  "blockchainFieldMeta": BlockchainFieldMeta,
+  "scope": {
+    type: Schema.Types.Mixed,
+    enum: [...Object.values(ATTRIBUTE_SCOPE)],
+    required: true
+  }
+});
+
+const Attribute = mongoose.model('attribute', AttributeSchema);
 
 
 const AttributeValueSchema = new Schema({
@@ -55,11 +101,13 @@ const ResearchMigratingSchema = new Schema({
   "tenantCriterias": { type: [Object], default: undefined },
   "milestones": { type: [Object], default: undefined },
   "partners": { type: [Object], default: undefined },
-  "abstract": { type: String, default: undefined }
+  "abstract": { type: String, default: undefined },
+  "videoSrc": { type: String, default: undefined }
 
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const Research = mongoose.model('research', ResearchMigratingSchema);
+
 
 const FAQ = new Schema({
   "question": { type: String, required: true },
@@ -140,7 +188,7 @@ const ResearchContentAssessmentCriterias = new Schema({
 const TenantProfileMigratingSchema = new Schema({
   "_id": { type: String },
   "name": { type: String },
-  "serverUrl": { type: String, required: true },
+  "serverUrl": { type: String, required: false }, // set later
   "shortName": { type: String },
   "description": { type: String },
   "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
@@ -251,6 +299,7 @@ const run = async () => {
     research.milestones = undefined;
     research.partners = undefined;
     research.abstract = undefined;
+    research.videoSrc = undefined;
 
     researchPromises.push(research.save());
   }
