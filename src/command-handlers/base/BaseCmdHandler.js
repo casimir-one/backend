@@ -74,7 +74,6 @@ class BaseCmdHandler extends EventEmitter {
     // TODO: Use Kafka producer
     this.logEvents(ctx.state.appEvents);
     PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
-    return true;
   };
 
 
