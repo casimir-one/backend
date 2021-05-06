@@ -204,6 +204,18 @@ class ProjectDtoService extends BaseService {
   }
 
 
+  async getProject(projectId) {
+    const result = this.getResearch(projectId);
+    return result;
+  }
+
+  
+  async getProjects(projectsIds) {
+    const result = this.getResearches(projectsIds);
+    return result;
+  }
+
+
   async getProjectView(projectId) {
     const project = await this.findOne({ _id: projectId });
     if (!project) return null;

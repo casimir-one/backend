@@ -1,3 +1,4 @@
+import qs from 'qs';
 import { APP_CMD } from '@deip/command-models';
 import { RESEARCH_STATUS } from './../../constants';
 import BaseController from './../base/BaseController';
@@ -12,6 +13,45 @@ const projectDtoService = new ProjectDtoService();
 
 
 class ProjectsController extends BaseController {
+
+
+  getProject = this.query({
+    h: async (ctx) => {
+      try {
+
+        const projectId = ctx.params.projectId;
+        const result = await projectDtoService.getProject(projectId);
+        ctx.status = 200;
+        ctx.body = result;
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+
+
+  getProjects = this.query({
+    h: async (ctx) => {
+      try {
+
+        const query = qs.parse(ctx.query);
+        const projectsIds = query.projectsIds;
+        if (!Array.isArray(projectsIds)) {
+          throw new BadRequestError(`projectsIds must be an array of ids`);
+        }
+
+        const result = await projectDtoService.getProjects(projectsIds);
+        ctx.status = 200;
+        ctx.body = result;
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 
 
   createProject = this.command({

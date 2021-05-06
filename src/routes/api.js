@@ -160,10 +160,6 @@ public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearc
 protected_route.post('/research', research.createResearch)
 protected_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
 
-protected_route.post('/v2/project', projectsCtrl.createProject)
-protected_route.put('/v2/project', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['entity-id'] })]), projectsCtrl.updateProject)
-protected_route.put('/v2/project/delete', projectsCtrl.deleteProject)
-
 public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
 protected_route.post('/fundraising', fundraising.createResearchTokenSale)
 protected_route.post('/fundraising/contributions', fundraising.createResearchTokenSaleContribution)
@@ -253,6 +249,15 @@ public_route.get('/attributes/system', attributes.getSystemAttributes);
 protected_route.post('/attribute', compose([tenantRoute, tenantAdminGuard]), attributes.createAttribute);
 protected_route.put('/attribute', compose([tenantRoute, tenantAdminGuard]), attributes.updateAttribute);
 protected_route.delete('/attribute/:id', compose([tenantRoute, tenantAdminGuard]), attributes.deleteAttribute);
+
+
+/* V2 */
+protected_route.get('/v2/project/:projectId', projectsCtrl.getProject)
+protected_route.get('/v2/projects', projectsCtrl.getProjects)
+protected_route.post('/v2/project', projectsCtrl.createProject)
+protected_route.put('/v2/project', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['entity-id'] })]), projectsCtrl.updateProject)
+protected_route.put('/v2/project/delete', projectsCtrl.deleteProject)
+
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

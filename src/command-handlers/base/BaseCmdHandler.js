@@ -31,7 +31,7 @@ class BaseCmdHandler extends EventEmitter {
   }
 
   register(cmdNum, handler) {
-    assert(!util.types.isAsyncFunction(handler), "Command handler must be sync due to threads concurrency issue");
+    assert(!util.types.isAsyncFunction(handler), "Handler must be sync due to concurrency issues that may happen after commands have been applied to blockchain state.");
     this.registered.push(cmdNum);
     this.on(cmdNum, (cmd, ctx) => {
       try {
