@@ -1,6 +1,6 @@
 import { TxEnvelope, CmdEnvelope } from '@deip/command-models';
 
-class ActionMessage {
+class MessageHandler {
 
   constructor(nextHandler, isMultipartForm) {
 
@@ -36,7 +36,7 @@ class ActionMessage {
 }
 
 
-class Action {
+class ActionHandler {
   constructor(actionHandler) {
     return async (ctx, next) => {
       await actionHandler(ctx);
@@ -50,15 +50,15 @@ class BaseController {
 
   constructor() {}
 
-  command({ form: ActionFormHandler, h: actionHandler }) {
-    if (!ActionFormHandler)
-      return new ActionMessage(new Action(actionHandler), false);
+  command({ form: FormHandler, h: actionHandler }) {
+    if (!FormHandler)
+      return new MessageHandler(new ActionHandler(actionHandler), false);
       
-    return new ActionFormHandler(new ActionMessage(new Action(actionHandler), true));
+    return new FormHandler(new MessageHandler(new ActionHandler(actionHandler), true));
   }
 
   query({ h: actionHandler }) {
-    return new Action(actionHandler);
+    return new ActionHandler(actionHandler);
   }
 
 }
