@@ -6,9 +6,10 @@ yarn-debug.log*
 yarn-error.log*
 test/unit/coverage
 files/*
+logs/*
 local-files/*
-/config/environment/.local*.env
-/config/environment/.demo.env
-/config/environment/.demo*.env
-/config/environment/.tto*.env
+/src/config/environment/.local*.env
+/src/config/environment/.demo.env
+/src/config/environment/.demo*.env
+/src/config/environment/.tto*.env
 /scripts/genesis-*.json
