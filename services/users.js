@@ -14,14 +14,10 @@ class UserService extends BaseReadModelService {
 
   async mapUsers(profiles) {
     const chainAccounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));
-    const chainMembershipTokens = await Promise.all(chainAccounts.map(a => deipRpc.api.getResearchGroupTokensByAccountAsync(a.name)));
-
     return chainAccounts
       .map((chainAccount) => {
         const profileRef = profiles.find(r => r._id == chainAccount.name);
-        const membershipTokens = chainMembershipTokens.find(teams => teams.length && teams[0].owner == chainAccount.name) || [];
-        const teams = membershipTokens.map(mt => mt.research_group.external_id);
-        return { username: chainAccount.name, tenantId: profileRef ? profileRef.tenantId : null, account: chainAccount, profile: profileRef ? profileRef : null, teams };
+        return { username: chainAccount.name, tenantId: profileRef ? profileRef.tenantId : null, account: chainAccount, profile: profileRef ? profileRef : null };
       });
   }
 
