@@ -17,7 +17,12 @@ const app = new Koa();
 require('./database');
 require('./queue');
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  allowHeaders: "*",
+  allowMethods: "*"
+}));
+
 app.use(koa_bodyparser());
 app.use(json());
 app.use(logger());
