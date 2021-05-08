@@ -123,6 +123,7 @@ const confirmAssetDepositRequest = async (ctx) => {
       return;
     }
 
+    console.info(`Handling invoice: ${JSON.stringify(invoice, null, 2)}`);
     const {
       amount_paid: amount,
       currency: currency,
@@ -148,7 +149,6 @@ const confirmAssetDepositRequest = async (ctx) => {
     }
   
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
-
     const issue_asset_op = ['issue_asset', {
       issuer: regacc,
       amount: `${amount}.00 ${currency.toUpperCase()}`,
