@@ -7,6 +7,7 @@ import UserService from './../../services/legacy/users';
 import TenantService from './../../services/legacy/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
 import AttributesService from './../../services/legacy/attributes';
+import { ATTRIBUTE_SCOPE } from '@deip/attributes-service';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
