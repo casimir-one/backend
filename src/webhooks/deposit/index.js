@@ -140,7 +140,7 @@ const confirmAssetDepositRequest = async (ctx) => {
     }
 
     const depositRequest = depositRequestDoc.toObject();
-    if (depositRequest.status == DEPOSIT_REQUEST_STATUS.PENDING) {
+    if (depositRequest.status != DEPOSIT_REQUEST_STATUS.PENDING) {
       ctx.status = 400;
       ctx.body = `Deposit request with ${requestToken} has been already resolved`;
       return;
