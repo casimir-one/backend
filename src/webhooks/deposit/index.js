@@ -11,6 +11,12 @@ function Encodeuint8arr(seed) {
 
 const Schema = mongoose.Schema;
 
+const DEPOSIT_REQUEST_STATUS = {
+  PENDING: 1,
+  APPROVED: 2,
+  REJECTED: 3
+}
+
 const AssetDepositRequestSchema = new Schema({
   "currency": { type: String, required: true },
   "amount": { type: Number, required: true },
@@ -18,8 +24,9 @@ const AssetDepositRequestSchema = new Schema({
   "account": { type: String, required: true }, // target balance owner
   "requestToken": { type: String, required: true, index: { unique: true } },
   "timestamp": { type: Number, required: true },
-  "isConfirmed": { type: Boolean, required: true, default: false },
-  "txInfo": { type: Object, required: false }
+  "status": { type: Number, enum: [...Object.values(DEPOSIT_REQUEST_STATUS)], required: true, default: DEPOSIT_REQUEST_STATUS.PENDING },
+  "txInfo": { type: Object, required: false },
+  "invoice": { type: Object, required: false }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 
@@ -89,7 +96,7 @@ const createAssetDepositRequest = async (ctx) => {
     })).save();
     const depositRequest = depositRequestDoc.toObject();
 
-    const redirectUrl = `${config.DEIP_PAYMENT_SERVICE_URL}?amount=${amount}&currency=${currency}&username=${username}&account=${account}&requestToken=${depositRequest.requestToken}&serverUrl=${config.DEIP_SERVER_URL}/webhook/assets/emit`;
+    const redirectUrl = `${config.DEIP_PAYMENT_SERVICE_URL}?amount=${amount}&currency=${currency}&username=${username}&account=${account}&requestToken=${depositRequest.requestToken}&serverUrl=${config.DEIP_SERVER_URL}&referrerUrl=${config.DEIP_CLIENT_URL}`;
    
     ctx.status = 200;
     ctx.body = {
@@ -106,24 +113,15 @@ const createAssetDepositRequest = async (ctx) => {
 
 
 const confirmAssetDepositRequest = async (ctx) => {
+  const {
+    sig,
+    invoice
+  } = ctx.request.body;
+
+  let depositRequestDoc;
+  
   try {
-    const {
-      sig,
-      invoice
-    } = ctx.request.body;    
 
-    try {
-      const publicKey = crypto.PublicKey.from(config.DEIP_PAYMENT_SERVICE_PUB_KEY);
-      const payloadStr = JSON.stringify(invoice, Object.keys(invoice).sort())
-      publicKey.verify(Encodeuint8arr(payloadStr).buffer, crypto.unhexify(sig).buffer);
-    }
-    catch (err) {
-      ctx.status = 401;
-      ctx.body = `Provided signature is not valid for provided invoice`;
-      return;
-    }
-
-    console.info(`Handling invoice: ${JSON.stringify(invoice, null, 2)}`);
     const {
       amount_paid: amount,
       currency: currency,
@@ -134,7 +132,7 @@ const confirmAssetDepositRequest = async (ctx) => {
       }
     } = invoice;
 
-    const depositRequestDoc = await AssetDepositRequest.findOne({ requestToken });
+    depositRequestDoc = await AssetDepositRequest.findOne({ requestToken });
     if (!depositRequestDoc) {
       ctx.status = 404;
       ctx.body = `Deposit request with ${requestToken} is not found`;
@@ -142,9 +140,20 @@ const confirmAssetDepositRequest = async (ctx) => {
     }
 
     const depositRequest = depositRequestDoc.toObject();
-    if (depositRequest.isConfirmed) {
+    if (depositRequest.status == DEPOSIT_REQUEST_STATUS.PENDING) {
       ctx.status = 400;
-      ctx.body = `Deposit request with ${requestToken} has been already confirmed`;
+      ctx.body = `Deposit request with ${requestToken} has been already resolved`;
+      return;
+    }
+
+    try {
+      const publicKey = crypto.PublicKey.from(config.DEIP_PAYMENT_SERVICE_PUB_KEY);
+      const payloadStr = JSON.stringify(invoice, Object.keys(invoice).sort())
+      publicKey.verify(Encodeuint8arr(payloadStr).buffer, crypto.unhexify(sig).buffer);
+    }
+    catch (err) {
+      ctx.status = 401;
+      ctx.body = `Provided signature is not valid for provided invoice`;
       return;
     }
   
@@ -161,22 +170,57 @@ const confirmAssetDepositRequest = async (ctx) => {
     signedTx = deipRpc.auth.signTransaction(signedTx, {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
     const txInfo = await blockchainService.sendTransactionAsync(signedTx);
 
-    depositRequestDoc.isConfirmed = true;
+    depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.APPROVED;
     depositRequestDoc.txInfo = txInfo;
+    depositRequest.invoice = invoice;
+    const approvedDepositRequest = await depositRequestDoc.save();
 
-    const confirmedDepositRequest = await depositRequestDoc.save();
-    console.log(confirmedDepositRequest.toObject());
-    
     ctx.status = 200;
     ctx.body = "OK";
   } 
   catch(err) {
+
+    if (depositRequestDoc) {
+      depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.REJECTED;
+      depositRequest.invoice = invoice;
+      const rejectedDepositRequest = await depositRequestDoc.save();
+    }
+
+    ctx.status = 500;
+    ctx.body = err.message;
+  }
+}
+
+
+const getDepositRequestByToken = async (ctx) => {
+  try {
+    const requestToken = ctx.params.requestToken;
+
+    if (!requestToken) {
+      ctx.status = 400;
+      ctx.body = `Request token is not specified`;
+      return;
+    }
+
+    const depositRequestDoc = await AssetDepositRequest.findOne({ requestToken });
+    if (!depositRequestDoc) {
+      ctx.status = 404;
+      ctx.body = `Deposit request with ${requestToken} is not found`;
+      return;
+    }
+
+    const depositRequest = depositRequestDoc.toObject();
+    ctx.status = 200;
+    ctx.body = depositRequest;
+  }
+  catch (err) {
     ctx.status = 500;
     ctx.body = err.message;
   }
 }
 
 module.exports = {
+  getDepositRequestByToken,
   createAssetDepositRequest,
   confirmAssetDepositRequest
 }

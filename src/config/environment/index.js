@@ -32,7 +32,7 @@ const config = {
   CHAIN_ID: process.env.CHAIN_ID,
   FAUCET_ACCOUNT: JSON.parse(process.env.FAUCET_ACCOUNT),
   DEIP_SERVER_URL: process.env.DEIP_SERVER_URL,
-  DEIP_CLIENT_URL: process.env.DEIP_CLIENT_URL, // todo: get rid of this
+  DEIP_CLIENT_URL: process.env.DEIP_CLIENT_URL,
   SIG_SEED: process.env.SIG_SEED,
   JWT_SECRET: process.env.JWT_SECRET
 };
