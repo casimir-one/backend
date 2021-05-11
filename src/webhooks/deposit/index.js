@@ -172,7 +172,7 @@ const confirmAssetDepositRequest = async (ctx) => {
 
     depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.APPROVED;
     depositRequestDoc.txInfo = txInfo;
-    depositRequest.invoice = invoice;
+    depositRequestDoc.invoice = invoice;
     const approvedDepositRequest = await depositRequestDoc.save();
 
     ctx.status = 200;
@@ -182,7 +182,7 @@ const confirmAssetDepositRequest = async (ctx) => {
 
     if (depositRequestDoc) {
       depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.REJECTED;
-      depositRequest.invoice = invoice;
+      depositRequestDoc.invoice = invoice;
       const rejectedDepositRequest = await depositRequestDoc.save();
     }
 
