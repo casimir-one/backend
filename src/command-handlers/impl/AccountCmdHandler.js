@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/command-models';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { TeamCreatedEvent } from './../../events';
+import { TeamCreatedEvent, TeamUpdatedEvent } from './../../events';
 
 
 class AccountCmdHandler extends BaseCmdHandler {
@@ -40,6 +40,29 @@ accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, (cmd, ctx) => {
 
 });
 
+accountCmdHandler.register(APP_CMD.UPDATE_ACCOUNT, (cmd, ctx) => {
 
+  const { 
+    entityId: accountId, 
+    creator, 
+    isTeamAccount, 
+    description, 
+    attributes 
+  } = cmd.getCmdPayload();
+
+  
+  if (isTeamAccount) {
+
+    ctx.state.appEvents.push(new TeamUpdatedEvent({
+      creator: creator,
+      accountId: accountId,
+      attributes: attributes,
+      isTeamAccount: isTeamAccount,
+      description: description,
+      proposalCtx: ctx.state.proposalsStackFrame
+    }));
+  }
+
+});
 
 module.exports = accountCmdHandler;

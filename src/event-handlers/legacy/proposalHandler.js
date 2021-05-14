@@ -3,7 +3,7 @@ import deipRpc from '@deip/rpc-client';
 import { APP_PROPOSAL } from '@deip/command-models';
 import { LEGACY_APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamService, TeamDtoService } from './../../services';
 import ProposalService from './../../services/impl/write/ProposalService';
 import UserService from './../../services/legacy/users';
 
@@ -13,7 +13,7 @@ class ProposalHandler extends EventEmitter { }
 const proposalHandler = new ProposalHandler();
 
 const usersService = new UserService({ scoped: false });
-const researchGroupService = new ResearchGroupService({ scoped: false });
+const teamDtoService = new TeamDtoService({ scoped: false });
 const proposalService = new ProposalService({ scoped: false });
 
 async function createProposal(event, chainContractType) {
@@ -28,7 +28,7 @@ async function createProposal(event, chainContractType) {
   const usersNames = chainAccounts.filter(a => !a.is_research_group).map(a => a.name);
 
   const involvedUsers = await usersService.getUsers(usersNames);
-  const involvedResearchGroups = await researchGroupService.getResearchGroups(researchGroupsNames);
+  const involvedResearchGroups = await teamDtoService.getTeams(researchGroupsNames);
 
   const multiTenantIds = [...involvedUsers, ...involvedResearchGroups].reduce((acc, item) => {
     if (!acc.some(id => id == item.tenantId)) {

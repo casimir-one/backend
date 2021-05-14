@@ -3,7 +3,7 @@ import deipRpc from '@deip/rpc-client';
 import APP_EVENT from './../../events/base/AppEvent';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import ProposalService from './../../services/impl/write/ProposalService';
-import TeamDtoService from './../../services/legacy/researchGroup'; // TODO: separate read/write schema
+import { TeamDtoService } from './../../services';
 
 class ProposalEventHandler extends BaseEventHandler {
 
@@ -27,7 +27,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   // Currently this collection includes 'personal' spaces that are being created for every standalone user.
   // We should replace this call after removing 'personal' spaces from domain logic
   const chainProposal = await deipRpc.api.getProposalStateAsync(proposalId);
-  const teams = await teamDtoService.getResearchGroups(chainProposal.required_approvals);
+  const teams = await teamDtoService.getTeams(chainProposal.required_approvals);
   const multiTenantIds = teams.reduce((acc, item) => {
     return acc.some(id => id == item.tenantId) ? acc : [...acc, item.tenantId];
   }, []);
@@ -81,5 +81,16 @@ proposalEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (
   // TODO: create multisig transaction read schema
 });
 
+proposalEventHandler.register(APP_EVENT.TEAM_UPDATE_PROPOSAL_ACCEPTED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.TEAM_UPDATE_PROPOSAL_CREATED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.TEAM_UPDATE_PROPOSAL_DECLINED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
 
 module.exports = proposalEventHandler;

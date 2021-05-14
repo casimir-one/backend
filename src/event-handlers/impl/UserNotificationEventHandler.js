@@ -3,7 +3,7 @@ import config from './../../config';
 import { USER_NOTIFICATION_TYPE, RESEARCH_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
 import TenantService from './../../services/legacy/tenant';
-import TeamDtoService from './../../services/legacy/researchGroup'; // TODO: separate read/write schema
+import { TeamService, TeamDtoService } from './../../services';
 import UserDtoService from './../../services/legacy/users';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
@@ -36,7 +36,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
 
   const tenant = await tenantService.getTenant(config.TENANT);
   const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
@@ -71,7 +71,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
   const { teamId, attributes } = event.getEventPayload();
 
   const tenant = await tenantService.getTenant(config.TENANT);
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
@@ -106,7 +106,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
 
   const tenant = await tenantService.getTenant(config.TENANT);
   const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
@@ -139,7 +139,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
 
   const tenant = await tenantService.getTenant(config.TENANT);
   const project = await projectDtoService.getResearch(projectId);
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const teamCreator = await userDtoService.getUser(team.creator);
 
   const notifiableUsers = await userDtoService.getUsers([...tenant.admins, ...project.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
@@ -169,7 +169,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
   const { teamId, projectId } = event.getEventPayload();
 
   const tenant = await tenantService.getTenant(config.TENANT);
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const project = await projectDtoService.getResearch(projectId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
@@ -202,7 +202,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (e
     inviter
   } = event.getEventPayload();
 
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const currentUser = await userDtoService.getUser(inviter);
   const inviteeUser = await userDtoService.getUser(invitee);
   const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
@@ -244,7 +244,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (
     invitee,
   } = event.getEventPayload();
 
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
   const inviteeUser = await userDtoService.getUser(invitee);
 
@@ -275,7 +275,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (
     teamId
   } = event.getEventPayload();
 
-  const team = await teamDtoService.getResearchGroup(teamId);
+  const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
   const inviteeUser = await userDtoService.getUser(invitee);
 

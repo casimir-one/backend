@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken';
 import config from './../../config';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamService } from './../../services';
 import UserService from './../../services/legacy/users';
 import TenantService from './../../services/legacy/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
@@ -89,7 +89,7 @@ const signUp = async function (ctx, next) {
   try {
 
     const usersService = new UserService();
-    const researchGroupService = new ResearchGroupService();
+    const teamService = new TeamService();
     const attributesService = new AttributesService()
 
     if (!username || !pubKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
@@ -139,7 +139,7 @@ const signUp = async function (ctx, next) {
   
       const attributes = attr ? [{attributeId: attr._id, value: username}] : [];
   
-      await researchGroupService.createResearchGroupRef({
+      await teamService.createTeam({
         externalId: username,
         creator: username,
         attributes
