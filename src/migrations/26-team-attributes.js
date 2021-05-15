@@ -321,6 +321,7 @@ const run = async () => {
     ];
 
     if (!TEAM_CUSTOM_ATTRIBUTES[researchGroupRefObj.tenantId]) {
+      teamPromises.push(researchGroupRef.save());
       continue;
     }
 
