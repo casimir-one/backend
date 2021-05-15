@@ -4,12 +4,11 @@ import { APP_PROPOSAL } from '@deip/command-models';
 import ProposalSchema from './../../../schemas/ProposalSchema';
 import { RESEARCH_STATUS } from './../../../constants';
 import ResearchService from './../../../services/impl/read/ProjectDtoService';
-import ResearchGroupService from './../../../services/legacy/researchGroup';
+import TeamDtoService from './TeamDtoService';
 import UserService from './../../../services/legacy/users';
 
-
 const usersService = new UserService({ scoped: false });
-const researchGroupService = new ResearchGroupService({ scoped: false });
+const teamDtoService = new TeamDtoService({ scoped: false });
 const researchService = new ResearchService({ scoped: false });
 
 
@@ -59,7 +58,7 @@ class ProposalDtoService extends BaseService {
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
-    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
     const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
 
     const proposals = [];
@@ -274,7 +273,7 @@ class ProposalDtoService extends BaseService {
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
     const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
@@ -310,7 +309,7 @@ class ProposalDtoService extends BaseService {
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
     const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
@@ -337,7 +336,7 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -362,7 +361,7 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
     const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
 
     return proposals.map((proposal) => {
@@ -382,7 +381,7 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -407,7 +406,7 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
     const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
 
     return proposals.map((proposal) => {
@@ -441,7 +440,7 @@ class ProposalDtoService extends BaseService {
     }, []);
 
 
-    const researchGroups = await researchGroupService.getResearchGroups(accountNames.map(a => a));
+    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
     const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
     const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => deipRpc.api.getResearchTokenSaleAsync(id)));
 
@@ -474,7 +473,7 @@ class ProposalDtoService extends BaseService {
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
     const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
@@ -503,7 +502,7 @@ class ProposalDtoService extends BaseService {
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
     const users = await usersService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await researchGroupService.getResearchGroups(chainResearchGroupAccounts.map(a => a.name))
+    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);

@@ -29,6 +29,10 @@ module.exports = {
     { h: teamEventHandler, await: true }
   ],
 
+  [APP_EVENT.TEAM_UPDATED]: [
+    { h: teamEventHandler, await: true }
+  ],
+
   [APP_EVENT.PROJECT_CREATED]: [
     { h: projectEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
@@ -74,5 +78,17 @@ module.exports = {
 
   [APP_EVENT.PROJECT_INVITE_DECLINED]: [
     { h: userNotificationEventHandler, await: false }
-  ]
+  ],
+
+  [APP_EVENT.TEAM_UPDATE_PROPOSAL_ACCEPTED]: [
+    { h: proposalEventHandler, await: false }
+  ],
+
+  [APP_EVENT.TEAM_UPDATE_PROPOSAL_CREATED]: [
+    { h: proposalEventHandler, await: false }
+  ],
+
+  [APP_EVENT.TEAM_UPDATE_PROPOSAL_DECLINED]: [
+    { h: proposalEventHandler, await: false }
+  ],
 };

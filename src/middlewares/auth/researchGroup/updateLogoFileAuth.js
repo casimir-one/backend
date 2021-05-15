@@ -1,18 +1,18 @@
-import ResearchGroupService from './../../../services/legacy/researchGroup';
+import { TeamDtoService } from './../../../services';
 import TenantService from './../../../services/legacy/tenant';
 
 
 function updateResearchGroupLogoFileAuth(options = {}) {
   return async function (ctx, next) {
     const tenantService = new TenantService();
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const currentTenant = ctx.state.tenant;
 
     const researchGroupExternalId = options.researchGroupEnitytId
       ? typeof options.researchGroupEnitytId === 'string' ? ctx.params[options.researchGroupEnitytId] : options.researchGroupEnitytId(ctx)
       : ctx.params.researchGroupExternalId;
 
-    const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+    const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
     ctx.assert(!!researchGroup, 404);
 
     if (researchGroup.tenantId == currentTenant.id) {

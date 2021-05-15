@@ -1,5 +1,5 @@
 import UserJoinRequestService from './../../services/legacy/userJoinRequests';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamDtoService } from './../../services';
 import * as blockchainService from './../../utils/blockchain';
 
 const getJoinRequestsByGroup = async (ctx) => {
@@ -47,7 +47,7 @@ const createJoinRequest = async (ctx) => {
 
   try {
 
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const userJoinRequestService = new UserJoinRequestService();
 
     if (!username || !coverLetter) {
@@ -62,7 +62,7 @@ const createJoinRequest = async (ctx) => {
       return;
     }
 
-    const researchGroup = await researchGroupService.authorizeResearchGroupAccount(researchGroupExternalId, username);
+    const researchGroup = await teamDtoService.authorizeTeamAccount(researchGroupExternalId, username);
     if (researchGroup) {
       ctx.status = 400;
       ctx.body = `"${username}" is member of "${researchGroupExternalId}" group already`;

@@ -6,12 +6,12 @@ import UserNotificationService from './../../services/legacy/userNotification';
 import ResearchContentService from './../../services/legacy/researchContent';
 import ReviewService from './../../services/legacy/review';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamDtoService } from './../../services';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
 import TenantService from './../../services/legacy/tenant';
 
 const userService = new UserService({ scoped: false });
-const researchGroupService = new ResearchGroupService({ scoped: false });
+const teamDtoService = new TeamDtoService({ scoped: false });
 const researchService = new ResearchService({ scoped: false });
 const userNotificationService = new UserNotificationService();
 
@@ -24,7 +24,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({
   const { researchGroupExternalId, researchExternalId, source: { offchain: { title } } } = researchContentProposedEvent.getSourceData();
   const eventEmitter = researchContentProposedEvent.getEventEmitter();
 
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const research = await researchService.getResearch(researchExternalId);
 
   const emitterUser = await userService.getUser(eventEmitter);
@@ -64,7 +64,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ 
 
   const researchContent = await researchContentService.getResearchContent(researchContentExternalId);
   const research = await researchService.getResearch(researchExternalId);
-  const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
+  const researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
   const emitterUser = await userService.getUser(eventEmitter);
   const isAcceptedByQuorum = researchGroup.external_id != eventEmitter;
 
@@ -100,7 +100,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, asy
   const { researchGroupExternalId } = researchGroupUpdateProposedEvent.getSourceData();
   const eventEmitter = researchGroupUpdateProposedEvent.getEventEmitter();
 
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -130,7 +130,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ ev
   const { researchGroupExternalId } = researchGroupUpdatedEvent.getSourceData();
   const eventEmitter = researchGroupUpdatedEvent.getEventEmitter();
 
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
@@ -255,7 +255,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, async
 userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event: userResignationProposedEvent }) => {
   const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
   const eventEmitter = userResignationProposedEvent.getEventEmitter();
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
   const excludedUser = await userService.getUser(member);
   const notificationsPromises = [];
@@ -327,7 +327,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async
   const eventEmitter = researchTokenSaleProposedEvent.getEventEmitter();
 
   const research = await researchService.getResearch(researchExternalId);
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
@@ -360,7 +360,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async 
   const eventEmitter = researchTokenSaleCreatedEvent.getEventEmitter();
 
   const research = await researchService.getResearch(researchExternalId);
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userService.getUser(eventEmitter);
   const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(researchTokenSaleExternalId);
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
@@ -400,7 +400,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREA
   let research = await researchService.getResearch(researchContent.research_external_id);
   let review = await reviewService.getReview(reviewExternalId);
 
-  let researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
+  let researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
   let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
   let notificationsPromises = [];
 
@@ -434,7 +434,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQU
   let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
   let research = await researchService.getResearch(researchContent.research_external_id);
-  let researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
+  let researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
 
   userNotificationService.createUserNotification({
     username: expert.account.name,

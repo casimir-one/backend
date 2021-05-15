@@ -22,7 +22,7 @@ import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
 import attributes from './../controllers/legacy/attributes';
 
-import { projectsCtrl, proposalsCtrl } from '../controllers';
+import { projectsCtrl, proposalsCtrl, teamsCtrl } from '../controllers';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
@@ -128,7 +128,6 @@ protected_route.put('/groups', compose([researchGroupLogoFileUpdateAuth({ resear
 public_route.get('/groups/listing', researchGroups.getResearchGroupsListing)
 public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchGroup)
 public_route.get('/groups/logo/:researchGroupExternalId', compose([researchGroupLogoFileReadAuth()]), researchGroups.getResearchGroupLogo)
-protected_route.post('/groups/logo', researchGroups.uploadResearchGroupLogo)
 protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
 public_route.get('/groups/member/:username', researchGroups.getResearchGroupsByUser)
 public_route.get('/groups/tenant/:tenantId', researchGroups.getResearchGroupsByTenant)
@@ -257,6 +256,13 @@ protected_route.get('/v2/projects', projectsCtrl.getProjects)
 protected_route.post('/v2/project', projectsCtrl.createProject)
 protected_route.put('/v2/project', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['entity-id'] })]), projectsCtrl.updateProject)
 protected_route.put('/v2/project/delete', projectsCtrl.deleteProject)
+
+protected_route.post('/v2/team', teamsCtrl.createTeam)
+protected_route.put('/v2/team', compose([researchGroupLogoFileUpdateAuth({ researchGroupEnitytId: (ctx) => ctx.request.headers['entity-id'] } )]), teamsCtrl.updateTeam)
+public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
+public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
+public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
+public_route.get('/v2/teams/tenant/:tenantId', teamsCtrl.getTeamsByTenant)
 
 
 const routes = {

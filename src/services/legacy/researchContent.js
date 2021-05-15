@@ -3,7 +3,7 @@ import BaseService from './../base/BaseService';
 import ProjectContentSchema from './../../schemas/ProjectContentSchema';
 import { RESEARCH_CONTENT_STATUS, CONTENT_TYPES_MAP } from './../../constants';
 import ResearchService from './../impl/read/ProjectDtoService';
-import ResearchGroupService from './researchGroup';
+import { TeamDtoService } from './../../services';
 import UsersService from './users';
 
 class ResearchContentService extends BaseService {
@@ -175,12 +175,12 @@ class ResearchContentService extends BaseService {
 
   async getResearchContentReferencesGraph(researchContentId) {
     const researchService = new ResearchService();
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const usersService = new UsersService();
 
     const researchContent = await this.getResearchContent(researchContentId);
     const research = await researchService.getResearch(researchContent.research_external_id);
-    const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
+    const researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
 
     const ref = await this.getResearchContentRef(researchContent.external_id);
 
@@ -236,7 +236,7 @@ class ResearchContentService extends BaseService {
 
   async getResearchContentOuterReferences(researchContent, acc) {
     const researchService = new ResearchService();
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const usersService = new UsersService();
 
     const outerReferences = await deipRpc.api.getContentsReferToContent2Async(researchContent.external_id);
@@ -259,7 +259,7 @@ class ResearchContentService extends BaseService {
       if (!outerRefResearch) {
         continue; // deleted research\content
       }
-      const outerRefResearchGroup = await researchGroupService.getResearchGroup(outerRefResearch.research_group.external_id);
+      const outerRefResearchGroup = await teamDtoService.getTeam(outerRefResearch.research_group.external_id);
       const outerRefResearchContent = await this.getResearchContent(researchContentExternalId);
 
       const ref = await this.getResearchContentRef(outerRefResearchContent.external_id);
@@ -283,7 +283,7 @@ class ResearchContentService extends BaseService {
 
   async getResearchContentInnerReferences(researchContent, acc) {
     const researchService = new ResearchService();
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const usersService = new UsersService();
 
     const innerReferences = await deipRpc.api.getContentReferences2Async(researchContent.external_id);
@@ -307,7 +307,7 @@ class ResearchContentService extends BaseService {
         continue; // deleted research\content
       }
       
-      const innerRefResearchGroup = await researchGroupService.getResearchGroup(innerRefResearch.research_group.external_id);
+      const innerRefResearchGroup = await teamDtoService.getTeam(innerRefResearch.research_group.external_id);
       const innerRefResearchContent = await this.getResearchContent(referenceResearchContentExternalId);
 
       const ref = await this.getResearchContentRef(innerRefResearchContent.external_id);

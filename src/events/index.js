@@ -4,6 +4,10 @@ import ProjectDeletedEvent from './impl/ProjectDeletedEvent';
 import ProjectMemberJoinedEvent from './impl/ProjectMemberJoinedEvent';
 
 import TeamCreatedEvent from './impl/TeamCreatedEvent';
+import TeamUpdatedEvent from './impl/TeamUpdatedEvent';
+import TeamUpdateProposalCreatedEvent from './impl/TeamUpdateProposalCreatedEvent';
+import TeamUpdateProposalAcceptedEvent from './impl/TeamUpdateProposalAcceptedEvent';
+import TeamUpdateProposalDeclinedEvent from './impl/TeamUpdateProposalDeclinedEvent';
 
 import ProposalCreatedEvent from './impl/ProposalCreatedEvent';
 import ProposalUpdatedEvent from './impl/ProposalUpdatedEvent';
@@ -29,6 +33,7 @@ module.exports = {
   ProjectMemberJoinedEvent,
 
   TeamCreatedEvent,
+  TeamUpdatedEvent,
 
   ProposalCreatedEvent,
   ProposalUpdatedEvent,
@@ -44,5 +49,9 @@ module.exports = {
   
   ProjectInviteCreatedEvent,
   ProjectInviteAcceptedEvent,
-  ProjectInviteDeclinedEvent
+  ProjectInviteDeclinedEvent,
+
+  TeamUpdateProposalAcceptedEvent,
+  TeamUpdateProposalCreatedEvent,
+  TeamUpdateProposalDeclinedEvent
 }
