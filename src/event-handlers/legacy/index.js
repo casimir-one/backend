@@ -13,7 +13,7 @@ import reviewHandler from './reviewHandler';
 
 import UserService from './../../services/legacy/users';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamDtoService } from './../../services';
 
 class AppEventHandler extends EventEmitter { }
 
@@ -110,7 +110,7 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, (payload, re
   const { external_id: researchExternalId, research_group: researchGroupExternalId } = create_research_operation[1];
   
   const usersService = new UserService();
-  const researchGroupService = new ResearchGroupService();
+  const teamDtoService = new TeamDtoService()
   const researchService = new ResearchService();
 
   const approverUserProfile = await usersService.findUserProfileByOwner(emitter);
@@ -122,7 +122,7 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, (payload, re
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
   const research = await researchService.getResearch(researchExternalId);
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
 
   const payload = { research, researchGroup, approver: approverUser, requester: requesterUser, tenant };
 

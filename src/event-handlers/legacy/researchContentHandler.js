@@ -3,7 +3,6 @@ import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, RESEARCH_CONTENT_STATUS } from './.
 import { handle, fire, wait } from './utils';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
-import ResearchGroupService from './../../services/legacy/researchGroup';
 import ResearchContentService from './../../services/legacy/researchContent';
 
 
@@ -15,7 +14,6 @@ researchContentHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, 
   const { event: researchContentCreatedEvent, tenant } = source;
 
   const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
   const researchContentService = new ResearchContentService();
 
   const { researchContentExternalId, researchExternalId, researchGroupExternalId, hash, references, authors, source: { offchain: { title, folder, algo, packageFiles, foreignReferences, type } } } = researchContentCreatedEvent.getSourceData();
@@ -46,7 +44,6 @@ researchContentHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload,
   const { event: researchContentCreatedEvent, tenant } = source;
 
   const researchService = new ResearchService();
-  const researchGroupService = new ResearchGroupService();
   const researchContentService = new ResearchContentService();
 
   const { researchContentExternalId, researchExternalId, researchGroupExternalId, hash, references, authors, source: { offchain: { title, folder, algo, packageFiles, foreignReferences, type } } } = researchContentCreatedEvent.getSourceData();

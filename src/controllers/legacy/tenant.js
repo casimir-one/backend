@@ -2,7 +2,7 @@ import deipRpc from '@deip/rpc-client';
 import sharp from 'sharp';
 import UserService from './../../services/legacy/users';
 import TenantService from './../../services/legacy/tenant';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamService } from './../../services';
 import FileStorage from './../../storage';
 import config from './../../config';
 import { USER_PROFILE_STATUS } from './../../constants';
@@ -334,7 +334,7 @@ const approveSignUpRequest = async (ctx, next) => {
 
     // TODO: check jwtUsername for admin
     const usersService = new UserService();
-    const researchGroupService = new ResearchGroupService();
+    const teamService = new TeamService();
     const attributesService = new AttributesService()
 
     const userProfile = await usersService.findUserProfileByOwner(username);
@@ -360,7 +360,7 @@ const approveSignUpRequest = async (ctx, next) => {
 
     const attributes = attr ? [{attributeId: attr._id, value: username}] : [];
 
-    await researchGroupService.createResearchGroupRef({
+    await teamService.createTeam({
       externalId: username,
       creator: username,
       attributes

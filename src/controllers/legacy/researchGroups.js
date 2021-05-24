@@ -1,79 +1,19 @@
 import sharp from 'sharp'
-import qs from 'qs';
 import * as blockchainService from './../../utils/blockchain';
 import FileStorage from './../../storage';
-import ResearchGroupService from './../../services/legacy/researchGroup';
-import ResearchGroupForm from './../../forms/legacy/researchGroup';
-import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';
-import ResearchGroupUpdatedEvent from './../../events/legacy/researchGroupUpdatedEvent';
-import ResearchGroupUpdateProposedEvent from './../../events/legacy/researchGroupUpdateProposedEvent';
-import ResearchGroupUpdateProposalSignedEvent from './../../events/legacy/researchGroupUpdateProposalSignedEvent';
 import UserResignationProposedEvent from './../../events/legacy/userResignationProposedEvent';
 import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
 
 
 const createResearchGroup = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-
-  try {
-    const { tx, offchainMeta } = await ResearchGroupForm(ctx);
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, offchainMeta);
-    ctx.state.events.push(researchGroupCreatedEvent);
-
-    const { researchGroupExternalId } = researchGroupCreatedEvent.getSourceData();
-      
-    ctx.status = 200;
-    ctx.body = { external_id: researchGroupExternalId };
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 }
 
 
 const updateResearchGroup = async (ctx, next) => {
-  const jwtUsername = ctx.state.user.username;
-
-  try {
-    const { tx, offchainMeta, isProposal } = await ResearchGroupForm(ctx);
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    if (isProposal) {
-      const researchGroupUpdateProposedEvent = new ResearchGroupUpdateProposedEvent(datums, offchainMeta);
-      ctx.state.events.push(researchGroupUpdateProposedEvent);
-
-      const researchGroupUpdateApprovals = researchGroupUpdateProposedEvent.getProposalApprovals();
-      for (let i = 0; i < researchGroupUpdateApprovals.length; i++) {
-        const approval = researchGroupUpdateApprovals[i];
-        const researchGroupUpdateProposalSignedEvent = new ResearchGroupUpdateProposalSignedEvent([approval]);
-        ctx.state.events.push(researchGroupUpdateProposalSignedEvent);
-      }
-      
-    } else {
-      const researchGroupUpdatedEvent = new ResearchGroupUpdatedEvent(datums);
-      ctx.state.events.push(researchGroupUpdatedEvent, offchainMeta);
-    }
-
-    ctx.status = 200;
-    ctx.body = [...ctx.state.events];
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 }
 
 
@@ -107,22 +47,6 @@ const leaveResearchGroup = async (ctx, next) => {
 
   await next();
 };
-
-
-
-const uploadResearchGroupLogo = async (ctx) => {
-  try {
-    const researchGroupService = new ResearchGroupService();
-    const { filename } = await ResearchGroupForm(ctx);
-    ctx.status = 200;
-    ctx.body = filename;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-}
-
 
 const getResearchGroupLogo = async (ctx) => {
 
@@ -201,70 +125,26 @@ const getResearchGroupLogo = async (ctx) => {
 
 
 const getResearchGroup = async (ctx) => {
-  const researchGroupExternalId = ctx.params.researchGroupExternalId;
-  const researchGroupService = new ResearchGroupService();
-
-  try {
-
-    const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
-    if (!researchGroup) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-    
-    ctx.status = 200;
-    ctx.body = researchGroup;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 }
 
 
 const getResearchGroupsByUser = async (ctx) => {
-  const member = ctx.params.username;
-  try {
-    const researchGroupService = new ResearchGroupService();
-    const researchGroups = await researchGroupService.getResearchGroupsByUser(member);
-    ctx.status = 200;
-    ctx.body = researchGroups;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 }
 
 
 const getResearchGroupsByTenant = async (ctx) => {
-  const tenantId = ctx.params.tenantId;
-  try {
-    const researchGroupService = new ResearchGroupService();
-    const researchGroups = await researchGroupService.getResearchGroupsByTenant(tenantId);
-    ctx.status = 200;
-    ctx.body = researchGroups;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 }
 
 
 const getResearchGroupsListing = async (ctx) => {
-  const query = qs.parse(ctx.query);
-  try {
-    const researchGroupService = new ResearchGroupService();
-    const researchGroups = await researchGroupService.getResearchGroupsListing(query.personal);
-    ctx.status = 200;
-    ctx.body = researchGroups;
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
+  ctx.status = 200;
+  ctx.body = "This resource is deprecated, use v2 endpoint";
 }
 
 
@@ -277,6 +157,5 @@ export default {
   getResearchGroupsByUser,
   updateResearchGroup,
   getResearchGroupLogo,
-  uploadResearchGroupLogo,
   leaveResearchGroup
 }

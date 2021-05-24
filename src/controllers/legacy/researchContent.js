@@ -11,7 +11,7 @@ import FileStorage from './../../storage';
 import crypto from 'crypto';
 import slug from 'limax';
 import * as blockchainService from './../../utils/blockchain';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamDtoService } from './../../services';
 import ResearchContentService from './../../services/legacy/researchContent'
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import { RESEARCH_CONTENT_STATUS } from './../../constants';
@@ -249,7 +249,7 @@ const updateResearchContentDarArchive = async (ctx) => {
       })
     });
 
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const researchContentService = new ResearchContentService();
 
     const rc = await researchContentService.getResearchContentRef(darId);
@@ -259,7 +259,7 @@ const updateResearchContentDarArchive = async (ctx) => {
       return;
     }
 
-    const authorized = await researchGroupService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
+    const authorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, jwtUsername)
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.researchId}" research`;
@@ -366,12 +366,12 @@ const createResearchContentDarArchive = async (ctx) => {
 
   try {
 
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const researchContentService = new ResearchContentService();
     const researchService = new ResearchService();
 
     const research = await researchService.getResearch(researchExternalId);
-    const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id);
+    const researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
 
     const externalId = `draft-${researchExternalId}-${uuidv4()}`;
     const darPath = FileStorage.getResearchDarArchiveDirPath(researchExternalId, externalId);
@@ -413,7 +413,7 @@ const deleteResearchContentDraft = async (ctx) => {
 
   try {
 
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const researchContentService = new ResearchContentService();
 
     const rc = await researchContentService.getResearchContentRef(refId);
@@ -423,7 +423,7 @@ const deleteResearchContentDraft = async (ctx) => {
       return;
     }
 
-    const authorized = await researchGroupService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
+    const authorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, jwtUsername)
     if (!authorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
@@ -461,7 +461,7 @@ const deleteResearchContentDraft = async (ctx) => {
 // DEPRECATED
 const updateDraftMetaAsync = async (researchContentId, archive) => {
 
-  const researchGroupService = new ResearchGroupService();
+  const teamDtoService = new TeamDtoService();
   const researchContentService = new ResearchContentService();
 
   const parseDraftMetaAsync = () => new Promise(resolve => {
@@ -493,7 +493,7 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   const accounts = [];
   for (let i = 0; i < authors.length; i++) {
     const username = authors[i];
-    const hasRgt = await researchGroupService.authorizeResearchGroupAccount(rc.researchGroupExternalId, username)
+    const hasRgt = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, username)
     if (hasRgt) {
       accounts.push(username)
     }
@@ -526,14 +526,14 @@ const uploadResearchContentPackage = async (ctx) => {
 
   try {
 
-    const researchGroupService = new ResearchGroupService();
+    const teamDtoService = new TeamDtoService();
     const researchContentService = new ResearchContentService();
     const researchService = new ResearchService();
 
     const { researchExternalId, title, authors, references, tempDestinationPath } = await ResearchContentPackageForm(ctx);
 
     const research = await researchService.getResearch(researchExternalId);
-    const researchGroup = await researchGroupService.getResearchGroup(research.research_group.external_id)
+    const researchGroup = await teamDtoService.getTeam(research.research_group.external_id)
 
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
     const hashObj = await FileStorage.calculateDirHash(tempDestinationPath, options);
@@ -604,7 +604,7 @@ const getResearchContentPackageFile = async function (ctx) {
   const isDownload = ctx.query.download === 'true';
 
   const researchContentService = new ResearchContentService();
-  const researchGroupService = new ResearchGroupService();
+  const teamDtoService = new TeamDtoService();
   const researchService = new ResearchService();
 
   const researchContentRef = await researchContentService.getResearchContentRef(researchContentExternalId);
@@ -617,7 +617,7 @@ const getResearchContentPackageFile = async function (ctx) {
   const research = await researchService.getResearch(researchContentRef.researchExternalId);
   if (research.isPrivate) {
     const jwtUsername = ctx.state.user.username;
-    const authorizedGroup = await researchGroupService.authorizeResearchGroupAccount(research.research_group.external_id, jwtUsername)
+    const authorizedGroup = await teamDtoService.authorizeTeamAccount(research.research_group.external_id, jwtUsername)
     if (!authorizedGroup) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to get "${research.external_id}" research content`;

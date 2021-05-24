@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchGroupService from './../../services/legacy/researchGroup';
+import { TeamService, TeamDtoService } from './../../services';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
 
 class ResearchGroupHandler extends EventEmitter { }
@@ -12,16 +12,17 @@ const researchGroupHandler = new ResearchGroupHandler();
 researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupCreatedEvent, tenant } = source;
 
-  const researchGroupService = new ResearchGroupService();
+  const teamService = new TeamService();
+  const teamDtoService = new TeamDtoService();
   const { researchGroupExternalId, creator, source: { offchain: { attributes } } } = researchGroupCreatedEvent.getSourceData();
 
-  await researchGroupService.createResearchGroupRef({
+  await teamService.createTeam({
     externalId: researchGroupExternalId,
     creator: creator,
     attributes: attributes
   });
 
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   return researchGroup;
 }));
 
@@ -29,15 +30,16 @@ researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, repl
 researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdatedEvent, tenant } = source;
 
-  const researchGroupService = new ResearchGroupService();
+  const teamService = new TeamService();
+  const teamDtoService = new TeamDtoService();
   const { researchGroupExternalId, source: { offchain: { attributes } } } = researchGroupUpdatedEvent.getSourceData();
 
-  await researchGroupService.updateResearchGroupRef({
+  await teamService.updateTeam({
     externalId: researchGroupExternalId,
     attributes: attributes
   });
 
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   return researchGroup;
 }));
 
@@ -45,7 +47,8 @@ researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, repl
 researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchGroupUpdateProposalSignedEvent, tenant } = source;
 
-  const researchGroupService = new ResearchGroupService();
+  const teamService = new TeamService();
+  const teamDtoService = new TeamDtoService();
   const proposalsService = new ProposalService();
 
   const proposalId = researchGroupUpdateProposalSignedEvent.getProposalId();
@@ -55,12 +58,12 @@ researchGroupHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED,
   const { researchGroupExternalId, source: { offchain: { attributes } } } = proposal.details;
 
   if (status == PROPOSAL_STATUS.APPROVED) {
-    await researchGroupService.updateResearchGroupRef(researchGroupExternalId, {
+    await teamService.updateTeam(researchGroupExternalId, {
       attributes
     });
   }
 
-  const researchGroup = await researchGroupService.getResearchGroup(researchGroupExternalId);
+  const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   return researchGroup;
 }));
 
