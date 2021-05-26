@@ -31,7 +31,7 @@ class AttributesService {
 
   async mapAttributes(attrs) {
     const tenant = await this.getTenantInstance();
-    const attributes = attrs.map(q => q.toObject());
+    const attributes = attrs.map(q => q.toObject({minimize: false}));
     return attributes.map((attr) => {
       const overwriteAttr = tenant.settings.attributeOverwrites.find(({_id}) => mongoose.Types.ObjectId(_id).toString() == mongoose.Types.ObjectId(attr._id).toString()) || {};
       return {...attr, ...overwriteAttr}
@@ -94,6 +94,7 @@ class AttributesService {
     title,
     shortTitle,
     description,
+    schemas,
     valueOptions,
     defaultValue,
     scope
@@ -106,6 +107,7 @@ class AttributesService {
       isHidden,
       isMultiple,
       title,
+      schemas,
       shortTitle,
       description,
       scope,
@@ -129,6 +131,7 @@ class AttributesService {
     isHidden,
     isMultiple,
     title,
+    schemas,
     shortTitle,
     description,
     valueOptions,
@@ -145,6 +148,7 @@ class AttributesService {
       attribute.isHidden = isHidden;
       attribute.title = title;
       attribute.scope = scope;
+      attribute.schemas = schemas;
       attribute.shortTitle = shortTitle;
       attribute.description = description;
       attribute.defaultValue = defaultValue;
@@ -164,6 +168,7 @@ class AttributesService {
       attribute.isMultiple = isMultiple;
       attribute.title = title;
       attribute.scope = scope;
+      attribute.schemas = schemas;
       attribute.shortTitle = shortTitle;
       attribute.description = description;
       attribute.valueOptions = valueOptions.map(opt => {
