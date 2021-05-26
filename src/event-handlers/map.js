@@ -4,7 +4,8 @@ import {
   proposalEventHandler, 
   teamEventHandler, 
   userNotificationEventHandler, 
-  userInviteEventHandler 
+  userInviteEventHandler,
+  attributeEventHandler
 } from './index';
 
 
@@ -91,4 +92,18 @@ module.exports = {
   [APP_EVENT.TEAM_UPDATE_PROPOSAL_DECLINED]: [
     { h: proposalEventHandler, await: false }
   ],
+
+  [APP_EVENT.ATTRIBUTE_CREATED]: [
+    { h: attributeEventHandler, await: true }
+  ],
+
+  [APP_EVENT.ATTRIBUTE_UPDATED]: [
+    { h: attributeEventHandler, await: true },
+    { h: projectEventHandler, await: true }
+  ],
+
+  [APP_EVENT.ATTRIBUTE_DELETED]: [
+    { h: attributeEventHandler, await: true },
+    { h: projectEventHandler, await: true },
+  ]
 };

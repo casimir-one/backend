@@ -109,6 +109,7 @@ const AttributeSchema = new Schema({
   "schemas": { type: Object, required: false, default: {} },
   "valueOptions": [AttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
+  "schemas": { type: Object, required: false, default: {} },
   "blockchainFieldMeta": BlockchainFieldMeta,
   "scope": {
     type: Number,

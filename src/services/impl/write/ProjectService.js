@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema';
-import AttributesService from './../../legacy/attributes';
+import AttributeDtoService from './../read/AttributeDtoService';
 import { logWarn } from './../../../utils/log';
 import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../../../constants';
 
@@ -20,8 +20,8 @@ class ProjectService extends BaseService {
     status
   }) {
 
-    const attributesService = new AttributesService();
-    const systemAttributes = await attributesService.getSystemAttributes();
+    const attributeDtoService = new AttributeDtoService();
+    const systemAttributes = await attributeDtoService.getSystemAttributes();
     const teamAttr = systemAttributes.find(attr => attr.scope == ATTRIBUTE_SCOPE.PROJECT && attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
     if (teamAttr.isHidden) {
       const rAttr = attributes.find(rAttr => rAttr.attributeId === teamAttr._id.toString());
@@ -59,8 +59,8 @@ class ProjectService extends BaseService {
 
   
   async mapAttributes(attributes) {
-    const attributesService = new AttributesService();
-    const projectAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
+    const attributeDtoService = new AttributeDtoService();
+    const projectAttributes = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
 
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.attributeId.toString());
@@ -156,6 +156,36 @@ class ProjectService extends BaseService {
         value: rAttrValue
       }
     })
+  }
+
+  async addAttributeToResearches({ attributeId, type, defaultValue }) {
+    const result = await this.updateMany({}, { $push: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId), type, value: defaultValue } } });
+    return result;
+  }
+
+
+  async removeAttributeFromResearches({ attributeId }) {
+    const result = await this.updateMany({}, { $pull: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId) } } });
+    return result;
+  }
+
+
+  async updateAttributeInResearches({ attributeId, type, valueOptions, defaultValue }) {
+    if (type == ATTRIBUTE_TYPE.STEPPER || type == ATTRIBUTE_TYPE.SELECT) {
+      const result = await this.updateMany(
+        {
+          $and: [
+            { 'attributes.attributeId': mongoose.Types.ObjectId(attributeId) },
+            { 'attributes.value': { $nin: [...valueOptions.map(opt => mongoose.Types.ObjectId(opt.value))] } }
+          ]
+        },
+        { $set: { 'attributes.$.value': defaultValue } }
+      );
+
+      return result;
+    } else {
+      return Promise.resolve();
+    }
   }
 
 }
