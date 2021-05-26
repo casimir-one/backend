@@ -15,14 +15,12 @@ import investmentPortfolio from '../controllers/legacy/investmentPortfolio'
 import grants from '../controllers/legacy/grants'
 import expressLicensing from '../controllers/legacy/expressLicensing'
 import userTransactions from '../controllers/legacy/userTransactions'
-import disciplines from '../controllers/legacy/disciplines'
 import fundraising from '../controllers/legacy/fundraising'
 import tenant from '../controllers/legacy/tenant';
 import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
-import attributes from './../controllers/legacy/attributes';
 
-import { projectsCtrl, proposalsCtrl, teamsCtrl } from '../controllers';
+import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl } from '../controllers';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
@@ -208,17 +206,6 @@ protected_route.get('/express-licensing/licensee/:licensee/licenser/:licenser', 
 
 protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
 protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
-public_route.get('/assets/id/:assetId', assets.getAssetById)
-public_route.get('/assets/symbol/:symbol', assets.getAssetBySymbol)
-public_route.get('/assets/type/:type', assets.getAssetsByType)
-public_route.get('/assets/issuer/:issuer', assets.getAssetsByIssuer)
-public_route.get(['/assets/limit/:limit/', '/assets/limit/:limit/:lowerBoundSymbol'], assets.lookupAssets)
-protected_route.get('/assets/owner/:owner/symbol/:symbol', assets.getAccountAssetBalance)
-protected_route.get('/assets/owner/:owner', assets.getAccountAssetsBalancesByOwner)
-public_route.get('/assets/accounts/symbol/:symbol', assets.getAccountsAssetBalancesByAsset)
-
-public_route.get('/disciplines', disciplines.getDomainDisciplines)
-public_route.get('/disciplines/research/:researchExternalId', disciplines.getDisciplinesByResearch)
 
 public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
 public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
@@ -230,16 +217,6 @@ protected_route.post('/nda', researchNda.createResearchNonDisclosureAgreement);
 public_route.get('/nda/:ndaExternalId', researchNda.getResearchNonDisclosureAgreement);
 public_route.get('/nda/creator/:username', researchNda.getResearchNonDisclosureAgreementsByCreator);
 public_route.get('/nda/research/:researchExternalId', researchNda.getResearchNonDisclosureAgreementsByResearch);
-
-public_route.get('/attributes', attributes.getAttributes);
-public_route.get('/attributes/scope/:scope', attributes.getAttributesByScope);
-public_route.get('/attributes/scope/network/:scope', attributes.getNetworkAttributesByScope);
-public_route.get('/attribute/:id', attributes.getAttribute);
-public_route.get('/attributes/network', attributes.getNetworkAttributes);
-public_route.get('/attributes/system', attributes.getSystemAttributes);
-protected_route.post('/attribute', compose([tenantRoute, tenantAdminGuard]), attributes.createAttribute);
-protected_route.put('/attribute', compose([tenantRoute, tenantAdminGuard]), attributes.updateAttribute);
-protected_route.delete('/attribute/:id', compose([tenantRoute, tenantAdminGuard]), attributes.deleteAttribute);
 
 
 /* V2 */
@@ -256,6 +233,27 @@ public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
 public_route.get('/v2/teams/tenant/:tenantId', teamsCtrl.getTeamsByTenant)
 
+public_route.get('/v2/attributes', attributesCtrl.getAttributes);
+public_route.get('/v2/attributes/scope/:scope', attributesCtrl.getAttributesByScope);
+public_route.get('/v2/attributes/scope/network/:scope', attributesCtrl.getNetworkAttributesByScope);
+public_route.get('/v2/attribute/:id', attributesCtrl.getAttribute);
+public_route.get('/v2/attributes/network', attributesCtrl.getNetworkAttributes);
+public_route.get('/v2/attributes/system', attributesCtrl.getSystemAttributes);
+protected_route.post('/v2/attribute', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.createAttribute);
+protected_route.put('/v2/attribute', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.updateAttribute);
+protected_route.put('/v2/attribute/delete', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.deleteAttribute);
+
+public_route.get('/v2/assets/id/:assetId', assetsCtrl.getAssetById)
+public_route.get('/v2/assets/symbol/:symbol', assetsCtrl.getAssetBySymbol)
+public_route.get('/v2/assets/type/:type', assetsCtrl.getAssetsByType)
+public_route.get('/v2/assets/issuer/:issuer', assetsCtrl.getAssetsByIssuer)
+public_route.get(['/v2/assets/limit/:limit/', '/v2/assets/limit/:limit/:lowerBoundSymbol'], assetsCtrl.lookupAssets)
+protected_route.get('/v2/assets/owner/:owner/symbol/:symbol', assetsCtrl.getAccountAssetBalance)
+protected_route.get('/v2/assets/owner/:owner', assetsCtrl.getAccountAssetsBalancesByOwner)
+public_route.get('/v2/assets/accounts/symbol/:symbol', assetsCtrl.getAccountsAssetBalancesByAsset)
+
+public_route.get('/v2/disciplines', domainsCtrl.getDomains)
+public_route.get('/v2/disciplines/project/:projectId', domainsCtrl.getDomainsByProject)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

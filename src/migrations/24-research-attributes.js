@@ -69,6 +69,7 @@ const AttributeSchema = new Schema({
   "isMultiple": { type: Boolean, default: false },
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
+  "schemas": { type: Object, required: false, default: {} },
   "description": { type: String, required: false },
   "schemas": { type: Object, required: false, default: {} },
   "valueOptions": [AttributeValueOption],

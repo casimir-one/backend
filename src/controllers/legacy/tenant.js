@@ -8,7 +8,7 @@ import config from './../../config';
 import { USER_PROFILE_STATUS } from './../../constants';
 import TenantSettingsForm from './../../forms/legacy/tenantSettings';
 import * as blockchainService from './../../utils/blockchain';
-import AttributesService from './../../services/legacy/attributes';
+import { AttributeDtoService } from './../../services';
 
 
 const updateTenantSettings = async (ctx) => {
@@ -335,7 +335,7 @@ const approveSignUpRequest = async (ctx, next) => {
     // TODO: check jwtUsername for admin
     const usersService = new UserService();
     const teamService = new TeamService();
-    const attributesService = new AttributesService()
+    const attributeDtoService = new AttributeDtoService()
 
     const userProfile = await usersService.findUserProfileByOwner(username);
     if (!userProfile) {
@@ -353,7 +353,7 @@ const approveSignUpRequest = async (ctx, next) => {
     const tx = await usersService.createUserAccount({ username, pubKey: userProfile.signUpPubKey, role });
 
     // temp solution //
-    const attrs = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.TEAM);
+    const attrs = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.TEAM);
     const attr = attrs.find(
       ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
     );
