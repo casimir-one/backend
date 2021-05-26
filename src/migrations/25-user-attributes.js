@@ -63,6 +63,7 @@ const AttributeSchema = new Schema({
   "title": { type: String, required: false },
   "shortTitle": { type: String, required: false },
   "description": { type: String, required: false },
+  "schemas": { type: Object, required: false, default: {} },
   "valueOptions": [AttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
   "blockchainFieldMeta": BlockchainFieldMeta,
