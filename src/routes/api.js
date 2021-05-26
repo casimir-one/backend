@@ -33,8 +33,9 @@ import researchContentFileCreateAuth from './../middlewares/auth/researchContent
 import researchContentFileDeleteAuth from './../middlewares/auth/researchContent/deleteFileAuth';
 import researchContentFilePublishAuth from './../middlewares/auth/researchContent/publishFileAuth';
 
-import researchAttributeMetaReadAuth from './../middlewares/auth/research/readAttributeMetaAuth';
-import researchAttributeMetaUpdateAuth from './../middlewares/auth/research/updateAttributeMetaAuth';
+import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
+import projectCmdProxy from './../middlewares/proxy/project/projectCmdProxy';
+import teamCmdProxy from './../middlewares/proxy/team/teamCmdProxy';
 
 import readGrantAwardWithdrawalRequestAuth from './../middlewares/auth/grantAwardWithdrawalRequest/readGrantAwardWithdrawalRequestAuth';
 
@@ -42,7 +43,7 @@ import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAut
 import userAttributeMetaUpdateAuth from '../middlewares/auth/user/updateAttributeMetaAuth';
 
 import researchGroupLogoFileReadAuth from './../middlewares/auth/researchGroup/readLogoFileAuth';
-import researchGroupLogoFileUpdateAuth from './../middlewares/auth/researchGroup/updateLogoFileAuth';
+
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -123,14 +124,8 @@ protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 
 protected_route.get('/proposals/:username/:status', proposals.getAccountProposals)
 
-protected_route.post('/groups', researchGroups.createResearchGroup)
-protected_route.put('/groups', compose([researchGroupLogoFileUpdateAuth({ researchGroupEnitytId: (ctx) => ctx.request.headers['research-group-external-id'] } )]), researchGroups.updateResearchGroup)
-public_route.get('/groups/listing', researchGroups.getResearchGroupsListing)
-public_route.get('/groups/:researchGroupExternalId', researchGroups.getResearchGroup)
 public_route.get('/groups/logo/:researchGroupExternalId', compose([researchGroupLogoFileReadAuth()]), researchGroups.getResearchGroupLogo)
 protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
-public_route.get('/groups/member/:username', researchGroups.getResearchGroupsByUser)
-public_route.get('/groups/tenant/:tenantId', researchGroups.getResearchGroupsByTenant)
 
 
 protected_route.get('/invites/:username', invites.getUserInvites)
@@ -149,15 +144,12 @@ protected_route.post('/reviews', reviews.createReview)
 
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
-protected_route.delete('/research/:researchExternalId', research.deleteResearch)
 public_route.get('/researches', research.getResearches)
-public_route.get('/research/:researchExternalId/attribute/:attributeId/file/:filename', compose([researchAttributeMetaReadAuth()]), research.getResearchAttributeFile)
+public_route.get('/research/:researchExternalId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
 
-protected_route.post('/research', research.createResearch)
-protected_route.put('/research', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id']})]), research.updateResearch)
 
 public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
 protected_route.post('/fundraising', fundraising.createResearchTokenSale)
@@ -253,12 +245,12 @@ protected_route.delete('/attribute/:id', compose([tenantRoute, tenantAdminGuard]
 /* V2 */
 protected_route.get('/v2/project/:projectId', projectsCtrl.getProject)
 protected_route.get('/v2/projects', projectsCtrl.getProjects)
-protected_route.post('/v2/project', projectsCtrl.createProject)
-protected_route.put('/v2/project', compose([researchAttributeMetaUpdateAuth({ researchEnitytId: (ctx) => ctx.request.header['entity-id'] })]), projectsCtrl.updateProject)
-protected_route.put('/v2/project/delete', projectsCtrl.deleteProject)
+protected_route.post('/v2/project', compose([projectCmdProxy()]), projectsCtrl.createProject)
+protected_route.put('/v2/project', compose([projectCmdProxy()]), projectsCtrl.updateProject)
+protected_route.put('/v2/project/delete', compose([projectCmdProxy()]), projectsCtrl.deleteProject)
 
-protected_route.post('/v2/team', teamsCtrl.createTeam)
-protected_route.put('/v2/team', compose([researchGroupLogoFileUpdateAuth({ researchGroupEnitytId: (ctx) => ctx.request.headers['entity-id'] } )]), teamsCtrl.updateTeam)
+protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam)
+protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
 public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
 public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)

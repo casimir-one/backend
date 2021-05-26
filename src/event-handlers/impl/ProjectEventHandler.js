@@ -1,5 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
+import { RESEARCH_STATUS } from './../../constants';
 import ProjectService from './../../services/impl/write/ProjectService';
 
 
@@ -17,7 +18,6 @@ const projectService = new ProjectService();
 
 
 projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
-
   const {
     projectId,
     teamId,
@@ -26,7 +26,7 @@ projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
     status
   } = event.getEventPayload();
 
-  const project = await projectService.createProject({
+  await projectService.createProject({
     projectId: projectId,
     teamId: teamId,
     attributes: attributes,
@@ -42,7 +42,7 @@ projectEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) => {
     attributes
   } = event.getEventPayload();
 
-  const project = await projectService.updateProject(projectId, {
+  await projectService.updateProject(projectId, {
     attributes: attributes
   });
 
@@ -50,7 +50,12 @@ projectEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) => {
 
 
 projectEventHandler.register(APP_EVENT.PROJECT_DELETED, async (event) => {
-  // TODO: handle project read schema
+  const {
+    projectId
+  } = event.getEventPayload();
+
+  await projectService.updateProject(projectId, { status: RESEARCH_STATUS.DELETED });
+
 });
 
 

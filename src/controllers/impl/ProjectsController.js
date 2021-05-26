@@ -5,10 +5,9 @@ import BaseController from './../base/BaseController';
 import { ProjectForm } from './../../forms';
 import { AppError, BadRequestError, NotFoundError, ConflictError } from './../../errors';
 import { projectCmdHandler } from './../../command-handlers';
-import { ProjectService, ProjectDtoService } from './../../services';
+import { ProjectDtoService } from './../../services';
 
 
-const projectService = new ProjectService();
 const projectDtoService = new ProjectDtoService();
 
 
@@ -135,14 +134,8 @@ class ProjectsController extends BaseController {
           }
         };
 
-        const alter = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.DELETE_PROJECT);
-          const { entityId: projectId } = appCmd.getCmdPayload();
-          await projectService.updateProject(projectId, { status: RESEARCH_STATUS.DELETED });
-        };
-
         const msg = ctx.state.msg;
-        await projectCmdHandler.process(msg, ctx, validate, alter);
+        await projectCmdHandler.process(msg, ctx, validate);
 
         ctx.status = 200;
         ctx.body = { model: "ok" };

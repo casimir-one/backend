@@ -7,7 +7,6 @@ import slug from 'limax';
 import qs from 'qs';
 import deipRpc from '@deip/rpc-client';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
-import ProjectService from './../../services/impl/write/ProjectService';
 import ResearchApplicationService from './../../services/legacy/researchApplication';
 import * as blockchainService from './../../utils/blockchain';
 import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_STATUS } from './../../constants';
@@ -19,19 +18,6 @@ import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreate
 const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
-
-
-const createResearch = async (ctx, next) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-};
-
-
-const updateResearch = async (ctx, next) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-};
-
 
 
 const createResearchApplication = async (ctx, next) => {
@@ -661,42 +647,6 @@ const getTenantResearchListing = async (ctx) => {
 };
 
 
-const deleteResearch = async (ctx) => {
-  const tenantId = ctx.state.tenant.id;
-  const researchExternalId = ctx.params.researchExternalId;
-  const jwtUsername = ctx.state.user.username;
-  const isTenantAdmin = ctx.state.isTenantAdmin;
-
-  try {
-
-    const projectDtoService = new ProjectDtoService();
-    const projectService = new ProjectService();
-    const research = await projectDtoService.getResearch(researchExternalId);
-
-    if (!research) {
-      ctx.status = 404;
-      ctx.body = `Research '${researchExternalId}' does not exist`;
-      return;
-    }
-
-    if (!isTenantAdmin || research.tenantId != tenantId) {
-      ctx.status = 401;
-      ctx.body = `"${jwtUsername}" is not permitted to delete "${researchExternalId}" research`;
-      return;
-    }
-
-    const updatedResearch = await projectService.updateProject(researchExternalId, { status: RESEARCH_STATUS.DELETED })
-    ctx.status = 200;
-    ctx.body = updatedResearch;
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-};
-
-
 export default {
   getResearch,
   getResearches,
@@ -705,9 +655,6 @@ export default {
   getUserResearchListing,
   getResearchGroupResearchListing,
   getTenantResearchListing,
-  createResearch,
-  updateResearch,
-  deleteResearch,
   createResearchApplication,
   editResearchApplication,
   approveResearchApplication,
