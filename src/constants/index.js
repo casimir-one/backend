@@ -14,7 +14,7 @@ import RESEARCH_STATUS from './researchStatus';
 import PROPOSAL_STATUS from './proposalStatus';
 import RESEARCH_ATTRIBUTE from './researchAttributes';
 import FILE_STORAGE from './fileStorage';
-import DISCIPLINES from './disciplines';
+import DOMAINS from './domains';
 import { RESEARCH_CONTENT_TYPES, CONTENT_TYPES_MAP } from './researchContentType';
 import ASSESSMENT_CRITERIA_TYPE from './assessmentCriteriaType';
 import ATTRIBUTE_SCOPE from './attributeScopes';
@@ -36,7 +36,7 @@ export {
   PROPOSAL_STATUS,
   RESEARCH_ATTRIBUTE,
   FILE_STORAGE,
-  DISCIPLINES,
+  DOMAINS,
   RESEARCH_CONTENT_TYPES,
   CONTENT_TYPES_MAP,
   ASSESSMENT_CRITERIA_TYPE,

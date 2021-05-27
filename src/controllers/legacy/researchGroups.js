@@ -5,18 +5,6 @@ import UserResignationProposedEvent from './../../events/legacy/userResignationP
 import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
 
 
-const createResearchGroup = async (ctx, next) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-}
-
-
-const updateResearchGroup = async (ctx, next) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-}
-
-
 const leaveResearchGroup = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx, offchainMeta } = ctx.request.body;
@@ -124,38 +112,7 @@ const getResearchGroupLogo = async (ctx) => {
 }
 
 
-const getResearchGroup = async (ctx) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-}
-
-
-const getResearchGroupsByUser = async (ctx) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-}
-
-
-const getResearchGroupsByTenant = async (ctx) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-}
-
-
-const getResearchGroupsListing = async (ctx) => {
-  ctx.status = 200;
-  ctx.body = "This resource is deprecated, use v2 endpoint";
-}
-
-
-
 export default {
-  getResearchGroup,
-  getResearchGroupsListing,
-  getResearchGroupsByTenant,
-  createResearchGroup,
-  getResearchGroupsByUser,
-  updateResearchGroup,
   getResearchGroupLogo,
   leaveResearchGroup
 }

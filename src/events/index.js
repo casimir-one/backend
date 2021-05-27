@@ -25,6 +25,9 @@ import ProjectInviteCreatedEvent from './impl/ProjectInviteCreatedEvent';
 import ProjectInviteAcceptedEvent from './impl/ProjectInviteAcceptedEvent';
 import ProjectInviteDeclinedEvent from './impl/ProjectInviteDeclinedEvent';
 
+import AttributeCreatedEvent from './impl/AttributeCreatedEvent';
+import AttributeUpdatedEvent from './impl/AttributeUpdatedEvent';
+import AttributeDeletedEvent from './impl/AttributeDeletedEvent';
 
 module.exports = {
   ProjectCreatedEvent,
@@ -53,5 +56,9 @@ module.exports = {
 
   TeamUpdateProposalAcceptedEvent,
   TeamUpdateProposalCreatedEvent,
-  TeamUpdateProposalDeclinedEvent
+  TeamUpdateProposalDeclinedEvent,
+
+  AttributeCreatedEvent,
+  AttributeUpdatedEvent,
+  AttributeDeletedEvent
 }

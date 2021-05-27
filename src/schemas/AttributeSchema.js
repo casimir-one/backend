@@ -39,6 +39,7 @@ const AttributeSchema = new Schema({
   "valueOptions": [AttributeValueOption],
   "defaultValue": { type: Schema.Types.Mixed, default: null },
   "blockchainFieldMeta": BlockchainFieldMeta,
+  "schemas": { type: Object, required: false, default: {} },
   "scope": {
     type: Number,
     enum: [...Object.values(ATTRIBUTE_SCOPE)],
