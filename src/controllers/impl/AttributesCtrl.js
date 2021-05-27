@@ -55,7 +55,7 @@ class AttributesController extends BaseController {
     h: async (ctx) => {
       try {
         const attributeId = ctx.params.id;
-        const attributes = await attributeDtoService.getAttributes(attributeId);
+        const attributes = await attributeDtoService.getAttribute(attributeId);
         ctx.status = 200
         ctx.body = attributes;
       } catch (err) {
