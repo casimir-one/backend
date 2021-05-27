@@ -206,14 +206,6 @@ protected_route.get('/express-licensing/licensee/:licensee/licenser/:licenser', 
 
 protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
 protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
-public_route.get('/assets/id/:assetId', assets.getAssetById)
-public_route.get('/assets/symbol/:symbol', assets.getAssetBySymbol)
-public_route.get('/assets/type/:type', assets.getAssetsByType)
-public_route.get('/assets/issuer/:issuer', assets.getAssetsByIssuer)
-public_route.get(['/assets/limit/:limit/', '/assets/limit/:limit/:lowerBoundSymbol'], assets.lookupAssets)
-protected_route.get('/assets/owner/:owner/symbol/:symbol', assets.getAccountAssetBalance)
-protected_route.get('/assets/owner/:owner', assets.getAccountAssetsBalancesByOwner)
-public_route.get('/assets/accounts/symbol/:symbol', assets.getAccountsAssetBalancesByAsset)
 
 public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
 public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)

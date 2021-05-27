@@ -1,8 +1,8 @@
 import TenantService from './../../../services/legacy/tenant';
-import AttributesService from './../../../services/legacy/attributes';
+import { AttributeDtoService } from './../../../services';
 
 const tenantService = new TenantService();
-const attributesService = new AttributesService();
+const attributeDtoService = new AttributeDtoService();
 
 
 function attributeFileProxy(options = {}) {
@@ -10,7 +10,7 @@ function attributeFileProxy(options = {}) {
     const currentTenant = ctx.state.tenant;
     const attributeId = ctx.params.attributeId;
 
-    const attribute = await attributesService.getAttribute(attributeId);
+    const attribute = await attributeDtoService.getAttribute(attributeId);
     ctx.assert(!!attribute, 404);
 
     if (attribute.tenantId == currentTenant.id) {
