@@ -5,7 +5,7 @@ import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate 
 import ExpressLicensingService from './../../legacy/expressLicensing';
 import ResearchNdaService from './../../legacy/researchNda';
 import UserService from './../../legacy/users';
-import AttributesService from './../../legacy/attributes';
+import AttributeDtoService from './AttributeDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../../constants';
 
 
@@ -19,7 +19,7 @@ class ProjectDtoService extends BaseService {
     const expressLicensingService = new ExpressLicensingService();
     const researchNdaService = new ResearchNdaService();
     const userService = new UserService();
-    const attributesService = new AttributesService()
+    const attributeDtoService = new AttributeDtoService()
 
     const filter = {
       searchTerm: "",
@@ -31,7 +31,7 @@ class ProjectDtoService extends BaseService {
     const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id));
     const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => researchNdaService.getResearchNdaListByResearch(r.external_id)));
-    const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
+    const researchAttributes = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
     
     return chainResearches
       .map((chainResearch) => {
@@ -171,38 +171,6 @@ class ProjectDtoService extends BaseService {
     const result = await this.mapResearch(researches);
     return result;
   }
-  
-
-  async addAttributeToResearches({ attributeId, type, defaultValue }) {
-    const result = await this.updateMany({}, { $push: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId), type, value: defaultValue } } });
-    return result;
-  }
-
-
-  async removeAttributeFromResearches({ attributeId }) {
-    const result = await this.updateMany({}, { $pull: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId) } } });
-    return result;
-  }
-
-
-  async updateAttributeInResearches({ attributeId, type, valueOptions, defaultValue }) {
-    if (type == ATTRIBUTE_TYPE.STEPPER || type == ATTRIBUTE_TYPE.SELECT) {
-      const result = await this.updateMany(
-        {
-          $and: [
-            { 'attributes.attributeId': mongoose.Types.ObjectId(attributeId) },
-            { 'attributes.value': { $nin: [...valueOptions.map(opt => mongoose.Types.ObjectId(opt.value))] } }
-          ]
-        },
-        { $set: { 'attributes.$.value': defaultValue } }
-      );
-
-      return result;
-    } else {
-      return Promise.resolve();
-    }
-  }
-
 
   async getProject(projectId) {
     const result = this.getResearch(projectId);

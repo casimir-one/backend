@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 
-class AssetService {
+class AssetDtoService {
   async getAssetById(assetId) {
     const asset = await deipRpc.api.getAssetAsync(assetId);
     return asset;
@@ -41,4 +41,4 @@ class AssetService {
   }
 }
 
-export default AssetService;
+export default AssetDtoService;

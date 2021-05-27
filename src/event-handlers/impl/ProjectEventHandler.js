@@ -1,7 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { RESEARCH_STATUS } from './../../constants';
-import ProjectService from './../../services/impl/write/ProjectService';
+import { ProjectService } from './../../services';
 
 
 class ProjectEventHandler extends BaseEventHandler {
@@ -61,6 +61,24 @@ projectEventHandler.register(APP_EVENT.PROJECT_DELETED, async (event) => {
 
 projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event) => {
   // TODO: handle project read schema
+});
+
+projectEventHandler.register(APP_EVENT.ATTRIBUTE_UPDATED, async (event) => {
+  const { attribute } = event.getEventPayload();
+  await projectService.updateAttributeInResearches({
+    attributeId: attribute._id,
+    type: attribute.type,
+    valueOptions: attribute.valueOptions,
+    defaultValue: attribute.defaultValue || null
+  });
+});
+
+projectEventHandler.register(APP_EVENT.ATTRIBUTE_DELETED, async (event) => {
+  const { attributeId } = event.getEventPayload();
+
+  await projectService.removeAttributeFromResearches({
+    attributeId
+  });
 });
 
 

@@ -5,7 +5,7 @@ import { handle, fire, wait } from './utils';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import ProjectService from './../../services/impl/write/ProjectService';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
-import AttributesService from './../../services/legacy/attributes'
+import { AttributeDtoService } from './../../services';
 
 
 class ResearchHandler extends EventEmitter { }
@@ -20,13 +20,13 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
 
   const projectDtoService = new ProjectDtoService();
   const proposalsService = new ProposalService();
-  const attributesService = new AttributesService();
+  const attributeDtoService = new AttributeDtoService();
 
   const proposalId = userResignationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
   const { member, researchGroupExternalId } = proposal.details;
 
-  const researchAttributes = await attributesService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
+  const researchAttributes = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
 
   const researches = await projectDtoService.getResearchesByResearchGroup(researchGroupExternalId);
 
