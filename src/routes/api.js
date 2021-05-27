@@ -252,8 +252,8 @@ protected_route.get('/v2/assets/owner/:owner/symbol/:symbol', assetsCtrl.getAcco
 protected_route.get('/v2/assets/owner/:owner', assetsCtrl.getAccountAssetsBalancesByOwner)
 public_route.get('/v2/assets/accounts/symbol/:symbol', assetsCtrl.getAccountsAssetBalancesByAsset)
 
-public_route.get('/v2/disciplines', domainsCtrl.getDomains)
-public_route.get('/v2/disciplines/project/:projectId', domainsCtrl.getDomainsByProject)
+public_route.get('/v2/domains', domainsCtrl.getDomains)
+public_route.get('/v2/domains/project/:projectId', domainsCtrl.getDomainsByProject)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),
