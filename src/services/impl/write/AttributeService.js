@@ -64,6 +64,8 @@ class AttributeService extends BaseService {
     valueOptions,
     defaultValue,
     isSystem,
+    isEditable,
+    isRequired,
     schemas,
     scope
   }) {
