@@ -16,7 +16,9 @@ const AttributeOverwrite = new Schema({
   "description": { type: String, required: false },
   "defaultValue": { type: Schema.Types.Mixed, default: null },
   "isFilterable": { type: Boolean, default: false },
-  "isHidden": { type: Boolean, default: false }
+  "isHidden": { type: Boolean, default: false },
+  "isEditable": { type: Boolean, default: true },
+  "isRequired": { type: Boolean, default: false }
 });
 
 const AppModuleMap = new Schema({
