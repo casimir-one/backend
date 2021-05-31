@@ -779,7 +779,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Employment",
       "description": "",
       "valueOptions": [],
-      "scope": .USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     }
   }
