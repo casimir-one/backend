@@ -123,7 +123,7 @@ const confirmAssetDepositRequest = async (ctx) => {
   try {
 
     const {
-      amount_paid: amount,
+      amount_paid: amount, // cents
       currency: currency,
       metadata: {
         account,
@@ -160,7 +160,7 @@ const confirmAssetDepositRequest = async (ctx) => {
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
     const issue_asset_op = ['issue_asset', {
       issuer: regacc,
-      amount: `${amount}.00 ${currency.toUpperCase()}`,
+      amount: `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`,
       recipient: account,
       memo: undefined,
       extensions: []
@@ -177,7 +177,7 @@ const confirmAssetDepositRequest = async (ctx) => {
 
     ctx.status = 200;
     ctx.body = "OK";
-  } 
+  }
   catch(err) {
 
     if (depositRequestDoc) {
