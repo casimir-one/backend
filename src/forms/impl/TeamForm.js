@@ -1,26 +1,55 @@
 import multer from 'koa-multer';
 import BaseForm from './../base/BaseForm';
+import mongoose from 'mongoose';
 import { getFileStorageUploader } from './../storage';
 
 const ENTITY_ID_HEADER = "entity-id";
+const TEAM_ATTRIBUTE_ID_SPLITTER = '-';
 
 const destinationHandler = (fileStorage) => function () {
   return async function (req, file, callback) {
-    const teamExternalId = req.headers[ENTITY_ID_HEADER];
-    const teamDirPath = fileStorage.getResearchGroupDirPath(teamExternalId);
+    const teamId = req.headers[ENTITY_ID_HEADER];
+    let folderPath = "";
+    let filePath = "";
 
-    const exists = await fileStorage.exists(teamDirPath);
-    if (!exists) {
-      await fileStorage.mkdir(teamDirPath);
+    const parts = file.originalname.split(TEAM_ATTRIBUTE_ID_SPLITTER);
+    const teamAttrId = parts[0];
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(teamAttrId)) {
+      folderPath = fileStorage.getResearchGroupAttributeDirPath(teamId, teamAttrId);
+      const name = file.originalname.substring(`${teamAttrId}${TEAM_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+      filePath = fileStorage.getResearchGroupAttributeFilePath(teamId, teamAttrId, name);
+    } else {
+      folderPath = fileStorage.getResearchGroupDirPath(teamId);
+      filePath = fileStorage.getResearchGroupFilePath(teamId, file.originalname);
     }
-    callback(null, teamDirPath)
+
+    const folderExists = await fileStorage.exists(folderPath);
+    if (folderExists) {
+      const fileExists = await fileStorage.exists(filePath);
+      if (fileExists) {
+        await fileStorage.delete(filePath);
+      }
+    } else {
+      await fileStorage.mkdir(folderPath);
+    }
+
+    callback(null, folderPath);
   };
 }
 
 
 const filenameHandler = () => function () {
   return function (req, file, callback) {
-    callback(null, `logo.png`);
+    let name = "";
+    const parts = file.originalname.split(TEAM_ATTRIBUTE_ID_SPLITTER);
+    const teamAttrId = parts[0];
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(teamAttrId)) {
+      name = file.originalname.substring(`${teamAttrId}${TEAM_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+    } else {
+      name = file.originalname;
+    }
+
+    callback(null, name);
   }
 }
 
