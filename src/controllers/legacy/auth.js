@@ -7,7 +7,7 @@ import UserService from './../../services/legacy/users';
 import TenantService from './../../services/legacy/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
 import { AttributeDtoService } from './../../services';
-import { ATTRIBUTE_SCOPE } from '@deip/attributes-service';
+import { ATTR_SCOPES } from '@deip/attributes-service';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -132,7 +132,7 @@ const signUp = async function (ctx, next) {
     if (status == USER_PROFILE_STATUS.APPROVED) {
       const tx = await usersService.createUserAccount({ username, pubKey, role });
 
-      const attrs = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.TEAM);
+      const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
       const attr = attrs.find(
         ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
       );

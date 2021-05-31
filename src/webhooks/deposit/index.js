@@ -33,7 +33,7 @@ const AssetDepositRequestSchema = new Schema({
 const AssetDepositRequest = mongoose.model('asset-deposit-request', AssetDepositRequestSchema);
 
 const SUPPORTED_CURRENCIES = ["USD", "EUR", "CAD", "CYN", "GBP"];
-const MIN_AMOUNT = 1;
+const MIN_AMOUNT = 100; // cents
 
 
 const createAssetDepositRequest = async (ctx) => {

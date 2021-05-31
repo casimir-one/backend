@@ -29,7 +29,7 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const USER_PROFILE_STATUS = require('./../constants').USER_PROFILE_STATUS;
-const ATTRIBUTE_SCOPE = require('./../constants').ATTRIBUTE_SCOPE;
+const ATTR_SCOPES = require('./../constants').ATTR_SCOPES;
 const ATTRIBUTE_TYPE = require('./../constants').ATTRIBUTE_TYPE;
 
 
@@ -70,7 +70,7 @@ const AttributeSchema = new Schema({
   "blockchainFieldMeta": BlockchainFieldMeta,
   "scope": {
     type: Schema.Types.Mixed,
-    enum: [...Object.values(ATTRIBUTE_SCOPE)],
+    enum: [...Object.values(ATTR_SCOPES)],
     required: true
   }
 });
@@ -207,7 +207,7 @@ const USER_SYSTEM_ATTRIBUTES = {
     "shortTitle": "First Name",
     "description": "",
     "valueOptions": [],
-    "scope": ATTRIBUTE_SCOPE.USER,
+    "scope": ATTR_SCOPES.USER,
     "isPublished": true,
     "isVisible": true,
     "component": false,
@@ -229,7 +229,7 @@ const USER_SYSTEM_ATTRIBUTES = {
     "shortTitle": "Last Name",
     "description": "",
     "valueOptions": [],
-    "scope": ATTRIBUTE_SCOPE.USER,
+    "scope": ATTR_SCOPES.USER,
     "isPublished": true,
     "isVisible": true,
     "component": false,
@@ -255,7 +255,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Birthday",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     BIO: {
@@ -273,7 +273,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Bio",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     COUNTRY: {
@@ -291,7 +291,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Country",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     CITY: {
@@ -309,7 +309,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "City",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     AVATAR: {
@@ -327,7 +327,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Avatar",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     EDUCATION: {
@@ -345,7 +345,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Education",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     EMPLOYMENT: {
@@ -363,7 +363,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Employment",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     }
   },
@@ -385,7 +385,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Birthday",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "isPublished": true,
       "isVisible": true,
       "component": false,
@@ -407,7 +407,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Bio",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "isPublished": true,
       "isVisible": true,
       "component": false,
@@ -429,7 +429,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Country",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "isPublished": true,
       "isVisible": true,
       "component": false,
@@ -451,7 +451,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "City",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "isPublished": true,
       "isVisible": true,
       "component": false,
@@ -473,7 +473,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Avatar",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "isPublished": true,
       "isVisible": true,
       "component": false,
@@ -495,7 +495,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Education",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "isPublished": true,
       "isVisible": true,
       "component": false,
@@ -517,7 +517,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Employment",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "isPublished": true,
       "isVisible": true,
       "component": false,
@@ -541,7 +541,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Birthday",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     BIO: {
@@ -559,7 +559,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Bio",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     COUNTRY: {
@@ -577,7 +577,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Country",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     CITY: {
@@ -595,7 +595,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "City",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     AVATAR: {
@@ -613,7 +613,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Avatar",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     EDUCATION: {
@@ -631,7 +631,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Education",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     EMPLOYMENT: {
@@ -649,7 +649,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Employment",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     }
   },
@@ -670,7 +670,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Birthday",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
 
@@ -689,7 +689,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Bio",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     COUNTRY: {
@@ -707,7 +707,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Country",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     CITY: {
@@ -725,7 +725,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "City",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     AVATAR: {
@@ -743,7 +743,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Avatar",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     EDUCATION: {
@@ -761,7 +761,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Education",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     },
     EMPLOYMENT: {
@@ -779,7 +779,7 @@ const USER_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Employment",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.USER,
+      "scope": ATTR_SCOPES.USER,
       "__v": 0
     }
   }

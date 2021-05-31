@@ -6,7 +6,7 @@ import ExpressLicensingService from './../../legacy/expressLicensing';
 import ResearchNdaService from './../../legacy/researchNda';
 import UserService from './../../legacy/users';
 import AttributeDtoService from './AttributeDtoService';
-import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTRIBUTE_SCOPE } from './../../../constants';
+import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
 
 
 class ProjectDtoService extends BaseService {
@@ -31,7 +31,7 @@ class ProjectDtoService extends BaseService {
     const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id));
     const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => researchNdaService.getResearchNdaListByResearch(r.external_id)));
-    const researchAttributes = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
+    const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
     
     return chainResearches
       .map((chainResearch) => {

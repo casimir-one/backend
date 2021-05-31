@@ -1,3 +1,3 @@
-const { ATTRIBUTE_SCOPE } = require('@deip/attributes-service');
+const { ATTR_SCOPES } = require('@deip/attributes-service');
 
-export default ATTRIBUTE_SCOPE;
+export default ATTR_SCOPES;

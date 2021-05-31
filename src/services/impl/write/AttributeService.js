@@ -22,6 +22,8 @@ class AttributeService extends BaseService {
     valueOptions,
     defaultValue,
     schemas,
+    isEditable,
+    isRequired,
     scope
   }) {
     const newAttribute = new AttributeSchema({
@@ -36,6 +38,8 @@ class AttributeService extends BaseService {
       description,
       scope,
       schemas,
+      isEditable,
+      isRequired,
       valueOptions: valueOptions.map(opt => {
         return { ...opt, value: mongoose.Types.ObjectId() };
       }),
@@ -60,6 +64,8 @@ class AttributeService extends BaseService {
     valueOptions,
     defaultValue,
     isSystem,
+    isEditable,
+    isRequired,
     schemas,
     scope
   }) {
@@ -78,6 +84,8 @@ class AttributeService extends BaseService {
       attribute.shortTitle = shortTitle;
       attribute.description = description;
       attribute.defaultValue = defaultValue;
+      attribute.isEditable = isEditable;
+      attribute.isRequired = isRequired;
 
       if(!tenantProfileObj.settings.attributeOverwrites.some((attr) => attributeId === attr._id.toString())) {
         tenantProfile.settings.attributeOverwrites.push(attribute)
@@ -106,6 +114,8 @@ class AttributeService extends BaseService {
         return { ...opt, value: opt.value ? mongoose.Types.ObjectId(opt.value.toString()) : mongoose.Types.ObjectId() };
       });
       attribute.defaultValue = defaultValue;
+      attribute.isEditable = isEditable;
+      attribute.isRequired = isRequired;
 
       const savedAttribute = await attribute.save();
       return savedAttribute.toObject();

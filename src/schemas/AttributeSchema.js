@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../constants';
+import { ATTRIBUTE_TYPE, ATTR_SCOPES } from './../constants';
 
 
 const Schema = mongoose.Schema;
@@ -42,7 +42,7 @@ const AttributeSchema = new Schema({
   "schemas": { type: Object, required: false, default: {} },
   "scope": {
     type: Number,
-    enum: [...Object.values(ATTRIBUTE_SCOPE)],
+    enum: [...Object.values(ATTR_SCOPES)],
     required: true
   }
 });
