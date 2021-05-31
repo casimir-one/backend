@@ -69,6 +69,7 @@ public_route.get('/users/tenant/:tenantId', users.getUsersByTenant)
 protected_route.put('/user/account/:username', users.updateUserAccount)
 protected_route.put('/user/profile/:username', compose([userAttributeMetaUpdateAuth({ userEntityId: (ctx) => ctx.request.header['username'] })]), users.updateUserProfile)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), users.getAvatar)
+public_route.get('/user/:username/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), users.getUserAttributeFile)
 protected_route.get('/user/transactions/:status', userTransactions.getUserTransactions)
 
 protected_route.get('/bookmarks/user/:username', users.getUserBookmarks)
@@ -123,6 +124,7 @@ protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/proposals/:username/:status', proposals.getAccountProposals)
 
 public_route.get('/groups/logo/:researchGroupExternalId', compose([researchGroupLogoFileReadAuth()]), researchGroups.getResearchGroupLogo)
+public_route.get('/team/:teamId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), researchGroups.getTeamAttributeFile)
 protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
 
 

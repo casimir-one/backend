@@ -3,6 +3,7 @@ import qs from 'qs';
 import UserService from './../../services/legacy/users';
 import { AttributeDtoService } from './../../services';
 import FileStorage from './../../storage';
+import slug from 'limax';
 import UserForm from './../../forms/legacy/user';
 import UserBookmarkService from './../../services/legacy/userBookmark';
 import * as blockchainService from './../../utils/blockchain';
@@ -163,9 +164,9 @@ const updateUserProfile = async (ctx) => {
     const { filename, profile } = await UserForm(ctx);
     const updatedUserProfile = await usersService.updateUserProfile(username, { ...profile });
 
-    if (filename && oldFilename != filename) {
-      await FileStorage.delete(FileStorage.getAccountAvatarFilePath(username, oldFilename))
-    }
+    // if (filename && oldFilename != filename) {
+      // await FileStorage.delete(FileStorage.getAccountAvatarFilePath(username, oldFilename))
+    // }
 
     ctx.status = 200;
     ctx.body = updatedUserProfile;
@@ -450,6 +451,106 @@ const getAvatar = async (ctx) => {
   }
 }
 
+const getUserAttributeFile = async (ctx) => {
+  const username = ctx.params.username;
+  const attributeId = ctx.params.attributeId;
+  const filename = ctx.params.filename;
+
+  const isTeamRootFolder = username == attributeId;
+  const filepath = isTeamRootFolder ? FileStorage.getAccountFilePath(username, filename) : FileStorage.getAccountAttributeFilePath(username, attributeId, filename);
+  let buff = await FileStorage.get(filepath);
+
+  try {
+
+    const imageQuery = ctx.query.image === 'true';
+    if (imageQuery) {
+      const exists = await FileStorage.exists(filepath);
+      if (!exists) {
+        filepath = FileStorage.getAccountDefaultAvatarFilePath();
+        buff = await FileStorage.get(filepath);
+      }
+
+      const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
+      const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
+      const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
+      const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
+
+      const resize = (w, h) => {
+        return new Promise((resolve) => {
+          sharp.cache(!noCache);
+          sharp(buff)
+            .rotate()
+            .resize(w, h)
+            .png()
+            .toBuffer()
+            .then(data => {
+              resolve(data)
+            })
+            .catch(err => {
+              resolve(err)
+            });
+        })
+      }
+
+      let image = await resize(width, height);
+      if (isRound) {
+        let round = (w) => {
+          let r = w / 2;
+          let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
+          return new Promise((resolve, reject) => {
+            image = sharp(image)
+              .overlayWith(circleShape, { cutout: true })
+              .png()
+              .toBuffer()
+              .then(data => {
+                resolve(data)
+              })
+              .catch(err => {
+                reject(err)
+              });
+          });
+        }
+
+        image = await round(width);
+      }
+
+      ctx.type = 'image/png';
+      ctx.status = 200;
+      ctx.body = image;
+
+    } else {
+
+      const isDownload = ctx.query.download === 'true';
+
+      const ext = filename.substr(filename.lastIndexOf('.') + 1);
+      const name = filename.substr(0, filename.lastIndexOf('.'));
+      const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
+      const isPdf = ['pdf'].some(e => e == ext);
+
+      if (isDownload) {
+        ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
+      } else if (isImage) {
+        ctx.response.set('Content-Type', `image/${ext}`);
+        ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
+      } else if (isPdf) {
+        ctx.response.set('Content-Type', `application/${ext}`);
+        ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
+      } else {
+        ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+        ctx.body = buff;
+      }
+    }
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
 
 export default {
   getUser,
@@ -470,6 +571,7 @@ export default {
   removeUserBookmark,
 
   uploadAvatar,
-  getAvatar
+  getAvatar,
+  getUserAttributeFile
   
 }
