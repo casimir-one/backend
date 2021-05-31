@@ -22,7 +22,7 @@ require("@babel/register")({
 
 const config = require('./../config');
 const mongoose = require('mongoose');
-const { ATTR_TYPES, ATTRIBUTE_SCOPE } = require('@deip/attributes-service');
+const { ATTR_TYPES, ATTR_SCOPES } = require('@deip/attributes-service');
 
 const STEPPER = "stepper";
 const TEXT = "text";
@@ -113,7 +113,7 @@ const AttributeSchema = new Schema({
   "blockchainFieldMeta": BlockchainFieldMeta,
   "scope": {
     type: Number,
-    enum: [...Object.values(ATTRIBUTE_SCOPE)],
+    enum: [...Object.values(ATTR_SCOPES)],
     required: true
   }
 });

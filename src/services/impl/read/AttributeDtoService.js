@@ -2,7 +2,7 @@ import deipRpc from '@deip/rpc-client';
 import AttributeSchema from './../../../schemas/AttributeSchema';
 import config from './../../../config';
 import TenantSchema from './../../../schemas/TenantSchema';
-import { ATTRIBUTE_SCOPE } from '@deip/attributes-service';
+import { ATTR_SCOPES } from '@deip/attributes-service';
 import mongoose from 'mongoose';
 
 class AttributeDtoService {
@@ -47,7 +47,7 @@ class AttributeDtoService {
     return mapAttributes;
   }
   
-  async getAttributesByScope(scope = ATTRIBUTE_SCOPE.PROJECT) {
+  async getAttributesByScope(scope = ATTR_SCOPES.PROJECT) {
     const tenant = await this.getTenantInstance();
     const result = await AttributeSchema.find({ tenantId: { $in: [tenant._id, null] }, scope });
     if (!result.length) return [];
@@ -55,7 +55,7 @@ class AttributeDtoService {
     return mapAttributes;
   }
   
-  async getNetworkAttributesByScope(scope = ATTRIBUTE_SCOPE.PROJECT) {
+  async getNetworkAttributesByScope(scope = ATTR_SCOPES.PROJECT) {
     const scopeQuery = await this.getBaseScopeQuery();
     const result = await AttributeSchema.find({...scopeQuery, scope});
     if (!result.length) return [];

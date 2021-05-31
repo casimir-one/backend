@@ -21,7 +21,7 @@ require("@babel/register")({
 
 
 const config = require('./../config');
-const ATTRIBUTE_SCOPE = require('./../constants').ATTRIBUTE_SCOPE;
+const ATTR_SCOPES = require('./../constants').ATTR_SCOPES;
 const ATTRIBUTE_TYPE = require('./../constants').ATTRIBUTE_TYPE;
 
 const mongoose = require('mongoose');
@@ -64,7 +64,7 @@ const AttributeSchema = new Schema({
   "blockchainFieldMeta": BlockchainFieldMeta,
   "scope": {
     type: Schema.Types.Mixed,
-    enum: [...Object.values(ATTRIBUTE_SCOPE)],
+    enum: [...Object.values(ATTR_SCOPES)],
     required: true
   }
 });
@@ -88,7 +88,7 @@ const TEAM_SYSTEM_ATTRIBUTES = {
     "shortTitle": "Name",
     "description": "",
     "valueOptions": [],
-    "scope": ATTRIBUTE_SCOPE.TEAM,
+    "scope": ATTR_SCOPES.TEAM,
     "blockchainFieldMeta": {
       "isPartial": false,
       "field": "name"
@@ -115,7 +115,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Description",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM,
+      "scope": ATTR_SCOPES.TEAM,
       "blockchainFieldMeta": {
         "isPartial": false,
         "field": "description"
@@ -136,7 +136,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Team Logo",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM
+      "scope": ATTR_SCOPES.TEAM
     }
   },
 
@@ -157,7 +157,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Description",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM,
+      "scope": ATTR_SCOPES.TEAM,
       "blockchainFieldMeta": {
         "isPartial": false,
         "field": "description"
@@ -178,7 +178,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Team Logo",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM
+      "scope": ATTR_SCOPES.TEAM
     }
   },
 
@@ -199,7 +199,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Description",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM,
+      "scope": ATTR_SCOPES.TEAM,
       "blockchainFieldMeta": {
         "isPartial": false,
         "field": "description"
@@ -220,7 +220,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Team Logo",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM
+      "scope": ATTR_SCOPES.TEAM
     }
   },
 
@@ -240,7 +240,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Description",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM,
+      "scope": ATTR_SCOPES.TEAM,
       "blockchainFieldMeta": {
         "isPartial": false,
         "field": "description"
@@ -261,7 +261,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "shortTitle": "Team Logo",
       "description": "",
       "valueOptions": [],
-      "scope": ATTRIBUTE_SCOPE.TEAM
+      "scope": ATTR_SCOPES.TEAM
     }
   }
 }
