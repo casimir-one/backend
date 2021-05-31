@@ -1,27 +1,54 @@
 import multer from 'koa-multer';
+import mongoose from 'mongoose';
 import { getFileStorageUploader } from './../storage';
 
 const USERNAME_HEADER = "username";
+const USER_ATTRIBUTE_ID_SPLITTER = '-';
 
 const destinationHandler = (fileStorage) => function () {
   return async function (req, file, callback) {
     const username = req.headers[USERNAME_HEADER];
-    const accountsDirPath = fileStorage.getAccountDirPath(username);
+    let folderPath = "";
+    let filePath = "";
 
-    const exists = await fileStorage.exists(accountsDirPath);
-    if (!exists) {
-      await fileStorage.mkdir(accountsDirPath);
+    const parts = file.originalname.split(USER_ATTRIBUTE_ID_SPLITTER);
+    const userAttrId = parts[0];
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(userAttrId)) {
+      folderPath = fileStorage.getAccountAttributeDirPath(username, userAttrId);
+      const name = file.originalname.substring(`${userAttrId}${USER_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+      filePath = fileStorage.getAccountAttributeFilePath(username, userAttrId, name);
+    } else {
+      folderPath = fileStorage.getAccountDirPath(username);
+      filePath = fileStorage.getAccountFilePath(username, file.originalname);
     }
-    callback(null, accountsDirPath)
+
+    const folderExists = await fileStorage.exists(folderPath);
+    if (folderExists) {
+      const fileExists = await fileStorage.exists(filePath);
+      if (fileExists) {
+        await fileStorage.delete(filePath);
+      }
+    } else {
+      await fileStorage.mkdir(folderPath);
+    }
+
+    callback(null, folderPath);
   };
 }
 
 
 const filenameHandler = () => function () {
   return function (req, file, callback) {
-    const username = req.headers[USERNAME_HEADER];
-    const ext = file.originalname.substr(file.originalname.lastIndexOf('.') + 1);
-    callback(null, `${username}.${ext}`);
+    let name = "";
+    const parts = file.originalname.split(USER_ATTRIBUTE_ID_SPLITTER);
+    const userAttrId = parts[0];
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(userAttrId)) {
+      name = file.originalname.substring(`${userAttrId}${USER_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+    } else {
+      name = file.originalname;
+    }
+
+    callback(null, name);
   }
 }
 

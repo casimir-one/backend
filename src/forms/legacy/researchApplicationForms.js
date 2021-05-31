@@ -19,7 +19,7 @@ export const researchApplicationAttachmentFilePath = (proposalId, filename) => `
 
 const researchApplicationStorage = (destFn, filename = null) => multer.diskStorage({
   destination: async function (req, file, callback) {
-    const proposalId = req.headers[PROPOSAL_ID_HEADER];;
+    const proposalId = req.headers[PROPOSAL_ID_HEADER];
     const folderPath = destFn(proposalId);
 
     try {
