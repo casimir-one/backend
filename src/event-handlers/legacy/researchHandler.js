@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTRIBUTE_SCOPE } from './../../constants';
+import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTR_SCOPES } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import ProjectService from './../../services/impl/write/ProjectService';
@@ -26,7 +26,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
   const proposal = await proposalsService.getProposal(proposalId);
   const { member, researchGroupExternalId } = proposal.details;
 
-  const researchAttributes = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
+  const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
 
   const researches = await projectDtoService.getResearchesByResearchGroup(researchGroupExternalId);
 

@@ -3,7 +3,7 @@ import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema';
 import AttributeDtoService from './../read/AttributeDtoService';
 import { logWarn } from './../../../utils/log';
-import { ATTRIBUTE_TYPE, ATTRIBUTE_SCOPE } from './../../../constants';
+import { ATTRIBUTE_TYPE, ATTR_SCOPES } from './../../../constants';
 
 
 class ProjectService extends BaseService {
@@ -22,7 +22,7 @@ class ProjectService extends BaseService {
 
     const attributeDtoService = new AttributeDtoService();
     const systemAttributes = await attributeDtoService.getSystemAttributes();
-    const teamAttr = systemAttributes.find(attr => attr.scope == ATTRIBUTE_SCOPE.PROJECT && attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
+    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.PROJECT && attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
     if (teamAttr.isHidden) {
       const rAttr = attributes.find(rAttr => rAttr.attributeId === teamAttr._id.toString());
       if (rAttr.value === null) {
@@ -60,7 +60,7 @@ class ProjectService extends BaseService {
   
   async mapAttributes(attributes) {
     const attributeDtoService = new AttributeDtoService();
-    const projectAttributes = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.PROJECT);
+    const projectAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
 
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.attributeId.toString());

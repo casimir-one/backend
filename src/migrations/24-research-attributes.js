@@ -24,7 +24,7 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 
-const ATTRIBUTE_SCOPE = require('../constants').ATTRIBUTE_SCOPE;
+const ATTR_SCOPES = require('../constants').ATTR_SCOPES;
 const ATTRIBUTE_TYPE = require('../constants').ATTRIBUTE_TYPE;
 const SIGN_UP_POLICY = require('../constants').SIGN_UP_POLICY;
 const NEW_RESEARCH_POLICY = require('../constants').NEW_RESEARCH_POLICY;
@@ -77,7 +77,7 @@ const AttributeSchema = new Schema({
   "blockchainFieldMeta": BlockchainFieldMeta,
   "scope": {
     type: Schema.Types.Mixed,
-    enum: [...Object.values(ATTRIBUTE_SCOPE)],
+    enum: [...Object.values(ATTR_SCOPES)],
     required: true
   }
 });
@@ -255,7 +255,7 @@ const run = async () => {
       const researchAttribute = new Attribute({
         tenantId: null,
         isSystem: true,
-        scope: ATTRIBUTE_SCOPE.PROJECT,
+        scope: ATTR_SCOPES.PROJECT,
         ...attr
       });
       
@@ -270,7 +270,7 @@ const run = async () => {
         const researchAttribute = new Attribute({
           tenantId: tenantProfiles[i]._id,
           isSystem: false,
-          scope: ATTRIBUTE_SCOPE.PROJECT,
+          scope: ATTR_SCOPES.PROJECT,
           ...attr
         });
 

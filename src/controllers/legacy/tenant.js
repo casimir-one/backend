@@ -353,7 +353,7 @@ const approveSignUpRequest = async (ctx, next) => {
     const tx = await usersService.createUserAccount({ username, pubKey: userProfile.signUpPubKey, role });
 
     // temp solution //
-    const attrs = await attributeDtoService.getAttributesByScope(ATTRIBUTE_SCOPE.TEAM);
+    const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
     const attr = attrs.find(
       ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
     );

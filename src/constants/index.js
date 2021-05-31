@@ -17,7 +17,7 @@ import FILE_STORAGE from './fileStorage';
 import DOMAINS from './domains';
 import { RESEARCH_CONTENT_TYPES, CONTENT_TYPES_MAP } from './researchContentType';
 import ASSESSMENT_CRITERIA_TYPE from './assessmentCriteriaType';
-import ATTRIBUTE_SCOPE from './attributeScopes';
+import ATTR_SCOPES from './attributeScopes';
 import QUEUE_TOPIC from './queueTopic';
 
 export {
@@ -40,6 +40,6 @@ export {
   RESEARCH_CONTENT_TYPES,
   CONTENT_TYPES_MAP,
   ASSESSMENT_CRITERIA_TYPE,
-  ATTRIBUTE_SCOPE,
+  ATTR_SCOPES,
   QUEUE_TOPIC
 }

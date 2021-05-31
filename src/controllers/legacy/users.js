@@ -6,7 +6,7 @@ import FileStorage from './../../storage';
 import UserForm from './../../forms/legacy/user';
 import UserBookmarkService from './../../services/legacy/userBookmark';
 import * as blockchainService from './../../utils/blockchain';
-import { USER_PROFILE_STATUS, ATTRIBUTE_SCOPE, ATTRIBUTE_TYPE } from './../../constants';
+import { USER_PROFILE_STATUS, ATTR_SCOPES, ATTRIBUTE_TYPE } from './../../constants';
 
 
 const getUser = async (ctx) => {
@@ -384,7 +384,7 @@ const getAvatar = async (ctx) => {
 
     if (user && user.profile && user.profile.attributes) {
       // temp solution //
-      const attrs = await attributeDtoService.getNetworkAttributesByScope(ATTRIBUTE_SCOPE.USER);
+      const attrs = await attributeDtoService.getNetworkAttributesByScope(ATTR_SCOPES.USER);
       const attr = attrs.find(
         ({ type, title, tenantId }) => title === 'Avatar' && type === ATTRIBUTE_TYPE.IMAGE && tenantId === user.tenantId
       );
