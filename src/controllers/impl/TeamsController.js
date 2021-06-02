@@ -99,11 +99,13 @@ class TeamsController extends BaseController {
         };
 
         const msg = ctx.state.msg;
+        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
+        const entityId = appCmd.getCmdPayload().entityId;
 
         await accountCmdHandler.process(msg, ctx, validate);
         
         ctx.status = 200;
-        ctx.body = { model: { entityId: ctx.request.header['entity-id'] } };
+        ctx.body = { entityId };
         
       } catch (err) {
         ctx.status = err.httpStatus || 500;
@@ -116,7 +118,6 @@ class TeamsController extends BaseController {
   updateTeam = this.command({
     form: TeamForm, h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
           const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
           if (!appCmd) {
@@ -137,10 +138,20 @@ class TeamsController extends BaseController {
         };
 
         const msg = ctx.state.msg;
+        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+        let entityId = '';
+        if(appCmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT) {
+          entityId = appCmd.getCmdPayload().entityId;
+        } else if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
+          const proposedCmds = appCmd.getProposedCmds();
+          const updateCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT)
+          entityId = updateCmd.getCmdPayload().entityId;
+        }
+
         await accountCmdHandler.process(msg, ctx, validate);
 
         ctx.status = 200;
-        ctx.body = { model: "ok" };
+        ctx.body = { entityId };
 
       } catch (err) {
         ctx.status = err.httpStatus || 500;
