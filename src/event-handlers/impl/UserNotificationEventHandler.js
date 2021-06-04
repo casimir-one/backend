@@ -3,8 +3,7 @@ import config from './../../config';
 import { USER_NOTIFICATION_TYPE, RESEARCH_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
 import TenantService from './../../services/legacy/tenant';
-import { TeamService, TeamDtoService } from './../../services';
-import UserDtoService from './../../services/legacy/users';
+import { TeamService, TeamDtoService, UserDtoService } from './../../services';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
 

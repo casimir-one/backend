@@ -29,6 +29,9 @@ import AttributeCreatedEvent from './impl/AttributeCreatedEvent';
 import AttributeUpdatedEvent from './impl/AttributeUpdatedEvent';
 import AttributeDeletedEvent from './impl/AttributeDeletedEvent';
 
+import UserUpdatedEvent from './impl/UserUpdatedEvent';
+import UserCreatedEvent from './impl/UserCreatedEvent';
+
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
@@ -60,5 +63,8 @@ module.exports = {
 
   AttributeCreatedEvent,
   AttributeUpdatedEvent,
-  AttributeDeletedEvent
+  AttributeDeletedEvent,
+
+  UserUpdatedEvent,
+  UserCreatedEvent
 }

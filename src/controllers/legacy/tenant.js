@@ -1,8 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import sharp from 'sharp';
-import UserService from './../../services/legacy/users';
 import TenantService from './../../services/legacy/tenant';
-import { TeamService } from './../../services';
+import { TeamService, UserDtoService, UserService } from './../../services';
 import FileStorage from './../../storage';
 import config from './../../config';
 import { USER_PROFILE_STATUS } from './../../constants';
@@ -315,8 +314,8 @@ const updateTenantNetworkSettings = async (ctx) => {
 
 const getSignUpRequests = async (ctx) => {
   try {
-    const usersService = new UserService();
-    const pendingUsersProfiles = await usersService.findUserProfilesByStatus(USER_PROFILE_STATUS.PENDING);
+    const userDtoService = new UserDtoService();
+    const pendingUsersProfiles = await userDtoService.findUserProfilesByStatus(USER_PROFILE_STATUS.PENDING);
     ctx.status = 200;
     ctx.body = pendingUsersProfiles;
   } catch (err) {
@@ -333,11 +332,12 @@ const approveSignUpRequest = async (ctx, next) => {
   try {
 
     // TODO: check jwtUsername for admin
-    const usersService = new UserService();
+    const userDtoService = new UserDtoService();
+    const userService = new UserService();
     const teamService = new TeamService();
     const attributeDtoService = new AttributeDtoService()
 
-    const userProfile = await usersService.findUserProfileByOwner(username);
+    const userProfile = await userDtoService.findUserProfileByOwner(username);
     if (!userProfile) {
       ctx.status = 404;
       ctx.body = `Sign up request for ${username} does not exist`;
@@ -350,7 +350,7 @@ const approveSignUpRequest = async (ctx, next) => {
       return;
     }
 
-    const tx = await usersService.createUserAccount({ username, pubKey: userProfile.signUpPubKey, role });
+    const tx = await userService.createUserAccount({ username, pubKey: userProfile.signUpPubKey, role });
 
     // temp solution //
     const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
@@ -381,7 +381,7 @@ const approveSignUpRequest = async (ctx, next) => {
     //   }
     // }
 
-    const approvedProfile = await usersService.updateUserProfile(username, { status: USER_PROFILE_STATUS.APPROVED });
+    const approvedProfile = await userService.updateUser(username, { status: USER_PROFILE_STATUS.APPROVED });
 
     ctx.status = 200;
     ctx.body = { profile: approvedProfile };
@@ -402,8 +402,9 @@ const rejectSignUpRequest = async (ctx) => {
   try {
 
     // TODO: check jwtUsername for admin
-    const usersService = new UserService();
-    const userProfile = await usersService.findUserProfileByOwner(username);
+    const userService = new UserService();
+    const userDtoService = new UserDtoService();
+    const userProfile = await userDtoService.findUserProfileByOwner(username);
     if (!userProfile) {
       ctx.status = 404;
       ctx.body = `Sign up request for ${username} does not exist`;
@@ -416,7 +417,7 @@ const rejectSignUpRequest = async (ctx) => {
       return;
     }
 
-    await usersService.deleteUserProfile(username);
+    await userService.deleteUser(username);
 
     ctx.status = 201;
     ctx.body = "";

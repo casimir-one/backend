@@ -11,9 +11,8 @@ import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
 import reviewHandler from './reviewHandler';
 
-import UserService from './../../services/legacy/users';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
-import { TeamDtoService } from './../../services';
+import { UserService, TeamDtoService } from './../../services';
 
 class AppEventHandler extends EventEmitter { }
 
@@ -85,9 +84,9 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_CREATED, (payload, rep
   const { creator, external_id: proposalId } = create_proposal_operation[1];
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
-  const usersService = new UserService();
+  const userService = new UserService();
 
-  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const requesterUserProfile = await userService.getUser(creator);
   const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
@@ -109,15 +108,15 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, (payload, re
   const { creator } = create_proposal_operation[1];
   const { external_id: researchExternalId, research_group: researchGroupExternalId } = create_research_operation[1];
   
-  const usersService = new UserService();
+  const userService = new UserService();
   const teamDtoService = new TeamDtoService()
   const researchService = new ResearchService();
 
-  const approverUserProfile = await usersService.findUserProfileByOwner(emitter);
+  const approverUserProfile = await userService.getUser(emitter);
   const [approverUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
   const approverUser = { profile: approverUserProfile, account: approverUserAccount };
 
-  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const requesterUserProfile = await userService.getUser(creator);
   const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
@@ -139,13 +138,13 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_REJECTED, (payload, re
   const { creator } = create_proposal_operation[1];
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
-  const usersService = new UserService();
+  const userService = new UserService();
 
-  const rejecterUserProfile = await usersService.findUserProfileByOwner(emitter);
+  const rejecterUserProfile = await userService.getUser(emitter);
   const [rejecterUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
   const rejecterUser = { profile: rejecterUserProfile, account: rejecterUserAccount };
 
-  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const requesterUserProfile = await userService.getUser(creator);
   const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
@@ -166,9 +165,9 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_EDITED, (payload, repl
   const { creator, external_id: proposalId } = create_proposal_operation[1];
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
-  const usersService = new UserService();
+  const userService = new UserService();
 
-  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const requesterUserProfile = await userService.getUser(creator);
   const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
   const proposal = await deipRpc.api.getProposalAsync(proposalId);
@@ -190,9 +189,9 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, (payload, rep
   const { creator, external_id: proposalId } = create_proposal_operation[1];
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
-  const usersService = new UserService();
+  const userService = new UserService();
 
-  const requesterUserProfile = await usersService.findUserProfileByOwner(creator);
+  const requesterUserProfile = await userService.getUser(creator);
   const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 

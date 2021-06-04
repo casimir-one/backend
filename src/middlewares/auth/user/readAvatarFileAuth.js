@@ -1,4 +1,4 @@
-import UserService from './../../../services/legacy/users';
+import { UserService } from './../../../services';
 import TenantService from './../../../services/legacy/tenant';
 
 
@@ -15,11 +15,11 @@ function userAvatarFileReadAuth(options = {}) {
     const user = await userService.getUser(username);
     ctx.assert(!!user, 404);
 
-    if (user.profile.tenantId == currentTenant.id) {
+    if (user.tenantId == currentTenant.id) {
       /* TODO: check access for requested file */
       await next();
     } else {
-      const requestedTenant = await tenantService.getTenant(user.profile.tenantId);
+      const requestedTenant = await tenantService.getTenant(user.tenantId);
       if (true) { /* TODO: check access for the requested source and chunk an access token to request the different tenant's server */
         ctx.redirect(`${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`);
         return;

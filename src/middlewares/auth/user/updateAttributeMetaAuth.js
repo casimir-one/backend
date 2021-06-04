@@ -1,4 +1,4 @@
-import UserService from '../../../services/legacy/users';
+import { UserService } from './../../../services';
 import TenantService from '../../../services/legacy/tenant';
 
 
@@ -16,7 +16,7 @@ function userAttributeMetaUpdateAuth(options = {}) {
     const user = await userService.getUser(username);
     ctx.assert(!!user, 404);
 
-    if (user.profile.tenantId == currentTenant.id && currentUser.username == username) {
+    if (user.tenantId == currentTenant.id && currentUser.username == username) {
       /* TODO: check access for requested file */
       await next();
     } else {

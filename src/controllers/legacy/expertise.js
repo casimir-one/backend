@@ -1,7 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import qs from 'qs';
-import UserService from './../../services/legacy/users';
 import ExpertiseService from './../../services/legacy/expertise';
+import { UserDtoService } from './../../services';
 
 const expertiseService = new ExpertiseService();
 
@@ -40,7 +40,7 @@ const getAccountEciStats = async (ctx) => {
   const username = ctx.params.username;
 
   try {
-    const usersService = new UserService();
+    const userDtoService = new UserDtoService();
 
     const stat = await deipRpc.api.getAccountEciStatsAsync(
       username,
@@ -51,7 +51,7 @@ const getAccountEciStats = async (ctx) => {
       filter.criteria || undefined
     );
 
-    const user = await usersService.getUser(username);
+    const user = await userDtoService.getUser(username);
     const result = { user, ...stat };
 
     ctx.status = 200;
@@ -70,7 +70,7 @@ const getAccountsEciStats = async (ctx) => {
   const filter = query.filter;
 
   try {
-    const usersService = new UserService();
+    const userDtoService = new UserDtoService();
     const stats = await deipRpc.api.getAccountsEciStatsAsync(
       filter.discipline || undefined,
       filter.from || undefined,
@@ -79,7 +79,7 @@ const getAccountsEciStats = async (ctx) => {
       filter.criteria || undefined
     );
 
-    const users = await Promise.all(stats.map(([name, stat]) => usersService.getUser(stat.account)));
+    const users = await Promise.all(stats.map(([name, stat]) => userDtoService.getUser(stat.account)));
 
     const result = stats.map(([name, stat], i) => {
       const user = users[i];

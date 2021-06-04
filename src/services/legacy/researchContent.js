@@ -3,8 +3,7 @@ import BaseService from './../base/BaseService';
 import ProjectContentSchema from './../../schemas/ProjectContentSchema';
 import { RESEARCH_CONTENT_STATUS, CONTENT_TYPES_MAP } from './../../constants';
 import ResearchService from './../impl/read/ProjectDtoService';
-import { TeamDtoService } from './../../services';
-import UsersService from './users';
+import { TeamDtoService, UserDtoService } from './../../services';
 
 class ResearchContentService extends BaseService {
 
@@ -176,7 +175,7 @@ class ResearchContentService extends BaseService {
   async getResearchContentReferencesGraph(researchContentId) {
     const researchService = new ResearchService();
     const teamDtoService = new TeamDtoService();
-    const usersService = new UsersService();
+    const userDtoService = new UserDtoService();
 
     const researchContent = await this.getResearchContent(researchContentId);
     const research = await researchService.getResearch(researchContent.research_external_id);
@@ -184,7 +183,7 @@ class ResearchContentService extends BaseService {
 
     const ref = await this.getResearchContentRef(researchContent.external_id);
 
-    const authorsProfiles = await usersService.getUsers(researchContent.authors);
+    const authorsProfiles = await userDtoService.getUsers(researchContent.authors);
 
     const root = {
       isRoot: true,
@@ -237,7 +236,7 @@ class ResearchContentService extends BaseService {
   async getResearchContentOuterReferences(researchContent, acc) {
     const researchService = new ResearchService();
     const teamDtoService = new TeamDtoService();
-    const usersService = new UsersService();
+    const userDtoService = new UserDtoService();
 
     const outerReferences = await deipRpc.api.getContentsReferToContent2Async(researchContent.external_id);
 
@@ -264,7 +263,7 @@ class ResearchContentService extends BaseService {
 
       const ref = await this.getResearchContentRef(outerRefResearchContent.external_id);
 
-      const authorsProfiles = await usersService.getUsers(outerRefResearchContent.authors);
+      const authorsProfiles = await userDtoService.getUsers(outerRefResearchContent.authors);
 
       acc.push({
         isOuter: true,
@@ -284,7 +283,7 @@ class ResearchContentService extends BaseService {
   async getResearchContentInnerReferences(researchContent, acc) {
     const researchService = new ResearchService();
     const teamDtoService = new TeamDtoService();
-    const usersService = new UsersService();
+    const userDtoService = new UserDtoService();
 
     const innerReferences = await deipRpc.api.getContentReferences2Async(researchContent.external_id);
 
@@ -312,7 +311,7 @@ class ResearchContentService extends BaseService {
 
       const ref = await this.getResearchContentRef(innerRefResearchContent.external_id);
 
-      const authorsProfiles = await usersService.getUsers(innerRefResearchContent.authors);
+      const authorsProfiles = await userDtoService.getUsers(innerRefResearchContent.authors);
 
       acc.push({
         isInner: true,

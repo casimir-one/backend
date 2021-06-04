@@ -2,8 +2,7 @@ import jwt from 'jsonwebtoken';
 import config from './../../config';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import { TeamService } from './../../services';
-import UserService from './../../services/legacy/users';
+import { TeamService, UserDtoService, UserService } from './../../services';
 import TenantService from './../../services/legacy/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
 import { AttributeDtoService } from './../../services';
@@ -19,8 +18,8 @@ const signIn = async function (ctx) {
 
   try {
 
-    const usersService = new UserService();
-    const user = await usersService.getUser(username);
+    const userDtoService = new UserDtoService();
+    const user = await userDtoService.getUser(username);
     if (!user || user.tenantId != tenant.id) {
       ctx.body = {
         success: false,
@@ -76,102 +75,102 @@ const signIn = async function (ctx) {
   }
 }
 
-const signUp = async function (ctx, next) {
-  const tenant = ctx.state.tenant;
-  const { 
-    username, 
-    email, 
-    attributes,
-    pubKey,
-    role
-  } = ctx.request.body;
+// const signUp = async function (ctx, next) {
+//   const tenant = ctx.state.tenant;
+//   const { 
+//     username, 
+//     email, 
+//     attributes,
+//     pubKey,
+//     role
+//   } = ctx.request.body;
 
-  try {
+//   try {
+//     const userService = new UserService();
+//     const userDtoService = new UserDtoService();
+//     const teamService = new TeamService();
+//     const attributeDtoService = new AttributeDtoService()
 
-    const usersService = new UserService();
-    const teamService = new TeamService();
-    const attributeDtoService = new AttributeDtoService()
+//     if (!username || !pubKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
+//       ctx.status = 400;
+//       ctx.body = `'username', 'pubKey', 'email', fields are required. Username allowable symbols are: [a-z0-9] `;
+//       return;
+//     }
 
-    if (!username || !pubKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(username)) {
-      ctx.status = 400;
-      ctx.body = `'username', 'pubKey', 'email', fields are required. Username allowable symbols are: [a-z0-9] `;
-      return;
-    }
+//     if (role && !tenant.profile.settings.roles.some((appRole) => appRole.role == role)) {
+//       ctx.status = 400;
+//       ctx.body = `'${role}' role is not valid for ${tenant.id} tenant`;
+//       return;
+//     }
 
-    if (role && !tenant.profile.settings.roles.some((appRole) => appRole.role == role)) {
-      ctx.status = 400;
-      ctx.body = `'${role}' role is not valid for ${tenant.id} tenant`;
-      return;
-    }
+//     const existingProfile = await userDtoService.findUserProfileByOwner(username);
+//     if (existingProfile) {
+//       ctx.status = 409;
+//       ctx.body = `Profile for '${username}' is under consideration or has been approved already`;
+//       return;
+//     }
 
-    const existingProfile = await usersService.findUserProfileByOwner(username);
-    if (existingProfile) {
-      ctx.status = 409;
-      ctx.body = `Profile for '${username}' is under consideration or has been approved already`;
-      return;
-    }
+//     const status = tenant.profile.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
+//       ? USER_PROFILE_STATUS.APPROVED
+//       : USER_PROFILE_STATUS.PENDING;
 
-    const status = tenant.profile.settings.signUpPolicy == SIGN_UP_POLICY.FREE || ctx.state.isTenantAdmin
-      ? USER_PROFILE_STATUS.APPROVED
-      : USER_PROFILE_STATUS.PENDING;
-
-    const userProfile = await usersService.createUserProfile({
-      username,
-      status,
-      signUpPubKey: pubKey,
-      tenant: tenant.id,
-      email,
-      attributes,
-      roles: role ? [{
-        role: role,
-        researchGroupExternalId: tenant.id
-      }] : undefined
-    });
+//     const userProfile = await userService.createUser({
+//       username,
+//       status,
+//       signUpPubKey: pubKey,
+//       tenant: tenant.id,
+//       email,
+//       attributes,
+//       roles: role ? [{
+//         role: role,
+//         researchGroupExternalId: tenant.id
+//       }] : undefined
+//     });
 
 
-    if (status == USER_PROFILE_STATUS.APPROVED) {
-      const tx = await usersService.createUserAccount({ username, pubKey, role });
+//     if (status == USER_PROFILE_STATUS.APPROVED) {
+//       const tx = await userService.createUserAccount({ username, pubKey, role });
 
-      const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
-      const attr = attrs.find(
-        ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
-      );
+//       const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
+//       const attr = attrs.find(
+//         ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
+//       );
   
-      const attributes = attr ? [{attributeId: attr._id, value: username}] : [];
+//       const attributes = attr ? [{attributeId: attr._id, value: username}] : [];
   
-      await teamService.createTeam({
-        externalId: username,
-        creator: username,
-        attributes
-      });
+//       await teamService.createTeam({
+//         externalId: username,
+//         creator: username,
+//         attributes
+//       });
 
-      /* Temp solution for ACTION PROJECT roles setup flow */
+//       /* Temp solution for ACTION PROJECT roles setup flow */
 
-      // const datums = blockchainService.extractOperations(tx);
-      // if (datums.length > 1) {
-      //   const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
-      //   ctx.state.events.push(userInvitationProposedEvent);
+//       // const datums = blockchainService.extractOperations(tx);
+//       // if (datums.length > 1) {
+//       //   const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
+//       //   ctx.state.events.push(userInvitationProposedEvent);
 
-      //   const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
-      //   for (let i = 0; i < userInvitationApprovals.length; i++) {
-      //     const approval = userInvitationApprovals[i];
-      //     const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
-      //     ctx.state.events.push(userInvitationProposalSignedEvent);
-      //   }
-      // }
-    }
+//       //   const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
+//       //   for (let i = 0; i < userInvitationApprovals.length; i++) {
+//       //     const approval = userInvitationApprovals[i];
+//       //     const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
+//       //     ctx.state.events.push(userInvitationProposalSignedEvent);
+//       //   }
+//       // }
+//     }
 
-    ctx.status = 200;
-    ctx.body = { profile: userProfile };
+//     ctx.status = 200;
+//     ctx.body = { profile: userProfile };
 
-  } catch (err) {
-    console.error(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
+//   } catch (err) {
+//     console.error(err);
+//     ctx.status = 500;
+//     ctx.body = err;
+//   }
 
-  await next();
-}
+//   await next();
+// }
 
 const chunkTenantAccessToken = async function (ctx) {
   const { clientTenantId, secretSigHex } = ctx.request.body;
@@ -217,6 +216,5 @@ const chunkTenantAccessToken = async function (ctx) {
 
 export default {
   signIn,
-  signUp,
   chunkTenantAccessToken
 }
