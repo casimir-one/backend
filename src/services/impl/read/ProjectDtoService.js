@@ -4,7 +4,6 @@ import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import ExpressLicensingService from './../../legacy/expressLicensing';
 import ResearchNdaService from './../../legacy/researchNda';
-import UserService from './../../legacy/users';
 import AttributeDtoService from './AttributeDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
 
@@ -18,7 +17,6 @@ class ProjectDtoService extends BaseService {
   async mapResearch(researches, filterObj) {
     const expressLicensingService = new ExpressLicensingService();
     const researchNdaService = new ResearchNdaService();
-    const userService = new UserService();
     const attributeDtoService = new AttributeDtoService()
 
     const filter = {

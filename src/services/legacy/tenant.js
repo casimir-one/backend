@@ -1,6 +1,6 @@
 import deipRpc from '@deip/rpc-client';
 import TenantSchema from './../../schemas/TenantSchema';
-import UserService from './../../services/legacy/users';
+import { UserDtoService, UserService } from './../../services';
 import config from './../../config';
 
 
@@ -10,11 +10,12 @@ class TenantService {
 
   async getTenant(id) {
     const userService = new UserService();
+    const userDtoService = new UserDtoService();
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
     const profile = doc.toObject();
     const account = await deipRpc.api.getResearchGroupAsync(id);
-    const tenantUsers = await userService.getUsersByTenant(id);
+    const tenantUsers = await userDtoService.getUsersByTenant(id);
     const usersWithAdminRole = tenantUsers.filter(user => userService.hasRole(user, 'admin'));
 
     const chainMembershipTokens = await Promise.all(usersWithAdminRole.map(u => deipRpc.api.getResearchGroupTokensByAccountAsync(u.username)));

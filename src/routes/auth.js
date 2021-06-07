@@ -1,10 +1,11 @@
+import { authCtrl } from '../controllers';
 import auth from '../controllers/legacy/auth.js'
 import koa_router from 'koa-router'
 
 const public_route = koa_router()
 
 public_route.post('/sign-in', auth.signIn)
-public_route.post('/sign-up', auth.signUp)
+public_route.post('/v2/sign-up', authCtrl.signUp)
 public_route.post('/tenant/sign-in', auth.chunkTenantAccessToken)
 
 

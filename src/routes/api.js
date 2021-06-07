@@ -14,13 +14,12 @@ import research from '../controllers/legacy/research'
 import investmentPortfolio from '../controllers/legacy/investmentPortfolio'
 import grants from '../controllers/legacy/grants'
 import expressLicensing from '../controllers/legacy/expressLicensing'
-import userTransactions from '../controllers/legacy/userTransactions'
 import fundraising from '../controllers/legacy/fundraising'
 import tenant from '../controllers/legacy/tenant';
 import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
 
-import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl } from '../controllers';
+import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl, usersCtrl } from '../controllers';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
@@ -34,6 +33,7 @@ import researchContentFilePublishAuth from './../middlewares/auth/researchConten
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
 import projectCmdProxy from './../middlewares/proxy/project/projectCmdProxy';
 import teamCmdProxy from './../middlewares/proxy/team/teamCmdProxy';
+import userCmdProxy from './../middlewares/proxy/user/userCmdProxy';
 
 import readGrantAwardWithdrawalRequestAuth from './../middlewares/auth/grantAwardWithdrawalRequest/readGrantAwardWithdrawalRequestAuth';
 
@@ -56,23 +56,8 @@ async function tenantAdminGuard(ctx, next) {
   await next();
 }
 
-public_route.get('/user/profile/:username', users.getUserProfile)
-public_route.get('/user/profiles', users.getUsersProfiles)
-public_route.get('/user/active', users.getActiveUsersProfiles)
-public_route.get('/user/name/:username', users.getUser)
-public_route.get('/user/email/:email', users.getUserByEmail)
-public_route.get('/users', users.getUsers)
-public_route.get('/users/listing', users.getUsersListing)
-public_route.get('/users/group/:researchGroupExternalId', users.getUsersByResearchGroup)
-public_route.get('/users/tenant/:tenantId', users.getUsersByTenant)
-
-protected_route.put('/user/account/:username', users.updateUserAccount)
-protected_route.put('/user/profile/:username', compose([userAttributeMetaUpdateAuth({ userEntityId: (ctx) => ctx.request.header['username'] })]), users.updateUserProfile)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), users.getAvatar)
-public_route.get('/user/:username/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), users.getUserAttributeFile)
-protected_route.get('/user/transactions/:status', userTransactions.getUserTransactions)
 
-protected_route.get('/bookmarks/user/:username', users.getUserBookmarks)
 protected_route.post('/bookmarks/user/:username', users.addUserBookmark)
 protected_route.delete('/bookmarks/user/:username/remove/:bookmarkId', users.removeUserBookmark)
 
@@ -256,6 +241,21 @@ public_route.get('/v2/assets/accounts/symbol/:symbol', assetsCtrl.getAccountsAss
 
 public_route.get('/v2/domains', domainsCtrl.getDomains)
 public_route.get('/v2/domains/project/:projectId', domainsCtrl.getDomainsByProject)
+
+public_route.get('/v2/user/profile/:username', usersCtrl.getUserProfile)
+public_route.get('/v2/users/profile', usersCtrl.getUsersProfiles)
+public_route.get('/v2/users/active', usersCtrl.getActiveUsersProfiles)
+public_route.get('/v2/user/name/:username', usersCtrl.getUser)
+public_route.get('/v2/user/email/:email', usersCtrl.getUserByEmail)
+public_route.get('/v2/users', usersCtrl.getUsers)
+public_route.get('/v2/users/listing', usersCtrl.getUsersListing)
+public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
+public_route.get('/v2/users/tenant/:tenantId', usersCtrl.getUsersByTenant)
+
+protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
+public_route.get('/user/:username/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), usersCtrl.getUserAttributeFile)
+
+protected_route.get('/v2/bookmarks/user/:username', usersCtrl.getUserBookmarks)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

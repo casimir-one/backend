@@ -5,7 +5,8 @@ import {
   teamEventHandler, 
   userNotificationEventHandler, 
   userInviteEventHandler,
-  attributeEventHandler
+  attributeEventHandler,
+  userEventHandler
 } from './index';
 
 
@@ -105,5 +106,14 @@ module.exports = {
   [APP_EVENT.ATTRIBUTE_DELETED]: [
     { h: attributeEventHandler, await: true },
     { h: projectEventHandler, await: true },
+  ],
+
+  [APP_EVENT.USER_CREATED]: [
+    { h: userEventHandler, await: true },
+    { h: teamEventHandler, await: true }
+  ],
+
+  [APP_EVENT.USER_UPDATED]: [
+    { h: userEventHandler, await: true }
   ]
 };

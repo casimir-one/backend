@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
 import { LEGACY_APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
-import UserService from './../../services/legacy/users';
+import { UserDtoService } from './../../services';
 import UserNotificationService from './../../services/legacy/userNotification';
 import ResearchContentService from './../../services/legacy/researchContent';
 import ReviewService from './../../services/legacy/review';
@@ -10,7 +10,7 @@ import { TeamDtoService } from './../../services';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
 import TenantService from './../../services/legacy/tenant';
 
-const userService = new UserService({ scoped: false });
+const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
 const researchService = new ResearchService({ scoped: false });
 const userNotificationService = new UserNotificationService();
@@ -27,9 +27,9 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const research = await researchService.getResearch(researchExternalId);
 
-  const emitterUser = await userService.getUser(eventEmitter);
+  const emitterUser = await userDtoService.getUser(eventEmitter);
 
-  const members = await userService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
+  const members = await userDtoService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notificationsPromises = [];
   const data = { title };
@@ -65,10 +65,10 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ 
   const researchContent = await researchContentService.getResearchContent(researchContentExternalId);
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
-  const emitterUser = await userService.getUser(eventEmitter);
+  const emitterUser = await userDtoService.getUser(eventEmitter);
   const isAcceptedByQuorum = researchGroup.external_id != eventEmitter;
 
-  const members = await userService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
+  const members = await userDtoService.getUsers([...tenant.admins, ...research.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notificationsPromises = [];
   const data = isAcceptedByQuorum ? { title: researchContent.title } : undefined;
@@ -101,7 +101,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, asy
   const eventEmitter = researchGroupUpdateProposedEvent.getEventEmitter();
 
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
-  const emitterUser = await userService.getUser(eventEmitter);
+  const emitterUser = await userDtoService.getUser(eventEmitter);
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
   const notificationsPromises = [];
@@ -131,7 +131,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ ev
   const eventEmitter = researchGroupUpdatedEvent.getEventEmitter();
 
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
-  const emitterUser = await userService.getUser(eventEmitter);
+  const emitterUser = await userDtoService.getUser(eventEmitter);
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -256,8 +256,8 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({
   const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
   const eventEmitter = userResignationProposedEvent.getEventEmitter();
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
-  const emitterUser = await userService.getUser(eventEmitter);
-  const excludedUser = await userService.getUser(member);
+  const emitterUser = await userDtoService.getUser(eventEmitter);
+  const excludedUser = await userDtoService.getUser(member);
   const notificationsPromises = [];
   const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -328,7 +328,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async
 
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
-  const emitterUser = await userService.getUser(eventEmitter);
+  const emitterUser = await userDtoService.getUser(eventEmitter);
 
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -361,7 +361,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async 
 
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
-  const emitterUser = await userService.getUser(eventEmitter);
+  const emitterUser = await userDtoService.getUser(eventEmitter);
   const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(researchTokenSaleExternalId);
   const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
 
@@ -394,7 +394,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREA
   const reviewService = new ReviewService();
   const { reviewExternalId, researchContentExternalId, author } = reviewCreatedEvent.getSourceData();
 
-  let reviewer = await userService.getUser(author);
+  let reviewer = await userDtoService.getUser(author);
   let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
   let research = await researchService.getResearch(researchContent.research_external_id);
@@ -429,8 +429,8 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQU
   const { source: { offchain: { reviewRequest }}} = reviewRequestedEvent.getSourceData();
   const { requestor: requestorId, expert: expertId, researchContentExternalId } = reviewRequest;
   const researchContentService = new ResearchContentService();
-  let requestor = await userService.getUser(requestorId);
-  let expert = await userService.getUser(expertId);
+  let requestor = await userDtoService.getUser(requestorId);
+  let expert = await userDtoService.getUser(expertId);
   let researchContent = await researchContentService.getResearchContent(researchContentExternalId);
 
   let research = await researchService.getResearch(researchContent.research_external_id);
@@ -456,7 +456,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSED, async ({ eve
   const eventEmitter = researchNdaProposedEvent.getEventEmitter()
 
   const research = await researchService.getResearch(researchExternalId);
-  const emitter = await userService.getUser(eventEmitter);
+  const emitter = await userDtoService.getUser(eventEmitter);
   const tenant = await tenantService.getTenant(emitter.tenantId);
 
   const notificationsPromises = [];
@@ -489,7 +489,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, async
   if (proposal.proposal.status != 1) {
     const research = await researchService.getResearch(proposal.details.researchExternalId);
     const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
-    const creator = await userService.getUser(proposal.proposer.username);
+    const creator = await userDtoService.getUser(proposal.proposer.username);
 
     const notificationsPromises = [];
 
@@ -522,7 +522,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, asy
   if (proposal.proposal.status != 1) {
     const research = await researchService.getResearch(proposal.details.researchExternalId);
     const tenant = await tenantService.getTenant(proposal.proposer.tenantId);
-    const creator = await userService.getUser(proposal.proposer.username);
+    const creator = await userDtoService.getUser(proposal.proposer.username);
 
     const notificationsPromises = [];
 

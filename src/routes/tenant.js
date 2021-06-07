@@ -2,6 +2,7 @@ import koa_router from 'koa-router'
 import compose from 'koa-compose'
 import tenant from '../controllers/legacy/tenant'
 import auth from '../controllers/legacy/auth'
+import { authCtrl } from '../controllers';
 
 const protected_route = koa_router();
 const public_route = koa_router();
@@ -27,9 +28,9 @@ protected_route.put('/settings', compose([tenantRoute, tenantAdminGuard]), tenan
 protected_route.put('/network-settings', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantNetworkSettings);
 
 protected_route.get('/registry/sign-ups', compose([tenantRoute, tenantAdminGuard]), tenant.getSignUpRequests);
-protected_route.put('/registry/sign-ups/approve', compose([tenantRoute, tenantAdminGuard]), tenant.approveSignUpRequest);
+// protected_route.put('/registry/sign-ups/approve', compose([tenantRoute, tenantAdminGuard]), tenant.approveSignUpRequest);
 protected_route.put('/registry/sign-ups/reject', compose([tenantRoute, tenantAdminGuard]), tenant.rejectSignUpRequest);
-protected_route.post('/registry/sign-up', compose([tenantRoute, tenantAdminGuard]), auth.signUp);
+protected_route.post('/v2/registry/sign-up', compose([tenantRoute, tenantAdminGuard]), authCtrl.signUp);
 protected_route.put('/admins/add', compose([tenantRoute, tenantAdminGuard]), tenant.addTenantAdmin);
 protected_route.put('/admins/remove', compose([tenantRoute, tenantAdminGuard]), tenant.removeTenantAdmin);
 

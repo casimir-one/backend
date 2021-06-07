@@ -1,4 +1,5 @@
 import multer from 'koa-multer';
+import BaseForm from './../base/BaseForm';
 import mongoose from 'mongoose';
 import { getFileStorageUploader } from './../storage';
 
@@ -61,29 +62,28 @@ const fileFilterHandler = (req, file, callback) => {
   callback(null, true);
 }
 
+class UserForm extends BaseForm {
 
-// TODO: Move all user fields here after UI form refactoring
-const UserForm = async (ctx) => {
+  constructor(nextHandler) {
 
-  const filesUploader = multer({
-    storage: getFileStorageUploader(destinationHandler, filenameHandler),
-    fileFilter: fileFilterHandler
-  });
+    const filesUploader = multer({
+      storage: getFileStorageUploader(destinationHandler, filenameHandler),
+      fileFilter: fileFilterHandler
+    });
 
-  const formHandler = filesUploader.any();
-  return formHandler(ctx, () => new Promise((resolve, reject) => {
-    try {
-      const filename = ctx.req.files.length ? ctx.req.files[0].filename : '';
-      const profile = JSON.parse(ctx.req.body.profile);
-      resolve({
-        profile,
-        filename
-      });
-    } catch (err) {
-      reject(err);
-    }
-  }));
-  
+    const multerHandler = filesUploader.any();
+
+    const formHandler = (ctx) => multerHandler(ctx, () => new Promise((resolve, reject) => {
+      try {
+        resolve({ files: ctx.req.files });
+      } catch (err) {
+        reject(err);
+      }
+    }));
+
+    return super(formHandler, nextHandler);
+  }
+
 }
 
 

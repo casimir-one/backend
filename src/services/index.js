@@ -8,6 +8,8 @@ import AttributeService from './impl/write/AttributeService';
 import AttributeDtoService from './impl/read/AttributeDtoService';
 import AssetDtoService from './impl/read/AssetDtoService';
 import DomainDtoService from './impl/read/DomainDtoService';
+import UserDtoService from './impl/read/UserDtoService';
+import UserService from './impl/write/UserService';
 
 module.exports = {
   TeamService,
@@ -24,6 +26,9 @@ module.exports = {
   AttributeService,
   AttributeDtoService,
 
-  DomainDtoService
+  DomainDtoService,
+
+  UserService,
+  UserDtoService
 
 }
