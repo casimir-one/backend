@@ -123,6 +123,7 @@ const TenantSchema = new Schema({
       }]
     },
     "attributeOverwrites": [AttributeOverwrite],
+    "attributeSettings": { type: Object },
     "layouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },

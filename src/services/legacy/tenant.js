@@ -122,6 +122,19 @@ class TenantService {
     const savedTenantProfile = await tenantProfile.save();
     return savedTenantProfile.toObject();
   }
+
+  async updateTenantAttributeSettings(tenantId, attributeSettings) {
+    const tenantProfile = await TenantSchema.findOne({ _id: tenantId });
+    tenantProfile.settings.attributeSettings = attributeSettings;
+    const savedTenantProfile = await tenantProfile.save();
+    return savedTenantProfile.toObject();
+  }
+
+  async getTenantAttributeSettings(tenantId) {
+    const profile = await TenantSchema.findOne({ _id: tenantId });
+    if (!profile) return null;
+    return profile.settings.attributeSettings;
+  }
 }
 
 
