@@ -1,12 +1,12 @@
 import deipRpc from '@deip/rpc-client';
-import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import ExpressLicensingService from './../../legacy/expressLicensing';
 import ResearchNdaService from './../../legacy/researchNda';
 import AttributeDtoService from './AttributeDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
-
+import crypto from '@deip/lib-crypto';
+import { TextEncoder } from 'util';
 
 class ProjectDtoService extends BaseService {
 
@@ -23,6 +23,7 @@ class ProjectDtoService extends BaseService {
       searchTerm: "",
       researchAttributes: [],
       tenantIds: [],
+      isDefault: undefined,
       ...filterObj
     }
 
@@ -57,8 +58,9 @@ class ProjectDtoService extends BaseService {
           ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
           : false;
 
-        return { ...chainResearch, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
+        return { ...chainResearch, entityId: chainResearch.external_id, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, isDefault: chainResearch.is_default, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
       })
+      .filter(r => filter.isDefault === undefined || filter.isDefault === r.isDefault)
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
         
         const attribute = researchAttributes.find(attr => attr._id.toString() === rAttr.attributeId.toString());
@@ -120,14 +122,6 @@ class ProjectDtoService extends BaseService {
   }
 
 
-  async lookupResearches(filter) {
-    const researches = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
-    if (!researches.length) return [];
-    const result = await this.mapResearch(researches, filter);
-    return result;
-  }
-
-
   async getResearch(researchExternalId) {
     const research = await this.findOne({ _id: researchExternalId, status: RESEARCH_STATUS.APPROVED });
     if (!research) return null;
@@ -145,10 +139,18 @@ class ProjectDtoService extends BaseService {
   }
 
 
+  async lookupResearches(filter) {
+    const researches = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
+    if (!researches.length) return [];
+    const result = await this.mapResearch(researches, { ...filter, isDefault: false });
+    return result;
+  }
+
+
   async getResearchesByResearchGroup(researchGroupExternalId) {
     const researches = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: RESEARCH_STATUS.APPROVED });
     if (!researches.length) return [];
-    const result = await this.mapResearch(researches);
+    const result = await this.mapResearch(researches, { isDefault: false });
     return result;
   }
 
@@ -157,7 +159,7 @@ class ProjectDtoService extends BaseService {
     const available = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
     const researches = available.filter(r => r.tenantId == tenantId);
     if (!researches.length) return [];
-    const result = await this.mapResearch(researches);
+    const result = await this.mapResearch(researches, { isDefault: false });
     return result;
   }
 
@@ -166,7 +168,7 @@ class ProjectDtoService extends BaseService {
     const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
     const researches = await this.findMany({ _id: { $in: [...chainResearches.map(r => r.external_id)] }, status: RESEARCH_STATUS.APPROVED });
     if (!researches.length) return [];
-    const result = await this.mapResearch(researches);
+    const result = await this.mapResearch(researches, { isDefault: false });
     return result;
   }
 
@@ -181,11 +183,12 @@ class ProjectDtoService extends BaseService {
     return result;
   }
 
-
-  async getProjectView(projectId) {
+  async getTeamDefaultProject(teamId) {
+    const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(teamId).buffer));
     const project = await this.findOne({ _id: projectId });
-    if (!project) return null;
-    return project;
+    const results = await this.mapResearch([project], { isDefault: true });
+    const [result] = results;
+    return result;
   }
 
 }

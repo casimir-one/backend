@@ -28,7 +28,8 @@ module.exports = {
   ],
 
   [APP_EVENT.TEAM_CREATED]: [
-    { h: teamEventHandler, await: true }
+    { h: teamEventHandler, await: true },
+    { h: projectEventHandler, await: false }
   ],
 
   [APP_EVENT.TEAM_UPDATED]: [

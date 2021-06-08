@@ -6,10 +6,11 @@ import { ProjectForm } from './../../forms';
 import { AppError, BadRequestError, NotFoundError, ConflictError } from './../../errors';
 import { projectCmdHandler } from './../../command-handlers';
 import { ProjectDtoService } from './../../services';
+import { ProjectService } from './../../services';
 
 
 const projectDtoService = new ProjectDtoService();
-
+const projectService = new ProjectService();
 
 class ProjectsController extends BaseController {
 
@@ -30,6 +31,22 @@ class ProjectsController extends BaseController {
     }
   });
 
+
+  getTeamDefaultProject = this.query({
+    h: async (ctx) => {
+      try {
+
+        const teamId = ctx.params.teamId;
+        const result = await projectDtoService.getTeamDefaultProject(teamId);
+        ctx.status = 200;
+        ctx.body = result;
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 
   getProjects = this.query({
     h: async (ctx) => {
@@ -125,11 +142,11 @@ class ProjectsController extends BaseController {
             throw new BadRequestError(`This endpoint accepts app cmd`);
           }
           const { entityId: projectId } = appCmd.getCmdPayload();
-          const projectView = await projectDtoService.getProjectView(projectId);
-          if (!projectView) {
+          const project = await projectService.getProject(projectId);
+          if (!project) {
             throw new NotFoundError(`Project ${projectId} is not found`);
           }
-          if (projectView.status === RESEARCH_STATUS.DELETED) {
+          if (project.status === RESEARCH_STATUS.DELETED) {
             throw new ConflictError(`Project ${projectId} is already deleted`);
           }
         };

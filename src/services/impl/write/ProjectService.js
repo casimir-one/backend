@@ -12,6 +12,10 @@ class ProjectService extends BaseService {
     super(ProjectSchema, options);
   }
 
+  async getProject(projectId) {
+    const project = await this.findOne({ _id: projectId });
+    return project || null;
+  }
 
   async createProject({
     projectId,
@@ -23,7 +27,14 @@ class ProjectService extends BaseService {
     const attributeDtoService = new AttributeDtoService();
     const systemAttributes = await attributeDtoService.getSystemAttributes();
     const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.PROJECT && attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
-    if (teamAttr.isHidden) {
+    
+    // Team attribute is required
+    if (!attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
+      attributes.push({
+        attributeId: teamAttr._id.toString(),
+        value: [teamId]
+      })
+    } else if (teamAttr.isHidden) {
       const rAttr = attributes.find(rAttr => rAttr.attributeId === teamAttr._id.toString());
       if (rAttr.value === null) {
         rAttr.value = [teamId];
