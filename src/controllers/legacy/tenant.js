@@ -551,6 +551,42 @@ const getTenantAttributeSettings = async (ctx) => {
   }
 }
 
+const updateTenantLayouts = async (ctx) => {
+  const jwtUsername = ctx.state.user.username;
+  const update = ctx.request.body;
+  const tenantId = ctx.state.tenant.id;
+
+  try {
+
+    const tenantService = new TenantService();
+    const updatedTenantProfile = await tenantService.updateTenantLayouts(
+      tenantId,
+      update
+    );
+
+    ctx.status = 200;
+    ctx.body = { tenantId };
+
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
+
+const getTenantLayouts = async (ctx) => {
+  const tenantId = ctx.params.tenant;
+  try {
+    const tenantService = new TenantService();
+    const result = await tenantService.getTenantLayouts(tenantId);
+    ctx.status = 200;
+    ctx.body = result;
+  } catch (err) {
+    console.log(err);
+    ctx.status = 500;
+    ctx.body = err;
+  }
+}
 
 export default {
   getNetworkTenant,
@@ -569,5 +605,7 @@ export default {
   signTxByTenant,
   affirmTxByTenant,
   updateTenantAttributeSettings,
-  getTenantAttributeSettings
+  getTenantAttributeSettings,
+  updateTenantLayouts,
+  getTenantLayouts
 }

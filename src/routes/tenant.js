@@ -17,6 +17,7 @@ public_route.get('/banner/:tenant', tenantRoute, tenant.getTenantBanner);
 public_route.get('/logo/:tenant', tenantRoute, tenant.getTenantLogo);
 public_route.post('/sign-in', tenantRoute, auth.signIn);
 public_route.get('/settings/attribute-settings/:tenant', tenant.getTenantAttributeSettings);
+public_route.get('/settings/layouts/:tenant', tenant.getTenantLayouts);
 
 
 async function tenantAdminGuard(ctx, next) {
@@ -28,6 +29,7 @@ protected_route.put('/profile', compose([tenantRoute, tenantAdminGuard]), tenant
 protected_route.put('/settings', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantSettings);
 protected_route.put('/network-settings', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantNetworkSettings);
 protected_route.put('/settings/attribute-settings', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantAttributeSettings);
+protected_route.put('/settings/layouts', compose([tenantRoute, tenantAdminGuard]), tenant.updateTenantLayouts);
 
 protected_route.get('/registry/sign-ups', compose([tenantRoute, tenantAdminGuard]), tenant.getSignUpRequests);
 // protected_route.put('/registry/sign-ups/approve', compose([tenantRoute, tenantAdminGuard]), tenant.approveSignUpRequest);
