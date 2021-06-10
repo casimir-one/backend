@@ -135,6 +135,19 @@ class TenantService {
     if (!profile) return null;
     return profile.settings.attributeSettings;
   }
+
+  async updateTenantLayouts(tenantId, layouts) {
+    const tenantProfile = await TenantSchema.findOne({ _id: tenantId });
+    tenantProfile.settings.layouts = layouts;
+    const savedTenantProfile = await tenantProfile.save();
+    return savedTenantProfile.toObject();
+  }
+
+  async getTenantLayouts(tenantId) {
+    const profile = await TenantSchema.findOne({ _id: tenantId });
+    if (!profile) return null;
+    return profile.settings.layouts;
+  }
 }
 
 
