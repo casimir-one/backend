@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox';
+import { createEnum } from '@deip/toolbox/lib/enum';
 
 const PROPOSAL_STATUS = createEnum({
   PENDING: 1,

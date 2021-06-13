@@ -31,9 +31,12 @@ class ProjectDtoService extends BaseService {
     const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => researchNdaService.getResearchNdaListByResearch(r.external_id)));
     const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
+    const refs = await deipRpc.api.getTeamMemberReferencesAsync(chainResearches.map(p => p.research_group.external_id), false);
+    const allMembers = refs.map((g) => g.map(m => m.account));
     
     return chainResearches
-      .map((chainResearch) => {
+      .map((chainResearch, i) => {
+        const members = allMembers[i];
         const researchRef = researches.find(r => r._id.toString() == chainResearch.external_id);
         const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id);
         // TEMP
@@ -61,8 +64,7 @@ class ProjectDtoService extends BaseService {
         if (chainResearch.is_default === undefined) {
           chainResearch.is_default = false;
         }
-
-        return { ...chainResearch, entityId: chainResearch.external_id, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, isDefault: chainResearch.is_default, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
+        return { ...chainResearch, members, entityId: chainResearch.external_id, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, isDefault: chainResearch.is_default, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
       })
       .filter(r => filter.isDefault === undefined || filter.isDefault === r.isDefault)
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
@@ -143,7 +145,7 @@ class ProjectDtoService extends BaseService {
   }
 
 
-  async lookupResearches(filter) {
+  async lookupProjects(filter) {
     const researches = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
     if (!researches.length) return [];
     const result = await this.mapResearch(researches, { ...filter, isDefault: false });
@@ -151,7 +153,7 @@ class ProjectDtoService extends BaseService {
   }
 
 
-  async getResearchesByResearchGroup(researchGroupExternalId) {
+  async getProjectsByTeam(researchGroupExternalId) {
     const researches = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: RESEARCH_STATUS.APPROVED });
     if (!researches.length) return [];
     const result = await this.mapResearch(researches, { isDefault: false });
@@ -159,7 +161,7 @@ class ProjectDtoService extends BaseService {
   }
 
 
-  async getResearchesByTenant(tenantId) {
+  async getProjectsByTenant(tenantId) {
     const available = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
     const researches = available.filter(r => r.tenantId == tenantId);
     if (!researches.length) return [];
@@ -168,13 +170,20 @@ class ProjectDtoService extends BaseService {
   }
 
 
-  async getResearchesForMember(member) {
-    const chainResearches = await deipRpc.api.getResearchesByResearchGroupMemberAsync(member);
-    const researches = await this.findMany({ _id: { $in: [...chainResearches.map(r => r.external_id)] }, status: RESEARCH_STATUS.APPROVED });
-    if (!researches.length) return [];
-    const result = await this.mapResearch(researches, { isDefault: false });
+  async getProjectsForMember(member) {
+    const teamsRefs = await deipRpc.api.getTeamReferencesAsync([member], false);
+    const [teamsIds] = teamsRefs.map((g) => g.map(m => m.team));
+    const chainResearches = await Promise.all(teamsIds.map(teamId => deipRpc.api.getResearchesByResearchGroupAsync(teamId)));
+    const chainProjects = chainResearches.reduce((acc, projectsList) => {
+      const projects = projectsList.filter(p => !acc.some(project => project.external_id == p.external_id));
+      return [...acc, ...projects];
+    }, []);
+    const projects = await this.findMany({ _id: { $in: [...chainProjects.map(p => p.external_id)] }, status: RESEARCH_STATUS.APPROVED });
+    if (!projects.length) return [];
+    const result = await this.mapResearch(projects, { isDefault: false });
     return result;
   }
+
 
   async getProject(projectId) {
     const result = this.getResearch(projectId);

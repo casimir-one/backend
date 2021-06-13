@@ -102,14 +102,15 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, asy
 
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
 
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let promise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
@@ -133,14 +134,15 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ ev
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
 
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
 
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let promise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
@@ -259,12 +261,13 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({
   const emitterUser = await userDtoService.getUser(eventEmitter);
   const excludedUser = await userDtoService.getUser(member);
   const notificationsPromises = [];
-  const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
 
-  for (let i = 0; i < rgtList.length; i++) {
-    let rgt = rgtList[i];
+  for (let i = 0; i < members.length; i++) {
+    let member = members[i];
     let memberNotificationPromise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member.owner,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
@@ -288,12 +291,13 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, a
   const { extendedDetails: { researchGroup, member: excludedUser }, proposer: emitterUser } = proposal;
 
   const notificationsPromises = [];
-  const rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
 
-  for (let i = 0; i < rgtList.length; i++) {
-    let rgt = rgtList[i];
+  for (let i = 0; i < members.length; i++) {
+    let member = members[i];
     let memberNotificationPromise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member.owner,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
@@ -330,13 +334,14 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
 
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let memberNotificationPromise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
@@ -363,13 +368,14 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async 
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
   const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(researchTokenSaleExternalId);
-  const members = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
   for (let i = 0; i < members.length; i++) {
-    let rgt = members[i];
+    let member = members[i];
     let memberNotificationPromise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member,
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
@@ -401,13 +407,15 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREA
   let review = await reviewService.getReview(reviewExternalId);
 
   let researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
-  let rgtList = await deipRpc.api.getResearchGroupTokensByResearchGroupAsync(researchGroup.id);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
+
   let notificationsPromises = [];
 
-  for (let i = 0; i < rgtList.length; i++) {
-    const rgt = rgtList[i];
+  for (let i = 0; i < members.length; i++) {
+    const member = members[i];
     let promise = userNotificationService.createUserNotification({
-      username: rgt.owner,
+      username: member,
       status: 'unread',
       type,
       metadata: {

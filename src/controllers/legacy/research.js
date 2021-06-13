@@ -534,7 +534,7 @@ const getPublicResearchListing = async (ctx) => {
 
   try {
     const projectDtoService = new ProjectDtoService();
-    const result = await projectDtoService.lookupResearches(filter);
+    const result = await projectDtoService.lookupProjects(filter);
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate);
   } catch (err) {
@@ -551,7 +551,7 @@ const getUserResearchListing = async (ctx) => {
 
   const projectDtoService = new ProjectDtoService();
   try {
-    const result = await projectDtoService.getResearchesForMember(member)
+    const result = await projectDtoService.getProjectsForMember(member)
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
 
@@ -569,7 +569,7 @@ const getResearchGroupResearchListing = async (ctx) => {
 
   try {
     const projectDtoService = new ProjectDtoService();
-    const result = await projectDtoService.getResearchesByResearchGroup(researchGroupExternalId);
+    const result = await projectDtoService.getProjectsByTeam(researchGroupExternalId);
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
 
@@ -635,7 +635,7 @@ const getTenantResearchListing = async (ctx) => {
 
   try {
     const projectDtoService = new ProjectDtoService();
-    const result = await projectDtoService.getResearchesByTenant(tenantId);
+    const result = await projectDtoService.getProjectsByTenant(tenantId);
     ctx.status = 200;
     ctx.body = result.filter(r => !r.isPrivate);
 

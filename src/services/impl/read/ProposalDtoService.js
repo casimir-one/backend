@@ -529,11 +529,11 @@ class ProposalDtoService extends BaseService {
     })
   }
 
-
-
+  
   async getAccountProposals(username) {
-    const chainResearchGroups = await deipRpc.api.getResearchGroupsByMemberAsync(username);
-    const signers = [username, ...chainResearchGroups.map(rg => rg.external_id)];
+    const teamsRefs = await deipRpc.api.getTeamReferencesAsync([username], false);
+    const [teamsIds] = teamsRefs.map((g) => g.map(m => m.team));
+    const signers = [username, ...teamsIds];
     const allProposals = await deipRpc.api.getProposalsBySignersAsync(signers);
     const externalIds = allProposals.reduce((unique, chainProposal) => {
       if (unique.some((id) => id == chainProposal.external_id))

@@ -9,12 +9,13 @@ class TeamDtoService extends BaseService {
   }
 
   async mapTeams(researchGroups) {
-    const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroups.map(r => r._id));
-    const membershipTokens = await Promise.all(chainResearchGroups.map(rg => deipRpc.api.getResearchGroupMembershipTokensAsync(rg.external_id)));
+    const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroups.map(rg => rg._id));
+    const refs = await deipRpc.api.getTeamMemberReferencesAsync(researchGroups.map(rg => rg._id), false);
+    const allMembers = refs.map((g) => g.map(m => m.account));
+
     return chainResearchGroups
-      .map((chainResearchGroup) => {
-        const researchGroupMembershipTokens = membershipTokens.find(members => members[0] && members[0].research_group.external_id == chainResearchGroup.external_id);
-        const members = researchGroupMembershipTokens ? researchGroupMembershipTokens.map(rgt => rgt.owner) : [];
+      .map((chainResearchGroup, i) => {
+        const members = allMembers[i];
         const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.external_id);
         return { ...chainResearchGroup, tenantId: researchGroupRef ? researchGroupRef.tenantId : null, researchGroupRef: researchGroupRef ? { ...researchGroupRef, members } : null };
       })
@@ -52,19 +53,19 @@ class TeamDtoService extends BaseService {
   }
 
   async authorizeTeamAccount(account, member) {
-    // TODO: check account authorities
-    const rgts = await deipRpc.api.getResearchGroupTokensByAccountAsync(member);
-    const rgt = rgts.find(rgt => rgt.research_group.external_id == account);
-    if (!rgt) return null;
-    const team = await this.getTeam(rgt.research_group.external_id);
-    return team;
+    const refs = await deipRpc.api.getTeamMemberReferencesAsync([account], false);
+    const [names] = refs.map((g) => g.map(m => m.account));
+    return names.includes(member);
   }
 
 
   async getTeamsByUser(member) {
-    const rgts = await deipRpc.api.getResearchGroupTokensByAccountAsync(member);
-    const teams = await this.getTeams(rgts.map(rgt => rgt.research_group.external_id));
-    return teams;
+    const teamsRefs = await deipRpc.api.getTeamReferencesAsync([member], false);
+    const [ids] = teamsRefs.map((g) => g.map(m => m.team));
+    const teams = await this.findMany({ _id: { $in: ids } });
+    if (!teams.length) return [];
+    const result = await this.mapTeams(teams);
+    return result;
   }
 
   async getTeamsByTenant(tenantId) {

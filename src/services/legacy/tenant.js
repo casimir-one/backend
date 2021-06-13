@@ -9,22 +9,13 @@ class TenantService {
   constructor() { };
 
   async getTenant(id) {
-    const userService = new UserService();
-    const userDtoService = new UserDtoService();
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
     const profile = doc.toObject();
     const account = await deipRpc.api.getResearchGroupAsync(id);
-    const tenantUsers = await userDtoService.getUsersByTenant(id);
-    const usersWithAdminRole = tenantUsers.filter(user => userService.hasRole(user, 'admin'));
+    const refs = await deipRpc.api.getTeamMemberReferencesAsync([config.TENANT], false);
+    const [admins] = refs.map((g) => g.map(m => m.account));
 
-    const chainMembershipTokens = await Promise.all(usersWithAdminRole.map(u => deipRpc.api.getResearchGroupTokensByAccountAsync(u.username)));
-
-    const admins = usersWithAdminRole.filter(user => {
-      const membershipTokens = chainMembershipTokens.find((teams) => teams.length && teams[0].owner == user.username) || [];
-      const teams = membershipTokens.map((mt) => mt.research_group.external_id);
-      return teams.includes(config.TENANT);
-    }).map(user => user.username);
     return { id: id, account: account.account, profile: profile, admins };
   }
 
