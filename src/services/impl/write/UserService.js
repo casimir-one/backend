@@ -64,7 +64,7 @@ class UserService extends BaseService {
 
   hasRole(user, role, tenantId = config.TENANT) {
     return user.profile.roles
-      .some((userRole) => tenantId == userRole.researchGroupExternalId && role == userRole.role);
+      .some((userRole) => tenantId == userRole.teamId && role == userRole.role);
   }
 }
 
