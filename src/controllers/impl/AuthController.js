@@ -21,8 +21,13 @@ class AuthController extends BaseController {
           if (Array.isArray(roles) && roles.find(({ role }) => role === 'admin')) {
             throw new BadRequestError(`Can't create admin account`);
           }
-          if (!entityId || !memoKey || !email || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(entityId)) {
-            throw new BadRequestError(`'username', 'pubKey', 'email', fields are required. Username allowable symbols are: [a-z0-9] `);
+          if (!entityId || !memoKey || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(entityId)) {
+            throw new BadRequestError(`'username', 'pubKey', fields are required. Username allowable symbols are: [a-z0-9] `);
+          }
+          
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          if (!pattern.test(email)) {
+            throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
           }
 
           const existingProfile = await userService.getUser(entityId);
