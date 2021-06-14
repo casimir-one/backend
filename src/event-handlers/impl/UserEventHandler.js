@@ -1,5 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
+import { USER_ROLES } from './../../constants';
 import {
   UserService
 } from './../../services';
@@ -56,6 +57,23 @@ userEventHandler.register(APP_EVENT.USER_UPDATED, async (event) => {
     email,
     attributes
   });
+});
+
+userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
+
+  const { creator, accountId } = event.getEventPayload();
+
+  const userInfo = await userService.getUser(creator);
+
+  if (userInfo) { 
+    const updatedUserProfile = await userService.updateUser(creator, {
+      status: userInfo.status,
+      email: userInfo.email,
+      attributes: userInfo.attributes,
+      roles: [...userInfo.roles, { role: USER_ROLES.TEAMADMIN,  researchGroupExternalId: accountId }]
+    });
+  }
+
 });
 
 module.exports = userEventHandler;
