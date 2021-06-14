@@ -4,6 +4,7 @@ import { BadRequestError, ConflictError } from './../../errors';
 import { accountCmdHandler } from './../../command-handlers';
 import { UserService } from './../../services';
 import config from './../../config';
+import { USER_ROLES } from './../../constants';
 
 const userService = new UserService();
 
@@ -18,7 +19,7 @@ class AuthController extends BaseController {
           }
 
           const { entityId, email, memoKey, roles } = appCmd.getCmdPayload();
-          if (Array.isArray(roles) && roles.find(({ role }) => role === 'admin')) {
+          if (Array.isArray(roles) && roles.find(({ role }) => role === USER_ROLES.ADMIN)) {
             throw new BadRequestError(`Can't create admin account`);
           }
           if (!entityId || !memoKey || !/^[a-z][a-z0-9\-]+[a-z0-9]$/.test(entityId)) {

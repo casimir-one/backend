@@ -19,6 +19,7 @@ import { RESEARCH_CONTENT_TYPES, CONTENT_TYPES_MAP } from './researchContentType
 import ASSESSMENT_CRITERIA_TYPE from './assessmentCriteriaType';
 import ATTR_SCOPES from './attributeScopes';
 import QUEUE_TOPIC from './queueTopic';
+import USER_ROLES from './userRoles';
 
 export {
   CHAIN_CONSTANTS,
@@ -41,5 +42,6 @@ export {
   CONTENT_TYPES_MAP,
   ASSESSMENT_CRITERIA_TYPE,
   ATTR_SCOPES,
-  QUEUE_TOPIC
+  QUEUE_TOPIC,
+  USER_ROLES
 }

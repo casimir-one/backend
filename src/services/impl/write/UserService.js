@@ -36,13 +36,18 @@ class UserService extends BaseService {
     status,
     email,
     attributes,
+    roles
   }) {
-
-    const result = await this.updateOne({ _id: username }, {
+    const updateInfo = {
       status,
       email,
       attributes
-    });
+    };
+    if (roles) {
+      updateInfo.roles = roles;
+    }
+
+    const result = await this.updateOne({ _id: username }, updateInfo);
 
     return result;
   }
