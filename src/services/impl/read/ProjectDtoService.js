@@ -58,6 +58,10 @@ class ProjectDtoService extends BaseService {
           ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
           : false;
 
+        if (chainResearch.is_default === undefined) {
+          chainResearch.is_default = false;
+        }
+
         return { ...chainResearch, entityId: chainResearch.external_id, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, isDefault: chainResearch.is_default, researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
       })
       .filter(r => filter.isDefault === undefined || filter.isDefault === r.isDefault)
