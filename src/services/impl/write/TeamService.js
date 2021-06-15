@@ -1,7 +1,7 @@
-import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
-
+import AttributeDtoService from './../read/AttributeDtoService';
+import { ATTRIBUTE_TYPE, ATTR_SCOPES } from './../../../constants';
 
 class TeamService extends BaseService {
 
@@ -14,6 +14,18 @@ class TeamService extends BaseService {
     creator,
     attributes
   }) {
+
+    const attributeDtoService = new AttributeDtoService();
+    const systemAttributes = await attributeDtoService.getSystemAttributes();
+    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.TEAM && attr.type == ATTRIBUTE_TYPE.TEXT);
+
+    // Team attribute is required
+    if (!attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
+      attributes.push({
+        attributeId: teamAttr._id.toString(),
+        value: `Team ${externalId}`
+      })
+    }
 
     const result = await this.createOne({
       _id: externalId,

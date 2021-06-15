@@ -46,7 +46,6 @@ projectEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) => {
   await projectService.updateProject(projectId, {
     attributes: attributes
   });
-
 });
 
 
@@ -61,6 +60,11 @@ projectEventHandler.register(APP_EVENT.PROJECT_DELETED, async (event) => {
 
 
 projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event) => {
+  // TODO: handle project read schema
+});
+
+
+projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_LEFT, async (event) => {
   // TODO: handle project read schema
 });
 
@@ -86,6 +90,7 @@ projectEventHandler.register(APP_EVENT.ATTRIBUTE_DELETED, async (event) => {
 
 
 projectEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
+  // Team default project
   const { accountId } = event.getEventPayload();
   const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(accountId).buffer));
 

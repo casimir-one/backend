@@ -77,8 +77,9 @@ class UserDtoService extends BaseService {
 
 
   async getUsersByTeam(teamId) {
-    const membershipTokens = await deipRpc.api.getResearchGroupMembershipTokensAsync(teamId);
-    const profiles = await this.findMany({ _id: { $in: [...membershipTokens.map(rgt => rgt.owner)] }, status: USER_PROFILE_STATUS.APPROVED });
+    const refs = await deipRpc.api.getTeamMemberReferencesAsync([teamId], false);
+    const [members] = refs.map((g) => g.map(m => m.account));
+    const profiles = await this.findMany({ _id: { $in: [...members] }, status: USER_PROFILE_STATUS.APPROVED });
     if (!profiles.length) return [];
     const result = await this.mapUsers(profiles);
     return result;

@@ -204,7 +204,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (e
   const team = await teamDtoService.getTeam(teamId);
   const currentUser = await userDtoService.getUser(inviter);
   const inviteeUser = await userDtoService.getUser(invitee);
-  const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
+  const notifiableUsers = await userDtoService.getUsersByTeam(teamId);
 
   const notifications = [];
   for (let i = 0; i < notifiableUsers.length; i++) {
@@ -244,7 +244,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (
   } = event.getEventPayload();
 
   const team = await teamDtoService.getTeam(teamId);
-  const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
+  const notifiableUsers = await userDtoService.getUsersByTeam(teamId);
   const inviteeUser = await userDtoService.getUser(invitee);
 
   const notifications = [];
@@ -275,7 +275,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (
   } = event.getEventPayload();
 
   const team = await teamDtoService.getTeam(teamId);
-  const notifiableUsers = await userDtoService.getUsersByResearchGroup(teamId);
+  const notifiableUsers = await userDtoService.getUsersByTeam(teamId);
   const inviteeUser = await userDtoService.getUser(invitee);
 
   const notifications = [];

@@ -62,8 +62,8 @@ const createJoinRequest = async (ctx) => {
       return;
     }
 
-    const researchGroup = await teamDtoService.authorizeTeamAccount(researchGroupExternalId, username);
-    if (researchGroup) {
+    const isAuthorized = await teamDtoService.authorizeTeamAccount(researchGroupExternalId, username);
+    if (isAuthorized) {
       ctx.status = 400;
       ctx.body = `"${username}" is member of "${researchGroupExternalId}" group already`;
       return;

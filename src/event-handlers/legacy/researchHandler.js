@@ -28,7 +28,7 @@ researchHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
 
   const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
 
-  const researches = await projectDtoService.getResearchesByResearchGroup(researchGroupExternalId);
+  const researches = await projectDtoService.getProjectsByTeam(researchGroupExternalId);
 
   const promises = [];
   for (let i = 0; i < researches.length; i++) {

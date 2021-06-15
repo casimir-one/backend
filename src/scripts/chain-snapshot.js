@@ -108,16 +108,13 @@ const run = async ({
 
   const chainAccounts = await deipRpc.api.lookupAccountsAsync('0', CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-  const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
-
   const chainResearchGroups = await deipRpc.api.lookupResearchGroupsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainResearches = await deipRpc.api.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => deipRpc.api.getResearchContentsByResearchAsync(r.external_id)));
   const chainResearchContents = [].concat.apply([], chainResearchContentsByResearch);
-  const chainResearchGroupMembershipTokensByResearchGroup = await Promise.all(chainResearchGroups.map(rg => deipRpc.api.getResearchGroupMembershipTokensAsync(rg.external_id)));
-  const chainResearchGroupMembershipTokensMap = chainResearchGroupMembershipTokensByResearchGroup.reduce((acc, rgts) => {
-    const [first, ...rest] = rgts;
-    acc[first.research_group.external_id] = rgts.map(rgt => rgt.owner).filter(owner => !blackListUsers.some(name => name == owner));
+  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(rg => deipRpc.api.getAccountMembersAsync(rg.external_id)));
+  const chainResearchGroupMembershipTokensMap = chainResearchGroupMembers.reduce((acc, accounts, i) => {
+    acc[chainResearchGroups[i].external_id] = accounts[i].filter(a => !blackListUsers.some(name => name == a));
     return acc;
   }, {});
 

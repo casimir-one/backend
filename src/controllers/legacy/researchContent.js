@@ -259,8 +259,8 @@ const updateResearchContentDarArchive = async (ctx) => {
       return;
     }
 
-    const authorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, jwtUsername)
-    if (!authorized) {
+    const isAuthorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, jwtUsername)
+    if (!isAuthorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.researchId}" research`;
       return;
@@ -324,6 +324,7 @@ const unlockResearchContentDraft = async (ctx) => {
 
   try {
     const researchContentService = new ResearchContentService();
+    const teamDtoService = new TeamDtoService();
 
     const rc = await researchContentService.getResearchContentRef(refId);
     if (!rc || (rc.status != RESEARCH_CONTENT_STATUS.PROPOSED && rc.status != RESEARCH_CONTENT_STATUS.PUBLISHED)) {
@@ -332,8 +333,8 @@ const unlockResearchContentDraft = async (ctx) => {
       return;
     }
 
-    const authorized = await authService.authorizeResearchGroupAccount(rc.researchGroupExternalId, jwtUsername)
-    if (!authorized) {
+    const isAuthorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, jwtUsername)
+    if (!isAuthorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${rc.researchId}" research`;
       return;
@@ -423,8 +424,8 @@ const deleteResearchContentDraft = async (ctx) => {
       return;
     }
 
-    const authorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, jwtUsername)
-    if (!authorized) {
+    const isAuthorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, jwtUsername)
+    if (!isAuthorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to edit "${researchId}" research`;
       return;
@@ -493,8 +494,8 @@ const updateDraftMetaAsync = async (researchContentId, archive) => {
   const accounts = [];
   for (let i = 0; i < authors.length; i++) {
     const username = authors[i];
-    const hasRgt = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, username)
-    if (hasRgt) {
+    const isAuthorized = await teamDtoService.authorizeTeamAccount(rc.researchGroupExternalId, username)
+    if (isAuthorized) {
       accounts.push(username)
     }
   }
@@ -617,8 +618,8 @@ const getResearchContentPackageFile = async function (ctx) {
   const research = await researchService.getResearch(researchContentRef.researchExternalId);
   if (research.isPrivate) {
     const jwtUsername = ctx.state.user.username;
-    const authorizedGroup = await teamDtoService.authorizeTeamAccount(research.research_group.external_id, jwtUsername)
-    if (!authorizedGroup) {
+    const isAuthorized = await teamDtoService.authorizeTeamAccount(research.research_group.external_id, jwtUsername)
+    if (!isAuthorized) {
       ctx.status = 401;
       ctx.body = `"${jwtUsername}" is not permitted to get "${research.external_id}" research content`;
       return;

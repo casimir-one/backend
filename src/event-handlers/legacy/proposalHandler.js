@@ -36,6 +36,7 @@ async function createProposal(event, chainContractType) {
   }, []);
   
   const proposalRef = await proposalService.createProposal({
+    status: chainProposal.status,
     proposalId: proposalId,
     type: chainContractType,
     details: {

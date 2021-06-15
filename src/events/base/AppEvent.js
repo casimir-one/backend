@@ -1,5 +1,4 @@
-import { createEnum } from '@deip/toolbox';
-
+import { createEnum } from '@deip/toolbox/lib/enum';
 
 const APP_EVENT = createEnum({
   PROJECT_CREATED: 1,
@@ -36,6 +35,8 @@ const APP_EVENT = createEnum({
 
   USER_CREATED: 25,
   USER_UPDATED: 26,
+  
+  PROJECT_MEMBER_LEFT: 27
 });
 
 

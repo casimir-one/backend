@@ -64,9 +64,22 @@ projectCmdHandler.register(APP_CMD.DELETE_PROJECT, (cmd, ctx) => {
 });
 
 
-projectCmdHandler.register(APP_CMD.JOIN_PROJECT, (cmd, ctx) => {
+projectCmdHandler.register(APP_CMD.JOIN_PROJECT_TEAM, (cmd, ctx) => {
   const { member, teamId, projectId } = cmd.getCmdPayload();
   
+  ctx.state.appEvents.push(new ProjectMemberJoinedEvent({
+    member: member,
+    teamId: teamId,
+    projectId: projectId,
+    proposalCtx: ctx.state.proposalsStackFrame
+  }));
+
+});
+
+
+projectCmdHandler.register(APP_CMD.LEAVE_PROJECT_TEAM, (cmd, ctx) => {
+  const { member, teamId, projectId } = cmd.getCmdPayload();
+
   ctx.state.appEvents.push(new ProjectMemberJoinedEvent({
     member: member,
     teamId: teamId,
