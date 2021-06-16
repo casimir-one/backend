@@ -103,4 +103,18 @@ projectEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
 });
 
 
+projectEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
+  // User default project
+  const { username } = event.getEventPayload();
+  const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(username).buffer));
+
+  await projectService.createProject({
+    projectId: projectId,
+    teamId: username,
+    attributes: [],
+    status: RESEARCH_STATUS.APPROVED
+  });
+});
+
+
 module.exports = projectEventHandler;
