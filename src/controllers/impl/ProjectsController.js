@@ -32,12 +32,12 @@ class ProjectsController extends BaseController {
   });
 
 
-  getTeamDefaultProject = this.query({
+  getDefaultProject = this.query({
     h: async (ctx) => {
       try {
 
-        const teamId = ctx.params.teamId;
-        const result = await projectDtoService.getTeamDefaultProject(teamId);
+        const accountId = ctx.params.accountId;
+        const result = await projectDtoService.getDefaultProject(accountId);
         ctx.status = 200;
         ctx.body = result;
 

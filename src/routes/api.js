@@ -208,7 +208,7 @@ public_route.get('/nda/research/:researchExternalId', researchNda.getResearchNon
 
 /* V2 */
 public_route.get('/v2/project/:projectId', projectsCtrl.getProject)
-public_route.get('/v2/project/default/:teamId', projectsCtrl.getTeamDefaultProject)
+public_route.get('/v2/project/default/:accountId', projectsCtrl.getDefaultProject)
 public_route.get('/v2/projects', projectsCtrl.getProjects)
 protected_route.post('/v2/project', compose([projectCmdProxy()]), projectsCtrl.createProject)
 protected_route.put('/v2/project', compose([projectCmdProxy()]), projectsCtrl.updateProject)

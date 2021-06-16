@@ -196,8 +196,8 @@ class ProjectDtoService extends BaseService {
     return result;
   }
 
-  async getTeamDefaultProject(teamId) {
-    const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(teamId).buffer));
+  async getDefaultProject(accountId) {
+    const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(accountId).buffer));
     const project = await this.findOne({ _id: projectId });
     const results = await this.mapResearch([project], { isDefault: true });
     const [result] = results;
