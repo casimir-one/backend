@@ -12,29 +12,29 @@ class TenantService {
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
     const profile = doc.toObject();
-    const account = await deipRpc.api.getResearchGroupAsync(id);
+    const [account] = await deipRpc.api.getAccountsAsync([id]);
     const refs = await deipRpc.api.getTeamMemberReferencesAsync([config.TENANT], false);
     const [admins] = refs.map((g) => g.map(m => m.account));
 
-    return { id: id, account: account.account, profile: profile, admins };
+    return { id: id, account: account, profile: profile, admins };
   }
 
   async getNetworkTenant(id) {
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
     const profile = doc.toObject();
-    const account = await deipRpc.api.getResearchGroupAsync(id);
-    return { id: profile._id, account: account.account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
+    const [account] = await deipRpc.api.getAccountsAsync([id]);
+    return { id: profile._id, account: account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
   }
 
   async getNetworkTenants() {
     const docs = await TenantSchema.find({});
     const profiles = docs.map(doc => doc.toObject());
-    const accounts = await deipRpc.api.getResearchGroupsAsync(profiles.map(p => p._id));
+    const accounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));
 
     const result = profiles.map((profile) => {
-      const account = accounts.find(a => a.account.name == profile._id);
-      return { id: profile._id, account: account.account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
+      const account = accounts.find(a => a.name == profile._id);
+      return { id: profile._id, account: account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
     });
     return result;
   }

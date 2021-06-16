@@ -9,15 +9,24 @@ class TeamDtoService extends BaseService {
   }
 
   async mapTeams(researchGroups) {
-    const chainResearchGroups = await deipRpc.api.getResearchGroupsAsync(researchGroups.map(rg => rg._id));
+    const chainResearchGroups = await deipRpc.api.getAccountsAsync(researchGroups.map(rg => rg._id));
     const refs = await deipRpc.api.getTeamMemberReferencesAsync(researchGroups.map(rg => rg._id), false);
     const allMembers = refs.map((g) => g.map(m => m.account));
 
     return chainResearchGroups
       .map((chainResearchGroup, i) => {
         const members = allMembers[i];
-        const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.external_id);
-        return { ...chainResearchGroup, tenantId: researchGroupRef ? researchGroupRef.tenantId : null, researchGroupRef: researchGroupRef ? { ...researchGroupRef, members } : null };
+        const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.name);
+        return { 
+          external_id: chainResearchGroup.name, 
+          creator: chainResearchGroup.name,
+          is_dao: chainResearchGroup.is_research_group,
+          is_personal: !chainResearchGroup.is_research_group,
+          description: chainResearchGroup.json_metadata,
+          account: chainResearchGroup, 
+          tenantId: researchGroupRef.tenantId, 
+          researchGroupRef: { ...researchGroupRef, members }
+        }
       })
       .map((researchGroup) => {
         const override = researchGroup.researchGroupRef ? { name: researchGroup.researchGroupRef.name, description: researchGroup.researchGroupRef.description } : { name: "Not specified", description: "Not specified" };
