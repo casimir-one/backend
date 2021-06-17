@@ -21,6 +21,8 @@ class UserDtoService extends BaseService {
           username: chainAccount.name,
           tenantId: profile.tenantId,
           account: chainAccount,
+          entityId: chainAccount.name,
+          attributes: profile.attributes,
           profile: { 
             ...profile,
             modules: roleInfo && roleInfo.modules ? roleInfo.modules : appModules,

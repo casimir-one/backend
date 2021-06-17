@@ -18,7 +18,9 @@ class TeamDtoService extends BaseService {
         const members = allMembers[i];
         const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.name);
         return { 
-          external_id: chainResearchGroup.name, 
+          external_id: chainResearchGroup.name,
+          entityId: chainResearchGroup.name,
+          attributes: researchGroupRef.attributes,
           creator: chainResearchGroup.name,
           is_dao: chainResearchGroup.is_research_group,
           is_personal: !chainResearchGroup.is_research_group,
