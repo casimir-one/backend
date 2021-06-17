@@ -20,7 +20,7 @@ class TeamService extends BaseService {
     const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.TEAM && attr.type == ATTRIBUTE_TYPE.TEXT);
 
     // Team attribute is required
-    if (!attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
+    if (teamAttr && !attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
       attributes.push({
         attributeId: teamAttr._id.toString(),
         value: `Team ${externalId}`
