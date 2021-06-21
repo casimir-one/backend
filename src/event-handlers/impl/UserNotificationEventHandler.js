@@ -3,9 +3,9 @@ import config from './../../config';
 import { USER_NOTIFICATION_TYPE, RESEARCH_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
 import TenantService from './../../services/legacy/tenant';
-import { TeamService, TeamDtoService, UserDtoService } from './../../services';
-import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
+import { TeamService, TeamDtoService, UserDtoService, ProjectDtoService } from './../../services';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
+import deipRpc from '@deip/rpc-client';
 
 
 class UserNotificationEventHandler extends BaseEventHandler {
@@ -296,6 +296,77 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (
 
 });
 
+userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED, async (event) => {
+  const { projectId, teamId, creator } = event.getEventPayload();
+  const qwe = event.getEventPayload();
+  console.log(qwe)
 
+  const project = await projectDtoService.getResearch(projectId);
+  const team = await teamDtoService.getTeam(teamId);
+  const emitterUser = await userDtoService.getUser(creator);
+
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([team.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
+
+  const notifications = [];
+  for (let i = 0; i < members.length; i++) {
+    let member = members[i];
+    notifications.push({
+      username: member,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
+      metadata: {
+        isProposalAutoAccepted: false, // legacy
+        proposal: { action: deipRpc.operations.getOperationTag("create_research_token_sale"), data: { research_id: project.id } }, // legacy
+        researchGroup: team,
+        research: project,
+        tokenSale: null,
+        emitter: emitterUser
+      }
+    });
+  }
+  
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event) => {
+  const { entityId, projectId, teamId, creator } = event.getEventPayload();
+  const qwe = event.getEventPayload();
+  console.log(qwe)
+
+  const project = await projectDtoService.getResearch(projectId);
+  const team = await teamDtoService.getTeam(teamId);
+  const emitterUser = await userDtoService.getUser(creator);
+  const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(entityId);
+  const refs = await deipRpc.api.getTeamMemberReferencesAsync([team.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
+
+  const notifications = [];
+  for (let i = 0; i < members.length; i++) {
+    let member = members[i];
+    notifications.push({
+      username: member,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        proposal: { action: deipRpc.operations.getOperationTag("create_research_token_sale"), data: { research_id: project.id }, is_completed: true }, // legacy
+        researchGroup: team,
+        research: project,
+        tokenSale,
+        emitter: emitterUser
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED, async (event) => {
+  // add notify
+});
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCEPTED, async (event) => {
+  // add notify
+});
 
 module.exports = userNotificationEventHandler;

@@ -3,7 +3,8 @@ import {
   projectCmdHandler, 
   proposalCmdHandler,
   accountCmdHandler,
-  attributeCmdHandler
+  attributeCmdHandler,
+  tokenSaleCmdHandler
 } from './index';
 
 
@@ -20,5 +21,7 @@ module.exports = {
   [APP_CMD.DECLINE_PROPOSAL]: proposalCmdHandler,
   [APP_CMD.CREATE_ATTRIBUTE]: attributeCmdHandler,
   [APP_CMD.UPDATE_ATTRIBUTE]: attributeCmdHandler,
-  [APP_CMD.DELETE_ATTRIBUTE]: attributeCmdHandler
+  [APP_CMD.DELETE_ATTRIBUTE]: attributeCmdHandler,
+  [APP_CMD.CREATE_PROJECT_TOKEN_SALE]: tokenSaleCmdHandler,
+  [APP_CMD.CONTRIBUTE_PROJECT_TOKEN_SALE]: tokenSaleCmdHandler,
 };

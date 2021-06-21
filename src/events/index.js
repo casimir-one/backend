@@ -32,6 +32,14 @@ import AttributeDeletedEvent from './impl/AttributeDeletedEvent';
 import UserUpdatedEvent from './impl/UserUpdatedEvent';
 import UserCreatedEvent from './impl/UserCreatedEvent';
 
+import ProjectTokenSaleProposalCreatedEvent from './impl/ProjectTokenSaleProposalCreatedEvent';
+import ProjectTokenSaleProposalAcceptedEvent from './impl/ProjectTokenSaleProposalAcceptedEvent';
+import ProjectTokenSaleProposalDeclinedEvent from './impl/ProjectTokenSaleProposalDeclinedEvent';
+
+import ProjectTokenSaleCreatedEvent from './impl/ProjectTokenSaleCreatedEvent';
+
+import ProjectTokenSaleContridutedEvent from './impl/ProjectTokenSaleContridutedEvent';
+
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
@@ -66,5 +74,13 @@ module.exports = {
   AttributeDeletedEvent,
 
   UserUpdatedEvent,
-  UserCreatedEvent
+  UserCreatedEvent,
+
+  ProjectTokenSaleProposalCreatedEvent,
+  ProjectTokenSaleProposalAcceptedEvent,
+  ProjectTokenSaleProposalDeclinedEvent,
+
+  ProjectTokenSaleCreatedEvent,
+
+  ProjectTokenSaleContridutedEvent
 }
