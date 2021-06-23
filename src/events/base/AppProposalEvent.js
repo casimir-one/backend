@@ -16,6 +16,10 @@ import TeamUpdateProposalAcceptedEvent from './../impl/TeamUpdateProposalAccepte
 import TeamUpdateProposalCreatedEvent from './../impl/TeamUpdateProposalCreatedEvent';
 import TeamUpdateProposalDeclinedEvent from './../impl/TeamUpdateProposalDeclinedEvent';
 
+import ProjectTokenSaleProposalCreatedEvent from './../impl/ProjectTokenSaleProposalCreatedEvent';
+import ProjectTokenSaleProposalAcceptedEvent from './../impl/ProjectTokenSaleProposalAcceptedEvent';
+import ProjectTokenSaleProposalDeclinedEvent from './../impl/ProjectTokenSaleProposalDeclinedEvent';
+
 module.exports = {
   [APP_PROPOSAL.PROJECT_INVITE_PROPOSAL]: {
     CREATED: ProjectInviteCreatedEvent,
@@ -36,5 +40,10 @@ module.exports = {
     CREATED: TeamUpdateProposalCreatedEvent,
     ACCEPTED: TeamUpdateProposalAcceptedEvent,
     DECLINED: TeamUpdateProposalDeclinedEvent
+  },
+  [APP_PROPOSAL.PROJECT_TOKEN_SALE_PROPOSAL]: {
+    CREATED: ProjectTokenSaleProposalCreatedEvent,
+    ACCEPTED: ProjectTokenSaleProposalAcceptedEvent,
+    DECLINED: ProjectTokenSaleProposalDeclinedEvent
   }
 }

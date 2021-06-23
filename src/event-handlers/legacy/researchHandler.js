@@ -117,38 +117,4 @@ researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (paylo
 
 }));
 
-
-researchHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CONTRIBUTED, (payload, reply) => handle(payload, reply, async (event) => {
-  const { event: researchTokenSaleContributedEvent } = event;
-  const projectDtoService = new ProjectDtoService();
-
-  const { tokenSaleExternalId } = researchTokenSaleContributedEvent.getSourceData();
-  const researchTokenSale = await deipRpc.api.getResearchTokenSaleAsync(tokenSaleExternalId);
-
-  const research = await projectDtoService.getResearch(researchTokenSale.research_external_id);
-  
-  if (researchTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
-    const investmentOpportunityAttr = research.researchRef.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
-    let hasUpdate = false;
-
-    if (!investmentOpportunityAttr) {
-      research.researchRef.attributes.push({
-        attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
-        value: false
-      });
-      hasUpdate = true;
-    } else if (investmentOpportunityAttr.value) {
-      investmentOpportunityAttr.value = false;
-      hasUpdate = true;
-    }
-
-    if (hasUpdate) {
-      await projectService.updateProject(research.external_id, { attributes: research.researchRef.attributes });
-    }
-  }
-
-
-}));
-
-
 export default researchHandler;

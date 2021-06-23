@@ -122,5 +122,25 @@ module.exports = {
 
   [APP_EVENT.USER_UPDATED]: [
     { h: userEventHandler, await: true }
-  ]
+  ],
+
+  [APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCEPTED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_TOKEN_SALE_CREATED]: [
+    { h: projectEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED]: [
+    { h: projectEventHandler, await: false }
+  ],
 };

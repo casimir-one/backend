@@ -93,4 +93,16 @@ proposalEventHandler.register(APP_EVENT.TEAM_UPDATE_PROPOSAL_DECLINED, async (ev
   // TODO: create multisig transaction read schema
 });
 
+proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCEPTED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
 module.exports = proposalEventHandler;

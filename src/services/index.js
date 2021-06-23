@@ -10,6 +10,7 @@ import AssetDtoService from './impl/read/AssetDtoService';
 import DomainDtoService from './impl/read/DomainDtoService';
 import UserDtoService from './impl/read/UserDtoService';
 import UserService from './impl/write/UserService';
+import FundraisingDtoService from './impl/read/FundraisingDtoService';
 
 module.exports = {
   TeamService,
@@ -29,6 +30,8 @@ module.exports = {
   DomainDtoService,
 
   UserService,
-  UserDtoService
+  UserDtoService,
+
+  FundraisingDtoService
 
 }

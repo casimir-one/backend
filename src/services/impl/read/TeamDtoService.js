@@ -21,7 +21,7 @@ class TeamDtoService extends BaseService {
           external_id: chainResearchGroup.name,
           entityId: chainResearchGroup.name,
           attributes: researchGroupRef.attributes,
-          creator: chainResearchGroup.name,
+          creator: researchGroupRef.creator,
           is_dao: chainResearchGroup.is_research_group,
           is_personal: !chainResearchGroup.is_research_group,
           description: chainResearchGroup.json_metadata,

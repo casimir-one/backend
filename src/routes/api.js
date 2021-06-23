@@ -11,15 +11,13 @@ import invites from '../controllers/legacy/invites'
 import assets from '../controllers/legacy/assets'
 import reviews from '../controllers/legacy/reviews'
 import research from '../controllers/legacy/research'
-import investmentPortfolio from '../controllers/legacy/investmentPortfolio'
 import grants from '../controllers/legacy/grants'
 import expressLicensing from '../controllers/legacy/expressLicensing'
-import fundraising from '../controllers/legacy/fundraising'
 import tenant from '../controllers/legacy/tenant';
 import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
 
-import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl, usersCtrl } from '../controllers';
+import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl, usersCtrl, fundraisingCtrl } from '../controllers';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
@@ -135,18 +133,6 @@ protected_route.get('/research/user/listing/:username', research.getUserResearch
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
 
-
-public_route.get('/fundraising/research/:researchExternalId', fundraising.getResearchTokenSalesByResearch)
-protected_route.post('/fundraising', fundraising.createResearchTokenSale)
-protected_route.post('/fundraising/contributions', fundraising.createResearchTokenSaleContribution)
-protected_route.get('/fundraising/:researchTokenSaleExternalId/contributions', fundraising.getResearchTokenSaleContributions)
-protected_route.get('/fundraising/research/:researchExternalId/contributions', fundraising.getResearchTokenSaleContributionsByResearch)
-
-protected_route.get('/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', fundraising.getAccountRevenueHistoryByAsset)
-protected_route.get('/history/account/:account/:cursor', fundraising.getAccountRevenueHistory)
-protected_route.get('/history/symbol/:symbol/:cursor', fundraising.getAssetRevenueHistory)
-protected_route.get('/contributions/researchId/:researchId', fundraising.getCurrentTokenSaleByResearch)
-
 protected_route.post('/research/application', research.createResearchApplication)
 protected_route.put('/research/application/:proposalId', research.editResearchApplication)
 protected_route.get('/research/application/listing', research.getResearchApplications)
@@ -175,9 +161,6 @@ protected_route.put('/research-content/texture/:researchContentExternalId', comp
 protected_route.post('/research-content/texture/:researchExternalId', compose([researchContentFileCreateAuth()]), researchContent.createResearchContentDarArchive)
 protected_route.post('/research-content/package', compose([researchContentFileCreateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id'] })]), researchContent.uploadResearchContentPackage)
 protected_route.get('/research-content/package/:researchContentExternalId/:fileHash', compose([researchContentFileReadAuth()]), researchContent.getResearchContentPackageFile)
-
-protected_route.get('/investment-portfolio/:username', investmentPortfolio.getUserInvestmentPortfolio)
-protected_route.put('/investment-portfolio/:username', investmentPortfolio.updateInvestmentPortfolio)
 
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
@@ -257,6 +240,16 @@ protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.upda
 public_route.get('/user/:username/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), usersCtrl.getUserAttributeFile)
 
 protected_route.get('/v2/bookmarks/user/:username', usersCtrl.getUserBookmarks)
+
+public_route.get('/v2/fundraising/project/:projectId', fundraisingCtrl.getProjectTokenSalesByProject)
+protected_route.post('/v2/fundraising', fundraisingCtrl.createProjectTokenSale)
+protected_route.post('/v2/fundraising/contributions', fundraisingCtrl.createProjectTokenSaleContribution)
+protected_route.get('/v2/fundraising/:projectTokenSaleExternalId/contributions', fundraisingCtrl.getProjectTokenSaleContributions)
+protected_route.get('/v2/fundraising/project/:projectId/contributions', fundraisingCtrl.getProjectTokenSaleContributionsByProject)
+
+protected_route.get('/v2/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', fundraisingCtrl.getAccountRevenueHistoryByAsset)
+protected_route.get('/v2/history/account/:account/:cursor', fundraisingCtrl.getAccountRevenueHistory)
+protected_route.get('/v2/history/symbol/:symbol/:cursor', fundraisingCtrl.getAssetRevenueHistory)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),
