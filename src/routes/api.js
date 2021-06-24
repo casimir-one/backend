@@ -246,6 +246,7 @@ protected_route.post('/v2/fundraising', fundraisingCtrl.createProjectTokenSale)
 protected_route.post('/v2/fundraising/contributions', fundraisingCtrl.createProjectTokenSaleContribution)
 protected_route.get('/v2/fundraising/:projectTokenSaleExternalId/contributions', fundraisingCtrl.getProjectTokenSaleContributions)
 protected_route.get('/v2/fundraising/project/:projectId/contributions', fundraisingCtrl.getProjectTokenSaleContributionsByProject)
+protected_route.get('/v2/fundraising/token-sale/:tokenSaleId', fundraisingCtrl.getProjectTokenSale)
 
 protected_route.get('/v2/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', fundraisingCtrl.getAccountRevenueHistoryByAsset)
 protected_route.get('/v2/history/account/:account/:cursor', fundraisingCtrl.getAccountRevenueHistory)

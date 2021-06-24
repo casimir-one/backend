@@ -37,6 +37,11 @@ class FundraisingDtoService {
     const history = await deipRpc.api.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
     return history;
   }
+
+  async getProjectTokenSale(tokenSaleId) {
+    const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(tokenSaleId);
+    return tokenSale;
+  }
   
 }
 
