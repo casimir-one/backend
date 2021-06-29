@@ -131,7 +131,7 @@ public_route.get('/researches', research.getResearches)
 public_route.get('/research/:researchExternalId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), research.getResearchAttributeFile)
 protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
-public_route.get('/research/tenant/listing/:tenantId', research.getTenantResearchListing)
+public_route.get('/research/listing', research.getTenantResearchListing)
 
 protected_route.post('/research/application', research.createResearchApplication)
 protected_route.put('/research/application/:proposalId', research.editResearchApplication)
