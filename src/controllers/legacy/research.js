@@ -631,7 +631,7 @@ const getResearches = async (ctx) => {
 
 
 const getTenantResearchListing = async (ctx) => {
-  const tenantId = ctx.params.tenantId;
+  const tenantId = ctx.state.tenant.id;
 
   try {
     const projectDtoService = new ProjectDtoService();

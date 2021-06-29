@@ -12,12 +12,12 @@ import { AttributeDtoService } from './../../services';
 
 const updateTenantSettings = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
-  const tenantExternalId = ctx.state.tenant.id;
+  const tenantId = ctx.state.tenant.id;
 
   try {
 
     const tenantService = new TenantService();
-    const tenant = await tenantService.getTenant(tenantExternalId);
+    const tenant = await tenantService.getTenant(tenantId);
     const oldBanner = tenant.profile.banner;
     const oldLogo = tenant.profile.logo;
     const { banner, logo, title } = await TenantSettingsForm(ctx);
@@ -28,10 +28,10 @@ const updateTenantSettings = async (ctx) => {
       name: title ? title : tenant.profile.name
     }
 
-    const updatedTenantProfile = await tenantService.updateTenantProfile(tenantExternalId, update, {});
+    const updatedTenantProfile = await tenantService.updateTenantProfile(tenantId, update, {});
 
     if (banner && oldBanner != banner) {
-      const oldFilepath = FileStorage.getTenantBannerFilePath(tenantExternalId, oldBanner);
+      const oldFilepath = FileStorage.getTenantBannerFilePath(tenantId, oldBanner);
       const exists = await FileStorage.exists(oldFilepath);
       if (exists) {
         await FileStorage.delete(oldFilepath);
@@ -39,7 +39,7 @@ const updateTenantSettings = async (ctx) => {
     }
 
     if (logo && oldLogo != logo) {
-      const oldFilepath = FileStorage.getTenantLogoFilePath(tenantExternalId, oldLogo);
+      const oldFilepath = FileStorage.getTenantLogoFilePath(tenantId, oldLogo);
       const exists = await FileStorage.exists(oldFilepath);
       if (exists) {
         await FileStorage.delete(oldFilepath);
@@ -58,7 +58,7 @@ const updateTenantSettings = async (ctx) => {
 
 
 const getTenantBanner = async (ctx) => {
-  const tenantExternalId = ctx.params.tenant;
+  const tenantId = ctx.state.tenant.id;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
@@ -67,14 +67,14 @@ const getTenantBanner = async (ctx) => {
   try {
 
     const tenantService = new TenantService();
-    const tenant = await tenantService.getTenant(tenantExternalId);
+    const tenant = await tenantService.getTenant(tenantId);
     const defaultBanner = FileStorage.getTenantDefaultBannerFilePath();
 
     let src;
     let buff;
 
     if (tenant.profile.banner) {
-      const filepath = FileStorage.getTenantBannerFilePath(tenantExternalId, tenant.profile.banner);
+      const filepath = FileStorage.getTenantBannerFilePath(tenantId, tenant.profile.banner);
       const exists = await FileStorage.exists(filepath);
       if (exists) {
         buff = await FileStorage.get(filepath);
@@ -137,7 +137,7 @@ const getTenantBanner = async (ctx) => {
 
 
 const getTenantLogo = async (ctx) => {
-  const tenantExternalId = ctx.params.tenant;
+  const tenantId = ctx.state.tenant.id;
   const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
   const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
   const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
@@ -146,14 +146,14 @@ const getTenantLogo = async (ctx) => {
   try {
 
     const tenantService = new TenantService();
-    const tenant = await tenantService.getTenant(tenantExternalId);
+    const tenant = await tenantService.getTenant(tenantId);
     const defaultLogo = FileStorage.getTenantDefaultLogoFilePath();
 
     let src;
     let buff;
 
     if (tenant.profile.logo) {
-      const filepath = FileStorage.getTenantLogoFilePath(tenantExternalId, tenant.profile.logo);
+      const filepath = FileStorage.getTenantLogoFilePath(tenantId, tenant.profile.logo);
       const exists = await FileStorage.exists(filepath);
       if (exists) {
         buff = await FileStorage.get(filepath);
@@ -216,13 +216,13 @@ const getTenantLogo = async (ctx) => {
 
 
 const getTenant = async (ctx) => {
-  const tenantExternalId = ctx.params.tenant;
+  const tenantId = ctx.state.tenant.id;
   try {
     const tenantService = new TenantService();
-    const tenant = await tenantService.getTenant(tenantExternalId);
+    const tenant = await tenantService.getTenant(tenantId);
     if (!tenant) {
       ctx.status = 404;
-      ctx.body = `Tenant '${tenantExternalId}' does not exist`
+      ctx.body = `Tenant '${tenantId}' does not exist`
       return;
     }
     ctx.status = 200;
@@ -236,10 +236,10 @@ const getTenant = async (ctx) => {
 
 
 const getNetworkTenant = async (ctx) => {
-  const tenantExternalId = ctx.params.tenant;
+  const tenantId = ctx.params.tenant;
   try {
     const tenantService = new TenantService();
-    const result = await tenantService.getNetworkTenant(tenantExternalId);
+    const result = await tenantService.getNetworkTenant(tenantId);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -266,14 +266,14 @@ const getNetworkTenants = async (ctx) => {
 const updateTenantProfile = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const update = ctx.request.body;
-  const tenantExternalId = ctx.state.tenant.id;
+  const tenantId = ctx.state.tenant.id;
 
   try {
 
     const tenantService = new TenantService();
-    const tenant = await tenantService.getTenant(tenantExternalId);
+    const tenant = await tenantService.getTenant(tenantId);
     const updatedTenantProfile = await tenantService.updateTenantProfile(
-      tenantExternalId, 
+      tenantId, 
       { ...tenant.profile, ...update }, 
       { ...tenant.profile.settings, ...update.settings }
     );
@@ -292,13 +292,13 @@ const updateTenantProfile = async (ctx) => {
 const updateTenantNetworkSettings = async (ctx) => {
   const jwtUsername = ctx.state.user.username;
   const update = ctx.request.body;
-  const tenantExternalId = ctx.state.tenant.id;
+  const tenantId = ctx.state.tenant.id;
 
   try {
 
     const tenantService = new TenantService();
     const updatedTenantProfile = await tenantService.updateTenantNetworkSettings(
-      tenantExternalId,
+      tenantId,
       update
     );
 
@@ -538,7 +538,7 @@ const updateTenantAttributeSettings = async (ctx) => {
 }
 
 const getTenantAttributeSettings = async (ctx) => {
-  const tenantId = ctx.params.tenant;
+  const tenantId = ctx.state.tenant.id;
   try {
     const tenantService = new TenantService();
     const result = await tenantService.getTenantAttributeSettings(tenantId);
@@ -575,7 +575,7 @@ const updateTenantLayouts = async (ctx) => {
 }
 
 const getTenantLayouts = async (ctx) => {
-  const tenantId = ctx.params.tenant;
+  const tenantId = ctx.state.tenant.id;
   try {
     const tenantService = new TenantService();
     const result = await tenantService.getTenantLayouts(tenantId);
