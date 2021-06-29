@@ -17,19 +17,24 @@ class UserDtoService extends BaseService {
         const profile = profiles.find((r) => r._id == chainAccount.name);
         const appModules = tenantProfile.settings.modules;
         const roleInfo = tenantProfile.settings.roles.find((appRole) => profile.roles.some((userRole) => appRole.role == userRole.role));
+        const roles = profile.roles.map(r => ({
+          role: r.role,
+          teamId: r.researchGroupExternalId
+        }));
+        const modules = roleInfo && roleInfo.modules ? roleInfo.modules : appModules;
         return {
           username: chainAccount.name,
           tenantId: profile.tenantId,
           account: chainAccount,
           entityId: chainAccount.name,
           attributes: profile.attributes,
-          profile: { 
+          ...profile,
+          modules,
+          roles,
+          profile: {
             ...profile,
-            modules: roleInfo && roleInfo.modules ? roleInfo.modules : appModules,
-            roles: profile.roles.map(r => ({
-              role: r.role,
-              teamId: r.researchGroupExternalId
-            }))
+            modules,
+            roles
           } };
       });
   }

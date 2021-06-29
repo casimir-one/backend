@@ -12,12 +12,12 @@ async function tenantRoute(ctx, next) {
   await next();
 }
 
-public_route.get('/:tenant', tenantRoute, tenant.getTenant);
-public_route.get('/banner/:tenant', tenantRoute, tenant.getTenantBanner);
-public_route.get('/logo/:tenant', tenantRoute, tenant.getTenantLogo);
+public_route.get('/', tenantRoute, tenant.getTenant);
+public_route.get('/banner', tenantRoute, tenant.getTenantBanner);
+public_route.get('/logo', tenantRoute, tenant.getTenantLogo);
 public_route.post('/sign-in', tenantRoute, auth.signIn);
-public_route.get('/settings/attribute-settings/:tenant', tenant.getTenantAttributeSettings);
-public_route.get('/settings/layouts/:tenant', tenant.getTenantLayouts);
+public_route.get('/settings/attribute-settings', tenant.getTenantAttributeSettings);
+public_route.get('/settings/layouts', tenant.getTenantLayouts);
 
 
 async function tenantAdminGuard(ctx, next) {
