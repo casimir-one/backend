@@ -1,4 +1,5 @@
-import { TxEnvelope, CmdEnvelope } from '@deip/command-models';
+import { TxEnvelope, CmdEnvelope } from '@deip/message-models';
+
 
 class MessageHandler {
 

@@ -48,7 +48,7 @@ class BaseCmdHandler extends EventEmitter {
     validate = async (appCmds, ctx) => {},
     alterOffchainWriteModel = async (appCmds, ctx) => {},
     alterOnchainWriteModel = async (tx, ctx) => {
-      const signedTx = deipRpc.auth.signTransaction(tx.finalize(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
+      const signedTx = deipRpc.auth.signTransaction(tx.getRawTx(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
       const txInfo = await protocolService.sendTransactionAsync(signedTx);
       return txInfo;
     },
