@@ -1,4 +1,4 @@
-import { TxEnvelope, CmdEnvelope } from '@deip/message-models';
+import { JsonDataMsg, MultFormDataMsg } from '@deip/message-models';
 
 
 class MessageHandler {
@@ -11,10 +11,9 @@ class MessageHandler {
         throw new Error("Server accepts messages with app commands only");
       }
 
-      const envelope = isMultipartForm ? JSON.parse(ctx.state.form.envelope) : ctx.request.body.envelope;
-      const EnvelopeClass = envelope.PROTOCOL ? TxEnvelope : CmdEnvelope;
-      const msgEnvelope = EnvelopeClass.Deserialize(envelope);
-      ctx.state.msg = msgEnvelope.unwrap();
+      ctx.state.msg = isMultipartForm
+        ? MultFormDataMsg.UnwrapEnvelope(ctx.state.form.envelope)
+        : JsonDataMsg.UnwrapEnvelope(ctx.request.body.envelope);
     }
 
     if (nextHandler.length === 2) {
