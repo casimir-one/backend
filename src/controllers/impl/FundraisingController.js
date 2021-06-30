@@ -169,6 +169,27 @@ class FundraisingController extends BaseController {
     }
   });
 
+  getAccountContributionsHistory = this.query({
+    h: async (ctx) => {
+      try {
+        const { account } = ctx.params;
+        const history = await fundraisingDtoService.getAccountContributionsHistory(account);
+        if (!history) {
+          ctx.status = 404;
+          ctx.body = null;
+          return;
+        }
+        ctx.body = history;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
   getAssetRevenueHistory = this.query({
     h: async (ctx) => {
       try {
