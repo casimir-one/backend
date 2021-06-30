@@ -250,6 +250,7 @@ protected_route.get('/v2/fundraising/token-sale/:tokenSaleId', fundraisingCtrl.g
 
 protected_route.get('/v2/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', fundraisingCtrl.getAccountRevenueHistoryByAsset)
 protected_route.get('/v2/history/account/:account/:cursor', fundraisingCtrl.getAccountRevenueHistory)
+protected_route.get('/v2/history/contributions/account/:account', fundraisingCtrl.getAccountContributionsHistory)
 protected_route.get('/v2/history/symbol/:symbol/:cursor', fundraisingCtrl.getAssetRevenueHistory)
 
 const routes = {
