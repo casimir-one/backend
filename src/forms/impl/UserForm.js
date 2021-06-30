@@ -3,7 +3,7 @@ import BaseForm from './../base/BaseForm';
 import mongoose from 'mongoose';
 import { getFileStorageUploader } from './../storage';
 
-const USERNAME_HEADER = "username";
+const USERNAME_HEADER = "entity-id";
 const USER_ATTRIBUTE_ID_SPLITTER = '-';
 
 const destinationHandler = (fileStorage) => function () {
