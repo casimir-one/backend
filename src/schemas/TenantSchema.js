@@ -124,6 +124,7 @@ const TenantSchema = new Schema({
     },
     "attributeOverwrites": [AttributeOverwrite],
     "attributeSettings": { type: Object },
+    "layoutSettings": { type: Object },
     "layouts": { type: Schema.Types.Mixed },
     "faq": [FAQ],
     "theme": { type: Object },
