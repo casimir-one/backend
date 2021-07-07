@@ -1,10 +1,10 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
+import { ChainService } from '@deip/chain-service';
 import PubSub from 'pubsub-js';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import * as protocolService from './../../utils/blockchain';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 import assert from 'assert';
 import config from './../../config';
@@ -48,8 +48,11 @@ class BaseCmdHandler extends EventEmitter {
     validate = async (appCmds, ctx) => {},
     alterOffchainWriteModel = async (appCmds, ctx) => {},
     alterOnchainWriteModel = async (tx, ctx) => {
-      const signedTx = deipRpc.auth.signTransaction(tx.getRawTx(), {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
-      const txInfo = await protocolService.sendTransactionAsync(signedTx);
+      const chainService = await ChainService.getInstanceAsync(config);
+      const chainApi = chainService.getChainApi();
+      const chainNodeClient = chainService.getChainNodeClient();
+      await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
+      const txInfo = await chainApi.sendTxAsync(tx.getRawTx());
       return txInfo;
     },
   ) {

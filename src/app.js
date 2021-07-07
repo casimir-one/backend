@@ -4,8 +4,8 @@ import logger from 'koa-logger';
 import serve from 'koa-static';
 import koa_bodyparser from "koa-bodyparser";
 import cors from '@koa/cors';
-import deipRpc from '@deip/rpc-client';
 import config from './config';
+import { ChainService } from '@deip/chain-service';
 
 if (!config.TENANT) throw new Error(`Tenant is not specified`);
 
@@ -49,17 +49,15 @@ app.use(require('./routes/webhook').protected.routes());
 
 app.use(require('./middlewares/legacy/events.js')()); // legacy event handlers
 
-app.listen(PORT, HOST, () => {
-  console.log(`Running on http://${HOST}:${PORT}`);
-});
-
-app.on('error', function (err, ctx) {
-  console.log('Server error', err);
-});
-
-deipRpc.api.setOptions({ url: process.env.DEIP_FULL_NODE_URL, reconnectTimeout: 3000 });
-deipRpc.config.set('chain_id', process.env.CHAIN_ID);
-
-console.log(config);
+ChainService.getInstanceAsync(config)
+  .then(() => {
+    console.log(config);
+    app.listen(PORT, HOST, () => {
+      console.log(`Running on http://${HOST}:${PORT}`);
+    });
+    app.on('error', function (err, ctx) {
+      console.log('Server error', err);
+    });
+  });
 
 module.exports = app;

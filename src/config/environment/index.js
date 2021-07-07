@@ -2,6 +2,7 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const FILE_STORAGE = require('./../../constants/fileStorage').default;
+const { PROTOCOL_CHAIN } = require('@deip/chain-service');
 
 const env = (process.env.DEIP_CONFIG || process.env.NODE_ENV == 'local')
   ? 'local'
@@ -14,7 +15,7 @@ require('dotenv').config({
 
 const config = {
   ENVIRONMENT: env,
-
+  PROTOCOL: process.env.PROTOCOL ? parseInt(process.env.PROTOCOL) : PROTOCOL_CHAIN.GRAPHENE,
   TENANT: process.env.TENANT || '0000000000000000000000000000000000000000',
   TENANT_FILE_STORAGE_TYPE: process.env.TENANT_FILE_STORAGE_TYPE || FILE_STORAGE.LOCAL_FILESYSTEM,
   TENANT_SFTP_HOST: process.env.TENANT_SFTP_HOST,
