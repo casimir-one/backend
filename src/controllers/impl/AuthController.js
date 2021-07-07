@@ -5,6 +5,7 @@ import { accountCmdHandler } from './../../command-handlers';
 import { UserService } from './../../services';
 import config from './../../config';
 import { USER_ROLES } from './../../constants';
+import deipRpc from '@deip/rpc-client';
 
 const userService = new UserService();
 
@@ -41,7 +42,7 @@ class AuthController extends BaseController {
         const { wif: regaccPrivKey } = registrar;
 
         const msg = ctx.state.msg;
-        msg.tx.sign(regaccPrivKey)
+        await msg.tx.signAsync(regaccPrivKey, deipRpc);
 
         await accountCmdHandler.process(msg, ctx, validate);
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
