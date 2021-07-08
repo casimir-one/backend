@@ -19,7 +19,7 @@ class FundraisingDtoService {
     if (!project) {
       return [];
     }
-    const result = await deipRpc.api.getContributionsHistoryByResearchAsync(project.id);
+    const result = await deipRpc.api.getContributionsHistoryByResearchAsync(project.entityId);
     return result;
   }
 
