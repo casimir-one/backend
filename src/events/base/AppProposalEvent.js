@@ -20,6 +20,14 @@ import ProjectTokenSaleProposalCreatedEvent from './../impl/ProjectTokenSaleProp
 import ProjectTokenSaleProposalAcceptedEvent from './../impl/ProjectTokenSaleProposalAcceptedEvent';
 import ProjectTokenSaleProposalDeclinedEvent from './../impl/ProjectTokenSaleProposalDeclinedEvent';
 
+import AssetTransferProposalCreatedEvent from './../impl/AssetTransferProposalCreatedEvent';
+import AssetTransferProposalAcceptedEvent from './../impl/AssetTransferProposalAcceptedEvent';
+import AssetTransferProposalDeclinedEvent from './../impl/AssetTransferProposalDeclinedEvent';
+
+import AssetExchangeProposalCreatedEvent from './../impl/AssetExchangeProposalCreatedEvent';
+import AssetExchangeProposalAcceptedEvent from './../impl/AssetExchangeProposalAcceptedEvent';
+import AssetExchangeProposalDeclinedEvent from './../impl/AssetExchangeProposalDeclinedEvent';
+
 module.exports = {
   [APP_PROPOSAL.PROJECT_INVITE_PROPOSAL]: {
     CREATED: ProjectInviteCreatedEvent,
@@ -45,5 +53,15 @@ module.exports = {
     CREATED: ProjectTokenSaleProposalCreatedEvent,
     ACCEPTED: ProjectTokenSaleProposalAcceptedEvent,
     DECLINED: ProjectTokenSaleProposalDeclinedEvent
+  },
+  [APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL]: {
+    CREATED: AssetTransferProposalCreatedEvent,
+    ACCEPTED: AssetTransferProposalAcceptedEvent,
+    DECLINED: AssetTransferProposalDeclinedEvent
+  },
+  [APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL]: {
+    CREATED: AssetExchangeProposalCreatedEvent,
+    ACCEPTED: AssetExchangeProposalAcceptedEvent,
+    DECLINED: AssetExchangeProposalDeclinedEvent
   }
 }

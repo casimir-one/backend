@@ -143,4 +143,8 @@ module.exports = {
   [APP_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED]: [
     { h: projectEventHandler, await: false }
   ],
+
+  [APP_EVENT.ASSET_TRANSFERED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
 };
