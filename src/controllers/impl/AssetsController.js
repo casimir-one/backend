@@ -1,5 +1,8 @@
 import BaseController from '../base/BaseController';
-import {AssetDtoService} from '../../services';
+import {APP_CMD} from '@deip/command-models';
+import { BadRequestError } from './../../errors';
+import { AssetDtoService } from '../../services';
+import { assetCmdHandler, proposalCmdHandler } from './../../command-handlers';
 
 const assetDtoService = new AssetDtoService();
 
@@ -168,6 +171,69 @@ class AssetsController extends BaseController {
         console.log(err);
         ctx.status = 500;
         ctx.body = err;
+      }
+    }
+  });
+
+  createAssetTransferRequest = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ASSET_TRANSFER || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+          if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
+            const proposedCmds = appCmd.getProposedCmds();
+            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.ASSET_TRANSFER)) {
+              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.ASSET_TRANSFER]} protocol cmd`);
+            }
+          }
+        };
+
+        const msg = ctx.state.msg;
+
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+
+  createAssetExchangeRequest = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+          if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
+            const proposedCmds = appCmd.getProposedCmds();
+            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.ASSET_TRANSFER)) {
+              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.ASSET_TRANSFER]} protocol cmd`);
+            }
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
       }
     }
   });

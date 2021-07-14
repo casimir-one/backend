@@ -298,8 +298,6 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED, async (event) => {
   const { projectId, teamId, creator } = event.getEventPayload();
-  const qwe = event.getEventPayload();
-  console.log(qwe)
 
   const project = await projectDtoService.getResearch(projectId);
   const team = await teamDtoService.getTeam(teamId);
@@ -331,8 +329,6 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event) => {
   const { entityId, projectId, teamId, creator } = event.getEventPayload();
-  const qwe = event.getEventPayload();
-  console.log(qwe)
 
   const project = await projectDtoService.getResearch(projectId);
   const team = await teamDtoService.getTeam(teamId);
@@ -366,6 +362,10 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECL
 });
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCEPTED, async (event) => {
+  // add notify
+});
+
+userNotificationEventHandler.register(APP_EVENT.ASSET_TRANSFERED, async (event) => {
   // add notify
 });
 

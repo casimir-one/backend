@@ -8,7 +8,6 @@ import notifications from '../controllers/legacy/notifications'
 import proposals from '../controllers/legacy/proposals'
 import researchGroups from '../controllers/legacy/researchGroups'
 import invites from '../controllers/legacy/invites'
-import assets from '../controllers/legacy/assets'
 import reviews from '../controllers/legacy/reviews'
 import research from '../controllers/legacy/research'
 import grants from '../controllers/legacy/grants'
@@ -174,9 +173,6 @@ protected_route.get('/express-licensing/researchId/:researchId', expressLicensin
 protected_route.get('/express-licensing/licensee/:licensee/researchId/:researchId', expressLicensing.getResearchLicensesByLicenseeAndResearch)
 protected_route.get('/express-licensing/licensee/:licensee/licenser/:licenser', expressLicensing.getResearchLicensesByLicenseeAndLicenser)
 
-protected_route.post('/assets/transfer', assets.createAssetTransferRequest)
-protected_route.post('/assets/exchange', assets.createAssetExchangeRequest)
-
 public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
 public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
 
@@ -222,6 +218,8 @@ public_route.get(['/v2/assets/limit/:limit/', '/v2/assets/limit/:limit/:lowerBou
 protected_route.get('/v2/assets/owner/:owner/symbol/:symbol', assetsCtrl.getAccountAssetBalance)
 protected_route.get('/v2/assets/owner/:owner', assetsCtrl.getAccountAssetsBalancesByOwner)
 public_route.get('/v2/assets/accounts/symbol/:symbol', assetsCtrl.getAccountsAssetBalancesByAsset)
+protected_route.post('/v2/assets/transfer', assetsCtrl.createAssetTransferRequest)
+protected_route.post('/v2/assets/exchange', assetsCtrl.createAssetExchangeRequest)
 
 public_route.get('/v2/domains', domainsCtrl.getDomains)
 public_route.get('/v2/domains/project/:projectId', domainsCtrl.getDomainsByProject)
