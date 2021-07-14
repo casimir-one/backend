@@ -25,14 +25,16 @@ projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
     teamId,
     description,
     attributes,
-    status
+    status,
+    isDefault
   } = event.getEventPayload();
 
   await projectService.createProject({
     projectId: projectId,
     teamId: teamId,
     attributes: attributes,
-    status: status
+    status: status,
+    isDefault: isDefault
   });
 
 });
@@ -86,34 +88,6 @@ projectEventHandler.register(APP_EVENT.ATTRIBUTE_DELETED, async (event) => {
 
   await projectService.removeAttributeFromResearches({
     attributeId
-  });
-});
-
-
-projectEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
-  // Team default project
-  const { accountId } = event.getEventPayload();
-  const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(accountId).buffer));
-
-  await projectService.createProject({
-    projectId: projectId,
-    teamId: accountId,
-    attributes: [],
-    status: RESEARCH_STATUS.APPROVED
-  });
-});
-
-
-projectEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
-  // User default project
-  const { username } = event.getEventPayload();
-  const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(username).buffer));
-
-  await projectService.createProject({
-    projectId: projectId,
-    teamId: username,
-    attributes: [],
-    status: RESEARCH_STATUS.APPROVED
   });
 });
 

@@ -19,7 +19,8 @@ projectCmdHandler.register(APP_CMD.CREATE_PROJECT, (cmd, ctx) => {
   const { 
     entityId: projectId, 
     teamId, 
-    attributes 
+    attributes,
+    isDefault
   } = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new ProjectCreatedEvent({
@@ -27,6 +28,7 @@ projectCmdHandler.register(APP_CMD.CREATE_PROJECT, (cmd, ctx) => {
     teamId: teamId,
     attributes: attributes,
     status: RESEARCH_STATUS.APPROVED,
+    isDefault: isDefault,
     proposalCtx: ctx.state.proposalsStackFrame
   }));
 

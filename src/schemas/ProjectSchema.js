@@ -11,6 +11,7 @@ const ProjectSchema = new Schema({
   "researchGroupExternalId": { type: String, required: true },
   "attributes": [AttributeValueSchema],
   "status": { type: String, enum: [...Object.values(RESEARCH_STATUS)], required: false },
+  "isDefault": { type: Boolean, default: false }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research', ProjectSchema);

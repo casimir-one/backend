@@ -47,7 +47,7 @@ class ProjectDtoService extends BaseService {
             return [...acc, ...nda.parties];
           }, []);
 
-        const attributes = researchRef ? researchRef.attributes : [];
+        const attributes = researchRef.attributes;
        
         const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
           ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value.toString()
@@ -61,10 +61,22 @@ class ProjectDtoService extends BaseService {
           ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
           : false;
 
-        if (chainResearch.is_default === undefined) {
-          chainResearch.is_default = false;
-        }
-        return { ...chainResearch, members, entityId: chainResearch.external_id, tenantId: researchRef ? researchRef.tenantId : null, title, abstract, isPrivate, isDefault: chainResearch.is_default, attributes: researchRef ? researchRef.attributes : [], researchRef: researchRef ? { ...researchRef, expressLicenses, grantedAccess } : { attributes: [], expressLicenses: [], grantedAccess: [] } };
+        return {
+          ...chainResearch,
+          members,
+          entityId: chainResearch.external_id,
+          tenantId: researchRef.tenantId,
+          title,
+          abstract,
+          isPrivate,
+          isDefault: researchRef.isDefault,
+          attributes: researchRef.attributes,
+          researchRef: {
+            ...researchRef,
+            expressLicenses,
+            grantedAccess
+          }
+        };
       })
       .filter(r => filter.isDefault === undefined || filter.isDefault === r.isDefault)
       .filter(r => !filter.searchTerm || (r.researchRef && r.researchRef.attributes.some(rAttr => {
@@ -197,8 +209,8 @@ class ProjectDtoService extends BaseService {
   }
 
   async getDefaultProject(accountId) {
-    const projectId = crypto.hexify(crypto.ripemd160(new TextEncoder('utf-8').encode(accountId).buffer));
-    const project = await this.findOne({ _id: projectId });
+    const project = await this.findOne({ isDefault: true, researchGroupExternalId: accountId });
+    if (!project) return null;
     const results = await this.mapResearch([project], { isDefault: true });
     const [result] = results;
     return result;

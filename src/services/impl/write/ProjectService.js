@@ -21,7 +21,8 @@ class ProjectService extends BaseService {
     projectId,
     teamId,
     attributes,
-    status
+    status,
+    isDefault
   }) {
 
     const attributeDtoService = new AttributeDtoService();
@@ -46,6 +47,7 @@ class ProjectService extends BaseService {
       _id: projectId,
       researchGroupExternalId: teamId,
       status: status,
+      isDefault: isDefault,
       attributes: mappedAttributes
     })
 
