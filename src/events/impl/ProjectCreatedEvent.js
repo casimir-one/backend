@@ -10,13 +10,14 @@ class ProjectCreatedEvent extends BaseEvent {
       projectId,
       teamId,
       attributes,
-      status
+      status,
+      isDefault
     } = eventPayload;
 
     assert(!!projectId, "'projectId' is required");
     assert(!!teamId, "'teamId' is required");
     assert(!!status, "'status' is required");
-    assert(!!attributes && attributes.length, "'attributes' required");
+    assert(!!attributes, "'attributes' required");
 
     super(APP_EVENT.PROJECT_CREATED, eventPayload);
   }
