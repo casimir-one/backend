@@ -1,6 +1,13 @@
 import deipRpc from '@deip/rpc-client';
+import AssetDepositRequestSchema from '../../../schemas/AssetDepositRequestSchema';
 
 class AssetDtoService {
+  async getAccountDepositHistory(account, status) {
+    const query = { account };
+    if (status) query.status = status;
+    const history = await AssetDepositRequestSchema.find(query)
+    return history;
+  }
   async getAssetById(assetId) {
     const asset = await deipRpc.api.getAssetAsync(assetId);
     return asset;

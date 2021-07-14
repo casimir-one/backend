@@ -20,6 +20,7 @@ import ASSESSMENT_CRITERIA_TYPE from './assessmentCriteriaType';
 import ATTR_SCOPES from './attributeScopes';
 import QUEUE_TOPIC from './queueTopic';
 import USER_ROLES from './userRoles';
+import DEPOSIT_REQUEST_STATUS from './assetDepositRequestStatus';
 
 export {
   CHAIN_CONSTANTS,
@@ -43,5 +44,6 @@ export {
   ASSESSMENT_CRITERIA_TYPE,
   ATTR_SCOPES,
   QUEUE_TOPIC,
-  USER_ROLES
+  USER_ROLES,
+  DEPOSIT_REQUEST_STATUS
 }

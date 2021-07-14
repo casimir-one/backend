@@ -1,0 +1,11 @@
+const PENDING = 1;
+const APPROVED = 2;
+const REJECTED = 3;
+
+const DEPOSIT_REQUEST_STATUS = {
+  PENDING,
+  APPROVED,
+  REJECTED
+}
+
+export default DEPOSIT_REQUEST_STATUS;
