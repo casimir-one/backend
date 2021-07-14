@@ -1,12 +1,41 @@
 import BaseController from '../base/BaseController';
 import {APP_CMD} from '@deip/command-models';
 import { BadRequestError } from './../../errors';
-import { AssetDtoService } from '../../services';
-import { assetCmdHandler, proposalCmdHandler } from './../../command-handlers';
+import { AssetDtoService, UserDtoService } from '../../services';
+import { assetCmdHandler } from './../../command-handlers';
+import qs from 'qs';
 
 const assetDtoService = new AssetDtoService();
+const userDtoService = new UserDtoService();
 
 class AssetsController extends BaseController {
+  getAccountDepositHistory = this.query({
+    h: async (ctx) => {
+      try {
+        const query = qs.parse(ctx.query);
+        const status = query.status;
+        const account = ctx.params.account;
+        const username = ctx.state.user.username;
+        if (account != username) {
+          const users = await userDtoService.getUsersByTeam(account)
+
+          if (!users.find(u => u.username == username)) {
+            ctx.status = 403;
+            ctx.body = `You have no permission to get info about '${account}' account or ${account} doesn't exist`;
+            return;
+          }
+        }
+        const history = await assetDtoService.getAccountDepositHistory(account, status);
+        ctx.body = history;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
   getAssetById = this.query({
     h: async (ctx) => {
       try {

@@ -1,36 +1,14 @@
-import mongoose from 'mongoose';
 import config from './../../config';
 import crypto from '@deip/lib-crypto';
 import deipRpc from '@deip/rpc-client';
 import { TextEncoder } from 'util';
 import * as blockchainService from './../../utils/blockchain';
+import { DEPOSIT_REQUEST_STATUS } from './../../constants';
+import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
 }
-
-const Schema = mongoose.Schema;
-
-const DEPOSIT_REQUEST_STATUS = {
-  PENDING: 1,
-  APPROVED: 2,
-  REJECTED: 3
-}
-
-const AssetDepositRequestSchema = new Schema({
-  "currency": { type: String, required: true },
-  "amount": { type: Number, required: true },
-  "username": { type: String, required: true }, // user who makes a payment
-  "account": { type: String, required: true }, // target balance owner
-  "requestToken": { type: String, required: true, index: { unique: true } },
-  "timestamp": { type: Number, required: true },
-  "status": { type: Number, enum: [...Object.values(DEPOSIT_REQUEST_STATUS)], required: true, default: DEPOSIT_REQUEST_STATUS.PENDING },
-  "txInfo": { type: Object, required: false },
-  "invoice": { type: Object, required: false }
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
-
-
-const AssetDepositRequest = mongoose.model('asset-deposit-request', AssetDepositRequestSchema);
 
 const SUPPORTED_CURRENCIES = ["USD", "EUR", "CAD", "CNY", "GBP"];
 const MIN_AMOUNT = 100; // cents
