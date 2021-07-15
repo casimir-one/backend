@@ -190,6 +190,27 @@ class FundraisingController extends BaseController {
     }
   });
 
+  getContributionsHistoryByTokenSale = this.query({
+    h: async (ctx) => {
+      try {
+        const tokenSaleId = ctx.params.tokenSaleId;
+        const history = await fundraisingDtoService.getContributionsHistoryByTokenSale(tokenSaleId);
+        if (!history) {
+          ctx.status = 404;
+          ctx.body = null;
+          return;
+        }
+        ctx.body = history;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
   getAssetRevenueHistory = this.query({
     h: async (ctx) => {
       try {
