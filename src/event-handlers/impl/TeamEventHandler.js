@@ -1,7 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { TeamService, AttributeDtoService } from './../../services';
-import { ATTR_SCOPES } from '@deip/attributes-service';
+import { ATTR_SCOPES } from '@deip/constants';
 import { ATTRIBUTE_TYPE } from './../../constants';
 
 

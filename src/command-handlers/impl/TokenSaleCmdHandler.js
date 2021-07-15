@@ -1,4 +1,4 @@
-import { APP_CMD } from '@deip/command-models';
+import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import { ProjectTokenSaleContridutedEvent, ProjectTokenSaleCreatedEvent } from './../../events';
 import { USER_PROFILE_STATUS } from './../../constants';

@@ -1,5 +1,5 @@
 import qs from 'qs';
-import { APP_CMD } from '@deip/command-models';
+import { APP_CMD } from '@deip/constants';
 import { RESEARCH_STATUS } from './../../constants';
 import BaseController from './../base/BaseController';
 import { ProjectForm } from './../../forms';

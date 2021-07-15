@@ -1,4 +1,4 @@
-import {APP_CMD} from '@deip/command-models';
+import { APP_CMD } from '@deip/constants';
 import BaseController from './../base/BaseController';
 import { BadRequestError, ConflictError } from './../../errors';
 import { accountCmdHandler } from './../../command-handlers';

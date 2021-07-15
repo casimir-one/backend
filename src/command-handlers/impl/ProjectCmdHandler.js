@@ -1,4 +1,4 @@
-import { APP_CMD } from '@deip/command-models';
+import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectUpdatedEvent, ProjectDeletedEvent } from './../../events';
 import { RESEARCH_STATUS } from './../../constants';

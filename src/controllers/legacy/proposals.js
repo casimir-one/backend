@@ -1,5 +1,5 @@
 import * as blockchainService from './../../utils/blockchain';
-import { APP_PROPOSAL } from '@deip/command-models';
+import { APP_PROPOSAL } from '@deip/constants';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 
 import ResearchContentProposalSignedEvent from './../../events/legacy/researchContentProposalSignedEvent';

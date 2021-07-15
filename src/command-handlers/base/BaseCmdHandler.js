@@ -9,7 +9,8 @@ import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 import assert from 'assert';
 import config from './../../config';
 import { QUEUE_TOPIC } from './../../constants';
-import { APP_PROPOSAL, CreateProposalCmd, UpdateProposalCmd, DeclineProposalCmd } from '@deip/command-models';
+import { CreateProposalCmd, UpdateProposalCmd, DeclineProposalCmd } from '@deip/command-models';
+import { APP_PROPOSAL } from '@deip/constants';
 import {
   logError,
   logWarn,

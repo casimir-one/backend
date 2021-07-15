@@ -22,7 +22,7 @@ require("@babel/register")({
 
 const config = require('./../config');
 const mongoose = require('mongoose');
-const { ATTR_TYPES, ATTR_SCOPES } = require('@deip/attributes-service');
+const { ATTR_TYPES, ATTR_SCOPES } = require('@deip/constants');
 
 const STEPPER = "stepper";
 const TEXT = "text";

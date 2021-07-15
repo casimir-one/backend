@@ -7,7 +7,7 @@ import slug from 'limax';
 import UserBookmarkService from './../../services/legacy/userBookmark';
 import { accountCmdHandler } from './../../command-handlers';
 import { USER_PROFILE_STATUS } from './../../constants';
-import {APP_CMD} from '@deip/command-models';
+import { APP_CMD } from '@deip/constants';
 import { UserForm } from './../../forms';
 
 const userDtoService = new UserDtoService();

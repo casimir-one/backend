@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { APP_PROPOSAL } from '@deip/command-models';
+import { APP_PROPOSAL } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 

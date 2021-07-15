@@ -6,7 +6,7 @@ import { TeamService, UserDtoService, UserService } from './../../services';
 import TenantService from './../../services/legacy/tenant';
 import { USER_PROFILE_STATUS, SIGN_UP_POLICY } from './../../constants';
 import { AttributeDtoService } from './../../services';
-import { ATTR_SCOPES } from '@deip/attributes-service';
+import { ATTR_SCOPES } from '@deip/constants';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);

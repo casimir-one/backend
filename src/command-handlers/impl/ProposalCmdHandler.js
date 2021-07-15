@@ -1,4 +1,4 @@
-import { APP_CMD, APP_PROPOSAL } from '@deip/command-models';
+import { APP_CMD, APP_PROPOSAL } from '@deip/constants';
 import { PROPOSAL_STATUS } from './../../constants';
 import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';

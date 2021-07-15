@@ -1,4 +1,4 @@
-import { APP_CMD } from '@deip/command-models';
+import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import { TeamCreatedEvent, TeamUpdatedEvent, UserCreatedEvent, UserUpdatedEvent } from './../../events';
 import { USER_PROFILE_STATUS } from './../../constants';

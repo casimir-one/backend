@@ -1,4 +1,4 @@
-import { APP_PROPOSAL } from '@deip/command-models';
+import { APP_PROPOSAL } from '@deip/constants';
 
 import ProjectProposalCreatedEvent from './../impl/ProjectProposalCreatedEvent';
 import ProjectProposalAcceptedEvent from './../impl/ProjectProposalAcceptedEvent';

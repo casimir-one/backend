@@ -1,4 +1,4 @@
-const { ATTR_TYPES } = require('@deip/attributes-service');
+const { ATTR_TYPES } = require('@deip/constants');
 
 const ATTRIBUTE_TYPE = ATTR_TYPES;
 

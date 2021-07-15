@@ -1,3 +1,3 @@
-const { ATTR_SCOPES } = require('@deip/attributes-service');
+const { ATTR_SCOPES } = require('@deip/constants');
 
 export default ATTR_SCOPES;

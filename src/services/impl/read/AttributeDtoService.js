@@ -2,7 +2,7 @@ import deipRpc from '@deip/rpc-client';
 import AttributeSchema from './../../../schemas/AttributeSchema';
 import config from './../../../config';
 import TenantSchema from './../../../schemas/TenantSchema';
-import { ATTR_SCOPES } from '@deip/attributes-service';
+import { ATTR_SCOPES } from '@deip/constants';
 import mongoose from 'mongoose';
 
 class AttributeDtoService {

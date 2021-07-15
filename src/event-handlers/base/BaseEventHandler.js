@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_PROPOSAL } from '@deip/command-models';
+import { APP_PROPOSAL } from '@deip/constants';
 import {
   logError,
   logWarn,

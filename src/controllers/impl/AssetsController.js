@@ -1,5 +1,5 @@
 import BaseController from '../base/BaseController';
-import {APP_CMD} from '@deip/command-models';
+import { APP_CMD } from '@deip/constants';
 import { BadRequestError } from './../../errors';
 import { AssetDtoService, UserDtoService } from '../../services';
 import { assetCmdHandler } from './../../command-handlers';

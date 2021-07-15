@@ -1,6 +1,6 @@
 import BaseEvent from './../base/BaseEvent';
 import APP_EVENT from './../../events/base/AppEvent';
-import { APP_PROPOSAL } from '@deip/command-models';
+import { APP_PROPOSAL } from '@deip/constants';
 import assert from 'assert';
 
 
