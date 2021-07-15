@@ -62,7 +62,17 @@ class FundraisingDtoService {
       tokenSale: tokenSalesInfo.find(({ external_id }) => external_id === r.tokenSale)
     }));
   }
-  
+
+  async getContributionsHistoryByTokenSale(tokenSaleId) {
+    const history = deipRpc.api.getContributionsHistoryByTokenSaleAsync(tokenSaleId);
+    const res = history.map((h) => ({
+      timestamp: h.timestamp,
+      contributor: h.op[1].contributor,
+      amount: h.op[1].amount
+    }))
+    return res;
+  }
+
   async getAssetRevenueHistory(symbol, cursor=0) {
     const history = await deipRpc.api.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
     return history;
