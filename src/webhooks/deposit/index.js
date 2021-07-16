@@ -1,4 +1,5 @@
 import config from './../../config';
+import qs from 'qs';
 import crypto from '@deip/lib-crypto';
 import deipRpc from '@deip/rpc-client';
 import { TextEncoder } from 'util';
@@ -21,6 +22,7 @@ const createAssetDepositRequest = async (ctx) => {
       amount,
       timestamp,
       account,
+      redirectUrl,
       sigHex
     } = ctx.request.body;
     const username = ctx.state.user.username;
@@ -33,7 +35,7 @@ const createAssetDepositRequest = async (ctx) => {
 
     if (!amount || amount < MIN_AMOUNT) {
       ctx.status = 400;
-      ctx.body = `Amount to deposit is less than min required amount which is ${MIN_AMOUNT} ${currency}`;
+      ctx.body = `Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(2)} ${currency}`;
       return;
     }
 
@@ -73,12 +75,23 @@ const createAssetDepositRequest = async (ctx) => {
       requestToken: sigHex
     })).save();
     const depositRequest = depositRequestDoc.toObject();
+    
+    const query = qs.stringify({
+      amount,
+      currency,
+      username,
+      account,
+      requestToken: depositRequest.requestToken,
+      serverUrl: config.DEIP_SERVER_URL,
+      referrerUrl: config.DEIP_CLIENT_URL,
+      redirectUrl
+     });
 
-    const redirectUrl = `${config.DEIP_PAYMENT_SERVICE_URL}?amount=${amount}&currency=${currency}&username=${username}&account=${account}&requestToken=${depositRequest.requestToken}&serverUrl=${config.DEIP_SERVER_URL}&referrerUrl=${config.DEIP_CLIENT_URL}`;
+    const redirectToPaymentUrl = `${config.DEIP_PAYMENT_SERVICE_URL}?${query}`;
    
     ctx.status = 200;
     ctx.body = {
-      redirectUrl,
+      redirectUrl: redirectToPaymentUrl,
       depositRequest
     }
   }
