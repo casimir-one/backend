@@ -35,7 +35,7 @@ const createAssetDepositRequest = async (ctx) => {
 
     if (!amount || amount < MIN_AMOUNT) {
       ctx.status = 400;
-      ctx.body = `Amount to deposit is less than min required amount which is ${MIN_AMOUNT} ${currency}`;
+      ctx.body = `Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(2)} ${currency}`;
       return;
     }
 
