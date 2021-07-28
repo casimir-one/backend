@@ -7,6 +7,9 @@ import AttributeDtoService from './AttributeDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
+import config from './../../../config';
+
+import { ChainService } from '@deip/chain-service';
 
 class ProjectDtoService extends BaseService {
 
@@ -27,11 +30,14 @@ class ProjectDtoService extends BaseService {
       ...filterObj
     }
 
-    const chainResearches = await deipRpc.api.getResearchesAsync(researches.map(r => r._id));
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const chainResearches = await chainApi.getProjectsAsync(researches.map(r => r._id));
+
     const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => researchNdaService.getResearchNdaListByResearch(r.external_id)));
     const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
-    const refs = await deipRpc.api.getTeamMemberReferencesAsync(chainResearches.map(p => p.research_group.external_id), false);
+    const refs = await chainApi.getTeamMemberReferencesAsync(chainResearches.map(p => p.research_group.external_id), false);
     const allMembers = refs.map((g) => g.map(m => m.account));
     
     return chainResearches
@@ -183,9 +189,11 @@ class ProjectDtoService extends BaseService {
 
 
   async getProjectsForMember(member) {
-    const teamsRefs = await deipRpc.api.getTeamReferencesAsync([member], false);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const teamsRefs = await chainApi.getTeamReferencesAsync([member], false);
     const [teamsIds] = teamsRefs.map((g) => g.map(m => m.team));
-    const chainResearches = await Promise.all(teamsIds.map(teamId => deipRpc.api.getResearchesByResearchGroupAsync(teamId)));
+    const chainResearches = await Promise.all(teamsIds.map(teamId => chainApi.getProjectsByTeamAsync(teamId)));
     const chainProjects = chainResearches.reduce((acc, projectsList) => {
       const projects = projectsList.filter(p => !acc.some(project => project.external_id == p.external_id));
       return [...acc, ...projects];

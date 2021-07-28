@@ -1,15 +1,24 @@
 import deipRpc from '@deip/rpc-client';
 import ProjectDtoService from './ProjectDtoService';
 import { CHAIN_CONSTANTS } from '../../../constants';
+import config from './../../../config';
+import { ChainService } from '@deip/chain-service';
+
 
 class FundraisingDtoService {
   async getProjectTokenSalesByProject(projectId) {
-    const result = await deipRpc.api.getResearchTokenSalesByResearchAsync(projectId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const result = await chainApi.getProjectTokenSalesByProjectAsync(projectId);
     return result;
   }
 
   async getProjectTokenSaleContributions(projectTokenSaleExternalId) {
-    const result = await deipRpc.api.getResearchTokenSaleContributionsByResearchTokenSaleAsync(projectTokenSaleExternalId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const result = await chainApi.getProjectTokenSaleContributionsByProjectTokenSaleAsync(projectTokenSaleExternalId);
     return result;
   }
 
@@ -19,23 +28,35 @@ class FundraisingDtoService {
     if (!project) {
       return [];
     }
-    const result = await deipRpc.api.getContributionsHistoryByResearchAsync(project.entityId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const result = await chainApi.getContributionsHistoryByProjectAsync(project.entityId);
     return result;
   }
 
   async getAccountRevenueHistoryByAsset(account, symbol, step=0, cursor=0, targetAsset) {
-    const history = await deipRpc.api.getAccountRevenueHistoryBySecurityTokenAsync(account, symbol, cursor, step, targetAsset);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const history = await chainApi.getAccountRevenueHistoryBySecurityTokenAsync(account, symbol, cursor, step, targetAsset);
     return history;
   }
   
   async getAccountRevenueHistory(account, cursor=0) {
-    const history = await deipRpc.api.getAccountRevenueHistoryAsync(account, cursor);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const history = await chainApi.getAccountRevenueHistoryAsync(account, cursor);
     return history;
   }
 
   async getAccountContributionsHistory(account) {
-    const history = await deipRpc.api.getContributionsHistoryByContributorAsync(account);
-    const assets = await deipRpc.api.lookupAssetsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const history = await chainApi.getContributionsHistoryByContributorAsync(account);
+    const assets = await chainApi.lookupAssetsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
     const promises = [];
     const res = history.reduce((accum, current) => {
       const currentDataOp = current.op[1];
@@ -64,7 +85,7 @@ class FundraisingDtoService {
   }
 
   async getContributionsHistoryByTokenSale(tokenSaleId) {
-    const history = deipRpc.api.getContributionsHistoryByTokenSaleAsync(tokenSaleId);
+    const history = chainApi.getContributionsHistoryByTokenSaleAsync(tokenSaleId);
     const res = history.map((h) => ({
       timestamp: h.timestamp,
       contributor: h.op[1].contributor,
@@ -74,12 +95,18 @@ class FundraisingDtoService {
   }
 
   async getAssetRevenueHistory(symbol, cursor=0) {
-    const history = await deipRpc.api.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const history = await chainApi.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
     return history;
   }
 
   async getProjectTokenSale(tokenSaleId) {
-    const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(tokenSaleId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const tokenSale = await chainApi.getProjectTokenSaleAsync(tokenSaleId);
     return tokenSale;
   }
   

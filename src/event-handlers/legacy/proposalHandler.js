@@ -5,6 +5,9 @@ import { LEGACY_APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ProposalService from './../../services/impl/write/ProposalService';
 import { UserDtoService, TeamDtoService } from './../../services';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
+
 
 class ProposalHandler extends EventEmitter { }
 
@@ -18,9 +21,11 @@ async function createProposal(event, chainContractType) {
 
   const proposalId = event.getProposalId();
   const eventModel = event.getSourceData();
-  const chainProposal = await deipRpc.api.getProposalStateAsync(proposalId);
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+  const chainProposal = await chainApi.getProposalStateAsync(proposalId);
 
-  const chainAccounts = await deipRpc.api.getAccountsAsync(chainProposal.required_approvals);
+  const chainAccounts = await chainApi.getAccountsAsync(chainProposal.required_approvals);
 
   const researchGroupsNames = chainAccounts.filter(a => a.is_research_group).map(a => a.name);
   const usersNames = chainAccounts.filter(a => !a.is_research_group).map(a => a.name);
