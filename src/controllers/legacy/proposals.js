@@ -3,19 +3,11 @@ import { APP_PROPOSAL } from '@deip/constants';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 
 import ResearchContentProposalSignedEvent from './../../events/legacy/researchContentProposalSignedEvent';
-import ResearchTokenSaleProposalSignedEvent from './../../events/legacy/researchTokenSaleProposalSignedEvent';
-import ResearchGroupUpdateProposalSignedEvent from './../../events/legacy/researchGroupUpdateProposalSignedEvent';
-import AssetTransferProposalSignedEvent from './../../events/legacy/assetTransferProposalSignedEvent';
-import AssetExchangeProposalSignedEvent from './../../events/legacy/assetExchangeProposalSignedEvent';
 import ResearchExpressLicenseProposalSignedEvent from './../../events/legacy/researchExpressLicenseProposalSignedEvent';
 import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
 import ResearchNdaProposalSignedEvent from './../../events/legacy/researchNdaProposalSignedEvent'
 
 import ResearchContentProposalRejectedEvent from './../../events/legacy/researchContentProposalRejectedEvent';
-import ResearchTokenSaleProposalRejectedEvent from './../../events/legacy/researchTokenSaleProposalRejectedEvent';
-import ResearchGroupUpdateProposalRejectedEvent from './../../events/legacy/researchGroupUpdateProposalRejectedEvent';
-import AssetTransferProposalRejectedEvent from './../../events/legacy/assetTransferProposalRejectedEvent';
-import AssetExchangeProposalRejectedEvent from './../../events/legacy/assetExchangeProposalRejectedEvent';
 import ResearchExpressLicenseProposalRejectedEvent from './../../events/legacy/researchExpressLicenseProposalRejectedEvent';
 import UserResignationProposalRejectedEvent from './../../events/legacy/userResignationProposalRejectedEvent';
 import ResearchNdaProposalRejectedEvent from './../../events/legacy/researchNdaProposalRejectedEvent';
@@ -61,26 +53,6 @@ const updateProposal = async (ctx, next) => {
     if (updatedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
       const researchContentProposalSignedEvent = new ResearchContentProposalSignedEvent(datums);
       ctx.state.events.push(researchContentProposalSignedEvent);
-    }
-
-    if (updatedProposal.type == APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL) {
-      const researchTokenSaleProposalSignedEvent = new ResearchTokenSaleProposalSignedEvent(datums);
-      ctx.state.events.push(researchTokenSaleProposalSignedEvent);
-    }
-
-    if (updatedProposal.type == APP_PROPOSAL.TEAM_UPDATE_PROPOSAL) {
-      const researchGroupUpdateProposalSignedEvent = new ResearchGroupUpdateProposalSignedEvent(datums);
-      ctx.state.events.push(researchGroupUpdateProposalSignedEvent);
-    }
-
-    if (updatedProposal.type == APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL) {
-      const assetTransferProposalSignedEvent = new AssetTransferProposalSignedEvent(datums);
-      ctx.state.events.push(assetTransferProposalSignedEvent);
-    }
-
-    if (updatedProposal.type == APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL) {
-      const assetExchangeProposalSignedEvent = new AssetExchangeProposalSignedEvent(datums);
-      ctx.state.events.push(assetExchangeProposalSignedEvent);
     }
 
     if (updatedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {
@@ -131,26 +103,6 @@ const deleteProposal = async (ctx, next) => {
     if (deletedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
       const researchContentProposalRejectedEvent = new ResearchContentProposalRejectedEvent(datums);
       ctx.state.events.push(researchContentProposalRejectedEvent);
-    }
-
-    if (deletedProposal.type == APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL) {
-      const researchTokenSaleProposalRejectedEvent = new ResearchTokenSaleProposalRejectedEvent(datums);
-      ctx.state.events.push(researchTokenSaleProposalRejectedEvent);
-    }
-
-    if (deletedProposal.type == APP_PROPOSAL.TEAM_UPDATE_PROPOSAL) {
-      const researchGroupUpdateProposalRejectedEvent = new ResearchGroupUpdateProposalRejectedEvent(datums);
-      ctx.state.events.push(researchGroupUpdateProposalRejectedEvent);
-    }
-
-    if (deletedProposal.type == APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL) {
-      const assetTransferProposalRejectedEvent = new AssetTransferProposalRejectedEvent(datums);
-      ctx.state.events.push(assetTransferProposalRejectedEvent);
-    }
-
-    if (deletedProposal.type == APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL) {
-      const assetExchangeProposalRejectedEvent = new AssetExchangeProposalRejectedEvent(datums);
-      ctx.state.events.push(assetExchangeProposalRejectedEvent);
     }
 
     if (deletedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {

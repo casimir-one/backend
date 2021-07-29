@@ -246,68 +246,6 @@ const getResearchApplicationAttachmentFile = async function (ctx) {
   }
 }
 
-
-const approveResearchApplication = async (ctx, next) => {
-  // DEPRECATED
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try { 
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const researchApplicationService = new ResearchApplicationService();
-
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    const { external_id: applicationId } = payload;
-
-    const researchApplication = await researchApplicationService.getResearchApplication(applicationId);
-    if (!researchApplication) {
-      ctx.status = 404;
-      ctx.body = `Research application "${applicationId}" is not found`;
-      return;
-    }
-
-    if (researchApplication.status != RESEARCH_APPLICATION_STATUS.PENDING) {
-      ctx.status = 400;
-      ctx.body = `Research application "${applicationId}" status is ${researchApplication.status}`;
-      return;
-    }
-
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-    const datums = blockchainService.extractOperations(tx);
-
-    const updatedProposal = await chainApi.getProposalAsync(applicationId);
-    const isAccepted = updatedProposal == null;
-
-    const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, { name: "", description: "" });
-    ctx.state.events.push(researchGroupCreatedEvent);
-
-    // TODO: Emit 'project created' event
-
-    const researchApplicationData = researchApplication;
-    const updatedResearchApplication = await researchApplicationService.updateResearchApplication(applicationId, {
-      ...researchApplicationData,
-      status: RESEARCH_APPLICATION_STATUS.APPROVED
-    });
-    
-    ctx.status = 200;
-    ctx.body = { tx, txResult };
-
-    if (isAccepted) {
-      ctx.state.events.push([LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, { tx: researchApplicationData.tx, emitter: jwtUsername }]);
-    }
-    
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
 const rejectResearchApplication = async (ctx, next) => {
   const jwtUsername = ctx.state.user.username;
   const { tx } = ctx.request.body;
@@ -663,7 +601,6 @@ export default {
   getTenantResearchListing,
   createResearchApplication,
   editResearchApplication,
-  approveResearchApplication,
   rejectResearchApplication,
   deleteResearchApplication,
   getResearchApplicationAttachmentFile,
