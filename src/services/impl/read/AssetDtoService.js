@@ -1,5 +1,7 @@
 import deipRpc from '@deip/rpc-client';
 import AssetDepositRequestSchema from '../../../schemas/AssetDepositRequestSchema';
+import config from './../../../config';
+import { ChainService } from '@deip/chain-service';
 
 class AssetDtoService {
   async getAccountDepositHistory(account, status) {
@@ -9,41 +11,65 @@ class AssetDtoService {
     return history;
   }
   async getAssetById(assetId) {
-    const asset = await deipRpc.api.getAssetAsync(assetId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.getAssetAsync(assetId);
     return asset;
   }
   async getAssetBySymbol(symbol) {
-    const asset = await deipRpc.api.getAssetBySymbolAsync(symbol);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.getAssetBySymbolAsync(symbol);
     return asset;
   }
 
   async getAssetsByType(type) {
-    const asset = await deipRpc.api.getAssetsByTypeAsync(type);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.getAssetsByTypeAsync(type);
     return asset;
   }
 
   async getAssetsByIssuer(issuer) {
-    const asset = await deipRpc.api.getAssetsByIssuerAsync(issuer);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.getAssetsByIssuerAsync(issuer);
     return asset;
   }
   
   async lookupAssets(lowerBoundSymbol='', limit=10000) {
-    const asset = await deipRpc.api.lookupAssetsAsync(lowerBoundSymbol, limit);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.lookupAssetsAsync(lowerBoundSymbol, limit);
     return asset;
   }
 
   async getAccountAssetBalance(owner, symbol) {
-    const asset = await deipRpc.api.getAccountAssetBalanceAsync(owner, symbol);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.getAccountAssetBalanceAsync(owner, symbol);
     return asset;
   }
 
   async getAccountAssetsBalancesByOwner(owner) {
-    const asset = await deipRpc.api.getAccountAssetsBalancesAsync(owner);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.getAccountAssetsBalancesAsync(owner);
     return asset;
   }
 
   async getAccountsAssetBalancesByAsset(symbol) {
-    const asset = await deipRpc.api.getAccountsAssetBalancesByAssetAsync(symbol);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const asset = await chainApi.getAccountsAssetBalancesByAssetAsync(symbol);
     return asset;
   }
 }

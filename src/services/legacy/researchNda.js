@@ -1,25 +1,37 @@
-import deipRpc from '@deip/rpc-client';
-
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
 
 class ResearchNdaService {
 
   async getResearchNda(ndaExternalId) {
-    const result = await deipRpc.api.getResearchNdaAsync(ndaExternalId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const result = await chainApi.getProjectNdaAsync(ndaExternalId);
     return result;
   }
   
   async getResearchNdaListByCreator(creator) {
-    const result = await deipRpc.api.getResearchNdaByCreatorAsync(creator);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const result = await chainApi.getProjectNdaByCreatorAsync(creator);
     return result;
   }
 
   async getResearchNdaListByHash(hash) {
-    const result = await deipRpc.api.getResearchNdaByHashAsync(hash);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const result = await chainApi.getProjectNdaByHashAsync(hash);
     return result;
   }
 
   async getResearchNdaListByResearch(researchExternalId) {
-    const result = await deipRpc.api.getResearchNdaByResearchAsync(researchExternalId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    
+    const result = await chainApi.getProjectNdaByProjectAsync(researchExternalId);
     return result;
   }
 

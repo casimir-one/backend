@@ -13,6 +13,9 @@ import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_STATUS } from 
 import FileStorage from './../../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../../forms/legacy/researchApplicationForms';
 import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
+
 
 
 const stat = util.promisify(fs.stat);
@@ -27,6 +30,8 @@ const createResearchApplication = async (ctx, next) => {
   try {
 
     const researchApplicationService = new ResearchApplicationService();
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
 
     const formUploader = researchApplicationForm.fields([
       { name: 'budgetAttachment', maxCount: 1 },
@@ -57,7 +62,7 @@ const createResearchApplication = async (ctx, next) => {
 
     const txResult = await blockchainService.sendTransactionAsync(form.tx);
     const datums = blockchainService.extractOperations(form.tx);
-    const proposal = await deipRpc.api.getProposalAsync(form.proposalId);
+    const proposal = await chainApi.getProposalAsync(form.proposalId);
     const isAccepted = proposal == null;
 
     const researchApplicationRm = await researchApplicationService.createResearchApplication({
@@ -248,7 +253,8 @@ const approveResearchApplication = async (ctx, next) => {
   const { tx } = ctx.request.body;
 
   try { 
-
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
     const researchApplicationService = new ResearchApplicationService();
 
     const operation = tx['operations'][0];
@@ -271,7 +277,7 @@ const approveResearchApplication = async (ctx, next) => {
     const txResult = await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
 
-    const updatedProposal = await deipRpc.api.getProposalAsync(applicationId);
+    const updatedProposal = await chainApi.getProposalAsync(applicationId);
     const isAccepted = updatedProposal == null;
 
     const researchGroupCreatedEvent = new ResearchGroupCreatedEvent(datums, { name: "", description: "" });

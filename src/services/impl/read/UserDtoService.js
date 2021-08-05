@@ -2,6 +2,8 @@ import deipRpc from '@deip/rpc-client';
 import { USER_PROFILE_STATUS } from '../../../constants';
 import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
+import config from './../../../config';
+import { ChainService } from '@deip/chain-service';
 
 class UserDtoService extends BaseService {
 
@@ -10,7 +12,9 @@ class UserDtoService extends BaseService {
   }
 
   async mapUsers(profiles) {
-    const chainAccounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const chainAccounts = await chainApi.getAccountsAsync(profiles.map(p => p._id));
     const tenantProfile = await this.getTenantInstance();
     return chainAccounts
       .map((chainAccount) => {
@@ -84,7 +88,9 @@ class UserDtoService extends BaseService {
 
 
   async getUsersByTeam(teamId) {
-    const refs = await deipRpc.api.getTeamMemberReferencesAsync([teamId], false);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const refs = await chainApi.getTeamMemberReferencesAsync([teamId], false);
     const [members] = refs.map((g) => g.map(m => m.account));
     const profiles = await this.findMany({ _id: { $in: [...members] }, status: USER_PROFILE_STATUS.APPROVED });
     if (!profiles.length) return [];

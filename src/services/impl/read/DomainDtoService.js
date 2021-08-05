@@ -3,6 +3,8 @@ import ProjectDtoService from './ProjectDtoService';
 import { CHAIN_CONSTANTS, DOMAINS } from '../../../constants';
 import DomainSchema from '../../../schemas/DomainSchema';
 import BaseService from '../../base/BaseService';
+import config from './../../../config';
+import { ChainService } from '@deip/chain-service';
 
 class DomainDtoService extends BaseService {
 
@@ -24,8 +26,10 @@ class DomainDtoService extends BaseService {
 
   async getDomainsByProject(projectId) {
     const projectDtoService = new ProjectDtoService();
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
     const project = await projectDtoService.getResearch(projectId);
-    const projectDomains = await deipRpc.api.getDisciplinesByResearchAsync(project.id);
+    const projectDomains = await chainApi.getDisciplinesByProjectAsync(project.id);
     const domains = await this.findMany({});
     const filtered = domains.filter(d => projectDomains.some(({ external_id }) => d._id === external_id));
     if (!filtered.length) return [];

@@ -1,6 +1,5 @@
 import EventEmitter from 'events';
 import deipRpc from '@deip/rpc-client';
-import { ChainService } from '@deip/chain-service';
 import PubSub from 'pubsub-js';
 import fs from 'fs';
 import util from 'util';
@@ -16,6 +15,7 @@ import {
   logWarn,
   logCmdInfo
 } from './../../utils/log';
+import { ChainService } from '@deip/chain-service';
 
 const proposalDtoService = new ProposalDtoService({ scoped: false });
 
@@ -166,7 +166,9 @@ class BaseCmdHandler extends EventEmitter {
 
 
   async extractUpdatedProposals({ proposalsIds, newProposalsCmds }) {
-    const proposalsStates = await deipRpc.api.getProposalsStatesAsync(proposalsIds.map(({ proposalId }) => proposalId));
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const proposalsStates = await chainApi.getProposalsStatesAsync(proposalsIds.map(({ proposalId }) => proposalId));
     const proposalsDtos = await proposalDtoService.getProposals(proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => proposalId));
 
     const existedProposals = proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => {

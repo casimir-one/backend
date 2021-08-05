@@ -1,6 +1,8 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
+import config from './../../../config';
+import { ChainService } from '@deip/chain-service';
 
 
 class TeamDtoService extends BaseService {
@@ -9,8 +11,10 @@ class TeamDtoService extends BaseService {
   }
 
   async mapTeams(researchGroups) {
-    const chainResearchGroups = await deipRpc.api.getAccountsAsync(researchGroups.map(rg => rg._id));
-    const refs = await deipRpc.api.getTeamMemberReferencesAsync(researchGroups.map(rg => rg._id), false);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const chainResearchGroups = await chainApi.getAccountsAsync(researchGroups.map(rg => rg._id));
+    const refs = await chainApi.getTeamMemberReferencesAsync(researchGroups.map(rg => rg._id), false);
     const allMembers = refs.map((g) => g.map(m => m.account));
 
     return chainResearchGroups
@@ -64,14 +68,18 @@ class TeamDtoService extends BaseService {
   }
 
   async authorizeTeamAccount(account, member) {
-    const refs = await deipRpc.api.getTeamMemberReferencesAsync([account], false);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const refs = await chainApi.getTeamMemberReferencesAsync([account], false);
     const [names] = refs.map((g) => g.map(m => m.account));
     return names.includes(member);
   }
 
 
   async getTeamsByUser(member) {
-    const teamsRefs = await deipRpc.api.getTeamReferencesAsync([member], false);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const teamsRefs = await chainApi.getTeamReferencesAsync([member], false);
     const [ids] = teamsRefs.map((g) => g.map(m => m.team));
     const teams = await this.findMany({ _id: { $in: ids } });
     if (!teams.length) return [];

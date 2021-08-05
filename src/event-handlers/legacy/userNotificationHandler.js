@@ -9,6 +9,8 @@ import ResearchService from './../../services/impl/read/ProjectDtoService';
 import { TeamDtoService } from './../../services';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
 import TenantService from './../../services/legacy/tenant';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
@@ -99,10 +101,12 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ 
 userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, async ({ event: researchGroupUpdateProposedEvent }) => {
   const { researchGroupExternalId } = researchGroupUpdateProposedEvent.getSourceData();
   const eventEmitter = researchGroupUpdateProposedEvent.getEventEmitter();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
@@ -133,8 +137,10 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, async ({ ev
 
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
@@ -256,12 +262,15 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, async
 
 userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event: userResignationProposedEvent }) => {
   const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+
   const eventEmitter = userResignationProposedEvent.getEventEmitter();
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
   const excludedUser = await userDtoService.getUser(member);
   const notificationsPromises = [];
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   for (let i = 0; i < members.length; i++) {
@@ -286,12 +295,15 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({
 
 userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({ event: userResignationProposalSignedEvent }) => {
   const proposalsService = new ProposalService();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+
   const proposalId = userResignationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
   const { extendedDetails: { researchGroup, member: excludedUser }, proposer: emitterUser } = proposal;
 
   const notificationsPromises = [];
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   for (let i = 0; i < members.length; i++) {
@@ -329,12 +341,14 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, a
 userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async ({ event: researchTokenSaleProposedEvent }) => {
   const { researchExternalId, researchGroupExternalId } = researchTokenSaleProposedEvent.getSourceData();
   const eventEmitter = researchTokenSaleProposedEvent.getEventEmitter();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
 
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
@@ -363,12 +377,14 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, async
 userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, async ({ event: researchTokenSaleCreatedEvent }) => {
   const { researchTokenSaleExternalId, researchExternalId, researchGroupExternalId } = researchTokenSaleCreatedEvent.getSourceData();
   const eventEmitter = researchTokenSaleCreatedEvent.getEventEmitter();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const research = await researchService.getResearch(researchExternalId);
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
-  const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(researchTokenSaleExternalId);
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const tokenSale = await chainApi.getProjectTokenSaleAsync(researchTokenSaleExternalId);
+  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   const notificationsPromises = [];
@@ -398,6 +414,9 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREA
   const { event: reviewCreatedEvent, tenant } = source;
   const researchContentService = new ResearchContentService();
   const reviewService = new ReviewService();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+
   const { reviewExternalId, researchContentExternalId, author } = reviewCreatedEvent.getSourceData();
 
   let reviewer = await userDtoService.getUser(author);
@@ -407,7 +426,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREA
   let review = await reviewService.getReview(reviewExternalId);
 
   let researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([researchGroup.external_id], false);
+  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   let notificationsPromises = [];

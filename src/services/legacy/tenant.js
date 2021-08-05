@@ -2,6 +2,7 @@ import deipRpc from '@deip/rpc-client';
 import TenantSchema from './../../schemas/TenantSchema';
 import { UserDtoService, UserService } from './../../services';
 import config from './../../config';
+import { ChainService } from '@deip/chain-service';
 
 
 class TenantService {
@@ -11,9 +12,11 @@ class TenantService {
   async getTenant(id) {
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
     const profile = doc.toObject();
-    const [account] = await deipRpc.api.getAccountsAsync([id]);
-    const refs = await deipRpc.api.getTeamMemberReferencesAsync([config.TENANT], false);
+    const [account] = await chainApi.getAccountsAsync([id]);
+    const refs = await chainApi.getTeamMemberReferencesAsync([config.TENANT], false);
     const [admins] = refs.map((g) => g.map(m => m.account));
 
     return { id: id, account: account, profile: profile, admins };
@@ -22,15 +25,19 @@ class TenantService {
   async getNetworkTenant(id) {
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
     const profile = doc.toObject();
-    const [account] = await deipRpc.api.getAccountsAsync([id]);
+    const [account] = await chainApi.getAccountsAsync([id]);
     return { id: profile._id, account: account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
   }
 
   async getNetworkTenants() {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
     const docs = await TenantSchema.find({});
     const profiles = docs.map(doc => doc.toObject());
-    const accounts = await deipRpc.api.getAccountsAsync(profiles.map(p => p._id));
+    const accounts = await chainApi.getAccountsAsync(profiles.map(p => p._id));
 
     const result = profiles.map((profile) => {
       const account = accounts.find(a => a.name == profile._id);

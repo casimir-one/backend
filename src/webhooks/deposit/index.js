@@ -6,6 +6,7 @@ import { TextEncoder } from 'util';
 import * as blockchainService from './../../utils/blockchain';
 import { DEPOSIT_REQUEST_STATUS } from './../../constants';
 import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
+import { ChainService } from '@deip/chain-service';
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -40,8 +41,11 @@ const createAssetDepositRequest = async (ctx) => {
     }
 
     // separate queries as api returns a set of accounts
-    const [depositor] = await deipRpc.api.getAccountsAsync([username]);
-    const [balanceOwner] = await deipRpc.api.getAccountsAsync([account]);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const [depositor] = await chainApi.getAccountsAsync([username]);
+    const [balanceOwner] = await chainApi.getAccountsAsync([account]);
     
     if (!depositor || !balanceOwner) {
       ctx.status = 404;

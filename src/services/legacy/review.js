@@ -1,7 +1,8 @@
 import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
 import ReviewSchema from './../../schemas/ReviewSchema';
-
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
 
 class ReviewService extends BaseService {
 
@@ -10,7 +11,9 @@ class ReviewService extends BaseService {
   }
 
   async mapReviews(reviews) {
-    const chainReviews = await deipRpc.api.getReviewsAsync(reviews.map(r => r._id));
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const chainReviews = await chainApi.getReviewsAsync(reviews.map(r => r._id));
 
     return chainReviews
       .map((chainReview) => {
@@ -75,7 +78,9 @@ class ReviewService extends BaseService {
   async getReviewVotes(reviewExternalId) {
     const review = await this.getReview(reviewExternalId);
     if (!review) return [];
-    const result = await deipRpc.api.getReviewVotesByReviewIdAsync(review.id)
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const result = await chainApi.getReviewVotesByReviewIdAsync(review.id)
     return result;
   }
 

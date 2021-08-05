@@ -4,6 +4,8 @@ import ProjectContentSchema from './../../schemas/ProjectContentSchema';
 import { RESEARCH_CONTENT_STATUS, CONTENT_TYPES_MAP } from './../../constants';
 import ResearchService from './../impl/read/ProjectDtoService';
 import { TeamDtoService, UserDtoService } from './../../services';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
 
 class ResearchContentService extends BaseService {
 
@@ -12,7 +14,10 @@ class ResearchContentService extends BaseService {
   }
 
   async mapResearchContents(researchContents) {
-    const chainResearchContents = await deipRpc.api.getResearchContentsAsync(researchContents.map(rc => rc._id));
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const chainResearchContents = await chainApi.getProjectContentsAsync(researchContents.map(rc => rc._id));
     
     return chainResearchContents
       .map((chainResearchContent) => {
@@ -161,7 +166,10 @@ class ResearchContentService extends BaseService {
 
 
   async lookupContentProposal(researchGroup, hash) {
-    const proposals = await deipRpc.api.getProposalsByCreatorAsync(researchGroup);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const proposals = await chainApi.getProposalsByCreatorAsync(researchGroup);
     const content = proposals.find(p => {
       const [op_name, op_payload] = p['proposed_transaction']['operations'][0];
       let tag = deipRpc.operations.getOperationTag(op_name);
@@ -237,8 +245,10 @@ class ResearchContentService extends BaseService {
     const researchService = new ResearchService();
     const teamDtoService = new TeamDtoService();
     const userDtoService = new UserDtoService();
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
 
-    const outerReferences = await deipRpc.api.getContentsReferToContent2Async(researchContent.external_id);
+    const outerReferences = await chainApi.getContentsReferToContent2Async(researchContent.external_id);
 
     for (let i = 0; i < outerReferences.length; i++) {
       const item = outerReferences[i];
@@ -284,8 +294,10 @@ class ResearchContentService extends BaseService {
     const researchService = new ResearchService();
     const teamDtoService = new TeamDtoService();
     const userDtoService = new UserDtoService();
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
 
-    const innerReferences = await deipRpc.api.getContentReferences2Async(researchContent.external_id);
+    const innerReferences = await chainApi.getContentReferences2Async(researchContent.external_id);
 
     for (let i = 0; i < innerReferences.length; i++) {
       const item = innerReferences[i];

@@ -6,6 +6,8 @@ import { RESEARCH_STATUS } from './../../../constants';
 import ResearchService from './../../../services/impl/read/ProjectDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
+import config from './../../../config';
+import { ChainService } from '@deip/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
@@ -20,8 +22,10 @@ class ProposalDtoService extends BaseService {
 
   
   async mapProposals(proposalsRefs, extended = true) {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
 
-    const chainProposals = await deipRpc.api.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
+    const chainProposals = await chainApi.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
 
     const names = chainProposals.reduce((names, chainProposal) => {
 
@@ -54,7 +58,7 @@ class ProposalDtoService extends BaseService {
     }, []);
 
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(names);
+    const chainAccounts = await chainApi.getAccountsAsync(names);
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
@@ -164,7 +168,10 @@ class ProposalDtoService extends BaseService {
       return [];
     }
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(members);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const chainAccounts = await chainApi.getAccountsAsync(members);
     accounts.push(...members)
 
     for(let i = 0; i < chainAccounts.length; i++) {
@@ -237,8 +244,11 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
-    const chainResearches = await deipRpc.api.getResearchesAsync(researchExternalIds);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
+    const chainResearches = await chainApi.getProjectsAsync(researchExternalIds);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -267,7 +277,10 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -303,7 +316,10 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -439,10 +455,12 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
 
     const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
     const researches = await researchService.getResearches(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
-    const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => deipRpc.api.getResearchTokenSaleAsync(id)));
+    const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => chainApi.getProjectTokenSaleAsync(id)));
 
 
     return proposals.map((proposal) => {
@@ -467,7 +485,10 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -495,8 +516,10 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
 
-    const chainAccounts = await deipRpc.api.getAccountsAsync(accountNames);
+    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -531,10 +554,13 @@ class ProposalDtoService extends BaseService {
 
   
   async getAccountProposals(username) {
-    const teamsRefs = await deipRpc.api.getTeamReferencesAsync([username], false);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const teamsRefs = await chainApi.getTeamReferencesAsync([username], false);
     const [teamsIds] = teamsRefs.map((g) => g.map(m => m.team));
     const signers = [username, ...teamsIds];
-    const allProposals = await deipRpc.api.getProposalsBySignersAsync(signers);
+    const allProposals = await chainApi.getProposalsBySignersAsync(signers);
     const externalIds = allProposals.reduce((unique, chainProposal) => {
       if (unique.some((id) => id == chainProposal.external_id))
         return unique;

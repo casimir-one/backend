@@ -10,6 +10,9 @@ import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
 import reviewHandler from './reviewHandler';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
+
 
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import { UserService, TeamDtoService } from './../../services';
@@ -85,12 +88,14 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_CREATED, (payload, rep
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
   const userService = new UserService();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const requesterUserProfile = await userService.getUser(creator);
-  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const [requesterUserAccount] = await chainApi.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
-  const proposal = await deipRpc.api.getProposalAsync(proposalId);
+  const proposal = await chainApi.getProposalAsync(proposalId);
   const research = { researchExternalId, title, disciplines };
 
   const payload = { research, proposal, requester: requesterUser, tenant };
@@ -111,13 +116,15 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_APPROVED, (payload, re
   const userService = new UserService();
   const teamDtoService = new TeamDtoService()
   const researchService = new ResearchService();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const approverUserProfile = await userService.getUser(emitter);
-  const [approverUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
+  const [approverUserAccount] = await chainApi.getAccountsAsync([emitter]);
   const approverUser = { profile: approverUserProfile, account: approverUserAccount };
 
   const requesterUserProfile = await userService.getUser(creator);
-  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const [requesterUserAccount] = await chainApi.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
   const research = await researchService.getResearch(researchExternalId);
@@ -139,13 +146,15 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_REJECTED, (payload, re
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
   const userService = new UserService();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const rejecterUserProfile = await userService.getUser(emitter);
-  const [rejecterUserAccount] = await deipRpc.api.getAccountsAsync([emitter]);
+  const [rejecterUserAccount] = await chainApi.getAccountsAsync([emitter]);
   const rejecterUser = { profile: rejecterUserProfile, account: rejecterUserAccount };
 
   const requesterUserProfile = await userService.getUser(creator);
-  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const [requesterUserAccount] = await chainApi.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
   const research = { researchExternalId, title, disciplines };
@@ -166,11 +175,13 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_EDITED, (payload, repl
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
   const userService = new UserService();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const requesterUserProfile = await userService.getUser(creator);
-  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const [requesterUserAccount] = await chainApi.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
-  const proposal = await deipRpc.api.getProposalAsync(proposalId);
+  const proposal = await chainApi.getProposalAsync(proposalId);
 
   const research = { researchExternalId, title, disciplines };
 
@@ -190,9 +201,11 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, (payload, rep
   const { external_id: researchExternalId, title, disciplines } = create_research_operation[1];
 
   const userService = new UserService();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   const requesterUserProfile = await userService.getUser(creator);
-  const [requesterUserAccount] = await deipRpc.api.getAccountsAsync([creator]);
+  const [requesterUserAccount] = await chainApi.getAccountsAsync([creator]);
   const requesterUser = { profile: requesterUserProfile, account: requesterUserAccount };
 
   const research = { researchExternalId, title, disciplines };

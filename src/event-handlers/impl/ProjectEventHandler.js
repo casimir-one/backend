@@ -5,6 +5,8 @@ import { RESEARCH_STATUS, TOKEN_SALE_STATUS, RESEARCH_ATTRIBUTE } from './../../
 import { ProjectService } from './../../services';
 import { TextEncoder } from 'util';
 import deipRpc from '@deip/rpc-client';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
 
 class ProjectEventHandler extends BaseEventHandler {
 
@@ -117,7 +119,9 @@ projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event)
 
 projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED, async (event) => {
   const { tokenSaleId } = event.getEventPayload();
-  const projectTokenSale = await deipRpc.api.getResearchTokenSaleAsync(tokenSaleId);
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+  const projectTokenSale = await chainApi.getProjectTokenSaleAsync(tokenSaleId);
 
   const project = await projectService.getProject(projectTokenSale.research_external_id);
   

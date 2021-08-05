@@ -6,6 +6,7 @@ import TenantService from './../../services/legacy/tenant';
 import { TeamService, TeamDtoService, UserDtoService, ProjectDtoService } from './../../services';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
 import deipRpc from '@deip/rpc-client';
+import { ChainService } from '@deip/chain-service';
 
 
 class UserNotificationEventHandler extends BaseEventHandler {
@@ -299,11 +300,14 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (
 userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED, async (event) => {
   const { projectId, teamId, creator } = event.getEventPayload();
 
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+
   const project = await projectDtoService.getResearch(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
 
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([team.external_id], false);
+  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   const notifications = [];
@@ -330,11 +334,14 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
 userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event) => {
   const { entityId, projectId, teamId, creator } = event.getEventPayload();
 
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+
   const project = await projectDtoService.getResearch(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
-  const tokenSale = await deipRpc.api.getResearchTokenSaleAsync(entityId);
-  const refs = await deipRpc.api.getTeamMemberReferencesAsync([team.external_id], false);
+  const tokenSale = await chainApi.getProjectTokenSaleAsync(entityId);
+  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
   const [members] = refs.map((g) => g.map(m => m.account));
 
   const notifications = [];

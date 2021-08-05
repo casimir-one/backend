@@ -4,6 +4,9 @@ import APP_EVENT from './../../events/base/AppEvent';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import ProposalService from './../../services/impl/write/ProposalService';
 import { TeamDtoService } from './../../services';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
+
 
 class ProposalEventHandler extends BaseEventHandler {
 
@@ -21,12 +24,14 @@ const teamDtoService = new TeamDtoService();
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   const { proposalId, creator, status, proposalCmd, type } = event.getEventPayload();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
 
   // This handler should be replaced with handlers for multisig transactions below
 
   // Currently this collection includes 'personal' spaces that are being created for every standalone user.
   // We should replace this call after removing 'personal' spaces from domain logic
-  const chainProposal = await deipRpc.api.getProposalStateAsync(proposalId);
+  const chainProposal = await chainApi.getProposalStateAsync(proposalId);
   const teams = await teamDtoService.getTeams(chainProposal.required_approvals);
   const multiTenantIds = teams.reduce((acc, item) => {
     return acc.some(id => id == item.tenantId) ? acc : [...acc, item.tenantId];

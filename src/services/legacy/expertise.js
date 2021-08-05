@@ -1,28 +1,44 @@
-import deipRpc from '@deip/rpc-client';
+import config from './../../config';
+import { ChainService } from '@deip/chain-service';
 
 class ExpertiseService {
   async getEciHistoryByResearchContentAndDiscipline(contentId, disciplineId) {
-    const expertise = await deipRpc.api.getEciHistoryByResearchContentAndDisciplineAsync(contentId, disciplineId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const expertise = await chainApi.getExpertiseContributionByProjectContentAndDisciplineAsync(contentId, disciplineId);
     return expertise;
   }
 
   async getExpertiseContributionsByResearch(researchId) {
-    const expertise = await deipRpc.api.getExpertiseContributionsByResearchAsync(researchId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const expertise = await chainApi.getExpertiseContributionsByProjectAsync(researchId);
     return expertise;
   }
 
   async getExpertiseContributionsByResearchAndDiscipline(researchId, disciplineId) {
-    const expertise = await deipRpc.api.getExpertiseContributionsByResearchAndDisciplineAsync(researchId, disciplineId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const expertise = await chainApi.getExpertiseContributionsByProjectAndDisciplineAsync(researchId, disciplineId);
     return expertise;
   }
 
   async getExpertiseContributionByResearchContentAndDiscipline(contentId, disciplineId) {
-    const expertise = await deipRpc.api.getExpertiseContributionByResearchContentAndDisciplineAsync(contentId, disciplineId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const expertise = await chainApi.getExpertiseContributionByProjectContentAndDisciplineAsync(contentId, disciplineId);
     return expertise;
   }
 
   async getExpertiseContributionsByResearchContent(contentId) {
-    const expertise = await deipRpc.api.getExpertiseContributionsByResearchContentAsync(contentId);
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const expertise = await chainApi.getExpertiseContributionsByProjectContentAsync(contentId);
     return expertise;
   }
 }
