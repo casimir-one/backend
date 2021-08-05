@@ -2,7 +2,7 @@ import BaseController from '../base/BaseController';
 import { FundraisingDtoService } from '../../services';
 import { tokenSaleCmdHandler } from './../../command-handlers';
 import { APP_CMD } from '@deip/constants';
-import { BadRequestError, ConflictError } from './../../errors';
+import { BadRequestError } from './../../errors';
 
 const fundraisingDtoService = new FundraisingDtoService();
 

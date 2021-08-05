@@ -5,7 +5,6 @@ import { handle, fire, wait } from './utils';
 import { LEGACY_APP_EVENTS } from './../../constants';
 import userNotificationsHandler from './userNotificationHandler';
 import researchHandler from './researchHandler';
-import researchGroupHandler from './researchGroupHandler';
 import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
 import researchContentHandler from './researchContentHandler';
@@ -42,43 +41,6 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload,
   await wait(researchContentHandler, researchContentProposalSignedEvent, null, tenant);
   // register handlers
 }));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchContentProposalRejectedEvent, tenant } = source;
-  // register handlers
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchGroupCreatedEvent, tenant } = source;
-  await wait(researchGroupHandler, researchGroupCreatedEvent, null, tenant);
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchGroupUpdatedEvent } = source;
-  await wait(researchGroupHandler, researchGroupUpdatedEvent);
-  fire(userNotificationsHandler, researchGroupUpdatedEvent);
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchGroupUpdateProposedEvent } = source;
-  await wait(proposalHandler, researchGroupUpdateProposedEvent);
-  fire(userNotificationsHandler, researchGroupUpdateProposedEvent);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchGroupUpdateProposalSignedEvent, tenant } = source;
-  await wait(researchGroupHandler, researchGroupUpdateProposalSignedEvent, null, tenant);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_GROUP_UPDATE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchGroupUpdateProposalRejectedEvent, tenant, emitter } = source;
-  // register handlers
-}));
-
 
 appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { tx, emitter, tenant } = source;
@@ -230,37 +192,6 @@ appEventHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, (payload,
   fire(userNotificationsHandler, userResignationProposalSignedEvent);
 }));
 
-
-appEventHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: userResignationProposalSignedEvent, tenant, emitter } = source;
-  // register handlers
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchTokenSaleCreatedEvent } = source;
-  await wait(researchHandler, researchTokenSaleCreatedEvent);
-  fire(userNotificationsHandler, researchTokenSaleCreatedEvent);
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchTokenSaleProposedEvent } = source;
-  await wait(proposalHandler, researchTokenSaleProposedEvent);
-  fire(userNotificationsHandler, researchTokenSaleProposedEvent);
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchTokenSaleProposalSignedEvent, tenant } = source;
-  await wait(researchHandler, researchTokenSaleProposalSignedEvent, null, tenant);
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_TOKEN_SALE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchTokenSaleProposalRejectedEvent, tenant } = source;
-  // register handlers
-}));
-
 appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposedEvent, tenant } = source;
   await wait(proposalHandler, researchExpressLicenseProposedEvent, null, tenant);
@@ -269,46 +200,6 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload
 appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposalSignedEvent, tenant } = source;
   await wait(expressLicensingHandler, researchExpressLicenseProposalSignedEvent, null, tenant);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchExpressLicenseProposalRejectedEvent, tenant } = source;
-  // register handlers
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.ASSET_EXCHANGE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetExchangeProposedEvent, tenant } = source;
-  await wait(proposalHandler, assetExchangeProposedEvent, null, tenant);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.ASSET_EXCHANGE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetExchangeProposalSignedEvent, tenant } = source;
-  // register handlers
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.ASSET_EXCHANGE_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetExchangeProposalRejectedEvent, tenant } = source;
-  // register handlers
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.ASSET_TRANSFERRED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetTransferredEvent, tenant } = source;
-  // register handlers
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.ASSET_TRANSFER_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetTransferProposedEvent, tenant } = source;
-  await wait(proposalHandler, assetTransferProposedEvent, null, tenant);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.ASSET_TRANSFER_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetTransferProposalSignedEvent, tenant } = source;
-  // register handlers
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.ASSET_TRANSFER_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: assetTransferProposalRejectedEvent, tenant } = source;
-  // register handlers
 }));
 
 appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
