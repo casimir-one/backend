@@ -12,7 +12,6 @@ import * as blockchainService from './../../utils/blockchain';
 import { LEGACY_APP_EVENTS, RESEARCH_APPLICATION_STATUS, RESEARCH_STATUS } from './../../constants';
 import FileStorage from './../../storage';
 import { researchApplicationForm, researchApplicationAttachmentFilePath } from './../../forms/legacy/researchApplicationForms';
-import ResearchGroupCreatedEvent from './../../events/legacy/researchGroupCreatedEvent';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
 
