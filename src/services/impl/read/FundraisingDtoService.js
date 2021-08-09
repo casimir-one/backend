@@ -88,7 +88,7 @@ class FundraisingDtoService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
 
-    const history = chainApi.getContributionsHistoryByTokenSaleAsync(tokenSaleId);
+    const history = await chainApi.getContributionsHistoryByTokenSaleAsync(tokenSaleId);
     const res = history.map((h) => ({
       timestamp: h.timestamp,
       contributor: h.op[1].contributor,
