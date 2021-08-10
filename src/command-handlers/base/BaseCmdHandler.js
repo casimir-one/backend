@@ -52,8 +52,8 @@ class BaseCmdHandler extends EventEmitter {
       const chainService = await ChainService.getInstanceAsync(config);
       const chainApi = chainService.getChainApi();
       const chainNodeClient = chainService.getChainNodeClient();
-      await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
-      const txInfo = await chainApi.sendTxAsync(tx.getRawTx());
+      await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);      
+      const txInfo = await tx.sendAsync(chainApi);
       return txInfo;
     },
   ) {
