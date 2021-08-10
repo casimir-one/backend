@@ -7,6 +7,7 @@ import domainsCtrl from './impl/DomainsController';
 import usersCtrl from './impl/UsersController';
 import authCtrl from './impl/AuthController';
 import fundraisingCtrl from './impl/FundraisingController';
+import documentTemplatesCtrl from './impl/DocumentTemplatesController';
 
 module.exports = {
   projectsCtrl,
@@ -17,5 +18,6 @@ module.exports = {
   domainsCtrl,
   usersCtrl,
   authCtrl,
-  fundraisingCtrl
+  fundraisingCtrl,
+  documentTemplatesCtrl
 }
