@@ -48,6 +48,10 @@ import AssetExchangeProposalCreatedEvent from './impl/AssetExchangeProposalCreat
 import AssetExchangeProposalAcceptedEvent from './impl/AssetExchangeProposalAcceptedEvent';
 import AssetExchangeProposalDeclinedEvent from './impl/AssetExchangeProposalDeclinedEvent';
 
+import DocumentTemplateCreatedEvent from './impl/DocumentTemplateCreatedEvent';
+import DocumentTemplateUpdatedEvent from './impl/DocumentTemplateUpdatedEvent';
+import DocumentTemplateDeletedEvent from './impl/DocumentTemplateDeletedEvent';
+
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
@@ -98,5 +102,9 @@ module.exports = {
   AssetTransferProposalDeclinedEvent,
   AssetExchangeProposalCreatedEvent,
   AssetExchangeProposalAcceptedEvent,
-  AssetExchangeProposalDeclinedEvent
+  AssetExchangeProposalDeclinedEvent,
+
+  DocumentTemplateCreatedEvent,
+  DocumentTemplateUpdatedEvent,
+  DocumentTemplateDeletedEvent
 }

@@ -6,7 +6,8 @@ import {
   userNotificationEventHandler, 
   userInviteEventHandler,
   attributeEventHandler,
-  userEventHandler
+  userEventHandler,
+  documentTemplateEventHandler
 } from './index';
 
 
@@ -145,5 +146,17 @@ module.exports = {
 
   [APP_EVENT.ASSET_TRANSFERED]: [
     { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.DOCUMENT_TEMPLATE_CREATED]: [
+    { h: documentTemplateEventHandler, await: false }
+  ],
+
+  [APP_EVENT.DOCUMENT_TEMPLATE_UPDATED]: [
+    { h: documentTemplateEventHandler, await: false }
+  ],
+
+  [APP_EVENT.DOCUMENT_TEMPLATE_DELETED]: [
+    { h: documentTemplateEventHandler, await: false }
   ],
 };

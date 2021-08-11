@@ -16,7 +16,7 @@ import tenant from '../controllers/legacy/tenant';
 import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
 
-import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl, usersCtrl, fundraisingCtrl } from '../controllers';
+import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl, usersCtrl, fundraisingCtrl, documentTemplatesCtrl } from '../controllers';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
@@ -252,6 +252,12 @@ protected_route.get('/v2/history/account/:account/:cursor', fundraisingCtrl.getA
 protected_route.get('/v2/history/contributions/account/:account', fundraisingCtrl.getAccountContributionsHistory)
 protected_route.get('/v2/history/contributions/token-sale/:tokenSaleId', fundraisingCtrl.getContributionsHistoryByTokenSale)
 protected_route.get('/v2/history/symbol/:symbol/:cursor', fundraisingCtrl.getAssetRevenueHistory)
+
+public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)
+public_route.get('/v2/document-templates/account/:account', documentTemplatesCtrl.getDocumentTemplatesByAccount)
+protected_route.post('/v2/document-template', documentTemplatesCtrl.createDocumentTemplate)
+protected_route.put('/v2/document-template', documentTemplatesCtrl.updateDocumentTemplate)
+protected_route.put('/v2/document-template/delete', documentTemplatesCtrl.deleteDocumentTemplate)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

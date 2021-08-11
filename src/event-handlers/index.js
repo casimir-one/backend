@@ -5,6 +5,7 @@ import userNotificationEventHandler from './impl/UserNotificationEventHandler';
 import userInviteEventHandler from './impl/UserInviteEventHandler';
 import attributeEventHandler from './impl/AttributeEventHandler';
 import userEventHandler from './impl/UserEventHandler';
+import documentTemplateEventHandler from './impl/DocumentTemplateEventHandler';
 
 
 module.exports = {
@@ -14,5 +15,6 @@ module.exports = {
   userNotificationEventHandler,
   userInviteEventHandler,
   attributeEventHandler,
-  userEventHandler
+  userEventHandler,
+  documentTemplateEventHandler
 }
