@@ -11,6 +11,8 @@ import DomainDtoService from './impl/read/DomainDtoService';
 import UserDtoService from './impl/read/UserDtoService';
 import UserService from './impl/write/UserService';
 import FundraisingDtoService from './impl/read/FundraisingDtoService';
+import DocumentTemplateDtoService from './impl/read/DocumentTemplateDtoService';
+import DocumentTemplateService from './impl/write/DocumentTemplateService';
 
 module.exports = {
   TeamService,
@@ -32,6 +34,9 @@ module.exports = {
   UserService,
   UserDtoService,
 
-  FundraisingDtoService
+  FundraisingDtoService,
+
+  DocumentTemplateDtoService,
+  DocumentTemplateService
 
 }

@@ -4,6 +4,7 @@ import proposalCmdHandler from './impl/ProposalCmdHandler';
 import attributeCmdHandler from './impl/AttributeCmdHandler';
 import tokenSaleCmdHandler from './impl/TokenSaleCmdHandler';
 import assetCmdHandler from './impl/AssetCmdHandler';
+import documentTemplateCmdHandler from './impl/DocumentTemplateCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -11,5 +12,6 @@ module.exports = {
   proposalCmdHandler,
   attributeCmdHandler,
   tokenSaleCmdHandler,
-  assetCmdHandler
+  assetCmdHandler,
+  documentTemplateCmdHandler
 }
