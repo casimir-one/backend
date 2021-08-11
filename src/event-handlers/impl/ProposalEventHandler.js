@@ -1,5 +1,4 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import deipRpc from '@deip/rpc-client';
 import APP_EVENT from './../../events/base/AppEvent';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import ProposalService from './../../services/impl/write/ProposalService';

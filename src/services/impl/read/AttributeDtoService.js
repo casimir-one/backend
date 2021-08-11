@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import AttributeSchema from './../../../schemas/AttributeSchema';
 import config from './../../../config';
 import TenantSchema from './../../../schemas/TenantSchema';

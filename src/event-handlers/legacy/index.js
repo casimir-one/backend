@@ -1,6 +1,5 @@
 
 import EventEmitter from 'events';
-import deipRpc from '@deip/rpc-client';
 import { handle, fire, wait } from './utils';
 import { LEGACY_APP_EVENTS } from './../../constants';
 import userNotificationsHandler from './userNotificationHandler';

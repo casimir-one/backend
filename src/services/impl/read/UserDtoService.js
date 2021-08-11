@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import { USER_PROFILE_STATUS } from '../../../constants';
 import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';

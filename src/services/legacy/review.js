@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
 import ReviewSchema from './../../schemas/ReviewSchema';
 import config from './../../config';

@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import AttributeSchema from './../../../schemas/AttributeSchema';
 import mongoose from 'mongoose';

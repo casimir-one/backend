@@ -4,7 +4,6 @@ import APP_EVENT from './../../events/base/AppEvent';
 import { RESEARCH_STATUS, TOKEN_SALE_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
 import { ProjectService } from './../../services';
 import { TextEncoder } from 'util';
-import deipRpc from '@deip/rpc-client';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
 

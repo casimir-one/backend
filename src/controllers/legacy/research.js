@@ -5,7 +5,6 @@ import sharp from 'sharp'
 import send from 'koa-send';
 import slug from 'limax';
 import qs from 'qs';
-import deipRpc from '@deip/rpc-client';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import ResearchApplicationService from './../../services/legacy/researchApplication';
 import * as blockchainService from './../../utils/blockchain';

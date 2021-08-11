@@ -1,6 +1,5 @@
 import ProjectExpressLicenseSchema from './../../schemas/ProjectExpressLicenseSchema';
 import BaseService from './../base/BaseService';
-import deipRpc from '@deip/rpc-client';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
 

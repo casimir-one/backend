@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import ProjectDtoService from './ProjectDtoService';
 import { CHAIN_CONSTANTS } from '../../../constants';
 import config from './../../../config';

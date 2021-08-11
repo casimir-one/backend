@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import AssetDepositRequestSchema from '../../../schemas/AssetDepositRequestSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';

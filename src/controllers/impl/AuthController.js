@@ -5,7 +5,7 @@ import { accountCmdHandler } from './../../command-handlers';
 import { UserService } from './../../services';
 import config from './../../config';
 import { USER_ROLES } from './../../constants';
-import deipRpc from '@deip/rpc-client';
+import { ChainService } from '@deip/chain-service';
 
 const userService = new UserService();
 
@@ -38,11 +38,12 @@ class AuthController extends BaseController {
           }
         };
 
-        const registrar = config.FAUCET_ACCOUNT;
-        const { wif: regaccPrivKey } = registrar;
+        const chainService = await ChainService.getInstanceAsync(config);
+        const chainNodeClient = chainService.getChainNodeClient();
+        const { wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
 
         const msg = ctx.state.msg;
-        await msg.tx.signAsync(regaccPrivKey, deipRpc);
+        await msg.tx.signAsync(regaccPrivKey, chainNodeClient);
 
         await accountCmdHandler.process(msg, ctx, validate);
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);

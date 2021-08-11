@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import qs from 'qs';
 import ExpertiseService from './../../services/legacy/expertise';
 import { UserDtoService } from './../../services';

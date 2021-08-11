@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import ExpressLicensingService from './../../legacy/expressLicensing';

@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import TenantSchema from './../../schemas/TenantSchema';
 import { UserDtoService, UserService } from './../../services';
 import config from './../../config';

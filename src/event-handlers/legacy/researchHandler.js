@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import deipRpc from '@deip/rpc-client';
 import { LEGACY_APP_EVENTS, PROPOSAL_STATUS, ATTRIBUTE_TYPE, RESEARCH_STATUS, USER_INVITE_STATUS, RESEARCH_ATTRIBUTE, TOKEN_SALE_STATUS, ATTR_SCOPES } from './../../constants';
 import { handle, fire, wait } from './utils';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';

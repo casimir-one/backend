@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL } from '@deip/constants';
 import ProposalSchema from './../../../schemas/ProposalSchema';

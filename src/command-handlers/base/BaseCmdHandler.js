@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import deipRpc from '@deip/rpc-client';
 import PubSub from 'pubsub-js';
 import fs from 'fs';
 import util from 'util';
