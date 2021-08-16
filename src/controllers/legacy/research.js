@@ -528,7 +528,7 @@ const getResearch = async (ctx) => {
 
   try {
     const projectDtoService = new ProjectDtoService();
-    const research = await projectDtoService.getResearch(researchExternalId);
+    const research = await projectDtoService.getProject(researchExternalId);
     if (!research) {
       ctx.status = 404;
       ctx.body = null;
@@ -558,7 +558,7 @@ const getResearches = async (ctx) => {
     }
 
     const projectDtoService = new ProjectDtoService();
-    const researches = await projectDtoService.getResearches(researchesExternalIds);
+    const researches = await projectDtoService.getProjects(researchesExternalIds);
 
     const result = researches;
     ctx.status = 200;

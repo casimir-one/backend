@@ -7,7 +7,8 @@ import {
   userInviteEventHandler,
   attributeEventHandler,
   userEventHandler,
-  documentTemplateEventHandler
+  documentTemplateEventHandler,
+  tokenSaleEventHandler
 } from './index';
 
 
@@ -137,6 +138,7 @@ module.exports = {
   ],
 
   [APP_EVENT.PROJECT_TOKEN_SALE_CREATED]: [
+    { h: tokenSaleEventHandler, await: true },
     { h: projectEventHandler, await: false }
   ],
 

@@ -14,7 +14,6 @@ const projectService = new ProjectService();
 
 class ProjectsController extends BaseController {
 
-
   getProject = this.query({
     h: async (ctx) => {
       try {

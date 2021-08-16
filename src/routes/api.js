@@ -16,7 +16,17 @@ import tenant from '../controllers/legacy/tenant';
 import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
 
-import { projectsCtrl, proposalsCtrl, teamsCtrl, attributesCtrl, assetsCtrl, domainsCtrl, usersCtrl, fundraisingCtrl, documentTemplatesCtrl } from '../controllers';
+import { 
+  projectsCtrl, 
+  proposalsCtrl, 
+  teamsCtrl, 
+  attributesCtrl, 
+  assetsCtrl, 
+  domainsCtrl, 
+  usersCtrl, 
+  investmentOppCtrl, 
+  documentTemplatesCtrl 
+} from '../controllers';
 
 import * as blockchainService from './../utils/blockchain';
 import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
@@ -176,6 +186,7 @@ protected_route.get('/express-licensing/licensee/:licensee/licenser/:licenser', 
 public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
 public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
 
+// deprecated
 protected_route.post('/infrastructure/tenant/sign', tenant.signTxByTenant)
 protected_route.post('/infrastructure/tenant/affirm', tenant.affirmTxByTenant)
 
@@ -240,18 +251,17 @@ public_route.get('/user/:username/attribute/:attributeId/file/:filename', compos
 
 protected_route.get('/v2/bookmarks/user/:username', usersCtrl.getUserBookmarks)
 
-public_route.get('/v2/fundraising/project/:projectId', fundraisingCtrl.getProjectTokenSalesByProject)
-protected_route.post('/v2/fundraising', fundraisingCtrl.createProjectTokenSale)
-protected_route.post('/v2/fundraising/contributions', fundraisingCtrl.createProjectTokenSaleContribution)
-protected_route.get('/v2/fundraising/:projectTokenSaleExternalId/contributions', fundraisingCtrl.getProjectTokenSaleContributions)
-protected_route.get('/v2/fundraising/project/:projectId/contributions', fundraisingCtrl.getProjectTokenSaleContributionsByProject)
-protected_route.get('/v2/fundraising/token-sale/:tokenSaleId', fundraisingCtrl.getProjectTokenSale)
-
-protected_route.get('/v2/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', fundraisingCtrl.getAccountRevenueHistoryByAsset)
-protected_route.get('/v2/history/account/:account/:cursor', fundraisingCtrl.getAccountRevenueHistory)
-protected_route.get('/v2/history/contributions/account/:account', fundraisingCtrl.getAccountContributionsHistory)
-protected_route.get('/v2/history/contributions/token-sale/:tokenSaleId', fundraisingCtrl.getContributionsHistoryByTokenSale)
-protected_route.get('/v2/history/symbol/:symbol/:cursor', fundraisingCtrl.getAssetRevenueHistory)
+public_route.get('/v2/investments/project/:projectId', investmentOppCtrl.getProjectTokenSalesByProject)
+protected_route.post('/v2/investments', investmentOppCtrl.createProjectTokenSale)
+protected_route.post('/v2/investments/contributions', investmentOppCtrl.createProjectTokenSaleContribution)
+protected_route.get('/v2/investments/:projectTokenSaleExternalId/contributions', investmentOppCtrl.getProjectTokenSaleContributions)
+protected_route.get('/v2/investments/project/:projectId/contributions', investmentOppCtrl.getProjectTokenSaleContributionsByProject)
+protected_route.get('/v2/investments/token-sale/:tokenSaleId', investmentOppCtrl.getProjectTokenSale)
+protected_route.get('/v2/investments/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', investmentOppCtrl.getAccountRevenueHistoryByAsset)
+protected_route.get('/v2/investments/history/account/:account/:cursor', investmentOppCtrl.getAccountRevenueHistory)
+protected_route.get('/v2/investments/history/contributions/account/:account', investmentOppCtrl.getAccountContributionsHistory)
+protected_route.get('/v2/investments/history/contributions/token-sale/:tokenSaleId', investmentOppCtrl.getContributionsHistoryByTokenSale)
+protected_route.get('/v2/investments/history/symbol/:symbol/:cursor', investmentOppCtrl.getAssetRevenueHistory)
 
 public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)
 public_route.get('/v2/document-templates/account/:account', documentTemplatesCtrl.getDocumentTemplatesByAccount)

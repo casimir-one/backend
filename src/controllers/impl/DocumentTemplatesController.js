@@ -8,6 +8,7 @@ const documentTemplateDtoService = new DocumentTemplateDtoService();
 const teamDtoService = new TeamDtoService();
 
 class DocumentTemplatesController extends BaseController {
+  
   getDocumentTemplate = this.query({
     h: async (ctx) => {
       try {

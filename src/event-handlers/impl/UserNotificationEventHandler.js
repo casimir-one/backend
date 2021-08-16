@@ -35,7 +35,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
   } = event.getEventPayload();
 
   const tenant = await tenantService.getTenant(config.TENANT);
-  const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
+  const project = await projectDtoService.getProject(projectId); // TODO: replace with a call to project read schema
   const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
@@ -105,7 +105,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
   const { projectId, teamId } = event.getEventPayload();
 
   const tenant = await tenantService.getTenant(config.TENANT);
-  const project = await projectDtoService.getResearch(projectId); // TODO: replace with a call to project read schema
+  const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
@@ -138,7 +138,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
   } = event.getEventPayload();
 
   const tenant = await tenantService.getTenant(config.TENANT);
-  const project = await projectDtoService.getResearch(projectId);
+  const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const teamCreator = await userDtoService.getUser(team.creator);
 
@@ -170,7 +170,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
 
   const tenant = await tenantService.getTenant(config.TENANT);
   const team = await teamDtoService.getTeam(teamId);
-  const project = await projectDtoService.getResearch(projectId);
+  const project = await projectDtoService.getProject(projectId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
@@ -303,7 +303,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
 
-  const project = await projectDtoService.getResearch(projectId);
+  const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
 
@@ -337,7 +337,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, asyn
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
 
-  const project = await projectDtoService.getResearch(projectId);
+  const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
   const tokenSale = await chainApi.getProjectTokenSaleAsync(entityId);

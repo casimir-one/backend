@@ -1,14 +1,12 @@
 import BaseEvent from './../base/BaseEvent';
-import { APP_PROPOSAL } from '@deip/constants';
 import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
 
 
 class ProjectTokenSaleCreatedEvent extends BaseEvent {
   constructor(eventPayload) {
-    const qwe = eventPayload;
-
     const {
+      tokenSaleId,
       teamId,
       projectId,
       startTime,
@@ -16,7 +14,9 @@ class ProjectTokenSaleCreatedEvent extends BaseEvent {
       securityTokensOnSale,
       softCap,
       hardCap,
-      creator
+      creator,
+      title,
+      metadata
     } = eventPayload;
 
     assert(!!teamId, "'teamId' is required");
@@ -28,7 +28,8 @@ class ProjectTokenSaleCreatedEvent extends BaseEvent {
     assert(!!softCap, "'softCap' required");
     assert(!!hardCap, "'hardCap' required");
 
-    super(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, { 
+    super(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, {
+      tokenSaleId,
       teamId,
       projectId,
       startTime,
@@ -36,7 +37,9 @@ class ProjectTokenSaleCreatedEvent extends BaseEvent {
       securityTokensOnSale,
       softCap,
       hardCap,
-      creator
+      creator,
+      title,
+      metadata
     });
   }
 }

@@ -2,14 +2,46 @@ import ProjectDtoService from './ProjectDtoService';
 import { CHAIN_CONSTANTS } from '../../../constants';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
+import BaseService from '../../base/BaseService';
+import InvestmentOpportunitySchema from '../../../schemas/InvestmentOpportunitySchema';
 
 
-class FundraisingDtoService {
-  async getProjectTokenSalesByProject(projectId) {
+class InvestmentOpportunityDtoService extends BaseService {
+
+  constructor(options = { scoped: true }) {
+    super(InvestmentOpportunitySchema, options);
+  }
+
+  async mapInvestmentOpportunity(investmentOpps) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    
-    const result = await chainApi.getProjectTokenSalesByProjectAsync(projectId);
+    const chainInvestmentOpps = await Promise.all(investmentOpps.map((investmentOpp) => chainApi.getProjectTokenSaleAsync(investmentOpp._id)));
+
+    return chainInvestmentOpps
+      .map((chainInvestmentOp, i) => {
+        const investmentOpp = investmentOpps.find((investmentOpp) => investmentOpp._id == chainInvestmentOp.external_id);
+        return {
+          ...chainInvestmentOp,
+          entityId: chainInvestmentOp.external_id,
+          type: investmentOpp.type,
+          title: investmentOpp.title || "",
+          metadata: investmentOpp.metadata || {}
+        }
+      });
+  }
+
+
+  async getProjectTokenSale(tokenSaleId) {
+    const investmentOpp = await this.findOne({ _id: tokenSaleId });
+    if (!investmentOpp) return null;
+    const results = await this.mapInvestmentOpportunity([investmentOpp]);
+    const [result] = results;
+    return result;
+  }
+  
+  async getProjectTokenSalesByProject(projectId) {
+    const investmentOpps = await this.findMany({ projectId });
+    const result = await this.mapInvestmentOpportunity(investmentOpps);
     return result;
   }
 
@@ -23,7 +55,7 @@ class FundraisingDtoService {
 
   async getProjectTokenSaleContributionsByProject(projectId) {
     const projectDtoService = new ProjectDtoService();
-    const project = await projectDtoService.getResearch(projectId);
+    const project = await projectDtoService.getProject(projectId);
     if (!project) {
       return [];
     }
@@ -103,16 +135,8 @@ class FundraisingDtoService {
     const history = await chainApi.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
     return history;
   }
-
-  async getProjectTokenSale(tokenSaleId) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const tokenSale = await chainApi.getProjectTokenSaleAsync(tokenSaleId);
-    return tokenSale;
-  }
   
 }
 
 
-export default FundraisingDtoService;
+export default InvestmentOpportunityDtoService;

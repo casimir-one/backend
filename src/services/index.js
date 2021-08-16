@@ -10,9 +10,11 @@ import AssetDtoService from './impl/read/AssetDtoService';
 import DomainDtoService from './impl/read/DomainDtoService';
 import UserDtoService from './impl/read/UserDtoService';
 import UserService from './impl/write/UserService';
-import FundraisingDtoService from './impl/read/FundraisingDtoService';
+import InvestmentOpportunityDtoService from './impl/read/InvestmentOpportunityDtoService';
+import InvestmentOpportunityService from './impl/write/InvestmentOpportunityService';
 import DocumentTemplateDtoService from './impl/read/DocumentTemplateDtoService';
 import DocumentTemplateService from './impl/write/DocumentTemplateService';
+
 
 module.exports = {
   TeamService,
@@ -34,9 +36,9 @@ module.exports = {
   UserService,
   UserDtoService,
 
-  FundraisingDtoService,
+  InvestmentOpportunityService,
+  InvestmentOpportunityDtoService,
 
   DocumentTemplateDtoService,
   DocumentTemplateService
-
 }

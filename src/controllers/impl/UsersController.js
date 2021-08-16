@@ -13,6 +13,7 @@ import { UserForm } from './../../forms';
 const userDtoService = new UserDtoService();
 
 class UsersController extends BaseController {
+  
   getUser = this.query({
     h: async (ctx) => {
       try {

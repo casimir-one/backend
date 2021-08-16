@@ -12,6 +12,7 @@ const teamDtoService = new TeamDtoService();
 
 
 class TeamsController extends BaseController {
+  
   getTeam = this.query({
     h: async (ctx) => {
       try {
