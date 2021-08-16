@@ -7,6 +7,7 @@ import ProposalDtoService from './impl/read/ProposalDtoService';
 import AttributeService from './impl/write/AttributeService';
 import AttributeDtoService from './impl/read/AttributeDtoService';
 import AssetDtoService from './impl/read/AssetDtoService';
+import AssetService from './impl/write/AssetService';
 import DomainDtoService from './impl/read/DomainDtoService';
 import UserDtoService from './impl/read/UserDtoService';
 import UserService from './impl/write/UserService';
@@ -27,6 +28,7 @@ module.exports = {
   ProposalDtoService,
 
   AssetDtoService,
+  AssetService,
 
   AttributeService,
   AttributeDtoService,

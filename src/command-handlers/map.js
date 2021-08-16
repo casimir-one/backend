@@ -27,6 +27,8 @@ module.exports = {
   [APP_CMD.CREATE_INVESTMENT_OPPORTUNITY]: investmentOppCmdHandler,
   [APP_CMD.INVEST]: investmentOppCmdHandler,
   [APP_CMD.ASSET_TRANSFER]: assetCmdHandler,
+  [APP_CMD.CREATE_ASSET]: assetCmdHandler,
+  [APP_CMD.ISSUE_ASSET]: assetCmdHandler,
   [APP_CMD.CREATE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
   [APP_CMD.UPDATE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
   [APP_CMD.DELETE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,

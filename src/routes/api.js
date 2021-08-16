@@ -232,6 +232,8 @@ protected_route.get('/v2/assets/owner/:owner', assetsCtrl.getAccountAssetsBalanc
 public_route.get('/v2/assets/accounts/symbol/:symbol', assetsCtrl.getAccountsAssetBalancesByAsset)
 protected_route.post('/v2/assets/transfer', assetsCtrl.createAssetTransferRequest)
 protected_route.post('/v2/assets/exchange', assetsCtrl.createAssetExchangeRequest)
+protected_route.post('/v2/asset/create', assetsCtrl.createAsset)
+protected_route.post('/v2/asset/issue', assetsCtrl.issueAsset)
 
 public_route.get('/v2/domains', domainsCtrl.getDomains)
 public_route.get('/v2/domains/project/:projectId', domainsCtrl.getDomainsByProject)

@@ -1,8 +1,26 @@
 import AssetDepositRequestSchema from '../../../schemas/AssetDepositRequestSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
+import AssetSchema from './../../../schemas/AssetSchema';
 
 class AssetDtoService {
+  async mapAssets(assets) {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+    const assetsObj = assets.map(a => a.toObject());
+
+    const chainAssets = await Promise.all(assetsObj.map(a => chainApi.getAssetBySymbolAsync(a.stringSymbol)));
+    return assetsObj
+      .map((asset, i) => {
+        const chainAsset = chainAssets.find((ca) => ca.string_symbol == asset.stringSymbol);
+        return {
+          ...asset,
+          currentSupply: chainAsset.current_supply,
+          symbol: chainAsset.symbol
+        }
+      });
+  }
+
   async getAccountDepositHistory(account, status) {
     const query = { account };
     if (status) query.status = status;
@@ -10,42 +28,37 @@ class AssetDtoService {
     return history;
   }
   async getAssetById(assetId) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const asset = await chainApi.getAssetAsync(assetId);
-    return asset;
+    const asset = await AssetSchema.findOne({ _id: assetId });
+    const result = await this.mapAssets([asset]);
+
+    return result[0];
   }
   async getAssetBySymbol(symbol) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const asset = await chainApi.getAssetBySymbolAsync(symbol);
-    return asset;
+    const asset = await AssetSchema.findOne({ stringSymbol: symbol });
+    const result = await this.mapAssets([asset]);
+
+    return result[0];
   }
 
   async getAssetsByType(type) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const asset = await chainApi.getAssetsByTypeAsync(type);
-    return asset;
+    const assets = await AssetSchema.find({ type });
+    const result = await this.mapAssets(assets);
+
+    return result;
   }
 
   async getAssetsByIssuer(issuer) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const asset = await chainApi.getAssetsByIssuerAsync(issuer);
-    return asset;
+    const assets = await AssetSchema.find({ issuer });
+    const result = await this.mapAssets(assets);
+
+    return result;
   }
   
-  async lookupAssets(lowerBoundSymbol='', limit=10000) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const asset = await chainApi.lookupAssetsAsync(lowerBoundSymbol, limit);
-    return asset;
+  async lookupAssets() {
+    const assets = await AssetSchema.find();
+    const result = await this.mapAssets(assets);
+
+    return result;
   }
 
   async getAccountAssetBalance(owner, symbol) {

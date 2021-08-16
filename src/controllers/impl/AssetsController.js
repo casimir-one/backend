@@ -266,6 +266,56 @@ class AssetsController extends BaseController {
       }
     }
   });
+
+  createAsset = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ASSET);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+  
+  issueAsset = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ISSUE_ASSET);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 }
 
 const assetsCtrl = new AssetsController();
