@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { ProjectTokenSaleContributedEvent, ProjectTokenSaleCreatedEvent } from './../../events';
+import { ProjectTokenSaleInvestedEvent, ProjectTokenSaleCreatedEvent } from './../../events';
 
 
 class InvestmentOpportunityCmdHandler extends BaseCmdHandler {
@@ -15,7 +15,7 @@ class InvestmentOpportunityCmdHandler extends BaseCmdHandler {
 const investmentOppCmdHandler = new InvestmentOpportunityCmdHandler();
 
 
-investmentOppCmdHandler.register(APP_CMD.CREATE_PROJECT_TOKEN_SALE, (cmd, ctx) => {
+investmentOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ctx) => {
   const {
     entityId: tokenSaleId,
     teamId,
@@ -47,16 +47,16 @@ investmentOppCmdHandler.register(APP_CMD.CREATE_PROJECT_TOKEN_SALE, (cmd, ctx) =
 });
 
 
-investmentOppCmdHandler.register(APP_CMD.CONTRIBUTE_PROJECT_TOKEN_SALE, (cmd, ctx) => {
+investmentOppCmdHandler.register(APP_CMD.INVEST, (cmd, ctx) => {
   const {
     tokenSaleId,
-    contributor,
+    investor,
     amount
   } = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new ProjectTokenSaleContributedEvent({
+  ctx.state.appEvents.push(new ProjectTokenSaleInvestedEvent({
     tokenSaleId,
-    contributor,
+    investor,
     amount
   }));
 });

@@ -45,15 +45,14 @@ class InvestmentOpportunityDtoService extends BaseService {
     return result;
   }
 
-  async getProjectTokenSaleContributions(projectTokenSaleExternalId) {
+  async getProjectTokenSaleInvestments(tokenSaleId) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    
-    const result = await chainApi.getProjectTokenSaleContributionsByProjectTokenSaleAsync(projectTokenSaleExternalId);
+    const result = await chainApi.getProjectTokenSaleContributionsByProjectTokenSaleAsync(tokenSaleId);
     return result;
   }
 
-  async getProjectTokenSaleContributionsByProject(projectId) {
+  async getProjectTokenSaleInvestmentsByProject(projectId) {
     const projectDtoService = new ProjectDtoService();
     const project = await projectDtoService.getProject(projectId);
     if (!project) {

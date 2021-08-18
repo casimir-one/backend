@@ -142,7 +142,7 @@ module.exports = {
     { h: projectEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED]: [
+  [APP_EVENT.PROJECT_TOKEN_SALE_INVESTED]: [
     { h: projectEventHandler, await: false }
   ],
 

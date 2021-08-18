@@ -13,7 +13,7 @@ class InvestmentOpportunityController extends BaseController {
       try {
 
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROJECT_TOKEN_SALE || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_INVESTMENT_OPPORTUNITY || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
           console.log(appCmd)
 
           if (!appCmd) {
@@ -21,8 +21,8 @@ class InvestmentOpportunityController extends BaseController {
           }
           if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
             const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROJECT_TOKEN_SALE)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.CREATE_PROJECT_TOKEN_SALE]} protocol cmd`);
+            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.CREATE_INVESTMENT_OPPORTUNITY)) {
+              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.CREATE_INVESTMENT_OPPORTUNITY]} protocol cmd`);
             }
           }
         };
@@ -41,12 +41,12 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  createProjectTokenSaleContribution = this.command({
+  investProjectTokenSale = this.command({
     h: async (ctx) => {
       try {
 
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CONTRIBUTE_PROJECT_TOKEN_SALE);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.INVEST);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
@@ -83,13 +83,13 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  getProjectTokenSaleContributions = this.query({
+  getProjectTokenSaleInvestments = this.query({
     h: async (ctx) => {
       try {
-        const projectTokenSaleExternalId = ctx.params.projectTokenSaleExternalId;
-        const contributions = await investmentOppDtoService.getProjectTokenSaleContributions(projectTokenSaleExternalId);
+        const tokenSaleId = ctx.params.tokenSaleId;
+        const investments = await investmentOppDtoService.getProjectTokenSaleInvestments(tokenSaleId);
         ctx.status = 200;
-        ctx.body = contributions;
+        ctx.body = investments;
       } catch (err) {
         console.log(err);
         ctx.status = 500;
@@ -98,13 +98,13 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  getProjectTokenSaleContributionsByProject = this.query({
+  getProjectTokenSaleInvestmentsByProject = this.query({
     h: async (ctx) => {
       try {
         const projectId = ctx.params.projectId;
-        const contributions = await investmentOppDtoService.getProjectTokenSaleContributionsByProject(projectId);
+        const investments = await investmentOppDtoService.getProjectTokenSaleInvestmentsByProject(projectId);
         ctx.status = 200;
-        ctx.body = contributions;
+        ctx.body = investments;
       } catch (err) {
         console.log(err);
         ctx.status = 500;

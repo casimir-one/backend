@@ -116,7 +116,7 @@ projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event)
 
 });
 
-projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED, async (event) => {
+projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_INVESTED, async (event) => {
   const { tokenSaleId } = event.getEventPayload();
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
