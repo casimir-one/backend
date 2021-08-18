@@ -9,13 +9,11 @@ class DocumentTemplateDtoService extends BaseService {
 
   async getDocumentTemplate(id) {
     const documentTemplate = await this.findOne({ _id: id });
-
     return documentTemplate;
   }
 
   async getDocumentTemplatesByAccount(account) {
     const documentTemplates = await this.findMany({ account });
-
     return documentTemplates;
   }
  

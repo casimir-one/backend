@@ -38,7 +38,7 @@ import ProjectTokenSaleProposalDeclinedEvent from './impl/ProjectTokenSalePropos
 
 import ProjectTokenSaleCreatedEvent from './impl/ProjectTokenSaleCreatedEvent';
 
-import ProjectTokenSaleContridutedEvent from './impl/ProjectTokenSaleContridutedEvent';
+import ProjectTokenSaleContributedEvent from './impl/ProjectTokenSaleContributedEvent';
 
 import AssetTransferedEvent from './impl/AssetTransferedEvent';
 import AssetTransferProposalCreatedEvent from './impl/AssetTransferProposalCreatedEvent';
@@ -94,7 +94,7 @@ module.exports = {
 
   ProjectTokenSaleCreatedEvent,
 
-  ProjectTokenSaleContridutedEvent,
+  ProjectTokenSaleContributedEvent,
 
   AssetTransferedEvent,
   AssetTransferProposalCreatedEvent,

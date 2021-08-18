@@ -6,6 +6,7 @@ import userInviteEventHandler from './impl/UserInviteEventHandler';
 import attributeEventHandler from './impl/AttributeEventHandler';
 import userEventHandler from './impl/UserEventHandler';
 import documentTemplateEventHandler from './impl/DocumentTemplateEventHandler';
+import tokenSaleEventHandler from './impl/TokenSaleEventHandler';
 
 
 module.exports = {
@@ -16,5 +17,6 @@ module.exports = {
   userInviteEventHandler,
   attributeEventHandler,
   userEventHandler,
-  documentTemplateEventHandler
+  documentTemplateEventHandler,
+  tokenSaleEventHandler
 }

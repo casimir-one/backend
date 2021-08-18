@@ -1,12 +1,13 @@
 import BaseController from '../base/BaseController';
-import { FundraisingDtoService } from '../../services';
-import { tokenSaleCmdHandler } from './../../command-handlers';
+import { InvestmentOpportunityDtoService } from '../../services';
+import { investmentOppCmdHandler } from './../../command-handlers';
 import { APP_CMD } from '@deip/constants';
 import { BadRequestError } from './../../errors';
 
-const fundraisingDtoService = new FundraisingDtoService();
+const investmentOppDtoService = new InvestmentOpportunityDtoService();
 
-class FundraisingController extends BaseController {
+class InvestmentOpportunityController extends BaseController {
+
   createProjectTokenSale = this.command({
     h: async (ctx) => {
       try {
@@ -28,7 +29,7 @@ class FundraisingController extends BaseController {
 
         const msg = ctx.state.msg;
 
-        await tokenSaleCmdHandler.process(msg, ctx, validate);
+        await investmentOppCmdHandler.process(msg, ctx, validate);
         
         ctx.status = 200;
         ctx.body = { model: 'ok' };
@@ -53,7 +54,7 @@ class FundraisingController extends BaseController {
 
         const msg = ctx.state.msg;
 
-        await tokenSaleCmdHandler.process(msg, ctx, validate);
+        await investmentOppCmdHandler.process(msg, ctx, validate);
 
         ctx.status = 200;
         ctx.body = {
@@ -67,26 +68,11 @@ class FundraisingController extends BaseController {
     }
   });
 
-  getDomains = this.query({
-    h: async (ctx) => {
-      try {
-        const domains = await domainDtoService.getDomains();
-        ctx.status = 200
-        ctx.body = domains;
-    
-      } catch (err) {
-        console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
-      }
-    }
-  });
-
   getProjectTokenSalesByProject = this.query({
     h: async (ctx) => {
       try {
         const projectId = ctx.params.projectId;
-        const tokenSales = await fundraisingDtoService.getProjectTokenSalesByProject(projectId);
+        const tokenSales = await investmentOppDtoService.getProjectTokenSalesByProject(projectId);
         ctx.status = 200;
         ctx.body = tokenSales;
       } catch (err) {
@@ -101,7 +87,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const projectTokenSaleExternalId = ctx.params.projectTokenSaleExternalId;
-        const contributions = await fundraisingDtoService.getProjectTokenSaleContributions(projectTokenSaleExternalId);
+        const contributions = await investmentOppDtoService.getProjectTokenSaleContributions(projectTokenSaleExternalId);
         ctx.status = 200;
         ctx.body = contributions;
       } catch (err) {
@@ -116,7 +102,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const projectId = ctx.params.projectId;
-        const contributions = await fundraisingDtoService.getProjectTokenSaleContributionsByProject(projectId);
+        const contributions = await investmentOppDtoService.getProjectTokenSaleContributionsByProject(projectId);
         ctx.status = 200;
         ctx.body = contributions;
       } catch (err) {
@@ -131,7 +117,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const { account, symbol, step, cursor, targetAsset } = ctx.params;
-        const history = await fundraisingDtoService.getAccountRevenueHistoryByAsset(account, symbol, step, cursor, targetAsset);
+        const history = await investmentOppDtoService.getAccountRevenueHistoryByAsset(account, symbol, step, cursor, targetAsset);
         if (!history) {
           ctx.status = 404;
           ctx.body = null;
@@ -152,7 +138,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const { account, cursor } = ctx.params;
-        const history = await fundraisingDtoService.getAccountRevenueHistory(account, cursor);
+        const history = await investmentOppDtoService.getAccountRevenueHistory(account, cursor);
         if (!history) {
           ctx.status = 404;
           ctx.body = null;
@@ -173,7 +159,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const { account } = ctx.params;
-        const history = await fundraisingDtoService.getAccountContributionsHistory(account);
+        const history = await investmentOppDtoService.getAccountContributionsHistory(account);
         if (!history) {
           ctx.status = 404;
           ctx.body = null;
@@ -194,7 +180,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const tokenSaleId = ctx.params.tokenSaleId;
-        const history = await fundraisingDtoService.getContributionsHistoryByTokenSale(tokenSaleId);
+        const history = await investmentOppDtoService.getContributionsHistoryByTokenSale(tokenSaleId);
         if (!history) {
           ctx.status = 404;
           ctx.body = null;
@@ -215,7 +201,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const { symbol, cursor } = ctx.params;
-        const history = await fundraisingDtoService.getAssetRevenueHistory(symbol, cursor);
+        const history = await investmentOppDtoService.getAssetRevenueHistory(symbol, cursor);
         if (!history) {
           ctx.status = 404;
           ctx.body = null;
@@ -236,7 +222,7 @@ class FundraisingController extends BaseController {
     h: async (ctx) => {
       try {
         const { tokenSaleId } = ctx.params;
-        const tokeSale = await fundraisingDtoService.getProjectTokenSale(tokenSaleId);
+        const tokeSale = await investmentOppDtoService.getProjectTokenSale(tokenSaleId);
         if (!tokeSale) {
           ctx.status = 404;
           ctx.body = null;
@@ -254,6 +240,6 @@ class FundraisingController extends BaseController {
   });
 }
 
-const fundraisingCtrl = new FundraisingController();
+const investmentOppCtrl = new InvestmentOpportunityController();
 
-module.exports = fundraisingCtrl;
+module.exports = investmentOppCtrl;

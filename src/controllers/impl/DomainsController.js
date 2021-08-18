@@ -1,9 +1,10 @@
 import BaseController from '../base/BaseController';
-import {DomainDtoService} from '../../services';
+import { DomainDtoService } from '../../services';
 
 const domainDtoService = new DomainDtoService();
 
 class DomainsController extends BaseController {
+
   getDomains = this.query({
     h: async (ctx) => {
       try {

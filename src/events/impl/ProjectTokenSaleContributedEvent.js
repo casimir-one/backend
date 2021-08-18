@@ -3,7 +3,7 @@ import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
 
 
-class ProjectTokenSaleContridutedEvent extends BaseEvent {
+class ProjectTokenSaleContributedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -22,4 +22,4 @@ class ProjectTokenSaleContridutedEvent extends BaseEvent {
 }
 
 
-module.exports = ProjectTokenSaleContridutedEvent;
+module.exports = ProjectTokenSaleContributedEvent;

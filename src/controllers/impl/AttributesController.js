@@ -7,6 +7,7 @@ import {AttributeDtoService} from './../../services';
 const attributeDtoService = new AttributeDtoService();
 
 class AttributesController extends BaseController {
+  
   getAttributes = this.query({
     h: async (ctx) => {
       try {

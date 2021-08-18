@@ -1,4 +1,3 @@
-
 import CHAIN_CONSTANTS from './chainConstants';
 import SIGN_UP_POLICY from './signUpPolicy';
 import USER_PROFILE_STATUS from './userProfileStatus';
@@ -21,6 +20,8 @@ import ATTR_SCOPES from './attributeScopes';
 import QUEUE_TOPIC from './queueTopic';
 import USER_ROLES from './userRoles';
 import DEPOSIT_REQUEST_STATUS from './assetDepositRequestStatus';
+import INVESTMENT_OPPORTUNITY_TYPE from './investmentOpportunityType'
+
 
 export {
   CHAIN_CONSTANTS,
@@ -45,5 +46,6 @@ export {
   ATTR_SCOPES,
   QUEUE_TOPIC,
   USER_ROLES,
-  DEPOSIT_REQUEST_STATUS
+  DEPOSIT_REQUEST_STATUS,
+  INVESTMENT_OPPORTUNITY_TYPE
 }

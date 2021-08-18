@@ -12,7 +12,11 @@ class DomainDtoService extends BaseService {
   }
 
   mapDomains(domains) {
-    return domains.map(d => ({ ...d, externalId: d._id }))
+    return domains.map(d => ({ 
+      ...d, 
+      entityId: d._id,
+      externalId: d._id
+    }))
   }
 
   async getDomains(excluded = DOMAINS.EXCLUDED) {
@@ -27,7 +31,7 @@ class DomainDtoService extends BaseService {
     const projectDtoService = new ProjectDtoService();
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    const project = await projectDtoService.getResearch(projectId);
+    const project = await projectDtoService.getProject(projectId);
     const projectDomains = await chainApi.getDisciplinesByProjectAsync(project.id);
     const domains = await this.findMany({});
     const filtered = domains.filter(d => projectDomains.some(({ external_id }) => d._id === external_id));
