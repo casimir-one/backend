@@ -1,4 +1,3 @@
-import deipRpc from '@deip/rpc-client';
 import BaseService from './../base/BaseService';
 import ProjectContentSchema from './../../schemas/ProjectContentSchema';
 import { RESEARCH_CONTENT_STATUS, CONTENT_TYPES_MAP } from './../../constants';
@@ -168,6 +167,8 @@ class ResearchContentService extends BaseService {
   async lookupContentProposal(researchGroup, hash) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
+    const chainNodeClient = chainService.getChainNodeClient();
+    const deipRpc = chainNodeClient;
 
     const proposals = await chainApi.getProposalsByCreatorAsync(researchGroup);
     const content = proposals.find(p => {

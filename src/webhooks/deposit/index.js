@@ -1,7 +1,6 @@
 import config from './../../config';
 import qs from 'qs';
 import crypto from '@deip/lib-crypto';
-import deipRpc from '@deip/rpc-client';
 import { TextEncoder } from 'util';
 import * as blockchainService from './../../utils/blockchain';
 import { DEPOSIT_REQUEST_STATUS } from './../../constants';
@@ -112,6 +111,10 @@ const confirmAssetDepositRequest = async (ctx) => {
     sig,
     invoice
   } = ctx.request.body;
+
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
 
   let depositRequestDoc;
   

@@ -5,7 +5,6 @@ import APP_EVENT from './../../events/base/AppEvent';
 import TenantService from './../../services/legacy/tenant';
 import { TeamService, TeamDtoService, UserDtoService, ProjectDtoService } from './../../services';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
-import deipRpc from '@deip/rpc-client';
 import { ChainService } from '@deip/chain-service';
 
 
@@ -302,6 +301,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
 
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
 
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
@@ -336,6 +337,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, asyn
 
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
 
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);

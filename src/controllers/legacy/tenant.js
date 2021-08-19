@@ -1,4 +1,4 @@
-import deipRpc from '@deip/rpc-client';
+import { ChainService } from '@deip/chain-service';
 import sharp from 'sharp';
 import TenantService from './../../services/legacy/tenant';
 import { TeamService, UserDtoService, UserService } from './../../services';
@@ -476,6 +476,10 @@ const signTxByTenant = async (ctx) => {
   const isTenantAccessToken = ctx.state.user.isTenant;
   try {
 
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainNodeClient = chainService.getChainNodeClient();
+    const deipRpc = chainNodeClient;
+
     if (isTenantAccessToken) {
       ctx.status = 403;
       ctx.body = `Endpoint can be used only by ${ctx.state.tenant.id} tenant`;
@@ -503,6 +507,10 @@ const affirmTxByTenant = async (ctx) => {
       ctx.body = `Endpoint can be used only by ${ctx.state.tenant.id} tenant`;
       return;
     }
+
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainNodeClient = chainService.getChainNodeClient();
+    const deipRpc = chainNodeClient;
 
     const result = deipRpc.auth.signTransaction(tx, {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY });
     ctx.status = 200;

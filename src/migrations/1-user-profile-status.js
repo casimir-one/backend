@@ -14,14 +14,9 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const bluebird = require('bluebird');
 const UserSchema = require('./../schemas/UserSchema');
-const deipRpc = require('@deip/rpc-client');
 const USER_PROFILE_STATUS = require('./../constants/userProfileStatus').default;
 
-
-deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
-deipRpc.config.set('chain_id', config.DEIP_FULL_NODE_URL);
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {

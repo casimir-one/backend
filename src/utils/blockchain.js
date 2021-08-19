@@ -1,12 +1,13 @@
 
-import deipRpc from '@deip/rpc-client';
+import { ChainService } from '@deip/chain-service';
 import config from './../config';
-import request from 'request';
-import util from 'util';
 
 async function signOperations(operations, privKey, refBlock = {}) {
   const { refBlockNum, refBlockPrefix } = refBlock;
-  
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
+
   const refBlockPromise = refBlockNum && refBlockPrefix
     ? Promise.resolve({ refBlockNum, refBlockPrefix })
     : getRefBlockSummary();
@@ -33,6 +34,10 @@ async function getRefBlockSummary() {
   let refBlockNum;
   let refBlockPrefix;
 
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
+
   return deipRpc.api.getDynamicGlobalPropertiesAsync()
     .then((res, err) => {
       if (err) throw new Error(err);
@@ -47,6 +52,10 @@ async function getRefBlockSummary() {
 }
 
 async function sendTransactionAsync(tx) {
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
+
   const promise = new Promise((resolve, reject) => {
     deipRpc.api.broadcastTransactionSynchronous(tx, function (err, result) {
       if (err) {
@@ -62,6 +71,10 @@ async function sendTransactionAsync(tx) {
 
 
 async function getBlock(blockNum) {
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
+
   return new Promise((resolve, reject) => {
     deipRpc.api.getBlock(blockNum, function (err, result) {
       if (err) {
@@ -73,6 +86,10 @@ async function getBlock(blockNum) {
 }
 
 async function getTransaction(trxId) {
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
+
   return new Promise((resolve, reject) => {
     deipRpc.api.getTransaction(trxId, function (err, result) {
       if (err) {

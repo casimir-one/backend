@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import deipRpc from '@deip/rpc-client';
 import { LEGACY_APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
 import { UserDtoService } from './../../services';
 import UserNotificationService from './../../services/legacy/userNotification';
@@ -25,6 +24,10 @@ const userNotificationHandler = new UserNotificationHandler();
 userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({ event: researchContentProposedEvent, tenant }) => {
   const { researchGroupExternalId, researchExternalId, source: { offchain: { title } } } = researchContentProposedEvent.getSourceData();
   const eventEmitter = researchContentProposedEvent.getEventEmitter();
+  
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
 
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const research = await researchService.getResearch(researchExternalId);
@@ -60,6 +63,10 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, async ({
 
 userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, async ({ event: researchContentCreatedEvent, tenant }) => {
   const researchContentService = new ResearchContentService();
+  
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
 
   const { researchContentExternalId, researchExternalId } = researchContentCreatedEvent.getSourceData();
   const eventEmitter = researchContentCreatedEvent.getEventEmitter();
@@ -193,8 +200,10 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, async
 
 userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event: userResignationProposedEvent }) => {
   const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
+  
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
 
   const eventEmitter = userResignationProposedEvent.getEventEmitter();
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
@@ -227,7 +236,8 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({
 userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({ event: userResignationProposalSignedEvent }) => {
   const proposalsService = new ProposalService();
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
 
   const proposalId = userResignationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);

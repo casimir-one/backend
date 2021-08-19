@@ -11,12 +11,11 @@
     "start": "npm run build && npm run serve"
   },
   "dependencies": {
-    "@deip/app-config-service": "1.335.0",
-    "@deip/command-models": "1.335.0",
-    "@deip/constants": "1.335.0",
+    "@deip/command-models": "1.335.1",
+    "@deip/constants": "1.335.1",
+    "@deip/message-models": "1.335.1",
+    "@deip/chain-service": "1.335.1",
     "@deip/lib-crypto": "1.118.0",
-    "@deip/message-models": "1.335.0",
-    "@deip/rpc-client": "1.335.0",
     "@deip/toolbox": "1.133.0",
     "@koa/cors": "^2.2.1",
     "axios": "^0.15.3",
@@ -91,7 +90,7 @@
     "webpack-merge": "^4.1.2"
   },
   "engines": {
-    "node": ">= 12.0.0",
+    "node": "^12.20.0 || ^14.13.1 || >=16.0.0",
     "npm": ">= 3.0.0"
   }
 }

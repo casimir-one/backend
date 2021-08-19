@@ -25,6 +25,7 @@ const { RESEARCH_CONTENT_TYPES, RESEARCH_STATUS } = require('./../constants');
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
 
+const ChainService = require('@deip/chain-service').ChainService;
 
 
 const blackListUsers = ['regacc', 'simonarataj'];
@@ -100,31 +101,33 @@ const run = async ({
   TARGET_DEIP_MONGO_STORAGE_CONNECTION_URL,
   DEIP_SERVER_URL
 }) => {
-  const deipRpc = require('@deip/rpc-client');
-  deipRpc.api.setOptions({ url: DEIP_FULL_NODE_URL });
-  deipRpc.config.set('chain_id', CHAIN_ID);
+
+  const chainService = await ChainService.getInstanceAsync({ ...config, DEIP_FULL_NODE_URL, CHAIN_ID, });
+  const chainNodeClient = chainService.getChainNodeClient();
+  const chainApi = chainService.getChainApi();
+  const deipRpc = chainNodeClient;
 
   // ONCHAIN DATA
 
-  const chainAccounts = await deipRpc.api.lookupAccountsAsync('0', CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainAccounts = await chainApi.lookupAccountsAsync('0', CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-  const chainResearchGroups = await deipRpc.api.lookupResearchGroupsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainResearches = await deipRpc.api.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => deipRpc.api.getResearchContentsByResearchAsync(r.external_id)));
+  const chainResearchGroups = await chainApi.lookupResearchGroupsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainResearches = await chainApi.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => chainApi.getResearchContentsByResearchAsync(r.external_id)));
   const chainResearchContents = [].concat.apply([], chainResearchContentsByResearch);
-  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(rg => deipRpc.api.getAccountMembersAsync(rg.external_id)));
+  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(rg => chainApi.getAccountMembersAsync(rg.external_id)));
   const chainResearchGroupMembershipTokensMap = chainResearchGroupMembers.reduce((acc, accounts, i) => {
     acc[chainResearchGroups[i].external_id] = accounts[i].filter(a => !blackListUsers.some(name => name == a));
     return acc;
   }, {});
 
-  const chainResearchContentsReviewsByResearch = await Promise.all(chainResearches.map(r => deipRpc.api.getReviewsByResearchAsync(r.external_id)));
+  const chainResearchContentsReviewsByResearch = await Promise.all(chainResearches.map(r => chainApi.getReviewsByResearchAsync(r.external_id)));
   const chainResearchContentsReviews = [].concat.apply([], chainResearchContentsReviewsByResearch);
 
-  const chainAssets = await deipRpc.api.lookupAssetsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainDisciplines = await deipRpc.api.lookupDisciplinesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainProposalsStates = await deipRpc.api.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => deipRpc.api.getAccountsAssetBalancesByAssetAsync(chainAsset.string_symbol)));
+  const chainAssets = await chainApi.lookupAssetsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainDisciplines = await chainApi.lookupDisciplinesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainProposalsStates = await chainApi.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => chainApi.getAccountsAssetBalancesByAssetAsync(chainAsset.string_symbol)));
 
   const snapshotUsers = chainUserAccounts.filter(a => !blackListUsers.some(name => name == a.name) && !genesisJSON.accounts.some(ac => ac.name == a.name)).map(a => {
     const key = a.owner.key_auths[0][0]; // "DEIP7cqzf9qxb9NEkXCJQjNEsGCHG48ywEqkrcaT3owTynHr828mso";
@@ -154,7 +157,7 @@ const run = async ({
 
   
   const snapshotResearchGroups = chainResearchGroups.filter(rg => !rg.is_personal && !genesisJSON.research_groups.some(researchGroup => researchGroup.account == rg.account)).map(rg => {
-    
+
     function getKeys() {
       const { owner: privKey, ownerPubkey: pubKey } = deipRpc.auth.getPrivateKeys(
         CryptoJS.lib.WordArray.random(32),

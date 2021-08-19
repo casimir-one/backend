@@ -12,7 +12,6 @@ require("@babel/register")({
 });
 
 const config = require('./../config');
-const deipRpc = require('@deip/rpc-client');
 const mongoose = require('mongoose');
 
 const AwardWithdrawalRequestSchema = require('./../schemas/AwardWithdrawalRequestSchema');
@@ -31,8 +30,6 @@ const UserInviteSchema = require('./../schemas/UserInviteSchema');
 const UserNotificationSchema = require('./../schemas/UserNotificationSchema');
 
 
-deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
-deipRpc.config.set('chain_id', config.CHAIN_ID);
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {

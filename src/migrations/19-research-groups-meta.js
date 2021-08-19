@@ -14,20 +14,21 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const bluebird = require('bluebird');
 const ResearchGroup = require('./../schemas/researchGroup');
 
-const deipRpc = require('@deip/rpc-client');
+const ChainService = require('@deip/chain-service').ChainService;
 const crypto = require('crypto');
 
-deipRpc.api.setOptions({ url: config.DEIP_FULL_NODE_URL });
-deipRpc.config.set('chain_id', config.CHAIN_ID);
+
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const run = async () => {
 
-  const chainResearchGroups = await deipRpc.api.lookupResearchGroupsAsync(1, 10000);
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi()
+
+  const chainResearchGroups = await chainApi.lookupResearchGroupsAsync(1, 10000);
 
   const researchGroupsPromises = [];
 

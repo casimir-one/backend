@@ -10,11 +10,16 @@ require("@babel/register")({
     ]
   ]
 });
-
-const deipRpc = require('@deip/rpc-client');
 const CryptoJS = require("crypto-js");
 
-function getKeys() {
+const config = require('./../config');
+const ChainService = require('@deip/chain-service').ChainService;
+
+async function getKeys() {
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
+
   const { owner: privKey, ownerPubkey: pubKey } = deipRpc.auth.getPrivateKeys(
     CryptoJS.lib.WordArray.random(32),
     CryptoJS.lib.WordArray.random(32),
