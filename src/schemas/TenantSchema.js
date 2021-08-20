@@ -60,8 +60,8 @@ const UserRoleModuleMap = new Schema({
 });
 
 const GlobalNetworkSettings = new Schema({
-  "scope": [String],
-  "nodes": [String]
+  "visibleTenantIds": { type: [String], default: [] } ,
+  "isGlobalScopeVisible": { type: Boolean, default: false }
 });
 
 const ReviewQuestion = new Schema({

@@ -6,13 +6,6 @@ import AttributeValueSchema from './AttributeValueSchema';
 const Schema = mongoose.Schema;
 
 
-const UserLocation = new Schema({
-  "_id": false,
-  "city": { type: String, trim: true, default: null },
-  "country": { type: String, trim: true, default: null },
-  "address": { type: String, trim: true, default: null }
-});
-
 const UserRole = new Schema({
   "_id": false,
   "role": { type: String, required: true, trim: true },

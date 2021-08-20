@@ -14,15 +14,14 @@ class AttributeDtoService {
     return tenant.toObject();
   }
   
-  async getBaseScopeQuery() {
+  async getBaseScopeQuery() { // TODO: replace it with BaseService
     const tenant = await this.getTenantInstance();
-    if (tenant.network.scope.length) {
-      const isAll = tenant.network.scope.some(s => s == 'all'); 
-      if (isAll) {
+    if (tenant.network.isGlobalScopeVisible || tenant.network.visibleTenantIds.length) {
+      if (tenant.network.isGlobalScopeVisible) {
         const tenants = await TenantSchema.find({});
         return { tenantId: { $in: [...tenants.map(t => t._id.toString()), null] } }
       } else {
-        return { tenantId: { $in: [...tenant.network.scope, null] } }
+        return { tenantId: { $in: [...tenant.network.visibleTenantIds, null] } }
       }
     } else {
       return { tenantId: { $in: [tenant._id, null] } }

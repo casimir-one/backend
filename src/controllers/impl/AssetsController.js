@@ -8,7 +8,9 @@ import qs from 'qs';
 const assetDtoService = new AssetDtoService();
 const userDtoService = new UserDtoService();
 
+
 class AssetsController extends BaseController {
+
   getAccountDepositHistory = this.query({
     h: async (ctx) => {
       try {
@@ -17,8 +19,7 @@ class AssetsController extends BaseController {
         const account = ctx.params.account;
         const username = ctx.state.user.username;
         if (account != username) {
-          const users = await userDtoService.getUsersByTeam(account)
-
+          const users = await userDtoService.getUsersByTeam(account);
           if (!users.find(u => u.username == username)) {
             ctx.status = 403;
             ctx.body = `You have no permission to get info about '${account}' account or ${account} doesn't exist`;
@@ -36,6 +37,8 @@ class AssetsController extends BaseController {
       }
     }
   });
+
+  
   getAssetById = this.query({
     h: async (ctx) => {
       try {
@@ -56,8 +59,9 @@ class AssetsController extends BaseController {
       }
     }
   });
-  
-   getAssetBySymbol = this.query({
+
+
+  getAssetBySymbol = this.query({
     h: async (ctx) => {
       try {
         const symbol = ctx.params.symbol;
@@ -77,8 +81,9 @@ class AssetsController extends BaseController {
       }
     }
   });
-  
-   getAssetsByType = this.query({
+
+
+  getAssetsByType = this.query({
     h: async (ctx) => {
       try {
         const type = ctx.params.type;
@@ -98,8 +103,9 @@ class AssetsController extends BaseController {
       }
     }
   });
+
   
-   getAssetsByIssuer = this.query({
+  getAssetsByIssuer = this.query({
     h: async (ctx) => {
       try {
         const issuer = ctx.params.issuer;
@@ -120,7 +126,8 @@ class AssetsController extends BaseController {
     }
   });
   
-   lookupAssets = this.query({
+
+  lookupAssets = this.query({
     h: async (ctx) => {
       try {
         const { lowerBoundSymbol, limit } = ctx.params;
@@ -141,7 +148,8 @@ class AssetsController extends BaseController {
     }
   });
   
-   getAccountAssetBalance = this.query({
+
+  getAccountAssetBalance = this.query({
     h: async (ctx) => {
       try {
         const { owner, symbol } = ctx.params;
@@ -162,7 +170,8 @@ class AssetsController extends BaseController {
     }
   });
   
-   getAccountAssetsBalancesByOwner = this.query({
+
+  getAccountAssetsBalancesByOwner = this.query({
     h: async (ctx) => {
       try {
         const owner = ctx.params.owner;
@@ -183,7 +192,8 @@ class AssetsController extends BaseController {
     }
   });
   
-   getAccountsAssetBalancesByAsset = this.query({
+
+  getAccountsAssetBalancesByAsset = this.query({
     h: async (ctx) => {
       try {
         const symbol = ctx.params.symbol;
@@ -203,6 +213,7 @@ class AssetsController extends BaseController {
       }
     }
   });
+
 
   createAssetTransferRequest = this.command({
     h: async (ctx) => {
@@ -236,6 +247,7 @@ class AssetsController extends BaseController {
     }
   });
 
+
   createAssetExchangeRequest = this.command({
     h: async (ctx) => {
       try {
@@ -266,8 +278,62 @@ class AssetsController extends BaseController {
       }
     }
   });
+
+
+  createAsset = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ASSET);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+  
+
+  issueAsset = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ISSUE_ASSET);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 }
 
+
 const assetsCtrl = new AssetsController();
+
 
 module.exports = assetsCtrl;

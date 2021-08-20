@@ -8,7 +8,8 @@ import {
   attributeEventHandler,
   userEventHandler,
   documentTemplateEventHandler,
-  tokenSaleEventHandler
+  tokenSaleEventHandler,
+  assetEventHandler
 } from './index';
 
 
@@ -147,6 +148,14 @@ module.exports = {
   ],
 
   [APP_EVENT.ASSET_TRANSFERED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.ASSET_CREATED]: [
+    { h: assetEventHandler, await: false }
+  ],
+
+  [APP_EVENT.ASSET_ISSUED]: [
     { h: userNotificationEventHandler, await: false }
   ],
 

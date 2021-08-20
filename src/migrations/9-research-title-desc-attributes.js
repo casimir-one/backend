@@ -14,7 +14,6 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const bluebird = require('bluebird');
 const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 

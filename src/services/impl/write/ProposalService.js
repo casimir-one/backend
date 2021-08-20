@@ -15,7 +15,7 @@ class ProposalService extends BaseService {
     status,
     type,
     details,
-    multiTenantIds,
+    tenantIdsScope,
     creator
   }) {
 
@@ -26,7 +26,7 @@ class ProposalService extends BaseService {
       status: status,
       creator: creator,
       details: details,
-      multiTenantIds: multiTenantIds
+      tenantIdsScope: tenantIdsScope
     });
 
     return result;

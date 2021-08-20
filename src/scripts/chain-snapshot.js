@@ -314,13 +314,13 @@ const run = async ({
         if (outdatedProposals.some(id => doc._id == id)) {
           return null;
         }
-        return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT] }
+        return { ...doc, tenantId: TENANT, tenantIdsScope: [TENANT] }
       }
       else if (collectionName == 'user-notifications') {
         if (blackListUsers.some(name => doc.username == name)) {
           return null;
         }
-        return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT] }
+        return { ...doc, tenantId: TENANT, tenantIdsScope: [TENANT] }
       }
       else if (collectionName == 'researches') {
         const attributes = doc.attributes;
@@ -351,7 +351,7 @@ const run = async ({
         return { ...doc, attributes: attributes, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? RESEARCH_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
       }
       else if (collectionName == 'research-contents') {
-        return { ...doc, tenantId: TENANT, multiTenantIds: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)) }
+        return { ...doc, tenantId: TENANT, tenantIdsScope: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)) }
       }
       else if (collectionName == 'user-profiles') {
         if (blackListUsers.some(name => doc._id == name)) {

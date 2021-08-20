@@ -41,6 +41,8 @@ import ProjectTokenSaleCreatedEvent from './impl/ProjectTokenSaleCreatedEvent';
 import ProjectTokenSaleInvestedEvent from './impl/ProjectTokenSaleInvestedEvent';
 
 import AssetTransferedEvent from './impl/AssetTransferedEvent';
+import AssetCreatedEvent from './impl/AssetCreatedEvent';
+import AssetIssuedEvent from './impl/AssetIssuedEvent';
 import AssetTransferProposalCreatedEvent from './impl/AssetTransferProposalCreatedEvent';
 import AssetTransferProposalAcceptedEvent from './impl/AssetTransferProposalAcceptedEvent';
 import AssetTransferProposalDeclinedEvent from './impl/AssetTransferProposalDeclinedEvent';
@@ -96,6 +98,8 @@ module.exports = {
   ProjectTokenSaleInvestedEvent,
 
   AssetTransferedEvent,
+  AssetCreatedEvent,
+  AssetIssuedEvent,
   AssetTransferProposalCreatedEvent,
   AssetTransferProposalAcceptedEvent,
   AssetTransferProposalDeclinedEvent,

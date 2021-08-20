@@ -115,7 +115,7 @@ class TenantService {
     globalNetworkIsVisible
   }) {
     const tenantProfile = await TenantSchema.findOne({ _id: tenantExternalId });
-    tenantProfile.network.scope = globalNetworkIsVisible ? ['all'] : [];
+    tenantProfile.network.isGlobalScopeVisible = !!globalNetworkIsVisible;
     const savedTenantProfile = await tenantProfile.save();
     return savedTenantProfile.toObject();
   }

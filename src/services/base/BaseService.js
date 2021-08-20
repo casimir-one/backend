@@ -33,46 +33,70 @@ class BaseService {
     const tenantProfile = await this.getTenantInstance();
     if (!this._scoped) return {};
 
-    if (tenantProfile.network.scope.length) {
-      const isAll = tenantProfile.network.scope.some(s => s == 'all');
-      if (isAll) { // temp solution until access management implementation
-        const tenants = await TenantSchema.find({});
-        return { $or: [{ tenantId: { $in: [...tenants.map(t => t._id.toString())] } }, { multiTenantIds: { $in: [...tenants.map(t => t._id.toString())] } }] };
-      } else {
-        return { $or: [{ tenantId: { $in: [...tenantProfile.network.scope] } }, { multiTenantIds: { $in: [...tenantProfile.network.scope] } }] };
-      }
+    if (tenantProfile.network.isGlobalScopeVisible) {
+      const tenants = await TenantSchema.find({});
+      const tenantProfiles = tenants.map(t => t.toObject());
+      return {
+        $or: [
+          { tenantId: { $in: [...tenantProfiles.map(t => t._id)] } },
+          { tenantIdsScope: { $in: [...tenantProfiles.map(t => t._id)] } },
+          { isGlobalScope: true }
+        ]
+      };
+    } else if (tenantProfile.network.visibleTenantIds.length) {
+      return {
+        $or: [
+          { tenantId: { $in: [...tenantProfile.network.visibleTenantIds] } },
+          { tenantIdsScope: { $in: [...tenantProfile.network.visibleTenantIds] } },
+          { isGlobalScope: true }
+        ]
+      };
     } else {
-      return { $or: [{ tenantId: { $in: [tenantProfile._id] } }, { multiTenantIds: { $in: [tenantProfile._id] } }] };
+      return {
+        $or: [
+          { tenantId: { $in: [tenantProfile._id] } },
+          { tenantIdsScope: { $in: [tenantProfile._id] } },
+          { isGlobalScope: true }
+        ]
+      };
     }
   }
 
 
   async findOne(searchQuery) {
     const scopeQuery = await this.getBaseScopeQuery();
-    const result = await this._schema.findOne({ ...searchQuery, ...scopeQuery });
-    return result ? result.toObject() : null;
+    const model = await this._schema.findOne({ ...searchQuery, ...scopeQuery });
+    const result = model ? model.toObject() : null;
+    return result;
   }
 
 
   async findMany(searchQuery) {
     const scopeQuery = await this.getBaseScopeQuery();
-    const result = await this._schema.find({ ...searchQuery, ...scopeQuery });
-    return [...result.map(r => r.toObject())];
+    const models = await this._schema.find({ ...searchQuery, ...scopeQuery });
+    const results = [...models.map(r => r.toObject())];
+    return results;
   }
 
 
   async createOne(fields) {
+    const tenantProfile = await this.getTenantInstance();
+
     const keys = Object.keys(fields);
     const payload = {};
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
+      assert(key !== 'isGlobalScope', `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
       let value = fields[key];
       if (value !== undefined)
         payload[key] = value;
     }
 
-    const tenantProfile = await this.getTenantInstance();
-    payload.tenantId = tenantProfile._id;
+    if (payload.tenantId) {
+      assert(payload.tenantId === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to create models for ${payload.tenantId} tenant`);
+    } else {
+      payload.tenantId = tenantProfile._id;
+    }
 
     const savedModel = await this._schema.create(payload);
     return savedModel.toObject();
@@ -80,9 +104,9 @@ class BaseService {
 
 
   async createMany(objects) {
-    const payloads = [];
     const tenantProfile = await this.getTenantInstance();
-
+    
+    const payloads = [];
     for (let i = 0; i < objects.length; i++) {
       const fields = objects[i];
 
@@ -90,12 +114,17 @@ class BaseService {
       const payload = {};
       for (let i = 0; i < keys.length; i++) {
         let key = keys[i];
+        assert(key !== 'isGlobalScope', `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
         let value = fields[key];
         if (value !== undefined)
           payload[key] = value;
       }
 
-      payload.tenantId = tenantProfile._id;
+      if (payload.tenantId) {
+        assert(payload.tenantId === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to create models for ${payload.tenantId} tenant`);
+      } else {
+        payload.tenantId = tenantProfile._id;
+      }
       
       payloads.push(payload);
     }
@@ -109,19 +138,21 @@ class BaseService {
 
 
   async updateOne(searchQuery, fields) {
+    const tenantProfile = await this.getTenantInstance();
     const scopeQuery = await this.getBaseScopeQuery();
-    const model = await this._schema.findOne({ ...searchQuery, ...scopeQuery });
 
+    const model = await this._schema.findOne({ ...searchQuery, ...scopeQuery });
     const keys = Object.keys(fields);
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
+      assert(key !== 'isGlobalScope', `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
       let value = fields[key];
+      if (key === 'tenantId') {
+        assert(value === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to update models for ${value} tenant`);
+      }
       if (value !== undefined)
         model[key] = value;
     }
-
-    const tenantProfile = await this.getTenantInstance();
-    model.tenantId = tenantProfile._id;
 
     const updatedModel = await model.save();
     return updatedModel.toObject();
@@ -129,14 +160,23 @@ class BaseService {
 
 
   async updateMany(searchQuery, updateQuery, options = {}) {
+    const tenantProfile = await this.getTenantInstance();
+
     const scopeQuery = await this.getBaseScopeQuery();
+    if (updateQuery.$set && updateQuery.$set) {
+      assert(!!!updateQuery.$set.tenantId || updateQuery.$set.tenantId === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to update models for ${updateQuery.$set.tenantId} tenant`);
+      assert(!!!updateQuery.$set.isGlobalScope, `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
+    }
+
     const result = await this._schema.update({ ...searchQuery, ...scopeQuery }, updateQuery, { ...options, multi: true });
     return result;
   }
 
   
   async deleteOne(searchQuery) {
-    const scopeQuery = await this.getBaseScopeQuery();
+    const tenantProfile = await this.getTenantInstance();
+
+    const scopeQuery = { tenantId: tenantProfile._id };
     const result = await this._schema.deleteOne({ ...searchQuery, ...scopeQuery });
     return result;
   }

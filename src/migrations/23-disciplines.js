@@ -11,21 +11,25 @@ require("@babel/register")({
   ]
 });
 
-const config = require('./../config');
+require("@babel/register")({
+  "only": [
+    function (filepath) {
+      return filepath.includes("node_modules/@deip") || filepath.includes("node_modules/crc");
+    },
+  ]
+});
 
+const config = require('./../config');
 const mongoose = require('mongoose');
-const Discipline = require('./../schemas/discipline');
-const TenantProfile = require('./../schemas/tenant');
-const ChainService = require('@deip/chain-service').ChainService;
+const Discipline = require('./../schemas/DomainSchema');
+const { ChainService } = require('@deip/chain-service');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
-
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi()
+  const chainApi = chainService.getChainApi();
 
-  const tenantProfiles = await TenantProfile.find({});
   const chainDisciplines = await chainApi.lookupDisciplinesAsync(0, 10000);
   const disciplinesPromises = [];
 
@@ -36,8 +40,7 @@ const run = async () => {
       _id: chainDiscipline.external_id,
       parentExternalId: chainDiscipline.parent_external_id,
       name: chainDiscipline.name,
-      tenantId: config.TENANT,
-      multiTenantIds: [...tenantProfiles.map(t => t._id.toString())]
+      isGlobalScope: true
     });
 
     disciplinesPromises.push(discipline.save());

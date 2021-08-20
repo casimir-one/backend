@@ -32,7 +32,7 @@ async function createProposal(event, chainContractType) {
   const involvedUsers = await userDtoService.getUsers(usersNames);
   const involvedResearchGroups = await teamDtoService.getTeams(researchGroupsNames);
 
-  const multiTenantIds = [...involvedUsers, ...involvedResearchGroups].reduce((acc, item) => {
+  const tenantIdsScope = [...involvedUsers, ...involvedResearchGroups].reduce((acc, item) => {
     if (!acc.some(id => id == item.tenantId)) {
       acc.push(item.tenantId);
     }
@@ -46,7 +46,7 @@ async function createProposal(event, chainContractType) {
     details: {
       ...eventModel
     },
-    multiTenantIds: multiTenantIds
+    tenantIdsScope: tenantIdsScope
   });
 
   return proposalRef;
