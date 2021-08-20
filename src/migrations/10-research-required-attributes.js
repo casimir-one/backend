@@ -14,7 +14,6 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const bluebird = require('bluebird');
 const TenantProfile = require('./../schemas/tenant');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);

@@ -32,7 +32,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   // We should replace this call after removing 'personal' spaces from domain logic
   const chainProposal = await chainApi.getProposalStateAsync(proposalId);
   const teams = await teamDtoService.getTeams(chainProposal.required_approvals);
-  const multiTenantIds = teams.reduce((acc, item) => {
+  const tenantIdsScope = teams.reduce((acc, item) => {
     return acc.some(id => id == item.tenantId) ? acc : [...acc, item.tenantId];
   }, []);
 
@@ -53,7 +53,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
     status: status,
     type: type,
     details: details,
-    multiTenantIds: multiTenantIds,
+    tenantIdsScope: tenantIdsScope,
     creator: creator
   });
   

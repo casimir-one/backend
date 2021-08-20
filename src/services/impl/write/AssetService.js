@@ -1,31 +1,36 @@
 import AssetSchema from './../../../schemas/AssetSchema';
+import BaseService from './../../base/BaseService';
 
-class AssetService {
+
+class AssetService extends BaseService {
+
+  constructor(options = { scoped: true }) {
+    super(AssetSchema, options);
+  }
 
   async createAsset({
-    stringSymbol,
+    entityId,
+    symbol,
     precision,
     issuer,
     description,
-    maxSupply,
-    tokenizedProjectId,
-    licenseRevenueHoldersShare,
-    type
+    type,
+    settings
   }) {
-    const newAsset = new AssetSchema({
-      _id: stringSymbol,
-      stringSymbol,
+
+    const result = await this.createOne({
+      _id: entityId,
+      symbol,
       precision,
       issuer,
       description,
-      maxSupply,
-      tokenizedProjectId,
-      licenseRevenueHoldersShare,
-      type
-    })
-    const savedAsset = await newAsset.save();
-    return savedAsset.toObject();
+      type,
+      settings
+    });
+
+    return result;
   }
 }
+
 
 export default AssetService;

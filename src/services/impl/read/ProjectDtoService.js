@@ -5,7 +5,6 @@ import ResearchNdaService from './../../legacy/researchNda';
 import AttributeDtoService from './AttributeDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
 import config from './../../../config';
-
 import { ChainService } from '@deip/chain-service';
 
 class ProjectDtoService extends BaseService {

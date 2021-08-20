@@ -1,10 +1,10 @@
-const GENERAL_ASSET = 1;
-const PROJECT_ASSET = 2;
+const GENERAL = 1;
+const PROJECT = 2;
 
 
 const ASSET_TYPE = {
-  GENERAL_ASSET,
-  PROJECT_ASSET
+  GENERAL,
+  PROJECT
 }
 
 export default ASSET_TYPE;
