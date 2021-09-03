@@ -1,7 +1,7 @@
 import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS } from './../../constants';
 import { handle, fire, wait } from './utils';
-import ResearchContentService from './../../services/legacy/researchContent';
+import { ProjectContentDtoService } from './../../services';
 import ReviewService from './../../services/legacy/review';
 import ReviewRequestService from './../../services/legacy/reviewRequest';
 
@@ -14,12 +14,12 @@ reviewHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payl
   const { event: reviewCreatedEvent, tenant } = source;
 
   const reviewService = new ReviewService();
-  const researchContentService = new ResearchContentService();
+  const projectContentDtoService = new ProjectContentDtoService();
   const reviewRequestService = new ReviewRequestService();
 
   const { reviewExternalId, researchContentExternalId, author, source: { offchain: { content } } } = reviewCreatedEvent.getSourceData();
 
-  const researchContent = await researchContentService.getResearchContent(researchContentExternalId);
+  const researchContent = await projectContentDtoService.getProjectContent(researchContentExternalId);
 
   const reviewRef = await reviewService.createReviewRef({
     externalId: reviewExternalId,

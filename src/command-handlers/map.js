@@ -6,7 +6,8 @@ import {
   attributeCmdHandler,
   investmentOppCmdHandler,
   assetCmdHandler,
-  documentTemplateCmdHandler
+  documentTemplateCmdHandler,
+  projectContentCmdHandler
 } from './index';
 
 
@@ -32,4 +33,8 @@ module.exports = {
   [APP_CMD.CREATE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
   [APP_CMD.UPDATE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
   [APP_CMD.DELETE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
+  [APP_CMD.CREATE_DRAFT]: projectContentCmdHandler,
+  [APP_CMD.UPDATE_DRAFT]: projectContentCmdHandler,
+  [APP_CMD.DELETE_DRAFT]: projectContentCmdHandler,
+  [APP_CMD.CREATE_PROJECT_CONTENT]: projectContentCmdHandler,
 };
