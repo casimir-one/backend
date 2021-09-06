@@ -9,6 +9,8 @@ import authCtrl from './impl/AuthController';
 import investmentOppCtrl from './impl/InvestmentOpportunityController';
 import documentTemplatesCtrl from './impl/DocumentTemplatesController';
 import projectContentsCtrl from './impl/ProjectContentsController';
+import reviewRequestsCtrl from './impl/ReviewRequestsController';
+import reviewsCtrl from './impl/ReviewsController';
 
 module.exports = {
   projectsCtrl,
@@ -21,6 +23,7 @@ module.exports = {
   authCtrl,
   investmentOppCtrl,
   documentTemplatesCtrl,
-  documentTemplatesCtrl,
-  projectContentsCtrl
+  projectContentsCtrl,
+  reviewRequestsCtrl,
+  reviewsCtrl
 }

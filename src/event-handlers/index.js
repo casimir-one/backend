@@ -9,6 +9,7 @@ import documentTemplateEventHandler from './impl/DocumentTemplateEventHandler';
 import tokenSaleEventHandler from './impl/TokenSaleEventHandler';
 import assetEventHandler from './impl/AssetEventHandler';
 import projectContentEventHandler from './impl/ProjectContentEventHandler';
+import reviewEventHandler from './impl/ReviewEventHandler';
 
 
 module.exports = {
@@ -22,5 +23,6 @@ module.exports = {
   documentTemplateEventHandler,
   tokenSaleEventHandler,
   assetEventHandler,
-  projectContentEventHandler
+  projectContentEventHandler,
+  reviewEventHandler
 }

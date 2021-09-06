@@ -6,6 +6,7 @@ import investmentOppCmdHandler from './impl/InvestmentOpportunityCmdHandler';
 import assetCmdHandler from './impl/AssetCmdHandler';
 import documentTemplateCmdHandler from './impl/DocumentTemplateCmdHandler';
 import projectContentCmdHandler from './impl/ProjectContentCmdHandler';
+import reviewCmdHandler from './impl/ReviewCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -15,5 +16,6 @@ module.exports = {
   investmentOppCmdHandler,
   assetCmdHandler,
   documentTemplateCmdHandler,
-  projectContentCmdHandler
+  projectContentCmdHandler,
+  reviewCmdHandler
 }

@@ -2,8 +2,6 @@ import EventEmitter from 'events';
 import { LEGACY_APP_EVENTS, USER_NOTIFICATION_TYPE, PROPOSAL_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
 import { UserDtoService } from './../../services';
 import UserNotificationService from './../../services/legacy/userNotification';
-import { ProjectContentDtoService } from './../../services';
-import ReviewService from './../../services/legacy/review';
 import ResearchService from './../../services/impl/read/ProjectDtoService';
 import { TeamDtoService } from './../../services';
 import ProposalService from './../../services/impl/read/ProposalDtoService';
@@ -193,74 +191,6 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, a
   }));
 
   Promise.all(notificationsPromises);
-});
-
-userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, async (source) => {
-  const type = USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW;
-  const { event: reviewCreatedEvent, tenant } = source;
-  const projectContentDtoService = new ProjectContentDtoService();
-  const reviewService = new ReviewService();
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
-
-  const { reviewExternalId, researchContentExternalId, author } = reviewCreatedEvent.getSourceData();
-
-  let reviewer = await userDtoService.getUser(author);
-  let researchContent = await projectContentDtoService.getProjectContent(researchContentExternalId);
-
-  let research = await researchService.getResearch(researchContent.research_external_id);
-  let review = await reviewService.getReview(reviewExternalId);
-
-  let researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
-  const refs = await chainApi.getTeamMemberReferencesAsync([researchGroup.external_id], false);
-  const [members] = refs.map((g) => g.map(m => m.account));
-
-  let notificationsPromises = [];
-
-  for (let i = 0; i < members.length; i++) {
-    const member = members[i];
-    let promise = userNotificationService.createUserNotification({
-      username: member,
-      status: 'unread',
-      type,
-      metadata: {
-        review,
-        researchContent,
-        research,
-        researchGroup,
-        reviewer
-      }
-    });
-    notificationsPromises.push(promise);
-  }
-
-  Promise.all(notificationsPromises);
-});
-
-
-userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, async ({ event: reviewRequestedEvent }) => {
-  const { source: { offchain: { reviewRequest }}} = reviewRequestedEvent.getSourceData();
-  const { requestor: requestorId, expert: expertId, researchContentExternalId } = reviewRequest;
-  const projectContentDtoService = new ProjectContentDtoService();
-  let requestor = await userDtoService.getUser(requestorId);
-  let expert = await userDtoService.getUser(expertId);
-  let researchContent = await projectContentDtoService.getProjectContent(researchContentExternalId);
-
-  let research = await researchService.getResearch(researchContent.research_external_id);
-  let researchGroup = await teamDtoService.getTeam(research.research_group.external_id);
-
-  userNotificationService.createUserNotification({
-    username: expert.account.name,
-    status: 'unread',
-    type: USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST,
-    metadata: {
-      requestor,
-      expert,
-      researchGroup,
-      research,
-      researchContent
-    }
-  });
 });
 
 userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSED, async ({ event: researchNdaProposedEvent }) => {

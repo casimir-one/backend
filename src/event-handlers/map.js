@@ -10,7 +10,8 @@ import {
   documentTemplateEventHandler,
   tokenSaleEventHandler,
   assetEventHandler,
-  projectContentEventHandler
+  projectContentEventHandler,
+  reviewEventHandler
 } from './index';
 
 
@@ -200,5 +201,23 @@ module.exports = {
   [APP_EVENT.PROJECT_CONTENT_CREATED]: [
     { h: projectContentEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
-  ]
+  ],
+  
+  [APP_EVENT.REVIEW_REQUEST_CREATED]: [
+    { h: reviewEventHandler, await: true },
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.REVIEW_REQUEST_DECLINED]: [
+    { h: reviewEventHandler, await: false }
+  ],
+
+  [APP_EVENT.REVIEW_CREATED]: [
+    { h: reviewEventHandler, await: true },
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.UPVOTED_REVIEW]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
 };

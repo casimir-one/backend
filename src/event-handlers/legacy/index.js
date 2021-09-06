@@ -6,7 +6,6 @@ import userNotificationsHandler from './userNotificationHandler';
 import researchHandler from './researchHandler';
 import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
-import reviewHandler from './reviewHandler';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
 
@@ -176,17 +175,6 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload
 appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposalSignedEvent, tenant } = source;
   await wait(expressLicensingHandler, researchExpressLicenseProposalSignedEvent, null, tenant);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: reviewCreatedEvent, tenant } = source;
-  await wait(reviewHandler, reviewCreatedEvent, null, tenant);
-  fire(userNotificationsHandler, LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_CREATED, source);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_EXPERT_REVIEW_REQUESTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: reviewRequestedEvent } = source;
-  fire(userNotificationsHandler, reviewRequestedEvent);
 }));
 
 appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {

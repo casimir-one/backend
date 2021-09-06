@@ -7,7 +7,7 @@ const ReviewRequestSchema = new Schema({
   "tenantId": { type: String, required: true },
   "expert": { type: String, required: true, index: true },
   "requestor": { type: String, required: true },
-  "researchContentExternalId": { type: String, required: true },
+  "projectContentId": { type: String, required: true },
   "status": {
     type: String,
     enum: ['pending', 'approved', 'denied'],
