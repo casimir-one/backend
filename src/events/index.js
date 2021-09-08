@@ -54,6 +54,11 @@ import DocumentTemplateCreatedEvent from './impl/DocumentTemplateCreatedEvent';
 import DocumentTemplateUpdatedEvent from './impl/DocumentTemplateUpdatedEvent';
 import DocumentTemplateDeletedEvent from './impl/DocumentTemplateDeletedEvent';
 
+import ProjectContentDraftCreatedEvent from './impl/ProjectContentDraftCreatedEvent';
+import ProjectContentDraftDeletedEvent from './impl/ProjectContentDraftDeletedEvent';
+import ProjectContentDraftUpdatedEvent from './impl/ProjectContentDraftUpdatedEvent';
+import ProjectContentCreatedEvent from './impl/ProjectContentCreatedEvent';
+
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
@@ -109,5 +114,10 @@ module.exports = {
 
   DocumentTemplateCreatedEvent,
   DocumentTemplateUpdatedEvent,
-  DocumentTemplateDeletedEvent
+  DocumentTemplateDeletedEvent,
+
+  ProjectContentDraftCreatedEvent,
+  ProjectContentDraftDeletedEvent,
+  ProjectContentDraftUpdatedEvent,
+  ProjectContentCreatedEvent,
 }

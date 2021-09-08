@@ -6,6 +6,7 @@ import TenantService from './../../services/legacy/tenant';
 import { TeamService, TeamDtoService, UserDtoService, ProjectDtoService } from './../../services';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
 import { ChainService } from '@deip/chain-service';
+import ProjectContentDtoService from '../../services/impl/read/ProjectContentDtoService';
 
 
 class UserNotificationEventHandler extends BaseEventHandler {
@@ -24,6 +25,7 @@ const userDtoService = new UserDtoService();
 const projectDtoService = new ProjectDtoService();
 const userNotificationsDtoService = new UserNotificationsDtoService();
 const tenantService = new TenantService();
+const projectContentDtoService = new ProjectContentDtoService();
 
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
@@ -359,6 +361,41 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, asyn
         researchGroup: team,
         research: project,
         tokenSale,
+        emitter: emitterUser
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (event) => {
+  const { projectId, teamId, creator, entityId: contentId } = event.getEventPayload();
+
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+  const chainNodeClient = chainService.getChainNodeClient();
+  const deipRpc = chainNodeClient;
+
+  const project = await projectDtoService.getProject(projectId);
+  const team = await teamDtoService.getTeam(teamId);
+  const emitterUser = await userDtoService.getUser(creator);
+  const projectContent = await projectContentDtoService.getProjectContent(contentId)
+  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
+
+  const notifications = [];
+  for (let i = 0; i < members.length; i++) {
+    let member = members[i];
+    notifications.push({
+      username: member,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
+      metadata: {
+        proposal: { action: deipRpc.operations.getOperationTag("create_research_content"), data: { research_id: project.id }, is_completed: true }, // legacy
+        researchGroup: team,
+        research: project,
+        researchContent: projectContent,
         emitter: emitterUser
       }
     });

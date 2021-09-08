@@ -52,12 +52,6 @@ async function createProposal(event, chainContractType) {
   return proposalRef;
 }
 
-proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchContentProposedEvent } = source;
-  const proposalRef = await createProposal(researchContentProposedEvent, APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL);
-  return proposalRef;
-}));
-
 proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: researchExpressLicenseProposedEvent } = source;
   const proposalRef = await createProposal(researchExpressLicenseProposedEvent, APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL);

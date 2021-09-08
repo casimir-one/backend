@@ -28,6 +28,10 @@ import AssetExchangeProposalCreatedEvent from './../impl/AssetExchangeProposalCr
 import AssetExchangeProposalAcceptedEvent from './../impl/AssetExchangeProposalAcceptedEvent';
 import AssetExchangeProposalDeclinedEvent from './../impl/AssetExchangeProposalDeclinedEvent';
 
+import ProjectContentProposalCreatedEvent from './../impl/ProjectContentProposalCreatedEvent';
+import ProjectContentProposalAcceptedEvent from './../impl/ProjectContentProposalAcceptedEvent';
+import ProjectContentProposalDeclinedEvent from './../impl/ProjectContentProposalDeclinedEvent';
+
 module.exports = {
   [APP_PROPOSAL.PROJECT_INVITE_PROPOSAL]: {
     CREATED: ProjectInviteCreatedEvent,
@@ -63,5 +67,10 @@ module.exports = {
     CREATED: AssetExchangeProposalCreatedEvent,
     ACCEPTED: AssetExchangeProposalAcceptedEvent,
     DECLINED: AssetExchangeProposalDeclinedEvent
+  },
+  [APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL]: {
+    CREATED: ProjectContentProposalCreatedEvent,
+    ACCEPTED: ProjectContentProposalAcceptedEvent,
+    DECLINED: ProjectContentProposalDeclinedEvent
   }
 }

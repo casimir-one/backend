@@ -1,16 +1,14 @@
 
 import mongoose from 'mongoose';
-import { RESEARCH_CONTENT_STATUS } from './../constants';
+import { RESEARCH_CONTENT_STATUS } from '../constants';
 
 const Schema = mongoose.Schema;
 
-const ProjectContentSchema = new Schema({
-  "_id": { type: String },
+const DraftSchema = new Schema({
   "tenantId": { type: String, required: true },
-  "researchExternalId": { type: String, required: true },
-  "researchGroupExternalId": { type: String, required: true },
+  "projectId": { type: String, required: true },
+  "teamId": { type: String, required: true },
   "folder": { type: String, required: true },
-  "researchId": { type: Number}, // legacy internal id
   "title": { type: String, required: true },
   "hash": { type: String, index: true },
   "algo": { type: String },
@@ -35,6 +33,6 @@ const ProjectContentSchema = new Schema({
   "foreignReferences": [{ type: String }],
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
-const model = mongoose.model('research-content', ProjectContentSchema);
+const model = mongoose.model('draft', DraftSchema);
 
 module.exports = model;
