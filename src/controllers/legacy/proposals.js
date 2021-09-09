@@ -2,12 +2,10 @@ import * as blockchainService from './../../utils/blockchain';
 import { APP_PROPOSAL } from '@deip/constants';
 import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 
-import ResearchContentProposalSignedEvent from './../../events/legacy/researchContentProposalSignedEvent';
 import ResearchExpressLicenseProposalSignedEvent from './../../events/legacy/researchExpressLicenseProposalSignedEvent';
 import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
 import ResearchNdaProposalSignedEvent from './../../events/legacy/researchNdaProposalSignedEvent'
 
-import ResearchContentProposalRejectedEvent from './../../events/legacy/researchContentProposalRejectedEvent';
 import ResearchExpressLicenseProposalRejectedEvent from './../../events/legacy/researchExpressLicenseProposalRejectedEvent';
 import UserResignationProposalRejectedEvent from './../../events/legacy/userResignationProposalRejectedEvent';
 import ResearchNdaProposalRejectedEvent from './../../events/legacy/researchNdaProposalRejectedEvent';
@@ -48,12 +46,6 @@ const updateProposal = async (ctx, next) => {
     await blockchainService.sendTransactionAsync(tx);
     const datums = blockchainService.extractOperations(tx);
     const updatedProposal = await proposalDtoService.getProposal(proposalId);
-
-
-    if (updatedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
-      const researchContentProposalSignedEvent = new ResearchContentProposalSignedEvent(datums);
-      ctx.state.events.push(researchContentProposalSignedEvent);
-    }
 
     if (updatedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {
       const researchExpressLicenseProposalSignedEvent = new ResearchExpressLicenseProposalSignedEvent(datums);
@@ -98,12 +90,6 @@ const deleteProposal = async (ctx, next) => {
     const datums = blockchainService.extractOperations(tx);
 
     const deletedProposal = await proposalDtoService.getProposal(proposalId);
-
-
-    if (deletedProposal.type == APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL) { // wip
-      const researchContentProposalRejectedEvent = new ResearchContentProposalRejectedEvent(datums);
-      ctx.state.events.push(researchContentProposalRejectedEvent);
-    }
 
     if (deletedProposal.type == APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL) {
       const researchExpressLicenseProposalRejectedEvent = new ResearchExpressLicenseProposalRejectedEvent(datums);

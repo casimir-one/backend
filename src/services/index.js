@@ -15,6 +15,9 @@ import InvestmentOpportunityDtoService from './impl/read/InvestmentOpportunityDt
 import InvestmentOpportunityService from './impl/write/InvestmentOpportunityService';
 import DocumentTemplateDtoService from './impl/read/DocumentTemplateDtoService';
 import DocumentTemplateService from './impl/write/DocumentTemplateService';
+import ProjectContentDtoService from './impl/read/ProjectContentDtoService';
+import ProjectContentService from './impl/write/ProjectContentService';
+import DraftService from './impl/write/DraftService';
 
 
 module.exports = {
@@ -42,5 +45,9 @@ module.exports = {
   InvestmentOpportunityDtoService,
 
   DocumentTemplateDtoService,
-  DocumentTemplateService
+  DocumentTemplateService,
+
+  ProjectContentDtoService,
+  ProjectContentService,
+  DraftService
 }

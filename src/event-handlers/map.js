@@ -9,7 +9,8 @@ import {
   userEventHandler,
   documentTemplateEventHandler,
   tokenSaleEventHandler,
-  assetEventHandler
+  assetEventHandler,
+  projectContentEventHandler
 } from './index';
 
 
@@ -170,4 +171,34 @@ module.exports = {
   [APP_EVENT.DOCUMENT_TEMPLATE_DELETED]: [
     { h: documentTemplateEventHandler, await: false }
   ],
+
+  [APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED]: [
+    { h: projectContentEventHandler, await: true }
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED]: [
+    { h: projectContentEventHandler, await: true }
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED]: [
+    { h: projectContentEventHandler, await: true }
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED]: [
+    { h: projectContentEventHandler, await: true },
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_PROPOSAL_ACCEPTED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_PROPOSAL_DECLINED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_CREATED]: [
+    { h: projectContentEventHandler, await: true },
+    { h: userNotificationEventHandler, await: false }
+  ]
 };

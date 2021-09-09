@@ -13,7 +13,6 @@ import research from '../controllers/legacy/research'
 import grants from '../controllers/legacy/grants'
 import expressLicensing from '../controllers/legacy/expressLicensing'
 import tenant from '../controllers/legacy/tenant';
-import researchContent from './../controllers/legacy/researchContent';
 import researchNda from './../controllers/legacy/researchNda';
 
 import { 
@@ -25,27 +24,20 @@ import {
   domainsCtrl, 
   usersCtrl, 
   investmentOppCtrl, 
-  documentTemplatesCtrl 
+  documentTemplatesCtrl,
+  projectContentsCtrl
 } from '../controllers';
-
-import * as blockchainService from './../utils/blockchain';
-import ResearchContentProposedEvent from './../events/legacy/researchContentProposedEvent';
-
-import researchContentFileReadAuth from './../middlewares/auth/researchContent/readFileAuth';
-import researchContentFileUpdateAuth from './../middlewares/auth/researchContent/updateFileAuth';
-import researchContentFileCreateAuth from './../middlewares/auth/researchContent/createFileAuth';
-import researchContentFileDeleteAuth from './../middlewares/auth/researchContent/deleteFileAuth';
-import researchContentFilePublishAuth from './../middlewares/auth/researchContent/publishFileAuth';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
 import projectCmdProxy from './../middlewares/proxy/project/projectCmdProxy';
+import projectContentCmdProxy from './../middlewares/proxy/projectContent/projectContentCmdProxy';
+import draftCmdProxy from '../middlewares/proxy/projectContent/draftCmdProxy';
 import teamCmdProxy from './../middlewares/proxy/team/teamCmdProxy';
 import userCmdProxy from './../middlewares/proxy/user/userCmdProxy';
 
 import readGrantAwardWithdrawalRequestAuth from './../middlewares/auth/grantAwardWithdrawalRequest/readGrantAwardWithdrawalRequestAuth';
 
 import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
-import userAttributeMetaUpdateAuth from '../middlewares/auth/user/updateAttributeMetaAuth';
 
 import researchGroupLogoFileReadAuth from './../middlewares/auth/researchGroup/readLogoFileAuth';
 
@@ -150,27 +142,6 @@ protected_route.get('/research/application/:proposalId/attachment', research.get
 protected_route.post('/research/application/reject', research.rejectResearchApplication)
 protected_route.post('/research/application/delete', research.deleteResearchApplication)
 
-public_route.get('/research-content/listing', researchContent.getPublicResearchContentListing)
-public_route.get('/research-content/:researchContentExternalId', researchContent.getResearchContent)
-public_route.get('/research-content/research/:researchExternalId', researchContent.getResearchContentAndDraftsByResearch)
-public_route.get('/research-content/tenant/:tenantId', researchContent.getResearchContentsByTenant)
-public_route.get('/research-content/ref/:refId', researchContent.getResearchContentRef)
-public_route.get('/research-content/ref/graph/:contentId', researchContent.getResearchContentReferencesGraph)
-
-protected_route.post('/research-content/ref/publish', compose([researchContentFilePublishAuth({ researchEnitytId: (ctx) => {  // TODO: replace with protected_route
-  const researchContentProposedEvent = new ResearchContentProposedEvent(blockchainService.extractOperations(ctx.request.body.tx), {});
-  const { researchExternalId } = researchContentProposedEvent.getSourceData();
-  return researchExternalId;
- } })]), researchContent.createResearchContent)
-protected_route.put('/research-content/ref/unlock/:refId', compose([researchContentFilePublishAuth({ researchContentEnitytId: 'refId' })]), researchContent.unlockResearchContentDraft)
-protected_route.delete('/research-content/ref/:refId', compose([researchContentFileDeleteAuth({ researchContentEnitytId: 'refId'})]), researchContent.deleteResearchContentDraft)
-protected_route.get('/research-content/texture/:researchContentExternalId', compose([researchContentFileReadAuth()]), researchContent.readResearchContentDarArchive)
-protected_route.get('/research-content/texture/:researchContentExternalId/assets/:file', compose([researchContentFileReadAuth()]), researchContent.readResearchContentDarArchiveStaticFiles)
-protected_route.put('/research-content/texture/:researchContentExternalId', compose([researchContentFileUpdateAuth()]), researchContent.updateResearchContentDarArchive)
-protected_route.post('/research-content/texture/:researchExternalId', compose([researchContentFileCreateAuth()]), researchContent.createResearchContentDarArchive)
-protected_route.post('/research-content/package', compose([researchContentFileCreateAuth({ researchEnitytId: (ctx) => ctx.request.header['research-external-id'] })]), researchContent.uploadResearchContentPackage)
-protected_route.get('/research-content/package/:researchContentExternalId/:fileHash', compose([researchContentFileReadAuth()]), researchContent.getResearchContentPackageFile)
-
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.createAwardWithdrawalRequest)
@@ -270,6 +241,26 @@ public_route.get('/v2/document-templates/account/:account', documentTemplatesCtr
 protected_route.post('/v2/document-template', documentTemplatesCtrl.createDocumentTemplate)
 protected_route.put('/v2/document-template', documentTemplatesCtrl.updateDocumentTemplate)
 protected_route.put('/v2/document-template/delete', documentTemplatesCtrl.deleteDocumentTemplate)
+
+public_route.get('/v2/project-content/listing', projectContentsCtrl.getPublicProjectContentListing)
+public_route.get('/v2/project-content/drafts/project/:projectId', projectContentsCtrl.getDraftsByProject)
+public_route.get('/v2/project-content/:projectContentId', projectContentsCtrl.getProjectContent)
+public_route.get('/v2/project-content/project/:projectId', projectContentsCtrl.getProjectContentsByProject)
+public_route.get('/v2/project-content/tenant/:tenantId', projectContentsCtrl.getProjectContentsByTenant)
+public_route.get('/v2/project-content/draft/:draftId', projectContentsCtrl.getDraft)
+public_route.get('/v2/project-content/ref/:refId', projectContentsCtrl.getProjectContentRef)
+public_route.get('/v2/project-content/ref/graph/:contentId', projectContentsCtrl.getProjectContentReferencesGraph)
+
+protected_route.post('/v2/project-content/ref/publish', compose([projectContentCmdProxy()]), projectContentsCtrl.createProjectContent)
+protected_route.put('/v2/project-content/draft/unlock', compose([draftCmdProxy()]), projectContentsCtrl.unlockDraft)
+protected_route.put('/v2/project-content/draft/delete', compose([draftCmdProxy()]), projectContentsCtrl.deleteDraft)
+protected_route.get('/v2/project-content/texture/:projectContentId', projectContentsCtrl.getProjectContentDar)
+protected_route.get('/v2/project-content/texture/:projectContentId/assets/:file', compose([projectContentCmdProxy()]), projectContentsCtrl.getProjectContentDarArchiveStaticFiles)
+protected_route.put('/v2/project-content/texture', compose([draftCmdProxy()]), projectContentsCtrl.updateDraft)
+protected_route.post('/v2/project-content/texture', compose([projectContentCmdProxy()]), projectContentsCtrl.createDraft)
+protected_route.post('/v2/project-content/package', compose([projectContentCmdProxy()]), projectContentsCtrl.uploadProjectContentPackage)
+protected_route.get('/v2/project-content/package/:projectContentId/:fileHash', compose([projectContentCmdProxy()]), projectContentsCtrl.getProjectContentPackageFile)
+
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

@@ -6,7 +6,6 @@ import userNotificationsHandler from './userNotificationHandler';
 import researchHandler from './researchHandler';
 import expressLicensingHandler from './expressLicensingHandler';
 import proposalHandler from './proposalHandler';
-import researchContentHandler from './researchContentHandler';
 import reviewHandler from './reviewHandler';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
@@ -18,28 +17,6 @@ import { UserService, TeamDtoService } from './../../services';
 class AppEventHandler extends EventEmitter { }
 
 const appEventHandler = new AppEventHandler();
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchContentProposedEvent, tenant } = source;
-  await wait(researchContentHandler, researchContentProposedEvent, null, tenant);
-  await wait(proposalHandler, researchContentProposedEvent, null, tenant);
-  fire(userNotificationsHandler, researchContentProposedEvent, null, tenant)
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchContentCreatedEvent, tenant } = source;
-  await wait(researchContentHandler, researchContentCreatedEvent, null, tenant);
-  fire(userNotificationsHandler, researchContentCreatedEvent, null, tenant);
-}));
-
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_CONTENT_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchContentProposalSignedEvent, tenant } = source;
-  await wait(researchContentHandler, researchContentProposalSignedEvent, null, tenant);
-  // register handlers
-}));
 
 appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_CREATED, (payload, reply) => handle(payload, reply, async (source) => {
   const { tx, emitter, tenant } = source;

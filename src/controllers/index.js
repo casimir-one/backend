@@ -8,6 +8,7 @@ import usersCtrl from './impl/UsersController';
 import authCtrl from './impl/AuthController';
 import investmentOppCtrl from './impl/InvestmentOpportunityController';
 import documentTemplatesCtrl from './impl/DocumentTemplatesController';
+import projectContentsCtrl from './impl/ProjectContentsController';
 
 module.exports = {
   projectsCtrl,
@@ -19,5 +20,7 @@ module.exports = {
   usersCtrl,
   authCtrl,
   investmentOppCtrl,
-  documentTemplatesCtrl
+  documentTemplatesCtrl,
+  documentTemplatesCtrl,
+  projectContentsCtrl
 }

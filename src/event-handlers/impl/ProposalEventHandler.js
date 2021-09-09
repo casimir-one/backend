@@ -1,10 +1,10 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
-import ProposalService from './../../services/impl/write/ProposalService';
-import { TeamDtoService } from './../../services';
+import { TeamDtoService, DraftService, ProposalService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
+import { RESEARCH_CONTENT_STATUS } from './../../constants';
 
 
 class ProposalEventHandler extends BaseEventHandler {
@@ -19,6 +19,7 @@ const proposalEventHandler = new ProposalEventHandler();
 
 const proposalService = new ProposalService();
 const teamDtoService = new TeamDtoService();
+const draftService = new DraftService();
 
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
@@ -107,6 +108,26 @@ proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCEPTED, as
 
 proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED, async (event) => {
   // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, async (event) => {
+  const {
+    proposalId,
+    expirationTime,
+    entityId,
+    projectId,
+    teamId,
+    content: draftId,
+    type,
+    authors,
+    title,
+    proposalCtx
+  } = event.getEventPayload();
+
+  await draftService.updateDraft({
+    _id: draftId,
+    status: RESEARCH_CONTENT_STATUS.PROPOSED
+  })
 });
 
 module.exports = proposalEventHandler;
