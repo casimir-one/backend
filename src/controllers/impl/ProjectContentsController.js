@@ -29,8 +29,7 @@ class ProjectContentsController extends BaseController {
         ctx.status = 200;
         ctx.body = projectContent;
       } catch (err) {
-        console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -52,8 +51,7 @@ class ProjectContentsController extends BaseController {
         ctx.status = 200;
         ctx.body = result;
       } catch (err) {
-        console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -68,7 +66,7 @@ class ProjectContentsController extends BaseController {
         ctx.body = result;
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -92,8 +90,7 @@ class ProjectContentsController extends BaseController {
         ctx.status = 200;
         ctx.body = result;
       } catch (err) {
-        console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -127,8 +124,7 @@ class ProjectContentsController extends BaseController {
         }
 
       } catch (err) {
-        console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -142,7 +138,7 @@ class ProjectContentsController extends BaseController {
         ctx.status = 200;
         ctx.body = projectContentRef;
       } catch (err) {
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -156,7 +152,7 @@ class ProjectContentsController extends BaseController {
         ctx.status = 200;
         ctx.body = graph;
       } catch (err) {
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -464,8 +460,7 @@ class ProjectContentsController extends BaseController {
         };
 
       } catch (err) {
-        console.error(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -544,8 +539,7 @@ class ProjectContentsController extends BaseController {
         };
 
       } catch (err) {
-        console.error(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
