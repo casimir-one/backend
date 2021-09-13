@@ -1,5 +1,4 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import crypto from '@deip/lib-crypto';
 import APP_EVENT from './../../events/base/AppEvent';
 import { RESEARCH_STATUS, TOKEN_SALE_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
 import { ProjectService } from './../../services';
