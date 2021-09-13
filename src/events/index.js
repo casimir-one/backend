@@ -58,6 +58,10 @@ import ProjectContentDraftCreatedEvent from './impl/ProjectContentDraftCreatedEv
 import ProjectContentDraftDeletedEvent from './impl/ProjectContentDraftDeletedEvent';
 import ProjectContentDraftUpdatedEvent from './impl/ProjectContentDraftUpdatedEvent';
 import ProjectContentCreatedEvent from './impl/ProjectContentCreatedEvent';
+import ReviewRequestCreatedEvent from './impl/ReviewRequestCreatedEvent';
+import ReviewRequestDeclinedEvent from './impl/ReviewRequestDeclinedEvent';
+import ReviewCreatedEvent from './impl/ReviewCreatedEvent';
+import UpvotedReviewEvent from './impl/UpvotedReviewEvent';
 
 module.exports = {
   ProjectCreatedEvent,
@@ -120,4 +124,9 @@ module.exports = {
   ProjectContentDraftDeletedEvent,
   ProjectContentDraftUpdatedEvent,
   ProjectContentCreatedEvent,
+
+  ReviewRequestCreatedEvent,
+  ReviewRequestDeclinedEvent,
+  ReviewCreatedEvent,
+  UpvotedReviewEvent
 }

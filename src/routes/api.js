@@ -2,13 +2,11 @@ import koa_router from 'koa-router'
 import compose from 'koa-compose';
 import users from '../controllers/legacy/users'
 import joinRequests from '../controllers/legacy/joinRequests'
-import reviewRequests from '../controllers/legacy/reviewRequests'
 import expertise from '../controllers/legacy/expertise'
 import notifications from '../controllers/legacy/notifications'
 import proposals from '../controllers/legacy/proposals'
 import researchGroups from '../controllers/legacy/researchGroups'
 import invites from '../controllers/legacy/invites'
-import reviews from '../controllers/legacy/reviews'
 import research from '../controllers/legacy/research'
 import grants from '../controllers/legacy/grants'
 import expressLicensing from '../controllers/legacy/expressLicensing'
@@ -25,7 +23,9 @@ import {
   usersCtrl, 
   investmentOppCtrl, 
   documentTemplatesCtrl,
-  projectContentsCtrl
+  projectContentsCtrl,
+  reviewsCtrl,
+  reviewRequestsCtrl
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
@@ -65,10 +65,6 @@ protected_route.put('/join-requests', joinRequests.updateJoinRequest)
 protected_route.get('/join-requests/group/:researchGroupExternalId', joinRequests.getJoinRequestsByGroup)
 protected_route.get('/join-requests/user/:username', joinRequests.getJoinRequestsByUser)
 
-protected_route.post('/review-requests', reviewRequests.createReviewRequest);
-protected_route.post('/review-requests/:id/deny', reviewRequests.denyReviewRequest);
-protected_route.get('/review-requests/expert/:username', reviewRequests.getReviewRequestsByExpert);
-protected_route.get('/review-requests/requestor/:username', reviewRequests.getReviewRequestsByRequestor);
 
 
 public_route.get('/expertise/user/:username/tokens', expertise.getAccountExpertiseTokens)
@@ -116,15 +112,6 @@ protected_route.get('/invites/:username', invites.getUserInvites)
 protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)
 protected_route.get('/invites/research/:researchExternalId', invites.getResearchPendingInvites)
 protected_route.post('/invites', invites.createUserInvite)
-
-
-public_route.get('/reviews/:reviewExternalId', reviews.getReview)
-public_route.get('/reviews/votes/:reviewExternalId', reviews.getReviewVotes)
-public_route.get('/reviews/research/:researchExternalId', reviews.getReviewsByResearch)
-public_route.get('/reviews/research-content/:researchContentExternalId', reviews.getReviewsByResearchContent)
-public_route.get('/reviews/author/:author', reviews.getReviewsByAuthor)
-protected_route.post('/reviews', reviews.createReview)
-
 
 public_route.get('/research/listing', research.getPublicResearchListing)
 public_route.get('/research/:researchExternalId', research.getResearch)
@@ -261,6 +248,18 @@ protected_route.post('/v2/project-content/texture', compose([projectContentCmdPr
 protected_route.post('/v2/project-content/package', compose([projectContentCmdProxy()]), projectContentsCtrl.uploadProjectContentPackage)
 protected_route.get('/v2/project-content/package/:projectContentId/:fileHash', compose([projectContentCmdProxy()]), projectContentsCtrl.getProjectContentPackageFile)
 
+public_route.get('/v2/review/:reviewId', reviewsCtrl.getReview)
+public_route.get('/v2/review/votes/:reviewId', reviewsCtrl.getReviewUpvotes)
+public_route.get('/v2/reviews/project/:projectId', reviewsCtrl.getReviewsByProject)
+public_route.get('/v2/reviews/project-content/:projectContentId', reviewsCtrl.getReviewsByProjectContent)
+public_route.get('/v2/reviews/author/:author', reviewsCtrl.getReviewsByAuthor)
+protected_route.post('/v2/review', reviewsCtrl.createReview)
+protected_route.post('/v2/review/upvote', reviewsCtrl.upvoteReview)
+
+protected_route.post('/v2/review-request', reviewRequestsCtrl.createReviewRequest);
+protected_route.put('/v2/review-request/deny', reviewRequestsCtrl.denyReviewRequest);
+protected_route.get('/v2/review-requests/expert/:username', reviewRequestsCtrl.getReviewRequestsByExpert);
+protected_route.get('/v2/review-requests/requestor/:username', reviewRequestsCtrl.getReviewRequestsByRequestor);
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

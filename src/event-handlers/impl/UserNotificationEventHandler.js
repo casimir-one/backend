@@ -3,11 +3,9 @@ import config from './../../config';
 import { USER_NOTIFICATION_TYPE, RESEARCH_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
 import TenantService from './../../services/legacy/tenant';
-import { TeamService, TeamDtoService, UserDtoService, ProjectDtoService } from './../../services';
+import { TeamDtoService, UserDtoService, ProjectDtoService, ReviewDtoService, ProjectContentDtoService } from './../../services';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
 import { ChainService } from '@deip/chain-service';
-import ProjectContentDtoService from '../../services/impl/read/ProjectContentDtoService';
-
 
 class UserNotificationEventHandler extends BaseEventHandler {
 
@@ -26,6 +24,7 @@ const projectDtoService = new ProjectDtoService();
 const userNotificationsDtoService = new UserNotificationsDtoService();
 const tenantService = new TenantService();
 const projectContentDtoService = new ProjectContentDtoService();
+const reviewDtoService = new ReviewDtoService();
 
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
@@ -402,6 +401,74 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (
   }
 
   await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (event) => {
+  const { expert: expertId, requestor: requestorId, projectContentId } = event.getEventPayload();
+
+  const requestor = await userDtoService.getUser(requestorId);
+  const expert = await userDtoService.getUser(expertId);
+  const projectContent = await projectContentDtoService.getProjectContent(projectContentId);
+  
+  const project = await projectDtoService.getProject(projectContent.research_external_id);
+  const team = await teamDtoService.getTeam(project.researchRef.researchGroupExternalId);
+
+  await userNotificationsDtoService.createUserNotifications([{
+    username: expert.account.name,
+    status: 'unread',
+    type: USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST,
+    metadata: {
+      requestor,
+      expert,
+      researchGroup: team,
+      research: project,
+      researchContent: projectContent
+    }
+  }]);
+});
+
+userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) => {
+  const {
+    entityId: reviewId,
+    author,
+    projectContentId
+  } = event.getEventPayload();
+
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+
+  let reviewer = await userDtoService.getUser(author);
+  let projectContent = await projectContentDtoService.getProjectContent(projectContentId);
+
+  let project = await projectDtoService.getProject(projectContent.researchContentRef.researchExternalId);
+  let review = await reviewDtoService.getReview(reviewId);
+
+  let team = await teamDtoService.getTeam(project.researchRef.researchGroupExternalId);
+  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
+  const [members] = refs.map((g) => g.map(m => m.account));
+
+  const notifications = [];
+  for (let i = 0; i < members.length; i++) {
+    let member = members[i];
+    notifications.push({
+      username: member,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW,
+      metadata: {
+        review,
+        researchContent: projectContent,
+        research: project,
+        researchGroup: team,
+        reviewer
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+userNotificationEventHandler.register(APP_EVENT.UPVOTED_REVIEW, async (event) => {
+  // add notify
 });
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED, async (event) => {

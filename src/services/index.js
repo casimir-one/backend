@@ -18,6 +18,10 @@ import DocumentTemplateService from './impl/write/DocumentTemplateService';
 import ProjectContentDtoService from './impl/read/ProjectContentDtoService';
 import ProjectContentService from './impl/write/ProjectContentService';
 import DraftService from './impl/write/DraftService';
+import ReviewRequestDtoService from './impl/read/ReviewRequestDtoService';
+import ReviewRequestService from './impl/write/ReviewRequestService';
+import ReviewDtoService from './impl/read/ReviewDtoService';
+import ReviewService from './impl/write/ReviewService';
 
 
 module.exports = {
@@ -49,5 +53,10 @@ module.exports = {
 
   ProjectContentDtoService,
   ProjectContentService,
-  DraftService
+  DraftService,
+
+  ReviewRequestDtoService,
+  ReviewRequestService,
+  ReviewDtoService,
+  ReviewService
 }
