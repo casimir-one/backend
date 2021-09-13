@@ -1,9 +1,20 @@
 import { JsonDataMsg, MultFormDataMsg } from '@deip/message-models';
+import { GrapheneTx, SubstrateTx } from '@deip/chain-service';
+import { PROTOCOL_CHAIN } from '@deip/constants';
+import config from '../../config';
+
+
+const TxClassMap = {
+  [PROTOCOL_CHAIN.GRAPHENE]: GrapheneTx,
+  [PROTOCOL_CHAIN.SUBSTRATE]: SubstrateTx
+}
 
 
 class MessageHandler {
 
   constructor(nextHandler, isMultipartForm) {
+
+    const TxClass = TxClassMap[config.PROTOCOL];
 
     function setMessage(ctx) {
       if ((isMultipartForm && !ctx.state.form.envelope) && !ctx.request.body.envelope) {
@@ -12,8 +23,8 @@ class MessageHandler {
       }
 
       ctx.state.msg = isMultipartForm
-        ? MultFormDataMsg.UnwrapEnvelope(ctx.state.form.envelope)
-        : JsonDataMsg.UnwrapEnvelope(ctx.request.body.envelope);
+        ? MultFormDataMsg.UnwrapEnvelope(ctx.state.form.envelope, TxClass)
+        : JsonDataMsg.UnwrapEnvelope(ctx.request.body.envelope, TxClass);
     }
 
     if (nextHandler.length === 2) {
