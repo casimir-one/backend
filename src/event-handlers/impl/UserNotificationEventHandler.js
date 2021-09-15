@@ -467,6 +467,90 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
   await userNotificationsDtoService.createUserNotifications(notifications);
 });
 
+userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, async (event) => {
+  const {
+    creator,
+    projectId
+  } = event.getEventPayload();
+
+  const project = await projectDtoService.getProject(projectId);
+  const emitter = await userDtoService.getUser(creator);
+  const tenant = await tenantService.getTenant(emitter.tenantId);
+
+  const notifications = [];
+  for (let i = 0; i < project.members.length; i++) {
+    let member = project.members[i];
+    notifications.push({
+      username: member,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_PROPOSED,
+      metadata: {
+        research: project,
+        emitter,
+        tenant
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (event) => {
+  const {
+    creator: creatorUsername,
+    projectId
+  } = event.getEventPayload();
+
+  const project = await projectDtoService.getProject(projectId);
+  const creator = await userDtoService.getUser(creatorUsername);
+  const tenant = await tenantService.getTenant(creator.tenantId);
+
+  const notifications = [];
+  for (let i = 0; i < [...project.members, creatorUsername].length; i++) {
+    let member = project.members[i] || creatorUsername;
+    notifications.push({
+      username: member,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_SIGNED,
+      metadata: {
+        research: project,
+        creator,
+        tenant
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
+userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, async (event) => {
+  const {
+    creator: creatorUsername,
+    projectId
+  } = event.getEventPayload();
+
+  const project = await projectDtoService.getProject(projectId);
+  const creator = await userDtoService.getUser(creatorUsername);
+  const tenant = await tenantService.getTenant(creator.tenantId);
+
+  const notifications = [];
+  for (let i = 0; i < [...project.members, creatorUsername].length; i++) {
+    let member = project.members[i] || creatorUsername;
+    notifications.push({
+      username: member,
+      status: 'unread',
+      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_REJECTED,
+      metadata: {
+        research: project,
+        creator,
+        tenant
+      }
+    });
+  }
+
+  await userNotificationsDtoService.createUserNotifications(notifications);
+});
+
 userNotificationEventHandler.register(APP_EVENT.UPVOTED_REVIEW, async (event) => {
   // add notify
 });

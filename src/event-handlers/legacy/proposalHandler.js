@@ -64,10 +64,4 @@ proposalHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply)
   return proposalRef;
 }));
 
-proposalHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchNdaProposedEvent } = source;
-  const proposalRef = await createProposal(researchNdaProposedEvent, APP_PROPOSAL.PROJECT_NDA_PROPOSAL);
-  return proposalRef;
-}));
-
 export default proposalHandler;

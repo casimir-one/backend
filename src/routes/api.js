@@ -11,7 +11,6 @@ import research from '../controllers/legacy/research'
 import grants from '../controllers/legacy/grants'
 import expressLicensing from '../controllers/legacy/expressLicensing'
 import tenant from '../controllers/legacy/tenant';
-import researchNda from './../controllers/legacy/researchNda';
 
 import { 
   projectsCtrl, 
@@ -25,7 +24,7 @@ import {
   documentTemplatesCtrl,
   projectContentsCtrl,
   reviewsCtrl,
-  reviewRequestsCtrl
+  projectNdaCtrl
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
@@ -148,12 +147,6 @@ public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
 protected_route.post('/infrastructure/tenant/sign', tenant.signTxByTenant)
 protected_route.post('/infrastructure/tenant/affirm', tenant.affirmTxByTenant)
 
-protected_route.post('/nda', researchNda.createResearchNonDisclosureAgreement);
-public_route.get('/nda/:ndaExternalId', researchNda.getResearchNonDisclosureAgreement);
-public_route.get('/nda/creator/:username', researchNda.getResearchNonDisclosureAgreementsByCreator);
-public_route.get('/nda/research/:researchExternalId', researchNda.getResearchNonDisclosureAgreementsByResearch);
-
-
 /* V2 */
 public_route.get('/v2/project/:projectId', projectsCtrl.getProject)
 public_route.get('/v2/project/default/:accountId', projectsCtrl.getDefaultProject)
@@ -256,10 +249,15 @@ public_route.get('/v2/reviews/author/:author', reviewsCtrl.getReviewsByAuthor)
 protected_route.post('/v2/review', reviewsCtrl.createReview)
 protected_route.post('/v2/review/upvote', reviewsCtrl.upvoteReview)
 
-protected_route.post('/v2/review-request', reviewRequestsCtrl.createReviewRequest);
-protected_route.put('/v2/review-request/deny', reviewRequestsCtrl.denyReviewRequest);
-protected_route.get('/v2/review-requests/expert/:username', reviewRequestsCtrl.getReviewRequestsByExpert);
-protected_route.get('/v2/review-requests/requestor/:username', reviewRequestsCtrl.getReviewRequestsByRequestor);
+protected_route.post('/v2/review-request', reviewsCtrl.createReviewRequest);
+protected_route.put('/v2/review-request/deny', reviewsCtrl.denyReviewRequest);
+protected_route.get('/v2/review-requests/expert/:username', reviewsCtrl.getReviewRequestsByExpert);
+protected_route.get('/v2/review-requests/requestor/:username', reviewsCtrl.getReviewRequestsByRequestor);
+
+protected_route.post('/v2/nda', projectNdaCtrl.createProjectNonDisclosureAgreement);
+public_route.get('/v2/nda/:ndaId', projectNdaCtrl.getProjectNonDisclosureAgreement);
+public_route.get('/v2/nda/creator/:username', projectNdaCtrl.getProjectNonDisclosureAgreementsByCreator);
+public_route.get('/v2/nda/project/:projectId', projectNdaCtrl.getProjectNonDisclosureAgreementsByProject);
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

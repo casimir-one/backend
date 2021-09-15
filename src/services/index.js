@@ -22,6 +22,7 @@ import ReviewRequestDtoService from './impl/read/ReviewRequestDtoService';
 import ReviewRequestService from './impl/write/ReviewRequestService';
 import ReviewDtoService from './impl/read/ReviewDtoService';
 import ReviewService from './impl/write/ReviewService';
+import ProjectNdaDtoService from './impl/read/ProjectNdaDtoService';
 
 
 module.exports = {
@@ -58,5 +59,7 @@ module.exports = {
   ReviewRequestDtoService,
   ReviewRequestService,
   ReviewDtoService,
-  ReviewService
+  ReviewService,
+
+  ProjectNdaDtoService
 }

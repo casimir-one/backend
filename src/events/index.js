@@ -58,10 +58,16 @@ import ProjectContentDraftCreatedEvent from './impl/ProjectContentDraftCreatedEv
 import ProjectContentDraftDeletedEvent from './impl/ProjectContentDraftDeletedEvent';
 import ProjectContentDraftUpdatedEvent from './impl/ProjectContentDraftUpdatedEvent';
 import ProjectContentCreatedEvent from './impl/ProjectContentCreatedEvent';
+
 import ReviewRequestCreatedEvent from './impl/ReviewRequestCreatedEvent';
 import ReviewRequestDeclinedEvent from './impl/ReviewRequestDeclinedEvent';
 import ReviewCreatedEvent from './impl/ReviewCreatedEvent';
 import UpvotedReviewEvent from './impl/UpvotedReviewEvent';
+
+import ProjectNdaCreatedEvent from './impl/ProjectNdaCreatedEvent';
+import ProjectNdaProposalCreatedEvent from './impl/ProjectNdaProposalCreatedEvent';
+import ProjectNdaProposalAcceptedEvent from './impl/ProjectNdaProposalAcceptedEvent';
+import ProjectNdaProposalDeclinedEvent from './impl/ProjectNdaProposalDeclinedEvent';
 
 module.exports = {
   ProjectCreatedEvent,
@@ -128,5 +134,10 @@ module.exports = {
   ReviewRequestCreatedEvent,
   ReviewRequestDeclinedEvent,
   ReviewCreatedEvent,
-  UpvotedReviewEvent
+  UpvotedReviewEvent,
+
+  ProjectNdaCreatedEvent,
+  ProjectNdaProposalCreatedEvent,
+  ProjectNdaProposalAcceptedEvent,
+  ProjectNdaProposalDeclinedEvent
 }
