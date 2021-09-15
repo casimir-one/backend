@@ -177,20 +177,4 @@ appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_EXPRESS_LICENSE_PROPOSAL_SIGNED, (
   await wait(expressLicensingHandler, researchExpressLicenseProposalSignedEvent, null, tenant);
 }));
 
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchNdaProposedEvent, tenant } = source;
-  await wait(proposalHandler, researchNdaProposedEvent, null, tenant);
-  fire(userNotificationsHandler, researchNdaProposedEvent);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSAL_SIGNED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchNdaProposalSignedEvent, tenant } = source;
-  fire(userNotificationsHandler, researchNdaProposalSignedEvent);
-}));
-
-appEventHandler.on(LEGACY_APP_EVENTS.RESEARCH_NDA_PROPOSAL_REJECTED, (payload, reply) => handle(payload, reply, async (source) => {
-  const { event: researchNdaProposalRejectedEvent, tenant } = source;
-  fire(userNotificationsHandler, researchNdaProposalRejectedEvent);
-}));
-
 export default appEventHandler;

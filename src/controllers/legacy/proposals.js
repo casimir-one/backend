@@ -4,11 +4,9 @@ import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
 
 import ResearchExpressLicenseProposalSignedEvent from './../../events/legacy/researchExpressLicenseProposalSignedEvent';
 import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
-import ResearchNdaProposalSignedEvent from './../../events/legacy/researchNdaProposalSignedEvent'
 
 import ResearchExpressLicenseProposalRejectedEvent from './../../events/legacy/researchExpressLicenseProposalRejectedEvent';
 import UserResignationProposalRejectedEvent from './../../events/legacy/userResignationProposalRejectedEvent';
-import ResearchNdaProposalRejectedEvent from './../../events/legacy/researchNdaProposalRejectedEvent';
 
 
 const createProposal = async (ctx) => {
@@ -57,11 +55,6 @@ const updateProposal = async (ctx, next) => {
       ctx.state.events.push(userResignationProposalSignedEvent);
     }
 
-    if (updatedProposal.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
-      const researchNdaProposalSignedEvent = new ResearchNdaProposalSignedEvent(datums);
-      ctx.state.events.push(researchNdaProposalSignedEvent);
-    }
-
     ctx.status = 200;
     ctx.body = [...ctx.state.events];
 
@@ -99,11 +92,6 @@ const deleteProposal = async (ctx, next) => {
     if (deletedProposal.type == APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL) {
       const userResignationProposalRejectedEvent = new UserResignationProposalRejectedEvent(datums);
       ctx.state.events.push(userResignationProposalRejectedEvent);
-    }
-
-    if (deletedProposal.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
-      const researchNdaProposalRejectedEvent = new ResearchNdaProposalRejectedEvent(datums);
-      ctx.state.events.push(researchNdaProposalRejectedEvent);
     }
 
     ctx.status = 200;

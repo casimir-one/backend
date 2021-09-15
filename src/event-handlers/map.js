@@ -220,4 +220,16 @@ module.exports = {
   [APP_EVENT.UPVOTED_REVIEW]: [
     { h: userNotificationEventHandler, await: false }
   ],
+
+  [APP_EVENT.PROJECT_NDA_CREATED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
 };
