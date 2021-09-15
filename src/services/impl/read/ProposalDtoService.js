@@ -537,17 +537,17 @@ class ProposalDtoService extends BaseService {
   }
 
   async extendResearchNdaProposals(proposals) {
-    const researchExternalIds = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.researchExternalId)) {
-        acc.push(proposal.details.researchExternalId);
+    const projectIds = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.projectId)) {
+        acc.push(proposal.details.projectId);
       }
       return acc;
     }, []);
 
-    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
+    const researches = await projectDtoService.getProjects(projectIds.map(rId => rId), Object.values(RESEARCH_STATUS));
 
     return proposals.map(proposal => {
-      const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
+      const research = researches.find(r => r.external_id == proposal.details.projectId);
       return { ...proposal, extendedDetails: { research } };
     })
   }

@@ -8,7 +8,8 @@ import {
   assetCmdHandler,
   documentTemplateCmdHandler,
   projectContentCmdHandler,
-  reviewCmdHandler
+  reviewCmdHandler,
+  projectNdaCmdHandler
 } from './index';
 
 
@@ -42,4 +43,5 @@ module.exports = {
   [APP_CMD.DECLINE_REVIEW_REQUEST]: reviewCmdHandler,
   [APP_CMD.CREATE_REVIEW]: reviewCmdHandler,
   [APP_CMD.UPVOTE_REVIEW]: reviewCmdHandler,
+  [APP_CMD.CREATE_PROJECT_NDA]: projectNdaCmdHandler,
 };

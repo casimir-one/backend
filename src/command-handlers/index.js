@@ -7,6 +7,7 @@ import assetCmdHandler from './impl/AssetCmdHandler';
 import documentTemplateCmdHandler from './impl/DocumentTemplateCmdHandler';
 import projectContentCmdHandler from './impl/ProjectContentCmdHandler';
 import reviewCmdHandler from './impl/ReviewCmdHandler';
+import projectNdaCmdHandler from './impl/ProjectNdaCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -17,5 +18,6 @@ module.exports = {
   assetCmdHandler,
   documentTemplateCmdHandler,
   projectContentCmdHandler,
-  reviewCmdHandler
+  reviewCmdHandler,
+  projectNdaCmdHandler
 }
