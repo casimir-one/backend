@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectUpdatedEvent, ProjectDeletedEvent } from './../../events';
+import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectMemberLeftEvent, ProjectUpdatedEvent, ProjectDeletedEvent } from './../../events';
 import { RESEARCH_STATUS } from './../../constants';
 
 
@@ -82,7 +82,7 @@ projectCmdHandler.register(APP_CMD.JOIN_PROJECT_TEAM, (cmd, ctx) => {
 projectCmdHandler.register(APP_CMD.LEAVE_PROJECT_TEAM, (cmd, ctx) => {
   const { member, teamId, projectId } = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new ProjectMemberJoinedEvent({
+  ctx.state.appEvents.push(new ProjectMemberLeftEvent({
     member: member,
     teamId: teamId,
     projectId: projectId,
