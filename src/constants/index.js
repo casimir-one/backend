@@ -6,9 +6,7 @@ import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
 import ATTRIBUTE_TYPE from './attributeTypes';
 import LEGACY_APP_EVENTS from './legacyAppEvents';
-import RESEARCH_APPLICATION_STATUS from './researchApplicationStatus';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
-import NEW_RESEARCH_POLICY from './newResearchPolicy';
 import RESEARCH_STATUS from './researchStatus';
 import PROPOSAL_STATUS from './proposalStatus';
 import RESEARCH_ATTRIBUTE from './researchAttributes';
@@ -32,9 +30,7 @@ export {
   USER_INVITE_STATUS,
   ATTRIBUTE_TYPE,
   LEGACY_APP_EVENTS,
-  RESEARCH_APPLICATION_STATUS,
   RESEARCH_CONTENT_STATUS,
-  NEW_RESEARCH_POLICY,
   RESEARCH_STATUS,
   PROPOSAL_STATUS,
   RESEARCH_ATTRIBUTE,

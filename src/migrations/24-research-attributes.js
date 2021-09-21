@@ -27,7 +27,6 @@ const mongoose = require('mongoose');
 const ATTR_SCOPES = require('../constants').ATTR_SCOPES;
 const ATTRIBUTE_TYPE = require('../constants').ATTRIBUTE_TYPE;
 const SIGN_UP_POLICY = require('../constants').SIGN_UP_POLICY;
-const NEW_RESEARCH_POLICY = require('../constants').NEW_RESEARCH_POLICY;
 const ASSESSMENT_CRITERIA_TYPE = require('../constants').ASSESSMENT_CRITERIA_TYPE;
 const RESEARCH_CONTENT_TYPES = require('../constants').RESEARCH_CONTENT_TYPES;
 const RESEARCH_STATUS = require('./../constants').RESEARCH_STATUS;
@@ -201,11 +200,6 @@ const TenantProfileMigratingSchema = new Schema({
     "signUpPolicy": {
       type: String,
       enum: [...Object.values(SIGN_UP_POLICY)],
-      required: true
-    },
-    "newResearchPolicy": {
-      type: String,
-      enum: [...Object.values(NEW_RESEARCH_POLICY)],
       required: true
     },
     "reviewQuestions": {

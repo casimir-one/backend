@@ -18,7 +18,6 @@ const AwardWithdrawalRequestSchema = require('./../schemas/AwardWithdrawalReques
 const ProjectExpressLicenseSchema = require('./../schemas/ProjectExpressLicenseSchema');
 const JoinRequest = require('./../schemas/JoinRequestSchema');
 const Proposal = require('./../schemas/read/ProposalReadModelSchema');
-const ResearchApplication = require('./../schemas/ProjectExpressLicenseSchema');
 const Research = require('./../schemas/ProjectSchema');
 const ResearchContent = require('./../schemas/ProjectContentSchema');
 const ResearchGroup = require('./../schemas/TeamSchema');
@@ -39,7 +38,6 @@ const run = async () => {
   await JoinRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Proposal.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Research.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ResearchApplication.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await ResearchContent.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await ResearchGroup.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Review.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });

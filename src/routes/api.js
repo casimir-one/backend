@@ -120,13 +120,6 @@ protected_route.get('/research/user/listing/:username', research.getUserResearch
 protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
 public_route.get('/research/listing', research.getTenantResearchListing)
 
-protected_route.post('/research/application', research.createResearchApplication)
-protected_route.put('/research/application/:proposalId', research.editResearchApplication)
-protected_route.get('/research/application/listing', research.getResearchApplications)
-protected_route.get('/research/application/:proposalId/attachment', research.getResearchApplicationAttachmentFile)
-// protected_route.post('/research/application/approve', research.approveResearchApplication)
-protected_route.post('/research/application/reject', research.rejectResearchApplication)
-protected_route.post('/research/application/delete', research.deleteResearchApplication)
 
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)

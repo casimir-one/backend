@@ -155,7 +155,5 @@ const getAvatar = async (ctx) => {
 export default {
   addUserBookmark,
   removeUserBookmark,
-
-  getAvatar,
-  
+  getAvatar
 }

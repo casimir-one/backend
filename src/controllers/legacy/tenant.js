@@ -6,7 +6,6 @@ import FileStorage from './../../storage';
 import config from './../../config';
 import { USER_PROFILE_STATUS } from './../../constants';
 import TenantSettingsForm from './../../forms/legacy/tenantSettings';
-import * as blockchainService from './../../utils/blockchain';
 import { AttributeDtoService } from './../../services';
 
 
@@ -430,47 +429,6 @@ const rejectSignUpRequest = async (ctx) => {
 }
 
 
-const addTenantAdmin = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-
-    ctx.status = 200;
-    ctx.body = { tx, txResult };
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-}
-
-
-const removeTenantAdmin = async (ctx) => {
-  const jwtUsername = ctx.state.user.username;
-  const { tx } = ctx.request.body;
-
-  try {
-
-    const operation = tx['operations'][0];
-    const payload = operation[1];
-    const txResult = await blockchainService.sendTransactionAsync(tx);
-
-    ctx.status = 200;
-    ctx.body = { tx, txResult };
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-}
-
 const signTxByTenant = async (ctx) => {
   const { tx } = ctx.request.body;
   const isTenantAccessToken = ctx.state.user.isTenant;
@@ -645,8 +603,6 @@ export default {
   updateTenantProfile,
   updateTenantNetworkSettings,
   updateTenantSettings,
-  addTenantAdmin,
-  removeTenantAdmin,
   signTxByTenant,
   affirmTxByTenant,
   updateTenantAttributeSettings,

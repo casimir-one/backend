@@ -37,8 +37,6 @@ protected_route.get('/registry/sign-ups', compose([tenantRoute, tenantAdminGuard
 // protected_route.put('/registry/sign-ups/approve', compose([tenantRoute, tenantAdminGuard]), tenant.approveSignUpRequest);
 protected_route.put('/registry/sign-ups/reject', compose([tenantRoute, tenantAdminGuard]), tenant.rejectSignUpRequest);
 protected_route.post('/v2/registry/sign-up', compose([tenantRoute, tenantAdminGuard]), authCtrl.signUp);
-protected_route.put('/admins/add', compose([tenantRoute, tenantAdminGuard]), tenant.addTenantAdmin);
-protected_route.put('/admins/remove', compose([tenantRoute, tenantAdminGuard]), tenant.removeTenantAdmin);
 
 const routes = { 
   protected: koa_router().use('/tenant', protected_route.routes()),

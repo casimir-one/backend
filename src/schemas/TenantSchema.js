@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, ATTRIBUTE_TYPE, NEW_RESEARCH_POLICY, ASSESSMENT_CRITERIA_TYPE, RESEARCH_CONTENT_TYPES } from './../constants';
+import { SIGN_UP_POLICY, ATTRIBUTE_TYPE, ASSESSMENT_CRITERIA_TYPE, RESEARCH_CONTENT_TYPES } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -96,11 +96,6 @@ const TenantSchema = new Schema({
     "signUpPolicy": {
       type: String,
       enum: [...Object.values(SIGN_UP_POLICY)],
-      required: true
-    },
-    "newResearchPolicy": {
-      type: String,
-      enum: [...Object.values(NEW_RESEARCH_POLICY)],
       required: true
     },
     "reviewQuestions": {
