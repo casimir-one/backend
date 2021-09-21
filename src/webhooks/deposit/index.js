@@ -2,10 +2,14 @@ import config from './../../config';
 import qs from 'qs';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import * as blockchainService from './../../utils/blockchain';
 import { DEPOSIT_REQUEST_STATUS } from './../../constants';
 import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 import { ChainService } from '@deip/chain-service';
+import { IssueAssetCmd } from '@deip/command-models';
+import { AssetDtoService } from './../../services';
+
+
+const assetDtoService = new AssetDtoService();
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -29,7 +33,14 @@ const createAssetDepositRequest = async (ctx) => {
 
     if (!currency || !SUPPORTED_CURRENCIES.includes(currency)) {
       ctx.status = 400;
-      ctx.body = `${currency} is not supported`;
+      ctx.body = `Asset with symbol ${currency} is not supported`;
+      return;
+    }
+
+    const asset = await assetDtoService.getAssetBySymbol(currency);
+    if (!asset) {
+      ctx.status = 400;
+      ctx.body = `Asset with symbol ${currency} is not found`;
       return;
     }
 
@@ -70,6 +81,7 @@ const createAssetDepositRequest = async (ctx) => {
     }
 
     const depositRequestDoc = await (new AssetDepositRequest({
+      assetId: asset._id,
       currency,
       amount,
       timestamp,
@@ -97,9 +109,7 @@ const createAssetDepositRequest = async (ctx) => {
       redirectUrl: redirectToPaymentUrl,
       depositRequest
     }
-  }
-
-  catch (err) {
+  } catch (err) {
     ctx.status = 500;
     ctx.body = err.message;
   }
@@ -113,8 +123,9 @@ const confirmAssetDepositRequest = async (ctx) => {
   } = ctx.request.body;
 
   const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
   const chainNodeClient = chainService.getChainNodeClient();
-  const deipRpc = chainNodeClient;
+  const chainTxBuilder = chainService.getChainTxBuilder();
 
   let depositRequestDoc;
   
@@ -148,25 +159,28 @@ const confirmAssetDepositRequest = async (ctx) => {
       const publicKey = crypto.PublicKey.from(config.DEIP_PAYMENT_SERVICE_PUB_KEY);
       const payloadStr = JSON.stringify(invoice, Object.keys(invoice).sort())
       publicKey.verify(Encodeuint8arr(payloadStr).buffer, crypto.unhexify(sig).buffer);
-    }
-    catch (err) {
+    } catch (err) {
       ctx.status = 401;
       ctx.body = `Provided signature is not valid for provided invoice`;
       return;
     }
-  
-    const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
-    const issue_asset_op = ['issue_asset', {
-      issuer: regacc,
-      amount: `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`,
-      recipient: account,
-      memo: undefined,
-      extensions: []
-    }];
 
-    let signedTx = await blockchainService.signOperations([issue_asset_op], regaccPrivKey);
-    signedTx = deipRpc.auth.signTransaction(signedTx, {}, { tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }); // affirm by tenant
-    const txInfo = await blockchainService.sendTransactionAsync(signedTx);
+    const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
+    const tx = await chainTxBuilder.begin()
+      .then((txBuilder) => {
+        const issueAssetCmd = new IssueAssetCmd({
+          assetId: depositRequest.assetId,
+          issuer: regacc,
+          amount: `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`,
+          recipient: account,
+        });
+        txBuilder.addCmd(issueAssetCmd);
+        return txBuilder.end();
+      })
+      .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));
+
+    await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
+    const txInfo = await tx.sendAsync(chainApi);
 
     depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.APPROVED;
     depositRequestDoc.txInfo = txInfo;
@@ -175,8 +189,8 @@ const confirmAssetDepositRequest = async (ctx) => {
 
     ctx.status = 200;
     ctx.body = "OK";
-  }
-  catch(err) {
+
+  } catch (err) {
 
     if (depositRequestDoc) {
       depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.REJECTED;
@@ -192,8 +206,8 @@ const confirmAssetDepositRequest = async (ctx) => {
 
 const getDepositRequestByToken = async (ctx) => {
   try {
-    const requestToken = ctx.params.requestToken;
 
+    const requestToken = ctx.params.requestToken;
     if (!requestToken) {
       ctx.status = 400;
       ctx.body = `Request token is not specified`;
@@ -210,12 +224,13 @@ const getDepositRequestByToken = async (ctx) => {
     const depositRequest = depositRequestDoc.toObject();
     ctx.status = 200;
     ctx.body = depositRequest;
-  }
-  catch (err) {
+
+  } catch (err) {
     ctx.status = 500;
     ctx.body = err.message;
   }
 }
+
 
 module.exports = {
   getDepositRequestByToken,

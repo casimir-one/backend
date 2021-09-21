@@ -4,6 +4,7 @@ import { DEPOSIT_REQUEST_STATUS } from './../constants';
 const Schema = mongoose.Schema;
 
 const AssetDepositRequestSchema = new Schema({
+  "assetId": { type: String, required: true },
   "currency": { type: String, required: true },
   "amount": { type: Number, required: true },
   "username": { type: String, required: true }, // user who makes a payment
