@@ -325,76 +325,6 @@ const getSignUpRequests = async (ctx) => {
 }
 
 
-const approveSignUpRequest = async (ctx, next) => {
-  const { username, role } = ctx.request.body;
-
-  try {
-
-    // TODO: check jwtUsername for admin
-    const userDtoService = new UserDtoService();
-    const userService = new UserService();
-    const teamService = new TeamService();
-    const attributeDtoService = new AttributeDtoService()
-
-    const userProfile = await userDtoService.findUserProfileByOwner(username);
-    if (!userProfile) {
-      ctx.status = 404;
-      ctx.body = `Sign up request for ${username} does not exist`;
-      return;
-    }
-
-    if (userProfile.status != USER_PROFILE_STATUS.PENDING) {
-      ctx.status = 400;
-      ctx.body = `Sign up request for ${username} was already approved`;
-      return;
-    }
-
-    const tx = await userService.createUserAccount({ username, pubKey: userProfile.signUpPubKey, role });
-
-    // temp solution //
-    const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
-    const attr = attrs.find(
-      ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
-    );
-
-    const attributes = attr ? [{attributeId: attr._id, value: username}] : [];
-
-    await teamService.createTeam({
-      externalId: username,
-      creator: username,
-      attributes
-    });
-
-    /* Temp solution for ACTION PROJECT roles setup flow */
-
-    // const datums = blockchainService.extractOperations(tx);
-    // if (datums.length > 1) {
-    //   const userInvitationProposedEvent = new UserInvitationProposedEvent(datums);
-    //   ctx.state.events.push(userInvitationProposedEvent);
-
-    //   const userInvitationApprovals = userInvitationProposedEvent.getProposalApprovals();
-    //   for (let i = 0; i < userInvitationApprovals.length; i++) {
-    //     const approval = userInvitationApprovals[i];
-    //     const userInvitationProposalSignedEvent = new UserInvitationProposalSignedEvent([approval]);
-    //     ctx.state.events.push(userInvitationProposalSignedEvent);
-    //   }
-    // }
-
-    const approvedProfile = await userService.updateUser(username, { status: USER_PROFILE_STATUS.APPROVED });
-
-    ctx.status = 200;
-    ctx.body = { profile: approvedProfile };
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-}
-
-
 const rejectSignUpRequest = async (ctx) => {
   const { username } = ctx.request.body;
 
@@ -546,7 +476,6 @@ export default {
   getTenantBanner,
   getTenantLogo,
   getSignUpRequests,
-  approveSignUpRequest,
   rejectSignUpRequest,
   updateTenantProfile,
   updateTenantNetworkSettings,

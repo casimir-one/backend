@@ -10,9 +10,11 @@ import { ChainService } from '@deip/chain-service';
 const userService = new UserService();
 
 class AuthController extends BaseController {
+
   signUp = this.command({
     h: async (ctx) => {
       try {
+        
         const validate = async (appCmds) => {
           const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
           if (!appCmd) {
