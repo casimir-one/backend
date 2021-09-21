@@ -9,13 +9,13 @@ class InvestmentOpportunityEventHandler extends BaseEventHandler {
   }
 }
 
-const investmentOpportunityEventHandler = new InvestmentOpportunityEventHandler();
-const investmentOpService = new InvestmentOpportunityService();
+const invstOppEventHandler = new InvestmentOpportunityEventHandler();
+const invstOppService = new InvestmentOpportunityService();
 
-investmentOpportunityEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (event) => {
+invstOppEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (event) => {
   const { title, metadata, projectId, tokenSaleId } = event.getEventPayload();
-  await investmentOpService.createInvestmentOpportunity({ 
-    tokenSaleId,
+  await invstOppService.createInvstOpp({
+    invstOppId: tokenSaleId,
     projectId,
     title, 
     metadata
@@ -23,9 +23,9 @@ investmentOpportunityEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREA
 });
 
 
-investmentOpportunityEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, async (event) => {
-  // TODO: create RM for InvstOpp participiation
+invstOppEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, async (event) => {
+  // TODO: create RM for InvstOpp participation
 });
 
 
-module.exports = investmentOpportunityEventHandler;
+module.exports = invstOppEventHandler;

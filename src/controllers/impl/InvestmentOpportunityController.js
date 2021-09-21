@@ -1,14 +1,14 @@
 import BaseController from '../base/BaseController';
 import { InvestmentOpportunityDtoService } from '../../services';
-import { investmentOppCmdHandler } from './../../command-handlers';
+import { invstOppCmdHandler } from './../../command-handlers';
 import { APP_CMD } from '@deip/constants';
 import { BadRequestError } from './../../errors';
 
-const investmentOppDtoService = new InvestmentOpportunityDtoService();
+const invstOppDtoService = new InvestmentOpportunityDtoService();
 
 class InvestmentOpportunityController extends BaseController {
 
-  createProjectTokenSale = this.command({
+  createInvstOpp = this.command({
     h: async (ctx) => {
       try {
 
@@ -29,7 +29,7 @@ class InvestmentOpportunityController extends BaseController {
 
         const msg = ctx.state.msg;
 
-        await investmentOppCmdHandler.process(msg, ctx, validate);
+        await invstOppCmdHandler.process(msg, ctx, validate);
         
         ctx.status = 200;
         ctx.body = { model: 'ok' };
@@ -41,7 +41,8 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  investProjectTokenSale = this.command({
+
+  participateInvstOpp = this.command({
     h: async (ctx) => {
       try {
 
@@ -54,7 +55,7 @@ class InvestmentOpportunityController extends BaseController {
 
         const msg = ctx.state.msg;
 
-        await investmentOppCmdHandler.process(msg, ctx, validate);
+        await invstOppCmdHandler.process(msg, ctx, validate);
 
         ctx.status = 200;
         ctx.body = {
@@ -68,11 +69,34 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  getProjectTokenSalesByProject = this.query({
+
+  getInvstOpp = this.query({
+    h: async (ctx) => {
+      try {
+        const { tokenSaleId } = ctx.params;
+        const tokeSale = await invstOppDtoService.getInvstOpp(tokenSaleId);
+        if (!tokeSale) {
+          ctx.status = 404;
+          ctx.body = null;
+          return;
+        }
+        ctx.body = tokeSale;
+        ctx.status = 200;
+      }
+      catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
+
+  getInvstOppByProject = this.query({
     h: async (ctx) => {
       try {
         const projectId = ctx.params.projectId;
-        const tokenSales = await investmentOppDtoService.getProjectTokenSalesByProject(projectId);
+        const tokenSales = await invstOppDtoService.getInvstOppByProject(projectId);
         ctx.status = 200;
         ctx.body = tokenSales;
       } catch (err) {
@@ -83,11 +107,12 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  getProjectTokenSaleInvestments = this.query({
+
+  getInvstOppParticipations = this.query({
     h: async (ctx) => {
       try {
         const tokenSaleId = ctx.params.tokenSaleId;
-        const investments = await investmentOppDtoService.getProjectTokenSaleInvestments(tokenSaleId);
+        const investments = await invstOppDtoService.getInvstOppParticipations(tokenSaleId);
         ctx.status = 200;
         ctx.body = investments;
       } catch (err) {
@@ -98,11 +123,12 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  getProjectTokenSaleInvestmentsByProject = this.query({
+
+  getInvstOppParticipationsByProject = this.query({
     h: async (ctx) => {
       try {
         const projectId = ctx.params.projectId;
-        const investments = await investmentOppDtoService.getProjectTokenSaleInvestmentsByProject(projectId);
+        const investments = await invstOppDtoService.getInvestmgetParticipationsByProjectentOpportunityParticipationsByProject(projectId);
         ctx.status = 200;
         ctx.body = investments;
       } catch (err) {
@@ -112,12 +138,80 @@ class InvestmentOpportunityController extends BaseController {
       }
     }
   });
+
+
+  getInvstOppParticipationsHistoryByAccount = this.query({
+    h: async (ctx) => {
+      try {
+        const { account } = ctx.params;
+        const history = await invstOppDtoService.getInvstOppParticipationsHistoryByAccount(account);
+        if (!history) {
+          ctx.status = 404;
+          ctx.body = null;
+          return;
+        }
+        ctx.body = history;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
+
+  getInvstOppParticipationsHistory = this.query({
+    h: async (ctx) => {
+      try {
+        const tokenSaleId = ctx.params.tokenSaleId;
+        const history = await invstOppDtoService.getInvstOppParticipationsHistory(tokenSaleId);
+        if (!history) {
+          ctx.status = 404;
+          ctx.body = null;
+          return;
+        }
+        ctx.body = history;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
+
+  // TODO: Move to Revenues controller
+  getAssetRevenueHistory = this.query({
+    h: async (ctx) => {
+      try {
+        const { symbol, cursor } = ctx.params;
+        const history = await invstOppDtoService.getAssetRevenueHistory(symbol, cursor);
+        if (!history) {
+          ctx.status = 404;
+          ctx.body = null;
+          return;
+        }
+        ctx.body = history;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
 
   getAccountRevenueHistoryByAsset = this.query({
     h: async (ctx) => {
       try {
         const { account, symbol, step, cursor, targetAsset } = ctx.params;
-        const history = await investmentOppDtoService.getAccountRevenueHistoryByAsset(account, symbol, step, cursor, targetAsset);
+        const history = await invstOppDtoService.getAccountRevenueHistoryByAsset(account, symbol, step, cursor, targetAsset);
         if (!history) {
           ctx.status = 404;
           ctx.body = null;
@@ -126,19 +220,20 @@ class InvestmentOpportunityController extends BaseController {
         ctx.body = history;
         ctx.status = 200;
       }
-      catch(err) {
+      catch (err) {
         console.log(err);
         ctx.status = 500;
         ctx.body = err;
       }
     }
   });
+
 
   getAccountRevenueHistory = this.query({
     h: async (ctx) => {
       try {
         const { account, cursor } = ctx.params;
-        const history = await investmentOppDtoService.getAccountRevenueHistory(account, cursor);
+        const history = await invstOppDtoService.getAccountRevenueHistory(account, cursor);
         if (!history) {
           ctx.status = 404;
           ctx.body = null;
@@ -147,7 +242,7 @@ class InvestmentOpportunityController extends BaseController {
         ctx.body = history;
         ctx.status = 200;
       }
-      catch(err) {
+      catch (err) {
         console.log(err);
         ctx.status = 500;
         ctx.body = err;
@@ -155,91 +250,8 @@ class InvestmentOpportunityController extends BaseController {
     }
   });
 
-  getAccountContributionsHistory = this.query({
-    h: async (ctx) => {
-      try {
-        const { account } = ctx.params;
-        const history = await investmentOppDtoService.getAccountContributionsHistory(account);
-        if (!history) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = history;
-        ctx.status = 200;
-      }
-      catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
-      }
-    }
-  });
-
-  getContributionsHistoryByTokenSale = this.query({
-    h: async (ctx) => {
-      try {
-        const tokenSaleId = ctx.params.tokenSaleId;
-        const history = await investmentOppDtoService.getContributionsHistoryByTokenSale(tokenSaleId);
-        if (!history) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = history;
-        ctx.status = 200;
-      }
-      catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
-      }
-    }
-  });
-
-  getAssetRevenueHistory = this.query({
-    h: async (ctx) => {
-      try {
-        const { symbol, cursor } = ctx.params;
-        const history = await investmentOppDtoService.getAssetRevenueHistory(symbol, cursor);
-        if (!history) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = history;
-        ctx.status = 200;
-      }
-      catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
-      }
-    }
-  });
-
-  getProjectTokenSale = this.query({
-    h: async (ctx) => {
-      try {
-        const { tokenSaleId } = ctx.params;
-        const tokeSale = await investmentOppDtoService.getProjectTokenSale(tokenSaleId);
-        if (!tokeSale) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = tokeSale;
-        ctx.status = 200;
-      }
-      catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
-      }
-    }
-  });
 }
 
-const investmentOppCtrl = new InvestmentOpportunityController();
+const invstOppCtrl = new InvestmentOpportunityController();
 
-module.exports = investmentOppCtrl;
+module.exports = invstOppCtrl;

@@ -20,7 +20,7 @@ import {
   assetsCtrl, 
   domainsCtrl, 
   usersCtrl, 
-  investmentOppCtrl, 
+  invstOppCtrl,
   documentTemplatesCtrl,
   projectContentsCtrl,
   reviewsCtrl,
@@ -204,17 +204,17 @@ public_route.get('/user/:username/attribute/:attributeId/file/:filename', compos
 
 protected_route.get('/v2/bookmarks/user/:username', usersCtrl.getUserBookmarks)
 
-public_route.get('/v2/investments/project/:projectId', investmentOppCtrl.getProjectTokenSalesByProject)
-protected_route.post('/v2/investments', investmentOppCtrl.createProjectTokenSale)
-protected_route.post('/v2/investments/contributions', investmentOppCtrl.investProjectTokenSale)
-protected_route.get('/v2/investments/:tokenSaleId/contributions', investmentOppCtrl.getProjectTokenSaleInvestments)
-protected_route.get('/v2/investments/project/:projectId/contributions', investmentOppCtrl.getProjectTokenSaleInvestmentsByProject)
-protected_route.get('/v2/investments/token-sale/:tokenSaleId', investmentOppCtrl.getProjectTokenSale)
-protected_route.get('/v2/investments/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', investmentOppCtrl.getAccountRevenueHistoryByAsset)
-protected_route.get('/v2/investments/history/account/:account/:cursor', investmentOppCtrl.getAccountRevenueHistory)
-protected_route.get('/v2/investments/history/contributions/account/:account', investmentOppCtrl.getAccountContributionsHistory)
-protected_route.get('/v2/investments/history/contributions/token-sale/:tokenSaleId', investmentOppCtrl.getContributionsHistoryByTokenSale)
-protected_route.get('/v2/investments/history/symbol/:symbol/:cursor', investmentOppCtrl.getAssetRevenueHistory)
+public_route.get('/v2/investments/project/:projectId', invstOppCtrl.getInvstOppByProject)
+protected_route.post('/v2/investments', invstOppCtrl.createInvstOpp)
+protected_route.post('/v2/investments/contributions', invstOppCtrl.participateInvstOpp)
+protected_route.get('/v2/investments/:tokenSaleId/contributions', invstOppCtrl.getInvstOppParticipations)
+protected_route.get('/v2/investments/project/:projectId/contributions', invstOppCtrl.getInvstOppParticipationsByProject)
+protected_route.get('/v2/investments/token-sale/:tokenSaleId', invstOppCtrl.getInvstOpp)
+protected_route.get('/v2/investments/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', invstOppCtrl.getAccountRevenueHistoryByAsset)
+protected_route.get('/v2/investments/history/account/:account/:cursor', invstOppCtrl.getAccountRevenueHistory)
+protected_route.get('/v2/investments/history/contributions/account/:account', invstOppCtrl.getInvstOppParticipationsHistoryByAccount)
+protected_route.get('/v2/investments/history/contributions/token-sale/:tokenSaleId', invstOppCtrl.getInvstOppParticipationsHistory)
+protected_route.get('/v2/investments/history/symbol/:symbol/:cursor', invstOppCtrl.getAssetRevenueHistory)
 
 public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)
 public_route.get('/v2/document-templates/account/:account', documentTemplatesCtrl.getDocumentTemplatesByAccount)

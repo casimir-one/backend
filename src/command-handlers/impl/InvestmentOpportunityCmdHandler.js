@@ -12,10 +12,10 @@ class InvestmentOpportunityCmdHandler extends BaseCmdHandler {
 }
 
 
-const investmentOppCmdHandler = new InvestmentOpportunityCmdHandler();
+const invstOppCmdHandler = new InvestmentOpportunityCmdHandler();
 
 
-investmentOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ctx) => {
+invstOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ctx) => {
   const {
     entityId: tokenSaleId,
     teamId,
@@ -47,7 +47,7 @@ investmentOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ct
 });
 
 
-investmentOppCmdHandler.register(APP_CMD.INVEST, (cmd, ctx) => {
+invstOppCmdHandler.register(APP_CMD.INVEST, (cmd, ctx) => {
   const {
     tokenSaleId,
     investor,
@@ -59,7 +59,8 @@ investmentOppCmdHandler.register(APP_CMD.INVEST, (cmd, ctx) => {
     investor,
     amount
   }));
+  
 });
 
 
-module.exports = investmentOppCmdHandler;
+module.exports = invstOppCmdHandler;

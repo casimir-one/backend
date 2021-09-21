@@ -7,15 +7,15 @@ class InvestmentOpportunityService extends BaseService {
     super(InvestmentOpportunitySchema, options);
   }
 
-  async createInvestmentOpportunity({
-    tokenSaleId,
+  async createInvstOpp({
+    invstOppId,
     projectId,
     title,
     metadata
   }) {
 
     const investmentOpp = await this.createOne({
-      _id: tokenSaleId,
+      _id: invstOppId,
       projectId,
       title,
       metadata

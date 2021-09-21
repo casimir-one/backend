@@ -2,7 +2,7 @@ import accountCmdHandler from './impl/AccountCmdHandler';
 import projectCmdHandler from './impl/ProjectCmdHandler';
 import proposalCmdHandler from './impl/ProposalCmdHandler';
 import attributeCmdHandler from './impl/AttributeCmdHandler';
-import investmentOppCmdHandler from './impl/InvestmentOpportunityCmdHandler';
+import invstOppCmdHandler from './impl/InvestmentOpportunityCmdHandler';
 import assetCmdHandler from './impl/AssetCmdHandler';
 import documentTemplateCmdHandler from './impl/DocumentTemplateCmdHandler';
 import projectContentCmdHandler from './impl/ProjectContentCmdHandler';
@@ -14,7 +14,7 @@ module.exports = {
   projectCmdHandler,
   proposalCmdHandler,
   attributeCmdHandler,
-  investmentOppCmdHandler,
+  invstOppCmdHandler,
   assetCmdHandler,
   documentTemplateCmdHandler,
   projectContentCmdHandler,

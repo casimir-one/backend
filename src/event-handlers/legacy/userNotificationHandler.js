@@ -163,7 +163,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, a
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         isProposalAutoAccepted: true, // legacy
-        proposal: { action: 13 data: { name: excludedUser.account.name } }, // legacy
+        proposal: { action: 13, data: { name: excludedUser.account.name } }, // legacy
         researchGroup,
         excluded: excludedUser,
         emitter: emitterUser

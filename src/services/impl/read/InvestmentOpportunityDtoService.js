@@ -12,7 +12,8 @@ class InvestmentOpportunityDtoService extends BaseService {
     super(InvestmentOpportunitySchema, options);
   }
 
-  async mapInvestmentOpportunity(investmentOpps) {
+
+  async mapInvstOpp(investmentOpps) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
     const chainInvestmentOpps = await Promise.all(investmentOpps.map((investmentOpp) => chainApi.getProjectTokenSaleAsync(investmentOpp._id)));
@@ -31,28 +32,31 @@ class InvestmentOpportunityDtoService extends BaseService {
   }
 
 
-  async getProjectTokenSale(tokenSaleId) {
-    const investmentOpp = await this.findOne({ _id: tokenSaleId });
+  async getInvstOpp(invstOppId) {
+    const investmentOpp = await this.findOne({ _id: invstOppId });
     if (!investmentOpp) return null;
-    const results = await this.mapInvestmentOpportunity([investmentOpp]);
+    const results = await this.mapInvstOpp([investmentOpp]);
     const [result] = results;
     return result;
   }
   
-  async getProjectTokenSalesByProject(projectId) {
+
+  async getInvstOppByProject(projectId) {
     const investmentOpps = await this.findMany({ projectId });
-    const result = await this.mapInvestmentOpportunity(investmentOpps);
+    const result = await this.mapInvstOpp(investmentOpps);
     return result;
   }
 
-  async getProjectTokenSaleInvestments(tokenSaleId) {
+
+  async getInvstOppParticipations(invstOppId) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    const result = await chainApi.getProjectTokenSaleContributionsByProjectTokenSaleAsync(tokenSaleId);
+    const result = await chainApi.getProjectTokenSaleContributionsByProjectTokenSaleAsync(invstOppId);
     return result;
   }
 
-  async getProjectTokenSaleInvestmentsByProject(projectId) {
+
+  async getInvstOppParticipationsByProject(projectId) {
     const projectDtoService = new ProjectDtoService();
     const project = await projectDtoService.getProject(projectId);
     if (!project) {
@@ -65,23 +69,8 @@ class InvestmentOpportunityDtoService extends BaseService {
     return result;
   }
 
-  async getAccountRevenueHistoryByAsset(account, symbol, step=0, cursor=0, targetAsset) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const history = await chainApi.getAccountRevenueHistoryBySecurityTokenAsync(account, symbol, cursor, step, targetAsset);
-    return history;
-  }
-  
-  async getAccountRevenueHistory(account, cursor=0) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    
-    const history = await chainApi.getAccountRevenueHistoryAsync(account, cursor);
-    return history;
-  }
 
-  async getAccountContributionsHistory(account) {
+  async getInvstOppParticipationsHistoryByAccount(account) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
 
@@ -100,7 +89,7 @@ class InvestmentOpportunityDtoService extends BaseService {
           return accum;
         }
       }
-      promises.push(this.getProjectTokenSale(currentDataOp.research_token_sale_external_id))
+      promises.push(this.getInvstOpp(currentDataOp.research_token_sale_external_id))
       return [ ...accum, {
         projectId: currentDataOp.research_external_id,
         tokenSale: currentDataOp.research_token_sale_external_id,
@@ -114,11 +103,12 @@ class InvestmentOpportunityDtoService extends BaseService {
     }));
   }
 
-  async getContributionsHistoryByTokenSale(tokenSaleId) {
+
+  async getInvstOppParticipationsHistory(invstOppId) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
 
-    const history = await chainApi.getContributionsHistoryByTokenSaleAsync(tokenSaleId);
+    const history = await chainApi.getContributionsHistoryByTokenSaleAsync(invstOppId);
     const res = history.map((h) => ({
       timestamp: h.timestamp,
       contributor: h.op[1].contributor,
@@ -127,11 +117,31 @@ class InvestmentOpportunityDtoService extends BaseService {
     return res;
   }
 
+
+  // TODO: Move to Revenues service
   async getAssetRevenueHistory(symbol, cursor=0) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
     
     const history = await chainApi.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
+    return history;
+  }
+
+
+  async getAccountRevenueHistoryByAsset(account, symbol, step = 0, cursor = 0, targetAsset) {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const history = await chainApi.getAccountRevenueHistoryBySecurityTokenAsync(account, symbol, cursor, step, targetAsset);
+    return history;
+  }
+
+  
+  async getAccountRevenueHistory(account, cursor = 0) {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainApi = chainService.getChainApi();
+
+    const history = await chainApi.getAccountRevenueHistoryAsync(account, cursor);
     return history;
   }
   
