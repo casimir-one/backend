@@ -64,28 +64,8 @@ const getResearchPendingInvites = async (ctx) => {
 }
 
 
-const createUserInvite = async (ctx, next) => {
-  // DEPRECATED: Use APP_PROPOSAL.PROJECT_INVITE_PROPOSAL instead
-
-  try {
-
-    ctx.status = 200;
-    ctx.body = "DEPRECATED: Use APP_PROPOSAL.PROJECT_INVITE_PROPOSAL flow instead";
-
-  } catch (err) {
-    console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
-  }
-
-  await next();
-
-};
-
-
 export default {
   getUserInvites,
   getResearchPendingInvites,
-  getResearchGroupPendingInvites,
-  createUserInvite
+  getResearchGroupPendingInvites
 }
