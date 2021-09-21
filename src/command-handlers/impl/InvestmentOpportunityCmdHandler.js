@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { ProjectTokenSaleInvestedEvent, ProjectTokenSaleCreatedEvent } from './../../events';
+import { InvestmentOpportunityCreatedEvent, InvestmentOpportunityParticipatedEvent } from './../../events';
 
 
 class InvestmentOpportunityCmdHandler extends BaseCmdHandler {
@@ -30,7 +30,7 @@ investmentOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ct
     metadata,
   } = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new ProjectTokenSaleCreatedEvent({
+  ctx.state.appEvents.push(new InvestmentOpportunityCreatedEvent({
     tokenSaleId,
     teamId,
     projectId,
@@ -54,7 +54,7 @@ investmentOppCmdHandler.register(APP_CMD.INVEST, (cmd, ctx) => {
     amount
   } = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new ProjectTokenSaleInvestedEvent({
+  ctx.state.appEvents.push(new InvestmentOpportunityParticipatedEvent({
     tokenSaleId,
     investor,
     amount

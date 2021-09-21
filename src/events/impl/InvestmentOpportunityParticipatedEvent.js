@@ -3,7 +3,7 @@ import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
 
 
-class ProjectTokenSaleInvestedEvent extends BaseEvent {
+class InvestmentOpportunityParticipatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -16,10 +16,10 @@ class ProjectTokenSaleInvestedEvent extends BaseEvent {
     assert(!!investor, "'investor' is required");
     assert(!!amount, "'amount' required");
 
-    super(APP_EVENT.PROJECT_TOKEN_SALE_INVESTED, eventPayload);
+    super(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, eventPayload);
   }
 
 }
 
 
-module.exports = ProjectTokenSaleInvestedEvent;
+module.exports = InvestmentOpportunityParticipatedEvent;

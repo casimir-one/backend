@@ -8,7 +8,7 @@ import {
   attributeEventHandler,
   userEventHandler,
   documentTemplateEventHandler,
-  tokenSaleEventHandler,
+  investmentOpportunityEventHandler,
   assetEventHandler,
   projectContentEventHandler,
   reviewEventHandler
@@ -140,12 +140,13 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_TOKEN_SALE_CREATED]: [
-    { h: tokenSaleEventHandler, await: true },
+  [APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED]: [
+    { h: investmentOpportunityEventHandler, await: true },
     { h: projectEventHandler, await: false }
   ],
-
-  [APP_EVENT.PROJECT_TOKEN_SALE_INVESTED]: [
+  
+  [APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED]: [
+    { h: investmentOpportunityEventHandler, await: true },
     { h: projectEventHandler, await: false }
   ],
 

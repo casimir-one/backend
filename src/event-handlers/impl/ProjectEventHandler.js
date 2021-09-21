@@ -90,50 +90,23 @@ projectEventHandler.register(APP_EVENT.ATTRIBUTE_DELETED, async (event) => {
   });
 });
 
-projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event) => {
+
+projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (event) => {
   const { projectId } = event.getEventPayload();
 
-  const project = await projectService.getProject(projectId);
-  const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
-
-  let hasUpdate = false;
-  if (!investmentOpportunityAttr) {
-    project.attributes.push({
-      attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
-      value: true
-    });
-    hasUpdate = true;
-  } else if (!investmentOpportunityAttr.value) {
-    investmentOpportunityAttr.value = true;
-    hasUpdate = true;
-  }
-
-  if (hasUpdate) {
-    await projectService.updateProject(project._id, { attributes: project.attributes });
-  }
-
-});
-
-projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_INVESTED, async (event) => {
-  const { tokenSaleId } = event.getEventPayload();
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
-  const projectTokenSale = await chainApi.getProjectTokenSaleAsync(tokenSaleId);
-
-  const project = await projectService.getProject(projectTokenSale.research_external_id);
-  
-  if (projectTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
+  if (projectId) { // TODO: Replace this validation with InvstOpp type check
+    const project = await projectService.getProject(projectId);
     const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
-    let hasUpdate = false;
 
+    let hasUpdate = false;
     if (!investmentOpportunityAttr) {
       project.attributes.push({
         attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
-        value: false
+        value: true
       });
       hasUpdate = true;
-    } else if (investmentOpportunityAttr.value) {
-      investmentOpportunityAttr.value = false;
+    } else if (!investmentOpportunityAttr.value) {
+      investmentOpportunityAttr.value = true;
       hasUpdate = true;
     }
 
@@ -141,6 +114,40 @@ projectEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_INVESTED, async (event
       await projectService.updateProject(project._id, { attributes: project.attributes });
     }
   }
+
+});
+
+
+projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, async (event) => {
+  const { tokenSaleId } = event.getEventPayload();
+  const chainService = await ChainService.getInstanceAsync(config);
+  const chainApi = chainService.getChainApi();
+  const projectTokenSale = await chainApi.getProjectTokenSaleAsync(tokenSaleId); // TODO: Use RM service
+
+  if (projectTokenSale.research_external_id) { // TODO: Replace this validation with InvstOpp type check
+    const project = await projectService.getProject(projectTokenSale.research_external_id);
+
+    if (projectTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
+      const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+      let hasUpdate = false;
+
+      if (!investmentOpportunityAttr) {
+        project.attributes.push({
+          attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+          value: false
+        });
+        hasUpdate = true;
+      } else if (investmentOpportunityAttr.value) {
+        investmentOpportunityAttr.value = false;
+        hasUpdate = true;
+      }
+
+      if (hasUpdate) {
+        await projectService.updateProject(project._id, { attributes: project.attributes });
+      }
+    }
+  }
+
 });
 
 module.exports = projectEventHandler;

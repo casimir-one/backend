@@ -333,7 +333,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
   await userNotificationsDtoService.createUserNotifications(notifications);
 });
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event) => {
+userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (event) => {
   const { entityId, projectId, teamId, creator } = event.getEventPayload();
 
   const chainService = await ChainService.getInstanceAsync(config);

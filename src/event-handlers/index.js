@@ -6,7 +6,7 @@ import userInviteEventHandler from './impl/UserInviteEventHandler';
 import attributeEventHandler from './impl/AttributeEventHandler';
 import userEventHandler from './impl/UserEventHandler';
 import documentTemplateEventHandler from './impl/DocumentTemplateEventHandler';
-import tokenSaleEventHandler from './impl/TokenSaleEventHandler';
+import investmentOpportunityEventHandler from './impl/InvestmentOpportunityEventHandler';
 import assetEventHandler from './impl/AssetEventHandler';
 import projectContentEventHandler from './impl/ProjectContentEventHandler';
 import reviewEventHandler from './impl/ReviewEventHandler';
@@ -21,7 +21,7 @@ module.exports = {
   attributeEventHandler,
   userEventHandler,
   documentTemplateEventHandler,
-  tokenSaleEventHandler,
+  investmentOpportunityEventHandler,
   assetEventHandler,
   projectContentEventHandler,
   reviewEventHandler

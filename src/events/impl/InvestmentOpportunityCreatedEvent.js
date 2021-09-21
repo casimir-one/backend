@@ -3,7 +3,7 @@ import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
 
 
-class ProjectTokenSaleCreatedEvent extends BaseEvent {
+class InvestmentOpportunityCreatedEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
       tokenSaleId,
@@ -28,7 +28,7 @@ class ProjectTokenSaleCreatedEvent extends BaseEvent {
     assert(!!softCap, "'softCap' required");
     assert(!!hardCap, "'hardCap' required");
 
-    super(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, {
+    super(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, {
       tokenSaleId,
       teamId,
       projectId,
@@ -45,4 +45,4 @@ class ProjectTokenSaleCreatedEvent extends BaseEvent {
 }
 
 
-module.exports = ProjectTokenSaleCreatedEvent;
+module.exports = InvestmentOpportunityCreatedEvent;

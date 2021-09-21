@@ -3,16 +3,16 @@ import APP_EVENT from './../../events/base/AppEvent';
 import { InvestmentOpportunityService } from './../../services';
 
 
-class TokenSaleEventHandler extends BaseEventHandler {
+class InvestmentOpportunityEventHandler extends BaseEventHandler {
   constructor() {
     super();
   }
 }
 
-const tokenSaleEventHandler = new TokenSaleEventHandler();
+const investmentOpportunityEventHandler = new InvestmentOpportunityEventHandler();
 const investmentOpService = new InvestmentOpportunityService();
 
-tokenSaleEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (event) => {
+investmentOpportunityEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (event) => {
   const { title, metadata, projectId, tokenSaleId } = event.getEventPayload();
   await investmentOpService.createInvestmentOpportunity({ 
     tokenSaleId,
@@ -20,8 +20,12 @@ tokenSaleEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_CREATED, async (even
     title, 
     metadata
   });
-  
 });
 
 
-module.exports = tokenSaleEventHandler;
+investmentOpportunityEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, async (event) => {
+  // TODO: create RM for InvstOpp participiation
+});
+
+
+module.exports = investmentOpportunityEventHandler;
