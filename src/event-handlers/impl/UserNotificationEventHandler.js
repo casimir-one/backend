@@ -302,8 +302,6 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
 
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
-  const chainNodeClient = chainService.getChainNodeClient();
-  const deipRpc = chainNodeClient;
 
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
@@ -321,7 +319,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
-        proposal: { action: deipRpc.operations.getOperationTag("create_research_token_sale"), data: { research_id: project.id } }, // legacy
+        proposal: { action: 19, data: { research_id: project.id } }, // legacy
         researchGroup: team,
         research: project,
         tokenSale: null,
@@ -338,8 +336,6 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
 
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
-  const chainNodeClient = chainService.getChainNodeClient();
-  const deipRpc = chainNodeClient;
 
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
@@ -356,7 +352,7 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
-        proposal: { action: deipRpc.operations.getOperationTag("create_research_token_sale"), data: { research_id: project.id }, is_completed: true }, // legacy
+        proposal: { action: 19, data: { research_id: project.id }, is_completed: true }, // legacy
         researchGroup: team,
         research: project,
         tokenSale,
@@ -373,8 +369,6 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (
 
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
-  const chainNodeClient = chainService.getChainNodeClient();
-  const deipRpc = chainNodeClient;
 
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
@@ -391,7 +385,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (
       status: 'unread',
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
-        proposal: { action: deipRpc.operations.getOperationTag("create_research_content"), data: { research_id: project.id }, is_completed: true }, // legacy
+        proposal: { action: 16, data: { research_id: project.id }, is_completed: true }, // legacy
         researchGroup: team,
         research: project,
         researchContent: projectContent,

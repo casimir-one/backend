@@ -422,10 +422,10 @@ class ProjectContentsController extends BaseController {
 
           const draft = await draftService.getDraft(draftId);
 
-          if(!draft) {
+          if (!draft) {
             throw new NotFoundError(`Draft for "${draftId}" id is not found`);
           }
-          if(draft.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
+          if (draft.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
             throw new BadRequestError(`Draft "${draftId}" is locked for updates`);
           }
       
@@ -434,9 +434,8 @@ class ProjectContentsController extends BaseController {
           if (!isAuthorized) {
             throw new ForbiddenError(`"${username}" is not permitted to edit "${projectId}" project`);
           }
-      
-          const proposal = await projectContentDtoService.lookupContentProposal(draft.teamId, draft.hash)
-          if (proposal && projectContentService.proposalIsNotExpired(proposal)) {
+
+          if (draft.status == RESEARCH_CONTENT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
       
@@ -476,9 +475,7 @@ class ProjectContentsController extends BaseController {
             throw new BadRequestError(`This endpoint accepts app cmd`);
           }
 
-          const {
-            draftId
-          } = appCmd.getCmdPayload();
+          const { draftId } = appCmd.getCmdPayload();
           const draft = await draftService.getDraft(draftId);
           if (!draft) {
             throw new NotFoundError(`Draft for "${draftId}" id is not found`);
@@ -490,11 +487,9 @@ class ProjectContentsController extends BaseController {
             throw new ForbiddenError(`"${username}" is not permitted to edit "${projectId}" project`);
           }
 
-
           // if there is a proposal for this content (no matter is it approved or still in voting progress)
           // we must respond with an error as blockchain hashed data should not be modified
-          const proposal = await projectContentDtoService.lookupContentProposal(draft.teamId, draft.hash)
-          if (proposal && projectContentService.proposalIsNotExpired(proposal)) {
+          if (draft.status == RESEARCH_CONTENT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
 

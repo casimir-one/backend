@@ -85,21 +85,6 @@ async function getBlock(blockNum) {
   })
 }
 
-async function getTransaction(trxId) {
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainNodeClient = chainService.getChainNodeClient();
-  const deipRpc = chainNodeClient;
-
-  return new Promise((resolve, reject) => {
-    deipRpc.api.getTransaction(trxId, function (err, result) {
-      if (err) {
-        return reject(err)
-      }
-      resolve(result);
-    });
-  })
-}
-
 
 function extractOperations(tx) {
   const result = [];
@@ -131,7 +116,6 @@ function extractOperationsFromProposal(proposal, result) {
 
 export {
   getBlock,
-  getTransaction,
   getRefBlockSummary,
   sendTransactionAsync,
   signOperations,

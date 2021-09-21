@@ -6,7 +6,7 @@ import BaseService from '../../base/BaseService';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 import ProjectContentSchema from './../../../schemas/ProjectContentSchema';
-import deipRpc from '@deip/rpc-client';
+
 
 const projectDtoService = new ProjectDtoService();
 const teamDtoService = new TeamDtoService();
@@ -90,19 +90,6 @@ class ProjectContentDtoService extends BaseService {
   async findProjectContentRefByHash(projectId, hash) {
     const result = await this.findOne({ researchExternalId: projectId, hash });
     return result;
-  }
-
-  async lookupContentProposal(team, hash) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-
-    const proposals = await chainApi.getProposalsByCreatorAsync(team);
-    const content = proposals.find(p => {
-      const [op_name, op_payload] = p['proposed_transaction']['operations'][0];
-      let tag = deipRpc.operations.getOperationTag(op_name);
-      return tag == deipRpc.operations.getOperationTag("create_research_content") && op_payload.content == hash;
-    });
-    return content;
   }
 
   async getProjectContentReferencesGraph(projectContentId) {

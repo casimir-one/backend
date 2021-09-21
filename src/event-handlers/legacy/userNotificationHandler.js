@@ -116,10 +116,6 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.RESEARCH_APPLICATION_DELETED, async
 userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({ event: userResignationProposedEvent }) => {
   const { member, researchGroupExternalId } = userResignationProposedEvent.getSourceData();
   
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainNodeClient = chainService.getChainNodeClient();
-  const deipRpc = chainNodeClient;
-
   const eventEmitter = userResignationProposedEvent.getEventEmitter();
   const researchGroup = await teamDtoService.getTeam(researchGroupExternalId);
   const emitterUser = await userDtoService.getUser(eventEmitter);
@@ -136,7 +132,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
-        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: excludedUser.account.name } }, // legacy
+        proposal: { action: 13, data: { name: excludedUser.account.name } }, // legacy
         researchGroup,
         excluded: excludedUser,
         emitter: emitterUser
@@ -150,9 +146,6 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, async ({
 
 userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, async ({ event: userResignationProposalSignedEvent }) => {
   const proposalsService = new ProposalService();
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainNodeClient = chainService.getChainNodeClient();
-  const deipRpc = chainNodeClient;
 
   const proposalId = userResignationProposalSignedEvent.getProposalId();
   const proposal = await proposalsService.getProposal(proposalId);
@@ -170,7 +163,7 @@ userNotificationHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSAL_SIGNED, a
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         isProposalAutoAccepted: true, // legacy
-        proposal: { action: deipRpc.operations.getOperationTag("leave_research_group_membership"), data: { name: excludedUser.account.name } }, // legacy
+        proposal: { action: 13 data: { name: excludedUser.account.name } }, // legacy
         researchGroup,
         excluded: excludedUser,
         emitter: emitterUser
