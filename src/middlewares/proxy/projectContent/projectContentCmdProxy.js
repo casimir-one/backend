@@ -1,12 +1,11 @@
-import { ProjectService, ProjectContentDtoService } from './../../../services';
+import { ProjectService, ProjectContentDtoService, ProjectLicensingDtoService } from './../../../services';
 import TenantService from './../../../services/legacy/tenant';
-import ExpressLicensingService from './../../../services/legacy/expressLicensing';
 import { getTenantAccessToken } from './../../../utils/network';
 
 const tenantService = new TenantService();
 const projectService = new ProjectService();
 const projectContentDtoService = new ProjectContentDtoService();
-const expressLicensingService = new ExpressLicensingService();
+const projectLicensingDtoService = new ProjectLicensingDtoService();
 
 
 function projectContentCmdProxy(options = {}) {
@@ -31,8 +30,8 @@ function projectContentCmdProxy(options = {}) {
     } else {
       const requestedTenant = await tenantService.getTenant(projectContent.tenantId);
       const jwtUsername = ctx.state.user.username;
-      const expressLicense = await expressLicensingService.getResearchLicensesByLicenseeAndResearch(jwtUsername, projectContent.researchExternalId)
-      if (expressLicense) {
+      const projectLicense = await projectLicensingDtoService.getProjectLicensesByLicenseeAndProject(jwtUsername, projectContent.researchExternalId)
+      if (projectLicense) {
         const accessToken = await getTenantAccessToken(requestedTenant);
         let url = `${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`.replace(ctx.request.querystring, '');
         url += `authorization=${accessToken}`;

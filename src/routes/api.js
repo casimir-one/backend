@@ -4,7 +4,6 @@ import expertise from '../controllers/legacy/expertise'
 import notifications from '../controllers/legacy/notifications'
 import invites from '../controllers/legacy/invites'
 import grants from '../controllers/legacy/grants'
-import expressLicensing from '../controllers/legacy/expressLicensing'
 import tenant from '../controllers/legacy/tenant';
 
 import { 
@@ -19,7 +18,10 @@ import {
   documentTemplatesCtrl,
   projectContentsCtrl,
   reviewsCtrl,
-  projectNdaCtrl
+  projectNdaCtrl,
+  contractAgreementCtrl,
+  incomeShareAgreementCtrl,
+  projectLicenseCtrl
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
@@ -83,14 +85,6 @@ protected_route.get('/invites/research/:researchExternalId', invites.getResearch
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.createAwardWithdrawalRequest)
-
-protected_route.post('/express-licensing', expressLicensing.createExpressLicenseRequest)
-protected_route.get('/express-licensing/externalId/:externalId', expressLicensing.getResearchLicense)
-protected_route.get('/express-licensing/licensee/:licensee', expressLicensing.getResearchLicensesByLicensee)
-protected_route.get('/express-licensing/licenser/:licenser', expressLicensing.getResearchLicensesByLicenser)
-protected_route.get('/express-licensing/researchId/:researchId', expressLicensing.getResearchLicensesByResearch)
-protected_route.get('/express-licensing/licensee/:licensee/researchId/:researchId', expressLicensing.getResearchLicensesByLicenseeAndResearch)
-protected_route.get('/express-licensing/licensee/:licensee/licenser/:licenser', expressLicensing.getResearchLicensesByLicenseeAndLicenser)
 
 public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
 public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
@@ -217,6 +211,18 @@ protected_route.post('/v2/nda', projectNdaCtrl.createProjectNonDisclosureAgreeme
 public_route.get('/v2/nda/:ndaId', projectNdaCtrl.getProjectNonDisclosureAgreement);
 public_route.get('/v2/nda/creator/:username', projectNdaCtrl.getProjectNonDisclosureAgreementsByCreator);
 public_route.get('/v2/nda/project/:projectId', projectNdaCtrl.getProjectNonDisclosureAgreementsByProject);
+
+protected_route.post('/v2/contract-agreement', contractAgreementCtrl.proposeContractAgreement)
+protected_route.post('/v2/contract-agreement/accept', contractAgreementCtrl.acceptContractAgreement)
+protected_route.get('/v2/contract-agreement/license/:licenseId', projectLicenseCtrl.getProjectLicense)
+protected_route.get('/v2/contract-agreement/licenses/licensee/:licensee', projectLicenseCtrl.getProjectLicensesByLicensee)
+protected_route.get('/v2/contract-agreement/licenses/licenser/:licenser', projectLicenseCtrl.getProjectLicensesByLicenser)
+protected_route.get('/v2/contract-agreement/licenses/projectId/:projectId', projectLicenseCtrl.getProjectLicensesByProject)
+protected_route.get('/v2/contract-agreement/licenses/licensee/:licensee/projectId/:projectId', projectLicenseCtrl.getProjectLicensesByLicenseeAndProject)
+protected_route.get('/v2/contract-agreement/licenses/licensee/:licensee/licenser/:licenser', projectLicenseCtrl.getProjectLicensesByLicenseeAndLicenser)
+protected_route.get('/v2/contract-agreements/creator/:creator', contractAgreementCtrl.getContractAgreementsListByCreator)
+protected_route.get('/v2/contract-agreement/isa/:incomeShareAgreementId', incomeShareAgreementCtrl.getIncomeShareAgreement)
+protected_route.get('/v2/contract-agreement/isas/creator/:creator', incomeShareAgreementCtrl.getIncomeShareAgreementsListByCreator)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

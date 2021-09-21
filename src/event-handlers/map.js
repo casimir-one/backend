@@ -11,7 +11,10 @@ import {
   investmentOpportunityEventHandler,
   assetEventHandler,
   projectContentEventHandler,
-  reviewEventHandler
+  reviewEventHandler,
+  contractAgreementEventHandler,
+  incomeShareAgreementEventHandler,
+  projectLicenseEventHandler
 } from './index';
 
 
@@ -232,5 +235,33 @@ module.exports = {
 
   [APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED]: [
     { h: userNotificationEventHandler, await: false }
+  ],
+  
+  [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED]: [
+    { h: contractAgreementEventHandler, await: true },
+    { h: incomeShareAgreementEventHandler, await: true },
+    { h: projectLicenseEventHandler, await: true }
+  ],
+
+  [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_ACCEPTED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_DECLINED]: [
+    { h: contractAgreementEventHandler, await: true },
+    { h: incomeShareAgreementEventHandler, await: true },
+    { h: projectLicenseEventHandler, await: true }
+  ],
+
+  [APP_EVENT.CONTRACT_AGREEMENT_CREATED]: [
+    { h: contractAgreementEventHandler, await: true },
+    { h: incomeShareAgreementEventHandler, await: true },
+    { h: projectLicenseEventHandler, await: true }
+  ],
+
+  [APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED]: [
+    { h: contractAgreementEventHandler, await: true },
+    { h: incomeShareAgreementEventHandler, await: true },
+    { h: projectLicenseEventHandler, await: true }
   ],
 };

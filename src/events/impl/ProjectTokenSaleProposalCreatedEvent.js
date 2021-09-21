@@ -15,7 +15,7 @@ class ProjectTokenSaleProposalCreatedEvent extends BaseEvent {
     assert(APP_PROPOSAL.PROJECT_TOKEN_SALE_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.PROJECT_TOKEN_SALE_PROPOSAL} proposal`);
     
     const proposedCmds = proposalCmd.getProposedCmds();
-    const сreateProjectTokenSaleCmd = proposedCmds[0];
+    const createProjectTokenSaleCmd = proposedCmds[0];
     const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
     const {
       teamId,
@@ -26,7 +26,7 @@ class ProjectTokenSaleProposalCreatedEvent extends BaseEvent {
       softCap,
       hardCap,
       creator
-    } = сreateProjectTokenSaleCmd.getCmdPayload();
+    } = createProjectTokenSaleCmd.getCmdPayload();
     
     assert(!!proposalId, `'proposalId' is required`);
     assert(!!expirationTime, `'expirationTime' is required`);
