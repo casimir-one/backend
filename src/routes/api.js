@@ -1,12 +1,8 @@
 import koa_router from 'koa-router'
 import compose from 'koa-compose';
-import users from '../controllers/legacy/users'
 import expertise from '../controllers/legacy/expertise'
 import notifications from '../controllers/legacy/notifications'
-import proposals from '../controllers/legacy/proposals'
-import researchGroups from '../controllers/legacy/researchGroups'
 import invites from '../controllers/legacy/invites'
-import research from '../controllers/legacy/research'
 import grants from '../controllers/legacy/grants'
 import expressLicensing from '../controllers/legacy/expressLicensing'
 import tenant from '../controllers/legacy/tenant';
@@ -31,12 +27,11 @@ import projectCmdProxy from './../middlewares/proxy/project/projectCmdProxy';
 import projectContentCmdProxy from './../middlewares/proxy/projectContent/projectContentCmdProxy';
 import draftCmdProxy from '../middlewares/proxy/projectContent/draftCmdProxy';
 import teamCmdProxy from './../middlewares/proxy/team/teamCmdProxy';
+import teamLogoProxy from './../middlewares/proxy/team/teamLogoProxy';
 import userCmdProxy from './../middlewares/proxy/user/userCmdProxy';
 
 import readGrantAwardWithdrawalRequestAuth from './../middlewares/auth/grantAwardWithdrawalRequest/readGrantAwardWithdrawalRequestAuth';
 import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
-import researchGroupLogoFileReadAuth from './../middlewares/auth/researchGroup/readLogoFileAuth';
-
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -50,11 +45,6 @@ async function tenantAdminGuard(ctx, next) {
   ctx.assert(ctx.state.isTenantAdmin, 401);
   await next();
 }
-
-public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), users.getAvatar)
-
-protected_route.post('/bookmarks/user/:username', users.addUserBookmark)
-protected_route.delete('/bookmarks/user/:username/remove/:bookmarkId', users.removeUserBookmark)
 
 public_route.get('/expertise/user/:username/tokens', expertise.getAccountExpertiseTokens)
 public_route.get('/expertise/discipline/:disciplineExternalId/tokens', expertise.getDisciplineExpertiseTokens)
@@ -81,31 +71,14 @@ protected_route.get('/notifications/user/:username', notifications.getNotificati
 protected_route.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
 protected_route.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
 
-
-protected_route.get('/proposals/:proposalExternalId', proposals.getProposalById)
-protected_route.get('/proposals/:username/:status', proposals.getAccountProposals)
-
 protected_route.put('/v2/proposals/update', proposalsCtrl.updateProposal)
 protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
-
-
-public_route.get('/groups/logo/:researchGroupExternalId', compose([researchGroupLogoFileReadAuth()]), researchGroups.getResearchGroupLogo)
-public_route.get('/team/:teamId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), researchGroups.getTeamAttributeFile)
-protected_route.post('/groups/leave', researchGroups.leaveResearchGroup)
-
+protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
+protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountProposals)
 
 protected_route.get('/invites/:username', invites.getUserInvites)
 protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)
 protected_route.get('/invites/research/:researchExternalId', invites.getResearchPendingInvites)
-
-public_route.get('/research/listing', research.getPublicResearchListing)
-public_route.get('/research/:researchExternalId', research.getResearch)
-public_route.get('/researches', research.getResearches)
-public_route.get('/research/:researchExternalId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), research.getResearchAttributeFile)
-protected_route.get('/research/user/listing/:username', research.getUserResearchListing)
-protected_route.get('/research/group/listing/:researchGroupExternalId', research.getResearchGroupResearchListing)
-public_route.get('/research/listing', research.getTenantResearchListing)
-
 
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
@@ -129,6 +102,11 @@ public_route.get('/v2/projects', projectsCtrl.getProjects)
 protected_route.post('/v2/project', compose([projectCmdProxy()]), projectsCtrl.createProject)
 protected_route.put('/v2/project', compose([projectCmdProxy()]), projectsCtrl.updateProject)
 protected_route.put('/v2/project/delete', compose([projectCmdProxy()]), projectsCtrl.deleteProject)
+public_route.get('/v2/projects/listing', projectsCtrl.getPublicProjectsListing)
+public_route.get('/project/:projectId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), projectsCtrl.getProjectAttributeFile)
+protected_route.get('/v2/projects/user/listing/:username', projectsCtrl.getUserProjectsListing)
+protected_route.get('/v2/projects/team/listing/:teamId', projectsCtrl.getTeamProjectsListing)
+public_route.get('/v2/projects/tenant/listing', projectsCtrl.getTenantProjectsListing)
 
 protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam)
 protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
@@ -136,6 +114,9 @@ public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
 public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
 public_route.get('/v2/teams/tenant/:tenantId', teamsCtrl.getTeamsByTenant)
+public_route.get('/team/logo/:teamId', compose([teamLogoProxy()]), teamsCtrl.getTeamLogo)
+public_route.get('/team/:teamId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), teamsCtrl.getTeamAttributeFile)
+protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)// temp: need change to cmd
 
 public_route.get('/v2/attributes', attributesCtrl.getAttributes);
 public_route.get('/v2/attributes/scope/:scope', attributesCtrl.getAttributesByScope);
@@ -176,6 +157,9 @@ public_route.get('/v2/users/tenant/:tenantId', usersCtrl.getUsersByTenant)
 
 protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
 public_route.get('/user/:username/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), usersCtrl.getUserAttributeFile)
+public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
+protected_route.post('/bookmarks/user/:username', usersCtrl.addUserBookmark) //temp: need change to cmd
+protected_route.delete('/bookmarks/user/:username/remove/:bookmarkId', usersCtrl.removeUserBookmark) //temp: need change to cmd
 
 protected_route.get('/v2/bookmarks/user/:username', usersCtrl.getUserBookmarks)
 

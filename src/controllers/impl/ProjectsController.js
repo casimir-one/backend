@@ -3,25 +3,28 @@ import { APP_CMD } from '@deip/constants';
 import { RESEARCH_STATUS } from './../../constants';
 import BaseController from './../base/BaseController';
 import { ProjectForm } from './../../forms';
-import { AppError, BadRequestError, NotFoundError, ConflictError } from './../../errors';
+import { BadRequestError, NotFoundError, ConflictError } from './../../errors';
 import { projectCmdHandler } from './../../command-handlers';
-import { ProjectDtoService } from './../../services';
-import { ProjectService } from './../../services';
+import { ProjectDtoService, ProjectService } from './../../services';
+import sharp from 'sharp'
+import slug from 'limax';
+import FileStorage from './../../storage';
 
 
 const projectDtoService = new ProjectDtoService();
 const projectService = new ProjectService();
 
 class ProjectsController extends BaseController {
-
   getProject = this.query({
     h: async (ctx) => {
       try {
-
         const projectId = ctx.params.projectId;
-        const result = await projectDtoService.getProject(projectId);
+        const project = await projectDtoService.getProject(projectId);
+        if (!project) {
+          throw new NotFoundError(`Project "${projectId}" id is not found`);
+        }
         ctx.status = 200;
-        ctx.body = result;
+        ctx.body = project;
 
       } catch (err) {
         ctx.status = err.httpStatus || 500;
@@ -30,11 +33,9 @@ class ProjectsController extends BaseController {
     }
   });
 
-
   getDefaultProject = this.query({
     h: async (ctx) => {
       try {
-
         const accountId = ctx.params.accountId;
         const result = await projectDtoService.getDefaultProject(accountId);
         ctx.status = 200;
@@ -50,7 +51,6 @@ class ProjectsController extends BaseController {
   getProjects = this.query({
     h: async (ctx) => {
       try {
-
         const query = qs.parse(ctx.query);
         const projectsIds = query.projectsIds;
         if (!Array.isArray(projectsIds)) {
@@ -68,9 +68,75 @@ class ProjectsController extends BaseController {
     }
   });
 
+  getPublicProjectsListing = this.query({
+    h: async (ctx) => {
+      try {
+        const query = qs.parse(ctx.query);
+        const filter = query.filter;
+        const result = await projectDtoService.lookupProjects(filter);
+        ctx.status = 200;
+        ctx.body = result.filter(r => !r.isPrivate);
+      } catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+
+    }
+  });
+
+  getUserProjectsListing = this.query({
+    h: async (ctx) => {
+      try {
+        const jwtUsername = ctx.state.user.username;
+        const member = ctx.params.username;
+        const result = await projectDtoService.getProjectsForMember(member)
+        ctx.status = 200;
+        ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
+      } catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+
+    }
+  });
+
+  getTeamProjectsListing = this.query({
+    h: async (ctx) => {
+      try {
+        const jwtUsername = ctx.state.user.username;
+        const teamId = ctx.params.teamId;
+        const result = await projectDtoService.getProjectsByTeam(teamId);
+        ctx.status = 200;
+        ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
+      } catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+
+    }
+  });
+
+  getTenantProjectsListing = this.query({
+    h: async (ctx) => {
+      try {
+        const tenantId = ctx.state.tenant.id;
+        const result = await projectDtoService.getProjectsByTenant(tenantId);
+        ctx.status = 200;
+        ctx.body = result.filter(r => !r.isPrivate);
+      } catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
 
   createProject = this.command({
-    form: ProjectForm, h: async (ctx) => {
+    form: ProjectForm,
+    h: async (ctx) => {
       try {
 
         const validate = async (appCmds) => {
@@ -88,10 +154,12 @@ class ProjectsController extends BaseController {
 
         const msg = ctx.state.msg;
         await projectCmdHandler.process(msg, ctx, validate);
-        
+
         ctx.status = 200;
-        ctx.body = { model: "ok" };
-        
+        ctx.body = {
+          model: "ok"
+        };
+
       } catch (err) {
         ctx.status = err.httpStatus || 500;
         ctx.body = err.message;
@@ -99,9 +167,9 @@ class ProjectsController extends BaseController {
     }
   });
 
-
   updateProject = this.command({
-    form: ProjectForm, h: async (ctx) => {
+    form: ProjectForm,
+    h: async (ctx) => {
       try {
 
         const validate = async (appCmds) => {
@@ -121,7 +189,9 @@ class ProjectsController extends BaseController {
         await projectCmdHandler.process(msg, ctx, validate);
 
         ctx.status = 200;
-        ctx.body = { model: "ok" };
+        ctx.body = {
+          model: "ok"
+        };
 
       } catch (err) {
         ctx.status = err.httpStatus || 500;
@@ -129,7 +199,6 @@ class ProjectsController extends BaseController {
       }
     }
   });
-
 
   deleteProject = this.command({
     h: async (ctx) => {
@@ -140,7 +209,9 @@ class ProjectsController extends BaseController {
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts app cmd`);
           }
-          const { entityId: projectId } = appCmd.getCmdPayload();
+          const {
+            entityId: projectId
+          } = appCmd.getCmdPayload();
           const project = await projectService.getProject(projectId);
           if (!project) {
             throw new NotFoundError(`Project ${projectId} is not found`);
@@ -154,7 +225,9 @@ class ProjectsController extends BaseController {
         await projectCmdHandler.process(msg, ctx, validate);
 
         ctx.status = 200;
-        ctx.body = { model: "ok" };
+        ctx.body = {
+          model: "ok"
+        };
 
       } catch (err) {
         ctx.status = err.httpStatus || 500;
@@ -163,11 +236,112 @@ class ProjectsController extends BaseController {
     }
   });
 
+  getProjectAttributeFile = this.query({
+    h: async (ctx) => {
+      try {
+        const projectId = ctx.params.projectId;
+        const attributeId = ctx.params.attributeId;
+        const filename = ctx.params.filename;
 
+        const isProjectRootFolder = projectId == attributeId;
+        const filepath = isProjectRootFolder ? FileStorage.getResearchFilePath(projectId, filename) : FileStorage.getResearchAttributeFilePath(projectId, attributeId, filename);
+
+        const fileExists = await FileStorage.exists(filepath);
+        if (!fileExists) {
+          throw new NotFoundError(`${filepath} is not found`);
+        }
+
+        const buff = await FileStorage.get(filepath);
+
+        const imageQuery = ctx.query.image === 'true';
+        if (imageQuery) {
+
+          const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
+          const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
+          const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
+          const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
+
+          const resize = (w, h) => {
+            return new Promise((resolve) => {
+              sharp.cache(!noCache);
+              sharp(buff)
+                .rotate()
+                .resize(w, h)
+                .png()
+                .toBuffer()
+                .then(data => {
+                  resolve(data)
+                })
+                .catch(err => {
+                  resolve(err)
+                });
+            })
+          }
+
+          let image = await resize(width, height);
+          if (isRound) {
+            let round = (w) => {
+              let r = w / 2;
+              let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
+              return new Promise((resolve, reject) => {
+                image = sharp(image)
+                  .overlayWith(circleShape, {
+                    cutout: true
+                  })
+                  .png()
+                  .toBuffer()
+                  .then(data => {
+                    resolve(data)
+                  })
+                  .catch(err => {
+                    reject(err)
+                  });
+              });
+            }
+
+            image = await round(width);
+          }
+
+          ctx.type = 'image/png';
+          ctx.status = 200;
+          ctx.body = image;
+
+        } else {
+
+          const isDownload = ctx.query.download === 'true';
+
+          const ext = filename.substr(filename.lastIndexOf('.') + 1);
+          const name = filename.substr(0, filename.lastIndexOf('.'));
+          const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
+          const isPdf = ['pdf'].some(e => e == ext);
+
+          if (isDownload) {
+            ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+            ctx.body = buff;
+          } else if (isImage) {
+            ctx.response.set('Content-Type', `image/${ext}`);
+            ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+            ctx.body = buff;
+          } else if (isPdf) {
+            ctx.response.set('Content-Type', `application/${ext}`);
+            ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+            ctx.body = buff;
+          } else {
+            ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
+            ctx.body = buff;
+          }
+        }
+
+      } catch (err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+
+    }
+  });
 }
 
-
 const projectsCtrl = new ProjectsController();
-
 
 module.exports = projectsCtrl;
