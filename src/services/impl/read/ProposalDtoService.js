@@ -192,8 +192,8 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, {});
 
-    const licenseRequests = await this.extendExpressLicenseRequests(grouped[APP_PROPOSAL.EXPRESS_LICENSE_PROPOSAL] || []);
-    result.push(...licenseRequests);
+    const contractAgreementContracts = await this.extendContractAgreementProposals(grouped[APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL] || []);
+    result.push(...contractAgreementContracts);
 
     const assetExchangesProposals = await this.extendAssetExchangeProposals(grouped[APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL] || []);
     result.push(...assetExchangesProposals);
@@ -229,17 +229,17 @@ class ProposalDtoService extends BaseService {
   }
 
 
-  async extendExpressLicenseRequests(requests) {
+  async extendContractAgreementProposals(requests) {
     const accountNames = requests.reduce((acc, req) => {
-      if (!acc.some(a => a == req.details.licensee)) {
-        acc.push(req.details.licensee);
+      if (!acc.some(a => a == req.details.creator)) {
+        acc.push(req.details.creator);
       }
       return acc;
     }, []);
 
-    const researchExternalIds = requests.reduce((acc, req) => {
-      if (!acc.some(r => r == req.details.researchExternalId)) {
-        acc.push(req.details.researchExternalId);
+    const projectIds = requests.reduce((acc, req) => {
+      if (!acc.some(r => r == req.details.projectId)) {
+        acc.push(req.details.projectId);
       }
       return acc;
     }, []);
@@ -248,7 +248,7 @@ class ProposalDtoService extends BaseService {
     const chainApi = chainService.getChainApi();
 
     const chainAccounts = await chainApi.getAccountsAsync(accountNames);
-    const chainResearches = await chainApi.getProjectsAsync(researchExternalIds);
+    const chainResearches = await chainApi.getProjectsAsync(projectIds);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -259,8 +259,8 @@ class ProposalDtoService extends BaseService {
 
     return requests.map((req) => {
       const extendedDetails = {
-        requester: users.find(u => u.account.name == req.details.licensee),
-        research: researches.find(r => r.external_id == req.details.researchExternalId)
+        requester: users.find(u => u.account.name == req.details.creator),
+        research: researches.find(r => r.external_id == req.details.projectId)
       }
       return { ...req, extendedDetails };
     })

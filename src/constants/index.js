@@ -20,6 +20,7 @@ import USER_ROLES from './userRoles';
 import DEPOSIT_REQUEST_STATUS from './assetDepositRequestStatus';
 import INVESTMENT_OPPORTUNITY_TYPE from './investmentOpportunityType';
 import ASSET_TYPE from './assetTypes';
+import CONTRACT_AGREEMENT_STATUS from './contractAgreementStatuses';
 
 export {
   CHAIN_CONSTANTS,
@@ -44,5 +45,6 @@ export {
   USER_ROLES,
   DEPOSIT_REQUEST_STATUS,
   INVESTMENT_OPPORTUNITY_TYPE,
-  ASSET_TYPE
+  ASSET_TYPE,
+  CONTRACT_AGREEMENT_STATUS
 }

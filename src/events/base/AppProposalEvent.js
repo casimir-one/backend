@@ -36,6 +36,10 @@ import ProjectNdaProposalCreatedEvent from './../impl/ProjectNdaProposalCreatedE
 import ProjectNdaProposalAcceptedEvent from './../impl/ProjectNdaProposalAcceptedEvent';
 import ProjectNdaProposalDeclinedEvent from './../impl/ProjectNdaProposalDeclinedEvent';
 
+import ContractAgreementProposalCreatedEvent from './../impl/ContractAgreementProposalCreatedEvent';
+import ContractAgreementProposalAcceptedEvent from './../impl/ContractAgreementProposalAcceptedEvent';
+import ContractAgreementProposalDeclinedEvent from './../impl/ContractAgreementProposalDeclinedEvent';
+
 module.exports = {
   [APP_PROPOSAL.PROJECT_INVITE_PROPOSAL]: {
     CREATED: ProjectInviteCreatedEvent,
@@ -81,5 +85,10 @@ module.exports = {
     CREATED: ProjectNdaProposalCreatedEvent,
     ACCEPTED: ProjectNdaProposalAcceptedEvent,
     DECLINED: ProjectNdaProposalDeclinedEvent
+  },
+  [APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL]: {
+    CREATED: ContractAgreementProposalCreatedEvent,
+    ACCEPTED: ContractAgreementProposalAcceptedEvent,
+    DECLINED: ContractAgreementProposalDeclinedEvent
   }
 }

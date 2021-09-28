@@ -69,6 +69,12 @@ import ProjectNdaProposalCreatedEvent from './impl/ProjectNdaProposalCreatedEven
 import ProjectNdaProposalAcceptedEvent from './impl/ProjectNdaProposalAcceptedEvent';
 import ProjectNdaProposalDeclinedEvent from './impl/ProjectNdaProposalDeclinedEvent';
 
+import ContractAgreementCreatedEvent from './impl/ContractAgreementCreatedEvent';
+import ContractAgreementProposalCreatedEvent from './impl/ContractAgreementProposalCreatedEvent';
+import ContractAgreementProposalAcceptedEvent from './impl/ContractAgreementProposalAcceptedEvent';
+import ContractAgreementProposalDeclinedEvent from './impl/ContractAgreementProposalDeclinedEvent';
+import ContractAgreementAcceptedEvent from './impl/ContractAgreementAcceptedEvent';
+
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
@@ -140,5 +146,11 @@ module.exports = {
   ProjectNdaCreatedEvent,
   ProjectNdaProposalCreatedEvent,
   ProjectNdaProposalAcceptedEvent,
-  ProjectNdaProposalDeclinedEvent
+  ProjectNdaProposalDeclinedEvent,
+
+  ContractAgreementCreatedEvent,
+  ContractAgreementProposalCreatedEvent,
+  ContractAgreementProposalAcceptedEvent,
+  ContractAgreementProposalDeclinedEvent,
+  ContractAgreementAcceptedEvent
 }

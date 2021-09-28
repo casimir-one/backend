@@ -77,17 +77,13 @@ class ProjectNdaController extends BaseController {
 
   createProjectNonDisclosureAgreement = this.command({
     h: async (ctx) => {
-      console.log(123)
       try {
         const validate = async (appCmds) => {
-          console.log()
           const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-          console.log(appCmd)
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
           const proposedCmds = appCmd.getProposedCmds();
-          console.log(proposedCmds, 'proposedCmdsproposedCmds')
           if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROJECT_NDA)) {
             throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.CREATE_PROJECT_NDA]} protocol cmd`);
           }

@@ -1,7 +1,7 @@
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
-import ExpressLicensingService from './../../legacy/expressLicensing';
 import AttributeDtoService from './AttributeDtoService';
+import ProjectLicensingDtoService from './ProjectLicensingDtoService';
 import ProjectNdaDtoService from './ProjectNdaDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
 import config from './../../../config';
@@ -14,7 +14,7 @@ class ProjectDtoService extends BaseService {
   }
 
   async mapResearch(researches, filterObj) {
-    const expressLicensingService = new ExpressLicensingService();
+    const projectLicensingDtoService = new ProjectLicensingDtoService();
     const projectNdaDtoService = new ProjectNdaDtoService();
     const attributeDtoService = new AttributeDtoService()
 
@@ -30,7 +30,7 @@ class ProjectDtoService extends BaseService {
     const chainApi = chainService.getChainApi();
     const chainResearches = await chainApi.getProjectsAsync(researches.map(r => r._id));
 
-    const researchesExpressLicenses = await expressLicensingService.getExpressLicensesByResearches(chainResearches.map(r => r.external_id));
+    const researchesExpressLicenses = await projectLicensingDtoService.getProjectLicensesByProjects(chainResearches.map(r => r.external_id));
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => projectNdaDtoService.getProjectNdaListByProject(r.external_id)));
     const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
     const refs = await chainApi.getTeamMemberReferencesAsync(chainResearches.map(p => p.research_group.external_id), false);

@@ -10,6 +10,9 @@ import investmentOpportunityEventHandler from './impl/InvestmentOpportunityEvent
 import assetEventHandler from './impl/AssetEventHandler';
 import projectContentEventHandler from './impl/ProjectContentEventHandler';
 import reviewEventHandler from './impl/ReviewEventHandler';
+import contractAgreementEventHandler from './impl/ContractAgreementEventHandler';
+import incomeShareAgreementEventHandler from './impl/IncomeShareAgreementEventHandler';
+import projectLicenseEventHandler from './impl/ProjectLicenseEventHandler';
 
 
 module.exports = {
@@ -24,5 +27,8 @@ module.exports = {
   investmentOpportunityEventHandler,
   assetEventHandler,
   projectContentEventHandler,
-  reviewEventHandler
+  reviewEventHandler,
+  contractAgreementEventHandler,
+  incomeShareAgreementEventHandler,
+  projectLicenseEventHandler
 }

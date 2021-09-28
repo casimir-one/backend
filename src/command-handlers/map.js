@@ -9,7 +9,8 @@ import {
   documentTemplateCmdHandler,
   projectContentCmdHandler,
   reviewCmdHandler,
-  projectNdaCmdHandler
+  projectNdaCmdHandler,
+  contractAgreementCmdHandler
 } from './index';
 
 
@@ -44,4 +45,6 @@ module.exports = {
   [APP_CMD.CREATE_REVIEW]: reviewCmdHandler,
   [APP_CMD.UPVOTE_REVIEW]: reviewCmdHandler,
   [APP_CMD.CREATE_PROJECT_NDA]: projectNdaCmdHandler,
+  [APP_CMD.CREATE_CONTRACT_AGREEMENT]: contractAgreementCmdHandler,
+  [APP_CMD.ACCEPT_CONTRACT_AGREEMENT]: contractAgreementCmdHandler,
 };

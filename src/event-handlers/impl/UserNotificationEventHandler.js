@@ -565,4 +565,8 @@ userNotificationEventHandler.register(APP_EVENT.ASSET_ISSUED, async (event) => {
   // add notify
 });
 
+userNotificationEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_ACCEPTED, async (event) => {
+  // add notify
+});
+
 module.exports = userNotificationEventHandler;
