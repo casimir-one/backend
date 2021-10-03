@@ -8,9 +8,13 @@ import ProjectUpdateProposalCreatedEvent from './../impl/ProjectUpdateProposalCr
 import ProjectUpdateProposalAcceptedEvent from './../impl/ProjectUpdateProposalAcceptedEvent';
 import ProjectUpdateProposalDeclinedEvent from './../impl/ProjectUpdateProposalDeclinedEvent';
 
-import ProjectInviteCreatedEvent from './../impl/ProjectInviteCreatedEvent';
-import ProjectInviteAcceptedEvent from './../impl/ProjectInviteAcceptedEvent';
-import ProjectInviteDeclinedEvent from './../impl/ProjectInviteDeclinedEvent';
+import TeamInviteCreatedEvent from './../impl/TeamInviteCreatedEvent';
+import TeamInviteAcceptedEvent from './../impl/TeamInviteAcceptedEvent';
+import TeamInviteDeclinedEvent from './../impl/TeamInviteDeclinedEvent';
+
+import TeamLeavingCreatedEvent from '../impl/TeamLeavingCreatedEvent';
+import TeamLeavingAcceptedEvent from '../impl/TeamLeavingAcceptedEvent';
+import TeamLeavingDeclinedEvent from '../impl/TeamLeavingDeclinedEvent';
 
 import TeamUpdateProposalAcceptedEvent from './../impl/TeamUpdateProposalAcceptedEvent';
 import TeamUpdateProposalCreatedEvent from './../impl/TeamUpdateProposalCreatedEvent';
@@ -41,10 +45,15 @@ import ContractAgreementProposalAcceptedEvent from './../impl/ContractAgreementP
 import ContractAgreementProposalDeclinedEvent from './../impl/ContractAgreementProposalDeclinedEvent';
 
 module.exports = {
-  [APP_PROPOSAL.PROJECT_INVITE_PROPOSAL]: {
-    CREATED: ProjectInviteCreatedEvent,
-    ACCEPTED: ProjectInviteAcceptedEvent,
-    DECLINED: ProjectInviteDeclinedEvent
+  [APP_PROPOSAL.JOIN_TEAM_PROPOSAL]: {
+    CREATED: TeamInviteCreatedEvent,
+    ACCEPTED: TeamInviteAcceptedEvent,
+    DECLINED: TeamInviteDeclinedEvent
+  },
+  [APP_PROPOSAL.LEAVE_TEAM_PROPOSAL]: {
+    CREATED: TeamLeavingCreatedEvent,
+    ACCEPTED: TeamLeavingAcceptedEvent,
+    DECLINED: TeamLeavingDeclinedEvent
   },
   [APP_PROPOSAL.PROJECT_PROPOSAL]: {
     CREATED: ProjectProposalCreatedEvent,

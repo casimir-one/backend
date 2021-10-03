@@ -74,7 +74,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_DECLINED, async (event) => {
   });
 });
 
-proposalEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event) => {
+proposalEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (event) => {
   // TODO: create multisig transaction read schema
 });
 

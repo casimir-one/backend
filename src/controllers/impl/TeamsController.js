@@ -2,9 +2,9 @@ import qs from 'qs';
 import { APP_CMD } from '@deip/constants';
 import BaseController from './../base/BaseController';
 import { TeamForm } from './../../forms';
-import { BadRequestError, NotFoundError } from './../../errors';
+import { BadRequestError, NotFoundError, ConflictError } from './../../errors';
 import { accountCmdHandler } from './../../command-handlers';
-import { TeamDtoService } from './../../services';
+import { TeamDtoService, TeamService, UserService } from './../../services';
 import sharp from 'sharp'
 import slug from 'limax';
 import * as blockchainService from './../../utils/blockchain';
@@ -13,6 +13,8 @@ import UserResignationProposedEvent from './../../events/legacy/userResignationP
 import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
 
 const teamDtoService = new TeamDtoService();
+const teamService = new TeamService();
+const userService = new UserService();
 
 class TeamsController extends BaseController {
 
@@ -176,38 +178,93 @@ class TeamsController extends BaseController {
     }
   });
 
-  leaveTeam = async (ctx, next) => {// temp: need change to cmd
-    try {
-      const jwtUsername = ctx.state.user.username;
-      const {
-        tx,
-        offchainMeta
-      } = ctx.request.body;
+  joinTeam = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
 
-      const txResult = await blockchainService.sendTransactionAsync(tx);
-      const datums = blockchainService.extractOperations(tx);
+          const proposedCmds = appCmd.getProposedCmds();
+          const joinTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.JOIN_TEAM);
 
-      const userResignationProposedEvent = new UserResignationProposedEvent(datums, offchainMeta);
-      ctx.state.events.push(userResignationProposedEvent);
+          if (!joinTeamCmd) {
+            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.JOIN_TEAM]} protocol cmd`);
+          }
+          const { member, teamId } = joinTeamCmd.getCmdPayload();
+          const user = await userService.getUser(member);
 
-      const userResignationApprovals = userResignationProposedEvent.getProposalApprovals();
-      for (let i = 0; i < userResignationApprovals.length; i++) {
-        const approval = userResignationApprovals[i];
-        const userResignationProposalSignedEvent = new UserResignationProposalSignedEvent([approval]);
-        ctx.state.events.push(userResignationProposalSignedEvent);
+          if (!user) {
+            throw new NotFoundError(`User "${member}" username is not found`);
+          }
+
+          const team = await teamService.getTeam(teamId);
+          if (team.members.includes(member)) {
+            throw new ConflictError(`User ${member} username already joined`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+
+        await accountCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
       }
-
-      ctx.status = 200;
-      ctx.body = [...ctx.state.events];
-
-    } catch (err) {
-      console.log(err);
-      ctx.status = 500;
-      ctx.body = err;
     }
+  });
 
-    await next();
-  };
+  leaveTeam = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+
+          const proposedCmds = appCmd.getProposedCmds();
+          const leaveTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.LEAVE_TEAM);
+
+          if (!leaveTeamCmd) {
+            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.LEAVE_TEAM]} protocol cmd`);
+          }
+          const { member, teamId } = leaveTeamCmd.getCmdPayload();
+          const user = await userService.getUser(member);
+
+          if (!user) {
+            throw new NotFoundError(`User "${member}" username is not found`);
+          }
+
+          const team = await teamService.getTeam(teamId);
+          if (!team.members.includes(member)) {
+            throw new ConflictError(`User ${member} username already left`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+
+        await accountCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 
   getTeamLogo = this.query({
     h: async (ctx) => {

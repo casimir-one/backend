@@ -218,10 +218,10 @@ class ProposalDtoService extends BaseService {
     const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL] || []);
     result.push(...researchTokenSaleProposals);
 
-    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.PROJECT_INVITE_PROPOSAL] || []);
+    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.JOIN_TEAM_PROPOSAL] || []);
     result.push(...userInvitationProposals);
 
-    const userResignationProposals = await this.extendUserResignationProposals(grouped[APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL] || []);
+    const userResignationProposals = await this.extendUserResignationProposals(grouped[APP_PROPOSAL.LEAVE_TEAM_PROPOSAL] || []);
     result.push(...userResignationProposals);
 
     const researchNdaProposals = await this.extendResearchNdaProposals(grouped[APP_PROPOSAL.PROJECT_NDA_PROPOSAL] || []);
@@ -530,7 +530,7 @@ class ProposalDtoService extends BaseService {
     const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
 
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
       const member = users.find(a => a.account.name == proposal.details.member);
       const extendedDetails = { researchGroup, member };
       return { ...proposal, extendedDetails };

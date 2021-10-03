@@ -70,10 +70,41 @@ userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
       status: userInfo.status,
       email: userInfo.email,
       attributes: userInfo.attributes,
+      teams: [...userInfo.teams, accountId],
       roles: [...userInfo.roles, { role: USER_ROLES.TEAMADMIN,  researchGroupExternalId: accountId }]
     });
   }
 
+});
+
+userEventHandler.register(APP_EVENT.TEAM_MEMBER_JOINED, async (event) => {
+  const {
+    member,
+    teamId
+  } = event.getEventPayload();
+
+  const userInfo = await userService.getUser(member);
+
+  const updatedUserProfile = await userService.updateUser(member, {
+    teams: [...userInfo.teams, teamId]
+  });
+
+});
+
+userEventHandler.register(APP_EVENT.TEAM_MEMBER_LEFT, async (event) => {
+  const {
+    member,
+    teamId
+  } = event.getEventPayload();
+
+  const userInfo = await userService.getUser(member);
+  const updatedTeams = [...userInfo.teams];
+  const index = updatedTeams.indexOf(teamId);
+  updatedTeams.splice(index, 1);
+
+  const updatedUserProfile = await userService.updateUser(member, {
+    teams: updatedTeams
+  });
 });
 
 module.exports = userEventHandler;

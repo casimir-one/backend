@@ -15,6 +15,7 @@ class UserService extends BaseService {
     signUpPubKey,
     status,
     email,
+    teams,
     attributes,
     roles
   }) {
@@ -26,6 +27,7 @@ class UserService extends BaseService {
       email: email,
       attributes: attributes,
       tenant: tenant,
+      teams: teams,
       roles: roles
     });
 
@@ -36,18 +38,16 @@ class UserService extends BaseService {
     status,
     email,
     attributes,
+    teams,
     roles
   }) {
-    const updateInfo = {
+    const result = await this.updateOne({ _id: username }, {
       status,
       email,
-      attributes
-    };
-    if (roles) {
-      updateInfo.roles = roles;
-    }
-
-    const result = await this.updateOne({ _id: username }, updateInfo);
+      attributes,
+      teams,
+      roles
+    });
 
     return result;
   }

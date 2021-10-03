@@ -1,6 +1,6 @@
 import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { ProjectCreatedEvent, ProjectMemberJoinedEvent, ProjectMemberLeftEvent, ProjectUpdatedEvent, ProjectDeletedEvent } from './../../events';
+import { ProjectCreatedEvent, ProjectUpdatedEvent, ProjectDeletedEvent } from './../../events';
 import { RESEARCH_STATUS } from './../../constants';
 
 
@@ -61,32 +61,6 @@ projectCmdHandler.register(APP_CMD.DELETE_PROJECT, (cmd, ctx) => {
 
   ctx.state.appEvents.push(new ProjectDeletedEvent({
     projectId: projectId
-  }));
-
-});
-
-
-projectCmdHandler.register(APP_CMD.JOIN_PROJECT_TEAM, (cmd, ctx) => {
-  const { member, teamId, projectId } = cmd.getCmdPayload();
-  
-  ctx.state.appEvents.push(new ProjectMemberJoinedEvent({
-    member: member,
-    teamId: teamId,
-    projectId: projectId,
-    proposalCtx: ctx.state.proposalsStackFrame
-  }));
-
-});
-
-
-projectCmdHandler.register(APP_CMD.LEAVE_PROJECT_TEAM, (cmd, ctx) => {
-  const { member, teamId, projectId } = cmd.getCmdPayload();
-
-  ctx.state.appEvents.push(new ProjectMemberLeftEvent({
-    member: member,
-    teamId: teamId,
-    projectId: projectId,
-    proposalCtx: ctx.state.proposalsStackFrame
   }));
 
 });
