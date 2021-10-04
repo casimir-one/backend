@@ -1,20 +1,59 @@
 import { APP_CMD, CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
 import BaseController from '../base/BaseController';
-import { BadRequestError } from '../../errors';
+import { BadRequestError, NotFoundError } from '../../errors';
 import { contractAgreementCmdHandler } from '../../command-handlers';
 import { ContractAgreementDtoService } from '../../services';
+import qs from 'qs';
 
 const contractAgreementDtoService = new ContractAgreementDtoService();
 
 class ContractAgreementController extends BaseController {
 
+  getContractAgreement = this.query({
+    h: async (ctx) => {
+      try {
+        const contractAgreementId = ctx.params.contractAgreementId;
+        const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId);
+
+        if (!contractAgreement) {
+          throw new NotFoundError(`ContractAgreement "${contractAgreementId}" contractAgreementId is not found`);
+        }
+
+        ctx.body = contractAgreement;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
+  getContractAgreements = this.query({
+    h: async (ctx) => {
+      try {
+        const query = qs.parse(ctx.query);
+        const contractAgreements = await contractAgreementDtoService.getContractAgreements(query);
+
+        ctx.body = contractAgreements;
+        ctx.status = 200;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = 500;
+        ctx.body = err;
+      }
+    }
+  });
+
   getContractAgreementsListByCreator = this.query({
     h: async (ctx) => {
       try {
         const creator = ctx.params.creator;
-        const expertise = await contractAgreementDtoService.getContractAgreementsListByCreator(creator);
+        const contractAgreements = await contractAgreementDtoService.getContractAgreementsListByCreator(creator);
 
-        ctx.body = expertise;
+        ctx.body = contractAgreements;
         ctx.status = 200;
       }
       catch(err) {

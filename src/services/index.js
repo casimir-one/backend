@@ -25,11 +25,6 @@ import ReviewService from './impl/write/ReviewService';
 import ProjectNdaDtoService from './impl/read/ProjectNdaDtoService';
 import ContractAgreementDtoService from './impl/read/ContractAgreementDtoService';
 import ContractAgreementService from './impl/write/ContractAgreementService';
-import IncomeShareAgreementDtoService from './impl/read/IncomeShareAgreementDtoService';
-import IncomeShareAgreementService from './impl/write/IncomeShareAgreementService';
-import ProjectLicensingDtoService from './impl/read/ProjectLicensingDtoService';
-import ProjectLicensingService from './impl/write/ProjectLicensingService';
-
 
 module.exports = {
   TeamService,
@@ -70,11 +65,5 @@ module.exports = {
   ProjectNdaDtoService,
 
   ContractAgreementDtoService,
-  ContractAgreementService,
-
-  IncomeShareAgreementDtoService,
-  IncomeShareAgreementService,
-
-  ProjectLicensingDtoService,
-  ProjectLicensingService
+  ContractAgreementService
 }

@@ -1,11 +1,12 @@
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import AttributeDtoService from './AttributeDtoService';
-import ProjectLicensingDtoService from './ProjectLicensingDtoService';
+import ContractAgreementDtoService from './ContractAgreementDtoService';
 import ProjectNdaDtoService from './ProjectNdaDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
+import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
 
 class ProjectDtoService extends BaseService {
 
@@ -14,7 +15,7 @@ class ProjectDtoService extends BaseService {
   }
 
   async mapResearch(researches, filterObj) {
-    const projectLicensingDtoService = new ProjectLicensingDtoService();
+    const contractAgreementDtoService = new ContractAgreementDtoService();
     const projectNdaDtoService = new ProjectNdaDtoService();
     const attributeDtoService = new AttributeDtoService()
 
@@ -30,7 +31,8 @@ class ProjectDtoService extends BaseService {
     const chainApi = chainService.getChainApi();
     const chainResearches = await chainApi.getProjectsAsync(researches.map(r => r._id));
 
-    const researchesExpressLicenses = await projectLicensingDtoService.getProjectLicensesByProjects(chainResearches.map(r => r.external_id));
+    const researchesExpressLicenses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE }); // (getAllContractAgreements) temp sol
+    console.log(researchesExpressLicenses, 'researchesExpressLicensesresearchesExpressLicensesresearchesExpressLicenses')
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => projectNdaDtoService.getProjectNdaListByProject(r.external_id)));
     const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
     const refs = await chainApi.getTeamMemberReferencesAsync(chainResearches.map(p => p.research_group.external_id), false);
@@ -40,7 +42,7 @@ class ProjectDtoService extends BaseService {
       .map((chainResearch, i) => {
         const members = allMembers[i];
         const researchRef = researches.find(r => r._id.toString() == chainResearch.external_id);
-        const expressLicenses = researchesExpressLicenses.filter(l => l.researchExternalId == chainResearch.external_id);
+        const expressLicenses = researchesExpressLicenses.filter(l => l.terms.projectId == chainResearch.external_id);
         // TEMP
         const grantedAccess = chainResearchNdaList
           .reduce((acc, list) => { return [...acc, ...list] }, [])

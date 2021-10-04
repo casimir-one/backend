@@ -12,9 +12,7 @@ import {
   assetEventHandler,
   projectContentEventHandler,
   reviewEventHandler,
-  contractAgreementEventHandler,
-  incomeShareAgreementEventHandler,
-  projectLicenseEventHandler
+  contractAgreementEventHandler
 } from './index';
 
 
@@ -239,8 +237,6 @@ module.exports = {
   
   [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED]: [
     { h: contractAgreementEventHandler, await: true },
-    { h: incomeShareAgreementEventHandler, await: true },
-    { h: projectLicenseEventHandler, await: true }
   ],
 
   [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_ACCEPTED]: [
@@ -249,19 +245,13 @@ module.exports = {
 
   [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_DECLINED]: [
     { h: contractAgreementEventHandler, await: true },
-    { h: incomeShareAgreementEventHandler, await: true },
-    { h: projectLicenseEventHandler, await: true }
   ],
 
   [APP_EVENT.CONTRACT_AGREEMENT_CREATED]: [
     { h: contractAgreementEventHandler, await: true },
-    { h: incomeShareAgreementEventHandler, await: true },
-    { h: projectLicenseEventHandler, await: true }
   ],
 
   [APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED]: [
     { h: contractAgreementEventHandler, await: true },
-    { h: incomeShareAgreementEventHandler, await: true },
-    { h: projectLicenseEventHandler, await: true }
   ],
 };

@@ -12,8 +12,6 @@ import projectContentsCtrl from './impl/ProjectContentsController';
 import reviewsCtrl from './impl/ReviewsController';
 import projectNdaCtrl from './impl/ProjectNdaController';
 import contractAgreementCtrl from './impl/ContractAgreementController';
-import incomeShareAgreementCtrl from './impl/IncomeShareAgreementController';
-import projectLicenseCtrl from './impl/ProjectLicenseController';
 
 module.exports = {
   projectsCtrl,
@@ -29,7 +27,5 @@ module.exports = {
   projectContentsCtrl,
   reviewsCtrl,
   projectNdaCtrl,
-  contractAgreementCtrl,
-  incomeShareAgreementCtrl,
-  projectLicenseCtrl
+  contractAgreementCtrl
 }

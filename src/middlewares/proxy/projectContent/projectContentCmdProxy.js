@@ -1,11 +1,12 @@
-import { ProjectService, ProjectContentDtoService, ProjectLicensingDtoService } from './../../../services';
+import { ProjectService, ProjectContentDtoService, ContractAgreementDtoService } from './../../../services';
 import TenantService from './../../../services/legacy/tenant';
 import { getTenantAccessToken } from './../../../utils/network';
+import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
 
 const tenantService = new TenantService();
 const projectService = new ProjectService();
 const projectContentDtoService = new ProjectContentDtoService();
-const projectLicensingDtoService = new ProjectLicensingDtoService();
+const contractAgreementDtoService = new ContractAgreementDtoService();
 
 
 function projectContentCmdProxy(options = {}) {
@@ -30,7 +31,8 @@ function projectContentCmdProxy(options = {}) {
     } else {
       const requestedTenant = await tenantService.getTenant(projectContent.tenantId);
       const jwtUsername = ctx.state.user.username;
-      const projectLicense = await projectLicensingDtoService.getProjectLicensesByLicenseeAndProject(jwtUsername, projectContent.researchExternalId)
+      const projectLicenses = await contractAgreementDtoService.getContractAgreements({ parties: [jwtUsername], type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE });
+      const projectLicense = projectLicenses.find(p => p.terms.projectId === projectContent.researchExternalId)
       if (projectLicense) {
         const accessToken = await getTenantAccessToken(requestedTenant);
         let url = `${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`.replace(ctx.request.querystring, '');
