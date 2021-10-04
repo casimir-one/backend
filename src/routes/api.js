@@ -19,9 +19,7 @@ import {
   projectContentsCtrl,
   reviewsCtrl,
   projectNdaCtrl,
-  contractAgreementCtrl,
-  incomeShareAgreementCtrl,
-  projectLicenseCtrl
+  contractAgreementCtrl
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
@@ -214,15 +212,9 @@ public_route.get('/v2/nda/project/:projectId', projectNdaCtrl.getProjectNonDiscl
 
 protected_route.post('/v2/contract-agreement', contractAgreementCtrl.proposeContractAgreement)
 protected_route.post('/v2/contract-agreement/accept', contractAgreementCtrl.acceptContractAgreement)
-protected_route.get('/v2/contract-agreement/license/:licenseId', projectLicenseCtrl.getProjectLicense)
-protected_route.get('/v2/contract-agreement/licenses/licensee/:licensee', projectLicenseCtrl.getProjectLicensesByLicensee)
-protected_route.get('/v2/contract-agreement/licenses/licenser/:licenser', projectLicenseCtrl.getProjectLicensesByLicenser)
-protected_route.get('/v2/contract-agreement/licenses/projectId/:projectId', projectLicenseCtrl.getProjectLicensesByProject)
-protected_route.get('/v2/contract-agreement/licenses/licensee/:licensee/projectId/:projectId', projectLicenseCtrl.getProjectLicensesByLicenseeAndProject)
-protected_route.get('/v2/contract-agreement/licenses/licensee/:licensee/licenser/:licenser', projectLicenseCtrl.getProjectLicensesByLicenseeAndLicenser)
+protected_route.get('/v2/contract-agreement/:contractAgreementId', contractAgreementCtrl.getContractAgreement)
 protected_route.get('/v2/contract-agreements/creator/:creator', contractAgreementCtrl.getContractAgreementsListByCreator)
-protected_route.get('/v2/contract-agreement/isa/:incomeShareAgreementId', incomeShareAgreementCtrl.getIncomeShareAgreement)
-protected_route.get('/v2/contract-agreement/isas/creator/:creator', incomeShareAgreementCtrl.getIncomeShareAgreementsListByCreator)
+protected_route.get('/v2/contract-agreements', contractAgreementCtrl.getContractAgreements)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

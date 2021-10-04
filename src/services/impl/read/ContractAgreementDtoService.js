@@ -15,12 +15,10 @@ class ContractAgreementDtoService extends BaseService {
 
     const chainContracts = await Promise.all(contracts.map(l => chainApi.getContractAgreementAsync(l._id)));
     const result = [];
-    chainContracts
-      .forEach((chainContract) => {
-        if (chainContract) {
-          const contract = contracts.find(c => c._id == chainContract.external_id);
-          result.push({ ...contract, chainContract });
-        }
+    contracts
+      .forEach((contract) => {
+        const chainContract = chainContracts.find(c => c ? c.external_id == contract._id : false);
+        result.push({ ...contract, chainContract });
       });
 
     return result;
@@ -33,8 +31,16 @@ class ContractAgreementDtoService extends BaseService {
     return result[0];
   }
 
-  async getContractAgreements() {
-    const contractAgreements = await this.findMany();
+  async getContractAgreements({
+    parties,
+    type,
+    status
+  } = {}) {
+    const query = {};
+    if (type) query.type = type;
+    if (status) query.status = status;
+    if (Array.isArray(parties) && parties.length) query.parties = { $all : [...parties] };
+    const contractAgreements = await this.findMany(query);
     const result = await this.mapContractAgreements(contractAgreements)
     return result;
   }
