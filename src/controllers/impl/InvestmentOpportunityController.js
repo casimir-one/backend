@@ -128,7 +128,7 @@ class InvestmentOpportunityController extends BaseController {
     h: async (ctx) => {
       try {
         const projectId = ctx.params.projectId;
-        const investments = await invstOppDtoService.getInvestmgetParticipationsByProjectentOpportunityParticipationsByProject(projectId);
+        const investments = await invstOppDtoService.getInvstOppParticipationsByProject(projectId);
         ctx.status = 200;
         ctx.body = investments;
       } catch (err) {

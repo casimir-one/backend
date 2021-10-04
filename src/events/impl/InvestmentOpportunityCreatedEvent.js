@@ -11,7 +11,7 @@ class InvestmentOpportunityCreatedEvent extends BaseEvent {
       projectId,
       startTime,
       endTime,
-      securityTokensOnSale,
+      shares,
       softCap,
       hardCap,
       creator,
@@ -24,7 +24,7 @@ class InvestmentOpportunityCreatedEvent extends BaseEvent {
     assert(!!startTime, "'startTime' required");
     assert(!!endTime, "'endTime' required");
     assert(new Date(endTime) > new Date(startTime), "'endTime' must be greater than 'startTime'");
-    assert(!!securityTokensOnSale, "'securityTokensOnSale' required");
+    assert(!!shares, "'shares' required");
     assert(!!softCap, "'softCap' required");
     assert(!!hardCap, "'hardCap' required");
 
@@ -34,7 +34,7 @@ class InvestmentOpportunityCreatedEvent extends BaseEvent {
       projectId,
       startTime,
       endTime,
-      securityTokensOnSale,
+      shares,
       softCap,
       hardCap,
       creator,
