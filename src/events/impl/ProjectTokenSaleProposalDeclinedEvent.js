@@ -22,7 +22,7 @@ class ProjectTokenSaleProposalDeclinedEvent extends BaseEvent {
       projectId,
       startTime,
       endTime,
-      securityTokensOnSale,
+      shares,
       softCap,
       hardCap,
       creator
@@ -35,7 +35,7 @@ class ProjectTokenSaleProposalDeclinedEvent extends BaseEvent {
     assert(!!startTime, `'startTime' is required`);
     assert(!!endTime, `'endTime' is required`);
     assert(new Date(endTime) > new Date(startTime), "'endTime' must be greater than 'startTime'");
-    assert(!!securityTokensOnSale, `'securityTokensOnSale' is required`);
+    assert(!!shares, `'shares' is required`);
     assert(!!softCap, `'softCap' is required`);
     assert(!!hardCap, `'hardCap' is required`);
 
@@ -46,7 +46,7 @@ class ProjectTokenSaleProposalDeclinedEvent extends BaseEvent {
       projectId,
       startTime,
       endTime,
-      securityTokensOnSale,
+      shares,
       softCap,
       hardCap,
       proposalCtx,
