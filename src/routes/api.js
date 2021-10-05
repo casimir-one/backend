@@ -215,6 +215,7 @@ protected_route.post('/v2/contract-agreement/accept', contractAgreementCtrl.acce
 protected_route.get('/v2/contract-agreement/:contractAgreementId', contractAgreementCtrl.getContractAgreement)
 protected_route.get('/v2/contract-agreements/creator/:creator', contractAgreementCtrl.getContractAgreementsListByCreator)
 protected_route.get('/v2/contract-agreements', contractAgreementCtrl.getContractAgreements)
+public_route.get('/contract-agreement/file/:filename', contractAgreementCtrl.getContractAgreementFile)
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

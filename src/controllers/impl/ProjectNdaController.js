@@ -21,7 +21,7 @@ class ProjectNdaController extends BaseController {
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }

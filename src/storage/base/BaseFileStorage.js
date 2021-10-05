@@ -51,6 +51,10 @@ const tenantLogoFilePath = (baseDir, tenantExternalId, filename) => `${tenantDir
 const tenantDefaultBannerFilePath = () => path.join(__dirname, `./../../default/default-tenant-banner.png`);
 const tenantDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-tenant-logo.png`);
 
+const contractAgreementDir = 'contracts';
+const contractAgreementDirPath = (baseDir) => `${baseDir}/${contractAgreementDir}`;
+const contractAgreementFilePath = (baseDir, filename) => `${contractAgreementDirPath(baseDir)}/${filename}`;
+
 
 class BaseFileStorage {
 
@@ -203,6 +207,14 @@ class BaseFileStorage {
 
   getResearchAwardWithdrawalRequestsPackageFilePath(researchExternalId, packageHash, fileHash) {
     return researchAwardWithdrawalRequestsPackageFilePath(this._baseDirPath, researchExternalId, packageHash, fileHash);
+  }
+
+  getContractAgreementDirPath() {
+    return contractAgreementDirPath(this._baseDirPath);
+  }
+
+  getContractAgreementFilePath(filename) {
+    return contractAgreementFilePath(this._baseDirPath, filename);
   }
 
 }

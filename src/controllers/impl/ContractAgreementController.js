@@ -3,6 +3,9 @@ import BaseController from '../base/BaseController';
 import { BadRequestError, NotFoundError } from '../../errors';
 import { contractAgreementCmdHandler } from '../../command-handlers';
 import { ContractAgreementDtoService } from '../../services';
+import { ContractAgreementForm } from './../../forms';
+import FileStorage from './../../storage';
+import slug from 'limax';
 import qs from 'qs';
 
 const contractAgreementDtoService = new ContractAgreementDtoService();
@@ -24,7 +27,7 @@ class ContractAgreementController extends BaseController {
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -64,7 +67,40 @@ class ContractAgreementController extends BaseController {
     }
   });
 
+  getContractAgreementFile = this.query({
+    h: async (ctx) => {
+      try {
+        const filename = ctx.params.filename;
+        const isDownload = ctx.query.download === 'true';
+
+        const filepath = FileStorage.getContractAgreementFilePath(filename);
+        const exists = await FileStorage.exists(filepath);
+        if (!exists) {
+          throw new NotFoundError(`Contract file with "${filepath}" filepath is not found`);
+        }
+        const buff = await FileStorage.get(filepath);
+
+        const ext = filename.substr(filename.lastIndexOf('.') + 1);
+        const name = filename.substr(0, filename.lastIndexOf('.'));
+
+        if (isDownload) {
+          ctx.response.set('content-disposition', `attachment; filename="${slug(name)}.${ext}"`);
+        } else { 
+          ctx.response.set('Content-Type', `application/${ext}`);
+          ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
+        }
+        ctx.body = buff;
+      }
+      catch(err) {
+        console.log(err);
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err;
+      }
+    }
+  });
+
   proposeContractAgreement = this.command({
+    form: ContractAgreementForm,
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
