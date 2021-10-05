@@ -15,7 +15,7 @@ const config = require('./../config');
 const mongoose = require('mongoose');
 
 const AwardWithdrawalRequestSchema = require('./../schemas/AwardWithdrawalRequestSchema');
-const ProjectLicenseSchema = require('./../schemas/ProjectLicenseSchema');
+const ContractAgreementSchema = require('./../schemas/ContractAgreementSchema');
 const JoinRequest = require('./../schemas/JoinRequestSchema');
 const Proposal = require('./../schemas/read/ProposalReadModelSchema');
 const Research = require('./../schemas/ProjectSchema');
@@ -34,7 +34,7 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 const run = async () => {
 
   await AwardWithdrawalRequestSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ProjectLicenseSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await ContractAgreementSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await JoinRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Proposal.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
   await Research.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });

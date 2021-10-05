@@ -32,7 +32,6 @@ class ProjectDtoService extends BaseService {
     const chainResearches = await chainApi.getProjectsAsync(researches.map(r => r._id));
 
     const researchesExpressLicenses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE }); // (getAllContractAgreements) temp sol
-    console.log(researchesExpressLicenses, 'researchesExpressLicensesresearchesExpressLicensesresearchesExpressLicenses')
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => projectNdaDtoService.getProjectNdaListByProject(r.external_id)));
     const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
     const refs = await chainApi.getTeamMemberReferencesAsync(chainResearches.map(p => p.research_group.external_id), false);
