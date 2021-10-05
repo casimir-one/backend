@@ -57,7 +57,8 @@ class ProposalDtoService extends BaseService {
     }, []);
 
 
-    const chainAccounts = await chainApi.getAccountsAsync(names);
+    const chainAccountsFromNames = await chainApi.getAccountsAsync(names);
+    const chainAccounts = chainAccountsFromNames.filter(a => !!a);
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
@@ -81,62 +82,63 @@ class ProposalDtoService extends BaseService {
         let key = `party${j + 1}`;
 
         let chainAccount = chainAccounts.find(chainAccount => chainAccount.name == party);
+        if (chainAccount) {
+          const allAuth = await this.getAllAuth(chainAccount);
+          let members = [...allAuth];
+          let possibleSigners = members
+            .reduce((acc, name) => {
+              if (!acc.some(n => n == name) && !chainProposal.required_approvals.some(a => a == name)) {
+                return [...acc, name];
+              }
+              return [...acc];
+            }, []);
 
-        const allAuth = await this.getAllAuth(chainAccount);
-        let members = [...allAuth];
-        let possibleSigners = members
-          .reduce((acc, name) => {
-            if (!acc.some(n => n == name) && !chainProposal.required_approvals.some(a => a == name)) {
-              return [...acc, name];
-            }
-            return [...acc];
-          }, []);
+          let isApproved = members.some(member => chainProposal.approvals.some(([name,]) => name == member)) || chainProposal.approvals.some(([name,]) => name == party);
 
-        let isApproved = members.some(member => chainProposal.approvals.some(([name,]) => name == member)) || chainProposal.approvals.some(([name,]) => name == party);
+          let isRejected = members.some(member => chainProposal.rejectors.some(([name,]) => name == member)) || chainProposal.rejectors.some(([name,]) => name == party);
 
-        let isRejected = members.some(member => chainProposal.rejectors.some(([name,]) => name == member)) || chainProposal.rejectors.some(([name,]) => name == party);
+          let isHidden = false;
 
-        let isHidden = false;
-
-        /////////////// temp solution /////////////
-        if (proposalRef.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
-          isHidden = researchGroups.some(({ tenantId }) => chainAccount.name === tenantId);
-          if (!isApproved && !isRejected && chainProposal.status != 1) {
-            const group = researchGroups.find(rg => rg.external_id == party);
-            if (group.external_id == group.tenantId) {
-              if (chainProposal.status == 3) isRejected = true;
-              if (chainProposal.status == 2) isApproved = true;
+          /////////////// temp solution /////////////
+          if (proposalRef.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
+            isHidden = researchGroups.some(({ tenantId }) => chainAccount.name === tenantId);
+            if (!isApproved && !isRejected && chainProposal.status != 1) {
+              const group = researchGroups.find(rg => rg.external_id == party);
+              if (group.external_id == group.tenantId) {
+                if (chainProposal.status == 3) isRejected = true;
+                if (chainProposal.status == 2) isApproved = true;
+              }
             }
           }
-        }
 
-        /////////////// end temp solution /////////////
+          /////////////// end temp solution /////////////
 
-        parties[key] = {
-          isProposer: party == chainProposal.proposer,
-          status: isApproved ? 2 : isRejected ? 3 : 1,
-          account: chainAccount.is_research_group ? researchGroups.find(rg => rg.external_id == party) : users.find(user => user.account.name == party),
-          isHidden,
-          signers: [
-            ...users.filter((u) => possibleSigners.some(member => u.account.name == member) || u.account.name == party),
-            ...researchGroups.filter((rg) => possibleSigners.some(member => rg.external_id == member) || rg.external_id == party),
-          ]
-            .filter((signer) => {
-              let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
-              return chainProposal.approvals.some(([name, txInfo]) => name == id) || chainProposal.rejectors.some(([name, txInfo]) => name == id);
-            })
-            .map((signer) => {
-              let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
+          parties[key] = {
+            isProposer: party == chainProposal.proposer,
+            status: isApproved ? 2 : isRejected ? 3 : 1,
+            account: chainAccount.is_research_group ? researchGroups.find(rg => rg.external_id == party) : users.find(user => user.account.name == party),
+            isHidden,
+            signers: [
+              ...users.filter((u) => possibleSigners.some(member => u.account.name == member) || u.account.name == party),
+              ...researchGroups.filter((rg) => possibleSigners.some(member => rg.external_id == member) || rg.external_id == party),
+            ]
+              .filter((signer) => {
+                let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
+                return chainProposal.approvals.some(([name, txInfo]) => name == id) || chainProposal.rejectors.some(([name, txInfo]) => name == id);
+              })
+              .map((signer) => {
+                let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
 
-              let approval = chainProposal.approvals.find(([name, txInfo]) => name == id);
-              let reject = chainProposal.rejectors.find(([name, txInfo]) => name == id);
+                let approval = chainProposal.approvals.find(([name, txInfo]) => name == id);
+                let reject = chainProposal.rejectors.find(([name, txInfo]) => name == id);
 
-              let txInfo = reject ? reject[1] : approval ? approval[1] : null;
-              return {
-                signer: signer,
-                txInfo: txInfo
-              }
-            })
+                let txInfo = reject ? reject[1] : approval ? approval[1] : null;
+                return {
+                  signer: signer,
+                  txInfo: txInfo
+                }
+              })
+          }
         }
       }
 
@@ -510,8 +512,8 @@ class ProposalDtoService extends BaseService {
       if (!acc.some(a => a == proposal.details.member)) {
         acc.push(proposal.details.member);
       }
-      if (!acc.some(a => a == proposal.details.researchGroupExternalId)) {
-        acc.push(proposal.details.researchGroupExternalId);
+      if (!acc.some(a => a == proposal.details.teamId)) {
+        acc.push(proposal.details.teamId);
       }
       return acc;
     }, []);
