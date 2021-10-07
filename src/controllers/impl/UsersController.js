@@ -29,7 +29,7 @@ class UsersController extends BaseController {
 
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -64,7 +64,7 @@ class UsersController extends BaseController {
         ctx.body = user;
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err;
       }
     }
@@ -82,7 +82,7 @@ class UsersController extends BaseController {
         ctx.body = userProfile;
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err.message;
       }
     }
@@ -148,7 +148,7 @@ class UsersController extends BaseController {
 
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
+        ctx.status = err.httpStatus || 500;
         ctx.body = err.message;
       }
     }
@@ -369,7 +369,7 @@ class UsersController extends BaseController {
 
     } catch (err) {
       console.log(err);
-      ctx.status = 500;
+      ctx.status = err.httpStatus || 500;
       ctx.body = err.message;
     }
   }
@@ -390,7 +390,7 @@ class UsersController extends BaseController {
 
     } catch (err) {
       console.log(err);
-      ctx.status = 500;
+      ctx.status = err.httpStatus || 500;
       ctx.body = err.message;
     }
   }
