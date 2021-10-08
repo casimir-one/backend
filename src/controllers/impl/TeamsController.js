@@ -7,10 +7,8 @@ import { accountCmdHandler } from './../../command-handlers';
 import { TeamDtoService, TeamService, UserService } from './../../services';
 import sharp from 'sharp'
 import slug from 'limax';
-import * as blockchainService from './../../utils/blockchain';
 import FileStorage from './../../storage';
-import UserResignationProposedEvent from './../../events/legacy/userResignationProposedEvent';
-import UserResignationProposalSignedEvent from './../../events/legacy/userResignationProposalSignedEvent';
+
 
 const teamDtoService = new TeamDtoService();
 const teamService = new TeamService();

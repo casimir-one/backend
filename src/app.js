@@ -47,8 +47,6 @@ app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/tenant.js').protected.routes());
 app.use(require('./routes/webhook').protected.routes());
 
-app.use(require('./middlewares/legacy/events.js')()); // legacy event handlers
-
 ChainService.getInstanceAsync(config)
   .then(() => {
     console.log(config);

@@ -10,7 +10,6 @@ function setup(options) {
     ctx.state.updatedProposals = {};
     ctx.state.proposalsStack = [];
     ctx.state.proposalsStackFrame = null;
-    ctx.state.events = []; // legacy
 
     const tenant = await tenantService.getTenant(config.TENANT);
     ctx.state.tenant = tenant;

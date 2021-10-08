@@ -5,7 +5,6 @@ import USER_NOTIFICATION_TYPE from './userNotificationType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
 import ATTRIBUTE_TYPE from './attributeTypes';
-import LEGACY_APP_EVENTS from './legacyAppEvents';
 import RESEARCH_CONTENT_STATUS from './researchContentStatus';
 import RESEARCH_STATUS from './researchStatus';
 import PROPOSAL_STATUS from './proposalStatus';
@@ -30,7 +29,6 @@ export {
   TOKEN_SALE_STATUS,
   USER_INVITE_STATUS,
   ATTRIBUTE_TYPE,
-  LEGACY_APP_EVENTS,
   RESEARCH_CONTENT_STATUS,
   RESEARCH_STATUS,
   PROPOSAL_STATUS,
