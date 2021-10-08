@@ -54,7 +54,7 @@ async function createProposal(event, chainContractType) {
 
 proposalHandler.on(LEGACY_APP_EVENTS.USER_RESIGNATION_PROPOSED, (payload, reply) => handle(payload, reply, async (source) => {
   const { event: userResignationProposedEvent } = source;
-  const proposalRef = await createProposal(userResignationProposedEvent, APP_PROPOSAL.PROJECT_LEAVE_PROPOSAL);
+  const proposalRef = await createProposal(userResignationProposedEvent, APP_PROPOSAL.LEAVE_TEAM_PROPOSAL);
   return proposalRef;
 }));
 

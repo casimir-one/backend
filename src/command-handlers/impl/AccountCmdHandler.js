@@ -1,6 +1,13 @@
 import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { TeamCreatedEvent, TeamUpdatedEvent, UserCreatedEvent, UserUpdatedEvent } from './../../events';
+import {
+  TeamCreatedEvent,
+  TeamUpdatedEvent,
+  UserCreatedEvent,
+  UserUpdatedEvent,
+  TeamMemberJoinedEvent,
+  TeamMemberLeftEvent
+} from './../../events';
 import { USER_PROFILE_STATUS } from './../../constants';
 
 
@@ -89,6 +96,29 @@ accountCmdHandler.register(APP_CMD.UPDATE_ACCOUNT, (cmd, ctx) => {
       status
     }));
   }
+});
+
+accountCmdHandler.register(APP_CMD.JOIN_TEAM, (cmd, ctx) => {
+  const { member, teamId, notes } = cmd.getCmdPayload();
+
+  ctx.state.appEvents.push(new TeamMemberJoinedEvent({
+    member,
+    teamId,
+    notes,
+    proposalCtx: ctx.state.proposalsStackFrame
+  }));
+
+});
+
+accountCmdHandler.register(APP_CMD.LEAVE_TEAM, (cmd, ctx) => {
+  const { member, teamId } = cmd.getCmdPayload();
+
+  ctx.state.appEvents.push(new TeamMemberLeftEvent({
+    member: member,
+    teamId: teamId,
+    proposalCtx: ctx.state.proposalsStackFrame
+  }));
+
 });
 
 module.exports = accountCmdHandler;

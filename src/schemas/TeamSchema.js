@@ -9,6 +9,7 @@ const TeamSchema = new Schema({
   "tenantId": { type: String, required: true },
   "creator": { type: String, required: true },
   "attributes": [AttributeValueSchema],
+  "members": { type: [String], required: true },
   "researchAreas": [Object],
 
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

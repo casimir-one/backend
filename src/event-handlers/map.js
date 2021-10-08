@@ -56,14 +56,6 @@ module.exports = {
     { h: projectEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_MEMBER_JOINED]: [
-    { h: projectEventHandler, await: true }
-  ],
-
-  [APP_EVENT.PROJECT_MEMBER_LEFT]: [
-    { h: projectEventHandler, await: true }
-  ],
-
   [APP_EVENT.PROJECT_PROPOSAL_CREATED]: [
     { h: proposalEventHandler, await: false },
     { h: userNotificationEventHandler, await: false }
@@ -78,19 +70,41 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_INVITE_CREATED]: [
+  [APP_EVENT.TEAM_INVITE_CREATED]: [
     { h: proposalEventHandler, await: true },
-    // { h: userInviteEventHandler, await: false },
+    { h: userInviteEventHandler, await: false },
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_INVITE_ACCEPTED]: [
-    // { h: userInviteEventHandler, await: false },
+  [APP_EVENT.TEAM_INVITE_ACCEPTED]: [
+    { h: userInviteEventHandler, await: false },
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_INVITE_DECLINED]: [
+  [APP_EVENT.TEAM_INVITE_DECLINED]: [
     { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.TEAM_MEMBER_JOINED]: [
+    { h: teamEventHandler, await: true },
+    { h: userEventHandler, await: true }
+  ],
+
+  [APP_EVENT.LEAVE_TEAM_CREATED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.LEAVE_TEAM_ACCEPTED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.LEAVE_TEAM_DECLINED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.TEAM_MEMBER_LEFT]: [
+    { h: teamEventHandler, await: true },
+    { h: userEventHandler, await: true }
   ],
 
   [APP_EVENT.TEAM_UPDATE_PROPOSAL_ACCEPTED]: [

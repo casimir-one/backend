@@ -20,7 +20,6 @@ const UserInviteSchema = new Schema({
   "notes": { type: String, required: false, trim: true },
   "rewardShare": { type: String, default: undefined },
   "failReason": { type: String },
-  "researches": [ResearchInvite],
   "status": {
     type: String,
     enum: [...Object.values(USER_INVITE_STATUS)],

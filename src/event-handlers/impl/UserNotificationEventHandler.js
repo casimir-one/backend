@@ -195,7 +195,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (event) => {
+userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (event) => {
   const { 
     invitee,
     teamId,
@@ -238,7 +238,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_CREATED, async (e
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (event) => {
+userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_ACCEPTED, async (event) => {
   const {
     teamId,
     invitee,
@@ -269,7 +269,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_ACCEPTED, async (
 });
 
 
-userNotificationEventHandler.register(APP_EVENT.PROJECT_INVITE_DECLINED, async (event) => {
+userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_DECLINED, async (event) => {
   const {
     invitee,
     teamId
@@ -566,6 +566,18 @@ userNotificationEventHandler.register(APP_EVENT.ASSET_ISSUED, async (event) => {
 });
 
 userNotificationEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_ACCEPTED, async (event) => {
+  // add notify
+});
+
+userNotificationEventHandler.register(APP_EVENT.LEAVE_TEAM_CREATED, async (event) => {
+  // add notify
+});
+
+userNotificationEventHandler.register(APP_EVENT.LEAVE_TEAM_ACCEPTED, async (event) => {
+  // add notify
+});
+
+userNotificationEventHandler.register(APP_EVENT.LEAVE_TEAM_DECLINED, async (event) => {
   // add notify
 });
 

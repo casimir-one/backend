@@ -57,7 +57,6 @@ class UserInviteService extends BaseService {
     rewardShare,
     status,
     notes,
-    researches,
     expiration
   }) {
 
@@ -70,7 +69,6 @@ class UserInviteService extends BaseService {
       status,
       notes,
       expiration,
-      researches,
       failReason: null
     });
 

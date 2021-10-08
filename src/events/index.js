@@ -1,8 +1,8 @@
 import ProjectCreatedEvent from './impl/ProjectCreatedEvent';
 import ProjectUpdatedEvent from './impl/ProjectUpdatedEvent';
 import ProjectDeletedEvent from './impl/ProjectDeletedEvent';
-import ProjectMemberJoinedEvent from './impl/ProjectMemberJoinedEvent';
-import ProjectMemberLeftEvent from './impl/ProjectMemberLeftEvent';
+import TeamMemberJoinedEvent from './impl/TeamMemberJoinedEvent';
+import TeamMemberLeftEvent from './impl/TeamMemberLeftEvent';
 
 import TeamCreatedEvent from './impl/TeamCreatedEvent';
 import TeamUpdatedEvent from './impl/TeamUpdatedEvent';
@@ -22,9 +22,9 @@ import ProjectUpdateProposalCreatedEvent from './impl/ProjectUpdateProposalCreat
 import ProjectUpdateProposalAcceptedEvent from './impl/ProjectUpdateProposalAcceptedEvent';
 import ProjectUpdateProposalDeclinedEvent from './impl/ProjectUpdateProposalDeclinedEvent';
 
-import ProjectInviteCreatedEvent from './impl/ProjectInviteCreatedEvent';
-import ProjectInviteAcceptedEvent from './impl/ProjectInviteAcceptedEvent';
-import ProjectInviteDeclinedEvent from './impl/ProjectInviteDeclinedEvent';
+import TeamInviteCreatedEvent from './impl/TeamInviteCreatedEvent';
+import TeamInviteAcceptedEvent from './impl/TeamInviteAcceptedEvent';
+import TeamInviteDeclinedEvent from './impl/TeamInviteDeclinedEvent';
 
 import AttributeCreatedEvent from './impl/AttributeCreatedEvent';
 import AttributeUpdatedEvent from './impl/AttributeUpdatedEvent';
@@ -79,8 +79,8 @@ module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
   ProjectDeletedEvent,
-  ProjectMemberJoinedEvent,
-  ProjectMemberLeftEvent,
+  TeamMemberJoinedEvent,
+  TeamMemberLeftEvent,
 
   TeamCreatedEvent,
   TeamUpdatedEvent,
@@ -97,9 +97,9 @@ module.exports = {
   ProjectUpdateProposalAcceptedEvent,
   ProjectUpdateProposalDeclinedEvent,
   
-  ProjectInviteCreatedEvent,
-  ProjectInviteAcceptedEvent,
-  ProjectInviteDeclinedEvent,
+  TeamInviteCreatedEvent,
+  TeamInviteAcceptedEvent,
+  TeamInviteDeclinedEvent,
 
   TeamUpdateProposalAcceptedEvent,
   TeamUpdateProposalCreatedEvent,

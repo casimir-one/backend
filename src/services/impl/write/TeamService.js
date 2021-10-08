@@ -12,7 +12,8 @@ class TeamService extends BaseService {
   async createTeam({
     externalId,
     creator,
-    attributes
+    attributes,
+    members
   }) {
 
     const attributeDtoService = new AttributeDtoService();
@@ -30,22 +31,30 @@ class TeamService extends BaseService {
     const result = await this.createOne({
       _id: externalId,
       creator,
-      attributes
+      attributes,
+      members
     });
 
     return result;
   }
 
-
   async updateTeam(externalId, {
-    attributes
+    attributes,
+    members
   }) {
 
     const result = this.updateOne({ _id: externalId }, {
-      attributes
+      attributes,
+      members
     });
 
     return result;
+  }
+
+  async getTeam(teamId) {
+    const team = await this.findOne({ _id: teamId });
+    if (!team) return null;
+    return team;
   }
 }
 

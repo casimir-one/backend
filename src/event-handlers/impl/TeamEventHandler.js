@@ -32,7 +32,8 @@ teamEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
     creator: creator,
     name: description, // TODO: extract from attributes
     description: description,
-    attributes: attributes
+    attributes: attributes,
+    members: [creator]
   });
 
 });
@@ -68,9 +69,41 @@ teamEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
   await teamService.createTeam({
     externalId: username,
     creator: username,
-    attributes
+    attributes,
+    members: [username]
   });
 
+});
+
+teamEventHandler.register(APP_EVENT.TEAM_MEMBER_JOINED, async (event) => {
+
+  const {
+    member,
+    teamId
+  } = event.getEventPayload();
+
+  const team = await teamService.getTeam(teamId);
+
+  const updatedTeam = await teamService.updateTeam(teamId, {
+    members: [...team.members, member]
+  });
+});
+
+
+teamEventHandler.register(APP_EVENT.TEAM_MEMBER_LEFT, async (event) => {
+  const {
+    member,
+    teamId
+  } = event.getEventPayload();
+
+  const team = await teamService.getTeam(teamId);
+  const updatedMembers = [...team.members];
+  const index = updatedMembers.indexOf(member);
+  updatedMembers.splice(index, 1);
+
+  const updatedTeam = await teamService.updateTeam(teamId, {
+    members: updatedMembers
+  });
 });
 
 module.exports = teamEventHandler;

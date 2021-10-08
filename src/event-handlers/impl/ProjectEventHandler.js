@@ -61,16 +61,6 @@ projectEventHandler.register(APP_EVENT.PROJECT_DELETED, async (event) => {
 });
 
 
-projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_JOINED, async (event) => {
-  // TODO: handle project read schema
-});
-
-
-projectEventHandler.register(APP_EVENT.PROJECT_MEMBER_LEFT, async (event) => {
-  // TODO: handle project read schema
-});
-
-
 projectEventHandler.register(APP_EVENT.ATTRIBUTE_UPDATED, async (event) => {
   const { attribute } = event.getEventPayload();
   await projectService.updateAttributeInResearches({
