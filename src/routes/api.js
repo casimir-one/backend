@@ -215,7 +215,6 @@ public_route.get('/v2/nda/project/:projectId', projectNdaCtrl.getProjectNonDiscl
 protected_route.post('/v2/contract-agreement', contractAgreementCtrl.proposeContractAgreement)
 protected_route.post('/v2/contract-agreement/accept', contractAgreementCtrl.acceptContractAgreement)
 protected_route.get('/v2/contract-agreement/:contractAgreementId', contractAgreementCtrl.getContractAgreement)
-protected_route.get('/v2/contract-agreements/creator/:creator', contractAgreementCtrl.getContractAgreementsListByCreator)
 protected_route.get('/v2/contract-agreements', contractAgreementCtrl.getContractAgreements)
 public_route.get('/contract-agreement/file/:filename', contractAgreementCtrl.getContractAgreementFile)
 
