@@ -300,15 +300,11 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_DECLINED, async (eve
 userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED, async (event) => {
   const { projectId, teamId, creator } = event.getEventPayload();
 
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
-
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
 
-  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
-  const [members] = refs.map((g) => g.map(m => m.account));
+  const { members } = team;
 
   const notifications = [];
   for (let i = 0; i < members.length; i++) {
@@ -341,8 +337,7 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
   const tokenSale = await chainApi.getProjectTokenSaleAsync(entityId);
-  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
-  const [members] = refs.map((g) => g.map(m => m.account));
+  const { members } = team;
 
   const notifications = [];
   for (let i = 0; i < members.length; i++) {
@@ -367,15 +362,11 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (event) => {
   const { projectId, teamId, creator, entityId: contentId } = event.getEventPayload();
 
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
-
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
   const projectContent = await projectContentDtoService.getProjectContent(contentId)
-  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
-  const [members] = refs.map((g) => g.map(m => m.account));
+  const { members } = team;
 
   const notifications = [];
   for (let i = 0; i < members.length; i++) {
@@ -428,9 +419,6 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
     projectContentId
   } = event.getEventPayload();
 
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
-
   let reviewer = await userDtoService.getUser(author);
   let projectContent = await projectContentDtoService.getProjectContent(projectContentId);
 
@@ -438,8 +426,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
   let review = await reviewDtoService.getReview(reviewId);
 
   let team = await teamDtoService.getTeam(project.researchRef.researchGroupExternalId);
-  const refs = await chainApi.getTeamMemberReferencesAsync([team.external_id], false);
-  const [members] = refs.map((g) => g.map(m => m.account));
+  const { members } = team;
 
   const notifications = [];
   for (let i = 0; i < members.length; i++) {

@@ -3,6 +3,9 @@ import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
+import TeamDtoService from './TeamDtoService';
+
+const teamDtoService = new TeamDtoService()
 
 class UserDtoService extends BaseService {
 
@@ -87,10 +90,8 @@ class UserDtoService extends BaseService {
 
 
   async getUsersByTeam(teamId) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const refs = await chainApi.getTeamMemberReferencesAsync([teamId], false);
-    const [members] = refs.map((g) => g.map(m => m.account));
+    const team = await teamDtoService.getTeam(teamId);
+    const { members } = team;
     const profiles = await this.findMany({ _id: { $in: [...members] }, status: USER_PROFILE_STATUS.APPROVED });
     if (!profiles.length) return [];
     const result = await this.mapUsers(profiles);
