@@ -2,6 +2,7 @@ import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { ContractAgreementService, ContractAgreementDtoService } from './../../services';
 import { CONTRACT_AGREEMENT_STATUS } from './../../constants/';
+import { APP_PROPOSAL, APP_CMD } from '@deip/constants';
 
 class ContractAgreementEventHandler extends BaseEventHandler {
   constructor() {
@@ -37,11 +38,36 @@ contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CRE
     startTime,
     endTime,
     acceptedByParties: [],
+    signers: [],
     type,
     terms,
     status: CONTRACT_AGREEMENT_STATUS.PROPOSED,
     proposalId
   });
+});
+
+contractAgreementEventHandler.register(APP_EVENT.PROPOSAL_UPDATED, async (event) => {
+
+  const { proposalCtx: { type: proposalType, proposedCmds }, approvals } = event.getEventPayload();
+
+  if (proposalType === APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL) {
+    const createContractAgreementCmd = proposedCmds.find(p => p.getCmdNum() === APP_CMD.CREATE_CONTRACT_AGREEMENT);
+    const { entityId: contractAgreementId } = createContractAgreementCmd.getCmdPayload();
+    const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId);
+    for (const approvalId of approvals) {
+      if (!contractAgreement.signers.some(s => s.id === approvalId)) {
+        const date = new Date(Date.now());
+        const updatedContractAgreement = await contractAgreementService.updateContractAgreement({
+          _id: contractAgreementId,
+          signers: [...contractAgreement.signers, {
+            id: approvalId,
+            date
+          }]
+        });
+        contractAgreement.signers = updatedContractAgreement.signers;
+      }
+    }
+  }
 });
 
 contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_DECLINED, async (event) => {
@@ -82,6 +108,7 @@ contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_CREATED, asy
       startTime,
       endTime,
       acceptedByParties: [],
+      signers: [],
       type,
       terms,
       status: CONTRACT_AGREEMENT_STATUS.PENDING
@@ -94,13 +121,20 @@ contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED, as
   const { entityId: contractAgreementId, party } = event.getEventPayload();
 
   const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId);
-
-  const updatedContractAgreement = await contractAgreementService.updateContractAgreement({
+  const updatedData = {
     _id: contractAgreementId,
     acceptedByParties: [...contractAgreement.acceptedByParties, party]
-  });
+  }
+  if (!contractAgreement.signers.some(s => s.id === party)) {
+    const date = new Date(Date.now());
+    updatedData.signers = [...contractAgreement.signers, {
+      id: party,
+      date
+    }]
+  }
+  const updatedContractAgreement = await contractAgreementService.updateContractAgreement(updatedData);
 
-  const isAllAccepted =  updatedContractAgreement.parties.every(p => updatedContractAgreement.acceptedByParties.includes(p));
+  const isAllAccepted = updatedContractAgreement.parties.every(p => updatedContractAgreement.acceptedByParties.includes(p));
 
   if (isAllAccepted) {
     await contractAgreementService.updateContractAgreement({

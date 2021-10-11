@@ -5,6 +5,12 @@ import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
+const SignerSchema = new Schema({
+  "_id": false,
+  "id": { type: String, required: true },
+  "date": { type: Date, required: true }
+});
+
 const ContractAgreementSchema = new Schema({
   "_id": { type: String },
   "tenantId": { type: String, required: true },
@@ -16,6 +22,7 @@ const ContractAgreementSchema = new Schema({
   "endTime": { type: Date },
   "acceptedByParties": { type: Array, default: [] },
   "proposalId": { type: String },
+  "signers": [SignerSchema],
   "type": {
     type: Number,
     enum: [...Object.values(CONTRACT_AGREEMENT_TYPE)],

@@ -49,7 +49,7 @@ proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
 
 
 proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, (cmd, ctx) => {
-  const { entityId: proposalId } = cmd.getCmdPayload();
+  const { entityId: proposalId, activeApprovalsToAdd = [] } = cmd.getCmdPayload();
 
   const {
     type,
@@ -63,7 +63,8 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, (cmd, ctx) => {
   ctx.state.appEvents.push(new ProposalUpdatedEvent({
     proposalId: proposalId,
     status: status,
-    proposalCtx: proposalCtx
+    proposalCtx: proposalCtx,
+    approvals: activeApprovalsToAdd
   }));
 
   if (status == PROPOSAL_STATUS.APPROVED) {

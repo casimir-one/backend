@@ -34,19 +34,15 @@ class ContractAgreementDtoService extends BaseService {
   async getContractAgreements({
     parties,
     type,
-    status
+    status,
+    creator
   } = {}) {
     const query = {};
     if (type) query.type = type;
     if (status) query.status = status;
+    if (creator) query.creator = creator;
     if (Array.isArray(parties) && parties.length) query.parties = { $all : [...parties] };
     const contractAgreements = await this.findMany(query);
-    const result = await this.mapContractAgreements(contractAgreements)
-    return result;
-  }
-
-  async getContractAgreementsListByCreator(creator) {
-    const contractAgreements = await this.findMany({ creator });
     const result = await this.mapContractAgreements(contractAgreements)
     return result;
   }

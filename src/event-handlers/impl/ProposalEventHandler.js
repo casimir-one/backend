@@ -110,24 +110,4 @@ proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED, as
   // TODO: create multisig transaction read schema
 });
 
-proposalEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, async (event) => {
-  const {
-    proposalId,
-    expirationTime,
-    entityId,
-    projectId,
-    teamId,
-    content: draftId,
-    type,
-    authors,
-    title,
-    proposalCtx
-  } = event.getEventPayload();
-
-  await draftService.updateDraft({
-    _id: draftId,
-    status: RESEARCH_CONTENT_STATUS.PROPOSED
-  })
-});
-
 module.exports = proposalEventHandler;

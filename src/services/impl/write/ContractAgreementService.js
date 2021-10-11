@@ -15,6 +15,7 @@ class ContractAgreementService extends BaseService {
     startTime,
     endTime,
     acceptedByParties,
+    signers,
     type,
     status,
     terms,
@@ -29,6 +30,7 @@ class ContractAgreementService extends BaseService {
       startTime,
       endTime,
       acceptedByParties,
+      signers,
       type,
       status,
       terms,
@@ -41,11 +43,13 @@ class ContractAgreementService extends BaseService {
   async updateContractAgreement({
     _id,
     status,
-    acceptedByParties
+    acceptedByParties,
+    signers
   }) {
     const result = await this.updateOne({ _id }, {
       status,
-      acceptedByParties
+      acceptedByParties,
+      signers
     });
 
     return result;

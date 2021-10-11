@@ -26,7 +26,8 @@ module.exports = {
   ],
 
   [APP_EVENT.PROPOSAL_UPDATED]: [
-    { h: proposalEventHandler, await: true }
+    { h: proposalEventHandler, await: true },
+    { h: contractAgreementEventHandler, await: true }
   ],
 
   [APP_EVENT.PROPOSAL_DECLINED]: [

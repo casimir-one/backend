@@ -50,23 +50,6 @@ class ContractAgreementController extends BaseController {
     }
   });
 
-  getContractAgreementsListByCreator = this.query({
-    h: async (ctx) => {
-      try {
-        const creator = ctx.params.creator;
-        const contractAgreements = await contractAgreementDtoService.getContractAgreementsListByCreator(creator);
-
-        ctx.body = contractAgreements;
-        ctx.status = 200;
-      }
-      catch(err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
-      }
-    }
-  });
-
   getContractAgreementFile = this.query({
     h: async (ctx) => {
       try {
