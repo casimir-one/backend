@@ -1,8 +1,9 @@
 import TenantSchema from './../../schemas/TenantSchema';
-import { UserDtoService, UserService } from './../../services';
+import { TeamDtoService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
 
+const teamDtoService = new TeamDtoService();
 
 class TenantService {
 
@@ -15,8 +16,8 @@ class TenantService {
     const chainApi = chainService.getChainApi();
     const profile = doc.toObject();
     const [account] = await chainApi.getAccountsAsync([id]);
-    const refs = await chainApi.getTeamMemberReferencesAsync([config.TENANT], false);
-    const [admins] = refs.map((g) => g.map(m => m.account));
+    const team = await teamDtoService.getTeam(config.TENANT);
+    const { members: admins } = team;
 
     return { id: id, account: account, profile: profile, admins };
   }

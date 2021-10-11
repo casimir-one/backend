@@ -1,12 +1,15 @@
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import AttributeDtoService from './AttributeDtoService';
+import TeamDtoService from './TeamDtoService';
 import ContractAgreementDtoService from './ContractAgreementDtoService';
 import ProjectNdaDtoService from './ProjectNdaDtoService';
 import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
+
+const teamDtoService = new TeamDtoService();
 
 class ProjectDtoService extends BaseService {
 
@@ -17,7 +20,7 @@ class ProjectDtoService extends BaseService {
   async mapResearch(researches, filterObj) {
     const contractAgreementDtoService = new ContractAgreementDtoService();
     const projectNdaDtoService = new ProjectNdaDtoService();
-    const attributeDtoService = new AttributeDtoService()
+    const attributeDtoService = new AttributeDtoService();
 
     const filter = {
       searchTerm: "",
@@ -34,8 +37,8 @@ class ProjectDtoService extends BaseService {
     const researchesExpressLicenses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE }); // (getAllContractAgreements) temp sol
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => projectNdaDtoService.getProjectNdaListByProject(r.external_id)));
     const researchAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
-    const refs = await chainApi.getTeamMemberReferencesAsync(chainResearches.map(p => p.research_group.external_id), false);
-    const allMembers = refs.map((g) => g.map(m => m.account));
+    let teams = await Promise.all(chainResearches.map(p => teamDtoService.getTeam(p.research_group.external_id)));
+    const allMembers = teams.map(t => t.members);
     
     return chainResearches
       .map((chainResearch, i) => {
@@ -188,8 +191,8 @@ class ProjectDtoService extends BaseService {
   async getProjectsForMember(member) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    const teamsRefs = await chainApi.getTeamReferencesAsync([member], false);
-    const [teamsIds] = teamsRefs.map((g) => g.map(m => m.team));
+    const teams = await teamDtoService.getTeamsByUser(member);
+    const teamsIds = teams.map(({ _id }) => _id);
     const chainResearches = await Promise.all(teamsIds.map(teamId => chainApi.getProjectsByTeamAsync(teamId)));
     const chainProjects = chainResearches.reduce((acc, projectsList) => {
       const projects = projectsList.filter(p => !acc.some(project => project.external_id == p.external_id));

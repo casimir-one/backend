@@ -559,8 +559,8 @@ class ProposalDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
 
-    const teamsRefs = await chainApi.getTeamReferencesAsync([username], false);
-    const [teamsIds] = teamsRefs.map((g) => g.map(m => m.team));
+    const teams = await teamDtoService.getTeamsByUser(username);
+    const teamsIds = teams.map(({ _id }) => _id);
     const signers = [username, ...teamsIds];
     const allProposals = await chainApi.getProposalsBySignersAsync(signers);
     const externalIds = allProposals.reduce((unique, chainProposal) => {
