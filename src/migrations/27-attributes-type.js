@@ -115,7 +115,8 @@ const AttributeSchema = new Schema({
     type: Number,
     enum: [...Object.values(ATTR_SCOPES)],
     required: true
-  }
+  },
+  "isGlobalScope": { type: Boolean, default: false }
 });
 
 const AttributesRefs = mongoose.model('attributes', AttributeSchema);

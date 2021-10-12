@@ -15,7 +15,8 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
+
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -41,18 +42,18 @@ const run = async () => {
         researchAttribute.type == DISCIPLINES_LIST ||
         researchAttribute.type == USERS_LIST ||
         researchAttribute.type == MULTI_SELECT ||
-        researchAttribute.type == ATTRIBUTE_TYPE.URL) {
+        researchAttribute.type == ATTR_TYPES.URL) {
 
         researchAttribute.isMultiple = true;
 
         if (researchAttribute.type == RESEARCH_GROUPS_LIST) {
-          researchAttribute.type = ATTRIBUTE_TYPE.RESEARCH_GROUP;
+          researchAttribute.type = ATTR_TYPES.RESEARCH_GROUP;
         } else if (researchAttribute.type == DISCIPLINES_LIST) {
-          researchAttribute.type = ATTRIBUTE_TYPE.DISCIPLINE;
+          researchAttribute.type = ATTR_TYPES.DISCIPLINE;
         } else if (researchAttribute.type == USERS_LIST) {
-          researchAttribute.type = ATTRIBUTE_TYPE.USER;
+          researchAttribute.type = ATTR_TYPES.USER;
         } else if (researchAttribute.type == MULTI_SELECT) {
-          researchAttribute.type = ATTRIBUTE_TYPE.SELECT;
+          researchAttribute.type = ATTR_TYPES.SELECT;
         }
 
       } else {

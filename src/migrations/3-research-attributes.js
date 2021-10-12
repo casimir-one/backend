@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
@@ -44,10 +44,10 @@ const run = async () => {
         isVisible: researchAttribute.isVisible,
         isEditable: true,
         isFilterable: true,
-        title: researchAttribute.type == ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelTitle : '',
-        shortTitle: researchAttribute.type == ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevelShortTitle : '',
+        title: researchAttribute.type == ATTR_TYPES.STEPPER ? researchAttribute.component.readinessLevelTitle : '',
+        shortTitle: researchAttribute.type == ATTR_TYPES.STEPPER ? researchAttribute.component.readinessLevelShortTitle : '',
         description: '',
-        valueOptions: researchAttribute.type == ATTRIBUTE_TYPE.STEPPER ? researchAttribute.component.readinessLevels.map(rl => {
+        valueOptions: researchAttribute.type == ATTR_TYPES.STEPPER ? researchAttribute.component.readinessLevels.map(rl => {
           return {
             title: rl.title,
             shortTitle: '',

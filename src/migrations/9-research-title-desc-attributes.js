@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
@@ -31,7 +31,7 @@ const run = async () => {
   
   const researchTitleAttribute = {
     _id: mongoose.Types.ObjectId("5f68be39c579c726e93a3006"),
-    type: ATTRIBUTE_TYPE.TEXT,
+    type: ATTR_TYPES.TEXT,
     isVisible: true,
     isEditable: false,
     isFilterable: false,
@@ -46,7 +46,7 @@ const run = async () => {
 
   const researchDescriptionAttribute = {
     _id: mongoose.Types.ObjectId("5f68be39c579c726e93a3007"),
-    type: ATTRIBUTE_TYPE.TEXTAREA,
+    type: ATTR_TYPES.TEXTAREA,
     isVisible: true,
     isEditable: false,
     isFilterable: false,

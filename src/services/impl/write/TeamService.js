@@ -1,7 +1,7 @@
 import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
 import AttributeDtoService from './../read/AttributeDtoService';
-import { ATTRIBUTE_TYPE, ATTR_SCOPES } from './../../../constants';
+import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 class TeamService extends BaseService {
 
@@ -18,7 +18,7 @@ class TeamService extends BaseService {
 
     const attributeDtoService = new AttributeDtoService();
     const systemAttributes = await attributeDtoService.getSystemAttributes();
-    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.TEAM && attr.type == ATTRIBUTE_TYPE.TEXT);
+    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.TEAM && attr.type == ATTR_TYPES.TEXT);
 
     // Team attribute is required
     if (teamAttr && !attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {

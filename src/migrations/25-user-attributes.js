@@ -29,9 +29,7 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const USER_PROFILE_STATUS = require('./../constants').USER_PROFILE_STATUS;
-const ATTR_SCOPES = require('./../constants').ATTR_SCOPES;
-const ATTRIBUTE_TYPE = require('./../constants').ATTRIBUTE_TYPE;
-
+const { ATTR_SCOPES, ATTR_TYPES } = require('@deip/constants');
 
 const AttributeValueOption = new Schema({
   "_id": false,
@@ -52,7 +50,7 @@ const AttributeSchema = new Schema({
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Schema.Types.Mixed,
-    enum: [...Object.values(ATTRIBUTE_TYPE)],
+    enum: [...Object.values(ATTR_TYPES)],
     required: true
   },
   "isFilterable": { type: Boolean, default: false },
@@ -72,7 +70,8 @@ const AttributeSchema = new Schema({
     type: Schema.Types.Mixed,
     enum: [...Object.values(ATTR_SCOPES)],
     required: true
-  }
+  },
+  "isGlobalScope": { type: Boolean, default: false }
 });
 
 const Attribute = mongoose.model('attribute', AttributeSchema);
@@ -194,6 +193,7 @@ const USER_SYSTEM_ATTRIBUTES = {
   FIRST_NAME: {
     "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f5"),
     "tenantId": null,
+    "isGlobalScope": true,
     "isSystem": true,
     "isFilterable": false,
     "isEditable": true,
@@ -216,6 +216,7 @@ const USER_SYSTEM_ATTRIBUTES = {
   LAST_NAME: {
     "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f6"),
     "tenantId": null,
+    "isGlobalScope": true,
     "isSystem": true,
     "isFilterable": false,
     "isEditable": true,

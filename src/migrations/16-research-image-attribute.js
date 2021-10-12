@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -30,7 +30,7 @@ const run = async () => {
 
   const researchCoverImageAttribute = {
     _id: mongoose.Types.ObjectId("5f58d4fa97f36d3938dde1ed"),
-    type: ATTRIBUTE_TYPE.IMAGE,
+    type: ATTR_TYPES.IMAGE,
     isPublished: true,
     isHidden: false,
     isRequired: false,

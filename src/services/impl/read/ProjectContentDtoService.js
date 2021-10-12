@@ -1,7 +1,7 @@
 import ProjectDtoService from './ProjectDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
-import { RESEARCH_CONTENT_STATUS, CONTENT_TYPES_MAP } from '../../../constants';
+import { PROJECT_CONTENT_STATUS, CONTENT_TYPES_MAP } from '../../../constants';
 import BaseService from '../../base/BaseService';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
@@ -36,7 +36,7 @@ class ProjectContentDtoService extends BaseService {
   }
 
   async getProjectContent(projectContentId) {
-    const projectContent = await this.findOne({ _id: projectContentId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const projectContent = await this.findOne({ _id: projectContentId, status: PROJECT_CONTENT_STATUS.PUBLISHED });
     if (!projectContent) return null;
     const [result] = await this.mapProjectContents([projectContent]);
     return result;
@@ -44,28 +44,28 @@ class ProjectContentDtoService extends BaseService {
 
 
   async getProjectContents(projectContentIds) {
-    const projectContents = await this.findMany({ _id: { $in: [...projectContentIds] }, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const projectContents = await this.findMany({ _id: { $in: [...projectContentIds] }, status: PROJECT_CONTENT_STATUS.PUBLISHED });
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
   async lookupProjectContents() {
-    const projectContents = await this.findMany({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const projectContents = await this.findMany({ status: PROJECT_CONTENT_STATUS.PUBLISHED });
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
   async getProjectContentsByProject(projectId) {
-    const projectContents = await this.findMany({ researchExternalId: projectId , status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const projectContents = await this.findMany({ researchExternalId: projectId , status: PROJECT_CONTENT_STATUS.PUBLISHED });
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
   async getProjectContentsByTenant(tenantId) {
-    const available = await this.findMany({ status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const available = await this.findMany({ status: PROJECT_CONTENT_STATUS.PUBLISHED });
     const projectContents = available.filter(r => r.tenantId == tenantId);
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
@@ -73,12 +73,12 @@ class ProjectContentDtoService extends BaseService {
   }
 
   async findPublishedProjectContentRefsByProject(projectId) {
-    const result = await this.findMany({ researchExternalId: projectId, status: RESEARCH_CONTENT_STATUS.PUBLISHED });
+    const result = await this.findMany({ researchExternalId: projectId, status: PROJECT_CONTENT_STATUS.PUBLISHED });
     return result;
   }
 
   async findDraftProjectContentRefsByProject(projectId) {
-    const result = await this.findMany({ researchExternalId: projectId, status: { $in: [ RESEARCH_CONTENT_STATUS.IN_PROGRESS, RESEARCH_CONTENT_STATUS.PROPOSED ] } });
+    const result = await this.findMany({ researchExternalId: projectId, status: { $in: [ PROJECT_CONTENT_STATUS.IN_PROGRESS, PROJECT_CONTENT_STATUS.PROPOSED ] } });
     return result;
   }
 

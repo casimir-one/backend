@@ -1,7 +1,7 @@
 import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import { ProjectCreatedEvent, ProjectUpdatedEvent, ProjectDeletedEvent } from './../../events';
-import { RESEARCH_STATUS } from './../../constants';
+import { PROJECT_STATUS } from './../../constants';
 
 
 class ProjectCmdHandler extends BaseCmdHandler {
@@ -27,7 +27,7 @@ projectCmdHandler.register(APP_CMD.CREATE_PROJECT, (cmd, ctx) => {
     projectId: projectId,
     teamId: teamId,
     attributes: attributes,
-    status: RESEARCH_STATUS.APPROVED,
+    status: PROJECT_STATUS.APPROVED,
     isDefault: isDefault,
     proposalCtx: ctx.state.proposalsStackFrame
   }));

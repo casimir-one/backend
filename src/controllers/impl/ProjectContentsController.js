@@ -6,7 +6,7 @@ import { projectContentCmdHandler } from '../../command-handlers';
 import { ProjectDtoService, ProjectContentService, ProjectContentDtoService, ProjectService, TeamDtoService, DraftService } from './../../services';
 import FileStorage from './../../storage';
 import readArchive from './../../dar/readArchive';
-import { RESEARCH_CONTENT_STATUS } from './../../constants';
+import { PROJECT_CONTENT_STATUS } from './../../constants';
 import mongoose from 'mongoose';
 
 const projectDtoService = new ProjectDtoService();
@@ -349,7 +349,7 @@ class ProjectContentsController extends BaseController {
               if(!draft) {
                 throw new NotFoundError(`Draft for "${draftId}" id is not found`);
               }
-              if(draft.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
+              if(draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
                 throw new BadRequestError(`Research content "${draft.projectId}" is in '${draft.status}' status`);
               }
             }
@@ -359,7 +359,7 @@ class ProjectContentsController extends BaseController {
             if(!draft) {
               throw new NotFoundError(`Draft for "${draftId}" id is not found`);
             }
-            if(draft.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
+            if(draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
               throw new BadRequestError(`Research content "${draft.projectId}" is in '${draft.status}' status`);
             }
           }
@@ -425,7 +425,7 @@ class ProjectContentsController extends BaseController {
           if (!draft) {
             throw new NotFoundError(`Draft for "${draftId}" id is not found`);
           }
-          if (draft.status != RESEARCH_CONTENT_STATUS.IN_PROGRESS) {
+          if (draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
             throw new BadRequestError(`Draft "${draftId}" is locked for updates`);
           }
       
@@ -435,7 +435,7 @@ class ProjectContentsController extends BaseController {
             throw new ForbiddenError(`"${username}" is not permitted to edit "${projectId}" project`);
           }
 
-          if (draft.status == RESEARCH_CONTENT_STATUS.PROPOSED) {
+          if (draft.status == PROJECT_CONTENT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
       
@@ -489,7 +489,7 @@ class ProjectContentsController extends BaseController {
 
           // if there is a proposal for this content (no matter is it approved or still in voting progress)
           // we must respond with an error as blockchain hashed data should not be modified
-          if (draft.status == RESEARCH_CONTENT_STATUS.PROPOSED) {
+          if (draft.status == PROJECT_CONTENT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
 

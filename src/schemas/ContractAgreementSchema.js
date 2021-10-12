@@ -1,7 +1,6 @@
 
 import mongoose from 'mongoose';
-import { CONTRACT_AGREEMENT_STATUS } from './../constants';
-import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
+import { CONTRACT_AGREEMENT_TYPE, CONTRACT_AGREEMENT_STATUS } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 

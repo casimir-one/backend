@@ -15,7 +15,7 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -33,7 +33,7 @@ const run = async () => {
       let researchAttribute = tenantProfile.settings.researchAttributes[j];
       if (researchAttribute.isBlockchainMeta) {
         researchAttribute.blockchainFieldMeta = {
-          field: researchAttribute.type == ATTRIBUTE_TYPE.TEXT ? 'title' : 'abstract',
+          field: researchAttribute.type == ATTR_TYPES.TEXT ? 'title' : 'abstract',
           isPartial: false
         }
       } else {

@@ -1,9 +1,6 @@
-const ADMIN = "admin";
-const TEAMADMIN = "team-admin";
-
 const USER_ROLES = {
-  ADMIN,
-  TEAMADMIN
+  ADMIN: "admin",
+  TEAMADMIN: "team-admin",
 }
 
 export default USER_ROLES;

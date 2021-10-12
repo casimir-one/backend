@@ -4,10 +4,10 @@ import AttributeDtoService from './AttributeDtoService';
 import TeamDtoService from './TeamDtoService';
 import ContractAgreementDtoService from './ContractAgreementDtoService';
 import ProjectNdaDtoService from './ProjectNdaDtoService';
-import { ATTRIBUTE_TYPE, RESEARCH_ATTRIBUTE, RESEARCH_STATUS, ATTR_SCOPES } from './../../../constants';
+import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from './../../../constants';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
-import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
+import { CONTRACT_AGREEMENT_TYPE, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 const teamDtoService = new TeamDtoService();
 
@@ -55,16 +55,16 @@ class ProjectDtoService extends BaseService {
 
         const attributes = researchRef.attributes;
        
-        const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
-          ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value.toString()
+        const title = attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString())
+          ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString()).value.toString()
           : "Not Specified";
 
-        const abstract = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString())
-          ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
+        const abstract = attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString())
+          ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
           : "Not Specified";
 
-        const isPrivate = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString())
-          ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
+        const isPrivate = attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.IS_PRIVATE.toString())
+          ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.IS_PRIVATE.toString()).value.toString() === 'true'
           : false;
 
         return {
@@ -91,15 +91,15 @@ class ProjectDtoService extends BaseService {
         if (!attribute || !rAttr.value)
           return false;
         
-        if (rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString() || rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString()) {
+        if (rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString() || rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString()) {
           return `${rAttr.value}`.toLowerCase().includes(filter.searchTerm.toLowerCase());
         }
 
-        // if (attribute.type == ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+        // if (attribute.type == ATTR_TYPES.RESEARCH_GROUP) {
         //   return r.research_group.name.toLowerCase().includes(filter.searchTerm.toLowerCase());
         // }
 
-        if (attribute.type == ATTRIBUTE_TYPE.USER) {
+        if (attribute.type == ATTR_TYPES.USER) {
           return r.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
         }
  
@@ -122,7 +122,7 @@ class ProjectDtoService extends BaseService {
             return !v || v === 'false';
           }
 
-          if (attribute.type == ATTRIBUTE_TYPE.EXPRESS_LICENSING) {
+          if (attribute.type == ATTR_TYPES.EXPRESS_LICENSING) {
             if (v == true || v === 'true') {
               return rAttr.value.length != 0;
             } else {
@@ -147,7 +147,7 @@ class ProjectDtoService extends BaseService {
 
 
   async getResearch(researchExternalId) {
-    const research = await this.findOne({ _id: researchExternalId, status: RESEARCH_STATUS.APPROVED });
+    const research = await this.findOne({ _id: researchExternalId, status: PROJECT_STATUS.APPROVED });
     if (!research) return null;
     const results = await this.mapResearch([research]);
     const [result] = results;
@@ -155,7 +155,7 @@ class ProjectDtoService extends BaseService {
   }
 
 
-  async getResearches(researchesExternalIds, statuses = [ RESEARCH_STATUS.APPROVED ]) {
+  async getResearches(researchesExternalIds, statuses = [ PROJECT_STATUS.APPROVED ]) {
     const researches = await this.findMany({ _id: { $in: [...researchesExternalIds] }, status: { $in: [...statuses] } });
     if (!researches.length) return [];
     const result = await this.mapResearch(researches);
@@ -164,7 +164,7 @@ class ProjectDtoService extends BaseService {
 
 
   async lookupProjects(filter) {
-    const researches = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
+    const researches = await this.findMany({ status: PROJECT_STATUS.APPROVED });
     if (!researches.length) return [];
     const result = await this.mapResearch(researches, { ...filter, isDefault: false });
     return result;
@@ -172,7 +172,7 @@ class ProjectDtoService extends BaseService {
 
 
   async getProjectsByTeam(researchGroupExternalId) {
-    const researches = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: RESEARCH_STATUS.APPROVED });
+    const researches = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: PROJECT_STATUS.APPROVED });
     if (!researches.length) return [];
     const result = await this.mapResearch(researches, { isDefault: false });
     return result;
@@ -180,7 +180,7 @@ class ProjectDtoService extends BaseService {
 
 
   async getProjectsByTenant(tenantId) {
-    const available = await this.findMany({ status: RESEARCH_STATUS.APPROVED });
+    const available = await this.findMany({ status: PROJECT_STATUS.APPROVED });
     const researches = available.filter(r => r.tenantId == tenantId);
     if (!researches.length) return [];
     const result = await this.mapResearch(researches, { isDefault: false });
@@ -192,13 +192,13 @@ class ProjectDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
     const teams = await teamDtoService.getTeamsByUser(member);
-    const teamsIds = teams.map(({ _id }) => _id);
+    const teamsIds = teams.map(({ entityId }) => entityId);
     const chainResearches = await Promise.all(teamsIds.map(teamId => chainApi.getProjectsByTeamAsync(teamId)));
     const chainProjects = chainResearches.reduce((acc, projectsList) => {
       const projects = projectsList.filter(p => !acc.some(project => project.external_id == p.external_id));
       return [...acc, ...projects];
     }, []);
-    const projects = await this.findMany({ _id: { $in: [...chainProjects.map(p => p.external_id)] }, status: RESEARCH_STATUS.APPROVED });
+    const projects = await this.findMany({ _id: { $in: [...chainProjects.map(p => p.external_id)] }, status: PROJECT_STATUS.APPROVED });
     if (!projects.length) return [];
     const result = await this.mapResearch(projects, { isDefault: false });
     return result;

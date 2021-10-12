@@ -8,7 +8,7 @@ import {
 import cloneArchive from './../../dar/cloneArchive'
 import writeArchive from './../../dar/writeArchive';
 import FileStorage from './../../storage';
-import { RESEARCH_CONTENT_STATUS } from './../../constants';
+import { PROJECT_CONTENT_STATUS } from './../../constants';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import path from 'path';
@@ -45,7 +45,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, 
     _id: draftId,
     authors,
     title,
-    status: RESEARCH_CONTENT_STATUS.PROPOSED
+    status: PROJECT_CONTENT_STATUS.PROPOSED
   })
 });
 
@@ -64,7 +64,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     hash: '',
     algo: '',
     folder: externalId,
-    status: RESEARCH_CONTENT_STATUS.IN_PROGRESS,
+    status: PROJECT_CONTENT_STATUS.IN_PROGRESS,
     authors: authors || [],
     references: references || [],
     packageFiles: [],
@@ -168,7 +168,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
       projectId,
       teamId,
       title,
-      status: RESEARCH_CONTENT_STATUS.PUBLISHED,
+      status: PROJECT_CONTENT_STATUS.PUBLISHED,
       authors,
       references
     });

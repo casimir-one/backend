@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -50,7 +50,7 @@ const run = async () => {
         })
       }
 
-      let researchGroupAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
+      let researchGroupAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == ATTR_TYPES.RESEARCH_GROUP);
       let researchGroupA = research.attributes.find(a => a.attributeId.toString() == researchGroupAttr._id.toString());
 
       if (researchGroupA) {

@@ -1,9 +1,6 @@
-const PENDING = "pending";
-const APPROVED = "approved";
-
 const USER_PROFILE_STATUS = {
-  PENDING,
-  APPROVED
+  PENDING: "pending",
+  APPROVED: "approved",
 }
 
 export default USER_PROFILE_STATUS;

@@ -1,7 +1,7 @@
 import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL } from '@deip/constants';
 import ProposalSchema from './../../../schemas/ProposalSchema';
-import { RESEARCH_STATUS } from './../../../constants';
+import { PROJECT_STATUS } from './../../../constants';
 import ProjectDtoService from './ProjectDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
@@ -221,8 +221,8 @@ class ProposalDtoService extends BaseService {
     const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.JOIN_TEAM_PROPOSAL] || []);
     result.push(...userInvitationProposals);
 
-    const userResignationProposals = await this.extendUserResignationProposals(grouped[APP_PROPOSAL.LEAVE_TEAM_PROPOSAL] || []);
-    result.push(...userResignationProposals);
+    const userLeavingProposals = await this.extendUserLeavingProposals(grouped[APP_PROPOSAL.LEAVE_TEAM_PROPOSAL] || []);
+    result.push(...userLeavingProposals);
 
     const researchNdaProposals = await this.extendResearchNdaProposals(grouped[APP_PROPOSAL.PROJECT_NDA_PROPOSAL] || []);
     result.push(...researchNdaProposals);
@@ -257,7 +257,7 @@ class ProposalDtoService extends BaseService {
 
     // currently we allow to buy the license only for user account
     const users = await userDtoService.getUsers(chainUserAccounts.map(a => a.name));
-    const researches = await projectDtoService.getProjects(chainResearches.map(r => r.external_id), Object.values(RESEARCH_STATUS));
+    const researches = await projectDtoService.getProjects(chainResearches.map(r => r.external_id), Object.values(PROJECT_STATUS));
 
     return requests.map((req) => {
       const extendedDetails = {
@@ -380,7 +380,7 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
+    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
@@ -425,7 +425,7 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
+    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
 
     return proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -461,7 +461,7 @@ class ProposalDtoService extends BaseService {
     const chainApi = chainService.getChainApi();
 
     const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(RESEARCH_STATUS));
+    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
     const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => chainApi.getProjectTokenSaleAsync(id)));
 
 
@@ -507,7 +507,7 @@ class ProposalDtoService extends BaseService {
   }
 
 
-  async extendUserResignationProposals(proposals) {
+  async extendUserLeavingProposals(proposals) {
     const accountNames = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.member)) {
         acc.push(proposal.details.member);
@@ -546,7 +546,7 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researches = await projectDtoService.getProjects(projectIds.map(rId => rId), Object.values(RESEARCH_STATUS));
+    const researches = await projectDtoService.getProjects(projectIds.map(rId => rId), Object.values(PROJECT_STATUS));
 
     return proposals.map(proposal => {
       const research = researches.find(r => r.external_id == proposal.details.projectId);
@@ -560,7 +560,7 @@ class ProposalDtoService extends BaseService {
     const chainApi = chainService.getChainApi();
 
     const teams = await teamDtoService.getTeamsByUser(username);
-    const teamsIds = teams.map(({ _id }) => _id);
+    const teamsIds = teams.map(({ entityId }) => entityId);
     const signers = [username, ...teamsIds];
     const allProposals = await chainApi.getProposalsBySignersAsync(signers);
     const externalIds = allProposals.reduce((unique, chainProposal) => {

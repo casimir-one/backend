@@ -16,7 +16,7 @@ const config = require('./../config');
 const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
 
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
@@ -43,13 +43,13 @@ const run = async () => {
       researchAttribute.isBlockchainMeta = undefined;
       researchAttribute.component = undefined;
 
-      if (researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+      if (researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == ATTR_TYPES.RESEARCH_GROUP) {
         researchAttribute.isHidden = true;
       } else {
         researchAttribute.isHidden = false;
       }
 
-      if (researchAttribute.type == DISCIPLINES_LIST || researchAttribute.type == ATTRIBUTE_TYPE.DISCIPLINE || researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == ATTRIBUTE_TYPE.RESEARCH_GROUP) {
+      if (researchAttribute.type == DISCIPLINES_LIST || researchAttribute.type == ATTR_TYPES.DISCIPLINE || researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == ATTR_TYPES.RESEARCH_GROUP) {
         researchAttribute.isEditable = false;
       } else {
         researchAttribute.isEditable = true;

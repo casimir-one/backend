@@ -16,7 +16,7 @@ const config = require('./../config');
 const mongoose = require('mongoose');
 const Research = require('./../schemas/research');
 
-const RESEARCH_STATUS = require('./../constants/researchStatus').default;
+const PROJECT_STATUS = require('./../constants/projectStatus').default;
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -29,7 +29,7 @@ const run = async () => {
 
   for (let i = 0; i < researchRefs.length; i++) {
     let researchRef = researchRefs[i];
-    researchRef.status = RESEARCH_STATUS.APPROVED;
+    researchRef.status = PROJECT_STATUS.APPROVED;
     researchPromises.push(researchRef.save());
   }
 

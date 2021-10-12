@@ -21,8 +21,7 @@ require("@babel/register")({
 
 
 const config = require('./../config');
-const ATTR_SCOPES = require('./../constants').ATTR_SCOPES;
-const ATTRIBUTE_TYPE = require('./../constants').ATTRIBUTE_TYPE;
+const { ATTR_SCOPES, ATTR_TYPES } = require('@deip/constants');
 
 const mongoose = require('mongoose');
 const Schema = mongoose.Schema;
@@ -47,7 +46,7 @@ const AttributeSchema = new Schema({
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Schema.Types.Mixed,
-    enum: [...Object.values(ATTRIBUTE_TYPE)],
+    enum: [...Object.values(ATTR_TYPES)],
     required: true
   },
   "isFilterable": { type: Boolean, default: false },
@@ -66,7 +65,8 @@ const AttributeSchema = new Schema({
     type: Schema.Types.Mixed,
     enum: [...Object.values(ATTR_SCOPES)],
     required: true
-  }
+  },
+  "isGlobalScope": { type: Boolean, default: false }
 });
 
 const Attribute = mongoose.model('attribute', AttributeSchema);
@@ -76,6 +76,7 @@ const TEAM_SYSTEM_ATTRIBUTES = {
   NAME: {
     "_id": mongoose.Types.ObjectId("6092cdf54572573b895a8139"),
     "tenantId": null,
+    "isGlobalScope": true,
     "isSystem": true,
     "isFilterable": false,
     "isEditable": true,
@@ -83,7 +84,7 @@ const TEAM_SYSTEM_ATTRIBUTES = {
     "isHidden": false,
     "isMultiple": false,
     "defaultValue": "",
-    "type": ATTRIBUTE_TYPE.TEXT,
+    "type": ATTR_TYPES.TEXT,
     "title": "Name",
     "shortTitle": "Name",
     "description": "",
@@ -110,7 +111,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": "",
-      "type": ATTRIBUTE_TYPE.TEXTAREA,
+      "type": ATTR_TYPES.TEXTAREA,
       "title": "Description",
       "shortTitle": "Description",
       "description": "",
@@ -131,7 +132,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": null,
-      "type": ATTRIBUTE_TYPE.IMAGE,
+      "type": ATTR_TYPES.IMAGE,
       "title": "Team Logo",
       "shortTitle": "Team Logo",
       "description": "",
@@ -152,7 +153,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": "",
-      "type": ATTRIBUTE_TYPE.TEXTAREA,
+      "type": ATTR_TYPES.TEXTAREA,
       "title": "Description",
       "shortTitle": "Description",
       "description": "",
@@ -173,7 +174,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": null,
-      "type": ATTRIBUTE_TYPE.IMAGE,
+      "type": ATTR_TYPES.IMAGE,
       "title": "Team Logo",
       "shortTitle": "Team Logo",
       "description": "",
@@ -194,7 +195,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": "",
-      "type": ATTRIBUTE_TYPE.TEXTAREA,
+      "type": ATTR_TYPES.TEXTAREA,
       "title": "Description",
       "shortTitle": "Description",
       "description": "",
@@ -215,7 +216,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": null,
-      "type": ATTRIBUTE_TYPE.IMAGE,
+      "type": ATTR_TYPES.IMAGE,
       "title": "Team Logo",
       "shortTitle": "Team Logo",
       "description": "",
@@ -235,7 +236,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": "",
-      "type": ATTRIBUTE_TYPE.TEXTAREA,
+      "type": ATTR_TYPES.TEXTAREA,
       "title": "Description",
       "shortTitle": "Description",
       "description": "",
@@ -256,7 +257,7 @@ const TEAM_CUSTOM_ATTRIBUTES = {
       "isHidden": false,
       "isMultiple": false,
       "defaultValue": null,
-      "type": ATTRIBUTE_TYPE.IMAGE,
+      "type": ATTR_TYPES.IMAGE,
       "title": "Team Logo",
       "shortTitle": "Team Logo",
       "description": "",

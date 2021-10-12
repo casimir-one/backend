@@ -31,11 +31,11 @@ const run = async () => {
 
     // const research = await Research.findOne({ _id: chainResearch.external_id });
 
-    // const titleAttr = research.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString());
+    // const titleAttr = research.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString());
     // const title = titleAttr ? titleAttr.value : "";
     const title = chainResearch.title;
 
-    // const descriptionAttr = research.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.DESCRIPTION.toString());
+    // const descriptionAttr = research.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString());
     // const description = descriptionAttr ? descriptionAttr.value : "";
     const description = chainResearch.abstract;
 

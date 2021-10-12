@@ -9,7 +9,7 @@ class AttributeService extends BaseService {
     super(AttributeSchema);
   }
 
-  async createAttribute(tenantExternalId, {
+  async createAttribute(tenantId, {
     type,
     isPublished,
     isFilterable,
@@ -44,7 +44,7 @@ class AttributeService extends BaseService {
       }),
       defaultValue,
       isSystem: false,
-      tenantId: tenantExternalId
+      tenantId
     })
     const savedAttribute = await newAttribute.save();
     return savedAttribute.toObject();
