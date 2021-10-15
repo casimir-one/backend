@@ -3,9 +3,9 @@ import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
-import TeamDtoService from './TeamDtoService';
+import TeamService from '../write/TeamService';
 
-const teamDtoService = new TeamDtoService()
+const teamService = new TeamService()
 
 class UserDtoService extends BaseService {
 
@@ -90,7 +90,8 @@ class UserDtoService extends BaseService {
 
 
   async getUsersByTeam(teamId) {
-    const team = await teamDtoService.getTeam(teamId);
+    const team = await teamService.getTeam(teamId);
+    if (!team) return [];
     const { members } = team;
     const profiles = await this.findMany({ _id: { $in: [...members] }, status: USER_PROFILE_STATUS.APPROVED });
     if (!profiles.length) return [];
