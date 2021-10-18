@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
@@ -32,7 +32,7 @@ const run = async () => {
 
   const roadmapAttribute = {
     _id: mongoose.Types.ObjectId("5f68be12ae115a26e475fb90"),
-    type: ATTRIBUTE_TYPE.ROADMAP,
+    type: ATTR_TYPES.ROADMAP,
     isVisible: true,
     isEditable: false,
     isFilterable: false,
@@ -45,7 +45,7 @@ const run = async () => {
 
   const partnersAttribute = {
     _id: mongoose.Types.ObjectId("5f68be12ae115a26e475fb91"),
-    type: ATTRIBUTE_TYPE.PARTNERS,
+    type: ATTR_TYPES.PARTNERS,
     isVisible: true,
     isEditable: false,
     isFilterable: false,
@@ -58,7 +58,7 @@ const run = async () => {
 
   const videoSrcAttribute = {
     _id: mongoose.Types.ObjectId("5f68be12ae115a26e475fb92"),
-    type: ATTRIBUTE_TYPE.VIDEO_URL,
+    type: ATTR_TYPES.VIDEO_URL,
     isVisible: true,
     isEditable: true,
     isFilterable: false,

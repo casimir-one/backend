@@ -1,9 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { TeamService, AttributeDtoService } from './../../services';
-import { ATTR_SCOPES } from '@deip/constants';
-import { ATTRIBUTE_TYPE } from './../../constants';
-
+import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 class TeamEventHandler extends BaseEventHandler {
 
@@ -61,7 +59,7 @@ teamEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
 
   const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
   const attr = attrs.find(
-    ({ type, title }) => title === 'Name' && type === ATTRIBUTE_TYPE.TEXT
+    ({ type, title }) => title === 'Name' && type === ATTR_TYPES.TEXT
   );
 
   const attributes = attr ? [{attributeId: attr._id, value: username}] : [];

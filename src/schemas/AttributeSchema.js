@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ATTRIBUTE_TYPE, ATTR_SCOPES } from './../constants';
+import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 
 const Schema = mongoose.Schema;
@@ -24,7 +24,7 @@ const AttributeSchema = new Schema({
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Number,
-    enum: [...Object.values(ATTRIBUTE_TYPE)],
+    enum: [...Object.values(ATTR_TYPES)],
     required: true
   },
   "isFilterable": { type: Boolean, default: false },
@@ -44,7 +44,8 @@ const AttributeSchema = new Schema({
     type: Number,
     enum: [...Object.values(ATTR_SCOPES)],
     required: true
-  }
+  },
+  "isGlobalScope": { type: Boolean, default: false }
 });
 
 const model = mongoose.model('attribute', AttributeSchema);

@@ -3,7 +3,7 @@ import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema';
 import AttributeDtoService from './../read/AttributeDtoService';
 import { logWarn } from './../../../utils/log';
-import { ATTRIBUTE_TYPE, ATTR_SCOPES } from './../../../constants';
+import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 
 class ProjectService extends BaseService {
@@ -27,7 +27,7 @@ class ProjectService extends BaseService {
 
     const attributeDtoService = new AttributeDtoService();
     const systemAttributes = await attributeDtoService.getSystemAttributes();
-    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.PROJECT && attr.type == ATTRIBUTE_TYPE.RESEARCH_GROUP);
+    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.PROJECT && attr.type == ATTR_TYPES.RESEARCH_GROUP);
     
     // Team attribute is required
     if (!attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
@@ -93,72 +93,72 @@ class ProjectService extends BaseService {
       }
 
       switch (attribute.type) {
-        case ATTRIBUTE_TYPE.STEPPER: {
+        case ATTR_TYPES.STEPPER: {
           rAttrValue = mongoose.Types.ObjectId(rAttr.value.toString()); // _id
           break;
         }
-        case ATTRIBUTE_TYPE.TEXT: {
+        case ATTR_TYPES.TEXT: {
           rAttrValue = rAttr.value.toString(); // text
           break;
         }
-        case ATTRIBUTE_TYPE.TEXTAREA: {
+        case ATTR_TYPES.TEXTAREA: {
           rAttrValue = rAttr.value.toString(); // text
           break;
         }
-        case ATTRIBUTE_TYPE.SELECT: {
+        case ATTR_TYPES.SELECT: {
           rAttrValue = rAttr.value.map(v => mongoose.Types.ObjectId(v.toString())); // _id
           break;
         }
-        case ATTRIBUTE_TYPE.URL: {
+        case ATTR_TYPES.URL: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
-        case ATTRIBUTE_TYPE.VIDEO_URL: {
+        case ATTR_TYPES.VIDEO_URL: {
           rAttrValue = rAttr.value.toString(); // url
           break;
         }
-        case ATTRIBUTE_TYPE.SWITCH: {
+        case ATTR_TYPES.SWITCH: {
           rAttrValue = rAttr.value == true || rAttr.value === 'true';
           break;
         }
-        case ATTRIBUTE_TYPE.CHECKBOX: {
+        case ATTR_TYPES.CHECKBOX: {
           rAttrValue = rAttr.value == true || rAttr.value === 'true';
           break;
         }
-        case ATTRIBUTE_TYPE.USER: {
+        case ATTR_TYPES.USER: {
           rAttrValue = rAttr.value.map(v => v.toString()); // username / external_id
           break;
         }
-        case ATTRIBUTE_TYPE.DISCIPLINE: {
+        case ATTR_TYPES.DISCIPLINE: {
           rAttrValue = rAttr.value.map(v => v.toString()); // external_id
           break;
         }
-        case ATTRIBUTE_TYPE.RESEARCH_GROUP: {
+        case ATTR_TYPES.RESEARCH_GROUP: {
           rAttrValue = rAttr.value.map(v => v.toString()); // external_id
           break;
         }
-        case ATTRIBUTE_TYPE.IMAGE: {
+        case ATTR_TYPES.IMAGE: {
           rAttrValue = rAttr.value.toString(); // image name
           break;
         }
-        case ATTRIBUTE_TYPE.FILE: {
+        case ATTR_TYPES.FILE: {
           rAttrValue = rAttr.value.toString(); // file name
           break;
         }
-        case ATTRIBUTE_TYPE.EXPRESS_LICENSING: {
+        case ATTR_TYPES.EXPRESS_LICENSING: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
-        case ATTRIBUTE_TYPE.ROADMAP: {
+        case ATTR_TYPES.ROADMAP: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
-        case ATTRIBUTE_TYPE.PARTNERS: {
+        case ATTR_TYPES.PARTNERS: {
           rAttrValue = rAttr.value.map(v => v); // schema
           break;
         }
         default: {
-          logWarn(`WARNING: Unhandeled value '${rAttr.value}' for attribute type ${ATTRIBUTE_TYPE[attribute.type]}`);
+          logWarn(`WARNING: Unhandeled value '${rAttr.value}' for attribute type ${ATTR_TYPES[attribute.type]}`);
           rAttrValue = rAttr.value;
           break;
         }
@@ -184,7 +184,7 @@ class ProjectService extends BaseService {
 
 
   async updateAttributeInResearches({ attributeId, type, valueOptions, defaultValue }) {
-    if (type == ATTRIBUTE_TYPE.STEPPER || type == ATTRIBUTE_TYPE.SELECT) {
+    if (type == ATTR_TYPES.STEPPER || type == ATTR_TYPES.SELECT) {
       const result = await this.updateMany(
         {
           $and: [

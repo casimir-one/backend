@@ -20,7 +20,7 @@ const CryptoJS = require("crypto-js");
 
 
 const CHAIN_CONSTANTS = require('./../constants/chainConstants').default;
-const { RESEARCH_CONTENT_TYPES, RESEARCH_STATUS } = require('./../constants');
+const { PROJECT_CONTENT_TYPES, PROJECT_STATUS } = require('./../constants');
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);
@@ -216,7 +216,7 @@ const run = async ({
       "research_external_id": research.external_id,
       "description": rc.description,
       "content": rc.content,
-      "type": RESEARCH_CONTENT_TYPES[rc.content_type.toUpperCase()],
+      "type": PROJECT_CONTENT_TYPES[rc.content_type.toUpperCase()],
       "authors": rc.authors.filter(author => !blackListUsers.some(name => name == author)),
       "references": rc.references
     }
@@ -348,7 +348,7 @@ const run = async ({
           disciplinesAttr.value = ["073ac406ef75dc83d577add7e87488ff40b45848"];
         }
 
-        return { ...doc, attributes: attributes, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? RESEARCH_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
+        return { ...doc, attributes: attributes, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? PROJECT_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
       }
       else if (collectionName == 'research-contents') {
         return { ...doc, tenantId: TENANT, tenantIdsScope: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)) }

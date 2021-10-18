@@ -24,12 +24,11 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 
-const ATTR_SCOPES = require('../constants').ATTR_SCOPES;
-const ATTRIBUTE_TYPE = require('../constants').ATTRIBUTE_TYPE;
+const { ATTR_SCOPES, ATTR_TYPES } = require('@deip/constants');
 const SIGN_UP_POLICY = require('../constants').SIGN_UP_POLICY;
 const ASSESSMENT_CRITERIA_TYPE = require('../constants').ASSESSMENT_CRITERIA_TYPE;
-const RESEARCH_CONTENT_TYPES = require('../constants').RESEARCH_CONTENT_TYPES;
-const RESEARCH_STATUS = require('./../constants').RESEARCH_STATUS;
+const PROJECT_CONTENT_TYPES = require('../constants').PROJECT_CONTENT_TYPES;
+const PROJECT_STATUS = require('./../constants').PROJECT_STATUS;
 
 const Schema = mongoose.Schema;
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -58,7 +57,7 @@ const AttributeSchema = new Schema({
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Schema.Types.Mixed,
-    enum: [...Object.values(ATTRIBUTE_TYPE)],
+    enum: [...Object.values(ATTR_TYPES)],
     required: true
   },
   "isFilterable": { type: Boolean, default: false },
@@ -78,7 +77,8 @@ const AttributeSchema = new Schema({
     type: Schema.Types.Mixed,
     enum: [...Object.values(ATTR_SCOPES)],
     required: true
-  }
+  },
+  "isGlobalScope": { type: Boolean, default: false }
 });
 
 const Attribute = mongoose.model('attribute', AttributeSchema);
@@ -96,7 +96,7 @@ const ResearchMigratingSchema = new Schema({
   "tenantId": { type: String, required: true },
   "researchGroupExternalId": { type: String, required: true },
   "attributes": [AttributeValueSchema],
-  "status": { type: String, enum: [...Object.values(RESEARCH_STATUS)], required: false },
+  "status": { type: String, enum: [...Object.values(PROJECT_STATUS)], required: false },
 
   // To remove
   "tenantCriterias": { type: [Object], default: undefined },
@@ -213,7 +213,7 @@ const TenantProfileMigratingSchema = new Schema({
     "assesmentCriterias": {
       type: [ResearchContentAssessmentCriterias],
       default: [{
-        contentType: RESEARCH_CONTENT_TYPES.UNKNOWN,
+        contentType: PROJECT_CONTENT_TYPES.UNKNOWN,
         values: [
           { id: ASSESSMENT_CRITERIA_TYPE.NOVELTY, title: 'Novelty', max: 5 },
           { id: ASSESSMENT_CRITERIA_TYPE.TECHNICAL_QUALITY, title: 'Technical Quality', max: 5 },
@@ -250,6 +250,7 @@ const run = async () => {
         tenantId: null,
         isSystem: true,
         scope: ATTR_SCOPES.PROJECT,
+        isGlobalScope: true,
         ...attr
       });
       
@@ -265,6 +266,7 @@ const run = async () => {
           tenantId: tenantProfiles[i]._id,
           isSystem: false,
           scope: ATTR_SCOPES.PROJECT,
+          isGlobalScope: false,
           ...attr
         });
 

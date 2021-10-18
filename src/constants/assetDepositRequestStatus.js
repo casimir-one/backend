@@ -1,11 +1,9 @@
-const PENDING = 1;
-const APPROVED = 2;
-const REJECTED = 3;
+import { createEnum } from '@deip/toolbox/lib/enum';
 
-const DEPOSIT_REQUEST_STATUS = {
-  PENDING,
-  APPROVED,
-  REJECTED
-}
+const DEPOSIT_REQUEST_STATUS = createEnum({
+  PENDING: 1,
+  APPROVED: 2,
+  REJECTED: 3,
+})
 
 export default DEPOSIT_REQUEST_STATUS;

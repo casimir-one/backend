@@ -1,6 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
-import { RESEARCH_STATUS, TOKEN_SALE_STATUS, RESEARCH_ATTRIBUTE } from './../../constants';
+import { PROJECT_STATUS, TOKEN_SALE_STATUS, PROJECT_ATTRIBUTE } from './../../constants';
 import { ProjectService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
@@ -56,7 +56,7 @@ projectEventHandler.register(APP_EVENT.PROJECT_DELETED, async (event) => {
     projectId
   } = event.getEventPayload();
 
-  await projectService.updateProject(projectId, { status: RESEARCH_STATUS.DELETED });
+  await projectService.updateProject(projectId, { status: PROJECT_STATUS.DELETED });
 
 });
 
@@ -86,12 +86,12 @@ projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (ev
 
   if (projectId) { // TODO: Replace this validation with InvstOpp type check
     const project = await projectService.getProject(projectId);
-    const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+    const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
 
     let hasUpdate = false;
     if (!investmentOpportunityAttr) {
       project.attributes.push({
-        attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+        attributeId: PROJECT_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
         value: true
       });
       hasUpdate = true;
@@ -118,12 +118,12 @@ projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, asyn
     const project = await projectService.getProject(projectTokenSale.research_external_id);
 
     if (projectTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
-      const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+      const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
       let hasUpdate = false;
 
       if (!investmentOpportunityAttr) {
         project.attributes.push({
-          attributeId: RESEARCH_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
+          attributeId: PROJECT_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
           value: false
         });
         hasUpdate = true;

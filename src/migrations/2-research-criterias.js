@@ -15,7 +15,8 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 const Research = require('./../schemas/research');
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
+
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -40,9 +41,9 @@ const run = async () => {
     const marlIndex = getRandomInt(0, 7);
     const srlIndex = getRandomInt(0, 7);
     research.tenantCriterias = [
-      { "component": "5ebd469a2cea71001f84345a", "type": ATTRIBUTE_TYPE.STEPPER, "value": { index: trlIndex } },
-      { "component": "5ebd47762cea71001f843460", "type": ATTRIBUTE_TYPE.STEPPER, "value": { index: marlIndex } },
-      { "component": "5ebd4b842cea71001f843467", "type": ATTRIBUTE_TYPE.STEPPER, "value": { index: srlIndex } },
+      { "component": "5ebd469a2cea71001f84345a", "type": ATTR_TYPES.STEPPER, "value": { index: trlIndex } },
+      { "component": "5ebd47762cea71001f843460", "type": ATTR_TYPES.STEPPER, "value": { index: marlIndex } },
+      { "component": "5ebd4b842cea71001f843467", "type": ATTR_TYPES.STEPPER, "value": { index: srlIndex } },
     ];
     promises.push(research.save());
   }

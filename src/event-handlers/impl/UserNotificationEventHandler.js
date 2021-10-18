@@ -1,6 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import config from './../../config';
-import { USER_NOTIFICATION_TYPE, RESEARCH_ATTRIBUTE } from './../../constants';
+import { USER_NOTIFICATION_TYPE, PROJECT_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
 import TenantService from './../../services/legacy/tenant';
 import { TeamDtoService, UserDtoService, ProjectDtoService, ReviewDtoService, ProjectContentDtoService } from './../../services';
@@ -41,8 +41,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
   const teamCreator = await userDtoService.getUser(team.creator);
 
   // TODO: replace with a call to project read schema
-  const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
-    ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+  const title = attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString())
+    ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString()).value
     : "Not Specified";
     
   const notifications = [];
@@ -76,8 +76,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
   const teamCreator = await userDtoService.getUser(team.creator);
 
   // TODO: replace with a call to project read schema
-  const title = attributes.some(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString())
-    ? attributes.find(rAttr => rAttr.attributeId.toString() == RESEARCH_ATTRIBUTE.TITLE.toString()).value
+  const title = attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString())
+    ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString()).value
     : "Not Specified";
 
   const notifications = [];
@@ -401,7 +401,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (e
   await userNotificationsDtoService.createUserNotifications([{
     username: expert.account.name,
     status: 'unread',
-    type: USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW_REQUEST,
+    type: USER_NOTIFICATION_TYPE.PROJECT_CONTENT_EXPERT_REVIEW_REQUEST,
     metadata: {
       requestor,
       expert,
@@ -434,7 +434,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
     notifications.push({
       username: member,
       status: 'unread',
-      type: USER_NOTIFICATION_TYPE.RESEARCH_CONTENT_EXPERT_REVIEW,
+      type: USER_NOTIFICATION_TYPE.PROJECT_CONTENT_EXPERT_REVIEW,
       metadata: {
         review,
         researchContent: projectContent,
@@ -464,7 +464,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, as
     notifications.push({
       username: member,
       status: 'unread',
-      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_PROPOSED,
+      type: USER_NOTIFICATION_TYPE.PROJECT_NDA_PROPOSED,
       metadata: {
         research: project,
         emitter,
@@ -492,7 +492,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (even
     notifications.push({
       username: member,
       status: 'unread',
-      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_SIGNED,
+      type: USER_NOTIFICATION_TYPE.PROJECT_NDA_SIGNED,
       metadata: {
         research: project,
         creator,
@@ -520,7 +520,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, a
     notifications.push({
       username: member,
       status: 'unread',
-      type: USER_NOTIFICATION_TYPE.RESEARCH_NDA_REJECTED,
+      type: USER_NOTIFICATION_TYPE.PROJECT_NDA_REJECTED,
       metadata: {
         research: project,
         creator,

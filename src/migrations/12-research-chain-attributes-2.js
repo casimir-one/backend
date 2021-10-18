@@ -17,7 +17,7 @@ const mongoose = require('mongoose');
 const TenantProfile = require('./../schemas/tenant');
 const Research = require('./../schemas/research');
 
-const ATTRIBUTE_TYPE = require('./../constants/attributeTypes').default;
+const { ATTR_TYPES } = require('@deip/constants');
 const ChainService = require('@deip/chain-service').ChainService;
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -55,7 +55,7 @@ const run = async () => {
 
   const researchGroupAttribute = {
     _id: mongoose.Types.ObjectId("5f690af5cdaaa53a27af4a30"),
-    type: ATTRIBUTE_TYPE.RESEARCH_GROUP,
+    type: ATTR_TYPES.RESEARCH_GROUP,
     isVisible: true,
     isRequired: true,
     isFilterable: true,
@@ -72,7 +72,7 @@ const run = async () => {
 
   const researchVisibilityAttribute = {
     _id: mongoose.Types.ObjectId("5f68d4fa98f36d2938dde5ec"),
-    type: ATTRIBUTE_TYPE.SWITCH,
+    type: ATTR_TYPES.SWITCH,
     isVisible: true,
     isRequired: true,
     isFilterable: false,
@@ -107,7 +107,7 @@ const run = async () => {
 
   const researchLicensingAssociateAttribute = {
     _id: mongoose.Types.ObjectId("5f68d4fa98f36d2938dde5ed"),
-    type: ATTRIBUTE_TYPE.USER,
+    type: ATTR_TYPES.USER,
     isVisible: true,
     isRequired: true,
     isFilterable: false,

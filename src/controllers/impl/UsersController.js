@@ -3,11 +3,10 @@ import { UserDtoService, AttributeDtoService } from '../../services';
 import sharp from 'sharp';
 import qs from 'qs';
 import FileStorage from './../../storage';
-import slug from 'limax';
 import UserBookmarkService from './../../services/legacy/userBookmark';
 import { accountCmdHandler } from './../../command-handlers';
-import { USER_PROFILE_STATUS, ATTR_SCOPES, ATTRIBUTE_TYPE } from './../../constants';
-import { APP_CMD } from '@deip/constants';
+import { USER_PROFILE_STATUS } from './../../constants';
+import { APP_CMD, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError } from './../../errors';
 
@@ -199,109 +198,6 @@ class UsersController extends BaseController {
     }
   });
 
-  getUserAttributeFile = this.query({
-    h: async (ctx) => {
-      try {
-        const username = ctx.params.username;
-        const attributeId = ctx.params.attributeId;
-        const filename = ctx.params.filename;
-
-        const isTeamRootFolder = username == attributeId;
-        const filepath = isTeamRootFolder ? FileStorage.getAccountFilePath(username, filename) : FileStorage.getAccountAttributeFilePath(username, attributeId, filename);
-        let buff = await FileStorage.get(filepath);
-
-        const imageQuery = ctx.query.image === 'true';
-        if (imageQuery) {
-          const exists = await FileStorage.exists(filepath);
-          if (!exists) {
-            filepath = FileStorage.getAccountDefaultAvatarFilePath();
-            buff = await FileStorage.get(filepath);
-          }
-
-          const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
-          const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
-          const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
-          const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
-
-          const resize = (w, h) => {
-            return new Promise((resolve) => {
-              sharp.cache(!noCache);
-              sharp(buff)
-                .rotate()
-                .resize(w, h)
-                .png()
-                .toBuffer()
-                .then(data => {
-                  resolve(data)
-                })
-                .catch(err => {
-                  resolve(err)
-                });
-            })
-          }
-
-          let image = await resize(width, height);
-          if (isRound) {
-            let round = (w) => {
-              let r = w / 2;
-              let circleShape = Buffer.from(`<svg><circle cx="${r}" cy="${r}" r="${r}" /></svg>`);
-              return new Promise((resolve, reject) => {
-                image = sharp(image)
-                  .overlayWith(circleShape, {
-                    cutout: true
-                  })
-                  .png()
-                  .toBuffer()
-                  .then(data => {
-                    resolve(data)
-                  })
-                  .catch(err => {
-                    reject(err)
-                  });
-              });
-            }
-
-            image = await round(width);
-          }
-
-          ctx.type = 'image/png';
-          ctx.status = 200;
-          ctx.body = image;
-
-        } else {
-
-          const isDownload = ctx.query.download === 'true';
-
-          const ext = filename.substr(filename.lastIndexOf('.') + 1);
-          const name = filename.substr(0, filename.lastIndexOf('.'));
-          const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
-          const isPdf = ['pdf'].some(e => e == ext);
-
-          if (isDownload) {
-            ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
-          } else if (isImage) {
-            ctx.response.set('Content-Type', `image/${ext}`);
-            ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
-          } else if (isPdf) {
-            ctx.response.set('Content-Type', `application/${ext}`);
-            ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
-          } else {
-            ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
-          }
-        }
-
-      } catch (err) {
-        console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
-      }
-    }
-  });
-
   updateUser = this.command({
     form: UserForm,
     h: async (ctx) => {
@@ -417,7 +313,7 @@ class UsersController extends BaseController {
               type,
               title,
               tenantId
-            }) => title === 'Avatar' && type === ATTRIBUTE_TYPE.IMAGE && tenantId === user.tenantId
+            }) => title === 'Avatar' && type === ATTR_TYPES.IMAGE && tenantId === user.tenantId
           );
           const userAttr = user.profile.attributes.find(({
             attributeId

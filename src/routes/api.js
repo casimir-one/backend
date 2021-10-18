@@ -95,7 +95,6 @@ protected_route.post('/v2/project', compose([projectCmdProxy()]), projectsCtrl.c
 protected_route.put('/v2/project', compose([projectCmdProxy()]), projectsCtrl.updateProject)
 protected_route.put('/v2/project/delete', compose([projectCmdProxy()]), projectsCtrl.deleteProject)
 public_route.get('/v2/projects/listing', projectsCtrl.getPublicProjectsListing)
-public_route.get('/project/:projectId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), projectsCtrl.getProjectAttributeFile)
 protected_route.get('/v2/projects/user/listing/:username', projectsCtrl.getUserProjectsListing)
 protected_route.get('/v2/projects/team/listing/:teamId', projectsCtrl.getTeamProjectsListing)
 public_route.get('/v2/projects/tenant/listing', projectsCtrl.getTenantProjectsListing)
@@ -110,7 +109,6 @@ public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
 public_route.get('/v2/teams/tenant/:tenantId', teamsCtrl.getTeamsByTenant)
 public_route.get('/team/logo/:teamId', compose([teamLogoProxy()]), teamsCtrl.getTeamLogo)
-public_route.get('/team/:teamId/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), teamsCtrl.getTeamAttributeFile)
 protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)// temp: need change to cmd
 
 public_route.get('/v2/attributes', attributesCtrl.getAttributes);
@@ -122,6 +120,7 @@ public_route.get('/v2/attributes/system', attributesCtrl.getSystemAttributes);
 protected_route.post('/v2/attribute', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.createAttribute);
 protected_route.put('/v2/attribute', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.updateAttribute);
 protected_route.put('/v2/attribute/delete', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.deleteAttribute);
+public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', compose([attributeFileProxy()]), attributesCtrl.getAttributeFile);
 
 public_route.get('/v2/assets/id/:assetId', assetsCtrl.getAssetById)
 public_route.get('/v2/assets/symbol/:symbol', assetsCtrl.getAssetBySymbol)
@@ -151,7 +150,6 @@ public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
 public_route.get('/v2/users/tenant/:tenantId', usersCtrl.getUsersByTenant)
 
 protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
-public_route.get('/user/:username/attribute/:attributeId/file/:filename', compose([attributeFileProxy()]), usersCtrl.getUserAttributeFile)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
 protected_route.post('/bookmarks/user/:username', usersCtrl.addUserBookmark) //temp: need change to cmd
 protected_route.delete('/bookmarks/user/:username/remove/:bookmarkId', usersCtrl.removeUserBookmark) //temp: need change to cmd

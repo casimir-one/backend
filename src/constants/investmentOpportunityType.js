@@ -1,9 +1,8 @@
-const UNKNOWN = 0;
-const PROJECT_TOKEN_SALE = 1;
+import { createEnum } from '@deip/toolbox/lib/enum';
 
-const INVESTMENT_OPPORTUNITY_TYPE = {
-  UNKNOWN,
-  PROJECT_TOKEN_SALE
-};
+const INVESTMENT_OPPORTUNITY_TYPE = createEnum({
+  UNKNOWN: 0,
+  PROJECT_TOKEN_SALE: 1,
+});
 
 export default INVESTMENT_OPPORTUNITY_TYPE;

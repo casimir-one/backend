@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, ATTRIBUTE_TYPE, ASSESSMENT_CRITERIA_TYPE, RESEARCH_CONTENT_TYPES } from './../constants';
+import { SIGN_UP_POLICY, ASSESSMENT_CRITERIA_TYPE, PROJECT_CONTENT_TYPES } from './../constants';
 
 const Schema = mongoose.Schema;
 
@@ -109,7 +109,7 @@ const TenantSchema = new Schema({
     "assesmentCriterias": {
       type: [ResearchContentAssessmentCriterias],
       default: [{
-        contentType: RESEARCH_CONTENT_TYPES.UNKNOWN,
+        contentType: PROJECT_CONTENT_TYPES.UNKNOWN,
         values: [
           { id: ASSESSMENT_CRITERIA_TYPE.NOVELTY, title: 'Novelty', max: 5 },
           { id: ASSESSMENT_CRITERIA_TYPE.TECHNICAL_QUALITY, title: 'Technical Quality', max: 5 },

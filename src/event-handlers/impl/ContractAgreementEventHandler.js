@@ -1,8 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { ContractAgreementService, ContractAgreementDtoService } from './../../services';
-import { CONTRACT_AGREEMENT_STATUS } from './../../constants/';
-import { APP_PROPOSAL, APP_CMD } from '@deip/constants';
+import { APP_PROPOSAL, APP_CMD, CONTRACT_AGREEMENT_STATUS } from '@deip/constants';
 
 class ContractAgreementEventHandler extends BaseEventHandler {
   constructor() {
