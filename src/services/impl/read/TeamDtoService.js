@@ -9,26 +9,25 @@ class TeamDtoService extends BaseService {
     super(TeamSchema, options);
   }
 
-  async mapTeams(researchGroups) {
+  async mapTeams(team) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    const chainResearchGroups = await chainApi.getAccountsAsync(researchGroups.map(rg => rg._id));
-
-    return chainResearchGroups
-      .map((chainResearchGroup) => {
-        const researchGroupRef = researchGroups.find(r => r._id.toString() == chainResearchGroup.name);
+    const chainTeams = await chainApi.getAccountsAsync(team.map(rg => rg._id));
+    return chainTeams
+      .map((chainTeam) => {
+        const teamRef = team.find(r => r._id.toString() == chainTeam.name);
         return { 
-          external_id: chainResearchGroup.name,
-          entityId: chainResearchGroup.name,
-          attributes: researchGroupRef.attributes,
-          creator: researchGroupRef.creator,
-          is_dao: chainResearchGroup.is_research_group,
-          is_personal: !chainResearchGroup.is_research_group,
-          description: chainResearchGroup.json_metadata,
-          account: chainResearchGroup, 
-          tenantId: researchGroupRef.tenantId,
-          members: researchGroupRef.members,
-          researchGroupRef
+          external_id: chainTeam.name,
+          entityId: chainTeam.name,
+          attributes: teamRef.attributes,
+          creator: teamRef.creator,
+          is_dao: chainTeam.is_research_group,
+          is_personal: !chainTeam.is_research_group,
+          description: chainTeam.json_metadata,
+          account: chainTeam, 
+          tenantId: teamRef.tenantId,
+          members: teamRef.members,
+          researchGroupRef: teamRef
         }
       })
       .map((researchGroup) => {
@@ -57,8 +56,8 @@ class TeamDtoService extends BaseService {
   }
 
 
-  async getTeams(teamIds) {
-    const teams = await this.findMany({ _id: { $in: [...teamIds] } });
+  async getTeams(teamsIds) {
+    const teams = await this.findMany({ _id: { $in: [...teamsIds] } });
     if (!teams.length) return [];
     const result = await this.mapTeams(teams);
     return result;

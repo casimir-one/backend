@@ -35,6 +35,25 @@ class TeamsController extends BaseController {
     }
   });
 
+  getTeams = this.query({
+    h: async (ctx) => {
+      try {
+        const query = qs.parse(ctx.query);
+        const teamsIds = query.teamsIds;
+        if (!Array.isArray(teamsIds)) {
+          throw new BadRequestError(`TeamsIds must be an array of ids`);
+        }
+        
+        const result = await teamDtoService.getTeams(teamsIds);
+        ctx.status = 200;
+        ctx.body = result;
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 
   getTeamsListing = this.query({
     h: async (ctx) => {

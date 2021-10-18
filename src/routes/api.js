@@ -102,6 +102,7 @@ public_route.get('/v2/projects/tenant/listing', projectsCtrl.getTenantProjectsLi
 
 protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam)
 protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
+public_route.get('/v2/teams', teamsCtrl.getTeams)
 protected_route.post('/v2/team/join', teamsCtrl.joinTeam)
 protected_route.post('/v2/team/leave',  teamsCtrl.leaveTeam)
 public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
