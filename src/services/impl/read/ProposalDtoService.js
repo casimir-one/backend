@@ -5,12 +5,14 @@ import { PROJECT_STATUS } from './../../../constants';
 import ProjectDtoService from './ProjectDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
+import AssetService from './../write/AssetService';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
 const projectDtoService = new ProjectDtoService({ scoped: false });
+const assetService = new AssetService({ scoped: false });
 
 
 class ProposalDtoService extends BaseService {
@@ -464,8 +466,7 @@ class ProposalDtoService extends BaseService {
     const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
     const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => chainApi.getProjectTokenSaleAsync(id)));
 
-
-    return proposals.map((proposal) => {
+    const result = proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
       const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
       const researchTokenSale = researchTokenSales.find(ts => ts.external_id == proposal.details.researchTokenSaleExternalId);
@@ -473,6 +474,52 @@ class ProposalDtoService extends BaseService {
       const extendedDetails = { researchGroup, research, researchTokenSale };
       return { ...proposal, extendedDetails };
     });
+
+    //temp solution
+    const fromStrToObjAsset = async (val) => {
+      if (typeof val === 'string') {
+        const [amount, symbol] = val.split(' ');
+        const asset = await assetService.getAssetBySymbol(symbol);
+        
+        return {
+          id: asset._id,
+          symbol,
+          amount: `${Number(amount)}`,
+          precision: asset.precision
+        }
+      }
+
+      if (Array.isArray(val)) {
+        const result = [];
+        for (let i = 0; i < val.length; i++) {
+          const strAsset = val[i];
+          const [amount, symbol] = strAsset.split(' ');
+          const asset = await assetService.getAssetBySymbol(symbol);
+          result.push({
+            id: asset._id,
+            symbol,
+            amount: `${Number(amount)}`,
+            precision: asset.precision
+          })
+        }
+          
+        return result;
+      }
+    }
+
+    for (let i = 0; i < result.length; i++) {
+      const prop = result[i];
+
+      const softCap = await fromStrToObjAsset(prop.extendedDetails.researchTokenSale.soft_cap);
+      const hardCap = await fromStrToObjAsset(prop.extendedDetails.researchTokenSale.hard_cap);
+      const shares = await fromStrToObjAsset(prop.extendedDetails.researchTokenSale.security_tokens_on_sale);
+
+      prop.extendedDetails.researchTokenSale.soft_cap = softCap;
+      prop.extendedDetails.researchTokenSale.hard_cap = hardCap;
+      prop.extendedDetails.researchTokenSale.security_tokens_on_sale = shares;
+    }
+
+    return result;
   }
 
 

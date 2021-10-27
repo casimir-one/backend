@@ -2,7 +2,7 @@ import BaseEvent from './../base/BaseEvent';
 import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
 
-class AttributeCreatedEvent extends BaseEvent {
+class AssetIssuedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -22,4 +22,4 @@ class AttributeCreatedEvent extends BaseEvent {
 
 }
 
-module.exports = AttributeCreatedEvent;
+module.exports = AssetIssuedEvent;

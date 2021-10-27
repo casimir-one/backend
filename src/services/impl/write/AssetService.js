@@ -30,6 +30,16 @@ class AssetService extends BaseService {
 
     return result;
   }
+
+  async getAssetBySymbol(symbol) {
+    const asset = await this.findOne({ symbol });
+    return asset;
+  }
+
+  async getAssetsBySymbols(symbols) {
+    const assets = await this.findMany({ symbol: { $in: [...symbols] } });
+    return assets;
+  }
 }
 
 

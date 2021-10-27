@@ -9,18 +9,54 @@ class InvestmentOpportunityService extends BaseService {
 
   async createInvstOpp({
     invstOppId,
+    teamId,
     projectId,
+    startTime,
+    endTime,
+    shares,
+    softCap,
+    hardCap,
+    creator,
     title,
-    metadata
+    totalInvested,
+    metadata,
+    status
   }) {
 
     const investmentOpp = await this.createOne({
       _id: invstOppId,
+      teamId,
       projectId,
+      startTime,
+      endTime,
+      shares,
+      softCap,
+      hardCap,
+      creator,
       title,
-      metadata
+      totalInvested,
+      metadata,
+      status
     });
 
+    return investmentOpp;
+  }
+
+  async updateInvstOpp({
+    _id,
+    totalInvested,
+    status
+  }) {
+    const result = await this.updateOne({ _id }, {
+      totalInvested,
+      status
+    });
+
+    return result;
+  }
+
+  async getInvstOpp(invstOppId) {
+    const investmentOpp = await this.findOne({ _id: invstOppId });
     return investmentOpp;
   }
 }

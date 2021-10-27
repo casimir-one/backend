@@ -4,8 +4,10 @@ import UserSchema from './../../../schemas/UserSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 import TeamService from '../write/TeamService';
+import AssetService from './../write/AssetService';
 
 const teamService = new TeamService()
+const assetService = new AssetService()
 
 class UserDtoService extends BaseService {
 
@@ -18,6 +20,18 @@ class UserDtoService extends BaseService {
     const chainApi = chainService.getChainApi();
     const chainAccounts = await chainApi.getAccountsAsync(profiles.map(p => p._id));
     const tenantProfile = await this.getTenantInstance();
+
+    //temp solution
+    const symbols = [];
+    chainAccounts.forEach(({ balances }) => {
+      balances.forEach(b => {
+        const symbol = b.split(' ')[1];
+        if (!symbols.includes(symbol)) {
+          symbols.push(symbol);
+        }
+      })
+    });
+    const assetsList = await assetService.getAssetsBySymbols(symbols)
     return chainAccounts
       .map((chainAccount) => {
         const profile = profiles.find((r) => r._id == chainAccount.name);
@@ -28,12 +42,29 @@ class UserDtoService extends BaseService {
           teamId: r.researchGroupExternalId
         }));
         const modules = roleInfo && roleInfo.modules ? roleInfo.modules : appModules;
+
+        //temp solution
+        const balances = chainAccount.balances.map(b => {
+          const [amount, symbol] = b.split(' ');
+          const asset = assetsList.find((a) => symbol === a.symbol);
+          return {
+            id: asset._id,
+            symbol,
+            amount: `${Number(amount)}`,
+            precision: asset.precision
+          }
+        });
+
         return {
           username: chainAccount.name,
           tenantId: profile.tenantId,
-          account: chainAccount,
+          account: {
+            ...chainAccount,
+            balances
+          },
           entityId: chainAccount.name,
           attributes: profile.attributes,
+          balances,
           ...profile,
           modules,
           roles,

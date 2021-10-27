@@ -109,10 +109,10 @@ projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (ev
 
 
 projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, async (event) => {
-  const { tokenSaleId } = event.getEventPayload();
+  const { investmentOpportunityId } = event.getEventPayload();
   const chainService = await ChainService.getInstanceAsync(config);
   const chainApi = chainService.getChainApi();
-  const projectTokenSale = await chainApi.getProjectTokenSaleAsync(tokenSaleId); // TODO: Use RM service
+  const projectTokenSale = await chainApi.getProjectTokenSaleAsync(investmentOpportunityId); // TODO: Use RM service
 
   if (projectTokenSale.research_external_id) { // TODO: Replace this validation with InvstOpp type check
     const project = await projectService.getProject(projectTokenSale.research_external_id);

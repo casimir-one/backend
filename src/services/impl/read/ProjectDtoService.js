@@ -7,8 +7,10 @@ import ProjectNdaDtoService from './ProjectNdaDtoService';
 import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from './../../../constants';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
+import AssetService from './../write/AssetService';
 import { CONTRACT_AGREEMENT_TYPE, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
+const assetService = new AssetService();
 const teamDtoService = new TeamDtoService();
 
 class ProjectDtoService extends BaseService {
@@ -40,7 +42,7 @@ class ProjectDtoService extends BaseService {
     let teams = await Promise.all(chainResearches.map(p => teamDtoService.getTeam(p.research_group.external_id)));
     const allMembers = teams.map(t => t.members);
     
-    return chainResearches
+    const result = chainResearches
       .map((chainResearch, i) => {
         const members = allMembers[i];
         const researchRef = researches.find(r => r._id.toString() == chainResearch.external_id);
@@ -143,6 +145,37 @@ class ProjectDtoService extends BaseService {
 
       })))
       .sort((a, b) => b.researchRef.created_at - a.researchRef.created_at);
+
+    //temp solution
+    const symbols = [];
+    result.forEach((p) => {
+      p.security_tokens.forEach(b => {
+        const symbol = b.split(' ')[1];
+        if (!symbols.includes(symbol)) {
+          symbols.push(symbol);
+        }
+      })
+    });
+    const assetsList = await assetService.getAssetsBySymbols(symbols);
+    return result.map(p => {
+      //temp solution
+      const balances = p.security_tokens.map(b => {
+        const [amount, symbol] = b.split(' ');
+        const asset = assetsList.find((a) => symbol === a.symbol);
+        return {
+          id: asset._id,
+          symbol,
+          amount: `${Number(amount)}`,
+          precision: asset.precision
+        }
+      });
+
+      return {
+        ...p,
+        security_tokens: balances,
+        securityTokens: balances
+      }
+    })
   }
 
 
