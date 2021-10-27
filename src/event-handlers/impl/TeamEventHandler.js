@@ -51,28 +51,6 @@ teamEventHandler.register(APP_EVENT.TEAM_UPDATED, async (event) => {
 
 });
 
-teamEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
-
-  const {
-    username
-  } = event.getEventPayload();
-
-  const attrs = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.TEAM);
-  const attr = attrs.find(
-    ({ type, title }) => title === 'Name' && type === ATTR_TYPES.TEXT
-  );
-
-  const attributes = attr ? [{attributeId: attr._id, value: username}] : [];
-
-  await teamService.createTeam({
-    externalId: username,
-    creator: username,
-    attributes,
-    members: [username]
-  });
-
-});
-
 teamEventHandler.register(APP_EVENT.TEAM_MEMBER_JOINED, async (event) => {
 
   const {

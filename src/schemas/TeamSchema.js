@@ -11,7 +11,7 @@ const TeamSchema = new Schema({
   "attributes": [AttributeValueSchema],
   "members": { type: [String], required: true },
   "researchAreas": [Object],
-
+  "isTenantTeam": { type: Boolean, default: false }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('research-groups', TeamSchema);
