@@ -12,7 +12,8 @@ import {
   assetEventHandler,
   projectContentEventHandler,
   reviewEventHandler,
-  contractAgreementEventHandler
+  contractAgreementEventHandler,
+  fileUploadEventHandler
 } from './index';
 
 
@@ -250,6 +251,7 @@ module.exports = {
   
   [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED]: [
     { h: contractAgreementEventHandler, await: true },
+    { h: fileUploadEventHandler, await: true }
   ],
 
   [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_ACCEPTED]: [
@@ -262,6 +264,7 @@ module.exports = {
 
   [APP_EVENT.CONTRACT_AGREEMENT_CREATED]: [
     { h: contractAgreementEventHandler, await: true },
+    { h: fileUploadEventHandler, await: true }
   ],
 
   [APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED]: [

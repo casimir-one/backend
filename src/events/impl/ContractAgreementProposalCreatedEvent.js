@@ -30,7 +30,8 @@ class ContractAgreementProposalCreatedEvent extends BaseEvent {
       projectId,
       licenser,
       termsHash,
-      fee
+      fee,
+      pdfContent
     } = createProjectNdaCmd.getCmdPayload();
 
     assert(!!proposalId, `'proposalId' is required`);
@@ -53,6 +54,7 @@ class ContractAgreementProposalCreatedEvent extends BaseEvent {
       endTime,
       type,
       terms,
+      pdfContent,
       proposalCtx
     });
 
