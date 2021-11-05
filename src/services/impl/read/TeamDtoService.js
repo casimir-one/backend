@@ -37,12 +37,9 @@ class TeamDtoService extends BaseService {
   }
 
 
-  async getTeamsListing(personal) {
-    const teams = await this.findMany({});
+  async getTeamsListing(withTenantTeam = false) {
+    const teams = await this.findMany({ isTenantTeam: withTenantTeam });
     const result = await this.mapTeams(teams);
-    if (!personal || personal === 'false') {
-      return result.filter(rg => !rg.is_personal);
-    }
     return result;
   }
 
@@ -70,15 +67,15 @@ class TeamDtoService extends BaseService {
   }
 
 
-  async getTeamsByUser(member) {
-    const teams = await this.findMany({ members: { $in : [member] } })
+  async getTeamsByUser(member, withTenantTeam = false) {
+    const teams = await this.findMany({ members: { $in : [member] }, isTenantTeam: withTenantTeam })
     if (!teams.length) return [];
     const result = await this.mapTeams(teams);
     return result;
   }
 
-  async getTeamsByTenant(tenantId) {
-    const available = await this.findMany({});
+  async getTeamsByTenant(tenantId, withTenantTeam = false) {
+    const available = await this.findMany({ isTenantTeam: withTenantTeam });
     const teams = available.filter(p => p.tenantId == tenantId);
     if (!teams.length) return [];
     const result = await this.mapTeams(teams);

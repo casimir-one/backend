@@ -59,10 +59,9 @@ class TeamsController extends BaseController {
     h: async (ctx) => {
       try {
 
-        const query = qs.parse(ctx.query);
-        const isPersonal = query.personal;
+        const { withTenantTeam } = qs.parse(ctx.query);
 
-        const result = await teamDtoService.getTeamsListing(isPersonal);
+        const result = await teamDtoService.getTeamsListing(withTenantTeam);
         ctx.status = 200;
         ctx.body = result;
 
@@ -76,9 +75,10 @@ class TeamsController extends BaseController {
   getTeamsByUser = this.query({
     h: async (ctx) => {
       try {
+        const { withTenantTeam } = qs.parse(ctx.query);
 
         const username = ctx.params.username;
-        const result = await teamDtoService.getTeamsByUser(username);
+        const result = await teamDtoService.getTeamsByUser(username, withTenantTeam);
         ctx.status = 200;
         ctx.body = result;
 
@@ -92,9 +92,10 @@ class TeamsController extends BaseController {
   getTeamsByTenant = this.query({
     h: async (ctx) => {
       try {
+        const { withTenantTeam } = qs.parse(ctx.query);
 
         const tenantId = ctx.params.tenantId;
-        const result = await teamDtoService.getTeamsByTenant(tenantId);
+        const result = await teamDtoService.getTeamsByTenant(tenantId, withTenantTeam);
         ctx.status = 200;
         ctx.body = result;
 
