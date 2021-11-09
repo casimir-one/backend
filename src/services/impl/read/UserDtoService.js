@@ -57,12 +57,13 @@ class UserDtoService extends BaseService {
 
         return {
           username: chainAccount.name,
+          entityId: chainAccount.name,
+          pubKey: chainAccount.owner.key_auths[0][0],
           tenantId: profile.tenantId,
           account: {
             ...chainAccount,
             balances
           },
-          entityId: chainAccount.name,
           attributes: profile.attributes,
           balances,
           ...profile,

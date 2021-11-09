@@ -5,7 +5,6 @@ import attributesCtrl from '../controllers/impl/AttributesController';
 import assetsCtrl from './impl/AssetsController';
 import domainsCtrl from './impl/DomainsController';
 import usersCtrl from './impl/UsersController';
-import authCtrl from './impl/AuthController';
 import invstOppCtrl from './impl/InvestmentOpportunityController';
 import documentTemplatesCtrl from './impl/DocumentTemplatesController';
 import projectContentsCtrl from './impl/ProjectContentsController';
@@ -22,7 +21,6 @@ module.exports = {
   assetsCtrl,
   domainsCtrl,
   usersCtrl,
-  authCtrl,
   invstOppCtrl,
   documentTemplatesCtrl,
   projectContentsCtrl,

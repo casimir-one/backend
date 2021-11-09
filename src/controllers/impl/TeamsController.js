@@ -6,7 +6,6 @@ import { BadRequestError, NotFoundError, ConflictError } from './../../errors';
 import { accountCmdHandler } from './../../command-handlers';
 import { TeamDtoService, TeamService, UserService } from './../../services';
 import sharp from 'sharp'
-import slug from 'limax';
 import FileStorage from './../../storage';
 
 
@@ -115,9 +114,7 @@ class TeamsController extends BaseController {
         const validate = async (appCmds) => {
           const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
           if (appCmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT) {
-            const {
-              isTeamAccount
-            } = appCmd.getCmdPayload();
+            const { isTeamAccount } = appCmd.getCmdPayload();
             if (!isTeamAccount) {
               throw new BadRequestError(`This endpoint should be for team account`);
             }

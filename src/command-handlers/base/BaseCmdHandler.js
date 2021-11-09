@@ -75,8 +75,9 @@ class BaseCmdHandler extends EventEmitter {
     BaseCmdHandler.Dispatch(appCmds, ctx);
 
     // TODO: Use Kafka producer
-    this.logEvents(ctx.state.appEvents);
-    PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, ctx.state.appEvents);
+    const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
+    this.logEvents(events);
+    PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, events);
   };
 
 
