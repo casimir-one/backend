@@ -26,6 +26,7 @@ class AssetDtoService extends BaseService {
           current_supply: chainAsset.current_supply,
           string_symbol: chainAsset.string_symbol,
           tokenized_research: chainAsset.tokenized_research,
+          tokenizedProject: chainAsset.tokenized_research,
           license_revenue_holders_share: chainAsset.license_revenue_holders_share
         }
       });
@@ -64,22 +65,61 @@ class AssetDtoService extends BaseService {
   async getAccountAssetBalance(owner, symbol) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    const asset = await chainApi.getAccountAssetBalanceAsync(owner, symbol);
-    return asset;
+    const chainAsset = await chainApi.getAccountAssetBalanceAsync(owner, symbol);
+
+    //temp solution
+    const asset = await this.findOne({ symbol: chainAsset.asset_symbol })
+    const [amount] = chainAsset.amount.split(' ');
+    return {
+      ...chainAsset,
+      tokenizedProject: chainAsset.tokenized_research,
+      id: asset._id,
+      symbol: asset.symbol,
+      amount: `${Number(amount)}`,
+      precision: asset.precision
+    }
   }
 
   async getAccountAssetsBalancesByOwner(owner) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    const asset = await chainApi.getAccountAssetsBalancesAsync(owner);
-    return asset;
+    const balances = await chainApi.getAccountAssetsBalancesAsync(owner);
+
+    //temp solution
+    const assets = await this.findMany({ symbol: { $in: [...balances.map(ca => ca.asset_symbol)] } })
+    return balances.map(b => {
+      const asset = assets.find(a => a.symbol === b.asset_symbol);
+      const [amount] = b.amount.split(' ');
+      return {
+        ...b,
+        tokenizedProject: b.tokenized_research,
+        id: asset._id,
+        symbol: asset.symbol,
+        amount: `${Number(amount)}`,
+        precision: asset.precision
+      }
+    });
   }
 
   async getAccountsAssetBalancesByAsset(symbol) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainApi = chainService.getChainApi();
-    const asset = await chainApi.getAccountsAssetBalancesByAssetAsync(symbol);
-    return asset;
+    const balances = await chainApi.getAccountsAssetBalancesByAssetAsync(symbol);
+
+    //temp solution
+    const assets = await this.findMany({ symbol: { $in: [...balances.map(ca => ca.asset_symbol)] } })
+    return balances.map(b => {
+      const asset = assets.find(a => a.symbol === b.asset_symbol);
+      const [amount] = b.amount.split(' ');
+      return {
+        ...b,
+        tokenizedProject: b.tokenized_research,
+        id: asset._id,
+        symbol: asset.symbol,
+        amount: `${Number(amount)}`,
+        precision: asset.precision
+      }
+    });
   }
 
   async getAccountDepositHistory(account, status) {

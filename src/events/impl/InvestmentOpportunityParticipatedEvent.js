@@ -7,14 +7,21 @@ class InvestmentOpportunityParticipatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      tokenSaleId,
+      investmentOpportunityId,
       investor,
-      amount
+      asset
     } = eventPayload;
 
-    assert(!!tokenSaleId, "'tokenSaleId' is required");
+    assert(!!investmentOpportunityId, "'investmentOpportunityId' is required");
     assert(!!investor, "'investor' is required");
-    assert(!!amount, "'amount' required");
+    assert(
+      !!asset
+      && asset.id
+      && asset.symbol
+      && !isNaN(asset.precision)
+      && asset.amount,
+      "'asset' is required and should contains 'id', 'symbol', 'precision', 'amount' fields"
+    )
 
     super(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, eventPayload);
   }

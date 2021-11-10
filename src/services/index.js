@@ -13,6 +13,8 @@ import UserDtoService from './impl/read/UserDtoService';
 import UserService from './impl/write/UserService';
 import InvestmentOpportunityDtoService from './impl/read/InvestmentOpportunityDtoService';
 import InvestmentOpportunityService from './impl/write/InvestmentOpportunityService';
+import InvestmentOpportunityParticipationDtoService from './impl/read/InvestmentOpportunityParticipationDtoService';
+import InvestmentOpportunityParticipationService from './impl/write/InvestmentOpportunityParticipationService';
 import DocumentTemplateDtoService from './impl/read/DocumentTemplateDtoService';
 import DocumentTemplateService from './impl/write/DocumentTemplateService';
 import ProjectContentDtoService from './impl/read/ProjectContentDtoService';
@@ -25,6 +27,7 @@ import ReviewService from './impl/write/ReviewService';
 import ProjectNdaDtoService from './impl/read/ProjectNdaDtoService';
 import ContractAgreementDtoService from './impl/read/ContractAgreementDtoService';
 import ContractAgreementService from './impl/write/ContractAgreementService';
+import RevenueDtoService from './impl/read/RevenueDtoService';
 
 module.exports = {
   TeamService,
@@ -49,6 +52,8 @@ module.exports = {
 
   InvestmentOpportunityService,
   InvestmentOpportunityDtoService,
+  InvestmentOpportunityParticipationDtoService,
+  InvestmentOpportunityParticipationService,
 
   DocumentTemplateDtoService,
   DocumentTemplateService,
@@ -65,5 +70,7 @@ module.exports = {
   ProjectNdaDtoService,
 
   ContractAgreementDtoService,
-  ContractAgreementService
+  ContractAgreementService,
+
+  RevenueDtoService
 }

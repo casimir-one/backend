@@ -6,7 +6,7 @@ import assert from 'assert';
 class InvestmentOpportunityCreatedEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
-      tokenSaleId,
+      investmentOpportunityId,
       teamId,
       projectId,
       startTime,
@@ -19,17 +19,28 @@ class InvestmentOpportunityCreatedEvent extends BaseEvent {
       metadata
     } = eventPayload;
 
+    const checkAsset = (asset, fieldName) => assert(
+      !!asset
+      && asset.id
+      && asset.symbol
+      && !isNaN(asset.precision)
+      && asset.amount,
+      `'${fieldName}' is required and should contains 'id', 'symbol', 'precision', 'amount' fields`
+    );
+
     assert(!!teamId, "'teamId' is required");
     assert(!!projectId, "'projectId' is required");
-    assert(!!startTime, "'startTime' required");
-    assert(!!endTime, "'endTime' required");
+    assert(!!startTime && !isNaN(startTime), "'startTime' required and should be in milliseconds");
+    assert(!!endTime && !isNaN(endTime), "'endTime' required and should be in milliseconds");
     assert(new Date(endTime) > new Date(startTime), "'endTime' must be greater than 'startTime'");
-    assert(!!shares, "'shares' required");
-    assert(!!softCap, "'softCap' required");
-    assert(!!hardCap, "'hardCap' required");
+    shares.forEach(share => {
+      checkAsset(share, 'share')
+    })
+    checkAsset(softCap, 'softCap')
+    checkAsset(hardCap, 'hardCap')
 
     super(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, {
-      tokenSaleId,
+      investmentOpportunityId,
       teamId,
       projectId,
       startTime,

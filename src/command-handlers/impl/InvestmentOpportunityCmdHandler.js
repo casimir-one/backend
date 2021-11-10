@@ -17,7 +17,7 @@ const invstOppCmdHandler = new InvestmentOpportunityCmdHandler();
 
 invstOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ctx) => {
   const {
-    entityId: tokenSaleId,
+    entityId: investmentOpportunityId,
     teamId,
     projectId,
     startTime,
@@ -31,7 +31,7 @@ invstOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ctx) =>
   } = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new InvestmentOpportunityCreatedEvent({
-    tokenSaleId,
+    investmentOpportunityId,
     teamId,
     projectId,
     startTime,
@@ -49,15 +49,15 @@ invstOppCmdHandler.register(APP_CMD.CREATE_INVESTMENT_OPPORTUNITY, (cmd, ctx) =>
 
 invstOppCmdHandler.register(APP_CMD.INVEST, (cmd, ctx) => {
   const {
-    tokenSaleId,
+    investmentOpportunityId,
     investor,
-    amount
+    asset
   } = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new InvestmentOpportunityParticipatedEvent({
-    tokenSaleId,
+    investmentOpportunityId,
     investor,
-    amount
+    asset
   }));
   
 });
