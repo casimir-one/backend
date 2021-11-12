@@ -41,7 +41,7 @@ const run = async () => {
   const assetsPromises = [];
 
   const projects = await Promise.all(chainAssets.filter((chainAsset) => !!chainAsset.tokenized_research).map((chainAsset) => {
-    return ProjectSchema.find({ _id: chainAsset.tokenized_research });
+    return ProjectSchema.findOne({ _id: chainAsset.tokenized_research });
   })) 
 
   for (let i = 0; i < chainAssets.length; i++) {

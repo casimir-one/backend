@@ -6,15 +6,20 @@ class AssetIssuedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      assetId,
       issuer,
-      amount,
+      asset,
       recipient
     } = eventPayload;
 
-    assert(!!assetId, "'assetId' is required");
     assert(!!issuer, "'issuer' is required");
-    assert(!!amount, "'amount' is required");
+    assert(
+      !!asset
+      && asset.id
+      && asset.symbol
+      && !isNaN(asset.precision)
+      && asset.amount,
+      "'asset' is required and should contains 'id', 'symbol', 'precision', 'amount' fields"
+    );
     assert(!!recipient, "'recipient' is required");
 
     super(APP_EVENT.ASSET_ISSUED, eventPayload);
