@@ -287,8 +287,8 @@ class UsersController extends BaseController {
   getUsersByTenant = this.query({
     h: async (ctx) => {
       try {
-        const tenantId = ctx.params.tenantId;
-        const users = await userDtoService.getUsersByTenant(tenantId);
+        const portalId = ctx.params.portalId;
+        const users = await userDtoService.getUsersByTenant(portalId);
         ctx.status = 200;
         ctx.body = users;
       } catch (err) {

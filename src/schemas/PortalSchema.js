@@ -82,7 +82,7 @@ const ResearchContentAssessmentCriterias = new Schema({
   "values": [ResearchContentAssessmentCriteria]
 });
 
-const TenantSchema = new Schema({
+const PortalSchema = new Schema({
   "_id": { type: String },
   "name": { type: String },
   "serverUrl": { type: String, required: true },
@@ -128,6 +128,6 @@ const TenantSchema = new Schema({
   }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' }, minimize: false });
 
-const model = mongoose.model('tenants-profiles', TenantSchema);
+const model = mongoose.model('tenants-profiles', PortalSchema);
 
 module.exports = model;

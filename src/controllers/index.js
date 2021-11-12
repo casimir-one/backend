@@ -12,6 +12,7 @@ import reviewsCtrl from './impl/ReviewsController';
 import projectNdaCtrl from './impl/ProjectNdaController';
 import contractAgreementCtrl from './impl/ContractAgreementController';
 import revenuesCtrl from './impl/RevenuesController';
+import portalCtrl from './impl/PortalController';
 
 module.exports = {
   projectsCtrl,
@@ -27,5 +28,6 @@ module.exports = {
   reviewsCtrl,
   projectNdaCtrl,
   contractAgreementCtrl,
-  revenuesCtrl
+  revenuesCtrl,
+  portalCtrl
 }

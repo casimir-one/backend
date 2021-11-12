@@ -9,6 +9,7 @@ import projectContentCmdHandler from './impl/ProjectContentCmdHandler';
 import reviewCmdHandler from './impl/ReviewCmdHandler';
 import projectNdaCmdHandler from './impl/ProjectNdaCmdHandler';
 import contractAgreementCmdHandler from './impl/ContractAgreementCmdHandler';
+import portalCmdHandler from './impl/PortalCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -21,5 +22,6 @@ module.exports = {
   projectContentCmdHandler,
   reviewCmdHandler,
   projectNdaCmdHandler,
-  contractAgreementCmdHandler
+  contractAgreementCmdHandler,
+  portalCmdHandler
 }

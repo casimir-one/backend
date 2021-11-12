@@ -60,8 +60,8 @@ class ProjectContentsController extends BaseController {
   getProjectContentsByTenant = this.query({
     h: async (ctx) => {
       try {
-        const tenantId = ctx.params.tenantId;
-        const result = await projectContentDtoService.getProjectContentsByTenant(tenantId)
+        const portalId = ctx.params.portalId;
+        const result = await projectContentDtoService.getProjectContentsByTenant(portalId)
         ctx.status = 200;
         ctx.body = result;
       } catch (err) {

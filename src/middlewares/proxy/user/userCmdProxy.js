@@ -1,7 +1,6 @@
-import { UserDtoService } from './../../../services';
-import TenantService from './../../../services/legacy/tenant';
+import { UserDtoService, PortalService } from './../../../services';
 
-const tenantService = new TenantService();
+const portalService = new PortalService();
 const userDtoService = new UserDtoService();
 
 
@@ -20,10 +19,10 @@ function userCmdProxy(options = {}) {
     if (ctx.req.method === "POST" || (ctx.req.method === "PUT" && user.tenantId == currentTenant.id)) {
       await next();
     } else {
-      const requestedTenant = await tenantService.getTenant(user.tenantId);
+      const requestedTenant = await portalService.getPortal(user.tenantId);
       if (true) { /* TODO: check access for the requested source and chunk an access token to request the different tenant's server */
         ctx.status = 307;
-        ctx.redirect(`${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`);
+        ctx.redirect(`${requestedTenant.serverUrl}${ctx.request.originalUrl}`);
         return;
       } else {
         ctx.assert(false, 403);

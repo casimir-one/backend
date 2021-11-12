@@ -19,7 +19,7 @@ class UserDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const chainAccounts = await chainRpc.getAccountsAsync(profiles.map(p => p._id));
-    const tenantProfile = await this.getTenantInstance();
+    const tenantProfile = await this.getPortalInstance();
 
     //temp solution
     const symbols = [];

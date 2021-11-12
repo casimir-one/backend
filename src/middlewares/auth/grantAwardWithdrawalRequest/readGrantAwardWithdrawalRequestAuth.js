@@ -1,5 +1,5 @@
 import GrantService from './../../../services/legacy/grants';
-import TenantService from './../../../services/legacy/tenant';
+import { PortalService } from './../../../services';
 
 
 function grantAwardWithdrawalRequestReadAuth(options = {}) {
@@ -8,7 +8,7 @@ function grantAwardWithdrawalRequestReadAuth(options = {}) {
     const awardNumber = ctx.params.awardNumber;
     const paymentNumber = ctx.params.paymentNumber;
 
-    const tenantService = new TenantService();
+    const portalService = new PortalService();
     const grantsService = new GrantService();
     
     const withdrawal = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
@@ -19,9 +19,9 @@ function grantAwardWithdrawalRequestReadAuth(options = {}) {
       /* TODO: check access for requested file */
       await next();
     } else {
-      const requestedTenant = await tenantService.getTenant(withdrawal.tenantId);
+      const requestedTenant = await portalService.getPortal(withdrawal.tenantId);
       if (true) { /* TODO: check access for the requested source and chunk an access token to request the different tenant's server */
-        ctx.redirect(`${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`);
+        ctx.redirect(`${requestedTenant.serverUrl}${ctx.request.originalUrl}`);
         return;
       } else {
         ctx.assert(false, 403);

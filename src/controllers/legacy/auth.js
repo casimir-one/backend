@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 import config from './../../config';
-import { UserDtoService } from './../../services';
-import TenantService from './../../services/legacy/tenant';
+import { UserDtoService, PortalDtoService } from './../../services';
 import { ChainService } from '@deip/chain-service';
 
 
@@ -66,8 +65,8 @@ const chunkTenantAccessToken = async function (ctx) {
   const { id: currentTenantId } = ctx.state.tenant;
 
   try {
-    const tenantService = new TenantService();
-    const clientTenant = await tenantService.getTenant(clientTenantId);
+    const portalDtoService = new PortalDtoService();
+    const clientTenant = await portalDtoService.getPortal(clientTenantId);
     const chainService = await ChainService.getInstanceAsync(config);
     const isValidSig = chainService.verifySignature(clientTenant.pubKey, config.SIG_SEED, secretSigHex);
 

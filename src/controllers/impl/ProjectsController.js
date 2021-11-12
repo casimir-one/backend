@@ -119,7 +119,7 @@ class ProjectsController extends BaseController {
     }
   });
 
-  getTenantProjectsListing = this.query({
+  getPortalProjectsListing = this.query({
     h: async (ctx) => {
       try {
         const tenantId = ctx.state.tenant.id;

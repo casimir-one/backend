@@ -107,4 +107,10 @@ userEventHandler.register(APP_EVENT.TEAM_MEMBER_LEFT, async (event) => {
   });
 });
 
+userEventHandler.register(APP_EVENT.USER_PROFILE_DELETED, async (event) => {
+  const { username } = event.getEventPayload();
+
+  await userService.deleteUser(username);
+});
+
 module.exports = userEventHandler;

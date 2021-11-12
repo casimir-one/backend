@@ -1,9 +1,8 @@
-import { ProjectService, ProjectContentDtoService, ContractAgreementDtoService } from './../../../services';
-import TenantService from './../../../services/legacy/tenant';
-import { getTenantAccessToken } from './../../../utils/network';
+import { ProjectService, ProjectContentDtoService, ContractAgreementDtoService, PortalService } from './../../../services';
+import { getPortalAccessToken } from './../../../utils/network';
 import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
 
-const tenantService = new TenantService();
+const portalService = new PortalService();
 const projectService = new ProjectService();
 const projectContentDtoService = new ProjectContentDtoService();
 const contractAgreementDtoService = new ContractAgreementDtoService();
@@ -29,13 +28,18 @@ function projectContentCmdProxy(options = {}) {
     if (ctx.req.method === "POST" || (ctx.req.method === "PUT" && projectContent.tenantId == currentTenant.id)) {
       await next();
     } else {
-      const requestedTenant = await tenantService.getTenant(projectContent.tenantId);
+      const requestedTenant = await portalService.getPortal(projectContent.tenantId);
       const jwtUsername = ctx.state.user.username;
       const projectLicenses = await contractAgreementDtoService.getContractAgreements({ parties: [jwtUsername], type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE });
       const projectLicense = projectLicenses.find(p => p.terms.projectId === projectContent.researchExternalId)
       if (projectLicense) {
-        const accessToken = await getTenantAccessToken(requestedTenant);
-        let url = `${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`.replace(ctx.request.querystring, '');
+        const accessToken = await getPortalAccessToken({
+          profile: {
+            ...requestedTenant,
+            id: requestedTenant._id
+          }
+        });
+        let url = `${requestedTenant.serverUrl}${ctx.request.originalUrl}`.replace(ctx.request.querystring, '');
         url += `authorization=${accessToken}`;
         for (const [key, value] of Object.entries(ctx.query)) {
           if (key != 'authorization') {

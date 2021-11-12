@@ -4,7 +4,6 @@ import expertise from '../controllers/legacy/expertise'
 import notifications from '../controllers/legacy/notifications'
 import invites from '../controllers/legacy/invites'
 import grants from '../controllers/legacy/grants'
-import tenant from '../controllers/legacy/tenant';
 
 import { 
   projectsCtrl, 
@@ -20,7 +19,8 @@ import {
   reviewsCtrl,
   projectNdaCtrl,
   contractAgreementCtrl,
-  revenuesCtrl
+  revenuesCtrl,
+  portalCtrl
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
@@ -85,8 +85,8 @@ protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', gr
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.createAwardWithdrawalRequest)
 
-public_route.get('/network/tenants/listing', tenant.getNetworkTenants)
-public_route.get('/network/tenants/:tenant', tenant.getNetworkTenant)
+public_route.get('/network/tenants/listing', portalCtrl.getNetworkPortals)
+public_route.get('/network/tenants/:portal', portalCtrl.getNetworkPortal)
 
 /* V2 */
 public_route.get('/v2/project/:projectId', projectsCtrl.getProject)
@@ -98,7 +98,7 @@ protected_route.put('/v2/project/delete', compose([projectCmdProxy()]), projects
 public_route.get('/v2/projects/listing', projectsCtrl.getPublicProjectsListing)
 protected_route.get('/v2/projects/user/listing/:username', projectsCtrl.getUserProjectsListing)
 protected_route.get('/v2/projects/team/listing/:teamId', projectsCtrl.getTeamProjectsListing)
-public_route.get('/v2/projects/tenant/listing', projectsCtrl.getTenantProjectsListing)
+public_route.get('/v2/projects/tenant/listing', projectsCtrl.getPortalProjectsListing)
 
 protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam)
 protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
@@ -108,7 +108,7 @@ protected_route.post('/v2/team/leave',  teamsCtrl.leaveTeam)
 public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
 public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
-public_route.get('/v2/teams/tenant/:tenantId', teamsCtrl.getTeamsByTenant)
+public_route.get('/v2/teams/tenant/:portalId', teamsCtrl.getTeamsByTenant)
 public_route.get('/team/logo/:teamId', compose([teamLogoProxy()]), teamsCtrl.getTeamLogo)
 protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)// temp: need change to cmd
 
@@ -148,7 +148,7 @@ public_route.get('/v2/user/email/:email', usersCtrl.getUserByEmail)
 public_route.get('/v2/users', usersCtrl.getUsers)
 public_route.get('/v2/users/listing', usersCtrl.getUsersListing)
 public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
-public_route.get('/v2/users/tenant/:tenantId', usersCtrl.getUsersByTenant)
+public_route.get('/v2/users/tenant/:portalId', usersCtrl.getUsersByTenant)
 
 protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
@@ -178,7 +178,7 @@ public_route.get('/v2/project-content/listing', projectContentsCtrl.getPublicPro
 public_route.get('/v2/project-content/drafts/project/:projectId', projectContentsCtrl.getDraftsByProject)
 public_route.get('/v2/project-content/:projectContentId', projectContentsCtrl.getProjectContent)
 public_route.get('/v2/project-content/project/:projectId', projectContentsCtrl.getProjectContentsByProject)
-public_route.get('/v2/project-content/tenant/:tenantId', projectContentsCtrl.getProjectContentsByTenant)
+public_route.get('/v2/project-content/tenant/:portalId', projectContentsCtrl.getProjectContentsByTenant)
 public_route.get('/v2/project-content/draft/:draftId', projectContentsCtrl.getDraft)
 public_route.get('/v2/project-content/ref/:refId', projectContentsCtrl.getProjectContentRef)
 public_route.get('/v2/project-content/ref/graph/:contentId', projectContentsCtrl.getProjectContentReferencesGraph)

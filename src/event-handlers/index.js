@@ -12,6 +12,8 @@ import projectContentEventHandler from './impl/ProjectContentEventHandler';
 import reviewEventHandler from './impl/ReviewEventHandler';
 import contractAgreementEventHandler from './impl/ContractAgreementEventHandler';
 import fileUploadEventHandler from './impl/FileUploadEventHandler';
+import portalEventHandler from './impl/PortalEventHandler';
+
 
 module.exports = {
   projectEventHandler,
@@ -27,5 +29,6 @@ module.exports = {
   projectContentEventHandler,
   reviewEventHandler,
   contractAgreementEventHandler,
-  fileUploadEventHandler
+  fileUploadEventHandler,
+  portalEventHandler
 };

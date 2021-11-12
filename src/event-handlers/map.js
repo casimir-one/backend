@@ -13,7 +13,8 @@ import {
   projectContentEventHandler,
   reviewEventHandler,
   contractAgreementEventHandler,
-  fileUploadEventHandler
+  fileUploadEventHandler,
+  portalEventHandler
 } from './index';
 
 
@@ -269,5 +270,33 @@ module.exports = {
 
   [APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED]: [
     { h: contractAgreementEventHandler, await: true },
+  ],
+
+  [APP_EVENT.PORTAL_PROFILE_UPDATED]: [
+    { h: portalEventHandler, await: true },
+  ],
+
+  [APP_EVENT.PORTAL_SETTINGS_UPDATED]: [
+    { h: portalEventHandler, await: true },
+  ],
+  
+  [APP_EVENT.LAYOUT_UPDATED]: [
+    { h: portalEventHandler, await: true },
+  ],
+
+  [APP_EVENT.LAYOUT_SETTINGS_UPDATED]: [
+    { h: portalEventHandler, await: true },
+  ],
+
+  [APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED]: [
+    { h: portalEventHandler, await: true },
+  ],
+
+  [APP_EVENT.NETWORK_SETTINGS_UPDATED]: [
+    { h: portalEventHandler, await: true },
+  ],
+  
+  [APP_EVENT.USER_PROFILE_DELETED]: [
+    { h: userEventHandler, await: true },
   ],
 };
