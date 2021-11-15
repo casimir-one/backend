@@ -1,19 +1,135 @@
 import BaseController from '../base/BaseController';
-import { UserDtoService, AttributeDtoService } from '../../services';
+import { UserDtoService, AttributeDtoService, UserService } from '../../services';
 import sharp from 'sharp';
 import qs from 'qs';
+import config from '../../config';
 import FileStorage from './../../storage';
 import UserBookmarkService from './../../services/legacy/userBookmark';
-import { accountCmdHandler } from './../../command-handlers';
-import { USER_PROFILE_STATUS } from './../../constants';
-import { APP_CMD, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
+import { USER_PROFILE_STATUS, USER_ROLES } from './../../constants';
+import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN } from '@deip/constants';
 import { UserForm } from './../../forms';
-import { BadRequestError, NotFoundError, ForbiddenError } from './../../errors';
+import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
+import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
+import { AssetTransferCmd } from '@deip/command-models';
+
 
 const userDtoService = new UserDtoService();
 const attributeDtoService = new AttributeDtoService();
+const userService = new UserService();
+
 
 class UsersController extends BaseController {
+
+  createUser = this.command({
+    h: async (ctx) => {
+      try {
+
+        const chainService = await ChainService.getInstanceAsync(config);
+        const chainNodeClient = chainService.getChainNodeClient();
+        const chainTxBuilder = chainService.getChainTxBuilder();
+
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+
+          const { entityId, email, memoKey, roles, creator } = appCmd.getCmdPayload();
+          if (Array.isArray(roles) && roles.find(({ role }) => role === USER_ROLES.ADMIN)) {
+            throw new BadRequestError(`Can't create admin account`);
+          }
+
+          if (!entityId || !memoKey || !creator) {
+            throw new BadRequestError(`'entityId', 'memoKey', 'creator' fields are required`);
+          }
+
+          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+          if (!pattern.test(email)) {
+            throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
+          }
+
+          const existingProfile = await userService.getUser(entityId);
+          if (existingProfile) {
+            throw new ConflictError(`Profile for '${entityId}' is under consideration or has been approved already`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        const createAccountCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
+        if (!createAccountCmd) {
+          throw new BadRequestError(`This endpoint accepts 'CreateAccountCmd'`);
+        }
+
+        const { creator, entityId, authority } = createAccountCmd.getCmdPayload();
+        const { wif: faucetPrivKey, username: faucetUsername, fundingAmount: faucetFundingAmount } = config.FAUCET_ACCOUNT;
+        
+        if (creator === faucetUsername) {
+          await msg.tx.signAsync(faucetPrivKey, chainNodeClient);
+        }
+
+        const isPreFunding = config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE && !!faucetFundingAmount;
+        const isPostFunding = config.PROTOCOL === PROTOCOL_CHAIN.GRAPHENE && !!faucetFundingAmount;
+
+        const fundUserAccount = async () => {
+          const fundingTx = await chainTxBuilder.begin()
+            .then((txBuilder) => {
+
+              if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
+                const { owner: { auths: [{ key: pubKey }]} } = authority;
+                const seedFundingCmd = new AssetTransferCmd({
+                  from: faucetUsername,
+                  to: pubKey,
+                  asset: faucetFundingAmount,
+                  memo: ''
+                });
+                txBuilder.addCmd(seedFundingCmd);
+              }
+
+              const daoFundingCmd = new AssetTransferCmd({
+                from: faucetUsername,
+                to: entityId,
+                asset: faucetFundingAmount,
+                memo: ''
+              });
+              txBuilder.addCmd(daoFundingCmd);
+
+              return txBuilder.end();
+            })
+            .then((finalizedTx) => finalizedTx.signAsync(faucetPrivKey, chainNodeClient))
+
+          await assetCmdHandler.process(fundingTx.getPayload(), ctx);
+        }
+
+        if (isPreFunding) {
+          await fundUserAccount();
+          await new Promise((resolve) => {
+            setTimeout(async function () {
+              await accountCmdHandler.process(msg, ctx, validate);
+              resolve();
+            }, config.CHAIN_BLOCK_INTERVAL_MILLIS);
+          });
+        } else if (isPostFunding) {
+          await accountCmdHandler.process(msg, ctx, validate);
+          await new Promise((resolve) => {
+            setTimeout(async function () {
+              await fundUserAccount();
+              resolve();
+            }, config.CHAIN_BLOCK_INTERVAL_MILLIS);
+          });
+        } else {
+          await accountCmdHandler.process(msg, ctx, validate);
+        }
+
+        ctx.status = 200;
+        ctx.body = { entityId };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 
   getUser = this.query({
     h: async (ctx) => {
@@ -235,7 +351,7 @@ class UsersController extends BaseController {
     }
   });
 
-  addUserBookmark = async (ctx) => {//temp: need change to cmd
+  addUserBookmark = async (ctx) => { // temp: need change to cmd
     try {
       const jwtUsername = ctx.state.user.username;
       const username = ctx.params.username;

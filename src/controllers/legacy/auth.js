@@ -1,13 +1,9 @@
 import jwt from 'jsonwebtoken';
 import config from './../../config';
-import crypto from '@deip/lib-crypto';
-import { TextEncoder } from 'util';
 import { UserDtoService } from './../../services';
 import TenantService from './../../services/legacy/tenant';
+import { ChainService } from '@deip/chain-service';
 
-function Encodeuint8arr(seed) {
-  return new TextEncoder("utf-8").encode(seed);
-}
 
 const signIn = async function (ctx) {
   const { username, secretSigHex } = ctx.request.body;
@@ -33,16 +29,8 @@ const signIn = async function (ctx) {
       return;
     }
 
-    const pubWif = user.account.owner.key_auths[0][0]
-    const publicKey = crypto.PublicKey.from(pubWif);
-
-    let isValidSig;
-    try {
-      // SIG_SEED should be uint8 array with length = 32
-      isValidSig = publicKey.verify(Encodeuint8arr(config.SIG_SEED).buffer, crypto.unhexify(secretSigHex).buffer);
-    } catch (err) {
-      isValidSig = false;
-    }
+    const chainService = await ChainService.getInstanceAsync(config);
+    const isValidSig = chainService.verifySignature(user.pubKey, config.SIG_SEED, secretSigHex);
 
     if (!isValidSig) {
       ctx.body = {
@@ -80,17 +68,8 @@ const chunkTenantAccessToken = async function (ctx) {
   try {
     const tenantService = new TenantService();
     const clientTenant = await tenantService.getTenant(clientTenantId);
-    
-    const pubWif = clientTenant.account.owner.key_auths.map(([key, threshold]) => key)[0];
-    const publicKey = crypto.PublicKey.from(pubWif);
-
-    let isValidSig;
-    try {
-      // SIG_SEED should be uint8 array with length = 32
-      isValidSig = publicKey.verify(Encodeuint8arr(config.SIG_SEED).buffer, crypto.unhexify(secretSigHex).buffer);
-    } catch (err) {
-      isValidSig = false;
-    }
+    const chainService = await ChainService.getInstanceAsync(config);
+    const isValidSig = chainService.verifySignature(clientTenant.pubKey, config.SIG_SEED, secretSigHex);
 
     if (!isValidSig) {
       ctx.status = 401;

@@ -19,7 +19,7 @@ class TenantService {
     const team = await teamDtoService.getTeam(config.TENANT);
     const { members: admins } = team;
 
-    return { id: id, account: account, profile: profile, admins };
+    return { id: id, pubKey: account.owner.key_auths[0][0], account: account, profile: profile, admins };
   }
 
   async getNetworkTenant(id) {
