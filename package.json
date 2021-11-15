@@ -43,6 +43,7 @@
     "node-cron": "^3.0.0",
     "parse-formdata": "^1.0.2",
     "pubsub-js": "^1.9.3",
+    "puppeteer": "^11.0.0",
     "qs": "^6.5.2",
     "queue": "^6.0.2",
     "sharp": "^0.28.1",
