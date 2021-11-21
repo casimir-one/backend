@@ -12,8 +12,8 @@ class InvestmentOpportunityDtoService extends BaseService {
 
   async mapInvstOpp(investmentOpps) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const chainInvestmentOpps = await Promise.all(investmentOpps.map((investmentOpp) => chainApi.getProjectTokenSaleAsync(investmentOpp._id)));
+    const chainRpc = chainService.getChainRpc();
+    const chainInvestmentOpps = await Promise.all(investmentOpps.map((investmentOpp) => chainRpc.getInvestmentOpportunityAsync(investmentOpp._id)));
 
     return chainInvestmentOpps
       .map((chainInvestmentOp, i) => {

@@ -20,9 +20,9 @@ class ProjectContentDtoService extends BaseService {
 
   async mapProjectContents(projectContents) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainProjectContents = await chainApi.getProjectContentsAsync(projectContents.map(rc => rc._id));
+    const chainProjectContents = await chainRpc.getProjectContentsAsync(projectContents.map(rc => rc._id));
     
     return chainProjectContents
       .map((chainProjectContent) => {
@@ -151,9 +151,9 @@ class ProjectContentDtoService extends BaseService {
 
   async getProjectContentOuterReferences(projectContent, acc) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const outerReferences = await chainApi.getContentsReferToContent2Async(projectContent.external_id);
+    const outerReferences = await chainRpc.getContentsReferToContent2Async(projectContent.external_id);
 
     for (let i = 0; i < outerReferences.length; i++) {
       const item = outerReferences[i];
@@ -197,9 +197,9 @@ class ProjectContentDtoService extends BaseService {
 
   async getProjectContentInnerReferences(projectContent, acc) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const innerReferences = await chainApi.getContentReferences2Async(projectContent.external_id);
+    const innerReferences = await chainRpc.getContentReferences2Async(projectContent.external_id);
 
     for (let i = 0; i < innerReferences.length; i++) {
       const item = innerReferences[i];

@@ -30,9 +30,9 @@ class DomainDtoService extends BaseService {
   async getDomainsByProject(projectId) {
     const projectDtoService = new ProjectDtoService();
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     const project = await projectDtoService.getProject(projectId);
-    const projectDomains = await chainApi.getDisciplinesByProjectAsync(project.id);
+    const projectDomains = await chainRpc.getDisciplinesByProjectAsync(project.id);
     const domains = await this.findMany({});
     const filtered = domains.filter(d => projectDomains.some(({ external_id }) => d._id === external_id));
     if (!filtered.length) return [];

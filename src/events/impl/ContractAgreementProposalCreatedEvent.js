@@ -17,41 +17,48 @@ class ContractAgreementProposalCreatedEvent extends BaseEvent {
 
     const proposedCmds = proposalCmd.getProposedCmds();
     const createProjectNdaCmd = proposedCmds[0];
-    const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
+    const { entityId: proposalId, expirationTime: proposalExpirationTime } = proposalCmd.getCmdPayload();
     const {
       entityId: contractAgreementId,
       creator,
       parties,
       hash,
-      startTime,
-      endTime,
+      activationTime,
+      expirationTime,
       type,
       terms,
       projectId,
       licenser,
       termsHash,
-      fee,
+      price,
       pdfContent
     } = createProjectNdaCmd.getCmdPayload();
 
     assert(!!proposalId, `'proposalId' is required`);
-    assert(!!expirationTime, `'expirationTime' is required`);
+    assert(!!proposalExpirationTime, `Proposal 'expirationTime' is required`);
     assert(!!contractAgreementId, "'contractAgreementId' is required");
     assert(!!creator, "'creator' is required");
     assert(!!parties && Array.isArray(parties) && parties.length > 1, "'parties' is required");
     assert(!!type, "'type' is required");
     assert(!!terms, "'terms' is required");
-    assert(startTime ? new Date(endTime) > new Date(startTime) : new Date(endTime) > new Date(), "'endTime' must be greater than current time or 'startTime'");
+
+    if (expirationTime && activationTime) {
+      assert(new Date(expirationTime) > new Date(activationTime), "'expirationTime' must be greater than 'activationTime'");
+    } else if (expirationTime) {
+      assert(new Date(expirationTime) > new Date(), "'expirationTime' must be greater than current time");
+    } else if (activationTime) {
+      assert(new Date(activationTime) > new Date(), "'activationTime' must be greater than current time");
+    }
 
     super(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED, {
       proposalId,
-      expirationTime,
+      proposalExpirationTime,
       contractAgreementId,
       creator,
       parties,
       hash,
-      startTime,
-      endTime,
+      activationTime,
+      expirationTime,
       type,
       terms,
       pdfContent,

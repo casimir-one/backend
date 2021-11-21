@@ -11,9 +11,9 @@ class ContractAgreementDtoService extends BaseService {
 
   async mapContractAgreements(contracts) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainContracts = await Promise.all(contracts.map(l => chainApi.getContractAgreementAsync(l._id)));
+    const chainContracts = await Promise.all(contracts.map(l => chainRpc.getContractAgreementAsync(l._id)));
     const result = [];
     contracts
       .forEach((contract) => {

@@ -31,7 +31,7 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
+  const chainRpc = chainService.getChainRpc();
 
   const investmentOppPromises = [];
   const investmentOpps = await InvestmentOpportunitySchema.find({});
@@ -70,7 +70,7 @@ const run = async () => {
   for (let i = 0; i < investmentOpps.length; i++) {
     const investmentOpp = investmentOpps[i];
     const investmentOppObj = investmentOpp.toObject();
-    const chainInvestmentOp = await chainApi.getProjectTokenSaleAsync(investmentOpp._id);
+    const chainInvestmentOp = await chainRpc.getInvestmentOpportunityAsync(investmentOpp._id);
     const project = await ProjectSchema.findOne({ _id: investmentOppObj.projectId })
 
     const softCap = await fromStrToObjAsset(chainInvestmentOp.soft_cap);

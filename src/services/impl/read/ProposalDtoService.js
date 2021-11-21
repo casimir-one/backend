@@ -24,9 +24,9 @@ class ProposalDtoService extends BaseService {
   
   async mapProposals(proposalsRefs, extended = true) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainProposals = await chainApi.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
+    const chainProposals = await chainRpc.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
 
     const names = chainProposals.reduce((names, chainProposal) => {
 
@@ -59,7 +59,7 @@ class ProposalDtoService extends BaseService {
     }, []);
 
 
-    const chainAccountsFromNames = await chainApi.getAccountsAsync(names);
+    const chainAccountsFromNames = await chainRpc.getAccountsAsync(names);
     const chainAccounts = chainAccountsFromNames.filter(a => !!a);
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -173,9 +173,9 @@ class ProposalDtoService extends BaseService {
     }
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainAccounts = await chainApi.getAccountsAsync(members);
+    const chainAccounts = await chainRpc.getAccountsAsync(members);
     accounts.push(...members)
 
     for(let i = 0; i < chainAccounts.length; i++) {
@@ -249,10 +249,10 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
-    const chainResearches = await chainApi.getProjectsAsync(projectIds);
+    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
+    const chainResearches = await chainRpc.getProjectsAsync(projectIds);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -282,9 +282,9 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
+    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -321,9 +321,9 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
+    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -460,11 +460,11 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
     const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
     const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
-    const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => chainApi.getProjectTokenSaleAsync(id)));
+    const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => chainRpc.getInvestmentOpportunityAsync(id)));
 
     const result = proposals.map((proposal) => {
       const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
@@ -535,9 +535,9 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
+    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -566,9 +566,9 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainAccounts = await chainApi.getAccountsAsync(accountNames);
+    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
 
     const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
     const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
@@ -604,12 +604,12 @@ class ProposalDtoService extends BaseService {
   
   async getAccountProposals(username) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
     const teams = await teamDtoService.getTeamsByUser(username);
     const teamsIds = teams.map(({ entityId }) => entityId);
     const signers = [username, ...teamsIds];
-    const allProposals = await chainApi.getProposalsBySignersAsync(signers);
+    const allProposals = await chainRpc.getProposalsBySignersAsync(signers);
     const externalIds = allProposals.reduce((unique, chainProposal) => {
       if (unique.some((id) => id == chainProposal.external_id))
         return unique;

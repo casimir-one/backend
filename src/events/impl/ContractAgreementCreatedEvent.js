@@ -11,24 +11,30 @@ class ContractAgreementCreatedEvent extends BaseEvent {
       creator,
       parties,
       hash,
-      startTime,
-      endTime,
+      activationTime,
+      expirationTime,
       type,
       terms
     } = eventPayload;
 
     assert(!!contractAgreementId, "'contractAgreementId' is required");
     assert(!!creator, "'creator' is required");
-    assert(!!endTime, "'endTime' is required");
     assert(!!hash, "'hash' is required");
     assert(!!type, "'type' is required");
     assert(!!terms, "'terms' is required");
     assert(!!parties && Array.isArray(parties) && parties.length > 1, "'parties' is required");
-    assert(startTime ? new Date(endTime) > new Date(startTime) : new Date(endTime) > new Date(), "'endTime' must be greater than current time or 'startTime'");
+
+    if (expirationTime && activationTime) {
+      assert(new Date(expirationTime) > new Date(activationTime), "'expirationTime' must be greater than 'activationTime'");
+    } else if (expirationTime) {
+      assert(new Date(expirationTime) > new Date(), "'expirationTime' must be greater than current time");
+    } else if (activationTime) {
+      assert(new Date(activationTime) > new Date(), "'activationTime' must be greater than current time");
+    }
 
     if (type == CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE) {
       assert(!!terms.projectId, "'projectId' is required");
-      assert(!!terms.fee, "'fee' is required");
+      assert(!!terms.price, "'price' is required");
     }
 
     super(APP_EVENT.CONTRACT_AGREEMENT_CREATED, eventPayload);

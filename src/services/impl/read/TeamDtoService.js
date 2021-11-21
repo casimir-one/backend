@@ -13,8 +13,8 @@ class TeamDtoService extends BaseService {
 
   async mapTeams(teams) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const chainTeams = await chainApi.getAccountsAsync(teams.map(rg => rg._id));
+    const chainRpc = chainService.getChainRpc();
+    const chainTeams = await chainRpc.getAccountsAsync(teams.map(rg => rg._id));
 
     //temp solution
     const symbols = [];

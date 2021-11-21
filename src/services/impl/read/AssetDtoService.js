@@ -13,9 +13,9 @@ class AssetDtoService extends BaseService {
 
   async mapAssets(assets) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const chainAssets = await Promise.all(assets.map(a => chainApi.getAssetBySymbolAsync(a.symbol)));
+    const chainAssets = await Promise.all(assets.map(a => chainRpc.getAssetBySymbolAsync(a.symbol)));
     return assets
       .map((asset) => {
         const chainAsset = chainAssets.find((ca) => ca.string_symbol == asset.symbol);
@@ -64,8 +64,8 @@ class AssetDtoService extends BaseService {
 
   async getAccountAssetBalance(owner, symbol) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const chainAsset = await chainApi.getAccountAssetBalanceAsync(owner, symbol);
+    const chainRpc = chainService.getChainRpc();
+    const chainAsset = await chainRpc.getAssetBalanceByOwnerAsync(owner, symbol);
 
     //temp solution
     const asset = await this.findOne({ symbol: chainAsset.asset_symbol })
@@ -82,8 +82,8 @@ class AssetDtoService extends BaseService {
 
   async getAccountAssetsBalancesByOwner(owner) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const balances = await chainApi.getAccountAssetsBalancesAsync(owner);
+    const chainRpc = chainService.getChainRpc();
+    const balances = await chainRpc.getAccountAssetsBalancesAsync(owner);
 
     //temp solution
     const assets = await this.findMany({ symbol: { $in: [...balances.map(ca => ca.asset_symbol)] } })
@@ -103,8 +103,8 @@ class AssetDtoService extends BaseService {
 
   async getAccountsAssetBalancesByAsset(symbol) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const balances = await chainApi.getAccountsAssetBalancesByAssetAsync(symbol);
+    const chainRpc = chainService.getChainRpc();
+    const balances = await chainRpc.getAssetBalancesByAssetAsync(symbol);
 
     //temp solution
     const assets = await this.findMany({ symbol: { $in: [...balances.map(ca => ca.asset_symbol)] } })

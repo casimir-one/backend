@@ -23,9 +23,9 @@ class RevenueDtoService {
 
   async getAssetRevenueHistory(symbol, cursor=0) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     
-    const history = await chainApi.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
+    const history = await chainRpc.getSecurityTokenRevenueHistoryAsync(symbol, cursor);
     const result = await this.mapRevenueHistory(history);
     return result;
   }
@@ -33,9 +33,9 @@ class RevenueDtoService {
 
   async getAccountRevenueHistoryByAsset(account, symbol, step = 0, cursor = 0, targetAsset) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const history = await chainApi.getAccountRevenueHistoryBySecurityTokenAsync(account, symbol, cursor, step, targetAsset);
+    const history = await chainRpc.getAccountRevenueHistoryBySecurityTokenAsync(account, symbol, cursor, step, targetAsset);
     const result = await this.mapRevenueHistory(history);
     return result;
   }
@@ -43,9 +43,9 @@ class RevenueDtoService {
   
   async getAccountRevenueHistory(account, cursor = 0) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const history = await chainApi.getAccountRevenueHistoryAsync(account, cursor);
+    const history = await chainRpc.getAccountRevenueHistoryAsync(account, cursor);
     const result = await this.mapRevenueHistory(history);
     return result;
   }

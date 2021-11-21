@@ -25,12 +25,12 @@ const run = async () => {
   
 
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi()
+  const chainRpc = chainService.getChainRpc()
 
 
   const researchPromises = [];
   const researches = await Research.find({});
-  const chainResearches = await chainApi.getResearchesAsync(researches.map(r => r._id.toString()));
+  const chainResearches = await chainRpc.getResearchesAsync(researches.map(r => r._id.toString()));
 
   const disciplinesAttributeId = "5f62d4fa98f46d2938dde1eb";
   for (let i = 0; i < researches.length; i++) {

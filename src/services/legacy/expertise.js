@@ -4,41 +4,41 @@ import { ChainService } from '@deip/chain-service';
 class ExpertiseService {
   async getEciHistoryByResearchContentAndDiscipline(contentId, disciplineId) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const expertise = await chainApi.getExpertiseContributionByProjectContentAndDisciplineAsync(contentId, disciplineId);
+    const expertise = await chainRpc.getExpertiseContributionByProjectContentAndDisciplineAsync(contentId, disciplineId);
     return expertise;
   }
 
   async getExpertiseContributionsByResearch(researchId) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const expertise = await chainApi.getExpertiseContributionsByProjectAsync(researchId);
+    const expertise = await chainRpc.getExpertiseContributionsByProjectAsync(researchId);
     return expertise;
   }
 
   async getExpertiseContributionsByResearchAndDiscipline(researchId, disciplineId) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const expertise = await chainApi.getExpertiseContributionsByProjectAndDisciplineAsync(researchId, disciplineId);
+    const expertise = await chainRpc.getExpertiseContributionsByProjectAndDisciplineAsync(researchId, disciplineId);
     return expertise;
   }
 
   async getExpertiseContributionByResearchContentAndDiscipline(contentId, disciplineId) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const expertise = await chainApi.getExpertiseContributionByProjectContentAndDisciplineAsync(contentId, disciplineId);
+    const expertise = await chainRpc.getExpertiseContributionByProjectContentAndDisciplineAsync(contentId, disciplineId);
     return expertise;
   }
 
   async getExpertiseContributionsByResearchContent(contentId) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const expertise = await chainApi.getExpertiseContributionsByProjectContentAsync(contentId);
+    const expertise = await chainRpc.getExpertiseContributionsByProjectContentAsync(contentId);
     return expertise;
   }
 }

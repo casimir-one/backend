@@ -23,10 +23,10 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi()
+  const chainRpc = chainService.getChainRpc()
 
   const researchContentsPromises = [];
-  const chainResearchContents = await chainApi.lookupResearchContentsAsync(0, 10000);
+  const chainResearchContents = await chainRpc.lookupResearchContentsAsync();
   
   for (let i = 0; i < chainResearchContents.length; i++) {
     const chainResearchContent = chainResearchContents[i];

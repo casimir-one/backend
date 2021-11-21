@@ -35,9 +35,9 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 const run = async () => {
 
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
+  const chainRpc = chainService.getChainRpc();
 
-  const chainAssets = await chainApi.lookupAssetsAsync('', 10000);
+  const chainAssets = await chainRpc.getAssetsListAsync();
   const assetsPromises = [];
 
   const projects = await Promise.all(chainAssets.filter((chainAsset) => !!chainAsset.tokenized_research).map((chainAsset) => {
