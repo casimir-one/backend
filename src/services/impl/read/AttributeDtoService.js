@@ -10,7 +10,7 @@ class AttributeDtoService extends BaseService {
   }
   
   async mapAttributes(attrs) {
-    const tenant = await this.getTenantInstance();
+    const tenant = await this.getPortalInstance();
     return attrs.map((attr) => {
       const overwriteAttr = tenant.settings.attributeOverwrites.find(({_id}) => mongoose.Types.ObjectId(_id).toString() == mongoose.Types.ObjectId(attr._id).toString()) || {};
       return {...attr, ...overwriteAttr}

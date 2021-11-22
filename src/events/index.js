@@ -75,6 +75,16 @@ import ContractAgreementProposalAcceptedEvent from './impl/ContractAgreementProp
 import ContractAgreementProposalDeclinedEvent from './impl/ContractAgreementProposalDeclinedEvent';
 import ContractAgreementAcceptedEvent from './impl/ContractAgreementAcceptedEvent';
 
+import AttributeSettingsUpdatedEvent from './impl/AttributeSettingsUpdatedEvent';
+import LayoutSettingsUpdatedEvent from './impl/LayoutSettingsUpdatedEvent';
+import LayoutUpdatedEvent from './impl/LayoutUpdatedEvent';
+import NetworkSettingsUpdatedEvent from './impl/NetworkSettingsUpdatedEvent';
+import PortalProfileUpdatedEvent from './impl/PortalProfileUpdatedEvent';
+import PortalSettingsUpdatedEvent from './impl/PortalSettingsUpdatedEvent';
+
+import UserProfileDeletedEvent from './impl/UserProfileDeletedEvent';
+
+
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
@@ -111,6 +121,7 @@ module.exports = {
 
   UserUpdatedEvent,
   UserCreatedEvent,
+  UserProfileDeletedEvent,
 
   ProjectTokenSaleProposalCreatedEvent,
   ProjectTokenSaleProposalAcceptedEvent,
@@ -152,5 +163,12 @@ module.exports = {
   ContractAgreementProposalCreatedEvent,
   ContractAgreementProposalAcceptedEvent,
   ContractAgreementProposalDeclinedEvent,
-  ContractAgreementAcceptedEvent
+  ContractAgreementAcceptedEvent,
+
+  AttributeSettingsUpdatedEvent,
+  LayoutSettingsUpdatedEvent,
+  LayoutUpdatedEvent,
+  NetworkSettingsUpdatedEvent,
+  PortalProfileUpdatedEvent,
+  PortalSettingsUpdatedEvent
 }

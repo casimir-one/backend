@@ -93,8 +93,8 @@ class TeamsController extends BaseController {
       try {
         const { withTenantTeam } = qs.parse(ctx.query);
 
-        const tenantId = ctx.params.tenantId;
-        const result = await teamDtoService.getTeamsByTenant(tenantId, withTenantTeam);
+        const portalId = ctx.params.portalId;
+        const result = await teamDtoService.getTeamsByTenant(portalId, withTenantTeam);
         ctx.status = 200;
         ctx.body = result;
 

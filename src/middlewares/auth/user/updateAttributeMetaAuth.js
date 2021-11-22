@@ -1,10 +1,7 @@
 import { UserService } from './../../../services';
-import TenantService from '../../../services/legacy/tenant';
-
 
 function userAttributeMetaUpdateAuth(options = {}) {
   return async function (ctx, next) {
-    const tenantService = new TenantService();
     const userService = new UserService();
     const currentTenant = ctx.state.tenant;
     const currentUser = ctx.state.user;

@@ -1,6 +1,6 @@
 import assert from 'assert';
 import config from './../../config';
-import TenantSchema from './../../schemas/TenantSchema';
+import PortalSchema from './../../schemas/PortalSchema';
 
 
 class BaseService {
@@ -16,9 +16,9 @@ class BaseService {
   }
 
 
-  async getTenantInstance() {
+  async getPortalInstance() {
     if (this._tenantProfile === undefined) {
-      const tenantProfile = await TenantSchema.findOne({ _id: config.TENANT });
+      const tenantProfile = await PortalSchema.findOne({ _id: config.TENANT });
       if (!tenantProfile) {
         throw new Error(`Tenant ${config.TENANT} is not found`);
       }
@@ -30,11 +30,11 @@ class BaseService {
 
 
   async getBaseScopeQuery() {
-    const tenantProfile = await this.getTenantInstance();
+    const tenantProfile = await this.getPortalInstance();
     if (!this._scoped) return {};
 
     if (tenantProfile.network.isGlobalScopeVisible) {
-      const tenants = await TenantSchema.find({});
+      const tenants = await PortalSchema.find({});
       const tenantProfiles = tenants.map(t => t.toObject());
       return {
         $or: [
@@ -80,7 +80,7 @@ class BaseService {
 
 
   async createOne(fields) {
-    const tenantProfile = await this.getTenantInstance();
+    const tenantProfile = await this.getPortalInstance();
 
     const keys = Object.keys(fields);
     const payload = {};
@@ -104,7 +104,7 @@ class BaseService {
 
 
   async createMany(objects) {
-    const tenantProfile = await this.getTenantInstance();
+    const tenantProfile = await this.getPortalInstance();
     
     const payloads = [];
     for (let i = 0; i < objects.length; i++) {
@@ -138,7 +138,7 @@ class BaseService {
 
 
   async updateOne(searchQuery, fields) {
-    const tenantProfile = await this.getTenantInstance();
+    const tenantProfile = await this.getPortalInstance();
     const scopeQuery = await this.getBaseScopeQuery();
 
     const model = await this._schema.findOne({ ...searchQuery, ...scopeQuery });
@@ -160,7 +160,7 @@ class BaseService {
 
 
   async updateMany(searchQuery, updateQuery, options = {}) {
-    const tenantProfile = await this.getTenantInstance();
+    const tenantProfile = await this.getPortalInstance();
 
     const scopeQuery = await this.getBaseScopeQuery();
     if (updateQuery.$set && updateQuery.$set) {
@@ -174,7 +174,7 @@ class BaseService {
 
   
   async deleteOne(searchQuery) {
-    const tenantProfile = await this.getTenantInstance();
+    const tenantProfile = await this.getPortalInstance();
 
     const scopeQuery = { tenantId: tenantProfile._id };
     const result = await this._schema.deleteOne({ ...searchQuery, ...scopeQuery });

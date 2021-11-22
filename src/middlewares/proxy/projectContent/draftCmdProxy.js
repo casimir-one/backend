@@ -1,10 +1,7 @@
-import { ProjectDtoService, ProjectContentDtoService, DraftService } from '../../../services';
-import TenantService from '../../../services/legacy/tenant';
+import { DraftService, PortalService } from '../../../services';
 
-const tenantService = new TenantService();
-const projectDtoService = new ProjectDtoService();
+const portalService = new PortalService();
 const draftService = new DraftService();
-const projectContentDtoService = new ProjectContentDtoService();
 
 
 function draftCmdProxy(options = {}) {
@@ -19,10 +16,10 @@ function draftCmdProxy(options = {}) {
     if (draft.tenantId == currentTenant.id) {
       await next();
     } else {
-      const requestedTenant = await tenantService.getTenant(draft.tenantId);
+      const requestedTenant = await portalService.getPortal(draft.tenantId);
       if (false) { /* TODO: check access for the requested source and chunk an access token to request the different tenant's server */
         ctx.status = 307;
-        ctx.redirect(`${requestedTenant.profile.serverUrl}${ctx.request.originalUrl}`);
+        ctx.redirect(`${requestedTenant.serverUrl}${ctx.request.originalUrl}`);
         return;
       } else {
         ctx.assert(false, 403);

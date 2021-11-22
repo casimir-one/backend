@@ -2,8 +2,7 @@ import BaseEventHandler from './../base/BaseEventHandler';
 import config from './../../config';
 import { USER_NOTIFICATION_TYPE, PROJECT_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
-import TenantService from './../../services/legacy/tenant';
-import { TeamDtoService, UserDtoService, ProjectDtoService, ReviewDtoService, ProjectContentDtoService } from './../../services';
+import { TeamDtoService, UserDtoService, ProjectDtoService, ReviewDtoService, ProjectContentDtoService, PortalDtoService } from './../../services';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
 import { ChainService } from '@deip/chain-service';
 
@@ -22,7 +21,7 @@ const teamDtoService = new TeamDtoService();
 const userDtoService = new UserDtoService();
 const projectDtoService = new ProjectDtoService();
 const userNotificationsDtoService = new UserNotificationsDtoService();
-const tenantService = new TenantService();
+const portalDtoService = new PortalDtoService();
 const projectContentDtoService = new ProjectContentDtoService();
 const reviewDtoService = new ReviewDtoService();
 
@@ -34,7 +33,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
     attributes
   } = event.getEventPayload();
 
-  const tenant = await tenantService.getTenant(config.TENANT);
+  const tenant = await portalDtoService.getPortal(config.TENANT);
   const project = await projectDtoService.getProject(projectId); // TODO: replace with a call to project read schema
   const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
@@ -70,7 +69,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
 userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event) => {
   const { teamId, attributes } = event.getEventPayload();
 
-  const tenant = await tenantService.getTenant(config.TENANT);
+  const tenant = await portalDtoService.getPortal(config.TENANT);
   const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
@@ -104,7 +103,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async (event) => {
   const { projectId, teamId } = event.getEventPayload();
 
-  const tenant = await tenantService.getTenant(config.TENANT);
+  const tenant = await portalDtoService.getPortal(config.TENANT);
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
@@ -137,7 +136,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
     teamId
   } = event.getEventPayload();
 
-  const tenant = await tenantService.getTenant(config.TENANT);
+  const tenant = await portalDtoService.getPortal(config.TENANT);
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const teamCreator = await userDtoService.getUser(team.creator);
@@ -168,7 +167,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
 userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event) => {
   const { teamId, projectId } = event.getEventPayload();
 
-  const tenant = await tenantService.getTenant(config.TENANT);
+  const tenant = await portalDtoService.getPortal(config.TENANT);
   const team = await teamDtoService.getTeam(teamId);
   const project = await projectDtoService.getProject(projectId);
   const notifiableUsers = await userDtoService.getUsers(tenant.admins);
@@ -456,7 +455,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, as
 
   const project = await projectDtoService.getProject(projectId);
   const emitter = await userDtoService.getUser(creator);
-  const tenant = await tenantService.getTenant(emitter.tenantId);
+  const tenant = await portalDtoService.getPortal(emitter.tenantId);
 
   const notifications = [];
   for (let i = 0; i < project.members.length; i++) {
@@ -484,7 +483,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (even
 
   const project = await projectDtoService.getProject(projectId);
   const creator = await userDtoService.getUser(creatorUsername);
-  const tenant = await tenantService.getTenant(creator.tenantId);
+  const tenant = await portalDtoService.getPortal(creator.tenantId);
 
   const notifications = [];
   for (let i = 0; i < [...project.members, creatorUsername].length; i++) {
@@ -512,7 +511,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, a
 
   const project = await projectDtoService.getProject(projectId);
   const creator = await userDtoService.getUser(creatorUsername);
-  const tenant = await tenantService.getTenant(creator.tenantId);
+  const tenant = await portalDtoService.getPortal(creator.tenantId);
 
   const notifications = [];
   for (let i = 0; i < [...project.members, creatorUsername].length; i++) {

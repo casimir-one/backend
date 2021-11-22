@@ -7,7 +7,7 @@ import { TextEncoder } from 'util';
 
 const requestPromise = util.promisify(request);
 
-async function getTenantAccessToken(requestedTenant) {
+async function getPortalAccessToken(requestedTenant) {
   const clientTenantId = config.TENANT;
   const requestedTenantId = requestedTenant.id;
 
@@ -31,5 +31,5 @@ async function getTenantAccessToken(requestedTenant) {
 }
 
 export {
-  getTenantAccessToken
+  getPortalAccessToken
 }

@@ -28,6 +28,8 @@ import ProjectNdaDtoService from './impl/read/ProjectNdaDtoService';
 import ContractAgreementDtoService from './impl/read/ContractAgreementDtoService';
 import ContractAgreementService from './impl/write/ContractAgreementService';
 import RevenueDtoService from './impl/read/RevenueDtoService';
+import PortalDtoService from './impl/read/PortalDtoService';
+import PortalService from './impl/write/PortalService';
 
 module.exports = {
   TeamService,
@@ -72,5 +74,8 @@ module.exports = {
   ContractAgreementDtoService,
   ContractAgreementService,
 
-  RevenueDtoService
+  RevenueDtoService,
+
+  PortalDtoService,
+  PortalService
 }

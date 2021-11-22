@@ -1,7 +1,7 @@
 import config from './../config'
-import TenantService from './../services/legacy/tenant';
+import { PortalDtoService } from './../services';
 
-const tenantService = new TenantService();
+const portalDtoService = new PortalDtoService();
 
 function setup(options) {
   return async function (ctx, next) {
@@ -11,7 +11,7 @@ function setup(options) {
     ctx.state.proposalsStack = [];
     ctx.state.proposalsStackFrame = null;
 
-    const tenant = await tenantService.getTenant(config.TENANT);
+    const tenant = await portalDtoService.getPortal(config.TENANT);
     ctx.state.tenant = tenant;
 
     await next();

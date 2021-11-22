@@ -1,7 +1,7 @@
 import BaseService from './../../base/BaseService';
 import AttributeSchema from './../../../schemas/AttributeSchema';
 import mongoose from 'mongoose';
-import TenantSchema from './../../../schemas/TenantSchema';
+import PortalSchema from './../../../schemas/PortalSchema';
 
 class AttributeService extends BaseService {
 
@@ -69,7 +69,7 @@ class AttributeService extends BaseService {
     scope
   }) {
     if(isSystem) {
-      const tenantProfile = await TenantSchema.findOne({ _id: tenantId });
+      const tenantProfile = await PortalSchema.findOne({ _id: tenantId });
 
       const tenantProfileObj = tenantProfile.toObject();
 

@@ -177,23 +177,23 @@ class BaseFileStorage {
     return researchGroupDefaultLogoFilePath();
   }
 
-  getTenantDirPath(tenantExternalId) {
+  getPortalDirPath(tenantExternalId) {
     return tenantDirPath(this._baseDirPath, tenantExternalId);
   }
 
-  getTenantBannerFilePath(tenantExternalId, filename) {
+  getPortalBannerFilePath(tenantExternalId, filename) {
     return tenantBannerFilePath(this._baseDirPath, tenantExternalId, filename);
   }
 
-  getTenantLogoFilePath(tenantExternalId, filename) {
+  getPortalLogoFilePath(tenantExternalId, filename) {
     return tenantLogoFilePath(this._baseDirPath, tenantExternalId, filename);
   }
 
-  getTenantDefaultBannerFilePath() {
+  getPortalDefaultBannerFilePath() {
     return tenantDefaultBannerFilePath();
   }
 
-  getTenantDefaultLogoFilePath() {
+  getPortalDefaultLogoFilePath() {
     return tenantDefaultLogoFilePath();
   }
 
