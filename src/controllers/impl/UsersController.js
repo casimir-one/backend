@@ -351,6 +351,42 @@ class UsersController extends BaseController {
     }
   });
 
+  updateUserPassword = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_ACCOUNT_AUTHORITY);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+          if (appCmd.getCmdNum() === APP_CMD.ALTER_ACCOUNT_AUTHORITY) {
+            const {
+              isTeamAccount
+            } = appCmd.getCmdPayload();
+            if (isTeamAccount) {
+              throw new BadRequestError(`This endpoint should be for user account`);
+            }
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await accountCmdHandler.process(msg, ctx, validate);
+
+        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_ACCOUNT_AUTHORITY);
+        const entityId = appCmd.getCmdPayload().entityId;
+
+        ctx.status = 200;
+        ctx.body = {
+          entityId
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+
   addUserBookmark = async (ctx) => { // temp: need change to cmd
     try {
       const jwtUsername = ctx.state.user.username;

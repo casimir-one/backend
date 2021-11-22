@@ -59,6 +59,17 @@ userEventHandler.register(APP_EVENT.USER_UPDATED, async (event) => {
   });
 });
 
+userEventHandler.register(APP_EVENT.USER_AUTHORITY_ALTERED, async (event) => {
+
+  // const {
+  //   username,
+  //   ownerAuth,
+  //   memoKey
+  // } = event.getEventPayload();
+
+  // change data
+});
+
 userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
 
   const { creator, accountId } = event.getEventPayload();

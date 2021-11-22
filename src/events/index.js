@@ -31,6 +31,7 @@ import AttributeUpdatedEvent from './impl/AttributeUpdatedEvent';
 import AttributeDeletedEvent from './impl/AttributeDeletedEvent';
 
 import UserUpdatedEvent from './impl/UserUpdatedEvent';
+import UserAuthorityAlteredEvent from './impl/UserAuthorityAlteredEvent';
 import UserCreatedEvent from './impl/UserCreatedEvent';
 
 import ProjectTokenSaleProposalCreatedEvent from './impl/ProjectTokenSaleProposalCreatedEvent';
@@ -120,6 +121,7 @@ module.exports = {
   AttributeDeletedEvent,
 
   UserUpdatedEvent,
+  UserAuthorityAlteredEvent,
   UserCreatedEvent,
   UserProfileDeletedEvent,
 
