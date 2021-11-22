@@ -7,7 +7,7 @@ class NetworkSettingsUpdatedEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
       portalId,
-      ...networkSettings 
+      networkSettings 
     } = eventPayload;
 
     assert(!!networkSettings, "'networkSettings' is required");

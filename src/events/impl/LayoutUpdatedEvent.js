@@ -7,7 +7,7 @@ class LayoutUpdatedEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
       portalId,
-      ...layout
+      layout
     } = eventPayload;
 
     assert(!!layout, "'layout' is required");
