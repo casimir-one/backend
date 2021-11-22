@@ -16,41 +16,46 @@ class ContractAgreementProposalAcceptedEvent extends BaseEvent {
     assert(APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL} proposal`);
 
     const proposedCmds = proposalCmd.getProposedCmds();
-    const createProjectNdaCmd = proposedCmds[0];
-    const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
+    const createContractAgreementCmd = proposedCmds[0];
+    const { entityId: proposalId } = proposalCmd.getCmdPayload();
     const {
       entityId: contractAgreementId,
       creator,
       parties,
       hash,
-      startTime,
-      endTime,
+      activationTime,
+      expirationTime,
       type,
       terms,
       projectId,
       licenser,
       termsHash,
-      fee
-    } = createProjectNdaCmd.getCmdPayload();
+      price
+    } = createContractAgreementCmd.getCmdPayload();
 
     assert(!!proposalId, `'proposalId' is required`);
-    assert(!!expirationTime, `'expirationTime' is required`);
     assert(!!contractAgreementId, "'contractAgreementId' is required");
     assert(!!creator, "'creator' is required");
     assert(!!parties && Array.isArray(parties) && parties.length > 1, "'parties' is required");
     assert(!!type, "'type' is required");
     assert(!!terms, "'terms' is required");
-    assert(startTime ? new Date(endTime) > new Date(startTime) : new Date(endTime) > new Date(), "'endTime' must be greater than current time or 'startTime'");
+
+    if (expirationTime && activationTime) {
+      assert(new Date(expirationTime) > new Date(activationTime), "'expirationTime' must be greater than 'activationTime'");
+    } else if (expirationTime) {
+      assert(new Date(expirationTime) > new Date(), "'expirationTime' must be greater than current time");
+    } else if (activationTime) {
+      assert(new Date(activationTime) > new Date(), "'activationTime' must be greater than current time");
+    }
 
     super(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_ACCEPTED, {
       proposalId,
-      expirationTime,
       contractAgreementId,
       creator,
       parties,
       hash,
-      startTime,
-      endTime,
+      activationTime,
+      expirationTime,
       type,
       terms,
       proposalCtx

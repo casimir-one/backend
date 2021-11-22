@@ -104,30 +104,30 @@ const run = async ({
 
   const chainService = await ChainService.getInstanceAsync({ ...config, DEIP_FULL_NODE_URL, CHAIN_ID, });
   const chainNodeClient = chainService.getChainNodeClient();
-  const chainApi = chainService.getChainApi();
+  const chainRpc = chainService.getChainRpc();
   const deipRpc = chainNodeClient;
 
   // ONCHAIN DATA
 
-  const chainAccounts = await chainApi.lookupAccountsAsync('0', CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainAccounts = await chainRpc.lookupAccountsAsync('0', CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-  const chainResearchGroups = await chainApi.lookupResearchGroupsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainResearches = await chainApi.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => chainApi.getResearchContentsByResearchAsync(r.external_id)));
+  const chainResearchGroups = await chainRpc.lookupResearchGroupsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainResearches = await chainRpc.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => chainRpc.getResearchContentsByResearchAsync(r.external_id)));
   const chainResearchContents = [].concat.apply([], chainResearchContentsByResearch);
-  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(rg => chainApi.getAccountMembersAsync(rg.external_id)));
+  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(rg => chainRpc.getAccountMembersAsync(rg.external_id)));
   const chainResearchGroupMembershipTokensMap = chainResearchGroupMembers.reduce((acc, accounts, i) => {
     acc[chainResearchGroups[i].external_id] = accounts[i].filter(a => !blackListUsers.some(name => name == a));
     return acc;
   }, {});
 
-  const chainResearchContentsReviewsByResearch = await Promise.all(chainResearches.map(r => chainApi.getReviewsByResearchAsync(r.external_id)));
+  const chainResearchContentsReviewsByResearch = await Promise.all(chainResearches.map(r => chainRpc.getReviewsByResearchAsync(r.external_id)));
   const chainResearchContentsReviews = [].concat.apply([], chainResearchContentsReviewsByResearch);
 
-  const chainAssets = await chainApi.lookupAssetsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainDisciplines = await chainApi.lookupDisciplinesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainProposalsStates = await chainApi.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => chainApi.getAccountsAssetBalancesByAssetAsync(chainAsset.string_symbol)));
+  const chainAssets = await chainRpc.getAssetsListAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainDisciplines = await chainRpc.lookupDisciplinesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainProposalsStates = await chainRpc.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => chainRpc.getAssetBalancesByAssetAsync(chainAsset.string_symbol)));
 
   const snapshotUsers = chainUserAccounts.filter(a => !blackListUsers.some(name => name == a.name) && !genesisJSON.accounts.some(ac => ac.name == a.name)).map(a => {
     const key = a.owner.key_auths[0][0]; // "DEIP7cqzf9qxb9NEkXCJQjNEsGCHG48ywEqkrcaT3owTynHr828mso";

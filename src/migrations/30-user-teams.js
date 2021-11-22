@@ -32,7 +32,7 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 const run = async () => {
 
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
+  const chainRpc = chainService.getChainRpc();
 
   const usersPromises = [];
 
@@ -41,7 +41,7 @@ const run = async () => {
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
     const userObj = user.toObject();
-    const usersRefs = await chainApi.getTeamReferencesAsync([userObj._id], false);
+    const usersRefs = await chainRpc.getTeamReferencesAsync([userObj._id], false);
     const [ids] = usersRefs.map((g) => g.map(m => m.team));
     const teams = await TeamSchema.find({ _id: { $in: ids } });
     user.teams = [...teams.map(({ _id }) => _id)];

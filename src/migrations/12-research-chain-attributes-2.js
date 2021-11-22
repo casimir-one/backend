@@ -28,7 +28,7 @@ const run = async () => {
   const USERS_LIST = "users-list";
 
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi()
+  const chainRpc = chainService.getChainRpc()
 
   await TenantProfile.update({}, { $set: { "settings.researchAttributes.$[].isBlockchainMeta": false } }, { multi: true });
 
@@ -137,7 +137,7 @@ const run = async () => {
   
   const researchPromises = [];
   const researches = await Research.find({});
-  const chainResearches = await chainApi.getResearchesAsync(researches.map(r => r._id.toString()));
+  const chainResearches = await chainRpc.getResearchesAsync(researches.map(r => r._id.toString()));
 
   for (let i = 0; i < researches.length; i++) {
     let research = researches[i];

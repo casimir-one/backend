@@ -52,10 +52,10 @@ const createAssetDepositRequest = async (ctx) => {
 
     // separate queries as api returns a set of accounts
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
 
-    const [depositor] = await chainApi.getAccountsAsync([username]);
-    const [balanceOwner] = await chainApi.getAccountsAsync([account]);
+    const [depositor] = await chainRpc.getAccountsAsync([username]);
+    const [balanceOwner] = await chainRpc.getAccountsAsync([account]);
     
     if (!depositor || !balanceOwner) {
       ctx.status = 404;
@@ -123,7 +123,7 @@ const confirmAssetDepositRequest = async (ctx) => {
   } = ctx.request.body;
 
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
+  const chainRpc = chainService.getChainRpc();
   const chainNodeClient = chainService.getChainNodeClient();
   const chainTxBuilder = chainService.getChainTxBuilder();
 
@@ -180,7 +180,7 @@ const confirmAssetDepositRequest = async (ctx) => {
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));
 
     await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
-    const txInfo = await tx.sendAsync(chainApi);
+    const txInfo = await tx.sendAsync(chainRpc);
 
     depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.APPROVED;
     depositRequestDoc.txInfo = txInfo;

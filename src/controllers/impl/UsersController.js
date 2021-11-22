@@ -80,7 +80,7 @@ class UsersController extends BaseController {
                 const seedFundingCmd = new AssetTransferCmd({
                   from: faucetUsername,
                   to: pubKey,
-                  asset: faucetFundingAmount,
+                  asset: { ...config.CORE_ASSET, amount: faucetFundingAmount },
                   memo: ''
                 });
                 txBuilder.addCmd(seedFundingCmd);
@@ -89,7 +89,7 @@ class UsersController extends BaseController {
               const daoFundingCmd = new AssetTransferCmd({
                 from: faucetUsername,
                 to: entityId,
-                asset: faucetFundingAmount,
+                asset: { ...config.CORE_ASSET, amount: faucetFundingAmount },
                 memo: ''
               });
               txBuilder.addCmd(daoFundingCmd);

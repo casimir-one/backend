@@ -13,9 +13,9 @@ class TenantService {
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     const profile = doc.toObject();
-    const [account] = await chainApi.getAccountsAsync([id]);
+    const [account] = await chainRpc.getAccountsAsync([id]);
     const team = await teamDtoService.getTeam(config.TENANT);
     const { members: admins } = team;
 
@@ -26,18 +26,18 @@ class TenantService {
     const doc = await TenantSchema.findOne({ _id: id });
     if (!doc) return null;
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     const profile = doc.toObject();
-    const [account] = await chainApi.getAccountsAsync([id]);
+    const [account] = await chainRpc.getAccountsAsync([id]);
     return { id: profile._id, account: account, profile: { ...profile, settings: { researchAttributes: profile.settings.researchAttributes } }, network: undefined };
   }
 
   async getNetworkTenants() {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     const docs = await TenantSchema.find({});
     const profiles = docs.map(doc => doc.toObject());
-    const accounts = await chainApi.getAccountsAsync(profiles.map(p => p._id));
+    const accounts = await chainRpc.getAccountsAsync(profiles.map(p => p._id));
 
     const result = profiles.map((profile) => {
       const account = accounts.find(a => a.name == profile._id);

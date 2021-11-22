@@ -17,8 +17,8 @@ class UserDtoService extends BaseService {
 
   async mapUsers(profiles) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const chainAccounts = await chainApi.getAccountsAsync(profiles.map(p => p._id));
+    const chainRpc = chainService.getChainRpc();
+    const chainAccounts = await chainRpc.getAccountsAsync(profiles.map(p => p._id));
     const tenantProfile = await this.getTenantInstance();
 
     //temp solution

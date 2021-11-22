@@ -331,12 +331,12 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
   const { entityId, projectId, teamId, creator } = event.getEventPayload();
 
   const chainService = await ChainService.getInstanceAsync(config);
-  const chainApi = chainService.getChainApi();
+  const chainRpc = chainService.getChainRpc();
 
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const emitterUser = await userDtoService.getUser(creator);
-  const tokenSale = await chainApi.getProjectTokenSaleAsync(entityId);
+  const tokenSale = await chainRpc.getInvestmentOpportunityAsync(entityId);
   const { members } = team;
 
   const notifications = [];

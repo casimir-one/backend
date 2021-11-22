@@ -5,33 +5,33 @@ class ProjectNdaDtoService {
 
   async getProjectNda(ndaId) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     
-    const result = await chainApi.getProjectNdaAsync(ndaId);
+    const result = await chainRpc.getProjectNdaAsync(ndaId);
     return result;
   }
   
   async getProjectNdaListByCreator(creator) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     
-    const result = await chainApi.getProjectNdaByCreatorAsync(creator);
+    const result = await chainRpc.getProjectNdaByCreatorAsync(creator);
     return result;
   }
 
   async getProjectNdaListByHash(hash) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     
-    const result = await chainApi.getProjectNdaByHashAsync(hash);
+    const result = await chainRpc.getProjectNdaByHashAsync(hash);
     return result;
   }
 
   async getProjectNdaListByProject(projectId) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     
-    const result = await chainApi.getProjectNdaByProjectAsync(projectId);
+    const result = await chainRpc.getProjectNdaByProjectAsync(projectId);
     return result;
   }
 

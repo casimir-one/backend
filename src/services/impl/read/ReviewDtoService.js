@@ -11,8 +11,8 @@ class ReviewDtoService extends BaseService {
 
   async mapReviews(reviews) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const chainReviews = await chainApi.getReviewsAsync(reviews.map(r => r._id));
+    const chainRpc = chainService.getChainRpc();
+    const chainReviews = await chainRpc.getReviewsAsync(reviews.map(r => r._id));
 
     return chainReviews
       .map((chainReview) => {
@@ -58,8 +58,8 @@ class ReviewDtoService extends BaseService {
     const review = await this.getReview(reviewId);
     if (!review) return [];
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const result = await chainApi.getReviewVotesByReviewIdAsync(review.id)
+    const chainRpc = chainService.getChainRpc();
+    const result = await chainRpc.getReviewVotesByReviewIdAsync(review.id)
     return result;
   }
 }

@@ -33,8 +33,8 @@ class ProjectDtoService extends BaseService {
     }
 
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const chainResearches = await chainApi.getProjectsAsync(researches.map(r => r._id));
+    const chainRpc = chainService.getChainRpc();
+    const chainResearches = await chainRpc.getProjectsAsync(researches.map(r => r._id));
 
     const researchesExpressLicenses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE }); // (getAllContractAgreements) temp sol
     const chainResearchNdaList = await Promise.all(chainResearches.map(r => projectNdaDtoService.getProjectNdaListByProject(r.external_id)));
@@ -223,10 +223,10 @@ class ProjectDtoService extends BaseService {
 
   async getProjectsForMember(member) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
+    const chainRpc = chainService.getChainRpc();
     const teams = await teamDtoService.getTeamsByUser(member);
     const teamsIds = teams.map(({ entityId }) => entityId);
-    const chainResearches = await Promise.all(teamsIds.map(teamId => chainApi.getProjectsByTeamAsync(teamId)));
+    const chainResearches = await Promise.all(teamsIds.map(teamId => chainRpc.getProjectsByTeamAsync(teamId)));
     const chainProjects = chainResearches.reduce((acc, projectsList) => {
       const projects = projectsList.filter(p => !acc.some(project => project.external_id == p.external_id));
       return [...acc, ...projects];

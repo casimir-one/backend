@@ -49,10 +49,10 @@ class BaseCmdHandler extends EventEmitter {
     alterOffchainWriteModel = async (appCmds, ctx) => {},
     alterOnchainWriteModel = async (tx, ctx) => {
       const chainService = await ChainService.getInstanceAsync(config);
-      const chainApi = chainService.getChainApi();
+      const chainRpc = chainService.getChainRpc();
       const chainNodeClient = chainService.getChainNodeClient();
       await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);      
-      const txInfo = await tx.sendAsync(chainApi);
+      const txInfo = await tx.sendAsync(chainRpc);
       return txInfo;
     },
   ) {
@@ -167,8 +167,8 @@ class BaseCmdHandler extends EventEmitter {
 
   async extractUpdatedProposals({ proposalsIds, newProposalsCmds }) {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const proposalsStates = await chainApi.getProposalsStatesAsync(proposalsIds.map(({ proposalId }) => proposalId));
+    const chainRpc = chainService.getChainRpc();
+    const proposalsStates = await chainRpc.getProposalsStatesAsync(proposalsIds.map(({ proposalId }) => proposalId));
     const proposalsDtos = await proposalDtoService.getProposals(proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => proposalId));
 
     const existedProposals = proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => {

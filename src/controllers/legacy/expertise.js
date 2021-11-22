@@ -13,8 +13,8 @@ const getAccountEciHistory = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const records = await chainApi.getAccountEciHistoryAsync(
+    const chainRpc = chainService.getChainRpc();
+    const records = await chainRpc.getAccountEciHistoryAsync(
       username,
       0, // cursor
       filter.discipline || undefined,
@@ -44,8 +44,8 @@ const getAccountEciStats = async (ctx) => {
   try {
     const userDtoService = new UserDtoService();
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const stat = await chainApi.getAccountEciStatsAsync(
+    const chainRpc = chainService.getChainRpc();
+    const stat = await chainRpc.getAccountEciStatsAsync(
       username,
       filter.discipline || undefined, 
       filter.from || undefined,
@@ -75,8 +75,8 @@ const getAccountsEciStats = async (ctx) => {
   try {
     const userDtoService = new UserDtoService();
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const stats = await chainApi.getAccountsEciStatsAsync(
+    const chainRpc = chainService.getChainRpc();
+    const stats = await chainRpc.getAccountsEciStatsAsync(
       filter.discipline || undefined,
       filter.from || undefined,
       filter.to || undefined,
@@ -111,8 +111,8 @@ const getResearchEciHistory = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const records = await chainApi.getProjectEciHistoryAsync(
+    const chainRpc = chainService.getChainRpc();
+    const records = await chainRpc.getProjectEciHistoryAsync(
       researchExternalId,
       0, // cursor
       filter.discipline || undefined,
@@ -142,8 +142,8 @@ const getResearchEciStats = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const stat = await chainApi.getProjectEciStatsAsync(
+    const chainRpc = chainService.getChainRpc();
+    const stat = await chainRpc.getProjectEciStatsAsync(
       researchExternalId,
       filter.discipline || undefined,
       filter.from || undefined,
@@ -171,8 +171,8 @@ const getResearchesEciStats = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const stats = await chainApi.getProjectsEciStatsAsync(
+    const chainRpc = chainService.getChainRpc();
+    const stats = await chainRpc.getProjectsEciStatsAsync(
       filter.discipline || undefined,
       filter.from || undefined,
       filter.to || undefined,
@@ -200,8 +200,8 @@ const getResearchContentEciHistory = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const records = await chainApi.getProjectContentEciHistoryAsync(
+    const chainRpc = chainService.getChainRpc();
+    const records = await chainRpc.getProjectContentEciHistoryAsync(
       researchContentExternalId,
       0, // cursor
       filter.discipline || undefined,
@@ -231,8 +231,8 @@ const getResearchContentEciStats = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const stat = await chainApi.getProjectContentEciStatsAsync(
+    const chainRpc = chainService.getChainRpc();
+    const stat = await chainRpc.getProjectContentEciStatsAsync(
       researchContentExternalId,
       filter.discipline || undefined,
       filter.from || undefined,
@@ -260,8 +260,8 @@ const getResearchContentsEciStats = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const stats = await chainApi.getProjectContentsEciStatsAsync(
+    const chainRpc = chainService.getChainRpc();
+    const stats = await chainRpc.getProjectContentsEciStatsAsync(
       filter.discipline || undefined,
       filter.from || undefined,
       filter.to || undefined,
@@ -288,8 +288,8 @@ const getDisciplineEciHistory = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const result = await chainApi.getDisciplineEciHistoryAsync(
+    const chainRpc = chainService.getChainRpc();
+    const result = await chainRpc.getDisciplineEciHistoryAsync(
       filter.discipline || undefined,
       filter.from || undefined,
       filter.to || undefined,
@@ -314,8 +314,8 @@ const getDisciplinesEciStatsHistory = async (ctx) => {
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const result = await chainApi.getDisciplinesEciStatsHistoryAsync(
+    const chainRpc = chainService.getChainRpc();
+    const result = await chainRpc.getDisciplinesEciStatsHistoryAsync(
       filter.from || undefined,
       filter.to || undefined,
       filter.step || undefined
@@ -335,8 +335,8 @@ const getDisciplinesEciStatsHistory = async (ctx) => {
 const getDisciplinesEciLastStats = async (ctx) => {
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const result = await chainApi.getDisciplinesEciLastStatsAsync();
+    const chainRpc = chainService.getChainRpc();
+    const result = await chainRpc.getDisciplinesEciLastStatsAsync();
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -351,8 +351,8 @@ const getAccountExpertiseTokens = async (ctx) => {
   const username = ctx.params.username;
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const result = await chainApi.getExpertTokensByAccountNameAsync(username);
+    const chainRpc = chainService.getChainRpc();
+    const result = await chainRpc.getExpertTokensByAccountNameAsync(username);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -367,8 +367,8 @@ const getDisciplineExpertiseTokens = async (ctx) => {
   const disciplineExternalId = ctx.params.disciplineExternalId;
   try {
     const chainService = await ChainService.getInstanceAsync(config);
-    const chainApi = chainService.getChainApi();
-    const result = await chainApi.getExpertTokensByDisciplineAsync(disciplineExternalId);
+    const chainRpc = chainService.getChainRpc();
+    const result = await chainRpc.getExpertTokensByDisciplineAsync(disciplineExternalId);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
