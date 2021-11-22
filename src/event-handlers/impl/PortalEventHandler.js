@@ -76,7 +76,7 @@ portalEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => 
 });
 
 portalEventHandler.register(APP_EVENT.LAYOUT_UPDATED, async (event) => {
-  const { portalId, ...layout } = event.getEventPayload();
+  const { portalId, layout } = event.getEventPayload();
 
   const updatedPortalProfile = await portalService.updatePortalLayouts(
     portalId,
@@ -85,7 +85,7 @@ portalEventHandler.register(APP_EVENT.LAYOUT_UPDATED, async (event) => {
 });
 
 portalEventHandler.register(APP_EVENT.LAYOUT_SETTINGS_UPDATED, async (event) => {
-  const { portalId, ...layoutSettings } = event.getEventPayload();
+  const { portalId, layoutSettings } = event.getEventPayload();
   
   const updatedPortalProfile = await portalService.updatePortalLayoutSettings(
     portalId,
@@ -94,7 +94,7 @@ portalEventHandler.register(APP_EVENT.LAYOUT_SETTINGS_UPDATED, async (event) => 
 });
 
 portalEventHandler.register(APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED, async (event) => {
-  const { portalId, ...attributeSettings } = event.getEventPayload();
+  const { portalId, attributeSettings } = event.getEventPayload();
 
   const updatedPortalProfile = await portalService.updatePortalAttributeSettings(
     portalId,
@@ -103,7 +103,7 @@ portalEventHandler.register(APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED, async (event) 
 });
 
 portalEventHandler.register(APP_EVENT.NETWORK_SETTINGS_UPDATED, async (event) => {
-  const { portalId, ...networkSettings } = event.getEventPayload();
+  const { portalId, networkSettings } = event.getEventPayload();
 
   const updatedPortalProfile = await portalService.updatePortalNetworkSettings(
     portalId,
