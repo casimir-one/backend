@@ -1,4 +1,4 @@
-import { APP_CMD } from '@deip/constants';
+import { APP_CMD, USER_PROFILE_STATUS } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import {
   TeamCreatedEvent,
@@ -9,7 +9,6 @@ import {
   TeamMemberLeftEvent,
   UserAuthorityAlteredEvent
 } from './../../events';
-import { USER_PROFILE_STATUS } from './../../constants';
 
 
 class AccountCmdHandler extends BaseCmdHandler {

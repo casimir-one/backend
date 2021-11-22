@@ -1,7 +1,8 @@
 import ProjectDtoService from './ProjectDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
-import { PROJECT_CONTENT_STATUS, CONTENT_TYPES_MAP } from '../../../constants';
+import { CONTENT_TYPES_MAP } from '../../../constants';
+import { PROJECT_CONTENT_STATUS } from '@deip/constants';
 import BaseService from '../../base/BaseService';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';

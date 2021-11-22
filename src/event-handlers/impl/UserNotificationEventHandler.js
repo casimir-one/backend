@@ -1,10 +1,11 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import config from './../../config';
-import { USER_NOTIFICATION_TYPE, PROJECT_ATTRIBUTE } from './../../constants';
+import { PROJECT_ATTRIBUTE } from './../../constants';
 import APP_EVENT from './../../events/base/AppEvent';
 import { TeamDtoService, UserDtoService, ProjectDtoService, ReviewDtoService, ProjectContentDtoService, PortalDtoService } from './../../services';
 import UserNotificationsDtoService from './../../services/legacy/userNotification';
 import { ChainService } from '@deip/chain-service';
+import { USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE } from '@deip/constants';
 
 class UserNotificationEventHandler extends BaseEventHandler {
 
@@ -49,7 +50,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
     let user = notifiableUsers[i];
     notifications.push({
       username: user.username,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         isProposalAutoAccepted: true, // legacy
@@ -84,7 +85,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
     let user = notifiableUsers[i];
     notifications.push({
       username: user.username,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
@@ -114,7 +115,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
     let user = notifiableUsers[i];
     notifications.push({
       username: user.username,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         isProposalAutoAccepted: true, // legacy
@@ -148,7 +149,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
     const user = notifiableUsers[i];
     notifications.push({
       username: user.username,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         isProposalAutoAccepted: true, // legacy
@@ -178,7 +179,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
     let user = notifiableUsers[i];
     notifications.push({
       username: user.username,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
@@ -211,7 +212,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (even
     let user = notifiableUsers[i];
     notifications.push({
       username: user.username,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         proposal: { action: 12, is_completed: true }, // legacy
@@ -224,7 +225,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (even
 
   notifications.push({
     username: invitee,
-    status: 'unread',
+    status: USER_NOTIFICATION_STATUS.UNREAD,
     type: USER_NOTIFICATION_TYPE.INVITATION,
     metadata: {
       researchGroup: team,
@@ -253,7 +254,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_ACCEPTED, async (eve
     if (user.username != invitee) {
       notifications.push({
         username: user.username,
-        status: 'unread',
+        status: USER_NOTIFICATION_STATUS.UNREAD,
         type: USER_NOTIFICATION_TYPE.INVITATION_APPROVED,
         metadata: {
           researchGroup: team,
@@ -283,7 +284,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_DECLINED, async (eve
     let user = notifiableUsers[i];
     notifications.push({
       username: user.username,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.INVITATION_REJECTED,
       metadata: {
         researchGroup: team,
@@ -310,7 +311,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
     let member = members[i];
     notifications.push({
       username: member,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
@@ -343,7 +344,7 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
     let member = members[i];
     notifications.push({
       username: member,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         proposal: { action: 19, data: { research_id: project.id }, is_completed: true }, // legacy
@@ -372,7 +373,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (
     let member = members[i];
     notifications.push({
       username: member,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         proposal: { action: 16, data: { research_id: project.id }, is_completed: true }, // legacy
@@ -399,7 +400,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (e
 
   await userNotificationsDtoService.createUserNotifications([{
     username: expert.account.name,
-    status: 'unread',
+    status: USER_NOTIFICATION_STATUS.UNREAD,
     type: USER_NOTIFICATION_TYPE.PROJECT_CONTENT_EXPERT_REVIEW_REQUEST,
     metadata: {
       requestor,
@@ -432,7 +433,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
     let member = members[i];
     notifications.push({
       username: member,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROJECT_CONTENT_EXPERT_REVIEW,
       metadata: {
         review,
@@ -462,7 +463,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, as
     let member = project.members[i];
     notifications.push({
       username: member,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROJECT_NDA_PROPOSED,
       metadata: {
         research: project,
@@ -490,7 +491,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (even
     let member = project.members[i] || creatorUsername;
     notifications.push({
       username: member,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROJECT_NDA_SIGNED,
       metadata: {
         research: project,
@@ -518,7 +519,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, a
     let member = project.members[i] || creatorUsername;
     notifications.push({
       username: member,
-      status: 'unread',
+      status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROJECT_NDA_REJECTED,
       metadata: {
         research: project,

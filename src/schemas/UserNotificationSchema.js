@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import USER_NOTIFICATION_TYPE from './../constants/userNotificationType';
+import { USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -8,12 +8,12 @@ const UserNotificationSchema = new Schema({
   "tenantId": { type: String, required: true },
   "username": { type: String, required: true, index: true },
   "status": {
-    type: String,
-    enum: ['unread', 'read'],
+    type: Number,
+    enum: [...Object.values(USER_NOTIFICATION_STATUS)],
     required: true
   },
   "type": {
-    type: String,
+    type: Number,
     enum: [...Object.values(USER_NOTIFICATION_TYPE)],
     required: true
   },

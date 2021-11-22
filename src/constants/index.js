@@ -1,10 +1,6 @@
 import CHAIN_CONSTANTS from './chainConstants';
-import SIGN_UP_POLICY from './signUpPolicy';
-import USER_PROFILE_STATUS from './userProfileStatus';
-import USER_NOTIFICATION_TYPE from './userNotificationType';
 import TOKEN_SALE_STATUS from './tokenSaleStatus';
 import USER_INVITE_STATUS from './userInviteStatus';
-import PROJECT_CONTENT_STATUS from './projectContentStatus';
 import PROJECT_STATUS from './projectStatus';
 import PROPOSAL_STATUS from './proposalStatus';
 import PROJECT_ATTRIBUTE from './projectAttributes';
@@ -17,15 +13,12 @@ import USER_ROLES from './userRoles';
 import DEPOSIT_REQUEST_STATUS from './assetDepositRequestStatus';
 import INVESTMENT_OPPORTUNITY_TYPE from './investmentOpportunityType';
 import ASSET_TYPE from './assetTypes';
+import REVIEW_REQUEST_STATUS from './reviewRequestStatus';
 
 export {
   CHAIN_CONSTANTS,
-  SIGN_UP_POLICY,
-  USER_PROFILE_STATUS,
-  USER_NOTIFICATION_TYPE,
   TOKEN_SALE_STATUS,
   USER_INVITE_STATUS,
-  PROJECT_CONTENT_STATUS,
   PROJECT_STATUS,
   PROPOSAL_STATUS,
   PROJECT_ATTRIBUTE,
@@ -39,4 +32,5 @@ export {
   DEPOSIT_REQUEST_STATUS,
   INVESTMENT_OPPORTUNITY_TYPE,
   ASSET_TYPE,
+  REVIEW_REQUEST_STATUS,
 }

@@ -1,6 +1,6 @@
 {
-  "signUpPolicy": "free",
-  "newResearchPolicy": "free",
+  "signUpPolicy": 1,
+  "newResearchPolicy": 1,
   "faq": [],
   "researchAttributes": [],
   "modules": {

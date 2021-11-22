@@ -28,8 +28,7 @@ const Schema = mongoose.Schema;
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
-const USER_PROFILE_STATUS = require('./../constants').USER_PROFILE_STATUS;
-const { ATTR_SCOPES, ATTR_TYPES } = require('@deip/constants');
+const { ATTR_SCOPES, ATTR_TYPES, USER_PROFILE_STATUS } = require('@deip/constants');
 
 const AttributeValueOption = new Schema({
   "_id": false,

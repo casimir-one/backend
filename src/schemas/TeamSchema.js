@@ -1,4 +1,3 @@
-
 import mongoose from 'mongoose';
 import AttributeValueSchema from './AttributeValueSchema';
 

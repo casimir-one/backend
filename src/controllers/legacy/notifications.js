@@ -1,4 +1,5 @@
 import UserNotificationService from './../../services/legacy/userNotification';
+import { USER_NOTIFICATION_STATUS } from '@deip/constants';
 
 const getNotificationsByUser = async (ctx) => {
   const username = ctx.params.username;
@@ -17,7 +18,7 @@ const getNotificationsByUser = async (ctx) => {
       return;
     }
 
-    const notifications = await userNotificationService.getUserNotifications(username, unreadOnly ? 'unread' : undefined);
+    const notifications = await userNotificationService.getUserNotifications(username, unreadOnly ? USER_NOTIFICATION_STATUS.UNREAD : undefined);
     ctx.status = 200;
     ctx.body = notifications;
 
@@ -54,7 +55,7 @@ const markUserNotificationAsRead = async (ctx) => {
     }
 
     const updatedNotification = await userNotificationService.updateUserNotification(notificationId, {
-      status: 'read'
+      status: USER_NOTIFICATION_STATUS.READ
     });
 
     ctx.status = 200;
@@ -84,7 +85,7 @@ const markAllUserNotificationAsRead = async (ctx) => {
       return;
     }
 
-    const updateStat = await userNotificationService.updateUserNotifications(jwtUsername, { status: 'read' });
+    const updateStat = await userNotificationService.updateUserNotifications(jwtUsername, { status: USER_NOTIFICATION_STATUS.READ });
     ctx.status = 200;
     ctx.body = updateStat;
 

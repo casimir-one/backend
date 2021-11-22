@@ -1,4 +1,4 @@
-import { USER_PROFILE_STATUS } from '../../../constants';
+import { USER_PROFILE_STATUS } from '@deip/constants';
 import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
 import config from './../../../config';

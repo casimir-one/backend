@@ -6,7 +6,7 @@ import { projectContentCmdHandler } from '../../command-handlers';
 import { ProjectDtoService, ProjectContentService, ProjectContentDtoService, ProjectService, TeamDtoService, DraftService } from './../../services';
 import FileStorage from './../../storage';
 import readArchive from './../../dar/readArchive';
-import { PROJECT_CONTENT_STATUS } from './../../constants';
+import { PROJECT_CONTENT_STATUS } from '@deip/constants';
 import mongoose from 'mongoose';
 
 const projectDtoService = new ProjectDtoService();

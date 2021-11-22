@@ -19,10 +19,10 @@ require("@babel/register")({
   ]
 });
 
-const config = require('./../config');
+const config = require('../config');
 
 const mongoose = require('mongoose');
-const TeamSchema = require('./../schemas/TeamSchema');
+const TeamSchema = require('../schemas/TeamSchema');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 

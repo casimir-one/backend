@@ -4,7 +4,7 @@ import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import { TeamDtoService, DraftService, ProposalService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
-import { PROJECT_CONTENT_STATUS } from './../../constants';
+import { PROJECT_CONTENT_STATUS } from '@deip/constants';
 
 
 class ProposalEventHandler extends BaseEventHandler {

@@ -10,7 +10,7 @@ const ProjectSchema = new Schema({
   "tenantId": { type: String, required: true },
   "researchGroupExternalId": { type: String, required: true },
   "attributes": [AttributeValueSchema],
-  "status": { type: String, enum: [...Object.values(PROJECT_STATUS)], required: false },
+  "status": { type: Number, enum: [...Object.values(PROJECT_STATUS)], required: false },
   "isDefault": { type: Boolean, default: false }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
