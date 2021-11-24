@@ -3,7 +3,7 @@ import { PROPOSAL_STATUS } from './../../constants';
 import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { ProposalCreatedEvent, ProposalUpdatedEvent, ProposalDeclinedEvent } from './../../events';
+import { ProposalCreatedEvent, ProposalAcceptedEvent, ProposalDeclinedEvent } from './../../events';
 
 
 class ProposalCmdHandler extends BaseCmdHandler {
@@ -48,8 +48,8 @@ proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
 });
 
 
-proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, (cmd, ctx) => {
-  const { entityId: proposalId, activeApprovalsToAdd = [] } = cmd.getCmdPayload();
+proposalCmdHandler.register(APP_CMD.ACCEPT_PROPOSAL, (cmd, ctx) => {
+  const { entityId: proposalId, account } = cmd.getCmdPayload();
 
   const {
     type,
@@ -60,11 +60,11 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, (cmd, ctx) => {
 
   const proposalCtx = { proposalId, type, proposedCmds };
 
-  ctx.state.appEvents.push(new ProposalUpdatedEvent({
+  ctx.state.appEvents.push(new ProposalAcceptedEvent({
     proposalId: proposalId,
     status: status,
     proposalCtx: proposalCtx,
-    approvals: activeApprovalsToAdd
+    account: account
   }));
 
   if (status == PROPOSAL_STATUS.APPROVED) {
@@ -92,7 +92,7 @@ proposalCmdHandler.register(APP_CMD.UPDATE_PROPOSAL, (cmd, ctx) => {
 
 
 proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, (cmd, ctx) => {
-  const { entityId: proposalId } = cmd.getCmdPayload();
+  const { entityId: proposalId, account } = cmd.getCmdPayload();
 
   const {
     type,
@@ -106,7 +106,8 @@ proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, (cmd, ctx) => {
   ctx.state.appEvents.push(new ProposalDeclinedEvent({
     proposalId: proposalId,
     status: status,
-    proposalCtx: proposalCtx
+    proposalCtx: proposalCtx,
+    account: account
   }));
 
   if (status == PROPOSAL_STATUS.REJECTED) {

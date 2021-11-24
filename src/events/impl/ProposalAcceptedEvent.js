@@ -3,7 +3,7 @@ import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
 
 
-class ProposalUpdatedEvent extends BaseEvent {
+class ProposalAcceptedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -16,10 +16,10 @@ class ProposalUpdatedEvent extends BaseEvent {
     assert(!!status, "'status' is required");
     assert(!!proposalCtx, "'proposalCtx' is required");
 
-    super(APP_EVENT.PROPOSAL_UPDATED, eventPayload);
+    super(APP_EVENT.PROPOSAL_ACCEPTED, eventPayload);
   }
 
 }
 
 
-module.exports = ProposalUpdatedEvent;
+module.exports = ProposalAcceptedEvent;

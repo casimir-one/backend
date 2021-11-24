@@ -1,8 +1,8 @@
 import ProjectCreatedEvent from './impl/ProjectCreatedEvent';
 import ProjectUpdatedEvent from './impl/ProjectUpdatedEvent';
 import ProjectDeletedEvent from './impl/ProjectDeletedEvent';
-import TeamMemberJoinedEvent from './impl/TeamMemberJoinedEvent';
-import TeamMemberLeftEvent from './impl/TeamMemberLeftEvent';
+import DaoMemberAddedEvent from './impl/DaoMemberAddedEvent';
+import DaoMemberRemovedEvent from './impl/DaoMemberRemovedEvent';
 
 import TeamCreatedEvent from './impl/TeamCreatedEvent';
 import TeamUpdatedEvent from './impl/TeamUpdatedEvent';
@@ -11,7 +11,7 @@ import TeamUpdateProposalAcceptedEvent from './impl/TeamUpdateProposalAcceptedEv
 import TeamUpdateProposalDeclinedEvent from './impl/TeamUpdateProposalDeclinedEvent';
 
 import ProposalCreatedEvent from './impl/ProposalCreatedEvent';
-import ProposalUpdatedEvent from './impl/ProposalUpdatedEvent';
+import ProposalAcceptedEvent from './impl/ProposalAcceptedEvent';
 import ProposalDeclinedEvent from './impl/ProposalDeclinedEvent';
 
 import ProjectProposalCreatedEvent from './impl/ProjectProposalCreatedEvent';
@@ -94,14 +94,14 @@ module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
   ProjectDeletedEvent,
-  TeamMemberJoinedEvent,
-  TeamMemberLeftEvent,
+  DaoMemberAddedEvent,
+  DaoMemberRemovedEvent,
 
   TeamCreatedEvent,
   TeamUpdatedEvent,
 
   ProposalCreatedEvent,
-  ProposalUpdatedEvent,
+  ProposalAcceptedEvent,
   ProposalDeclinedEvent,
 
   ProjectProposalCreatedEvent,

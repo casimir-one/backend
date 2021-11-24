@@ -12,17 +12,55 @@ class ReviewDtoService extends BaseService {
   async mapReviews(reviews) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const chainReviews = await chainRpc.getReviewsAsync(reviews.map(r => r._id));
+    const chainReviews = await Promise.all(reviews.map((review) => chainRpc.getReviewAsync(review._id)));
 
-    return chainReviews
-      .map((chainReview) => {
-        const reviewRef = reviews.find(r => r._id.toString() == chainReview.external_id);
-        return { ...chainReview, reviewRef: reviewRef ? reviewRef : null };
-      })
-      .map((review) => {
-        const override = review.reviewRef ? { content: review.reviewRef.content } : { content: "Not specified" };
-        return { ...review, ...override };
-      });
+    return reviews.map((review) => {
+      const chainReview = chainReviews.find((chainReview) => !!chainReview && chainReview.reviewId == review._id);
+      
+      let isPositive = undefined;
+      let domains = [];
+      let eciMap = {};
+      let assessment = { type: 0, model: { scores: [] } };
+      if (chainReview) {
+        isPositive = chainReview.isPositive;
+        domains = chainReview.domains;
+        eciMap = chainReview.eciMap;
+        chainReview = assessment;
+      } else {
+        console.warn(`Review with ID '${review._id}' is not found in the Chain`);
+      }
+
+      return {
+        _id: review._id,
+        tenantId: review.tenantId,
+        projectId: review.researchExternalId,
+        projectContentId: review.researchContentExternalId,
+        author: review.author,
+        content: review.content,
+        domains: domains,
+        eciMap: eciMap,
+        assessment: assessment,
+        createdAt: review.createdAt,
+        updatedAt: review.updatedAt,
+
+
+        // @deprecated
+        external_id: review._id,
+        research_content_external_id: review.researchContentExternalId,
+        is_positive: isPositive,
+        reviewRef: review,
+        created_at: review.createdAt,
+        disciplines: domains.map((domainId) => {
+          return {
+            external_id: domainId,
+            name: domainId
+          }
+        }),
+        expertise_tokens_amount_by_discipline: eciMap,
+        assessment_model_v: assessment.type,
+        scores: assessment.model.scores
+      };
+    });
   }
 
   async getReview(id) {

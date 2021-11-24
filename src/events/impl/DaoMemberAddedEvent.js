@@ -3,7 +3,7 @@ import APP_EVENT from '../base/AppEvent';
 import assert from 'assert';
 
 
-class TeamMemberJoinedEvent extends BaseEvent {
+class DaoMemberAddedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -14,10 +14,10 @@ class TeamMemberJoinedEvent extends BaseEvent {
     assert(!!member, "'member' is required");
     assert(!!teamId, "'teamId' is required");
 
-    super(APP_EVENT.TEAM_MEMBER_JOINED, eventPayload);
+    super(APP_EVENT.DAO_MEMBER_ADDED, eventPayload);
   }
 
 }
 
 
-module.exports = TeamMemberJoinedEvent;
+module.exports = DaoMemberAddedEvent;

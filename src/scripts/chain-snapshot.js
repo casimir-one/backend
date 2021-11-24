@@ -109,35 +109,38 @@ const run = async ({
 
   // ONCHAIN DATA
 
-  const chainAccounts = await chainRpc.lookupAccountsAsync('0', CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-  const chainResearchGroups = await chainRpc.lookupResearchGroupsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainResearches = await chainRpc.lookupResearchesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => chainRpc.getResearchContentsByResearchAsync(r.external_id)));
+  const chainAccounts = await chainRpc.getAccountsListAsync();
+  const chainResearchGroups = chainAccounts.filter(a => a.authority.owner.auths.length > 1);
+  const chainUserAccounts = chainAccounts.filter(a => a.authority.owner.auths.length <= 1);
+  const chainResearches = await chainRpc.getProjectsListAsync();
+  const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => chainRpc.getProjectContentsByProjectAsync(r.external_id)));
   const chainResearchContents = [].concat.apply([], chainResearchContentsByResearch);
-  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(rg => chainRpc.getAccountMembersAsync(rg.external_id)));
+  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(dao => chainRpc.getAccountMembersAsync(dao.daoId)));
   const chainResearchGroupMembershipTokensMap = chainResearchGroupMembers.reduce((acc, accounts, i) => {
-    acc[chainResearchGroups[i].external_id] = accounts[i].filter(a => !blackListUsers.some(name => name == a));
+    acc[chainResearchGroups[i].daoId] = accounts[i].filter(a => !blackListUsers.some(name => name == a));
     return acc;
   }, {});
 
   const chainResearchContentsReviewsByResearch = await Promise.all(chainResearches.map(r => chainRpc.getReviewsByResearchAsync(r.external_id)));
   const chainResearchContentsReviews = [].concat.apply([], chainResearchContentsReviewsByResearch);
 
-  const chainAssets = await chainRpc.getAssetsListAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainAssets = await chainRpc.getAssetsListAsync();
   const chainDisciplines = await chainRpc.lookupDisciplinesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainProposalsStates = await chainRpc.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => chainRpc.getAssetBalancesByAssetAsync(chainAsset.string_symbol)));
+  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => chainRpc.getAssetBalancesByAssetSymbolAsync(chainAsset.symbol)));
 
   const snapshotUsers = chainUserAccounts.filter(a => !blackListUsers.some(name => name == a.name) && !genesisJSON.accounts.some(ac => ac.name == a.name)).map(a => {
-    const key = a.owner.key_auths[0][0]; // "DEIP7cqzf9qxb9NEkXCJQjNEsGCHG48ywEqkrcaT3owTynHr828mso";
-    return {
+    const key = a.authority.owner.auths
+      .filter((auth) => !!auth.pubKey)
+      .map((auth) => auth.pubKey)[0] || null; // "DEIP7cqzf9qxb9NEkXCJQjNEsGCHG48ywEqkrcaT3owTynHr828mso";
+    
+      return {
       "name": a.name,
       "recovery_account": a.recovery_account,
       "public_key": key
     }
   });
-  
+
   const snapshotDisciplines = [...chainDisciplines, ...newDisciplines].filter(d => !genesisJSON.disciplines.some(discipline => discipline.external_id == d.external_id)).map((discipline) => {
     return {
       "name": discipline.name,
@@ -156,7 +159,7 @@ const run = async ({
 
 
   
-  const snapshotResearchGroups = chainResearchGroups.filter(rg => !rg.is_personal && !genesisJSON.research_groups.some(researchGroup => researchGroup.account == rg.account)).map(rg => {
+  const snapshotResearchGroups = chainResearchGroups.filter(rg => !genesisJSON.research_groups.some(researchGroup => researchGroup.account == rg.account)).map(rg => {
 
     function getKeys() {
       const { owner: privKey, ownerPubkey: pubKey } = deipRpc.auth.getPrivateKeys(
@@ -169,18 +172,18 @@ const run = async ({
       return { privKey, pubKey };
     }
 
-    const public_key = rg.external_id == TENANT ? getKeys().pubKey : undefined;
-    // const public_key = rg.external_id == "fa81a9ab079d34b383db5935ce18cafc96f36dc5" ? "DEIP8G25xQk3dPCdBqdihEppiZ4Rjw7Dcc5DbjGgX6tDgWFL29zepJ"
-    //   : rg.external_id == "00067e21d5b12b2393677e87d3fbbc52adcfbb28" ? "DEIP8FiSkbrAEHtk3GMLjEi23kdiG8QRNbUrjcC4vHasTM8FQmanNd"
-    //   : rg.external_id == "e7b3aabc542e77062b599d24a00b60ea6122850d" ? "DEIP8feUU1MigFXQtd5aebrrucQZx4QiaWn6WCJR5a2re1zZbDPzny"
-    //   : rg.external_id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c" ? "DEIP5f4JLkEhGVxzbkXVqcaYXRJ4o9C4GbBJyP3FYyyMn5EY2Trs5U" 
+    const public_key = rg.daoId == TENANT ? getKeys().pubKey : undefined;
+    // const public_key = rg.daoId == "fa81a9ab079d34b383db5935ce18cafc96f36dc5" ? "DEIP8G25xQk3dPCdBqdihEppiZ4Rjw7Dcc5DbjGgX6tDgWFL29zepJ"
+    //   : rg.daoId == "00067e21d5b12b2393677e87d3fbbc52adcfbb28" ? "DEIP8FiSkbrAEHtk3GMLjEi23kdiG8QRNbUrjcC4vHasTM8FQmanNd"
+    //   : rg.daoId == "e7b3aabc542e77062b599d24a00b60ea6122850d" ? "DEIP8feUU1MigFXQtd5aebrrucQZx4QiaWn6WCJR5a2re1zZbDPzny"
+    //   : rg.daoId == "8c5081e73c0af4c232a78417bc1b573ebe70c40c" ? "DEIP5f4JLkEhGVxzbkXVqcaYXRJ4o9C4GbBJyP3FYyyMn5EY2Trs5U"
     //   : undefined;
 
     return {
-      "account": rg.external_id,
+      "account": rg.daoId,
       "creator": rg.creator,
       "description": rg.description,
-      "members": chainResearchGroupMembershipTokensMap[rg.external_id],
+      "members": chainResearchGroupMembershipTokensMap[rg.daoId],
       "tenant": TENANT,
       "public_key": public_key
     }
@@ -253,22 +256,17 @@ const run = async ({
   let init_supply = 0;
   const snapshotAccountBallances = [].concat.apply([], chainAssetsBallances.map((chainAssetBallances) => {
     const balances = chainAssetBallances.map((chainAssetBallance) => {
-      const [stringAmount, symbol] = chainAssetBallance.amount.split(' ');
-      const amount = parseInt(stringAmount.replace('.', ''));
       const isCoreAsset = symbol == 'DEIP' || symbol == 'TESTS';
-      if (isCoreAsset) {
-        init_supply += amount;
-      }
       return {
-        "owner": chainAssetBallance.owner,
-        "amount": amount,
-        "symbol": isCoreAsset ? undefined : symbol,
+        "owner": chainAssetBallance.account,
+        "amount": chainAssetBallance.amount,
+        "symbol": isCoreAsset ? undefined : chainAssetBallance.symbol,
         "tokenized_research": chainAssetBallance.tokenized_research || undefined
       };
     });
 
     return balances;
-  })); 
+  }));
   snapshotAccountBallances.sort((a, b) => (a.owner > b.owner) ? 1 : ((b.owner > a.owner) ? -1 : 0))
 
   genesisJSON.init_supply = init_supply;

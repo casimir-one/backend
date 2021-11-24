@@ -10,20 +10,42 @@ class InvestmentOpportunityDtoService extends BaseService {
     super(InvestmentOpportunitySchema, options);
   }
 
-  async mapInvstOpp(investmentOpps) {
+
+  async mapInvstOpp(invstOpps) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const chainInvestmentOpps = await Promise.all(investmentOpps.map((investmentOpp) => chainRpc.getInvestmentOpportunityAsync(investmentOpp._id)));
+    const chainInvstOpps = await Promise.all(invstOpps.map((invstOpp) => chainRpc.getInvestmentOpportunityAsync(invstOpp._id)));
+    
+    return invstOpps.map((invstOpp) => {
 
-    return chainInvestmentOpps
-      .map((chainInvestmentOp, i) => {
-        const investmentOpp = investmentOpps.find((investmentOpp) => investmentOpp._id == chainInvestmentOp.external_id);
-        return {
-          chainInvestmentOp,
-          ...investmentOpp,
-          status: chainInvestmentOp.status
-        }
-      });
+      const chainInvstOpp = chainInvstOpps.find((chainInvstOpp) => chainInvstOpp && chainInvstOpp.invstOppId == invstOpp._id);
+      if (!chainInvstOpp) {
+        console.warn(`Investment opportunity with ID '${invstOpp._id}' is not found in the Chain`);
+      }
+
+      return {
+        _id: invstOpp._id,
+        tenantId: invstOpp.tenantId,
+        projectId: invstOpp.projectId,
+        title: invstOpp.title,
+        metadata: invstOpp.metadata,
+        teamId: invstOpp.teamId,
+        startTime: invstOpp.startTime,
+        endTime: invstOpp.endTime,
+        shares: invstOpp.shares,
+        softCap: invstOpp.softCap,
+        hardCap: invstOpp.hardCap,
+        creator: invstOpp.creator,
+        totalInvested: invstOpp.totalInvested,
+        type: invstOpp.type,
+        createdAt: invstOpp.createdAt,
+        updatedAt: invstOpp.updatedAt,
+        status: chainInvstOpp ? chainInvstOpp.status : null,
+
+        // @deprecated
+        chainInvestmentOp: chainInvstOpp
+      };
+    });;
   }
 
   async getInvstOpp(invstOppId) {

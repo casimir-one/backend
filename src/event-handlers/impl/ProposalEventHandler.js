@@ -1,10 +1,10 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
-import { TeamDtoService, DraftService, ProposalService } from './../../services';
+import { TeamDtoService, ProposalService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
-import { PROJECT_CONTENT_STATUS } from '@deip/constants';
+import { waitChainBlockAsync } from './../../utils/network';
 
 
 class ProposalEventHandler extends BaseEventHandler {
@@ -19,7 +19,6 @@ const proposalEventHandler = new ProposalEventHandler();
 
 const proposalService = new ProposalService();
 const teamDtoService = new TeamDtoService();
-const draftService = new DraftService();
 
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
@@ -27,15 +26,22 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc();
 
-  // This handler should be replaced with handlers for multisig transactions below
+  await waitChainBlockAsync(); // We have to wait for proposal creation in the Chain until we have chain Event Streaming subscription
+  const chainProposal = await chainRpc.getProposalAsync(proposalId);
+  const tenantIdsScope = [];
+  const decisionMakers = [];
 
-  // Currently this collection includes 'personal' spaces that are being created for every standalone user.
-  // We should replace this call after removing 'personal' spaces from domain logic
-  const chainProposal = await chainRpc.getProposalStateAsync(proposalId);
-  const teams = await teamDtoService.getTeams(chainProposal.required_approvals);
-  const tenantIdsScope = teams.reduce((acc, item) => {
-    return acc.some(id => id == item.tenantId) ? acc : [...acc, item.tenantId];
-  }, []);
+  if (chainProposal) { // Proposal may be deleted from the chain once it's resolved, let's keep this check until subscriptions to chain Event Stream
+    const teams = await teamDtoService.getTeams(chainProposal.decisionMakers);
+    const portalIdsScope = teams.reduce((acc, item) => {
+      return acc.some(id => id == item.tenantId) ? acc : [...acc, item.tenantId];
+    }, []);
+    tenantIdsScope.push(...portalIdsScope);
+    decisionMakers.push(...chainProposal.decisionMakers);
+  } else {
+    console.warn(`Proposal with ID '${proposalId}' is not found in the Chain`);
+  }
+
 
   let details = {}; // TEMP support for legacy 'details' field, must be removed after schema separation
   const ProposalCreatedHookEvent = APP_PROPOSAL_EVENT[type]['CREATED'];
@@ -55,22 +61,31 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
     type: type,
     details: details,
     tenantIdsScope: tenantIdsScope,
-    creator: creator
+    creator: creator,
+    decisionMakers: decisionMakers
   });
   
 });
 
-proposalEventHandler.register(APP_EVENT.PROPOSAL_UPDATED, async (event) => {
-  const { proposalId, status } = event.getEventPayload();
-  const proposal = await proposalService.updateProposal(proposalId, {
-    status: status
+proposalEventHandler.register(APP_EVENT.PROPOSAL_ACCEPTED, async (event) => {
+  const { proposalId, status, account } = event.getEventPayload();
+
+  const proposal = await proposalService.getProposal(proposalId);
+  const approvers = [...proposal.approvers, account];
+  await proposalService.updateProposal(proposalId, {
+    status: status,
+    approvers: approvers
   });
 });
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_DECLINED, async (event) => {
-  const { proposalId, status } = event.getEventPayload();
-  const proposal = await proposalService.updateProposal(proposalId, {
-    status: status
+  const { proposalId, status, account } = event.getEventPayload();
+
+  const proposal = await proposalService.getProposal(proposalId);
+  const rejectors = [...proposal.rejectors, account];
+  await proposalService.updateProposal(proposalId, {
+    status: status,
+    rejectors: rejectors
   });
 });
 

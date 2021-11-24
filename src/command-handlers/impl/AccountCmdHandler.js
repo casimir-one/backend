@@ -5,8 +5,8 @@ import {
   TeamUpdatedEvent,
   UserCreatedEvent,
   UserUpdatedEvent,
-  TeamMemberJoinedEvent,
-  TeamMemberLeftEvent,
+  DaoMemberAddedEvent,
+  DaoMemberRemovedEvent,
   UserAuthorityAlteredEvent
 } from './../../events';
 
@@ -23,15 +23,15 @@ const accountCmdHandler = new AccountCmdHandler();
 
 
 
-accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, (cmd, ctx) => {
+accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
 
   const { 
     entityId,
     creator,
+    authority,
     isTeamAccount,
     description,
     attributes,
-    memoKey,
     email,
     roles
   } = cmd.getCmdPayload();
@@ -47,24 +47,25 @@ accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, (cmd, ctx) => {
       description: description,
       proposalCtx: ctx.state.proposalsStackFrame
     }));
-  }
 
-  if (!isTeamAccount) {
+  } else {
+
     const tenant = ctx.state.tenant;
     ctx.state.appEvents.push(new UserCreatedEvent({
       username: entityId,
       status: USER_PROFILE_STATUS.APPROVED,
-      pubKey: memoKey,
+      pubKey: authority.owner.auths[0].key,
       tenantId: tenant.id,
       email,
       attributes,
       roles
     }));
+
   }
 
 });
 
-accountCmdHandler.register(APP_CMD.UPDATE_ACCOUNT, (cmd, ctx) => {
+accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
 
   const { 
     entityId,
@@ -78,6 +79,7 @@ accountCmdHandler.register(APP_CMD.UPDATE_ACCOUNT, (cmd, ctx) => {
 
   
   if (isTeamAccount) {
+
     ctx.state.appEvents.push(new TeamUpdatedEvent({
       creator: creator,
       accountId: entityId,
@@ -86,39 +88,38 @@ accountCmdHandler.register(APP_CMD.UPDATE_ACCOUNT, (cmd, ctx) => {
       description: description,
       proposalCtx: ctx.state.proposalsStackFrame
     }));
-  }
+    
+  } else {
 
-  if (!isTeamAccount) {
     ctx.state.appEvents.push(new UserUpdatedEvent({
       username: entityId,
       attributes,
       email,
       status
     }));
+
   }
 });
 
-accountCmdHandler.register(APP_CMD.ALTER_ACCOUNT_AUTHORITY, (cmd, ctx) => {
+accountCmdHandler.register(APP_CMD.ALTER_DAO_AUTHORITY, (cmd, ctx) => {
   const { 
     entityId,
     isTeamAccount,
-    ownerAuth,
-    memoKey
+    authority,
   } = cmd.getCmdPayload();
 
   if (!isTeamAccount) {
     ctx.state.appEvents.push(new UserAuthorityAlteredEvent({
       username: entityId,
-      ownerAuth,
-      memoKey
+      authority
     }));
   }
 });
 
-accountCmdHandler.register(APP_CMD.JOIN_TEAM, (cmd, ctx) => {
+accountCmdHandler.register(APP_CMD.ADD_DAO_MEMBER, (cmd, ctx) => {
   const { member, teamId, notes } = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new TeamMemberJoinedEvent({
+  ctx.state.appEvents.push(new DaoMemberAddedEvent({
     member,
     teamId,
     notes,
@@ -127,10 +128,10 @@ accountCmdHandler.register(APP_CMD.JOIN_TEAM, (cmd, ctx) => {
 
 });
 
-accountCmdHandler.register(APP_CMD.LEAVE_TEAM, (cmd, ctx) => {
+accountCmdHandler.register(APP_CMD.REMOVE_DAO_MEMBER, (cmd, ctx) => {
   const { member, teamId } = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new TeamMemberLeftEvent({
+  ctx.state.appEvents.push(new DaoMemberRemovedEvent({
     member: member,
     teamId: teamId,
     proposalCtx: ctx.state.proposalsStackFrame

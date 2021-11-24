@@ -1,9 +1,10 @@
 import BaseController from '../base/BaseController';
 import { APP_CMD } from '@deip/constants';
+import qs from 'qs';
 import { BadRequestError } from './../../errors';
 import { AssetDtoService, UserDtoService } from '../../services';
 import { assetCmdHandler } from './../../command-handlers';
-import qs from 'qs';
+
 
 const assetDtoService = new AssetDtoService();
 const userDtoService = new UserDtoService();
@@ -219,14 +220,14 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ASSET_TRANSFER || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_ASSET || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
           if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
             const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.ASSET_TRANSFER)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.ASSET_TRANSFER]} protocol cmd`);
+            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_ASSET)) {
+              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.TRANSFER_ASSET]} protocol cmd`);
             }
           }
         };
@@ -258,8 +259,8 @@ class AssetsController extends BaseController {
           }
           if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
             const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.ASSET_TRANSFER)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.ASSET_TRANSFER]} protocol cmd`);
+            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_ASSET)) {
+              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.TRANSFER_ASSET]} protocol cmd`);
             }
           }
         };

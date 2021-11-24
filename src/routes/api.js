@@ -72,7 +72,7 @@ public_route.get('/expertise/content/:contentId', expertise.getExpertiseContribu
 protected_route.get('/v2/notifications/user/:username', notificationsCtrl.getNotificationsByUser)
 protected_route.put('/v2/notifications/mark-read', notificationsCtrl.markUserNotificationsAsRead)
 
-protected_route.put('/v2/proposals/update', proposalsCtrl.updateProposal)
+protected_route.put('/v2/proposals/update', proposalsCtrl.acceptProposal)
 protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
 protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountProposals)

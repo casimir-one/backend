@@ -3,20 +3,22 @@ import PubSub from 'pubsub-js';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import ProposalDtoService from './../../services/impl/read/ProposalDtoService';
+import ProposalService from './../../services/impl/write/ProposalService';
 import assert from 'assert';
 import config from './../../config';
 import { QUEUE_TOPIC } from './../../constants';
-import { CreateProposalCmd, UpdateProposalCmd, DeclineProposalCmd } from '@deip/command-models';
-import { APP_PROPOSAL } from '@deip/constants';
+import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@deip/command-models';
+import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
 import {
   logError,
   logWarn,
   logCmdInfo
 } from './../../utils/log';
 import { ChainService } from '@deip/chain-service';
+import { waitChainBlockAsync } from './../../utils/network';
 
-const proposalDtoService = new ProposalDtoService({ scoped: false });
+
+const proposalService = new ProposalService({ scoped: false });
 
 class BaseCmdHandler extends EventEmitter {
 
@@ -69,12 +71,15 @@ class BaseCmdHandler extends EventEmitter {
 
     const { proposalsIds, newProposalsCmds } = this.extractAlteredProposals(appCmds);
     if (proposalsIds.length) { // Until we have blockchain-emitted events and a saga we have to check proposal status manually
-      ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
+      await waitChainBlockAsync(async () => {
+        ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
+      });
     }
 
+    // The rest code must be synchronous
     BaseCmdHandler.Dispatch(appCmds, ctx);
 
-    // TODO: Use Kafka producer
+    // TODO: Use Apache Kafka producer
     const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
     this.logEvents(events);
     PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, events);
@@ -145,20 +150,30 @@ class BaseCmdHandler extends EventEmitter {
 
     const proposalUpdates = [];
     proposalUpdates.push(...appCmds.filter(cmd => {
-      return cmd instanceof UpdateProposalCmd || cmd instanceof DeclineProposalCmd;
-    }).map(cmd => ({ cmd, isNewProposal: newProposalsCmds.some(proposalCmd => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()) })));
+      return cmd instanceof AcceptProposalCmd || cmd instanceof DeclineProposalCmd;
+    }).map(cmd => ({
+      cmd,
+      isNewProposal: newProposalsCmds.some(proposalCmd => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()),
+      isAccepted: cmd instanceof AcceptProposalCmd,
+      isDeclined: cmd instanceof DeclineProposalCmd
+    })));
 
     for (let i = 0; i < newProposalsCmds.length; i++) {
       let proposalCmd = newProposalsCmds[i];
       proposalUpdates.push(...proposalCmd.getProposedCmds().filter(cmd => {
-        return cmd instanceof UpdateProposalCmd || cmd instanceof DeclineProposalCmd;
-      }).map(cmd => ({ cmd, isNewProposal: newProposalsCmds.some((proposalCmd) => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()) })));
+        return cmd instanceof AcceptProposalCmd || cmd instanceof DeclineProposalCmd;
+      }).map(cmd => ({ 
+        cmd, 
+        isNewProposal: newProposalsCmds.some((proposalCmd) => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()),
+        isAccepted: cmd instanceof AcceptProposalCmd,
+        isDeclined: cmd instanceof DeclineProposalCmd
+      })));
     }
 
     const proposalsIds = proposalUpdates.reduce((acc, item) => {
-      let { cmd, isNewProposal } = item;
+      let { cmd, isNewProposal, isAccepted, isDeclined } = item;
       let { entityId: proposalId } = cmd.getCmdPayload();
-      return acc.some(p => p.proposalId === proposalId) ? acc : [...acc, { proposalId, isNewProposal }];
+      return acc.some(p => p.proposalId === proposalId) ? acc : [...acc, { proposalId, isNewProposal, isAccepted, isDeclined }];
     }, []);
 
     return { proposalsIds, newProposalsCmds };
@@ -168,16 +183,16 @@ class BaseCmdHandler extends EventEmitter {
   async extractUpdatedProposals({ proposalsIds, newProposalsCmds }) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const proposalsStates = await chainRpc.getProposalsStatesAsync(proposalsIds.map(({ proposalId }) => proposalId));
-    const proposalsDtos = await proposalDtoService.getProposals(proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => proposalId));
+    const chainProposals = await Promise.all(proposalsIds.map(({ proposalId }) => chainRpc.getProposalAsync(proposalId)));
+    const proposals = await proposalService.getProposals(proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => proposalId));
 
-    const existedProposals = proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId }) => {
-      const proposalDto = proposalsDtos.find(p => p._id === proposalId);
-      const proposalsState = proposalsStates.find(p => p.external_id === proposalId);
-      const proposalCmd = CreateProposalCmd.Deserialize(proposalDto.cmd);
+    const existedProposals = proposalsIds.filter(({ isNewProposal }) => !isNewProposal).map(({ proposalId, isAccepted, isDeclined }) => {
+      const proposal = proposals.find(p => p._id === proposalId);
+      const proposalCmd = CreateProposalCmd.Deserialize(proposal.cmd);
       const proposedCmds = proposalCmd.getProposedCmds();
       const type = proposalCmd.getProposalType();
-      const status = proposalsState.status;
+      const chainProposal = chainProposals.filter((p) => !!p).find(p => p.proposalId === proposalId);
+      const status = chainProposal ? chainProposal.status : isAccepted ? PROPOSAL_STATUS.APPROVED : isDeclined ? PROPOSAL_STATUS.REJECTED : PROPOSAL_STATUS.PENDING;
       return {
         proposalId,
         type,
@@ -188,11 +203,10 @@ class BaseCmdHandler extends EventEmitter {
     })
 
     const createdProposals = proposalsIds.filter(({ isNewProposal }) => isNewProposal).map(({ proposalId }) => {
-      const proposalsState = proposalsStates.find(p => p.external_id === proposalId);
       const proposalCmd = newProposalsCmds.find(cmd => cmd.getProtocolEntityId() === proposalId);
       const proposedCmds = proposalCmd.getProposedCmds();
       const type = proposalCmd.getProposalType();
-      const status = proposalsState.status;
+      const status = PROPOSAL_STATUS.PENDING;
       return {
         proposalId,
         type,

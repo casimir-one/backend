@@ -1,6 +1,5 @@
 
 import mongoose from 'mongoose';
-import { APP_PROPOSAL } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -11,7 +10,10 @@ const ProposalSchema = new Schema({
   "cmd": { type: Object, required: false /* temp */ },
   "status": { type: Number, required: true },
   "type": { type: Number, required: true },
-  "details": { type: Object, required: true }
+  "details": { type: Object, required: true },
+  "decisionMakers": { type: Array, default: [] },
+  "approvers": { type: Array, default: [] },
+  "rejectors": { type: Array, default: [] },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const model = mongoose.model('proposals', ProposalSchema);

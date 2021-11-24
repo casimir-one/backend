@@ -42,7 +42,7 @@ class ProposalsController extends BaseController {
     }
   });
 
-  updateProposal = this.command({
+  acceptProposal = this.command({
     h: async (ctx) => {
       try {
         const msg = ctx.state.msg;

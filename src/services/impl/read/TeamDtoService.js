@@ -2,9 +2,7 @@ import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
-import AssetService from './../write/AssetService';
 
-const assetService = new AssetService()
 
 class TeamDtoService extends BaseService {
   constructor(options = { scoped: true }) { 
@@ -14,58 +12,45 @@ class TeamDtoService extends BaseService {
   async mapTeams(teams) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const chainTeams = await chainRpc.getAccountsAsync(teams.map(rg => rg._id));
 
-    //temp solution
-    const symbols = [];
-    chainTeams.forEach(({ balances }) => {
-      balances.forEach(b => {
-        const symbol = b.split(' ')[1];
-        if (!symbols.includes(symbol)) {
-          symbols.push(symbol);
-        }
-      })
+    const chainAccounts = await chainRpc.getAccountsAsync(teams.map(team => team._id));
+    const chainBalances = await Promise.all(teams.map(team => chainRpc.getAssetsBalancesByOwnerAsync(team._id)));
+
+    return teams.map((team) => {
+      const chainAccount = chainAccounts.find((chainAccount) => chainAccount && chainAccount.daoId == team._id);
+
+      const balances = [];
+      if (chainAccount) {
+        const teamBalances = chainBalances.filter((chainBalance) => chainBalance && chainBalance.account === team._id);
+        balances.push(...teamBalances);
+      } else {
+        console.warn(`Team account with ID '${team._id}' is not found in the Chain`);
+      }
+
+      return {
+        _id: team._id,
+        tenantId: team.tenantId,
+        attributes: team.attributes,
+        creator: team.creator,
+        balances: balances,
+        members: team.members,
+        name: team.name || "",
+        description: team.description || "",
+        createdAt: team.createdAt,
+        updatedAt: team.updatedAt,
+        metadataHash: chainAccount ? chainAccount.metadata : null,
+
+
+        // @deprecated
+        external_id: team._id,
+        entityId: team._id,
+        researchGroupRef: team,
+        is_dao: true,
+        is_personal: false,
+        account: chainAccount ? { ...chainAccount, balances } : { balances },
+        created: team.createdAt
+      }
     });
-    const assetsList = await assetService.getAssetsBySymbols(symbols)
-
-    return chainTeams
-      .map((chainTeam) => {
-        const teamRef = teams.find(r => r._id.toString() == chainTeam.name);
-
-        //temp solution
-        const balances = chainTeam.balances.map(b => {
-          const [amount, symbol] = b.split(' ');
-          const asset = assetsList.find((a) => symbol === a.symbol);
-          return {
-            id: asset._id,
-            symbol,
-            amount: `${Number(amount)}`,
-            precision: asset.precision
-          }
-        });
-
-        return { 
-          external_id: chainTeam.name,
-          entityId: chainTeam.name,
-          attributes: teamRef.attributes,
-          creator: teamRef.creator,
-          is_dao: chainTeam.is_research_group,
-          is_personal: !chainTeam.is_research_group,
-          description: chainTeam.json_metadata,
-          account: {
-            ...chainTeam,
-            balances
-          },
-          balances,
-          tenantId: teamRef.tenantId,
-          members: teamRef.members,
-          researchGroupRef: teamRef
-        }
-      })
-      .map((researchGroup) => {
-        const override = researchGroup.researchGroupRef ? { name: researchGroup.researchGroupRef.name, description: researchGroup.researchGroupRef.description } : { name: "Not specified", description: "Not specified" };
-        return { ...researchGroup, ...override };
-      });
   }
 
 

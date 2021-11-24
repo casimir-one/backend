@@ -45,26 +45,25 @@ contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CRE
   });
 });
 
-contractAgreementEventHandler.register(APP_EVENT.PROPOSAL_UPDATED, async (event) => {
+contractAgreementEventHandler.register(APP_EVENT.PROPOSAL_ACCEPTED, async (event) => {
 
-  const { proposalCtx: { type: proposalType, proposedCmds }, approvals } = event.getEventPayload();
+  const { proposalCtx: { type: proposalType, proposedCmds }, account } = event.getEventPayload();
 
   if (proposalType === APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL) {
     const createContractAgreementCmd = proposedCmds.find(p => p.getCmdNum() === APP_CMD.CREATE_CONTRACT_AGREEMENT);
     const { entityId: contractAgreementId } = createContractAgreementCmd.getCmdPayload();
-    const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId);
-    for (const approvalId of approvals) {
-      if (!contractAgreement.signers.some(s => s.id === approvalId)) {
-        const date = new Date().getTime();
-        const updatedContractAgreement = await contractAgreementService.updateContractAgreement({
-          _id: contractAgreementId,
-          signers: [...contractAgreement.signers, {
-            id: approvalId,
-            date
-          }]
-        });
-        contractAgreement.signers = updatedContractAgreement.signers;
-      }
+    
+    const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId); 
+    if (!contractAgreement.signers.some(s => s.id === account)) {
+      const date = new Date().getTime();
+      const updatedContractAgreement = await contractAgreementService.updateContractAgreement({
+        _id: contractAgreementId,
+        signers: [...contractAgreement.signers, {
+          id: account,
+          date
+        }]
+      });
+      contractAgreement.signers = updatedContractAgreement.signers;
     }
   }
 });

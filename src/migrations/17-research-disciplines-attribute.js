@@ -30,13 +30,13 @@ const run = async () => {
 
   const researchPromises = [];
   const researches = await Research.find({});
-  const chainResearches = await chainRpc.getResearchesAsync(researches.map(r => r._id.toString()));
+  const chainResearches = await Promise.all(researches.map(r => chainRpc.getProjectAsync(r._id)));
 
   const disciplinesAttributeId = "5f62d4fa98f46d2938dde1eb";
   for (let i = 0; i < researches.length; i++) {
     let research = researches[i];
-    let chainResearch = chainResearches.find(r => r.external_id == research._id.toString());
-    let disciplines = chainResearch.disciplines.map(d => d.external_id);
+    let chainResearch = chainResearches.find(r => r.projectId == research._id.toString());
+    let disciplines = chainResearch.disciplines.map(d => d);
 
     const attribute = research.attributes.find(attr => attr.attributeId.toString() == disciplinesAttributeId);
 

@@ -1,11 +1,4 @@
-import { createEnum } from '@deip/toolbox';
+import { PROPOSAL_STATUS } from '@deip/constants';
 
-const PROPOSAL_STATUS = createEnum({
-  PENDING: 1,
-  APPROVED: 2,
-  REJECTED: 3,
-  FAILED: 4,
-  EXPIRED: 5
-});
-
+// TODO: use direct imports
 export default PROPOSAL_STATUS;

@@ -10,9 +10,8 @@ class ReviewCreatedEvent extends BaseEvent {
       author,
       projectContentId,
       content,
-      weight,
       assessment,
-      disciplines
+      domains
     } = eventPayload;
 
     assert(!!author, "'author' is required");

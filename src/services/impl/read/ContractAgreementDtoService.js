@@ -9,25 +9,46 @@ class ContractAgreementDtoService extends BaseService {
     super(ContractAgreementSchema, options);
   }
 
-  async mapContractAgreements(contracts) {
+  async mapContractAgreements(agreements) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const chainContracts = await Promise.all(contracts.map(l => chainRpc.getContractAgreementAsync(l._id)));
-    const result = [];
-    contracts
-      .forEach((contract) => {
-        const chainContract = chainContracts.find(c => c ? c.external_id == contract._id : false);
-        result.push({ ...contract, chainContract });
-      });
+    const chainAgreements = await Promise.all(agreements.map(agreement => chainRpc.getContractAgreementAsync(agreement._id)));
+    
+    return agreements.map((agreement) => {
+      const chainAgreement = chainAgreements.find((chainAgreement) => chainAgreement && chainAgreement.agreementId == agreement._id);
+      if (!chainAgreement) {
+        console.warn(`Contract agreement with ID '${agreement._id}' is not found in the Chain`);
+      }
 
-    return result;
+      return {
+        _id: agreement._id,
+        tenantId: agreement.tenantId,
+        status: agreement.status,
+        creator: agreement.creator,
+        parties: agreement.parties,
+        hash: agreement.hash,
+        activationTime: agreement.activationTime,
+        expirationTime: agreement.expirationTime,
+        acceptedByParties: agreement.acceptedByParties,
+        proposalId: agreement.proposalId,
+        signers: agreement.signers,
+        type: agreement.type,
+        terms: agreement.terms,
+        createdAt: agreement.created_at,
+        updatedAt: agreement.updated_at,
+
+        // @deprecated
+        chainContract: chainAgreement || null
+      };
+    });
+
   }
 
   async getContractAgreement(id) {
     const contractAgreement = await this.findOne({ _id: id });
     if (!contractAgreement) return null;
-    const result = await this.mapContractAgreements([contractAgreement])
+    const result = await this.mapContractAgreements([contractAgreement]);
     return result[0];
   }
 
@@ -43,7 +64,7 @@ class ContractAgreementDtoService extends BaseService {
     if (creator) query.creator = creator;
     if (Array.isArray(parties) && parties.length) query.parties = { $all : [...parties] };
     const contractAgreements = await this.findMany(query);
-    const result = await this.mapContractAgreements(contractAgreements)
+    const result = await this.mapContractAgreements(contractAgreements);
     return result;
   }
 }

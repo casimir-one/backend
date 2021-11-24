@@ -1,9 +1,8 @@
 import ProjectDtoService from './ProjectDtoService';
-import { CHAIN_CONSTANTS, DOMAINS } from '../../../constants';
+import { DOMAINS } from '../../../constants';
 import DomainSchema from '../../../schemas/DomainSchema';
 import BaseService from '../../base/BaseService';
-import config from './../../../config';
-import { ChainService } from '@deip/chain-service';
+
 
 class DomainDtoService extends BaseService {
 
@@ -12,11 +11,18 @@ class DomainDtoService extends BaseService {
   }
 
   mapDomains(domains) {
-    return domains.map(d => ({ 
-      ...d, 
-      entityId: d._id,
-      externalId: d._id
-    }))
+    return domains.map((domain) => {
+      return {
+        _id: domain._id,
+        tenantId: domain.tenantId,
+        name: domain.name,
+
+        // @deprecated
+        entityId: domain._id,
+        externalId: domain._id,
+        parentExternalId: domain.parentExternalId
+      }
+    });
   }
 
   async getDomains(excluded = DOMAINS.EXCLUDED) {
@@ -29,17 +35,12 @@ class DomainDtoService extends BaseService {
 
   async getDomainsByProject(projectId) {
     const projectDtoService = new ProjectDtoService();
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
     const project = await projectDtoService.getProject(projectId);
-    const projectDomains = await chainRpc.getDisciplinesByProjectAsync(project.id);
-    const domains = await this.findMany({});
-    const filtered = domains.filter(d => projectDomains.some(({ external_id }) => d._id === external_id));
-    if (!filtered.length) return [];
-    const result = this.mapDomains(filtered);
+    const domains = await this.findMany({ _id: { $in: [...project.domains] } });
+    const result = this.mapDomains(domains);
     return result;
   }
- 
 }
+
 
 export default DomainDtoService;

@@ -1,9 +1,10 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { PROJECT_STATUS, TOKEN_SALE_STATUS, PROJECT_ATTRIBUTE } from './../../constants';
-import { ProjectService } from './../../services';
+import { ProjectService, InvestmentOpportunityDtoService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
+
 
 class ProjectEventHandler extends BaseEventHandler {
 
@@ -16,6 +17,7 @@ class ProjectEventHandler extends BaseEventHandler {
 const projectEventHandler = new ProjectEventHandler();
 
 const projectService = new ProjectService();
+const invstOppDtoService = new InvestmentOpportunityDtoService();
 
 
 projectEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
@@ -110,25 +112,23 @@ projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (ev
 
 projectEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, async (event) => {
   const { investmentOpportunityId } = event.getEventPayload();
-  const chainService = await ChainService.getInstanceAsync(config);
-  const chainRpc = chainService.getChainRpc();
-  const projectTokenSale = await chainRpc.getInvestmentOpportunityAsync(investmentOpportunityId); // TODO: Use RM service
 
-  if (projectTokenSale.research_external_id) { // TODO: Replace this validation with InvstOpp type check
-    const project = await projectService.getProject(projectTokenSale.research_external_id);
+  const invstOpp = await invstOppDtoService.getInvstOpp(investmentOpportunityId);
+  if (invstOpp.projectId) {
+    const project = await projectService.getProject(invstOpp.projectId);
 
-    if (projectTokenSale.status != TOKEN_SALE_STATUS.ACTIVE) {
-      const investmentOpportunityAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
+    if (invstOpp.status != TOKEN_SALE_STATUS.ACTIVE) {
+      const invstOppAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.INVESTMENT_OPPORTUNITY.toString());
       let hasUpdate = false;
 
-      if (!investmentOpportunityAttr) {
+      if (!invstOppAttr) {
         project.attributes.push({
           attributeId: PROJECT_ATTRIBUTE.INVESTMENT_OPPORTUNITY,
           value: false
         });
         hasUpdate = true;
-      } else if (investmentOpportunityAttr.value) {
-        investmentOpportunityAttr.value = false;
+      } else if (invstOppAttr.value) {
+        invstOppAttr.value = false;
         hasUpdate = true;
       }
 

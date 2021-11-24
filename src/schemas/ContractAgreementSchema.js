@@ -15,7 +15,7 @@ const ContractAgreementSchema = new Schema({
   "tenantId": { type: String, required: true },
   "status": { type: Number, enum: [...Object.values(CONTRACT_AGREEMENT_STATUS)], required: true, default: CONTRACT_AGREEMENT_STATUS.PENDING },
   "creator": { type: String, required: true},
-  "parties": { type: Array, required: true},
+  "parties": { type: Array, required: true },
   "hash": { type: String, required: true},
   "activationTime": { type: Number },
   "expirationTime": { type: Number },
