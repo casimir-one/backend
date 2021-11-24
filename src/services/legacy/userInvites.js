@@ -17,13 +17,13 @@ class UserInviteService extends BaseService {
 
 
   async findUserPendingInvites(username) {
-    const result = await this.findMany({ invitee: username, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date() } });
+    const result = await this.findMany({ invitee: username, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date().getTime() } });
     return result;
   }
 
 
   async findResearchGroupPendingInvites(researchGroupExternalId) {
-    const result = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date() } });
+    const result = await this.findMany({ researchGroupExternalId: researchGroupExternalId, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date().getTime() } });
     return result;
   }
 
@@ -42,7 +42,7 @@ class UserInviteService extends BaseService {
         { 'researches': null },
         { 'researches.externalId': { $in: [researchExternalId] } }
       ],
-      expiration: { $gt: new Date() }
+      expiration: { $gt: new Date().getTime() }
     });
 
     return result;

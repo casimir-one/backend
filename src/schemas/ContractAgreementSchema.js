@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
 const SignerSchema = new Schema({
   "_id": false,
   "id": { type: String, required: true },
-  "date": { type: Date, required: true }
+  "date": { type: Number, required: true }
 });
 
 const ContractAgreementSchema = new Schema({
@@ -17,8 +17,8 @@ const ContractAgreementSchema = new Schema({
   "creator": { type: String, required: true},
   "parties": { type: Array, required: true},
   "hash": { type: String, required: true},
-  "activationTime": { type: Date },
-  "expirationTime": { type: Date },
+  "activationTime": { type: Number },
+  "expirationTime": { type: Number },
   "acceptedByParties": { type: Array, default: [] },
   "proposalId": { type: String },
   "signers": [SignerSchema],

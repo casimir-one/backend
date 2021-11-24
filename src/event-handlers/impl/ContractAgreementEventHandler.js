@@ -55,7 +55,7 @@ contractAgreementEventHandler.register(APP_EVENT.PROPOSAL_UPDATED, async (event)
     const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId);
     for (const approvalId of approvals) {
       if (!contractAgreement.signers.some(s => s.id === approvalId)) {
-        const date = new Date(Date.now());
+        const date = new Date().getTime();
         const updatedContractAgreement = await contractAgreementService.updateContractAgreement({
           _id: contractAgreementId,
           signers: [...contractAgreement.signers, {
@@ -125,7 +125,7 @@ contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED, as
     acceptedByParties: [...contractAgreement.acceptedByParties, party]
   }
   if (!contractAgreement.signers.some(s => s.id === party)) {
-    const date = new Date(Date.now());
+    const date = new Date().getTime();
     updatedData.signers = [...contractAgreement.signers, {
       id: party,
       date
