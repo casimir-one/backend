@@ -5,8 +5,6 @@ import {
   ProjectContentService,
   DraftService
 } from './../../services';
-import cloneArchive from './../../dar/cloneArchive'
-import writeArchive from './../../dar/writeArchive';
 import FileStorage from './../../storage';
 import { PROJECT_CONTENT_STATUS } from './../../constants';
 import mongoose from 'mongoose';
@@ -72,11 +70,6 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
   }
 
   if (draftType == 'dar') { 
-    const darPath = FileStorage.getResearchDarArchiveDirPath(projectId, externalId.toString());
-    const blankDarPath = FileStorage.getResearchBlankDarArchiveDirPath();
-    
-    await cloneArchive(blankDarPath, darPath, true);
-
     draftData.title = title || externalId;
     draftData.type = draftType;
   }
@@ -96,13 +89,10 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     const projectContentPackageDirExists = await FileStorage.exists(projectContentPackageDirPath);
 
     if (projectContentPackageDirExists) {
-      console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
-      await FileStorage.rmdir(tempDestinationPath);
-
+      // draft already exist
       return
     }
-    
-    await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
+
     draftData.title = title;
     draftData.hash = packageHash;
     draftData.algo = 'sha256';
@@ -116,30 +106,13 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (event) => {
 
-  const { _id: draftId, xmlDraft } = event.getEventPayload();
+  // const { _id: draftId, xmlDraft } = event.getEventPayload();
 
-  const draft = await draftService.getDraft(draftId);
-
-  const opts = {}
-  const archiveDir = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
-  const version = await writeArchive(archiveDir, xmlDraft, {
-    versioning: opts.versioning
-  })
+  // update readModel
 });
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED, async (event) => {
-
   const { draftId } = event.getEventPayload();
-
-  const draft = await draftService.getDraft(draftId)
-
-  if (draft.type === 'dar') {
-    const darPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
-    await FileStorage.rmdir(darPath);
-  } else if (draft.type === 'package') {
-    const packagePath = FileStorage.getResearchContentPackageDirPath(draft.projectId, draft.hash);
-    await FileStorage.rmdir(packagePath);
-  }
 
   await draftService.deleteDraft(draftId);
 });

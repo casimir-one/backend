@@ -1,7 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
-import FileStorage from './../../storage';
-import { AttributeService, ProjectDtoService, PortalService } from './../../services';
+import { PortalService } from './../../services';
 
 
 class PortalEventHandler extends BaseEventHandler {
@@ -14,7 +13,6 @@ class PortalEventHandler extends BaseEventHandler {
 
 const portalEventHandler = new PortalEventHandler();
 const portalService = new PortalService();
-const projectDtoService = new ProjectDtoService();
 
 portalEventHandler.register(APP_EVENT.PORTAL_PROFILE_UPDATED, async (event) => {
   const {
@@ -22,7 +20,9 @@ portalEventHandler.register(APP_EVENT.PORTAL_PROFILE_UPDATED, async (event) => {
     shortName,
     description,
     email,
-    settings,
+    settings: {
+      faq
+    },
     portalId
   } = event.getEventPayload();
   
@@ -38,41 +38,19 @@ portalEventHandler.register(APP_EVENT.PORTAL_PROFILE_UPDATED, async (event) => {
     }, 
     {
       ...portal.settings,
-      ...settings
+      faq
     }
   );
 });
 
 portalEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
   const { title, banner, logo, portalId } = event.getEventPayload();
-  
-  const portal = await portalService.getPortal(portalId);
-  const oldBanner = portal.banner;
-  const oldLogo = portal.logo;
 
-  const update = {
-    banner: banner ? banner : portal.banner,
-    logo: logo ? logo : portal.logo,
-    name: title ? title : portal.name
-  }
-
-  const updatedPortalProfile = await portalService.updatePortalProfile(portalId, update, {});
-
-  if (banner && oldBanner != banner) {
-    const oldFilepath = FileStorage.getPortalBannerFilePath(portalId, oldBanner);
-    const exists = await FileStorage.exists(oldFilepath);
-    if (exists) {
-      await FileStorage.delete(oldFilepath);
-    }
-  }
-
-  if (logo && oldLogo != logo) {
-    const oldFilepath = FileStorage.getPortalLogoFilePath(portalId, oldLogo);
-    const exists = await FileStorage.exists(oldFilepath);
-    if (exists) {
-      await FileStorage.delete(oldFilepath);
-    }
-  }
+  const updatedPortalProfile = await portalService.updatePortalProfile(portalId, {
+    banner,
+    logo,
+    name: title
+  }, {});
 });
 
 portalEventHandler.register(APP_EVENT.LAYOUT_UPDATED, async (event) => {

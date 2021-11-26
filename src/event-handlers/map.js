@@ -191,14 +191,17 @@ module.exports = {
   ],
 
   [APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED]: [
+    { h: fileUploadEventHandler, await: true },
     { h: projectContentEventHandler, await: true }
   ],
 
   [APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED]: [
+    { h: fileUploadEventHandler, await: true },
     { h: projectContentEventHandler, await: true }
   ],
 
   [APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED]: [
+    { h: fileUploadEventHandler, await: true },
     { h: projectContentEventHandler, await: true }
   ],
 
@@ -277,7 +280,8 @@ module.exports = {
   ],
 
   [APP_EVENT.PORTAL_SETTINGS_UPDATED]: [
-    { h: portalEventHandler, await: true },
+    { h: fileUploadEventHandler, await: true },
+    { h: portalEventHandler, await: true }
   ],
   
   [APP_EVENT.LAYOUT_UPDATED]: [
