@@ -74,6 +74,7 @@ import ContractAgreementProposalCreatedEvent from './impl/ContractAgreementPropo
 import ContractAgreementProposalAcceptedEvent from './impl/ContractAgreementProposalAcceptedEvent';
 import ContractAgreementProposalDeclinedEvent from './impl/ContractAgreementProposalDeclinedEvent';
 import ContractAgreementAcceptedEvent from './impl/ContractAgreementAcceptedEvent';
+import ContractAgreementRejectedEvent from './impl/ContractAgreementRejectedEvent';
 
 import AttributeSettingsUpdatedEvent from './impl/AttributeSettingsUpdatedEvent';
 import LayoutSettingsUpdatedEvent from './impl/LayoutSettingsUpdatedEvent';
@@ -164,6 +165,7 @@ module.exports = {
   ContractAgreementProposalAcceptedEvent,
   ContractAgreementProposalDeclinedEvent,
   ContractAgreementAcceptedEvent,
+  ContractAgreementRejectedEvent,
 
   AttributeSettingsUpdatedEvent,
   LayoutSettingsUpdatedEvent,

@@ -143,4 +143,14 @@ contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED, as
   }
 });
 
+contractAgreementEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_REJECTED, async (event) => {
+
+  const { entityId: contractAgreementId, party } = event.getEventPayload();
+
+  await contractAgreementService.updateContractAgreement({
+    _id: contractAgreementId,
+    status: CONTRACT_AGREEMENT_STATUS.REJECTED
+  });
+});
+
 module.exports = contractAgreementEventHandler;

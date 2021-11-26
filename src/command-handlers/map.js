@@ -48,6 +48,7 @@ module.exports = {
   [APP_CMD.CREATE_PROJECT_NDA]: projectNdaCmdHandler,
   [APP_CMD.CREATE_CONTRACT_AGREEMENT]: contractAgreementCmdHandler,
   [APP_CMD.ACCEPT_CONTRACT_AGREEMENT]: contractAgreementCmdHandler,
+  [APP_CMD.REJECT_CONTRACT_AGREEMENT]: contractAgreementCmdHandler,
   [APP_CMD.UPDATE_PORTAL_PROFILE]: portalCmdHandler,
   [APP_CMD.UPDATE_PORTAL_SETTINGS]: portalCmdHandler,
   [APP_CMD.UPDATE_LAYOUT]: portalCmdHandler,

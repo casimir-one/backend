@@ -272,6 +272,10 @@ module.exports = {
     { h: contractAgreementEventHandler, await: true },
   ],
 
+  [APP_EVENT.CONTRACT_AGREEMENT_REJECTED]: [
+    { h: contractAgreementEventHandler, await: true },
+  ],
+
   [APP_EVENT.PORTAL_PROFILE_UPDATED]: [
     { h: portalEventHandler, await: true },
   ],

@@ -211,11 +211,12 @@ public_route.get('/v2/nda/:ndaId', projectNdaCtrl.getProjectNonDisclosureAgreeme
 public_route.get('/v2/nda/creator/:username', projectNdaCtrl.getProjectNonDisclosureAgreementsByCreator);
 public_route.get('/v2/nda/project/:projectId', projectNdaCtrl.getProjectNonDisclosureAgreementsByProject);
 
-protected_route.post('/v2/contract-agreement', contractAgreementCtrl.proposeContractAgreement)
-protected_route.post('/v2/contract-agreement/accept', contractAgreementCtrl.acceptContractAgreement)
-protected_route.get('/v2/contract-agreement/:contractAgreementId', contractAgreementCtrl.getContractAgreement)
-protected_route.get('/v2/contract-agreements', contractAgreementCtrl.getContractAgreements)
-public_route.get('/contract-agreement/file/:filename', contractAgreementCtrl.getContractAgreementFile)
+protected_route.post('/v2/contract-agreement', contractAgreementCtrl.proposeContractAgreement);
+protected_route.post('/v2/contract-agreement/accept', contractAgreementCtrl.acceptContractAgreement);
+protected_route.post('/v2/contract-agreement/reject', contractAgreementCtrl.rejectContractAgreement);
+protected_route.get('/v2/contract-agreement/:contractAgreementId', contractAgreementCtrl.getContractAgreement);
+protected_route.get('/v2/contract-agreements', contractAgreementCtrl.getContractAgreements);
+public_route.get('/contract-agreement/file/:filename', contractAgreementCtrl.getContractAgreementFile);
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),
