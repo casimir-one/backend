@@ -47,8 +47,7 @@ class PortalService {
     logo,
     banner
   }, {
-    faq,
-    layouts
+    faq
   }) {
 
     const portalProfile = await PortalSchema.findOne({ _id: portalId });
@@ -63,7 +62,6 @@ class PortalService {
     portalProfile.logo = logo !== undefined ? logo : portalProfile.logo;
     portalProfile.banner = banner !== undefined ? banner : portalProfile.banner;
     portalProfile.settings.faq = faq !== undefined ? faq : portalProfile.settings.faq;
-    portalProfile.settings.layouts = layouts !== undefined ? layouts : portalProfile.settings.layouts;
     
     const savedPortalProfile = await portalProfile.save();
     return savedPortalProfile.toObject();
