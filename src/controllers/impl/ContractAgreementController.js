@@ -151,6 +151,31 @@ class ContractAgreementController extends BaseController {
       }
     }
   });
+
+  rejectContractAgreement = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.REJECT_CONTRACT_AGREEMENT);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+        };
+        
+        const msg = ctx.state.msg;
+        await contractAgreementCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
 }
 
 const contractAgreementCtrl = new ContractAgreementController();
