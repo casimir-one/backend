@@ -6,7 +6,8 @@ import {
   UserCreatedEvent,
   UserUpdatedEvent,
   TeamMemberJoinedEvent,
-  TeamMemberLeftEvent
+  TeamMemberLeftEvent,
+  UserAuthorityAlteredEvent
 } from './../../events';
 import { USER_PROFILE_STATUS } from './../../constants';
 
@@ -26,10 +27,10 @@ const accountCmdHandler = new AccountCmdHandler();
 accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, (cmd, ctx) => {
 
   const { 
-    entityId, 
-    creator, 
-    isTeamAccount, 
-    description, 
+    entityId,
+    creator,
+    isTeamAccount,
+    description,
     attributes,
     memoKey,
     email,
@@ -67,10 +68,10 @@ accountCmdHandler.register(APP_CMD.CREATE_ACCOUNT, (cmd, ctx) => {
 accountCmdHandler.register(APP_CMD.UPDATE_ACCOUNT, (cmd, ctx) => {
 
   const { 
-    entityId, 
-    creator, 
-    isTeamAccount, 
-    description, 
+    entityId,
+    creator,
+    isTeamAccount,
+    description,
     attributes,
     email,
     status
@@ -94,6 +95,23 @@ accountCmdHandler.register(APP_CMD.UPDATE_ACCOUNT, (cmd, ctx) => {
       attributes,
       email,
       status
+    }));
+  }
+});
+
+accountCmdHandler.register(APP_CMD.ALTER_ACCOUNT_AUTHORITY, (cmd, ctx) => {
+  const { 
+    entityId,
+    isTeamAccount,
+    ownerAuth,
+    memoKey
+  } = cmd.getCmdPayload();
+
+  if (!isTeamAccount) {
+    ctx.state.appEvents.push(new UserAuthorityAlteredEvent({
+      username: entityId,
+      ownerAuth,
+      memoKey
     }));
   }
 });

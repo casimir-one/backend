@@ -144,6 +144,10 @@ module.exports = {
     { h: userEventHandler, await: true }
   ],
 
+  [APP_EVENT.USER_AUTHORITY_ALTERED]: [
+    { h: userEventHandler, await: true }
+  ],
+
   [APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED]: [
     { h: userNotificationEventHandler, await: false }
   ],
