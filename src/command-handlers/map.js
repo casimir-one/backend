@@ -23,6 +23,7 @@ module.exports = {
   [APP_CMD.LEAVE_TEAM]: accountCmdHandler,
   [APP_CMD.CREATE_ACCOUNT]: accountCmdHandler,
   [APP_CMD.UPDATE_ACCOUNT]: accountCmdHandler,
+  [APP_CMD.ALTER_ACCOUNT_AUTHORITY]: accountCmdHandler,
   [APP_CMD.CREATE_PROPOSAL]: proposalCmdHandler,
   [APP_CMD.UPDATE_PROPOSAL]: proposalCmdHandler,
   [APP_CMD.DECLINE_PROPOSAL]: proposalCmdHandler,

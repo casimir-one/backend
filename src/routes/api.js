@@ -151,6 +151,7 @@ public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
 public_route.get('/v2/users/tenant/:portalId', usersCtrl.getUsersByTenant)
 
 protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
+protected_route.put('/v2/user/update/password', compose([userCmdProxy()]), usersCtrl.updateUserPassword)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
 protected_route.post('/bookmarks/user/:username', usersCtrl.addUserBookmark) //temp: need change to cmd
 protected_route.delete('/bookmarks/user/:username/remove/:bookmarkId', usersCtrl.removeUserBookmark) //temp: need change to cmd
