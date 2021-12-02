@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox/lib/enum';
+import { createEnum } from '@deip/toolbox';
 
 const USER_INVITE_STATUS = createEnum({
   SENT: 1,

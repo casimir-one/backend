@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox/lib/enum';
+import { createEnum } from '@deip/toolbox';
 
 const PROJECT_STATUS = createEnum({
   PROPOSED: 1,

@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox/lib/enum';
+import { createEnum } from '@deip/toolbox';
 
 const QUEUE_TOPIC = createEnum({
   APP_EVENT_TOPIC: 1

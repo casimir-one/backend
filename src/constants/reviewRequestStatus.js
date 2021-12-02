@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox/lib/enum';
+import { createEnum } from '@deip/toolbox';
 
 const REVIEW_REQUEST_STATUS = createEnum({
   PENDING: 1,

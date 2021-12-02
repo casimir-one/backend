@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox/lib/enum';
+import { createEnum } from '@deip/toolbox';
 
 const TOKEN_SALE_STATUS = createEnum({
   ACTIVE: 1,

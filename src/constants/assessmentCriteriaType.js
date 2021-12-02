@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox/lib/enum';
+import { createEnum } from '@deip/toolbox';
 
 const ASSESSMENT_CRITERIA_TYPE = createEnum({
   UNKNOWN: 0,

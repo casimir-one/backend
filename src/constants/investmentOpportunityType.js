@@ -1,4 +1,4 @@
-import { createEnum } from '@deip/toolbox/lib/enum';
+import { createEnum } from '@deip/toolbox';
 
 const INVESTMENT_OPPORTUNITY_TYPE = createEnum({
   UNKNOWN: 0,
