@@ -21,7 +21,7 @@ const UserInviteSchema = new Schema({
   "rewardShare": { type: String, default: undefined },
   "failReason": { type: String },
   "status": {
-    type: String,
+    type: Number,
     enum: [...Object.values(USER_INVITE_STATUS)],
     required: true
   },

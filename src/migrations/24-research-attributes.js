@@ -24,8 +24,7 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 
-const { ATTR_SCOPES, ATTR_TYPES } = require('@deip/constants');
-const SIGN_UP_POLICY = require('../constants').SIGN_UP_POLICY;
+const { ATTR_SCOPES, ATTR_TYPES, SIGN_UP_POLICY } = require('@deip/constants');
 const ASSESSMENT_CRITERIA_TYPE = require('../constants').ASSESSMENT_CRITERIA_TYPE;
 const PROJECT_CONTENT_TYPES = require('../constants').PROJECT_CONTENT_TYPES;
 const PROJECT_STATUS = require('./../constants').PROJECT_STATUS;

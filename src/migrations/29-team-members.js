@@ -22,7 +22,7 @@ require("@babel/register")({
 const { ChainService } = require('@deip/chain-service');
 
 const config = require('./../config');
-const { USER_PROFILE_STATUS } = require('./../constants');
+const { USER_PROFILE_STATUS } = require('@deip/constants');
 
 const mongoose = require('mongoose');
 const TeamSchema = require('./../schemas/TeamSchema');

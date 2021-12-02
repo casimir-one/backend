@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { PROJECT_CONTENT_STATUS } from './../constants';
+import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DATA_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -15,12 +15,12 @@ const ProjectContentSchema = new Schema({
   "hash": { type: String, index: true },
   "algo": { type: String },
   "type": {
-    type: String,
-    enum: ['file', 'dar', 'package'],
+    type: Number,
+    enum: [...Object.values(PROJECT_CONTENT_DATA_TYPES)],
     required: true
   },
   "status": {
-    type: String,
+    type: Number,
     enum: [...Object.values(PROJECT_CONTENT_STATUS)],
     required: true
   },

@@ -15,7 +15,7 @@ const config = require('./../config');
 
 const mongoose = require('mongoose');
 const UserSchema = require('./../schemas/UserSchema');
-const USER_PROFILE_STATUS = require('./../constants/userProfileStatus').default;
+const { USER_PROFILE_STATUS } = require('@deip/constants');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 

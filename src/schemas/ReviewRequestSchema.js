@@ -1,4 +1,4 @@
-
+import { REVIEW_REQUEST_STATUS } from './../constants';
 import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
@@ -9,8 +9,8 @@ const ReviewRequestSchema = new Schema({
   "requestor": { type: String, required: true },
   "projectContentId": { type: String, required: true },
   "status": {
-    type: String,
-    enum: ['pending', 'approved', 'denied'],
+    type: Number,
+    enum: [...Object.values(REVIEW_REQUEST_STATUS)],
     required: true
   },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });

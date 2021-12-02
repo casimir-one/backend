@@ -1,6 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { ReviewRequestService, ReviewRequestDtoService, ProjectContentDtoService, ReviewService } from './../../services';
+import { REVIEW_REQUEST_STATUS } from './../../constants';
 
 class ReviewEventHandler extends BaseEventHandler {
 
@@ -28,7 +29,7 @@ reviewEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (event) => {
     expert,
     requestor,
     projectContentId,
-    status: 'pending'
+    status: REVIEW_REQUEST_STATUS.PENDING
   });
 });
 
@@ -38,7 +39,7 @@ reviewEventHandler.register(APP_EVENT.REVIEW_REQUEST_DECLINED, async (event) => 
 
   await reviewRequestService.updateReviewRequest({
     _id: reviewRequestId,
-    status: 'denied'
+    status: REVIEW_REQUEST_STATUS.DENIED
   });
 });
 
@@ -64,12 +65,12 @@ reviewEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) => {
     content
   });
 
-  const expertReviewRequests = await reviewRequestDtoService.getReviewRequestsByExpert(author, 'pending');
+  const expertReviewRequests = await reviewRequestDtoService.getReviewRequestsByExpert(author, REVIEW_REQUEST_STATUS.PENDING);
   const reviewRequest = expertReviewRequests.find(r => r.projectContentId == projectContentId);
   if (reviewRequest) {
     await reviewRequestService.updateReviewRequest({
       _id: reviewRequest._id,
-      status: 'approved'
+      status: REVIEW_REQUEST_STATUS.APPROVED
     })
   } 
 });

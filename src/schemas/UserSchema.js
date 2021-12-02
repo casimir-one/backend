@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import USER_PROFILE_STATUS from './../constants/userProfileStatus';
+import { USER_PROFILE_STATUS } from '@deip/constants';
 import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
@@ -18,7 +18,7 @@ const UserSchema = new Schema({
   "tenantId": { type: String, required: true },
   "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "signUpPubKey": { type: String, default: null },
-  "status": { type: String, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
+  "status": { type: Number, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
   "teams": { type: [String], default: [] },
   "attributes": [AttributeValueSchema],
   "roles": [UserRole],

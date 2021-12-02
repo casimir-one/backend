@@ -6,7 +6,7 @@ import {
   DraftService
 } from './../../services';
 import FileStorage from './../../storage';
-import { PROJECT_CONTENT_STATUS } from './../../constants';
+import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DATA_TYPES } from '@deip/constants';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import path from 'path';
@@ -69,12 +69,12 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     foreignReferences: []
   }
 
-  if (draftType == 'dar') { 
+  if (draftType == PROJECT_CONTENT_DATA_TYPES.DAR) {
     draftData.title = title || externalId;
     draftData.type = draftType;
   }
 
-  if (draftType == 'package' && ctx.req.files.length > 0) {
+  if (draftType == PROJECT_CONTENT_DATA_TYPES.PACKAGE && ctx.req.files.length > 0) {
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
     const files = ctx.req.files;
     const tempDestinationPath = files[0].destination;

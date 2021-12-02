@@ -6,8 +6,8 @@ import config from '../../config';
 import FileStorage from './../../storage';
 import UserBookmarkService from './../../services/legacy/userBookmark';
 import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
-import { USER_PROFILE_STATUS, USER_ROLES } from './../../constants';
-import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN } from '@deip/constants';
+import { USER_ROLES } from './../../constants';
+import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, USER_PROFILE_STATUS, USER_BOOKMARK_TYPE } from '@deip/constants';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
 import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
@@ -400,7 +400,7 @@ class UsersController extends BaseController {
       const bookmarkType = data.type;
       let ref
       switch (bookmarkType) {
-        case 'research':
+        case USER_BOOKMARK_TYPE.PROJECT:
           const researchId = +data.researchId;
           ref = data.researchId;
           break;

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose';
+import { USER_BOOKMARK_TYPE } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -6,8 +7,8 @@ const UserBookmarkSchema = new Schema({
   "tenantId": { type: String, required: true },
   "username": { type: String, required: true },
   "type": {
-    type: String,
-    enum: ['research'],
+    type: Number,
+    enum: [...Object.values(USER_BOOKMARK_TYPE)],
     required: true,
   },
   "ref": { type: String, required: true }

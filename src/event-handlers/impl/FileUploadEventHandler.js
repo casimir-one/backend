@@ -9,6 +9,7 @@ import writeArchive from './../../dar/writeArchive';
 import { generatePdf } from '../../utils/pdf';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
+import { PROJECT_CONTENT_DATA_TYPES } from '@deip/constants';
 
 const getContractFilePath = async (filename) => {
   const contractAgreementDir = FileStorage.getContractAgreementDirPath();
@@ -102,14 +103,14 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (
 
   const externalId = mongoose.Types.ObjectId(draftId);
 
-  if (draftType == 'dar') { 
+  if (draftType == PROJECT_CONTENT_DATA_TYPES.DAR) { 
     const darPath = FileStorage.getResearchDarArchiveDirPath(projectId, externalId.toString());
     const blankDarPath = FileStorage.getResearchBlankDarArchiveDirPath();
     
     await cloneArchive(blankDarPath, darPath, true);
   }
   const files = ctx.req.files;
-  if (draftType == 'package' && files.length > 0) {
+  if (draftType == PROJECT_CONTENT_DATA_TYPES.PACKAGE && files.length > 0) {
     const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
     const tempDestinationPath = files[0].destination;
     const hashObj = await FileStorage.calculateDirHash(tempDestinationPath, options);
@@ -151,10 +152,10 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED, async (
 
   const draft = await draftService.getDraft(draftId)
 
-  if (draft.type === 'dar') {
+  if (draft.type === PROJECT_CONTENT_DATA_TYPES.DAR) {
     const darPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
     await FileStorage.rmdir(darPath);
-  } else if (draft.type === 'package') {
+  } else if (draft.type === PROJECT_CONTENT_DATA_TYPES.PACKAGE) {
     const packagePath = FileStorage.getResearchContentPackageDirPath(draft.projectId, draft.hash);
     await FileStorage.rmdir(packagePath);
   }
