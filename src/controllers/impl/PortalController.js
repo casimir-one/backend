@@ -1,11 +1,10 @@
 import BaseController from '../base/BaseController';
 import { PortalService, PortalDtoService, UserDtoService } from '../../services';
-import { APP_CMD, CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
+import { APP_CMD, CONTRACT_AGREEMENT_TYPE, USER_PROFILE_STATUS } from '@deip/constants';
 import { BadRequestError, NotFoundError } from '../../errors';
 import { portalCmdHandler } from '../../command-handlers';
 import sharp from 'sharp';
 import FileStorage from '../../storage';
-import { USER_PROFILE_STATUS } from '../../constants';
 import { PortalSettingsForm } from './../../forms';
 
 const portalService = new PortalService();
