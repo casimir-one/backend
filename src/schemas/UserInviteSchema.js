@@ -25,9 +25,9 @@ const UserInviteSchema = new Schema({
     enum: [...Object.values(USER_INVITE_STATUS)],
     required: true
   },
-  "expiration": { type: Date, required: true, index: true },
+  "expiration": { type: Number, required: true, index: true },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
-const model = mongoose.model('user-invites', UserInviteSchema);
+const model = mongoose.model('user-invite', UserInviteSchema);
 
 module.exports = model;

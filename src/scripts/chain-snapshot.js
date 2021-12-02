@@ -233,8 +233,7 @@ const run = async ({
     }
   });
 
-  const plus3years = new Date(new Date().getTime() + 86400000 * 365 * 3).toISOString().split('.')[0]; // 3 years
-  const expirationTime = `${plus3years.split('T')[0]}T00:00:00`;
+  const expirationTime = new Date().getTime() + 86400000 * 365 * 3; // 3 years
   
   const snapshotProposals = chainProposalsStates.filter((p) => p.status == 1 || p.status == 5).map((p) => {
     return {
@@ -385,7 +384,7 @@ const run = async ({
         if (outdatedProposals.some(id => doc._id == id)) {
           return null;
         }
-        return { ...doc, tenantId: TENANT, expiration: new Date(new Date().getTime() + 86400000 * 365 * 3) }
+        return { ...doc, tenantId: TENANT, expiration: new Date().getTime() + 86400000 * 365 * 3 }
       }
       else if (collectionName == 'user-bookmarks') {
         if (blackListUsers.some(name => doc.username == name)) {

@@ -113,8 +113,8 @@ const Education = new Schema({
   "_id": false,
   "educationalInstitution": { type: String, required: true, trim: true },
   "period": {
-    "from": { type: Date, default: null },
-    "to": { type: Date, default: null }
+    "from": { type: Number, default: 1 },
+    "to": { type: Number, default: 1 }
   },
   "degree": { type: String, required: true },
   "area": { type: String, required: true },
@@ -130,8 +130,8 @@ const Employment = new Schema({
     "country": { type: String, trim: true, default: null }
   },
   "period": {
-    "from": { type: Date, default: null },
-    "to": { type: Date, default: null }
+    "from": { type: Number, default: 1 },
+    "to": { type: Number, default: 1 }
   },
   "position": { type: String, required: true },
   "description": { type: String, default: null },
@@ -155,7 +155,7 @@ const UserProfileMigratingSchema = new Schema({
   "firstName": { type: String, default: undefined },
   "lastName": { type: String, default: undefined },
   "bio": { type: String, default: undefined},
-  "birthdate": { type: Date, default: undefined},
+  "birthdate": { type: Number, default: 1},
   "category": { type: String, default: undefined },
   "occupation": { type: String, default: undefined },
   "roles": [UserRole],
@@ -837,11 +837,10 @@ const run = async () => {
     const userProfileDoc = userProfiles[i];
     const user = userProfileDoc.toObject();
 
-    let userBirthdate = '';
+    let userBirthdate = 1;
 
     if (user.birthdate) {
-      const d = new Date(user.birthdate)
-      userBirthdate = `${d.getFullYear()}-${('0' + (d.getMonth() + 1)).slice(-2)}-${('0' + d.getDate()).slice(-2)}`
+      userBirthdate = new Date(user.birthdate).getTime()
     }
 
     userProfileDoc.attributes = [
