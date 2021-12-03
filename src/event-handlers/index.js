@@ -13,6 +13,7 @@ import reviewEventHandler from './impl/ReviewEventHandler';
 import contractAgreementEventHandler from './impl/ContractAgreementEventHandler';
 import fileUploadEventHandler from './impl/FileUploadEventHandler';
 import portalEventHandler from './impl/PortalEventHandler';
+import userSettingsEventHandler from './impl/UserSettingsEventHandler';
 
 
 module.exports = {
@@ -30,5 +31,6 @@ module.exports = {
   reviewEventHandler,
   contractAgreementEventHandler,
   fileUploadEventHandler,
-  portalEventHandler
+  portalEventHandler,
+  userSettingsEventHandler
 };

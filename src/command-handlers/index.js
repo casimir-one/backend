@@ -10,6 +10,8 @@ import reviewCmdHandler from './impl/ReviewCmdHandler';
 import projectNdaCmdHandler from './impl/ProjectNdaCmdHandler';
 import contractAgreementCmdHandler from './impl/ContractAgreementCmdHandler';
 import portalCmdHandler from './impl/PortalCmdHandler';
+import userSettingsCmdHandler from './impl/UserSettingsCmdHandler';
+import notificationCmdHandler from './impl/NotificationCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -23,5 +25,7 @@ module.exports = {
   reviewCmdHandler,
   projectNdaCmdHandler,
   contractAgreementCmdHandler,
-  portalCmdHandler
+  portalCmdHandler,
+  userSettingsCmdHandler,
+  notificationCmdHandler
 }

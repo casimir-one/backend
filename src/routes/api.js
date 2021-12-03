@@ -1,8 +1,6 @@
 import koa_router from 'koa-router'
 import compose from 'koa-compose';
 import expertise from '../controllers/legacy/expertise'
-import notifications from '../controllers/legacy/notifications'
-import invites from '../controllers/legacy/invites'
 import grants from '../controllers/legacy/grants'
 
 import { 
@@ -20,7 +18,10 @@ import {
   projectNdaCtrl,
   contractAgreementCtrl,
   revenuesCtrl,
-  portalCtrl
+  portalCtrl,
+  userSettingsCtrl,
+  notificationsCtrl,
+  invitesCtrl
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
@@ -68,18 +69,16 @@ public_route.get('/expertise/research/:researchId/discipline/:disciplineId', exp
 public_route.get('/expertise/content/:contentId/discipline/:disciplineId', expertise.getExpertiseContributionByResearchContentAndDiscipline)
 public_route.get('/expertise/content/:contentId', expertise.getExpertiseContributionsByResearchContent)
 
-protected_route.get('/notifications/user/:username', notifications.getNotificationsByUser)
-protected_route.put('/notifications/:username/mark-read/:notificationId', notifications.markUserNotificationAsRead)
-protected_route.put('/notifications/:username/mark-all-read', notifications.markAllUserNotificationAsRead)
+protected_route.get('/v2/notifications/user/:username', notificationsCtrl.getNotificationsByUser)
+protected_route.put('/v2/notifications/mark-read', notificationsCtrl.markUserNotificationsAsRead)
 
 protected_route.put('/v2/proposals/update', proposalsCtrl.updateProposal)
 protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
 protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountProposals)
 
-protected_route.get('/invites/:username', invites.getUserInvites)
-protected_route.get('/invites/group/:researchGroupExternalId', invites.getResearchGroupPendingInvites)
-protected_route.get('/invites/research/:researchExternalId', invites.getResearchPendingInvites)
+protected_route.get('/v2/invites/:username', invitesCtrl.getUserInvites)
+protected_route.get('/v2/invites/team/:teamId', invitesCtrl.getTeamPendingInvites)
 
 protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
@@ -153,10 +152,10 @@ public_route.get('/v2/users/tenant/:portalId', usersCtrl.getUsersByTenant)
 protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
 protected_route.put('/v2/user/update/password', compose([userCmdProxy()]), usersCtrl.updateUserPassword)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
-protected_route.post('/bookmarks/user/:username', usersCtrl.addUserBookmark) //temp: need change to cmd
-protected_route.delete('/bookmarks/user/:username/remove/:bookmarkId', usersCtrl.removeUserBookmark) //temp: need change to cmd
 
-protected_route.get('/v2/bookmarks/user/:username', usersCtrl.getUserBookmarks)
+protected_route.post('/v2/bookmarks', userSettingsCtrl.createUserBookmark)
+protected_route.post('/v2/bookmarks/delete', userSettingsCtrl.deleteUserBookmark)
+protected_route.get('/v2/bookmarks/user/:username', userSettingsCtrl.getUserBookmarks)
 
 public_route.get('/v2/investments/project/:projectId', invstOppCtrl.getInvstOppByProject)
 protected_route.post('/v2/investments', invstOppCtrl.createInvstOpp)

@@ -30,6 +30,9 @@ import ContractAgreementService from './impl/write/ContractAgreementService';
 import RevenueDtoService from './impl/read/RevenueDtoService';
 import PortalDtoService from './impl/read/PortalDtoService';
 import PortalService from './impl/write/PortalService';
+import UserBookmarkService from './impl/write/UserBookmarkService';
+import UserNotificationService from './impl/write/UserNotificationService';
+import UserInviteService from './impl/write/UserInviteService';
 
 module.exports = {
   TeamService,
@@ -77,5 +80,9 @@ module.exports = {
   RevenueDtoService,
 
   PortalDtoService,
-  PortalService
+  PortalService,
+
+  UserBookmarkService,
+  UserNotificationService,
+  UserInviteService
 }

@@ -4,10 +4,9 @@ import sharp from 'sharp';
 import qs from 'qs';
 import config from '../../config';
 import FileStorage from './../../storage';
-import UserBookmarkService from './../../services/legacy/userBookmark';
 import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
-import { USER_ROLES } from './../../constants';
-import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, USER_PROFILE_STATUS, USER_BOOKMARK_TYPE } from '@deip/constants';
+import { USER_PROFILE_STATUS, USER_ROLES } from './../../constants';
+import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN } from '@deip/constants';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
 import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
@@ -243,32 +242,6 @@ class UsersController extends BaseController {
     }
   });
 
-  getUserBookmarks = this.query({
-    h: async (ctx) => {
-      try {
-        const jwtUsername = ctx.state.user.username;
-        const username = ctx.params.username;
-        const type = ctx.query.type;
-        const ref = ctx.query.ref;
-
-        const userBookmarkService = new UserBookmarkService();
-
-        if (username !== jwtUsername) {
-          throw new ForbiddenError(`You have no permission to get '${username}' bookmarks`);
-        }
-
-        const bookmarks = await userBookmarkService.getUserBookmarks(username, type, ref);
-        ctx.status = 200;
-        ctx.body = bookmarks;
-
-      } catch (err) {
-        console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
-      }
-    }
-  });
-
   getUsersByTeam = this.query({
     h: async (ctx) => {
       try {
@@ -386,62 +359,6 @@ class UsersController extends BaseController {
       }
     }
   });
-
-  addUserBookmark = async (ctx) => { // temp: need change to cmd
-    try {
-      const jwtUsername = ctx.state.user.username;
-      const username = ctx.params.username;
-      const userBookmarkService = new UserBookmarkService();
-      if (username !== jwtUsername) {
-        throw new ForbiddenError(`You have no permission to create '${username}' bookmarks`);
-      }
-
-      const data = ctx.request.body;
-      const bookmarkType = data.type;
-      let ref
-      switch (bookmarkType) {
-        case USER_BOOKMARK_TYPE.PROJECT:
-          const researchId = +data.researchId;
-          ref = data.researchId;
-          break;
-      }
-
-      const bookmark = await userBookmarkService.createUserBookmark({
-        username,
-        type: data.type,
-        ref
-      });
-
-      ctx.status = 201;
-      ctx.body = bookmark;
-
-    } catch (err) {
-      console.log(err);
-      ctx.status = err.httpStatus || 500;
-      ctx.body = err.message;
-    }
-  }
-
-  removeUserBookmark = async (ctx) => {//temp: need change to cmd
-    try {
-      const jwtUsername = ctx.state.user.username;
-      const username = ctx.params.username;
-      const bookmarkId = ctx.params.bookmarkId;
-
-      const userBookmarkService = new UserBookmarkService();
-      if (username !== jwtUsername) {
-        throw new ForbiddenError(`You have no permission to remove '${username}' bookmarks`);
-      }
-
-      await userBookmarkService.removeUserBookmark(bookmarkId);
-      ctx.status = 204;
-
-    } catch (err) {
-      console.log(err);
-      ctx.status = err.httpStatus || 500;
-      ctx.body = err.message;
-    }
-  }
 
   getAvatar = this.query({
     h: async (ctx) => {

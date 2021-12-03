@@ -13,6 +13,9 @@ import projectNdaCtrl from './impl/ProjectNdaController';
 import contractAgreementCtrl from './impl/ContractAgreementController';
 import revenuesCtrl from './impl/RevenuesController';
 import portalCtrl from './impl/PortalController';
+import userSettingsCtrl from './impl/UserSettingsController';
+import notificationsCtrl from './impl/NotificationsController';
+import invitesCtrl from './impl/InvitesController';
 
 module.exports = {
   projectsCtrl,
@@ -29,5 +32,8 @@ module.exports = {
   projectNdaCtrl,
   contractAgreementCtrl,
   revenuesCtrl,
-  portalCtrl
+  portalCtrl,
+  userSettingsCtrl,
+  notificationsCtrl,
+  invitesCtrl
 }
