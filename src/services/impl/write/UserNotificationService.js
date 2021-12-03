@@ -1,6 +1,5 @@
-import BaseService from './../base/BaseService';
-import UserNotificationSchema from './../../schemas/UserNotificationSchema';
-
+import BaseService from './../../base/BaseService';
+import UserNotificationSchema from './../../../schemas/UserNotificationSchema';
 
 class UserNotificationService extends BaseService {
 
@@ -32,12 +31,17 @@ class UserNotificationService extends BaseService {
     return result;
   }
 
-  async updateUserNotifications(username, {
+  async updateUserNotifications(username, notificationsIds = [], {
     status
   }) {
+    const query = { username };
 
+    if (notificationsIds.length) {
+      query._id = { $in: notificationsIds }
+    }
+    
     const result = await this.updateMany(
-      { username },
+      { ...query },
       { $set: { 'status': status } }
     );
 
@@ -50,7 +54,6 @@ class UserNotificationService extends BaseService {
     type,
     metadata
   }) {
-
     const result = await this.createOne({
       username,
       status,
@@ -62,9 +65,7 @@ class UserNotificationService extends BaseService {
 
 
   async createUserNotifications(models) {
-
     const notifications = models.map(notification => {
-      
       const {
         username,
         status,
@@ -78,7 +79,6 @@ class UserNotificationService extends BaseService {
     const result = await this.createMany(notifications);
     return result;
   }
-
 }
 
 export default UserNotificationService;

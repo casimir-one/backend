@@ -1,11 +1,18 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import config from './../../config';
 import { PROJECT_ATTRIBUTE } from './../../constants';
-import APP_EVENT from './../../events/base/AppEvent';
-import { TeamDtoService, UserDtoService, ProjectDtoService, ReviewDtoService, ProjectContentDtoService, PortalDtoService } from './../../services';
-import UserNotificationsDtoService from './../../services/legacy/userNotification';
-import { ChainService } from '@deip/chain-service';
 import { USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE } from '@deip/constants';
+import APP_EVENT from './../../events/base/AppEvent';
+import {
+  TeamDtoService,
+  UserDtoService,
+  ProjectDtoService,
+  ReviewDtoService,
+  ProjectContentDtoService,
+  PortalDtoService,
+  UserNotificationService
+} from './../../services';
+import { ChainService } from '@deip/chain-service';
 
 class UserNotificationEventHandler extends BaseEventHandler {
 
@@ -21,11 +28,24 @@ const userNotificationEventHandler = new UserNotificationEventHandler();
 const teamDtoService = new TeamDtoService();
 const userDtoService = new UserDtoService();
 const projectDtoService = new ProjectDtoService();
-const userNotificationsDtoService = new UserNotificationsDtoService();
+const userNotificationService = new UserNotificationService();
 const portalDtoService = new PortalDtoService();
 const projectContentDtoService = new ProjectContentDtoService();
 const reviewDtoService = new ReviewDtoService();
 
+userNotificationEventHandler.register(APP_EVENT.NOTIFICATIONS_MARKED_AS_READ, async (event) => {
+  const {
+    username,
+    markAll,
+    notifications
+  } = event.getEventPayload();
+
+  await userNotificationService.updateUserNotifications(
+    username,
+    markAll ? [] : notifications,
+    { status: USER_NOTIFICATION_STATUS.READ }
+  );
+});
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) => {
   const {
@@ -62,7 +82,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 
 });
 
@@ -97,7 +117,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 
@@ -127,7 +147,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 
@@ -161,7 +181,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 
@@ -191,7 +211,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 
@@ -233,7 +253,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (even
     }
   });
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 
 });
 
@@ -264,7 +284,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_ACCEPTED, async (eve
     }
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 
 });
 
@@ -293,7 +313,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_DECLINED, async (eve
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 
 });
 
@@ -324,7 +344,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
     });
   }
   
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (event) => {
@@ -356,7 +376,7 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (event) => {
@@ -385,7 +405,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (event) => {
@@ -398,7 +418,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (e
   const project = await projectDtoService.getProject(projectContent.research_external_id);
   const team = await teamDtoService.getTeam(project.researchRef.researchGroupExternalId);
 
-  await userNotificationsDtoService.createUserNotifications([{
+  await userNotificationService.createUserNotifications([{
     username: expert.account.name,
     status: USER_NOTIFICATION_STATUS.UNREAD,
     type: USER_NOTIFICATION_TYPE.PROJECT_CONTENT_EXPERT_REVIEW_REQUEST,
@@ -445,7 +465,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, async (event) => {
@@ -473,7 +493,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, as
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (event) => {
@@ -501,7 +521,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (even
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, async (event) => {
@@ -529,7 +549,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, a
     });
   }
 
-  await userNotificationsDtoService.createUserNotifications(notifications);
+  await userNotificationService.createUserNotifications(notifications);
 });
 
 userNotificationEventHandler.register(APP_EVENT.UPVOTED_REVIEW, async (event) => {

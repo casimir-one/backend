@@ -1,13 +1,11 @@
-import BaseService from './../base/BaseService';
-import UserBookmarkSchema from './../../schemas/UserBookmarkSchema';
-
+import BaseService from './../../base/BaseService';
+import UserBookmarkSchema from './../../../schemas/UserBookmarkSchema';
 
 class UserBookmarkService extends BaseService {
 
   constructor(options = { scoped: true }) { 
     super(UserBookmarkSchema, options);
   }
-
 
   async getUserBookmarks(username, type, ref) {
     const query = { username };
@@ -40,11 +38,10 @@ class UserBookmarkService extends BaseService {
   }
 
 
-  async removeUserBookmark(id) {
+  async deleteUserBookmark(id) {
     const result = await this.deleteOne({ _id: id});
     return result;
   }
-
 }
 
 export default UserBookmarkService;

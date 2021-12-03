@@ -11,7 +11,9 @@ import {
   reviewCmdHandler,
   projectNdaCmdHandler,
   contractAgreementCmdHandler,
-  portalCmdHandler
+  portalCmdHandler,
+  userSettingsCmdHandler,
+  notificationCmdHandler
 } from './index';
 
 
@@ -56,5 +58,8 @@ module.exports = {
   [APP_CMD.UPDATE_LAYOUT_SETTINGS]: portalCmdHandler,
   [APP_CMD.UPDATE_ATTRIBUTE_SETTINGS]: portalCmdHandler,
   [APP_CMD.UPDATE_NETWORK_SETTINGS]: portalCmdHandler,
-  [APP_CMD.DELETE_USER_PROFILE]: portalCmdHandler
+  [APP_CMD.DELETE_USER_PROFILE]: portalCmdHandler,
+  [APP_CMD.CREATE_BOOKMARK]: userSettingsCmdHandler,
+  [APP_CMD.DELETE_BOOKMARK]: userSettingsCmdHandler,
+  [APP_CMD.MARK_NOTIFICATIONS_AS_READ]: notificationCmdHandler
 };

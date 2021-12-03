@@ -86,6 +86,9 @@ import PortalSettingsUpdatedEvent from './impl/PortalSettingsUpdatedEvent';
 
 import UserProfileDeletedEvent from './impl/UserProfileDeletedEvent';
 
+import BookmarkCreatedEvent from './impl/BookmarkCreatedEvent';
+import BookmarkDeletedEvent from './impl/BookmarkDeletedEvent';
+import NotificationsMarkedAsReadEvent from './impl/NotificationsMarkedAsReadEvent';
 
 module.exports = {
   ProjectCreatedEvent,
@@ -174,5 +177,9 @@ module.exports = {
   LayoutUpdatedEvent,
   NetworkSettingsUpdatedEvent,
   PortalProfileUpdatedEvent,
-  PortalSettingsUpdatedEvent
+  PortalSettingsUpdatedEvent,
+
+  BookmarkCreatedEvent,
+  BookmarkDeletedEvent,
+  NotificationsMarkedAsReadEvent
 }

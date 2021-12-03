@@ -1,6 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import { USER_INVITE_STATUS } from './../../constants';
-import UserInviteDtoService from './../../services/legacy/userInvites';
+import { UserInviteService } from './../../services';
 import APP_EVENT from './../../events/base/AppEvent';
 
 
@@ -14,13 +14,13 @@ class UserInviteEventHandler extends BaseEventHandler {
 
 const userInviteEventHandler = new UserInviteEventHandler();
 
-const userInviteDtoService = new UserInviteDtoService();
+const userInviteService = new UserInviteService();
 
 
 userInviteEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (event) => {
   const { proposalId, expirationTime, invitee, inviter, teamId, notes } = event.getEventPayload();
 
-  await userInviteDtoService.createUserInvite({
+  await userInviteService.createUserInvite({
     externalId: proposalId,
     invitee: invitee,
     creator: inviter,
@@ -35,7 +35,7 @@ userInviteEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (event) => 
 userInviteEventHandler.register(APP_EVENT.TEAM_INVITE_ACCEPTED, async (event) => {
   const { proposalId } = event.getEventPayload();
 
-  await userInviteDtoService.updateUserInvite(proposalId, {
+  await userInviteService.updateUserInvite(proposalId, {
     status: USER_INVITE_STATUS.APPROVED
   });
 

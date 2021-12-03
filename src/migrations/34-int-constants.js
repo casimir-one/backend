@@ -45,7 +45,7 @@ const DraftSchemaClass = new Schema({
   "hash": { type: String, index: true },
   "algo": { type: String },
   "type": {
-    type:[Number, String],
+    type: Schema.Types.Mixed,
     required: true
   },
   "status": {
@@ -431,8 +431,11 @@ const run = async () => {
     const draft = drafts[i];
     if (PROJECT_CONTENT_STATUS[draft.status]) {
       draft.status = PROJECT_CONTENT_STATUS[draft.status];
-      draftsPromises.push(draft.save());
     }
+    if (PROJECT_CONTENT_DATA_TYPES[draft.type]) {
+      draft.type = PROJECT_CONTENT_DATA_TYPES[draft.type];
+    }
+    draftsPromises.push(draft.save());
   }
 
   for (let i = 0; i < projectContents.length; i++) {

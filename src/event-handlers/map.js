@@ -14,7 +14,8 @@ import {
   reviewEventHandler,
   contractAgreementEventHandler,
   fileUploadEventHandler,
-  portalEventHandler
+  portalEventHandler,
+  userSettingsEventHandler
 } from './index';
 
 
@@ -310,5 +311,17 @@ module.exports = {
   
   [APP_EVENT.USER_PROFILE_DELETED]: [
     { h: userEventHandler, await: true },
+  ],
+
+  [APP_EVENT.BOOKMARK_CREATED]: [
+    { h: userSettingsEventHandler, await: true },
+  ],
+
+  [APP_EVENT.BOOKMARK_DELETED]: [
+    { h: userSettingsEventHandler, await: true },
+  ],
+
+  [APP_EVENT.NOTIFICATIONS_MARKED_AS_READ]: [
+    { h: userNotificationEventHandler, await: true },
   ],
 };
