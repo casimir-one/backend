@@ -138,7 +138,7 @@ class UsersController extends BaseController {
       } catch (err) {
         console.log(err);
         ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.body = err.message;
       }
     }
   });
@@ -173,7 +173,7 @@ class UsersController extends BaseController {
       } catch (err) {
         console.log(err);
         ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.body = err.message;
       }
     }
   });

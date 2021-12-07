@@ -10,7 +10,7 @@ const ReviewSchema = new Schema({
   "researchContentExternalId": { type: String, required: true },
   "author": { type: String, required: true },
   "content": { type: String, required: true }
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
 const model = mongoose.model('reviews', ReviewSchema);
 

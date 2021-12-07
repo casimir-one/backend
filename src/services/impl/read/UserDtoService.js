@@ -68,8 +68,8 @@ class UserDtoService extends BaseService {
         signUpPubKey: user.signUpPubKey || null,
         status: user.status,
         teams: user.teams,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        createdAt: user.createdAt || user.created_at,
+        updatedAt: user.updatedAt || user.updated_at,
         metadataHash: chainAccount ? chainAccount.metadata : null,
 
 

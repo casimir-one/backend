@@ -8,12 +8,12 @@ class ProjectContentDraftCreatedEvent extends BaseEvent {
     const {
       projectId,
       draftId,
-      draftType
+      formatType
     } = eventPayload;
 
     assert(!!projectId, "'projectId' is required");
     assert(!!draftId, "'draftId' is required");
-    assert(!!draftType, "'draftType' is required");
+    assert(!!formatType, "'formatType' is required");
 
     super(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, eventPayload);
   }

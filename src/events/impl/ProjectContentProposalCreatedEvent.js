@@ -18,7 +18,7 @@ class ProjectContentProposalCreatedEvent extends BaseEvent {
     const proposedCmds = proposalCmd.getProposedCmds();
     const createProjectContentCmd = proposedCmds[0];
     const { entityId: proposalId, expirationTime, creator } = proposalCmd.getCmdPayload();
-    const { projectId, teamId, type, description, content, authors, references, title, entityId } = createProjectContentCmd.getCmdPayload();
+    const { projectId, teamId, contentType, description, content, authors, references, title, entityId } = createProjectContentCmd.getCmdPayload();
 
     assert(!!proposalId, `'proposalId' is required`);
     assert(!!expirationTime, `'expirationTime' is required`);
@@ -26,7 +26,7 @@ class ProjectContentProposalCreatedEvent extends BaseEvent {
     assert(!!projectId, `'projectId' is required`);
     assert(!!teamId, `'teamId' is required`);
     assert(!!content, `'content' is required`);
-    assert(!!type, `'type' is required`);
+    assert(!!contentType, `'contentType' is required`);
     assert(!!authors && authors.length, `'authors' is required`);
     assert(!!title, `'title' is required`);
 
@@ -37,7 +37,7 @@ class ProjectContentProposalCreatedEvent extends BaseEvent {
       projectId,
       teamId,
       content,
-      type,
+      contentType,
       authors,
       title,
       references,

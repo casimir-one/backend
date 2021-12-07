@@ -93,8 +93,8 @@ class ProjectDtoService extends BaseService {
         positiveReviewCount: chainProject ? chainProject.positiveReviewCount : 0,
         negativeReviewCount: chainProject ? chainProject.negativeReviewCount : 0,
         projectContentCount: chainProject ? chainProject.projectContentCount : 0,
-        createdAt: project.createdAt,
-        updatedAt: project.updatedAt,
+        createdAt: project.createdAt || project.created_at,
+        updatedAt: project.updatedAt || project.updated_at,
         nfts: nfts,
         expressLicenses: expressLicenses,
         grantedAccess: grantedAccess,
@@ -124,7 +124,7 @@ class ProjectDtoService extends BaseService {
           expressLicenses,
           grantedAccess
         },
-        created_at: project.createdAt,
+        created_at: project.createdAt || project.created_at,
         last_update_time: project.updatedAt,
         security_tokens: nfts,
         securityTokens: nfts

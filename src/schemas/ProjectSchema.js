@@ -12,7 +12,7 @@ const ProjectSchema = new Schema({
   "attributes": [AttributeValueSchema],
   "status": { type: Number, enum: [...Object.values(PROJECT_STATUS)], required: false },
   "isDefault": { type: Boolean, default: false }
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
 const model = mongoose.model('research', ProjectSchema);
 

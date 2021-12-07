@@ -11,6 +11,8 @@ import mongoose from 'mongoose';
 import crypto from 'crypto';
 import path from 'path';
 
+const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
+
 class ProjectContentEventHandler extends BaseEventHandler {
 
   constructor() {
@@ -33,7 +35,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, 
     projectId,
     teamId,
     content: draftId,
-    type,
+    contentType,
     authors,
     title,
     proposalCtx
@@ -43,13 +45,14 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, 
     _id: draftId,
     authors,
     title,
+    contentType,
     status: PROJECT_CONTENT_STATUS.PROPOSED
   })
 });
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (event) => {
 
-  const { projectId, draftId, draftType, authors, references, title, ctx } = event.getEventPayload();
+  const { projectId, draftId, contentType, formatType, authors, references, title, ctx } = event.getEventPayload();
 
   const project = await projectDtoService.getProject(projectId);
 
@@ -57,10 +60,13 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
 
   const draftData = {
     externalId,
+    title: title || externalId,
     projectId,
     teamId: project.research_group.external_id,
     hash: '',
-    algo: '',
+    algo: 'sha256',
+    contentType,
+    formatType,
     folder: externalId,
     status: PROJECT_CONTENT_STATUS.IN_PROGRESS,
     authors: authors || [],
@@ -69,46 +75,39 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     foreignReferences: []
   }
 
-  if (draftType == PROJECT_CONTENT_DATA_TYPES.DAR) {
-    draftData.title = title || externalId;
-    draftData.type = draftType;
-  }
+  const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
+  const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
+  const hashes = hashObj.children.map(f => f.hash);
+  hashes.sort();
+  const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
+  draftData.hash = packageHash;
+  draftData.packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
 
-  if (draftType == PROJECT_CONTENT_DATA_TYPES.PACKAGE && ctx.req.files.length > 0) {
-    const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
-    const files = ctx.req.files;
-    const tempDestinationPath = files[0].destination;
-    const hashObj = await FileStorage.calculateDirHash(tempDestinationPath, options);
-
-    const hashes = hashObj.children.map(f => f.hash);
-    hashes.sort();
-    const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
-
-    const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, packageHash);
-
-    const projectContentPackageDirExists = await FileStorage.exists(projectContentPackageDirPath);
-
-    if (projectContentPackageDirExists) {
-      // draft already exist
-      return
-    }
-
-    draftData.title = title;
-    draftData.hash = packageHash;
-    draftData.algo = 'sha256';
-    draftData.type = draftType;
-    draftData.packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
-    draftData.folder = packageHash;
-  }
-  
   const projectContentRef = await draftService.createDraft(draftData);
 });
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (event) => {
 
-  // const { _id: draftId, xmlDraft } = event.getEventPayload();
+  const { _id: draftId, authors, title, contentType, references, status, xmlDraft } = event.getEventPayload();
 
-  // update readModel
+  const draft = await draftService.getDraft(draftId);
+
+  const projectContentPackageDirPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draftId);
+  const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
+  const hashes = hashObj.children.map(f => f.hash);
+  hashes.sort();
+  const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
+
+  await draftService.updateDraft({
+    _id: draftId,
+    authors,
+    title,
+    contentType,
+    references,
+    status,
+    hash: packageHash,
+    packageFiles: hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }))
+  })
 });
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED, async (event) => {
@@ -122,7 +121,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
   const {
     projectId,
     teamId,
-    type,
+    contentType,
     description,
     content,
     authors,
@@ -131,9 +130,9 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
     entityId
   } = event.getEventPayload();
 
-    const draft = await draftService.getDraft(content)
+    const draft = await draftService.getDraftByHash(content)
 
-    await draftService.deleteDraft(content);
+    await draftService.deleteDraft(draft._id);
 
     const projectContent = await projectContentService.createProjectContentRef({
       ...draft,
@@ -141,7 +140,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
       projectId,
       teamId,
       title,
-      status: PROJECT_CONTENT_STATUS.PUBLISHED,
+      contentType,
       authors,
       references
     });

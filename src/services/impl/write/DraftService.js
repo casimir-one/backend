@@ -15,7 +15,8 @@ class DraftService extends BaseService {
     title,
     hash,
     algo,
-    type,
+    contentType,
+    formatType,
     status,
     packageFiles,
     authors,
@@ -30,7 +31,8 @@ class DraftService extends BaseService {
       title,
       hash,
       algo,
-      type,
+      contentType,
+      formatType,
       status,
       packageFiles,
       authors,
@@ -47,7 +49,8 @@ class DraftService extends BaseService {
     title,
     hash,
     algo,
-    type,
+    contentType,
+    formatType,
     status,
     packageFiles,
     authors,
@@ -59,7 +62,8 @@ class DraftService extends BaseService {
       title,
       hash,
       algo,
-      type,
+      contentType,
+      formatType,
       status,
       packageFiles,
       authors,
@@ -82,6 +86,11 @@ class DraftService extends BaseService {
 
   async getDraft(id) {
     const draft = await this.findOne({ _id: id });
+    return draft;
+  }
+
+  async getDraftByHash(hash) {
+    const draft = await this.findOne({ hash });
     return draft;
   }
 

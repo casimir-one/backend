@@ -35,8 +35,8 @@ class ContractAgreementDtoService extends BaseService {
         signers: agreement.signers,
         type: agreement.type,
         terms: agreement.terms,
-        createdAt: agreement.created_at,
-        updatedAt: agreement.updated_at,
+        createdAt: agreement.createdAt || agreement.created_at,
+        updatedAt: agreement.updatedAt || agreement.updated_at,
 
         // @deprecated
         chainContract: chainAgreement || null
