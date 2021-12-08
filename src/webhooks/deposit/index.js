@@ -54,8 +54,8 @@ const createAssetDepositRequest = async (ctx) => {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const [depositor] = await chainRpc.getAccountsAsync([username]);
-    const [balanceOwner] = await chainRpc.getAccountsAsync([account]);
+    const depositor = await chainRpc.getAccountAsync(username);
+    const balanceOwner = await chainRpc.getAccountAsync(account);
     
     if (!depositor || !balanceOwner) {
       ctx.status = 404;
@@ -64,7 +64,11 @@ const createAssetDepositRequest = async (ctx) => {
     }
 
     try {
-      const pubKey = depositor.owner.key_auths[0][0];
+      // TODO: Support substrate
+      const pubKey = depositor.authority.owner.auths
+        .filter((auth) => !!auth.pubKey)
+        .map((auth) => auth.pubKey)[0];
+
       const publicKey = crypto.PublicKey.from(pubKey);
       const payload = {
         amount,

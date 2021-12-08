@@ -1,4 +1,3 @@
-import { PROPOSAL_STATUS } from './../../../constants';
 import BaseService from './../../base/BaseService';
 import ProposalSchema from './../../../schemas/ProposalSchema';
 
@@ -9,6 +8,19 @@ class ProposalService extends BaseService {
     super(ProposalSchema, options);
   }
   
+
+  async getProposal(proposalId) {
+    const proposal = await this.findOne({ _id: proposalId });
+    return proposal || null;
+  }
+
+  
+  async getProposals(proposalsIds) {
+    const proposals = await this.findMany({ _id: { $in: [...proposalsIds] } });
+    return proposals;
+  }
+
+
   async createProposal({
     proposalId,
     proposalCmd,
@@ -16,7 +28,8 @@ class ProposalService extends BaseService {
     type,
     details,
     tenantIdsScope,
-    creator
+    creator,
+    decisionMakers
   }) {
 
     const result = await this.createOne({
@@ -26,7 +39,10 @@ class ProposalService extends BaseService {
       status: status,
       creator: creator,
       details: details,
-      tenantIdsScope: tenantIdsScope
+      tenantIdsScope: tenantIdsScope,
+      decisionMakers: decisionMakers,
+      approvers: [],
+      rejectors: []
     });
 
     return result;
@@ -34,11 +50,15 @@ class ProposalService extends BaseService {
 
 
   async updateProposal(proposalId, {
-    status
+    status,
+    approvers,
+    rejectors
   }) {
 
     const result = await this.updateOne({ _id: proposalId }, {
-      status: status
+      status: status,
+      approvers: approvers,
+      rejectors: rejectors
     });
 
     return result;

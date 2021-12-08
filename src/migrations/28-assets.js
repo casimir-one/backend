@@ -50,7 +50,7 @@ const run = async () => {
 
     const payload = {
       "_id": id,
-      "symbol": chainAsset.string_symbol,
+      "symbol": chainAsset.symbol,
       "precision": chainAsset.precision,
       "issuer": chainAsset.issuer,
       "description": chainAsset.description,

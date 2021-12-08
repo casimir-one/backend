@@ -3,11 +3,12 @@ import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
+import { genRipemd160Hash } from '@deip/toolbox';
 import TeamService from '../write/TeamService';
-import AssetService from './../write/AssetService';
+import { PROTOCOL_CHAIN } from '@deip/constants';
+
 
 const teamService = new TeamService()
-const assetService = new AssetService()
 
 class UserDtoService extends BaseService {
 
@@ -15,109 +16,118 @@ class UserDtoService extends BaseService {
     super(UserSchema, options);
   }
 
-  async mapUsers(profiles) {
+  async mapUsers(users) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const chainAccounts = await chainRpc.getAccountsAsync(profiles.map(p => p._id));
+
+    // temp for substrate migration
+    const isValidChainId = (value) => { 
+      return config.PROTOCOL === PROTOCOL_CHAIN.GRAPHENE || (value.length === 40 && /^[0-9a-fA-F]+$/.test(value));
+    };
+    const chainAccounts = await chainRpc.getAccountsAsync(users.map(user => isValidChainId(user._id) ? user._id : genRipemd160Hash(user.email)));
     const tenantProfile = await this.getPortalInstance();
+    const chainBalances = await Promise.all(users.map((user) => chainRpc.getAssetsBalancesByOwnerAsync(user._id)));
 
-    //temp solution
-    const symbols = [];
-    chainAccounts.forEach(({ balances }) => {
-      balances.forEach(b => {
-        const symbol = b.split(' ')[1];
-        if (!symbols.includes(symbol)) {
-          symbols.push(symbol);
-        }
-      })
-    });
-    const assetsList = await assetService.getAssetsBySymbols(symbols)
-    return chainAccounts
-      .map((chainAccount) => {
-        const profile = profiles.find((r) => r._id == chainAccount.name);
-        const appModules = tenantProfile.settings.modules;
-        const roleInfo = tenantProfile.settings.roles.find((appRole) => profile.roles.some((userRole) => appRole.role == userRole.role));
-        const roles = profile.roles.map(r => ({
-          role: r.role,
-          teamId: r.researchGroupExternalId
-        }));
-        const modules = roleInfo && roleInfo.modules ? roleInfo.modules : appModules;
+    return users.map((user) => {
 
-        //temp solution
-        const balances = chainAccount.balances.map(b => {
-          const [amount, symbol] = b.split(' ');
-          const asset = assetsList.find((a) => symbol === a.symbol);
-          return {
-            id: asset._id,
-            symbol,
-            amount: `${Number(amount)}`,
-            precision: asset.precision
-          }
-        });
+      const chainAccount = chainAccounts.find((chainAccount) => chainAccount && chainAccount.daoId == user._id);
 
-        return {
-          username: chainAccount.name,
-          entityId: chainAccount.name,
-          pubKey: chainAccount.owner.key_auths[0][0],
-          tenantId: profile.tenantId,
-          account: {
-            ...chainAccount,
-            balances
-          },
-          attributes: profile.attributes,
-          balances,
-          ...profile,
+      const balances = [];
+      let pubKey;
+
+      if (chainAccount) {
+
+        const userBalances = chainBalances.filter((chainBalance) => chainBalances && chainBalance.account === chainAccount.daoId);
+        balances.push(...userBalances);
+
+        pubKey = chainAccount.authority.owner.auths
+          .filter((auth) => !!auth.pubKey)
+          .map((auth) => auth.pubKey)[0];
+
+      } else {
+        console.warn(`User account with ID '${user._id}' is not found in the Chain`);
+      }
+
+      const appModules = tenantProfile.settings.modules;
+      const roleInfo = tenantProfile.settings.roles.find((appRole) => user.roles.some((userRole) => appRole.role == userRole.role));
+      const roles = user.roles.map(r => ({
+        role: r.role,
+        teamId: r.researchGroupExternalId
+      }));
+      const modules = roleInfo && roleInfo.modules ? roleInfo.modules : appModules;
+
+      return {
+        _id: user._id,
+        tenantId: user.tenantId,
+        email: user.email,
+        attributes: user.attributes,
+        balances: balances,
+        modules: modules,
+        roles: roles,
+        pubKey: pubKey || null,
+        signUpPubKey: user.signUpPubKey || null,
+        status: user.status,
+        teams: user.teams,
+        createdAt: user.createdAt,
+        updatedAt: user.updatedAt,
+        metadataHash: chainAccount ? chainAccount.metadata : null,
+
+
+        // @deprecated
+        username: user._id,
+        entityId: user._id,
+        account: chainAccount ? { ...chainAccount, balances } : { balances },
+        profile: {
+          ...user,
           modules,
-          roles,
-          profile: {
-            ...profile,
-            modules,
-            roles
-          } };
-      });
+          roles
+        },
+        created: user.createdAt
+      };
+    });
   }
 
 
   async getUserByEmail(email) {
-    const profile = await this.findOne({ email: email, status: USER_PROFILE_STATUS.APPROVED });
-    if (!profile) return null;
-    const [result] = await this.mapUsers([profile]);
+    const user = await this.findOne({ email: email, status: USER_PROFILE_STATUS.APPROVED });
+    if (!user) return null;
+    const [result] = await this.mapUsers([user]);
     return result;
   }
 
 
   async getUser(username) {
-    const profile = await this.findOne({ _id: username, status: USER_PROFILE_STATUS.APPROVED });
-    if (!profile) return null;
-    const [result] = await this.mapUsers([profile]);
+    const user = await this.findOne({ _id: username, status: USER_PROFILE_STATUS.APPROVED });
+    if (!user) return null;
+    const [result] = await this.mapUsers([user]);
     return result;
   }
 
 
   async getUsers(usernames) {
-    const profiles = await this.findMany({ _id: { $in: [...usernames] }, status: USER_PROFILE_STATUS.APPROVED });
-    if (!profiles.length) return [];
-    const result = await this.mapUsers(profiles);
+    const users = await this.findMany({ _id: { $in: [...usernames] }, status: USER_PROFILE_STATUS.APPROVED });
+    if (!users.length) return [];
+    const result = await this.mapUsers(users);
     return result;
   }
 
 
   // TODO: Remove this
   async findUserProfileByOwner(username) {
-    const profile = await this.findOne({ _id: username });
-    return profile;
+    const user = await this.findOne({ _id: username });
+    return user;
   }
 
 
   async findUserProfilesByStatus(status) {
-    const profiles = await this.findMany({ status: status })
-    return profiles;
+    const users = await this.findMany({ status: status })
+    return users;
   }
 
 
   async findUserProfiles(accounts) {
-    const profiles = await this.findMany({ '_id': { $in: accounts } });
-    return profiles;
+    const users = await this.findMany({ '_id': { $in: accounts } });
+    return users;
   }
 
 
@@ -125,26 +135,26 @@ class UserDtoService extends BaseService {
     const team = await teamService.getTeam(teamId);
     if (!team) return [];
     const { members } = team;
-    const profiles = await this.findMany({ _id: { $in: [...members] }, status: USER_PROFILE_STATUS.APPROVED });
-    if (!profiles.length) return [];
-    const result = await this.mapUsers(profiles);
+    const users = await this.findMany({ _id: { $in: [...members] }, status: USER_PROFILE_STATUS.APPROVED });
+    if (!users.length) return [];
+    const result = await this.mapUsers(users);
     return result;
   }
 
 
   async getUsersByTenant(tenantId) {
     const available = await this.findMany({ status: USER_PROFILE_STATUS.APPROVED });
-    const profiles = available.filter(p => p.tenantId == tenantId);
-    if (!profiles.length) return [];
-    const result = await this.mapUsers(profiles);
+    const users = available.filter(p => p.tenantId == tenantId);
+    if (!users.length) return [];
+    const result = await this.mapUsers(users);
     return result;
   }
 
   
   async getUsersListing(status) {
-    const profiles = await this.findMany({ status: status ? status : USER_PROFILE_STATUS.APPROVED });
-    if (!profiles.length) return [];
-    const result = await this.mapUsers(profiles);
+    const users = await this.findMany({ status: status ? status : USER_PROFILE_STATUS.APPROVED });
+    if (!users.length) return [];
+    const result = await this.mapUsers(users);
     return result;
   }
 }

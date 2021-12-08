@@ -12,7 +12,7 @@ class AssetCmdHandler extends BaseCmdHandler {
 
 const assetCmdHandler = new AssetCmdHandler();
 
-assetCmdHandler.register(APP_CMD.ASSET_TRANSFER, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.TRANSFER_ASSET, (cmd, ctx) => {
 
   const transferData = cmd.getCmdPayload();
   

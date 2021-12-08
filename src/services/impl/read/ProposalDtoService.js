@@ -1,18 +1,18 @@
 import BaseService from './../../base/BaseService';
-import { APP_PROPOSAL } from '@deip/constants';
+import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
 import ProposalSchema from './../../../schemas/ProposalSchema';
 import { PROJECT_STATUS } from './../../../constants';
 import ProjectDtoService from './ProjectDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
-import AssetService from './../write/AssetService';
+import InvestmentOpportunityDtoService from './InvestmentOpportunityDtoService';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
 const projectDtoService = new ProjectDtoService({ scoped: false });
-const assetService = new AssetService({ scoped: false });
+const invstOppDtoService = new InvestmentOpportunityDtoService({ scoped: false });
 
 
 class ProposalDtoService extends BaseService {
@@ -22,34 +22,37 @@ class ProposalDtoService extends BaseService {
   }
 
   
-  async mapProposals(proposalsRefs, extended = true) {
+  async mapProposals(proposals, extended = true) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
+    const chainProposals = await Promise.all(proposals.map((proposal) => chainRpc.getProposalAsync(proposal._id)));
 
-    const chainProposals = await chainRpc.getProposalsStatesAsync(proposalsRefs.map(p => p._id));
+    const names = proposals.reduce((names, proposal) => {
+      const chainProposal = chainProposals.filter((chainProposal) => !!chainProposal).find((chainProposal) => chainProposal.proposalId == proposal._id);
+      
+      if (!chainProposal)
+        return names;
 
-    const names = chainProposals.reduce((names, chainProposal) => {
-
-      if (!names.some((n) => n == chainProposal.proposer)) {
-        names.push(chainProposal.proposer);
+      if (!names.some((n) => n == chainProposal.creator)) {
+        names.push(chainProposal.creator);
       }
 
-      for (let i = 0; i < chainProposal.required_approvals.length; i++) {
-        let name = chainProposal.required_approvals[i];
+      for (let i = 0; i < chainProposal.decisionMakers.length; i++) {
+        let name = chainProposal.decisionMakers[i];
         if (!names.some((n) => n == name)) {
           names.push(name);
         }
       }
 
-      for (let i = 0; i < chainProposal.approvals.length; i++) {
-        let [name, txInfo] = chainProposal.approvals[i];
+      for (let i = 0; i < chainProposal.approvers.length; i++) {
+        const name = chainProposal.approvers[i];
         if (!names.some((n) => n == name)) {
           names.push(name);
         }
       }
 
       for (let i = 0; i < chainProposal.rejectors.length; i++) {
-        let [name, txInfo] = chainProposal.rejectors[i];
+        const name = chainProposal.rejectors[i];
         if (!names.some((n) => n == name)) {
           names.push(name);
         }
@@ -58,116 +61,115 @@ class ProposalDtoService extends BaseService {
       return names;
     }, []);
 
+    const chainAccounts = await chainRpc.getAccountsAsync(names);
+    const teams = await teamDtoService.getTeams(names);
+    const users = await userDtoService.getUsers(names);
+    const result = [];
 
-    const chainAccountsFromNames = await chainRpc.getAccountsAsync(names);
-    const chainAccounts = chainAccountsFromNames.filter(a => !!a);
-    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
-    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
-    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
-    const users = await userDtoService.getUsers(chainUserAccounts.map(a => a.name));
+    for (let i = 0; i < proposals.length; i++) {
+      const proposal = proposals[i];
+      const chainProposal = chainProposals.filter((chainProposal) => !!chainProposal).find((chainProposal) => chainProposal.proposalId == proposal._id);
+      if (!chainProposal) {
+        console.warn(`Proposal with ID '${proposal._id}' is not found in the Chain`);
+      }
 
-    const proposals = [];
+      const parties = {};
+      for (let j = 0; j < proposal.decisionMakers.length; j++) {
+        const party = proposal.decisionMakers[j];
+        const key = `party${j + 1}`;
 
-    for (let i = 0; i < chainProposals.length; i++) {
-      let chainProposal = chainProposals[i];
-      let proposerAccount = chainAccounts.find(a => a.name == chainProposal.proposer);
-      let proposer = proposerAccount.is_research_group
-        ? researchGroups.find(rg => rg.external_id == chainProposal.proposer)
-        : users.find(u => u.account.name == chainProposal.proposer);
-
-      let proposalRef = proposalsRefs.find(p => p._id == chainProposal.external_id);
-
-      let parties = {};
-      for (let j = 0; j < chainProposal.required_approvals.length; j++) {
-        let party = chainProposal.required_approvals[j];
-        let key = `party${j + 1}`;
-
-        let chainAccount = chainAccounts.find(chainAccount => chainAccount.name == party);
+        const chainAccount = chainAccounts.find(chainAccount => chainAccount.daoId == party);
         if (chainAccount) {
-          const allAuth = await this.getAllAuth(chainAccount);
-          let members = [...allAuth];
-          let possibleSigners = members
-            .reduce((acc, name) => {
-              if (!acc.some(n => n == name) && !chainProposal.required_approvals.some(a => a == name)) {
-                return [...acc, name];
-              }
-              return [...acc];
-            }, []);
+          const signatories = await this.getPossibleSignatories(chainAccount);
+          const members = [...signatories];
+          const possibleSigners = members.reduce((acc, name) => {
+            if (!acc.some(n => n == name) && !proposal.decisionMakers.some(a => a == name)) {
+              return [...acc, name];
+            }
+            return [...acc];
+          }, []);
 
-          let isApproved = members.some(member => chainProposal.approvals.some(([name,]) => name == member)) || chainProposal.approvals.some(([name,]) => name == party);
-
-          let isRejected = members.some(member => chainProposal.rejectors.some(([name,]) => name == member)) || chainProposal.rejectors.some(([name,]) => name == party);
-
+          let isApproved = members.some(member => proposal.approvers.some((name) => name == member)) || proposal.approvers.some((name) => name == party);
+          let isRejected = members.some(member => proposal.rejectors.some((name) => name == member)) || proposal.rejectors.some((name) => name == party);
           let isHidden = false;
 
-          /////////////// temp solution /////////////
-          if (proposalRef.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
-            isHidden = researchGroups.some(({ tenantId }) => chainAccount.name === tenantId);
-            if (!isApproved && !isRejected && chainProposal.status != 1) {
-              const group = researchGroups.find(rg => rg.external_id == party);
-              if (group.external_id == group.tenantId) {
-                if (chainProposal.status == 3) isRejected = true;
-                if (chainProposal.status == 2) isApproved = true;
+          // TODO: move to event handler
+          if (proposal.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
+            isHidden = teams.some(({ tenantId }) => chainAccount.daoId === tenantId);
+            if (!isApproved && !isRejected && proposal.status != PROPOSAL_STATUS.PENDING) {
+              const team = teams.find(team => team._id == party);
+              if (team._id == team.tenantId) {
+                if (proposal.status == PROPOSAL_STATUS.REJECTED)
+                  isRejected = true;
+                if (proposal.status == PROPOSAL_STATUS.APPROVED)
+                  isApproved = true;
               }
             }
           }
 
-          /////////////// end temp solution /////////////
-
           parties[key] = {
-            isProposer: party == chainProposal.proposer,
-            status: isApproved ? 2 : isRejected ? 3 : 1,
-            account: chainAccount.is_research_group ? researchGroups.find(rg => rg.external_id == party) : users.find(user => user.account.name == party),
+            isProposer: party == proposal.creator,
+            status: isApproved ? PROPOSAL_STATUS.APPROVED : isRejected ? PROPOSAL_STATUS.REJECTED : PROPOSAL_STATUS.PENDING,
+            account: users.find(user => user._id == party) || teams.find(team => team._id == party),
             isHidden,
             signers: [
-              ...users.filter((u) => possibleSigners.some(member => u.account.name == member) || u.account.name == party),
-              ...researchGroups.filter((rg) => possibleSigners.some(member => rg.external_id == member) || rg.external_id == party),
+              ...users.filter((user) => possibleSigners.some(member => user._id == member) || user._id == party),
+              ...teams.filter((team) => possibleSigners.some(member => team._id == member) || team._id == party),
             ]
               .filter((signer) => {
-                let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
-                return chainProposal.approvals.some(([name, txInfo]) => name == id) || chainProposal.rejectors.some(([name, txInfo]) => name == id);
+                return proposal.approvers.some((name) => name == signer._id) || proposal.rejectors.some((name) => name == signer._id);
               })
               .map((signer) => {
-                let id = signer.account.is_research_group ? signer.external_id : signer.account.name;
-
-                let approval = chainProposal.approvals.find(([name, txInfo]) => name == id);
-                let reject = chainProposal.rejectors.find(([name, txInfo]) => name == id);
-
-                let txInfo = reject ? reject[1] : approval ? approval[1] : null;
                 return {
                   signer: signer,
-                  txInfo: txInfo
+                  txInfo: null // TODO: move to event handler
                 }
               })
           }
         }
       }
 
-      proposals.push({
-        _id: proposalRef._id,
-        entityId: proposalRef._id,
-        cmd: proposalRef.cmd,
-        proposer: proposer,
+      result.push({
+        _id: proposal._id,
+        tenantId: proposal.tenantId,
+        cmd: proposal.cmd,
+        proposer: proposal.creator,
         parties: parties,
-        proposal: chainProposal,
-        type: proposalRef.type,
-        details: proposalRef.details
+        type: proposal.type,
+        status: chainProposal ? chainProposal.status : proposal.status,
+        decisionMakers: chainProposal ? chainProposal.decisionMakers : proposal.decisionMakers,
+        approvers: chainProposal ? chainProposal.approvers : proposal.approvers,
+        rejectors: chainProposal ? chainProposal.rejectors : proposal.rejectors,
+
+        // @deprecated
+        entityId: proposal._id,
+        details: proposal.details,
+        proposal: chainProposal || null,
       })
     }
 
-    if (!extended) return proposals;
+    if (!extended) 
+      return result;
 
-    const extendedProposals = await this.extendProposalsDetails(proposals);
-    return extendedProposals;
+    try {
+      // @deprecated
+      const extendedProposals = await this.extendProposalsDetails(result);
+      return extendedProposals;
+    } catch(err) {
+      console.error(err);
+      return result;
+    }
+
   }
 
-  async getAllAuth(account, checkAccounts = []) {
+
+  async getPossibleSignatories(account, checkAccounts = []) {
     const accounts = [];
-    const activeAuth = account.active.account_auths.map(([name, threshold]) => name);
-    const ownerAuth = account.owner.account_auths.map(([name, threshold]) => name);
-    let members = [...activeAuth, ...ownerAuth];
-    members = members.filter(acc => !checkAccounts.includes(acc));
+
+    const members = [...account.authority.owner.auths.map((auth) => auth.daoId)]
+      .filter(daoId => !checkAccounts.includes(daoId));
+
     if (members.length === 0) {
       return [];
     }
@@ -176,17 +178,18 @@ class ProposalDtoService extends BaseService {
     const chainRpc = chainService.getChainRpc();
 
     const chainAccounts = await chainRpc.getAccountsAsync(members);
-    accounts.push(...members)
+    accounts.push(...members);
 
-    for(let i = 0; i < chainAccounts.length; i++) {
-      if (chainAccounts[i].is_research_group) {
-        const accountsNames = await this.getAllAuth(chainAccounts[i], accounts)
-        accounts.push(...accountsNames);
+    for (let i = 0; i < chainAccounts.length; i++) {
+      const chainAccount = chainAccounts[i];
+      const team = await teamDtoService.getTeam(chainAccount.daoId);
+      if (team) {
+        const daoIds = await this.getPossibleSignatories(chainAccount, accounts);
+        accounts.push(...daoIds);
       }
     }
     return [...accounts];
   }
-
   
   async extendProposalsDetails(proposals) {
     const result = [];
@@ -220,10 +223,10 @@ class ProposalDtoService extends BaseService {
     const researchTokenSaleProposals = await this.extendResearchTokenSaleProposals(grouped[APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL] || []);
     result.push(...researchTokenSaleProposals);
 
-    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.JOIN_TEAM_PROPOSAL] || []);
+    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL] || []);
     result.push(...userInvitationProposals);
 
-    const userLeavingProposals = await this.extendUserLeavingProposals(grouped[APP_PROPOSAL.LEAVE_TEAM_PROPOSAL] || []);
+    const userLeavingProposals = await this.extendUserLeavingProposals(grouped[APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL] || []);
     result.push(...userLeavingProposals);
 
     const researchNdaProposals = await this.extendResearchNdaProposals(grouped[APP_PROPOSAL.PROJECT_NDA_PROPOSAL] || []);
@@ -248,23 +251,15 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-
-    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
-    const chainResearches = await chainRpc.getProjectsAsync(projectIds);
-
-    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
-    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
 
     // currently we allow to buy the license only for user account
-    const users = await userDtoService.getUsers(chainUserAccounts.map(a => a.name));
-    const researches = await projectDtoService.getProjects(chainResearches.map(r => r.external_id), Object.values(PROJECT_STATUS));
+    const users = await userDtoService.getUsers(accountNames);
+    const projects = await projectDtoService.getProjects(projectIds, Object.values(PROJECT_STATUS));
 
     return requests.map((req) => {
       const extendedDetails = {
         requester: users.find(u => u.account.name == req.details.creator),
-        research: researches.find(r => r.external_id == req.details.projectId)
+        research: projects.find(p => p._id == req.details.projectId)
       }
       return { ...req, extendedDetails };
     })
@@ -281,32 +276,15 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-
-    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
-
-    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
-    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-
-    const users = await userDtoService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
+    const users = await userDtoService.getUsers(accountNames);
+    const teams = await teamDtoService.getTeams(accountNames)
 
     return proposals.map((proposal) => {
-      const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
-      const party2Account = chainAccounts.find(a => a.name == proposal.details.party2);
-
-      const party1 = party1Account.is_research_group 
-        ? researchGroups.find(rg => rg.external_id == proposal.details.party1) 
-        : users.find(u => u.account.name == proposal.details.party1);
-
-      const party2 = party2Account.is_research_group
-        ? researchGroups.find(rg => rg.external_id == proposal.details.party2)
-        : users.find(u => u.account.name == proposal.details.party2);
-
+      const party1 = teams.find(team => team._id == proposal.details.party1) || users.find(user => user._id == proposal.details.party1);
+      const party2 = teams.find(team => team._id == proposal.details.party2) || users.find(user => user._id == proposal.details.party2);
       const extendedDetails = { party1, party2 };
       return { ...proposal, extendedDetails };
-    })
+    });
   }
 
   async extendAssetTransferProposals(proposals) {
@@ -320,29 +298,12 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-
-    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
-
-    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
-    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-
-    const users = await userDtoService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
+    const users = await userDtoService.getUsers(accountNames);
+    const teams = await teamDtoService.getTeams(accountNames)
 
     return proposals.map((proposal) => {
-      const party1Account = chainAccounts.find(a => a.name == proposal.details.party1);
-      const party2Account = chainAccounts.find(a => a.name == proposal.details.party2);
-
-      const party1 = party1Account.is_research_group
-        ? researchGroups.find(rg => rg.external_id == proposal.details.party1)
-        : users.find(u => u.account.name == proposal.details.party1);
-
-      const party2 = party2Account.is_research_group
-        ? researchGroups.find(rg => rg.external_id == proposal.details.party2)
-        : users.find(u => u.account.name == proposal.details.party2);
-
+      const party1 = teams.find(team => team._id == proposal.details.party1) || users.find(user => user._id == proposal.details.party1);
+      const party2 = teams.find(team => team._id == proposal.details.party2) || users.find(user => user._id == proposal.details.party2);
       const extendedDetails = { party1, party2 };
       return { ...proposal, extendedDetails };
     })
@@ -356,10 +317,9 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-
+    const teams = await teamDtoService.getTeams(accountNames.map(a => a));
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
+      const researchGroup = teams.find(team => team._id == proposal.details.researchGroupExternalId);
       const extendedDetails = { researchGroup };
       return { ...proposal, extendedDetails };
     });
@@ -374,20 +334,20 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchExternalIds = proposals.reduce((acc, proposal) => {
+    const projectsIds = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.projectId)) {
         acc.push(proposal.details.projectId);
       }
       return acc;
     }, []);
 
-    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
+    const teams = await teamDtoService.getTeams(accountNames);
+    const projects = await projectDtoService.getProjects(projectsIds, Object.values(PROJECT_STATUS));
 
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
-      const research = researches.find(r => r.external_id == proposal.details.projectId);
-      const extendedDetails = { researchGroup, research };
+      const team = teams.find(team => team._id == proposal.details.teamId);
+      const project = projects.find(project => project._id == proposal.details.projectId);
+      const extendedDetails = { researchGroup: team, research: project };
       return { ...proposal, extendedDetails };
     });
   }
@@ -401,11 +361,10 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-
+    const teams = await teamDtoService.getTeams(accountNames);
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
-      const extendedDetails = { researchGroup };
+      const team = teams.find(team => team._id == proposal.details.researchGroupExternalId);
+      const extendedDetails = { researchGroup: team };
       return { ...proposal, extendedDetails };
     });
   }
@@ -426,13 +385,13 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
+    const teams = await teamDtoService.getTeams(accountNames);
+    const researches = await projectDtoService.getProjects(researchExternalIds, Object.values(PROJECT_STATUS));
 
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
-      const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
-      const extendedDetails = { researchGroup, research };
+      const team = teams.find(team => team._id == proposal.details.researchGroupExternalId);
+      const project = researches.find(project => project._id == proposal.details.researchExternalId);
+      const extendedDetails = { researchGroup: team, research: project };
       return { ...proposal, extendedDetails };
     });
   }
@@ -445,81 +404,43 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researchExternalIds = proposals.reduce((acc, proposal) => {
+    const projectsIds = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.researchExternalId)) {
         acc.push(proposal.details.researchExternalId);
       }
       return acc;
     }, []);
 
-    const researchTokenSaleExternalIds = proposals.reduce((acc, proposal) => {
+    const invstOppsIds = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.researchTokenSaleExternalId)) {
         acc.push(proposal.details.researchTokenSaleExternalId);
       }
       return acc;
     }, []);
 
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
 
-    const researchGroups = await teamDtoService.getTeams(accountNames.map(a => a));
-    const researches = await projectDtoService.getProjects(researchExternalIds.map(rId => rId), Object.values(PROJECT_STATUS));
-    const researchTokenSales = await Promise.all(researchTokenSaleExternalIds.map(id => chainRpc.getInvestmentOpportunityAsync(id)));
+    const teams = await teamDtoService.getTeams(accountNames);
+    const projects = await projectDtoService.getProjects(projectsIds, Object.values(PROJECT_STATUS));
+    const invstOpps = await invstOppDtoService.getInvstOpps(invstOppsIds);
 
-    const result = proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.researchGroupExternalId);
-      const research = researches.find(r => r.external_id == proposal.details.researchExternalId);
-      const researchTokenSale = researchTokenSales.find(ts => ts.external_id == proposal.details.researchTokenSaleExternalId);
+    return proposals.map((proposal) => {
+      const team = teams.find(team => team._id == proposal.details.researchGroupExternalId);
+      const project = projects.find(project => project._id == proposal.details.researchExternalId);
+      const invstOpp = invstOpps.find(invstOpp => invstOpp._id == proposal.details.researchTokenSaleExternalId);
 
-      const extendedDetails = { researchGroup, research, researchTokenSale };
+      const extendedDetails = { 
+        researchGroup: team, 
+        research: project, 
+        researchTokenSale: { 
+          ...invstOpp, 
+          soft_cap: invstOpp.softCap, 
+          hard_cap: invstOpp.hardCap, 
+          security_tokens_on_sale: invstOpp.shares 
+        }
+      };
       return { ...proposal, extendedDetails };
     });
 
-    //temp solution
-    const fromStrToObjAsset = async (val) => {
-      if (typeof val === 'string') {
-        const [amount, symbol] = val.split(' ');
-        const asset = await assetService.getAssetBySymbol(symbol);
-        
-        return {
-          id: asset._id,
-          symbol,
-          amount: `${Number(amount)}`,
-          precision: asset.precision
-        }
-      }
-
-      if (Array.isArray(val)) {
-        const result = [];
-        for (let i = 0; i < val.length; i++) {
-          const strAsset = val[i];
-          const [amount, symbol] = strAsset.split(' ');
-          const asset = await assetService.getAssetBySymbol(symbol);
-          result.push({
-            id: asset._id,
-            symbol,
-            amount: `${Number(amount)}`,
-            precision: asset.precision
-          })
-        }
-          
-        return result;
-      }
-    }
-
-    for (let i = 0; i < result.length; i++) {
-      const prop = result[i];
-
-      const softCap = await fromStrToObjAsset(prop.extendedDetails.researchTokenSale.soft_cap);
-      const hardCap = await fromStrToObjAsset(prop.extendedDetails.researchTokenSale.hard_cap);
-      const shares = await fromStrToObjAsset(prop.extendedDetails.researchTokenSale.security_tokens_on_sale);
-
-      prop.extendedDetails.researchTokenSale.soft_cap = softCap;
-      prop.extendedDetails.researchTokenSale.hard_cap = hardCap;
-      prop.extendedDetails.researchTokenSale.security_tokens_on_sale = shares;
-    }
-
-    return result;
   }
 
 
@@ -534,21 +455,13 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-
-    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
-
-    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
-    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-
-    const users = await userDtoService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
+    const users = await userDtoService.getUsers(accountNames);
+    const teams = await teamDtoService.getTeams(accountNames)
 
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
-      const invitee = users.find(a => a.account.name == proposal.details.invitee);
-      const extendedDetails = { researchGroup, invitee };
+      const team = teams.find(team => team._id == proposal.details.teamId);
+      const invitee = users.find(users => users._id == proposal.details.invitee);
+      const extendedDetails = { researchGroup: team, invitee };
       return { ...proposal, extendedDetails };
     });
   }
@@ -565,21 +478,13 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-
-    const chainAccounts = await chainRpc.getAccountsAsync(accountNames);
-
-    const chainResearchGroupAccounts = chainAccounts.filter(a => a.is_research_group);
-    const chainUserAccounts = chainAccounts.filter(a => !a.is_research_group);
-
-    const users = await userDtoService.getUsers(chainUserAccounts.map(a => a.name));
-    const researchGroups = await teamDtoService.getTeams(chainResearchGroupAccounts.map(a => a.name))
+    const users = await userDtoService.getUsers(accountNames);
+    const teams = await teamDtoService.getTeams(accountNames);
 
     return proposals.map((proposal) => {
-      const researchGroup = researchGroups.find(a => a.account.name == proposal.details.teamId);
-      const member = users.find(a => a.account.name == proposal.details.member);
-      const extendedDetails = { researchGroup, member };
+      const team = teams.find(team => team._id == proposal.details.teamId);
+      const member = users.find(user => user._id == proposal.details.member);
+      const extendedDetails = { researchGroup: team, member };
       return { ...proposal, extendedDetails };
     });
 
@@ -593,11 +498,11 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const researches = await projectDtoService.getProjects(projectIds.map(rId => rId), Object.values(PROJECT_STATUS));
+    const projects = await projectDtoService.getProjects(projectIds, Object.values(PROJECT_STATUS));
 
     return proposals.map(proposal => {
-      const research = researches.find(r => r.external_id == proposal.details.projectId);
-      return { ...proposal, extendedDetails: { research } };
+      const project = projects.find(project => project._id == proposal.details.projectId);
+      return { ...proposal, extendedDetails: { research: project } };
     })
   }
 
@@ -605,18 +510,9 @@ class ProposalDtoService extends BaseService {
   async getAccountProposals(username) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-
-    const teams = await teamDtoService.getTeamsByUser(username);
-    const teamsIds = teams.map(({ entityId }) => entityId);
-    const signers = [username, ...teamsIds];
-    const allProposals = await chainRpc.getProposalsBySignersAsync(signers);
-    const externalIds = allProposals.reduce((unique, chainProposal) => {
-      if (unique.some((id) => id == chainProposal.external_id))
-        return unique;
-      return [chainProposal.external_id, ...unique];
-    }, []);
-
-    const proposals = await this.findMany({ _id: { $in: [...externalIds] } });
+    const chainAccount = await chainRpc.getAccountAsync(username);
+    const signatories = await this.getPossibleSignatories(chainAccount);
+    const proposals = await this.findMany({ decisionMakers: { $in: [...signatories] } });
     const result = await this.mapProposals(proposals);
     return result;
   }

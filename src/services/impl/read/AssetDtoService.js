@@ -14,22 +14,35 @@ class AssetDtoService extends BaseService {
   async mapAssets(assets) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-
     const chainAssets = await Promise.all(assets.map(a => chainRpc.getAssetBySymbolAsync(a.symbol)));
-    return assets
-      .map((asset) => {
-        const chainAsset = chainAssets.find((ca) => ca.string_symbol == asset.symbol);
-        return { 
-          ...asset,
-          // support for legacy api
-          max_supply: chainAsset.max_supply,
-          current_supply: chainAsset.current_supply,
-          string_symbol: chainAsset.string_symbol,
-          tokenized_research: chainAsset.tokenized_research,
-          tokenizedProject: chainAsset.tokenized_research,
-          license_revenue_holders_share: chainAsset.license_revenue_holders_share
-        }
-      });
+    
+    return assets.map((asset) => {
+
+      const chainAsset = chainAssets.find((chainAsset) => chainAsset && chainAsset.symbol == asset.symbol);
+      if (!chainAsset) {
+        console.warn(`Asset with symbol '${asset.symbol}' is not found in the Chain`);
+      }
+
+      return { 
+        _id: asset._id,
+        tenantId: asset.tenantId,
+        symbol: asset.symbol,
+        precision: asset.precision,
+        issuer: asset.issuer,
+        description: asset.description,
+        settings: { ...asset.settings },
+        type: asset.type,
+        
+        // @deprecated
+        max_supply: chainAsset ? chainAsset.currentSupply : null,
+        current_supply: chainAsset ? chainAsset.currentSupply : null,
+        string_symbol: chainAsset ? chainAsset.symbol : null,
+        tokenized_research: asset.settings.projectId || null,
+        tokenizedProject: asset.settings.projectId || null,
+        license_revenue_holders_share: asset.settings.licenseRevenueHoldersShare || null
+      }
+
+    });
   }
 
   async getAssetById(assetId) {
@@ -65,38 +78,59 @@ class AssetDtoService extends BaseService {
   async getAccountAssetBalance(owner, symbol) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const chainAsset = await chainRpc.getAssetBalanceByOwnerAsync(owner, symbol);
 
-    //temp solution
-    const asset = await this.findOne({ symbol: chainAsset.asset_symbol })
-    const [amount] = chainAsset.amount.split(' ');
+    const chainBalance = await chainRpc.getAssetBalanceByOwnerAndAssetSymbolAsync(owner, symbol);
+    if (!chainBalance) return null;
+
+    const asset = await this.findOne({ symbol: chainBalance.symbol });
+    if (!asset) {
+      console.warn(`Asset with symbol '${chainBalance.symbol}' is not found in the Read Model database`);
+    }
+
     return {
-      ...chainAsset,
-      tokenizedProject: chainAsset.tokenized_research,
-      id: asset._id,
-      symbol: asset.symbol,
-      amount: `${Number(amount)}`,
-      precision: asset.precision
+      assetId: chainBalance.assetId,
+      amount: chainBalance.amount,
+      owner: chainBalance.account,
+      symbol: chainBalance.symbol,
+      precision: chainBalance.precision,
+      // TODO: infer 'tokenizedProject' from balance object
+      tokenizedProject: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null,
+
+      // @deprecated
+      id: chainBalance.assetId, // should be '_id' of account balance object
+      asset_id: chainBalance.assetId,
+      asset_symbol: chainBalance.symbol || "",
+      tokenized_research: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null
     }
   }
 
   async getAccountAssetsBalancesByOwner(owner) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const balances = await chainRpc.getAccountAssetsBalancesAsync(owner);
 
-    //temp solution
-    const assets = await this.findMany({ symbol: { $in: [...balances.map(ca => ca.asset_symbol)] } })
-    return balances.map(b => {
-      const asset = assets.find(a => a.symbol === b.asset_symbol);
-      const [amount] = b.amount.split(' ');
+    const chainBalances = await chainRpc.getAssetsBalancesByOwnerAsync(owner);
+    const assets = await this.findMany({ symbol: { $in: [...chainBalances.map(chainBalance => chainBalance.symbol)] } });
+
+    return chainBalances.map((chainBalance) => {
+      const asset = assets.find(asset => asset.symbol === chainBalance.symbol);
+      if (!asset) {
+        console.warn(`Asset with symbol '${chainBalance.symbol}' is not found in the Read Model database`);
+      }
+
       return {
-        ...b,
-        tokenizedProject: b.tokenized_research,
-        id: asset._id,
-        symbol: asset.symbol,
-        amount: `${Number(amount)}`,
-        precision: asset.precision
+        assetId: chainBalance.assetId,
+        amount: chainBalance.amount,
+        owner: chainBalance.account,
+        symbol: chainBalance.symbol,
+        precision: chainBalance.precision,
+        // TODO: infer 'tokenizedProject' from balance object
+        tokenizedProject: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null,
+
+        // @deprecated
+        id: chainBalance.assetId, // should be '_id' of account balance object
+        asset_id: chainBalance.assetId,
+        asset_symbol: chainBalance.symbol || "",
+        tokenized_research: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null,
       }
     });
   }
@@ -104,21 +138,32 @@ class AssetDtoService extends BaseService {
   async getAccountsAssetBalancesByAsset(symbol) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const balances = await chainRpc.getAssetBalancesByAssetAsync(symbol);
+    const chainBalances = await chainRpc.getAssetBalancesByAssetSymbolAsync(symbol);
 
-    //temp solution
-    const assets = await this.findMany({ symbol: { $in: [...balances.map(ca => ca.asset_symbol)] } })
-    return balances.map(b => {
-      const asset = assets.find(a => a.symbol === b.asset_symbol);
-      const [amount] = b.amount.split(' ');
-      return {
-        ...b,
-        tokenizedProject: b.tokenized_research,
-        id: asset._id,
-        symbol: asset.symbol,
-        amount: `${Number(amount)}`,
-        precision: asset.precision
+    const assets = await this.findMany({ symbol: { $in: [...chainBalances.map(chainBalance => chainBalance.symbol)] } });
+
+    return chainBalances.map((chainBalance) => {
+      const asset = assets.find(asset => asset.symbol === chainBalance.symbol);
+      if (!asset) {
+        console.warn(`Asset with symbol '${chainBalance.symbol}' is not found in the Read Model database`);
       }
+
+      return {
+        assetId: chainBalance.assetId,
+        amount: chainBalance.amount,
+        owner: chainBalance.account,
+        symbol: chainBalance.symbol,
+        precision: chainBalance.precision,
+        // TODO: infer 'tokenizedProject' from balance object
+        tokenizedProject: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null,
+
+        // @deprecated
+        id: chainBalance.assetId,
+        // should be '_id' of account balance object
+        asset_id: chainBalance.assetId,
+        asset_symbol: chainBalance.symbol || "",
+        tokenized_research: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null
+      };
     });
   }
 

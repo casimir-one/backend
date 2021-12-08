@@ -26,7 +26,7 @@ const run = async () => {
   const chainRpc = chainService.getChainRpc()
 
   const researchContentsPromises = [];
-  const chainResearchContents = await chainRpc.lookupResearchContentsAsync();
+  const chainResearchContents = await chainRpc.getProjectContentsListAsync();
   
   for (let i = 0; i < chainResearchContents.length; i++) {
     const chainResearchContent = chainResearchContents[i];

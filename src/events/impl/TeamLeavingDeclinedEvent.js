@@ -13,7 +13,7 @@ class TeamLeavingDeclinedEvent extends BaseEvent {
     } = eventPayload;
 
     assert(!!proposalCmd, `'proposalCmd' is required`);
-    assert(APP_PROPOSAL.LEAVE_TEAM_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.LEAVE_TEAM_PROPOSAL} proposal`);
+    assert(APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL} proposal`);
 
     const proposedCmds = proposalCmd.getProposedCmds();
     const joinProjectCmd = proposedCmds[0];

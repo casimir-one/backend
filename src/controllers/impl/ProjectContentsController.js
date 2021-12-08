@@ -77,15 +77,15 @@ class ProjectContentsController extends BaseController {
       try {
         const projectContents = await projectContentDtoService.lookupProjectContents();
         const projectIds = projectContents.reduce((acc, projectContent) => {
-          if (!acc.some(projectId => projectId == projectContent.research_external_id)) {
-            acc.push(projectContent.research_external_id);
+          if (!acc.some(projectId => projectId == projectContent.projectId)) {
+            acc.push(projectContent.projectId);
           }
           return acc;
         }, []);
 
         const projects = await projectDtoService.getProjects(projectIds);
-        const publicProjectsIds = projects.filter(r => !r.isPrivate).map(r => r.external_id);
-        const result = projectContents.filter(projectContent => publicProjectsIds.some(id => id == projectContent.research_external_id))
+        const publicProjectsIds = projects.filter(r => !r.isPrivate).map(r => r._id);
+        const result = projectContents.filter(projectContent => publicProjectsIds.some(id => id == projectContent.projectId))
 
         ctx.status = 200;
         ctx.body = result;

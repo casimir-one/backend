@@ -28,7 +28,7 @@ module.exports = {
     { h: proposalEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROPOSAL_UPDATED]: [
+  [APP_EVENT.PROPOSAL_ACCEPTED]: [
     { h: proposalEventHandler, await: true },
     { h: contractAgreementEventHandler, await: true }
   ],
@@ -89,7 +89,7 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.TEAM_MEMBER_JOINED]: [
+  [APP_EVENT.DAO_MEMBER_ADDED]: [
     { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
   ],
@@ -106,7 +106,7 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.TEAM_MEMBER_LEFT]: [
+  [APP_EVENT.DAO_MEMBER_REMOVED]: [
     { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
   ],

@@ -9,8 +9,9 @@ import { USER_PROFILE_STATUS, USER_ROLES } from './../../constants';
 import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN } from '@deip/constants';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
-import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
-import { AssetTransferCmd } from '@deip/command-models';
+import { ChainService } from '@deip/chain-service';
+import { TransferAssetCmd } from '@deip/command-models';
+import { waitChainBlockAsync } from './../../utils/network';
 
 
 const userDtoService = new UserDtoService();
@@ -29,18 +30,18 @@ class UsersController extends BaseController {
         const chainTxBuilder = chainService.getChainTxBuilder();
 
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
 
-          const { entityId, email, memoKey, roles, creator } = appCmd.getCmdPayload();
+          const { entityId, email, roles, creator } = appCmd.getCmdPayload();
           if (Array.isArray(roles) && roles.find(({ role }) => role === USER_ROLES.ADMIN)) {
             throw new BadRequestError(`Can't create admin account`);
           }
 
-          if (!entityId || !memoKey || !creator) {
-            throw new BadRequestError(`'entityId', 'memoKey', 'creator' fields are required`);
+          if (!entityId || !creator) {
+            throw new BadRequestError(`'entityId', 'creator' fields are required`);
           }
 
           const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
@@ -55,7 +56,7 @@ class UsersController extends BaseController {
         };
 
         const msg = ctx.state.msg;
-        const createAccountCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
+        const createAccountCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
         if (!createAccountCmd) {
           throw new BadRequestError(`This endpoint accepts 'CreateAccountCmd'`);
         }
@@ -76,20 +77,18 @@ class UsersController extends BaseController {
 
               if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
                 const { owner: { auths: [{ key: pubKey }]} } = authority;
-                const seedFundingCmd = new AssetTransferCmd({
+                const seedFundingCmd = new TransferAssetCmd({
                   from: faucetUsername,
                   to: pubKey,
-                  asset: { ...config.CORE_ASSET, amount: faucetFundingAmount },
-                  memo: ''
+                  asset: { ...config.CORE_ASSET, amount: faucetFundingAmount }
                 });
                 txBuilder.addCmd(seedFundingCmd);
               }
 
-              const daoFundingCmd = new AssetTransferCmd({
+              const daoFundingCmd = new TransferAssetCmd({
                 from: faucetUsername,
                 to: entityId,
-                asset: { ...config.CORE_ASSET, amount: faucetFundingAmount },
-                memo: ''
+                asset: { ...config.CORE_ASSET, amount: faucetFundingAmount }
               });
               txBuilder.addCmd(daoFundingCmd);
 
@@ -102,19 +101,14 @@ class UsersController extends BaseController {
 
         if (isPreFunding) {
           await fundUserAccount();
-          await new Promise((resolve) => {
-            setTimeout(async function () {
-              await accountCmdHandler.process(msg, ctx, validate);
-              resolve();
-            }, config.CHAIN_BLOCK_INTERVAL_MILLIS);
+          await waitChainBlockAsync(async () => {
+            await accountCmdHandler.process(msg, ctx, validate);
           });
+          await waitChainBlockAsync(); // await for new DAO in the Chain
         } else if (isPostFunding) {
           await accountCmdHandler.process(msg, ctx, validate);
-          await new Promise((resolve) => {
-            setTimeout(async function () {
-              await fundUserAccount();
-              resolve();
-            }, config.CHAIN_BLOCK_INTERVAL_MILLIS);
+          await waitChainBlockAsync(async () => {
+            await fundUserAccount();
           });
         } else {
           await accountCmdHandler.process(msg, ctx, validate);
@@ -292,11 +286,11 @@ class UsersController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT) {
+          if (appCmd.getCmdNum() === APP_CMD.UPDATE_DAO) {
             const {
               isTeamAccount
             } = appCmd.getCmdPayload();
@@ -309,7 +303,7 @@ class UsersController extends BaseController {
         const msg = ctx.state.msg;
         await accountCmdHandler.process(msg, ctx, validate);
 
-        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT);
+        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO);
         const entityId = appCmd.getCmdPayload().entityId;
 
         ctx.status = 200;
@@ -323,16 +317,17 @@ class UsersController extends BaseController {
       }
     }
   });
+
 
   updateUserPassword = this.command({
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_ACCOUNT_AUTHORITY);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_DAO_AUTHORITY);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
-          if (appCmd.getCmdNum() === APP_CMD.ALTER_ACCOUNT_AUTHORITY) {
+          if (appCmd.getCmdNum() === APP_CMD.ALTER_DAO_AUTHORITY) {
             const {
               isTeamAccount
             } = appCmd.getCmdPayload();
@@ -342,11 +337,43 @@ class UsersController extends BaseController {
           }
         };
 
-        const msg = ctx.state.msg;
-        await accountCmdHandler.process(msg, ctx, validate);
 
-        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_ACCOUNT_AUTHORITY);
-        const entityId = appCmd.getCmdPayload().entityId;
+        const msg = ctx.state.msg;
+        const alterDaoAuthorityCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_DAO_AUTHORITY);
+        if (!alterDaoAuthorityCmd) {
+          throw new BadRequestError(`This endpoint accepts 'AlterDaoAuthorityCmd'`);
+        }
+
+        const fundUserAccount = async () => {
+          const chainService = await ChainService.getInstanceAsync(config);
+          const chainNodeClient = chainService.getChainNodeClient();
+          const chainTxBuilder = chainService.getChainTxBuilder();
+
+          const { wif: faucetPrivKey, username: faucetUsername, fundingAmount: faucetFundingAmount } = config.FAUCET_ACCOUNT;
+          const fundingTx = await chainTxBuilder.begin()
+            .then((txBuilder) => {
+              const { authority } = alterDaoAuthorityCmd.getCmdPayload();
+              const { owner: { auths: [{ key: pubKey }] } } = authority;
+              const seedFundingCmd = new TransferAssetCmd({
+                from: faucetUsername,
+                to: pubKey,
+                asset: { ...config.CORE_ASSET, amount: faucetFundingAmount }
+              });
+              txBuilder.addCmd(seedFundingCmd);
+              return txBuilder.end();
+            })
+            .then((finalizedTx) => finalizedTx.signAsync(faucetPrivKey, chainNodeClient))
+
+          await assetCmdHandler.process(fundingTx.getPayload(), ctx);
+        }
+
+        await accountCmdHandler.process(msg, ctx, validate);
+        // @temp solution for TESTNET
+        if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
+          await fundUserAccount();
+        }
+
+        const { entityId } = alterDaoAuthorityCmd.getCmdPayload();
 
         ctx.status = 200;
         ctx.body = {
@@ -359,6 +386,7 @@ class UsersController extends BaseController {
       }
     }
   });
+
 
   getAvatar = this.query({
     h: async (ctx) => {

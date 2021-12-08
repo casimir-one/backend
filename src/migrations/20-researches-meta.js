@@ -24,7 +24,7 @@ const run = async () => {
   const chainRpc = chainService.getChainRpc()
 
   const researchesPromises = [];
-  const chainResearches = await chainRpc.lookupResearchesAsync();
+  const chainResearches = await chainRpc.getProjectsListAsync();
   
   for (let i = 0; i < chainResearches.length; i++) {
     const chainResearch = chainResearches[i];
@@ -42,7 +42,7 @@ const run = async () => {
     const meta = { title: title, description: description };
     const hash = crypto.createHash('sha256').update(JSON.stringify(meta)).digest("hex");
 
-    console.log({ id: chainResearch.external_id, hash });
+    console.log({ id: chainResearch.projectId, hash });
 
     // researchesPromises.push(research.save());
   }

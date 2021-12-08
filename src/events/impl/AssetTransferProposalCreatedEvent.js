@@ -15,9 +15,9 @@ class AssetTransferProposalCreatedEvent extends BaseEvent {
     assert(APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL} proposal`);
     
     const proposedCmds = proposalCmd.getProposedCmds();
-    const assetTransferCmd = proposedCmds[0];
-    const { entityId: proposalId, expirationTime, creator } = proposalCmd.getCmdPayload();
-    const { from: party1, to: party2, amount: asset, memo } = assetTransferCmd.getCmdPayload();
+    const transferAssetCmd = proposedCmds[0];
+    const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
+    const { from: party1, to: party2, amount: asset, memo } = transferAssetCmd.getCmdPayload();
     
     assert(!!proposalId, `'proposalId' is required`);
     assert(!!expirationTime, `'expirationTime' is required`);

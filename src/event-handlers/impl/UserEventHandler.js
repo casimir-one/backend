@@ -61,13 +61,6 @@ userEventHandler.register(APP_EVENT.USER_UPDATED, async (event) => {
 
 userEventHandler.register(APP_EVENT.USER_AUTHORITY_ALTERED, async (event) => {
 
-  // const {
-  //   username,
-  //   ownerAuth,
-  //   memoKey
-  // } = event.getEventPayload();
-
-  // change data
 });
 
 userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
@@ -88,7 +81,7 @@ userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
 
 });
 
-userEventHandler.register(APP_EVENT.TEAM_MEMBER_JOINED, async (event) => {
+userEventHandler.register(APP_EVENT.DAO_MEMBER_ADDED, async (event) => {
   const {
     member,
     teamId
@@ -102,7 +95,7 @@ userEventHandler.register(APP_EVENT.TEAM_MEMBER_JOINED, async (event) => {
 
 });
 
-userEventHandler.register(APP_EVENT.TEAM_MEMBER_LEFT, async (event) => {
+userEventHandler.register(APP_EVENT.DAO_MEMBER_REMOVED, async (event) => {
   const {
     member,
     teamId

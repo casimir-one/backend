@@ -12,7 +12,7 @@ class ProjectTokenSaleProposalCreatedEvent extends BaseEvent {
     } = eventPayload;
 
     assert(!!proposalCmd, `'proposalCmd' is required`);
-    assert(APP_PROPOSAL.PROJECT_TOKEN_SALE_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.PROJECT_TOKEN_SALE_PROPOSAL} proposal`);
+    assert(APP_PROPOSAL.INVESTMENT_OPPORTUNITY_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.INVESTMENT_OPPORTUNITY_PROPOSAL} proposal`);
     
     const proposedCmds = proposalCmd.getProposedCmds();
     const createProjectTokenSaleCmd = proposedCmds[0];

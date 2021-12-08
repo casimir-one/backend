@@ -8,8 +8,7 @@ class AssetTransferedEvent extends BaseEvent {
     const {
       from,
       to,
-      asset,
-      memo
+      asset
     } = eventPayload;
 
     assert(!!from, "'from' is required");

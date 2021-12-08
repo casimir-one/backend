@@ -29,11 +29,11 @@ const run = async () => {
 
   const researchPromises = [];
   const researches = await Research.find({});
-  const chainResearches = await chainRpc.getResearchesAsync(researches.map(r => r._id));
+  const chainResearches = await Promise.all(researches.map(r => chainRpc.getProjectAsync(r._id)));
 
   for (let i = 0; i < researches.length; i++) {
     let research = researches[i];
-    let chainResearch = chainResearches.find(r => r.external_id == research._id);
+    let chainResearch = chainResearches.find(r => r.projectId == research._id);
 
     if (chainResearch) {
       research.title = chainResearch.title;

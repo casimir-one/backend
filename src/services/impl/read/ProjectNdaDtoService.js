@@ -3,6 +3,8 @@ import { ChainService } from '@deip/chain-service';
 
 class ProjectNdaDtoService {
 
+  // TODO: Chain-agnostic API
+
   async getProjectNda(ndaId) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();

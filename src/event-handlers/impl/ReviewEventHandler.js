@@ -50,14 +50,13 @@ reviewEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) => {
     author,
     projectContentId,
     content,
-    weight,
     assessment,
-    disciplines
+    domains
   } = event.getEventPayload();
 
   const projectContentRef = await projectContentDtoService.getProjectContentRef(projectContentId);
 
-  const reviewRef = await reviewService.createReview({
+  await reviewService.createReview({
     reviewId,
     projectId: projectContentRef.researchExternalId,
     projectContentId,

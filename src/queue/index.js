@@ -3,7 +3,7 @@ import cron from 'node-cron';
 import BaseEventHandler from './../event-handlers/base/BaseEventHandler';
 import { QUEUE_TOPIC } from './../constants';
 
-// TODO: Use Kafka consumer
+// TODO: Use Apache Kafka consumer
 
 var isBroadcasting = false;
 const eventsBuffer = [];

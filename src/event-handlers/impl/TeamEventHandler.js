@@ -51,7 +51,7 @@ teamEventHandler.register(APP_EVENT.TEAM_UPDATED, async (event) => {
 
 });
 
-teamEventHandler.register(APP_EVENT.TEAM_MEMBER_JOINED, async (event) => {
+teamEventHandler.register(APP_EVENT.DAO_MEMBER_ADDED, async (event) => {
 
   const {
     member,
@@ -66,7 +66,7 @@ teamEventHandler.register(APP_EVENT.TEAM_MEMBER_JOINED, async (event) => {
 });
 
 
-teamEventHandler.register(APP_EVENT.TEAM_MEMBER_LEFT, async (event) => {
+teamEventHandler.register(APP_EVENT.DAO_MEMBER_REMOVED, async (event) => {
   const {
     member,
     teamId

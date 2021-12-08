@@ -19,21 +19,59 @@ class ProjectContentDtoService extends BaseService {
     super(ProjectContentSchema, options);
   }
 
-  async mapProjectContents(projectContents) {
+  async mapProjectContents(projectsContents) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const chainProjectContents = await chainRpc.getProjectContentsAsync(projectContents.map(rc => rc._id));
-    
-    return chainProjectContents
-      .map((chainProjectContent) => {
-        const projectContentRef = projectContents.find(rc => rc._id == chainProjectContent.external_id);
-        return { ...chainProjectContent, researchContentRef: projectContentRef ? projectContentRef : null };
-      })
-      .map((projectContent) => {
-        const override = projectContent.researchContentRef ? { title: projectContent.researchContentRef.title } : { title: "Not specified" };
-        return { ...projectContent, ...override };
-      });
+    const chainProjectsContents = await chainRpc.getProjectContentsAsync(projectsContents.map(c => c._id));
+
+    return projectsContents.map((projectContent) => {
+      const chainProjectContent = chainProjectsContents.find((chainProjectContent) => !!chainProjectContent && chainProjectContent.contentId == projectContent._id);
+      
+      let contentType = null;
+      let metadata = null;
+      let eciMap = {};
+      if (chainProjectContent) {
+        contentType = chainProjectContent.type;
+        metadata = chainProjectContent.metadata;
+        eciMap = chainProjectContent.eciMap;
+      } else {
+        console.warn(`Project content with ID '${projectContent._id}' is not found in the Chain`);
+      }
+
+      return {
+        _id: projectContent._id,
+        tenantId: projectContent.tenantId,
+        projectId: projectContent.researchExternalId,
+        teamId: projectContent.researchGroupExternalId,
+        title: projectContent.title,
+        folder: projectContent.folder,
+        authors: projectContent.authors,
+        hash: projectContent.hash,
+        algo: projectContent.algo,
+        type: projectContent.type,
+        status: projectContent.status,
+        packageFiles: projectContent.packageFiles,
+        references: projectContent.references,
+        foreignReferences: projectContent.foreignReferences,
+        createdAt: projectContent.createdAt,
+        updatedAt: projectContent.updatedAt,
+        metadata: metadata,
+        eciMap: eciMap,
+        contentType: contentType,
+        
+        
+        // @deprecated
+        external_id: projectContent._id,
+        research_external_id: projectContent.researchExternalId,
+        content: projectContent.hash,
+        content_type: contentType,
+        description: metadata,
+        researchContentRef: projectContent,
+        eci_per_discipline: eciMap,
+        created_at: projectContent.createdAt
+      };
+    });
   }
 
   async getProjectContent(projectContentId) {
@@ -95,7 +133,7 @@ class ProjectContentDtoService extends BaseService {
 
   async getProjectContentReferencesGraph(projectContentId) {
     const projectContent = await this.getProjectContent(projectContentId);
-    const project = await projectDtoService.getResearch(projectContent.research_external_id);
+    const project = await projectDtoService.getProject(projectContent.research_external_id);
     const team = await teamDtoService.getTeam(project.research_group.external_id);
 
     const ref = await this.getProjectContentRef(projectContent.external_id);
@@ -170,7 +208,7 @@ class ProjectContentDtoService extends BaseService {
         research_content_reference_external_id: referenceprojectContentId
       } = payload;
 
-      const outerRefProject = await projectDtoService.getResearch(projectId);
+      const outerRefProject = await projectDtoService.getProject(projectId);
       if (!outerRefProject) {
         continue; // deleted research\content
       }
@@ -216,7 +254,7 @@ class ProjectContentDtoService extends BaseService {
         research_content_reference_external_id: referenceprojectContentId
       } = payload;
 
-      const innerRefProject = await projectDtoService.getResearch(referenceProjectExternalId);
+      const innerRefProject = await projectDtoService.getProject(referenceProjectExternalId);
       if (!innerRefProject) {
         continue; // deleted research\content
       }

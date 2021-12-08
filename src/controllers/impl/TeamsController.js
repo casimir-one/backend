@@ -112,8 +112,8 @@ class TeamsController extends BaseController {
       try {
 
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
-          if (appCmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT) {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
+          if (appCmd.getCmdNum() === APP_CMD.CREATE_DAO) {
             const { isTeamAccount } = appCmd.getCmdPayload();
             if (!isTeamAccount) {
               throw new BadRequestError(`This endpoint should be for team account`);
@@ -125,7 +125,7 @@ class TeamsController extends BaseController {
         };
 
         const msg = ctx.state.msg;
-        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ACCOUNT);
+        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
         const entityId = appCmd.getCmdPayload().entityId;
 
         await accountCmdHandler.process(msg, ctx, validate);
@@ -148,11 +148,11 @@ class TeamsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT) {
+          if (appCmd.getCmdNum() === APP_CMD.UPDATE_DAO) {
             const {
               isTeamAccount
             } = appCmd.getCmdPayload();
@@ -162,20 +162,20 @@ class TeamsController extends BaseController {
           }
           if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
             const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.UPDATE_ACCOUNT]} protocol cmd`);
+            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO)) {
+              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.UPDATE_DAO]} protocol cmd`);
             }
           }
         };
 
         const msg = ctx.state.msg;
-        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
+        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
         let entityId = '';
-        if (appCmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT) {
+        if (appCmd.getCmdNum() === APP_CMD.UPDATE_DAO) {
           entityId = appCmd.getCmdPayload().entityId;
         } else if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
           const proposedCmds = appCmd.getProposedCmds();
-          const updateCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ACCOUNT)
+          const updateCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO)
           entityId = updateCmd.getCmdPayload().entityId;
         }
 
@@ -203,10 +203,10 @@ class TeamsController extends BaseController {
           }
 
           const proposedCmds = appCmd.getProposedCmds();
-          const joinTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.JOIN_TEAM);
+          const joinTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ADD_DAO_MEMBER);
 
           if (!joinTeamCmd) {
-            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.JOIN_TEAM]} protocol cmd`);
+            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.ADD_DAO_MEMBER]} protocol cmd`);
           }
           const { member, teamId } = joinTeamCmd.getCmdPayload();
           const user = await userService.getUser(member);
@@ -247,10 +247,10 @@ class TeamsController extends BaseController {
           }
 
           const proposedCmds = appCmd.getProposedCmds();
-          const leaveTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.LEAVE_TEAM);
+          const leaveTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.REMOVE_DAO_MEMBER);
 
           if (!leaveTeamCmd) {
-            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.LEAVE_TEAM]} protocol cmd`);
+            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.REMOVE_DAO_MEMBER]} protocol cmd`);
           }
           const { member, teamId } = leaveTeamCmd.getCmdPayload();
           const user = await userService.getUser(member);

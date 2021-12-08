@@ -45,12 +45,12 @@ import ContractAgreementProposalAcceptedEvent from './../impl/ContractAgreementP
 import ContractAgreementProposalDeclinedEvent from './../impl/ContractAgreementProposalDeclinedEvent';
 
 module.exports = {
-  [APP_PROPOSAL.JOIN_TEAM_PROPOSAL]: {
+  [APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL]: {
     CREATED: TeamInviteCreatedEvent,
     ACCEPTED: TeamInviteAcceptedEvent,
     DECLINED: TeamInviteDeclinedEvent
   },
-  [APP_PROPOSAL.LEAVE_TEAM_PROPOSAL]: {
+  [APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL]: {
     CREATED: TeamLeavingCreatedEvent,
     ACCEPTED: TeamLeavingAcceptedEvent,
     DECLINED: TeamLeavingDeclinedEvent
@@ -70,7 +70,7 @@ module.exports = {
     ACCEPTED: TeamUpdateProposalAcceptedEvent,
     DECLINED: TeamUpdateProposalDeclinedEvent
   },
-  [APP_PROPOSAL.PROJECT_TOKEN_SALE_PROPOSAL]: {
+  [APP_PROPOSAL.INVESTMENT_OPPORTUNITY_PROPOSAL]: {
     CREATED: ProjectTokenSaleProposalCreatedEvent,
     ACCEPTED: ProjectTokenSaleProposalAcceptedEvent,
     DECLINED: ProjectTokenSaleProposalDeclinedEvent

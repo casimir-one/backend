@@ -8,12 +8,11 @@ class UserAuthorityAlteredEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
       username,
-      ownerAuth,
-      memoKey
+      authority,
     } = eventPayload;
 
     assert(!!username, "'username' is required");
-    assert(!!ownerAuth, "'ownerAuth' required");
+    assert(!!authority, "'authority' required");
 
     super(APP_EVENT.USER_AUTHORITY_ALTERED, eventPayload);
   }

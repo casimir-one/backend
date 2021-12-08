@@ -85,7 +85,7 @@ const createAwardWithdrawalRequest = async (ctx) => {
     const researchService = new ResearchService();
     const grantsService = new GrantService();
 
-    const research = await researchService.getResearch(researchId);
+    const research = await researchService.getProject(researchId);
 
     const { tempDestinationPath, awardNumber, subawardNumber, paymentNumber } = await GrantAwardPaymentForm(ctx);
 

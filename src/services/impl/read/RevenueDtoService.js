@@ -5,6 +5,7 @@ const assetService = new AssetService()
 
 class RevenueDtoService {
   async mapRevenueHistory(chainRevenueHistory) {
+    // TODO: Chain-agnostic API
     const assets = await assetService.getAssetsBySymbols(chainRevenueHistory.map(c => c.revenue.split(' ')[1]))
     return chainRevenueHistory.map(c => {
       const [amount, symbol] = c.revenue.split(' ');
