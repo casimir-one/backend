@@ -36,13 +36,15 @@ class ProjectDtoService extends BaseService {
     const projectAccesses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_ACCESS });
     const projectsAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
     const teams = await Promise.all(projects.map((project) => teamDtoService.getTeam(project.researchGroupExternalId)));
-    const allMembers = teams.map(t => t.members);
+    const teamsMembers = teams.filter((team) => !!team).map((team) => ({ teamId: team._id, members: team.members }));
 
     const chainProjects = await chainRpc.getProjectsAsync(projects.map(p => p._id));
     const chainProjectNfts = await Promise.all(projects.map(p => chainRpc.getProjectAssetsAsync(p._id)));
 
-    return projects.map((project, i) => {
-      const members = allMembers[i] || [];
+    return projects.map((project) => {
+      const teamMembers = teamsMembers.find((t) => t.teamId == project.researchGroupExternalId);
+      const members = teamMembers ? teamMembers.members : [];
+
       const chainProject = chainProjects.find((chainProject) => chainProject && chainProject.projectId == project._id);
 
       let isPrivate;
