@@ -191,7 +191,7 @@ protected_route.get('/v2/project-content/texture/:projectContentId/assets/:file'
 protected_route.put('/v2/project-content/texture', compose([draftCmdProxy()]), projectContentsCtrl.updateDraft)
 protected_route.post('/v2/project-content/texture', compose([projectContentCmdProxy()]), projectContentsCtrl.createDraft)
 protected_route.post('/v2/project-content/package', compose([projectContentCmdProxy()]), projectContentsCtrl.uploadProjectContentPackage)
-protected_route.get('/v2/project-content/package/:projectContentId/:fileHash', compose([projectContentCmdProxy()]), projectContentsCtrl.getProjectContentPackageFile)
+protected_route.get('/v2/project-content/package/:projectContentId/:fileHash', projectContentsCtrl.getProjectContentPackageFile)
 
 public_route.get('/v2/review/:reviewId', reviewsCtrl.getReview)
 public_route.get('/v2/review/votes/:reviewId', reviewsCtrl.getReviewUpvotes)

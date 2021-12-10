@@ -2,7 +2,6 @@ import ProjectDtoService from './ProjectDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
 import { CONTENT_TYPES_MAP } from '../../../constants';
-import { PROJECT_CONTENT_STATUS } from '@deip/constants';
 import BaseService from '../../base/BaseService';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
@@ -28,11 +27,9 @@ class ProjectContentDtoService extends BaseService {
     return projectsContents.map((projectContent) => {
       const chainProjectContent = chainProjectsContents.find((chainProjectContent) => !!chainProjectContent && chainProjectContent.contentId == projectContent._id);
       
-      let contentType = null;
       let metadata = null;
       let eciMap = {};
       if (chainProjectContent) {
-        contentType = chainProjectContent.type;
         metadata = chainProjectContent.metadata;
         eciMap = chainProjectContent.eciMap;
       } else {
@@ -54,28 +51,28 @@ class ProjectContentDtoService extends BaseService {
         packageFiles: projectContent.packageFiles,
         references: projectContent.references,
         foreignReferences: projectContent.foreignReferences,
-        createdAt: projectContent.createdAt,
-        updatedAt: projectContent.updatedAt,
+        createdAt: projectContent.createdAt || projectContent.created_at,
+        updatedAt: projectContent.updatedAt || projectContent.updated_at,
         metadata: metadata,
         eciMap: eciMap,
-        contentType: contentType,
+        contentType: projectContent.contentType,
+        formatType: projectContent.formatType,
         
         
         // @deprecated
         external_id: projectContent._id,
         research_external_id: projectContent.researchExternalId,
         content: projectContent.hash,
-        content_type: contentType,
         description: metadata,
         researchContentRef: projectContent,
         eci_per_discipline: eciMap,
-        created_at: projectContent.createdAt
+        created_at: projectContent.createdAt || projectContent.created_at
       };
     });
   }
 
   async getProjectContent(projectContentId) {
-    const projectContent = await this.findOne({ _id: projectContentId, status: PROJECT_CONTENT_STATUS.PUBLISHED });
+    const projectContent = await this.findOne({ _id: projectContentId });
     if (!projectContent) return null;
     const [result] = await this.mapProjectContents([projectContent]);
     return result;
@@ -83,28 +80,28 @@ class ProjectContentDtoService extends BaseService {
 
 
   async getProjectContents(projectContentIds) {
-    const projectContents = await this.findMany({ _id: { $in: [...projectContentIds] }, status: PROJECT_CONTENT_STATUS.PUBLISHED });
+    const projectContents = await this.findMany({ _id: { $in: [...projectContentIds] } });
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
   async lookupProjectContents() {
-    const projectContents = await this.findMany({ status: PROJECT_CONTENT_STATUS.PUBLISHED });
+    const projectContents = await this.findMany({});
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
   async getProjectContentsByProject(projectId) {
-    const projectContents = await this.findMany({ researchExternalId: projectId , status: PROJECT_CONTENT_STATUS.PUBLISHED });
+    const projectContents = await this.findMany({ researchExternalId: projectId });
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
   async getProjectContentsByTenant(tenantId) {
-    const available = await this.findMany({ status: PROJECT_CONTENT_STATUS.PUBLISHED });
+    const available = await this.findMany({});
     const projectContents = available.filter(r => r.tenantId == tenantId);
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
@@ -112,12 +109,7 @@ class ProjectContentDtoService extends BaseService {
   }
 
   async findPublishedProjectContentRefsByProject(projectId) {
-    const result = await this.findMany({ researchExternalId: projectId, status: PROJECT_CONTENT_STATUS.PUBLISHED });
-    return result;
-  }
-
-  async findDraftProjectContentRefsByProject(projectId) {
-    const result = await this.findMany({ researchExternalId: projectId, status: { $in: [ PROJECT_CONTENT_STATUS.IN_PROGRESS, PROJECT_CONTENT_STATUS.PROPOSED ] } });
+    const result = await this.findMany({ researchExternalId: projectId });
     return result;
   }
 
@@ -281,7 +273,7 @@ class ProjectContentDtoService extends BaseService {
   }
 
   getProjectContentType(type) {
-    return CONTENT_TYPES_MAP.find((t) => t.type === type);
+    return CONTENT_TYPES_MAP.find((t) => t.type === type || t.id === type);
   }
  
 }

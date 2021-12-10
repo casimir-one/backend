@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DATA_TYPES } from '@deip/constants';
+import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DATA_TYPES, RESEARCH_CONTENT_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -12,7 +12,12 @@ const DraftSchema = new Schema({
   "title": { type: String, required: true },
   "hash": { type: String, index: true },
   "algo": { type: String },
-  "type": {
+  "contentType": {
+    type: Number,
+    enum: [...Object.values(RESEARCH_CONTENT_TYPES)],
+    default: RESEARCH_CONTENT_TYPES.UNKNOWN
+  },
+  "formatType": {
     type: Number,
     enum: [...Object.values(PROJECT_CONTENT_DATA_TYPES)],
     required: true
@@ -31,7 +36,7 @@ const DraftSchema = new Schema({
   "authors": [{ type: String }],
   "references": [{ type: String }],
   "foreignReferences": [{ type: String }],
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
 const model = mongoose.model('draft', DraftSchema);
 

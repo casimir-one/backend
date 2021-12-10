@@ -99,36 +99,21 @@ fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event)
 
 fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (event) => {
 
-  const { projectId, draftId, draftType, ctx } = event.getEventPayload();
+  const { projectId, draftId, formatType, ctx } = event.getEventPayload();
 
   const externalId = mongoose.Types.ObjectId(draftId);
 
-  if (draftType == PROJECT_CONTENT_DATA_TYPES.DAR) { 
-    const darPath = FileStorage.getResearchDarArchiveDirPath(projectId, externalId.toString());
+  if (formatType == PROJECT_CONTENT_DATA_TYPES.DAR) { 
+    const darPath = FileStorage.getResearchDarArchiveDirPath(projectId, externalId);
     const blankDarPath = FileStorage.getResearchBlankDarArchiveDirPath();
     
     await cloneArchive(blankDarPath, darPath, true);
   }
   const files = ctx.req.files;
-  if (draftType == PROJECT_CONTENT_DATA_TYPES.PACKAGE && files.length > 0) {
-    const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
+  if (formatType == PROJECT_CONTENT_DATA_TYPES.PACKAGE && files.length > 0) {
     const tempDestinationPath = files[0].destination;
-    const hashObj = await FileStorage.calculateDirHash(tempDestinationPath, options);
 
-    const hashes = hashObj.children.map(f => f.hash);
-    hashes.sort();
-    const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
-
-    const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, packageHash);
-
-    const projectContentPackageDirExists = await FileStorage.exists(projectContentPackageDirPath);
-
-    if (projectContentPackageDirExists) {
-      console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
-      await FileStorage.rmdir(tempDestinationPath);
-      // draft already exist
-      return
-    }
+    const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
     
     await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
   }

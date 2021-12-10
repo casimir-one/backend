@@ -31,7 +31,7 @@ const InvestmentOpportunitySchema = new Schema({
     required: true,
     default: TS_TYPES.INACTIVE
   },
-});
+}, { timestamps: true });
 
 const model = mongoose.model('investment-opportunity', InvestmentOpportunitySchema);
 

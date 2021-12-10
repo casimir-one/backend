@@ -34,7 +34,7 @@ const signIn = async function (ctx) {
     if (!isValidSig) {
       ctx.body = {
         success: false,
-        error: `Signature is invalid for ${username}, make sure you specify correct private key`
+        error: 'Wrong email or password. Please try again.'
       };
       return;
     }

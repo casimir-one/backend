@@ -38,8 +38,8 @@ class InvestmentOpportunityDtoService extends BaseService {
         creator: invstOpp.creator,
         totalInvested: invstOpp.totalInvested,
         type: invstOpp.type,
-        createdAt: invstOpp.createdAt,
-        updatedAt: invstOpp.updatedAt,
+        createdAt: invstOpp.createdAt || invstOpp.created_at,
+        updatedAt: invstOpp.updatedAt || invstOpp.updated_at,
         status: chainInvstOpp ? chainInvstOpp.status : null,
 
         // @deprecated

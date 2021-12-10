@@ -10,7 +10,7 @@ class ProjectContentCreatedEvent extends BaseEvent {
       projectId,
       teamId,
       content,
-      type,
+      contentType,
       authors,
       title
     } = eventPayload;
@@ -19,7 +19,7 @@ class ProjectContentCreatedEvent extends BaseEvent {
     assert(!!projectId, "'projectId' is required");
     assert(!!teamId, "'teamId' is required");
     assert(!!content, "'content' is required");
-    assert(!!type, "'type' is required");
+    assert(!!contentType, "'contentType' is required");
     assert(!!authors && authors.length, "'authors' is required");
     assert(!!title, "'title' is required");
 

@@ -3,11 +3,19 @@ import BaseController from '../base/BaseController';
 import { ProjectContentPackageForm } from '../../forms';
 import { BadRequestError, NotFoundError, ConflictError, ForbiddenError } from '../../errors';
 import { projectContentCmdHandler } from '../../command-handlers';
-import { ProjectDtoService, ProjectContentService, ProjectContentDtoService, ProjectService, TeamDtoService, DraftService } from './../../services';
+import {
+  ProjectDtoService,
+  ProjectContentService,
+  ProjectContentDtoService,
+  ProjectService,
+  TeamDtoService,
+  DraftService
+} from './../../services';
 import FileStorage from './../../storage';
 import readArchive from './../../dar/readArchive';
 import { PROJECT_CONTENT_STATUS } from '@deip/constants';
 import mongoose from 'mongoose';
+import slug from 'limax';
 
 const projectDtoService = new ProjectDtoService();
 const projectService = new ProjectService();
@@ -165,12 +173,28 @@ class ProjectContentsController extends BaseController {
         const fileHash = ctx.params.fileHash;
         const isDownload = ctx.query.download === 'true';
 
+        const dirPathData = {
+          projectId: '',
+          packageFiles: '',
+          folder: ''
+        };
+
         const projectContentRef = await projectContentDtoService.getProjectContentRef(projectContentId);
         if (!projectContentRef) {
-          throw new NotFoundError(`Package "${projectContentId}" is not found`);
+          const draft = await draftService.getDraft(projectContentId);
+          if (!draft) {
+            throw new NotFoundError(`Package for "${projectContentId}" id is not found`);
+          }
+          dirPathData.projectId = draft.projectId
+          dirPathData.folder = draft.folder
+          dirPathData.packageFiles = draft.packageFiles
+        } else {
+          dirPathData.projectId = projectContentRef.researchExternalId
+          dirPathData.folder = projectContentRef.folder
+          dirPathData.packageFiles = projectContentRef.packageFiles
         }
 
-        const project = await projectDtoService.getProject(projectContentRef.researchExternalId);
+        const project = await projectDtoService.getProject(dirPathData.projectId);
         if (project.isPrivate) {
           const jwtUsername = ctx.state.user.username;
           const isAuthorized = await teamDtoService.authorizeTeamAccount(project.research_group.external_id, jwtUsername)
@@ -179,13 +203,13 @@ class ProjectContentsController extends BaseController {
           }
         }
 
-        const file = projectContentRef.packageFiles.find(f => f.hash == fileHash);
+        const file = dirPathData.packageFiles.find(f => f.hash == fileHash);
         if (!file) {
           throw new NotFoundError(`File "${fileHash}" is not found`);
         }
 
         const filename = file.filename;
-        const filepath = FileStorage.getResearchContentPackageFilePath(projectContentRef.researchExternalId, projectContentRef.hash, filename);
+        const filepath = FileStorage.getResearchContentPackageFilePath(dirPathData.projectId, dirPathData.folder, filename);
         const ext = filename.substr(filename.lastIndexOf('.') + 1);
         const name = filename.substr(0, filename.lastIndexOf('.'));
         const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
@@ -257,7 +281,7 @@ class ProjectContentsController extends BaseController {
           if (record._binary) {
             delete record._binary
             record.encoding = 'url'
-            record.data = `${config.DEIP_SERVER_URL}/api/research-content/texture/${projectContentId}/assets/${record.path}?authorization=${jwt}`;
+            record.data = `${config.DEIP_SERVER_URL}/api/v2/project-content/texture/${projectContentId}/assets/${record.path}?authorization=${jwt}`;
           }
         })
         ctx.status = 200;
@@ -342,25 +366,34 @@ class ProjectContentsController extends BaseController {
             if (!createProjectContentCmd) {
               throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.CREATE_PROJECT_CONTENT]} protocol cmd`);
             } else {
-              const draftId = createProjectContentCmd.getCmdPayload().content;
-
-              const draft = await draftService.getDraft(draftId);
-
+              const draftHash = createProjectContentCmd.getCmdPayload().content;
+              const draft = await draftService.getDraftByHash(draftHash);
               if(!draft) {
-                throw new NotFoundError(`Draft for "${draftId}" id is not found`);
+                throw new NotFoundError(`Draft for "${draftHash}" hash is not found`);
+              }
+              const projectContent = await projectContentDtoService.findProjectContentRefByHash(draft.projectId, draftHash);
+              
+              if (projectContent) {
+                throw new ConflictError(`Project content with "${draftHash}" hash already exist`);
               }
               if(draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
-                throw new BadRequestError(`Research content "${draft.projectId}" is in '${draft.status}' status`);
+                throw new BadRequestError(`Project content "${draft.projectId}" is in '${draft.status}' status`);
               }
             }
-          } else if (cmd.getCmdNum() === APP_CMD.CREATE_PROJECT_CONTENT) {
-            const draftId = appCmd.getCmdPayload().content;
-            const draft = await draftService.getDraft(draftId);
+          } else if (appCmd.getCmdNum() === APP_CMD.CREATE_PROJECT_CONTENT) {
+            const draftHash = appCmd.getCmdPayload().content;
+            const draft = await draftService.getDraftByHash(draftHash);
+
             if(!draft) {
-              throw new NotFoundError(`Draft for "${draftId}" id is not found`);
+              throw new NotFoundError(`Draft for "${draftHash}" hash is not found`);
+            }
+            const projectContent = await projectContentDtoService.findProjectContentRefByHash(draft.projectId, draftHash);
+
+            if (projectContent) {
+              throw new ConflictError(`Project content with "${draftHash}" hash already exist`);
             }
             if(draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
-              throw new BadRequestError(`Research content "${draft.projectId}" is in '${draft.status}' status`);
+              throw new BadRequestError(`Project content "${draft.projectId}" is in '${draft.status}' status`);
             }
           }
         };

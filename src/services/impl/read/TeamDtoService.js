@@ -36,8 +36,8 @@ class TeamDtoService extends BaseService {
         members: team.members,
         name: team.name || "",
         description: team.description || "",
-        createdAt: team.createdAt,
-        updatedAt: team.updatedAt,
+        createdAt: team.createdAt || team.created_at,
+        updatedAt: team.updatedAt || team.updated_at,
         metadataHash: chainAccount ? chainAccount.metadata : null,
 
 

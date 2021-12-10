@@ -40,8 +40,8 @@ class ReviewDtoService extends BaseService {
         domains: domains,
         eciMap: eciMap,
         assessment: assessment,
-        createdAt: review.createdAt,
-        updatedAt: review.updatedAt,
+        createdAt: review.createdAt || review.created_at,
+        updatedAt: review.updatedAt || review.updated_at,
 
 
         // @deprecated
@@ -49,7 +49,7 @@ class ReviewDtoService extends BaseService {
         research_content_external_id: review.researchContentExternalId,
         is_positive: isPositive,
         reviewRef: review,
-        created_at: review.createdAt,
+        created_at: review.createdAt || review.created_at,
         disciplines: domains.map((domainId) => {
           return {
             external_id: domainId,

@@ -28,7 +28,7 @@ const ContractAgreementSchema = new Schema({
     required: true
   },
   "terms": { type: Object, required: true }
-}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
+}, { timestamps: true });
 
 
 const model = mongoose.model('contract-agreement', ContractAgreementSchema);

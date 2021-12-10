@@ -22,7 +22,7 @@ const UserSchema = new Schema({
   "teams": { type: [String], default: [] },
   "attributes": [AttributeValueSchema],
   "roles": [UserRole],
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
 const model = mongoose.model('user-profile', UserSchema);
 
