@@ -70,10 +70,14 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
         const issueAssetCmd = new IssueAssetCmd({
-          assetId: asset._id,
           issuer: regacc,
-          amount: `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`,
-          recipient: account,
+          asset: {
+            id: asset._id,
+            symbol: asset.symbol,
+            precision: asset.precision,
+            amount: `${(amount / 100).toFixed(2)} ${asset.symbol}`
+          },
+          recipient: account
         });
         txBuilder.addCmd(issueAssetCmd);
         return txBuilder.end();
@@ -272,14 +276,19 @@ const confirmAssetDepositRequest = async (ctx) => {
       return;
     }
 
+    const asset = await assetDtoService.getAssetBySymbol(depositRequest.currency.toUpperCase());
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
         const issueAssetCmd = new IssueAssetCmd({
-          assetId: depositRequest.assetId,
           issuer: regacc,
-          amount: `${(amount / 100).toFixed(2)} ${currency.toUpperCase()}`,
-          recipient: account,
+          asset: {
+            id: asset._id,
+            symbol: asset.symbol,
+            precision: asset.precision,
+            amount: `${(amount / 100).toFixed(2)} ${asset.symbol}` 
+          },
+          recipient: account
         });
         txBuilder.addCmd(issueAssetCmd);
         return txBuilder.end();
