@@ -23,7 +23,7 @@ const AssetSchema = new Schema({
     type: Number,
     enum: [...Object.values(ASSET_TYPE)],
     required: true,
-    default: ASSET_TYPE.GENERAL
+    default: ASSET_TYPE.COIN
   },
   "isGlobalScope": { type: Boolean, default: false }
 });

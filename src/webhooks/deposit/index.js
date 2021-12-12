@@ -86,7 +86,7 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
             id: asset._id,
             symbol: asset.symbol,
             precision: asset.precision,
-            amount: `${(amount / 100).toFixed(2)} ${asset.symbol}`
+            amount: `${(amount / 100).toFixed(asset.precision)} ${asset.symbol}`
           },
           recipient: account
         });
@@ -169,7 +169,7 @@ const createAssetDepositRequest = async (ctx) => {
 
     if (!amount || amount < MIN_AMOUNT) {
       ctx.status = 400;
-      ctx.body = `Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(2)} ${currency}`;
+      ctx.body = `Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(asset.precision)} ${currency}`;
       return;
     }
 
@@ -288,7 +288,7 @@ const confirmAssetDepositRequest = async (ctx) => {
             id: asset._id,
             symbol: asset.symbol,
             precision: asset.precision,
-            amount: `${(amount / 100).toFixed(2)} ${asset.symbol}` 
+            amount: `${(amount / 100).toFixed(asset.precision)} ${asset.symbol}`
           },
           recipient: account
         });

@@ -41,7 +41,7 @@ assetEventHandler.register(APP_EVENT.ASSET_CREATED, async (event) => {
     settings.licenseRevenueHoldersShare = licenseRevenue ? licenseRevenue.holdersShare : undefined;
   }
 
-  const type = settings.projectId ? ASSET_TYPE.PROJECT : ASSET_TYPE.GENERAL;
+  const type = settings.projectId ? ASSET_TYPE.NFT : ASSET_TYPE.COIN;
 
   await assetService.createAsset({
     entityId,

@@ -54,7 +54,7 @@ const run = async () => {
       "precision": chainAsset.precision,
       "issuer": chainAsset.issuer,
       "description": chainAsset.description,
-      "type": chainAsset.tokenized_research ? ASSET_TYPE.PROJECT : ASSET_TYPE.GENERAL,
+      "type": chainAsset.tokenized_research ? ASSET_TYPE.NFT : ASSET_TYPE.COIN,
       "settings": {
         "projectId": chainAsset.tokenized_research || null,
         "maxSupply": parseInt(chainAsset.max_supply),
