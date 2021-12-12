@@ -19,7 +19,7 @@ const SUPPORTED_CURRENCIES = ["USD", "EUR", "CAD", "CNY", "GBP"];
 const MIN_AMOUNT = 100; // cents
 
 
-// TEMP until Stipe fix
+// @temp until Dev Stripe fix
 const processAssetDepositRequestForTestnet = async (ctx) => {
   try {
     const {
@@ -28,9 +28,9 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
       timestamp,
       account,
       redirectUrl,
-      sigHex
+      sigHex,
+      sigSource
     } = ctx.request.body;
-
     const username = ctx.state.user.username;
 
     const chainService = await ChainService.getInstanceAsync(config);
@@ -63,6 +63,17 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
     if (!depositor || !balanceOwner) {
       ctx.status = 404;
       ctx.body = `${username} or ${account} account is not found`;
+      return;
+    }
+
+    const depositorPubKey = depositor.authority.owner.auths
+      .filter((auth) => !!auth.pubKey)
+      .map((auth) => auth.pubKey)[0];
+
+    const isValidSig = chainService.verifySignature(depositorPubKey, sigSource, sigHex);
+    if (!isValidSig) {
+      ctx.status = 400;
+      ctx.body = `Signature ${sigSource} is invalid for public key ${depositorPubKey}`;
       return;
     }
 
@@ -135,9 +146,13 @@ const createAssetDepositRequest = async (ctx) => {
       timestamp,
       account,
       redirectUrl,
-      sigHex
+      sigHex,
+      sigSource
     } = ctx.request.body;
     const username = ctx.state.user.username;
+
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainRpc = chainService.getChainRpc();
 
     if (!currency || !SUPPORTED_CURRENCIES.includes(currency)) {
       ctx.status = 400;
@@ -158,10 +173,6 @@ const createAssetDepositRequest = async (ctx) => {
       return;
     }
 
-    // separate queries as api returns a set of accounts
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-
     const depositor = await chainRpc.getAccountAsync(username);
     const balanceOwner = await chainRpc.getAccountAsync(account);
     
@@ -171,24 +182,14 @@ const createAssetDepositRequest = async (ctx) => {
       return;
     }
 
-    try {
-      // TODO: Support substrate
-      const pubKey = depositor.authority.owner.auths
-        .filter((auth) => !!auth.pubKey)
-        .map((auth) => auth.pubKey)[0];
+    const depositorPubKey = depositor.authority.owner.auths
+      .filter((auth) => !!auth.pubKey)
+      .map((auth) => auth.pubKey)[0];
 
-      const publicKey = crypto.PublicKey.from(pubKey);
-      const payload = {
-        amount,
-        currency,
-        account,
-        timestamp,
-      };
-      const payloadStr = JSON.stringify(payload, Object.keys(payload).sort())
-      publicKey.verify(Encodeuint8arr(payloadStr).buffer, crypto.unhexify(sigHex).buffer);
-    } catch (err) {
+    const isValidSig = chainService.verifySignature(depositorPubKey, sigSource, sigHex);
+    if (!isValidSig) {
       ctx.status = 400;
-      ctx.body = `Provided sigHex is not valid for '${username}' account`;
+      ctx.body = `Signature ${sigSource} is invalid for public key ${depositorPubKey}`;
       return;
     }
 
@@ -295,6 +296,7 @@ const confirmAssetDepositRequest = async (ctx) => {
         return txBuilder.end();
       })
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));
+
 
     const { tx: trx } = tx.getPayload();
     await trx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
