@@ -84,7 +84,8 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
       })
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));
 
-    await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
+    const { tx: trx } = tx.getPayload();
+    await trx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
     const txInfo = await tx.sendAsync(chainRpc);
 
     const depositRequestDoc = await (new AssetDepositRequest({
@@ -295,7 +296,8 @@ const confirmAssetDepositRequest = async (ctx) => {
       })
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));
 
-    await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
+    const { tx: trx } = tx.getPayload();
+    await trx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
     const txInfo = await tx.sendAsync(chainRpc);
 
     depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.APPROVED;
