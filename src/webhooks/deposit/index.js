@@ -86,7 +86,7 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
             id: asset._id,
             symbol: asset.symbol,
             precision: asset.precision,
-            amount: `${(amount / 100).toFixed(asset.precision)} ${asset.symbol}`
+            amount: amount / 100 // cents
           },
           recipient: account
         });
@@ -288,7 +288,7 @@ const confirmAssetDepositRequest = async (ctx) => {
             id: asset._id,
             symbol: asset.symbol,
             precision: asset.precision,
-            amount: `${(amount / 100).toFixed(asset.precision)} ${asset.symbol}`
+            amount: amount / 100 // cents
           },
           recipient: account
         });
