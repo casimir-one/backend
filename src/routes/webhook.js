@@ -1,12 +1,12 @@
 
 import koa_router from 'koa-router';
-import { createAssetDepositRequest, confirmAssetDepositRequest, getDepositRequestByToken } from './../webhooks/deposit';
+import { createAssetDepositRequest, confirmAssetDepositRequest, getDepositRequestByToken, processAssetDepositRequestForTestnet } from './../webhooks/deposit';
 
 const public_route = koa_router();
 const protected_route = koa_router();
 
 public_route.post('/assets/emit', confirmAssetDepositRequest)
-protected_route.post('/assets/deposit', createAssetDepositRequest)
+protected_route.post('/assets/deposit', processAssetDepositRequestForTestnet)
 protected_route.get('/assets/deposit/:requestToken', getDepositRequestByToken);
 
 const routes = {
