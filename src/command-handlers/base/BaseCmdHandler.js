@@ -55,6 +55,7 @@ class BaseCmdHandler extends EventEmitter {
       const chainNodeClient = chainService.getChainNodeClient();
       await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);      
       const txInfo = await tx.sendAsync(chainRpc);
+      await waitChainBlockAsync(); // This must be replaced with chain Domain event subscriber
       return txInfo;
     },
   ) {
@@ -71,9 +72,7 @@ class BaseCmdHandler extends EventEmitter {
 
     const { proposalsIds, newProposalsCmds } = this.extractAlteredProposals(appCmds);
     if (proposalsIds.length) { // Until we have blockchain-emitted events and a saga we have to check proposal status manually
-      await waitChainBlockAsync(async () => {
-        ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
-      });
+      ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
     }
 
     // The rest code must be synchronous

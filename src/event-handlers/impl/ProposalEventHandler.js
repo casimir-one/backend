@@ -4,7 +4,6 @@ import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import { TeamDtoService, ProposalService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';
-import { waitChainBlockAsync } from './../../utils/network';
 
 
 class ProposalEventHandler extends BaseEventHandler {
@@ -26,7 +25,6 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc();
 
-  await waitChainBlockAsync(); // We have to wait for proposal creation in the Chain until we have chain Event Streaming subscription
   const chainProposal = await chainRpc.getProposalAsync(proposalId);
   const tenantIdsScope = [];
   const decisionMakers = [];

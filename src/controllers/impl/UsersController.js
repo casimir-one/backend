@@ -11,7 +11,6 @@ import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
 import { TransferAssetCmd } from '@deip/command-models';
-import { waitChainBlockAsync } from './../../utils/network';
 
 
 const userDtoService = new UserDtoService();
@@ -101,15 +100,10 @@ class UsersController extends BaseController {
 
         if (isPreFunding) {
           await fundUserAccount();
-          await waitChainBlockAsync(async () => {
-            await accountCmdHandler.process(msg, ctx, validate);
-          });
-          await waitChainBlockAsync(); // await for new DAO in the Chain
+          await accountCmdHandler.process(msg, ctx, validate);
         } else if (isPostFunding) {
           await accountCmdHandler.process(msg, ctx, validate);
-          await waitChainBlockAsync(async () => {
-            await fundUserAccount();
-          });
+          await fundUserAccount();
         } else {
           await accountCmdHandler.process(msg, ctx, validate);
         }
