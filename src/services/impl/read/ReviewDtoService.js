@@ -16,7 +16,7 @@ class ReviewDtoService extends BaseService {
 
     return reviews.map((review) => {
       const chainReview = chainReviews.find((chainReview) => !!chainReview && chainReview.reviewId == review._id);
-      
+
       let isPositive = undefined;
       let domains = [];
       let eciMap = {};
@@ -25,7 +25,7 @@ class ReviewDtoService extends BaseService {
         isPositive = chainReview.isPositive;
         domains = chainReview.domains;
         eciMap = chainReview.eciMap;
-        chainReview = assessment;
+        assessment = chainReview.assessment;
       } else {
         console.warn(`Review with ID '${review._id}' is not found in the Chain`);
       }
@@ -97,7 +97,7 @@ class ReviewDtoService extends BaseService {
     if (!review) return [];
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const result = await chainRpc.getReviewVotesByReviewIdAsync(review.id)
+    const result = await chainRpc.getReviewUpvotesByReviewAsync(reviewId)
     return result;
   }
 }
