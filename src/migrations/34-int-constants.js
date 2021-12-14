@@ -393,7 +393,7 @@ const REVIEW_REQUEST_STATUS = {
   "denied": 3
 }
 
-const PROJECT_CONTENT_DATA_TYPES = {
+const PROJECT_CONTENT_FORMAT = {
   "dar": 1,
   "package": 2,
   "file": 3
@@ -432,8 +432,8 @@ const run = async () => {
     if (PROJECT_CONTENT_STATUS[draft.status]) {
       draft.status = PROJECT_CONTENT_STATUS[draft.status];
     }
-    if (PROJECT_CONTENT_DATA_TYPES[draft.type]) {
-      draft.type = PROJECT_CONTENT_DATA_TYPES[draft.type];
+    if (PROJECT_CONTENT_FORMAT[draft.type]) {
+      draft.type = PROJECT_CONTENT_FORMAT[draft.type];
     }
     draftsPromises.push(draft.save());
   }
@@ -443,8 +443,8 @@ const run = async () => {
     if (PROJECT_CONTENT_STATUS[projectContent.status]) {
       projectContent.status = PROJECT_CONTENT_STATUS[projectContent.status];
     }
-    if (PROJECT_CONTENT_DATA_TYPES[projectContent.type]) {
-      projectContent.type = PROJECT_CONTENT_DATA_TYPES[projectContent.type];
+    if (PROJECT_CONTENT_FORMAT[projectContent.type]) {
+      projectContent.type = PROJECT_CONTENT_FORMAT[projectContent.type];
     }
     projectContentsPromises.push(projectContent.save());
   }

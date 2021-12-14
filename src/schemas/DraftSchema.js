@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DATA_TYPES, RESEARCH_CONTENT_TYPES } from '@deip/constants';
+import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT, RESEARCH_CONTENT_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -19,7 +19,7 @@ const DraftSchema = new Schema({
   },
   "formatType": {
     type: Number,
-    enum: [...Object.values(PROJECT_CONTENT_DATA_TYPES)],
+    enum: [...Object.values(PROJECT_CONTENT_FORMAT)],
     required: true
   },
   "status": {
@@ -33,6 +33,7 @@ const DraftSchema = new Schema({
     "hash": { type: String, required: true },
     "ext": { type: String, required: true },
   }],
+  "jsonData": { type: Object },
   "authors": [{ type: String }],
   "references": [{ type: String }],
   "foreignReferences": [{ type: String }],

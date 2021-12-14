@@ -13,7 +13,7 @@ import {
 } from './../../services';
 import FileStorage from './../../storage';
 import readArchive from './../../dar/readArchive';
-import { PROJECT_CONTENT_STATUS } from '@deip/constants';
+import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import mongoose from 'mongoose';
 import slug from 'limax';
 
@@ -471,11 +471,13 @@ class ProjectContentsController extends BaseController {
           if (draft.status == PROJECT_CONTENT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
-      
-          const archiveDir = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
-          const exists = await FileStorage.exists(archiveDir);
-          if (!exists) {
-            throw new NotFoundError(`Dar "${archiveDir}" is not found`);
+          
+          if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+            const archiveDir = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
+            const exists = await FileStorage.exists(archiveDir);
+            if (!exists) {
+              throw new NotFoundError(`Dar "${archiveDir}" is not found`);
+            }
           }
         };
 

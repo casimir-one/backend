@@ -19,6 +19,7 @@ class DraftService extends BaseService {
     formatType,
     status,
     packageFiles,
+    jsonData,
     authors,
     references,
     foreignReferences
@@ -35,6 +36,7 @@ class DraftService extends BaseService {
       formatType,
       status,
       packageFiles,
+      jsonData,
       authors,
       references,
       foreignReferences
@@ -53,6 +55,7 @@ class DraftService extends BaseService {
     formatType,
     status,
     packageFiles,
+    jsonData,
     authors,
     references,
     foreignReferences
@@ -66,6 +69,7 @@ class DraftService extends BaseService {
       formatType,
       status,
       packageFiles,
+      jsonData,
       authors,
       references,
       foreignReferences

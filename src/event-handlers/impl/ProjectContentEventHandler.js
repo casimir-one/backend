@@ -5,8 +5,9 @@ import {
   ProjectContentService,
   DraftService
 } from './../../services';
+import { genSha256Hash } from '@deip/toolbox';
 import FileStorage from './../../storage';
-import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DATA_TYPES } from '@deip/constants';
+import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import path from 'path';
@@ -52,7 +53,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, 
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (event) => {
 
-  const { projectId, draftId, contentType, formatType, authors, references, title, ctx } = event.getEventPayload();
+  const { projectId, draftId, contentType, formatType, authors, references, title, jsonData, ctx } = event.getEventPayload();
 
   const project = await projectDtoService.getProject(projectId);
 
@@ -75,28 +76,41 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     foreignReferences: []
   }
 
-  const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
-  const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
-  const hashes = hashObj.children.map(f => f.hash);
-  hashes.sort();
-  const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
-  draftData.hash = packageHash;
-  draftData.packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
+  if (formatType === PROJECT_CONTENT_FORMAT.JSON) {
+    const packageHash = genSha256Hash(JSON.stringify(jsonData));
+    draftData.jsonData = jsonData;
+    draftData.hash = packageHash;
+    draftData.packageFiles = [];
+  } else {
+    const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
+    const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
+    const hashes = hashObj.children.map(f => f.hash);
+    hashes.sort();
+    const packageHash = genSha256Hash(hashes.join(","));
+    draftData.hash = packageHash;
+    draftData.packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
+  }
 
   const projectContentRef = await draftService.createDraft(draftData);
 });
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (event) => {
 
-  const { _id: draftId, authors, title, contentType, references, status, xmlDraft } = event.getEventPayload();
+  const { _id: draftId, authors, title, contentType, formatType, references, status, jsonData, xmlDraft } = event.getEventPayload();
 
   const draft = await draftService.getDraft(draftId);
-
-  const projectContentPackageDirPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draftId);
-  const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
-  const hashes = hashObj.children.map(f => f.hash);
-  hashes.sort();
-  const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
+  let packageHash = '';
+  let packageFiles = [];
+  if (formatType === PROJECT_CONTENT_FORMAT.JSON) {
+    packageHash = genSha256Hash(JSON.stringify(jsonData));
+  } else if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+    const projectContentPackageDirPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draftId);
+    const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
+    const hashes = hashObj.children.map(f => f.hash);
+    hashes.sort();
+    packageHash = genSha256Hash(hashes.join(","));
+    packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
+  }
 
   await draftService.updateDraft({
     _id: draftId,
@@ -105,8 +119,9 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, asy
     contentType,
     references,
     status,
+    jsonData,
     hash: packageHash,
-    packageFiles: hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }))
+    packageFiles
   })
 });
 
