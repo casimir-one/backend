@@ -9,7 +9,7 @@ import writeArchive from './../../dar/writeArchive';
 import { generatePdf } from '../../utils/pdf';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
-import { PROJECT_CONTENT_DATA_TYPES } from '@deip/constants';
+import { PROJECT_CONTENT_FORMAT } from '@deip/constants';
 
 const getContractFilePath = async (filename) => {
   const contractAgreementDir = FileStorage.getContractAgreementDirPath();
@@ -101,21 +101,23 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (
 
   const { projectId, draftId, formatType, ctx } = event.getEventPayload();
 
-  const externalId = mongoose.Types.ObjectId(draftId);
-
-  if (formatType == PROJECT_CONTENT_DATA_TYPES.DAR) { 
-    const darPath = FileStorage.getResearchDarArchiveDirPath(projectId, externalId);
+  if (formatType === PROJECT_CONTENT_FORMAT.DAR || formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+    const externalId = mongoose.Types.ObjectId(draftId);
+    
+    if (formatType == PROJECT_CONTENT_FORMAT.DAR) { 
+      const darPath = FileStorage.getResearchDarArchiveDirPath(projectId, externalId);
     const blankDarPath = FileStorage.getResearchBlankDarArchiveDirPath();
     
     await cloneArchive(blankDarPath, darPath, true);
-  }
-  const files = ctx.req.files;
-  if (formatType == PROJECT_CONTENT_DATA_TYPES.PACKAGE && files.length > 0) {
-    const tempDestinationPath = files[0].destination;
-
-    const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
-    
-    await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
+    }
+    const files = ctx.req.files;
+    if (formatType == PROJECT_CONTENT_FORMAT.PACKAGE && files.length > 0) {
+      const tempDestinationPath = files[0].destination;
+      
+      const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
+      
+      await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
+    }
   }
 });
 
@@ -125,11 +127,13 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (
 
   const draft = await draftService.getDraft(draftId);
 
-  const opts = {}
-  const archiveDir = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
-  const version = await writeArchive(archiveDir, xmlDraft, {
-    versioning: opts.versioning
-  })
+  if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+    const opts = {}
+    const archiveDir = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
+    const version = await writeArchive(archiveDir, xmlDraft, {
+      versioning: opts.versioning
+    })
+  }
 });
 
 fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED, async (event) => {
@@ -137,10 +141,10 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED, async (
 
   const draft = await draftService.getDraft(draftId)
 
-  if (draft.type === PROJECT_CONTENT_DATA_TYPES.DAR) {
+  if (draft.type === PROJECT_CONTENT_FORMAT.DAR) {
     const darPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
     await FileStorage.rmdir(darPath);
-  } else if (draft.type === PROJECT_CONTENT_DATA_TYPES.PACKAGE) {
+  } else if (draft.type === PROJECT_CONTENT_FORMAT.PACKAGE) {
     const packagePath = FileStorage.getResearchContentPackageDirPath(draft.projectId, draft.hash);
     await FileStorage.rmdir(packagePath);
   }
