@@ -1,43 +1,41 @@
 import { JsonDataMsg, MultFormDataMsg } from '@deip/message-models';
-import { GrapheneTx, SubstrateTx } from '@deip/chain-service';
-import { PROTOCOL_CHAIN } from '@deip/constants';
 import config from '../../config';
-
-
-const TxClassMap = {
-  [PROTOCOL_CHAIN.GRAPHENE]: GrapheneTx,
-  [PROTOCOL_CHAIN.SUBSTRATE]: SubstrateTx
-}
+import { ChainService } from '@deip/chain-service';
 
 
 class MessageHandler {
 
   constructor(nextHandler, isMultipartForm) {
 
-    const TxClass = TxClassMap[config.PROTOCOL];
+    async function setMessage(ctx) {
 
-    function setMessage(ctx) {
+      const chainService = await ChainService.getInstanceAsync(config);
+      const chainInfo = chainService.getChainInfo();
+
+      const TxClass = chainInfo.TxClass;
+      const metadata = chainInfo.metadata;
+
       if ((isMultipartForm && !ctx.state.form.envelope) && !ctx.request.body.envelope) {
         ctx.status = 400;
         throw new Error("Server accepts messages with app commands only");
       }
 
       ctx.state.msg = isMultipartForm
-        ? MultFormDataMsg.UnwrapEnvelope(ctx.state.form.envelope, TxClass)
-        : JsonDataMsg.UnwrapEnvelope(ctx.request.body.envelope, TxClass);
+        ? MultFormDataMsg.UnwrapEnvelope(ctx.state.form.envelope, TxClass, metadata)
+        : JsonDataMsg.UnwrapEnvelope(ctx.request.body.envelope, TxClass, metadata);
     }
 
     if (nextHandler.length === 2) {
 
       return async (ctx, next) => {
-        setMessage(ctx);
+        await setMessage(ctx);
         return nextHandler(ctx, next);
       }
 
     } else {
 
       return async (ctx) => {
-        setMessage(ctx);
+        await setMessage(ctx);
         return nextHandler(ctx);
       }
 
@@ -62,7 +60,7 @@ class ActionHandler {
       return async (ctx) => {
         await actionHandler(ctx);
       }
-      
+
     }
 
   }
@@ -71,12 +69,12 @@ class ActionHandler {
 
 class BaseController {
 
-  constructor() {}
+  constructor() { }
 
   command({ form: FormHandler, h: actionHandler }) {
     if (!FormHandler)
       return new MessageHandler(new ActionHandler(actionHandler), false);
-      
+
     return new FormHandler(new MessageHandler(new ActionHandler(actionHandler), true));
   }
 
