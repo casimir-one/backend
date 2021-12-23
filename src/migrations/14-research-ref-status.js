@@ -14,7 +14,7 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const Research = require('./../schemas/research');
+const Project = require('./../schemas/ProjectSchema');
 
 const PROJECT_STATUS = require('./../constants/projectStatus').default;
 
@@ -24,16 +24,16 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
   
-  const researchPromises = [];
-  const researchRefs = await Research.find({});
+  const projectPromises = [];
+  const projectRefs = await Project.find({});
 
-  for (let i = 0; i < researchRefs.length; i++) {
-    let researchRef = researchRefs[i];
-    researchRef.status = PROJECT_STATUS.APPROVED;
-    researchPromises.push(researchRef.save());
+  for (let i = 0; i < projectRefs.length; i++) {
+    let projectRef = projectRefs[i];
+    projectRef.status = PROJECT_STATUS.APPROVED;
+    projectPromises.push(projectRef.save());
   }
 
-  await Promise.all(researchPromises);
+  await Promise.all(projectPromises);
 
 };
 

@@ -7,7 +7,7 @@ import cors from '@koa/cors';
 import config from './config';
 import { ChainService } from '@deip/chain-service';
 
-if (!config.TENANT) throw new Error(`Tenant is not specified`);
+if (!config.TENANT) throw new Error(`Portal is not specified`);
 
 const PORT = process.env.PORT || 80;
 const HOST = process.env.HOST || '0.0.0.0';
@@ -33,18 +33,18 @@ app.use(require('./middlewares/setup.js')());
 app.use(serve('files/static'));
 app.use(require('./routes/auth.js').public.routes());
 app.use(require('./routes/api.js').public.routes());
-app.use(require('./routes/tenant.js').public.routes());
+app.use(require('./routes/portal.js').public.routes());
 app.use(require('./routes/webhook.js').public.routes());
 
 
 // user auth layer
 app.use(require('./middlewares/auth/userAuth.js')());
-// tenant auth layer
-app.use(require('./middlewares/auth/tenantAuth.js')());
+// portal auth layer
+app.use(require('./middlewares/auth/portalAuth.js')());
 
 // protected routes layer
 app.use(require('./routes/api.js').protected.routes());
-app.use(require('./routes/tenant.js').protected.routes());
+app.use(require('./routes/portal.js').protected.routes());
 app.use(require('./routes/webhook').protected.routes());
 
 ChainService.getInstanceAsync(config)

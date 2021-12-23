@@ -1,11 +1,11 @@
 
 import mongoose from 'mongoose';
-import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT, RESEARCH_CONTENT_TYPES } from '@deip/constants';
+import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
 const DraftSchema = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "projectId": { type: String, required: true },
   "teamId": { type: String, required: true },
   "folder": { type: String, required: true },
@@ -14,8 +14,8 @@ const DraftSchema = new Schema({
   "algo": { type: String },
   "contentType": {
     type: Number,
-    enum: [...Object.values(RESEARCH_CONTENT_TYPES)],
-    default: RESEARCH_CONTENT_TYPES.UNKNOWN
+    enum: [...Object.values(PROJECT_CONTENT_TYPES)],
+    default: PROJECT_CONTENT_TYPES.UNKNOWN
   },
   "formatType": {
     type: Number,

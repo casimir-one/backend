@@ -23,7 +23,7 @@ userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
     username,
     status,
     pubKey,
-    tenantId,
+    portalId,
     email,
     attributes,
     roles
@@ -33,12 +33,12 @@ userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
     username,
     status,
     signUpPubKey: pubKey,
-    tenant: tenantId,
+    portal: portalId,
     email,
     attributes,
     roles: roles.map(r => ({
       role: r.role,
-      researchGroupExternalId: r.researchGroupExternalId || tenantId
+      teamId: r.teamId || portalId
     }))
   });
 });
@@ -75,7 +75,7 @@ userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
       email: userInfo.email,
       attributes: userInfo.attributes,
       teams: [...userInfo.teams, accountId],
-      roles: [...userInfo.roles, { role: USER_ROLES.TEAMADMIN,  researchGroupExternalId: accountId }]
+      roles: [...userInfo.roles, { role: USER_ROLES.TEAMADMIN,  teamId: accountId }]
     });
   }
 

@@ -8,8 +8,8 @@ class UserInviteService extends BaseService {
     super(UserInviteSchema, options);
   }
 
-  async findUserInvite(externalId) {
-    const result = await this.findOne({ _id: externalId });
+  async findUserInvite(inviteId) {
+    const result = await this.findOne({ _id: inviteId });
     return result;
   }
 
@@ -21,15 +21,15 @@ class UserInviteService extends BaseService {
 
 
   async findTeamPendingInvites(teamId) {
-    const result = await this.findMany({ researchGroupExternalId: teamId, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date().getTime() } });
+    const result = await this.findMany({ teamId: teamId, status: USER_INVITE_STATUS.SENT, expiration: { $gt: new Date().getTime() } });
     return result;
   }
 
   async createUserInvite({
-    externalId,
+    _id,
     invitee,
     creator,
-    researchGroupExternalId,
+    teamId,
     rewardShare,
     status,
     notes,
@@ -37,10 +37,10 @@ class UserInviteService extends BaseService {
   }) {
 
     const result = await this.createOne({
-      _id: externalId,
+      _id,
       invitee,
       creator,
-      researchGroupExternalId,
+      teamId,
       rewardShare,
       status,
       notes,
@@ -52,12 +52,12 @@ class UserInviteService extends BaseService {
   }
 
 
-  async updateUserInvite(externalId, {
+  async updateUserInvite(inviteId, {
     status,
     failReason,
   }) {
 
-    const result = await this.updateOne({ _id: externalId }, {
+    const result = await this.updateOne({ _id: inviteId }, {
       status,
       failReason
     });

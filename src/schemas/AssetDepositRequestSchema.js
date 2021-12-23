@@ -14,7 +14,7 @@ const AssetDepositRequestSchema = new Schema({
   "status": { type: Number, enum: [...Object.values(DEPOSIT_REQUEST_STATUS)], required: true, default: DEPOSIT_REQUEST_STATUS.PENDING },
   "txInfo": { type: Object, required: false },
   "invoice": { type: Object, required: false }
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
 const model = mongoose.model('asset-deposit-request', AssetDepositRequestSchema);
 

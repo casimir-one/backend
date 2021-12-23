@@ -10,7 +10,7 @@ class UserCreatedEvent extends BaseEvent {
       username,
       status,
       pubKey,
-      tenantId,
+      portalId,
       email,
       attributes,
       roles

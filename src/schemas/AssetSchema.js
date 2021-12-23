@@ -13,7 +13,7 @@ const AssetSettingsSchema = new Schema({
 
 const AssetSchema = new Schema({
   "_id": { type: String, required: true },
-  "tenantId": { type: String, required: false },
+  "portalId": { type: String, required: false },
   "symbol": { type: String, required: true },
   "precision": { type: Number, required: true },
   "issuer": { type: String, required: true },
@@ -28,6 +28,6 @@ const AssetSchema = new Schema({
   "isGlobalScope": { type: Boolean, default: false }
 });
 
-const model = mongoose.model('assets', AssetSchema);
+const model = mongoose.model('asset', AssetSchema);
 
 module.exports = model;

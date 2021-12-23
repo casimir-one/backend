@@ -29,7 +29,7 @@ class TeamDtoService extends BaseService {
 
       return {
         _id: team._id,
-        tenantId: team.tenantId,
+        portalId: team.portalId,
         attributes: team.attributes,
         creator: team.creator,
         balances: balances,
@@ -42,9 +42,9 @@ class TeamDtoService extends BaseService {
 
 
         // @deprecated
-        external_id: team._id,
+        // external_id: team._id,
         entityId: team._id,
-        researchGroupRef: team,
+        teamRef: team,
         is_dao: true,
         is_personal: false,
         account: chainAccount ? { ...chainAccount, balances } : { balances },
@@ -54,8 +54,8 @@ class TeamDtoService extends BaseService {
   }
 
 
-  async getTeamsListing(withTenantTeam = false) {
-    const teams = await this.findMany({ isTenantTeam: withTenantTeam });
+  async getTeamsListing(withPortalTeam = false) {
+    const teams = await this.findMany({ isPortalTeam: withPortalTeam });
     const result = await this.mapTeams(teams);
     return result;
   }
@@ -84,16 +84,16 @@ class TeamDtoService extends BaseService {
   }
 
 
-  async getTeamsByUser(member, withTenantTeam = false) {
-    const teams = await this.findMany({ members: { $in : [member] }, isTenantTeam: withTenantTeam })
+  async getTeamsByUser(member, withPortalTeam = false) {
+    const teams = await this.findMany({ members: { $in : [member] }, isPortalTeam: withPortalTeam })
     if (!teams.length) return [];
     const result = await this.mapTeams(teams);
     return result;
   }
 
-  async getTeamsByTenant(tenantId, withTenantTeam = false) {
-    const available = await this.findMany({ isTenantTeam: withTenantTeam });
-    const teams = available.filter(p => p.tenantId == tenantId);
+  async getTeamsByPortal(portalId, withPortalTeam = false) {
+    const available = await this.findMany({ isPortalTeam: withPortalTeam });
+    const teams = available.filter(p => p.portalId == portalId);
     if (!teams.length) return [];
     const result = await this.mapTeams(teams);
     return result;

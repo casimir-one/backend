@@ -14,35 +14,35 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
+const PortalProfile = require('./../schemas/PortalSchema');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const run = async () => {
   
-  const tenantPromises = [];
-  const tenants = await TenantProfile.find({});
+  const portalPromises = [];
+  const portals = await PortalProfile.find({});
   
 
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
     
-    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenantProfile.settings.researchAttributes[j];
-      if (researchAttribute.isBlockchainMeta) {
-        researchAttribute.isRequired = true;
+    for (let j = 0; j < portalProfile.settings.projectAttributes.length; j++) {
+      let projectAttribute = portalProfile.settings.projectAttributes[j];
+      if (projectAttribute.isBlockchainMeta) {
+        projectAttribute.isRequired = true;
       } else {
-        researchAttribute.isRequired = false;
+        projectAttribute.isRequired = false;
       }
     }
 
-    tenantPromises.push(tenantProfile.save());
+    portalPromises.push(portalProfile.save());
   }
 
-  await Promise.all(tenantPromises);
+  await Promise.all(portalPromises);
 
-  await TenantProfile.update({}, { $unset: { "settings.researchAttributes.$[].isEditable": "" } }, { multi: true });
+  await PortalProfile.update({}, { $unset: { "settings.projectAttributes.$[].isEditable": "" } }, { multi: true });
 };
 
 

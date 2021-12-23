@@ -6,7 +6,7 @@ import PortalSchema from './../../schemas/PortalSchema';
 class BaseService {
 
   _schema = undefined;
-  _tenantProfile = undefined;
+  _portalProfile = undefined;
   _scoped = undefined;
 
   constructor(schema, options = { scoped: true }) {
@@ -17,45 +17,45 @@ class BaseService {
 
 
   async getPortalInstance() {
-    if (this._tenantProfile === undefined) {
-      const tenantProfile = await PortalSchema.findOne({ _id: config.TENANT });
-      if (!tenantProfile) {
-        throw new Error(`Tenant ${config.TENANT} is not found`);
+    if (this._portalProfile === undefined) {
+      const portalProfile = await PortalSchema.findOne({ _id: config.TENANT });
+      if (!portalProfile) {
+        throw new Error(`Portal ${config.TENANT} is not found`);
       }
-      this._tenantProfile = tenantProfile.toObject();
+      this._portalProfile = portalProfile.toObject();
     }
 
-    return this._tenantProfile;
+    return this._portalProfile;
   }
 
 
   async getBaseScopeQuery() {
-    const tenantProfile = await this.getPortalInstance();
+    const portalProfile = await this.getPortalInstance();
     if (!this._scoped) return {};
 
-    if (tenantProfile.network.isGlobalScopeVisible) {
-      const tenants = await PortalSchema.find({});
-      const tenantProfiles = tenants.map(t => t.toObject());
+    if (portalProfile.network.isGlobalScopeVisible) {
+      const portals = await PortalSchema.find({});
+      const portalProfiles = portals.map(t => t.toObject());
       return {
         $or: [
-          { tenantId: { $in: [...tenantProfiles.map(t => t._id)] } },
-          { tenantIdsScope: { $in: [...tenantProfiles.map(t => t._id)] } },
+          { portalId: { $in: [...portalProfiles.map(t => t._id)] } },
+          { portalIdsScope: { $in: [...portalProfiles.map(t => t._id)] } },
           { isGlobalScope: true }
         ]
       };
-    } else if (tenantProfile.network.visibleTenantIds.length) {
+    } else if (portalProfile.network.visiblePortalIds.length) {
       return {
         $or: [
-          { tenantId: { $in: [...tenantProfile.network.visibleTenantIds] } },
-          { tenantIdsScope: { $in: [...tenantProfile.network.visibleTenantIds] } },
+          { portalId: { $in: [...portalProfile.network.visiblePortalIds] } },
+          { portalIdsScope: { $in: [...portalProfile.network.visiblePortalIds] } },
           { isGlobalScope: true }
         ]
       };
     } else {
       return {
         $or: [
-          { tenantId: { $in: [tenantProfile._id] } },
-          { tenantIdsScope: { $in: [tenantProfile._id] } },
+          { portalId: { $in: [portalProfile._id] } },
+          { portalIdsScope: { $in: [portalProfile._id] } },
           { isGlobalScope: true }
         ]
       };
@@ -80,22 +80,22 @@ class BaseService {
 
 
   async createOne(fields) {
-    const tenantProfile = await this.getPortalInstance();
+    const portalProfile = await this.getPortalInstance();
 
     const keys = Object.keys(fields);
     const payload = {};
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
-      assert(key !== 'isGlobalScope', `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
+      assert(key !== 'isGlobalScope', `Portal ${portalProfile._id} is not authorized to set global scope for models`);
       let value = fields[key];
       if (value !== undefined)
         payload[key] = value;
     }
 
-    if (payload.tenantId) {
-      assert(payload.tenantId === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to create models for ${payload.tenantId} tenant`);
+    if (payload.portalId) {
+      assert(payload.portalId === portalProfile._id, `${portalProfile._id} portal is not authorized to create models for ${payload.portalId} portal`);
     } else {
-      payload.tenantId = tenantProfile._id;
+      payload.portalId = portalProfile._id;
     }
 
     const savedModel = await this._schema.create(payload);
@@ -104,7 +104,7 @@ class BaseService {
 
 
   async createMany(objects) {
-    const tenantProfile = await this.getPortalInstance();
+    const portalProfile = await this.getPortalInstance();
     
     const payloads = [];
     for (let i = 0; i < objects.length; i++) {
@@ -114,16 +114,16 @@ class BaseService {
       const payload = {};
       for (let i = 0; i < keys.length; i++) {
         let key = keys[i];
-        assert(key !== 'isGlobalScope', `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
+        assert(key !== 'isGlobalScope', `Portal ${portalProfile._id} is not authorized to set global scope for models`);
         let value = fields[key];
         if (value !== undefined)
           payload[key] = value;
       }
 
-      if (payload.tenantId) {
-        assert(payload.tenantId === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to create models for ${payload.tenantId} tenant`);
+      if (payload.portalId) {
+        assert(payload.portalId === portalProfile._id, `${portalProfile._id} portal is not authorized to create models for ${payload.portalId} portal`);
       } else {
-        payload.tenantId = tenantProfile._id;
+        payload.portalId = portalProfile._id;
       }
       
       payloads.push(payload);
@@ -138,17 +138,17 @@ class BaseService {
 
 
   async updateOne(searchQuery, fields) {
-    const tenantProfile = await this.getPortalInstance();
+    const portalProfile = await this.getPortalInstance();
     const scopeQuery = await this.getBaseScopeQuery();
 
     const model = await this._schema.findOne({ ...searchQuery, ...scopeQuery });
     const keys = Object.keys(fields);
     for (let i = 0; i < keys.length; i++) {
       let key = keys[i];
-      assert(key !== 'isGlobalScope', `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
+      assert(key !== 'isGlobalScope', `Portal ${portalProfile._id} is not authorized to set global scope for models`);
       let value = fields[key];
-      if (key === 'tenantId') {
-        assert(value === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to update models for ${value} tenant`);
+      if (key === 'portalId') {
+        assert(value === portalProfile._id, `${portalProfile._id} portal is not authorized to update models for ${value} portal`);
       }
       if (value !== undefined)
         model[key] = value;
@@ -160,12 +160,12 @@ class BaseService {
 
 
   async updateMany(searchQuery, updateQuery, options = {}) {
-    const tenantProfile = await this.getPortalInstance();
+    const portalProfile = await this.getPortalInstance();
 
     const scopeQuery = await this.getBaseScopeQuery();
     if (updateQuery.$set && updateQuery.$set) {
-      assert(!!!updateQuery.$set.tenantId || updateQuery.$set.tenantId === tenantProfile._id, `${tenantProfile._id} tenant is not authorized to update models for ${updateQuery.$set.tenantId} tenant`);
-      assert(!!!updateQuery.$set.isGlobalScope, `Tenant ${tenantProfile._id} is not authorized to set global scope for models`);
+      assert(!!!updateQuery.$set.portalId || updateQuery.$set.portalId === portalProfile._id, `${portalProfile._id} portal is not authorized to update models for ${updateQuery.$set.portalId} portal`);
+      assert(!!!updateQuery.$set.isGlobalScope, `Portal ${portalProfile._id} is not authorized to set global scope for models`);
     }
 
     const result = await this._schema.update({ ...searchQuery, ...scopeQuery }, updateQuery, { ...options, multi: true });
@@ -174,9 +174,9 @@ class BaseService {
 
   
   async deleteOne(searchQuery) {
-    const tenantProfile = await this.getPortalInstance();
+    const portalProfile = await this.getPortalInstance();
 
-    const scopeQuery = { tenantId: tenantProfile._id };
+    const scopeQuery = { portalId: portalProfile._id };
     const result = await this._schema.deleteOne({ ...searchQuery, ...scopeQuery });
     return result;
   }

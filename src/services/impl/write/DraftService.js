@@ -8,7 +8,7 @@ class DraftService extends BaseService {
   }
 
   async createDraft({
-    externalId,
+    _id,
     projectId,
     teamId,
     folder,
@@ -25,7 +25,7 @@ class DraftService extends BaseService {
     foreignReferences
   }) {
     const draft = await this.createOne({
-      _id: externalId,
+      _id,
       projectId,
       teamId,
       folder,

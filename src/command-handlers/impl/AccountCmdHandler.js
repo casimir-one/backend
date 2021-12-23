@@ -50,12 +50,12 @@ accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
 
   } else {
 
-    const tenant = ctx.state.tenant;
+    const portal = ctx.state.portal;
     ctx.state.appEvents.push(new UserCreatedEvent({
       username: entityId,
       status: USER_PROFILE_STATUS.APPROVED,
       pubKey: authority.owner.auths[0].key,
-      tenantId: tenant.id,
+      portalId: portal.id,
       email,
       attributes,
       roles

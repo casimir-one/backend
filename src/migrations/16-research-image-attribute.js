@@ -14,8 +14,8 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
-const Research = require('./../schemas/research');
+const PortalProfile = require('./../schemas/PortalSchema');
+const Project = require('./../schemas/ProjectSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 
@@ -25,10 +25,10 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
   
-  const tenantPromises = [];
-  const tenants = await TenantProfile.find({});
+  const portalPromises = [];
+  const portals = await PortalProfile.find({});
 
-  const researchCoverImageAttribute = {
+  const projectCoverImageAttribute = {
     _id: mongoose.Types.ObjectId("5f58d4fa97f36d3938dde1ed"),
     type: ATTR_TYPES.IMAGE,
     isPublished: true,
@@ -45,27 +45,27 @@ const run = async () => {
   };
 
   
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
-    tenantProfile.settings.researchAttributes.push(researchCoverImageAttribute);
-    tenantPromises.push(tenantProfile.save());
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
+    portalProfile.settings.projectAttributes.push(projectCoverImageAttribute);
+    portalPromises.push(portalProfile.save());
   }
   
-  const researchPromises = [];
-  const researches = await Research.find({});
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
+  const projectPromises = [];
+  const projects = await Project.find({});
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
     
-    research.attributes.push({
+    project.attributes.push({
       value: "background.png",
-      attributeId: researchCoverImageAttribute._id
+      attributeId: projectCoverImageAttribute._id
     });
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(tenantPromises);
-  await Promise.all(researchPromises);
+  await Promise.all(portalPromises);
+  await Promise.all(projectPromises);
 
 };
 

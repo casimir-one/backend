@@ -16,21 +16,21 @@ attributeCmdHandler.register(APP_CMD.CREATE_ATTRIBUTE, (cmd, ctx) => {
 
   const attribute = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new AttributeCreatedEvent({ tenantId: ctx.state.tenant.id, attribute }));
+  ctx.state.appEvents.push(new AttributeCreatedEvent({ portalId: ctx.state.portal.id, attribute }));
 });
 
 attributeCmdHandler.register(APP_CMD.UPDATE_ATTRIBUTE, (cmd, ctx) => {
 
   const attribute = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new AttributeUpdatedEvent({ tenantId: ctx.state.tenant.id, attribute }));
+  ctx.state.appEvents.push(new AttributeUpdatedEvent({ portalId: ctx.state.portal.id, attribute }));
 });
 
 attributeCmdHandler.register(APP_CMD.DELETE_ATTRIBUTE, (cmd, ctx) => {
 
   const { attributeId } = cmd.getCmdPayload();
 
-  ctx.state.appEvents.push(new AttributeDeletedEvent({ tenantId: ctx.state.tenant.id, attributeId }));
+  ctx.state.appEvents.push(new AttributeDeletedEvent({ portalId: ctx.state.portal.id, attributeId }));
 });
 
 module.exports = attributeCmdHandler;

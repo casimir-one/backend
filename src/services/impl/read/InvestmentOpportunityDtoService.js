@@ -25,7 +25,7 @@ class InvestmentOpportunityDtoService extends BaseService {
 
       return {
         _id: invstOpp._id,
-        tenantId: invstOpp.tenantId,
+        portalId: invstOpp.portalId,
         projectId: invstOpp.projectId,
         title: invstOpp.title,
         metadata: invstOpp.metadata,

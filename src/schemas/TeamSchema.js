@@ -5,14 +5,13 @@ const Schema = mongoose.Schema;
 
 const TeamSchema = new Schema({
   "_id": { type: String, required: true },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "creator": { type: String, required: true },
   "attributes": [AttributeValueSchema],
   "members": { type: [String], required: true },
-  "researchAreas": [Object],
-  "isTenantTeam": { type: Boolean, default: false }
+  "isPortalTeam": { type: Boolean, default: false }
 }, { timestamps: true });
 
-const model = mongoose.model('research-groups', TeamSchema);
+const model = mongoose.model('teams-dao', TeamSchema);
 
 module.exports = model;

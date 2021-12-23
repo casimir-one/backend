@@ -9,7 +9,7 @@ class AttributeService extends BaseService {
     super(AttributeSchema);
   }
 
-  async createAttribute(tenantId, {
+  async createAttribute(portalId, {
     type,
     isPublished,
     isFilterable,
@@ -44,13 +44,13 @@ class AttributeService extends BaseService {
       }),
       defaultValue,
       isSystem: false,
-      tenantId
+      portalId
     })
     const savedAttribute = await newAttribute.save();
     return savedAttribute.toObject();
   }
 
-  async updateAttribute(tenantId, {
+  async updateAttribute(portalId, {
     _id: attributeId,
     type,
     isPublished,
@@ -69,11 +69,11 @@ class AttributeService extends BaseService {
     scope
   }) {
     if(isSystem) {
-      const tenantProfile = await PortalSchema.findOne({ _id: tenantId });
+      const portalProfile = await PortalSchema.findOne({ _id: portalId });
 
-      const tenantProfileObj = tenantProfile.toObject();
+      const portalProfileObj = portalProfile.toObject();
 
-      const attribute = tenantProfileObj.settings.attributeOverwrites.find(a => a._id.toString() === mongoose.Types.ObjectId(attributeId).toString()) || {};
+      const attribute = portalProfileObj.settings.attributeOverwrites.find(a => a._id.toString() === mongoose.Types.ObjectId(attributeId).toString()) || {};
       attribute._id = mongoose.Types.ObjectId(attributeId);
       attribute.isFilterable = isFilterable;
       attribute.isHidden = isHidden;
@@ -86,17 +86,17 @@ class AttributeService extends BaseService {
       attribute.isEditable = isEditable;
       attribute.isRequired = isRequired;
 
-      if(!tenantProfileObj.settings.attributeOverwrites.some((attr) => attributeId === attr._id.toString())) {
-        tenantProfile.settings.attributeOverwrites.push(attribute)
+      if(!portalProfileObj.settings.attributeOverwrites.some((attr) => attributeId === attr._id.toString())) {
+        portalProfile.settings.attributeOverwrites.push(attribute)
       } else {
-        tenantProfile.settings.attributeOverwrites = [
-          ...tenantProfileObj.settings.attributeOverwrites.filter(a => a._id.toString() !== attributeId),
+        portalProfile.settings.attributeOverwrites = [
+          ...portalProfileObj.settings.attributeOverwrites.filter(a => a._id.toString() !== attributeId),
           attribute
         ]
       }
 
-      const savedTenantProfile = await tenantProfile.save();
-      return savedTenantProfile.toObject();
+      const savedPortalProfile = await portalProfile.save();
+      return savedPortalProfile.toObject();
     } else {
       const attribute = await AttributeSchema.findOne({ _id: attributeId })
       attribute.type = type;
@@ -121,10 +121,10 @@ class AttributeService extends BaseService {
     }
   }
 
-  async deleteAttribute(tenantId, {
+  async deleteAttribute(portalId, {
     _id: attributeId,
   }) {
-    const deletedAttr = await AttributeSchema.deleteOne({ _id: attributeId, tenantId, isSystem: false });
+    const deletedAttr = await AttributeSchema.deleteOne({ _id: attributeId, portalId, isSystem: false });
     return deletedAttr;
   }
 }

@@ -18,9 +18,9 @@ const AwardWithdrawalRequestSchema = require('./../schemas/AwardWithdrawalReques
 const ContractAgreementSchema = require('./../schemas/ContractAgreementSchema');
 const JoinRequest = require('./../schemas/JoinRequestSchema');
 const Proposal = require('./../schemas/read/ProposalReadModelSchema');
-const Research = require('./../schemas/ProjectSchema');
-const ResearchContent = require('./../schemas/ProjectContentSchema');
-const ResearchGroup = require('./../schemas/TeamSchema');
+const Project = require('./../schemas/ProjectSchema');
+const ProjectContent = require('./../schemas/ProjectContentSchema');
+const Team = require('./../schemas/TeamSchema');
 const Review = require('./../schemas/ReviewSchema');
 const ReviewRequest = require('./../schemas/ReviewRequestSchema');
 const UserSchema = require('./../schemas/UserSchema');
@@ -33,19 +33,19 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
 
-  await AwardWithdrawalRequestSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ContractAgreementSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await JoinRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await Proposal.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await Research.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ResearchContent.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ResearchGroup.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await Review.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await ReviewRequest.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserBookmarkSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserInviteSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
-  await UserNotificationSchema.update({}, { $set: { "tenantId": config.TENANT } }, { multi: true });
+  await AwardWithdrawalRequestSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await ContractAgreementSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await JoinRequest.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await Proposal.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await Project.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await ProjectContent.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await Team.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await Review.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await ReviewRequest.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await UserSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await UserBookmarkSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await UserInviteSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
+  await UserNotificationSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
   
 };
 

@@ -17,8 +17,8 @@ class ReviewService extends BaseService {
 
     const result = await this.createOne({
       _id: reviewId,
-      researchContentExternalId: projectContentId,
-      researchExternalId: projectId,
+      projectContentId,
+      projectId,
       author,
       content
     });
@@ -32,7 +32,7 @@ class ReviewService extends BaseService {
   }
 
   async getReviewsByProjectContent(projectContentId) {
-    const reviews = await this.findMany({ researchContentExternalId: projectContentId });
+    const reviews = await this.findMany({ projectContentId: projectContentId });
     return reviews;
   }
 

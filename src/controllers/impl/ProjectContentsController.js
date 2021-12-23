@@ -65,11 +65,11 @@ class ProjectContentsController extends BaseController {
     }
   });
 
-  getProjectContentsByTenant = this.query({
+  getProjectContentsByPortal = this.query({
     h: async (ctx) => {
       try {
         const portalId = ctx.params.portalId;
-        const result = await projectContentDtoService.getProjectContentsByTenant(portalId)
+        const result = await projectContentDtoService.getProjectContentsByPortal(portalId)
         ctx.status = 200;
         ctx.body = result;
       } catch (err) {
@@ -109,8 +109,8 @@ class ProjectContentsController extends BaseController {
       try {
         const projectContentId = ctx.params.projectContentId;
         const filename = ctx.params.file;
-        const rc = await projectContentDtoService.getProjectContentRef(projectContentId);
-        const filepath = FileStorage.getResearchDarArchiveFilePath(rc.researchExternalId, rc.folder, filename);
+        const projectContent = await projectContentDtoService.getProjectContentRef(projectContentId);
+        const filepath = FileStorage.getProjectDarArchiveFilePath(projectContent.projectId, projectContent.folder, filename);
 
         const buff = await FileStorage.get(filepath);
         const ext = filename.substr(filename.lastIndexOf('.') + 1);
@@ -189,7 +189,7 @@ class ProjectContentsController extends BaseController {
           dirPathData.folder = draft.folder
           dirPathData.packageFiles = draft.packageFiles
         } else {
-          dirPathData.projectId = projectContentRef.researchExternalId
+          dirPathData.projectId = projectContentRef.projectId
           dirPathData.folder = projectContentRef.folder
           dirPathData.packageFiles = projectContentRef.packageFiles
         }
@@ -197,9 +197,9 @@ class ProjectContentsController extends BaseController {
         const project = await projectDtoService.getProject(dirPathData.projectId);
         if (project.isPrivate) {
           const jwtUsername = ctx.state.user.username;
-          const isAuthorized = await teamDtoService.authorizeTeamAccount(project.research_group.external_id, jwtUsername)
+          const isAuthorized = await teamDtoService.authorizeTeamAccount(project.teamId, jwtUsername)
           if (!isAuthorized) {
-            throw new ForbiddenError(`"${jwtUsername}" is not permitted to get "${project.external_id}" research content`);
+            throw new ForbiddenError(`"${jwtUsername}" is not permitted to get "${project._id}" project content`);
           }
         }
 
@@ -209,7 +209,7 @@ class ProjectContentsController extends BaseController {
         }
 
         const filename = file.filename;
-        const filepath = FileStorage.getResearchContentPackageFilePath(dirPathData.projectId, dirPathData.folder, filename);
+        const filepath = FileStorage.getProjectContentPackageFilePath(dirPathData.projectId, dirPathData.folder, filename);
         const ext = filename.substr(filename.lastIndexOf('.') + 1);
         const name = filename.substr(0, filename.lastIndexOf('.'));
         const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
@@ -259,11 +259,11 @@ class ProjectContentsController extends BaseController {
           dirPathData.projectId = draft.projectId
           dirPathData.folder = draft.folder
         } else {
-          dirPathData.projectId = projectContent.researchExternalId
+          dirPathData.projectId = projectContent.projectId
           dirPathData.folder = projectContent.folder
         }
 
-        const archiveDir = FileStorage.getResearchDarArchiveDirPath(dirPathData.projectId, dirPathData.folder);
+        const archiveDir = FileStorage.getProjectDarArchiveDirPath(dirPathData.projectId, dirPathData.folder);
         const exists = await FileStorage.exists(archiveDir);
 
         if (!exists) {
@@ -473,7 +473,7 @@ class ProjectContentsController extends BaseController {
           }
           
           if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
-            const archiveDir = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
+            const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
             const exists = await FileStorage.exists(archiveDir);
             if (!exists) {
               throw new NotFoundError(`Dar "${archiveDir}" is not found`);

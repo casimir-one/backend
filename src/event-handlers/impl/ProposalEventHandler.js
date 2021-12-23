@@ -26,15 +26,15 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   const chainRpc = chainService.getChainRpc();
 
   const chainProposal = await chainRpc.getProposalAsync(proposalId);
-  const tenantIdsScope = [];
+  const portalIdsScope = [];
   const decisionMakers = [];
 
   if (chainProposal) { // Proposal may be deleted from the chain once it's resolved, let's keep this check until subscriptions to chain Event Stream
     const teams = await teamDtoService.getTeams(chainProposal.decisionMakers);
     const portalIdsScope = teams.reduce((acc, item) => {
-      return acc.some(id => id == item.tenantId) ? acc : [...acc, item.tenantId];
+      return acc.some(id => id == item.portalId) ? acc : [...acc, item.portalId];
     }, []);
-    tenantIdsScope.push(...portalIdsScope);
+    portalIdsScope.push(...portalIdsScope);
     decisionMakers.push(...chainProposal.decisionMakers);
   } else {
     console.warn(`Proposal with ID '${proposalId}' is not found in the Chain`);
@@ -58,7 +58,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
     status: status,
     type: type,
     details: details,
-    tenantIdsScope: tenantIdsScope,
+    portalIdsScope: portalIdsScope,
     creator: creator,
     decisionMakers: decisionMakers
   });

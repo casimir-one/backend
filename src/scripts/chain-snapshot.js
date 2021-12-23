@@ -29,26 +29,26 @@ const ChainService = require('@deip/chain-service').ChainService;
 
 
 const blackListUsers = ['regacc', 'simonarataj'];
-const newDisciplines = [
+const newDomains = [
   {
     "name": "Information Technology",
-    "external_id": "fd60bc92d9255aa27f356c3381ad84c6f29220a8",
-    "external_parent_id": ""
+    "_id": "fd60bc92d9255aa27f356c3381ad84c6f29220a8",
+    "parentId": ""
   },
   {
     "name": "Finance",
-    "external_id": "bd2f73aa965f1b49da800656cd37abfade9898db",
-    "parent_external_id": ""
+    "_id": "bd2f73aa965f1b49da800656cd37abfade9898db",
+    "parentId": ""
   },
   {
     "name": "Music Industry",
-    "external_id": "073ac406ef75dc83d577add7e87488ff40b45848",
-    "parent_external_id": ""
+    "_id": "073ac406ef75dc83d577add7e87488ff40b45848",
+    "parentId": ""
   },
   {
     "name": "Microscopy",
-    "external_id": "a34214092025a3ca79097a7c13dd8011d74e7336",
-    "parent_external_id": ""
+    "_id": "a34214092025a3ca79097a7c13dd8011d74e7336",
+    "parentId": ""
   }
 ];
 
@@ -94,7 +94,7 @@ const privateAttr = {
 var genesisJSON;
 
 const run = async ({ 
-  TENANT, 
+  PORTAL, 
   DEIP_FULL_NODE_URL, 
   CHAIN_ID, 
   DEIP_MONGO_STORAGE_CONNECTION_URL, 
@@ -110,22 +110,22 @@ const run = async ({
   // ONCHAIN DATA
 
   const chainAccounts = await chainRpc.getAccountsListAsync();
-  const chainResearchGroups = chainAccounts.filter(a => a.authority.owner.auths.length > 1);
+  const chainTeams = chainAccounts.filter(a => a.authority.owner.auths.length > 1);
   const chainUserAccounts = chainAccounts.filter(a => a.authority.owner.auths.length <= 1);
-  const chainResearches = await chainRpc.getProjectsListAsync();
-  const chainResearchContentsByResearch = await Promise.all(chainResearches.map(r => chainRpc.getProjectContentsByProjectAsync(r.external_id)));
-  const chainResearchContents = [].concat.apply([], chainResearchContentsByResearch);
-  const chainResearchGroupMembers = await Promise.all(chainResearchGroups.map(dao => chainRpc.getAccountMembersAsync(dao.daoId)));
-  const chainResearchGroupMembershipTokensMap = chainResearchGroupMembers.reduce((acc, accounts, i) => {
-    acc[chainResearchGroups[i].daoId] = accounts[i].filter(a => !blackListUsers.some(name => name == a));
+  const chainProjects = await chainRpc.getProjectsListAsync();
+  const chainProjectContentsByProject = await Promise.all(chainProjects.map(r => chainRpc.getProjectContentsByProjectAsync(r._id)));
+  const chainProjectContents = [].concat.apply([], chainProjectContentsByProject);
+  const chainTeamMembers = await Promise.all(chainTeams.map(dao => chainRpc.getAccountMembersAsync(dao.daoId)));
+  const chainTeamMembershipTokensMap = chainTeamMembers.reduce((acc, accounts, i) => {
+    acc[chainTeams[i].daoId] = accounts[i].filter(a => !blackListUsers.some(name => name == a));
     return acc;
   }, {});
 
-  const chainResearchContentsReviewsByResearch = await Promise.all(chainResearches.map(r => chainRpc.getReviewsByResearchAsync(r.external_id)));
-  const chainResearchContentsReviews = [].concat.apply([], chainResearchContentsReviewsByResearch);
+  const chainProjectContentsReviewsByProject = await Promise.all(chainProjects.map(r => chainRpc.getReviewsByProjectAsync(r._id)));
+  const chainProjectContentsReviews = [].concat.apply([], chainProjectContentsReviewsByProject);
 
   const chainAssets = await chainRpc.getAssetsListAsync();
-  const chainDisciplines = await chainRpc.lookupDisciplinesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
+  const chainDomains = await chainRpc.lookupDomainsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainProposalsStates = await chainRpc.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => chainRpc.getAssetBalancesByAssetSymbolAsync(chainAsset.symbol)));
 
@@ -141,11 +141,11 @@ const run = async ({
     }
   });
 
-  const snapshotDisciplines = [...chainDisciplines, ...newDisciplines].filter(d => !genesisJSON.disciplines.some(discipline => discipline.external_id == d.external_id)).map((discipline) => {
+  const snapshotDomains = [...chainDomains, ...newDomains].filter(d => !genesisJSON.domains.some(domain => domain._id == d._id)).map((domain) => {
     return {
-      "name": discipline.name,
-      "external_id": discipline.external_id,
-      "external_parent_id": discipline.parent_external_id
+      "name": domain.name,
+      "_id": domain._id,
+      "parentId": domain.parentId
     };
   });
 
@@ -159,7 +159,7 @@ const run = async ({
 
 
   
-  const snapshotResearchGroups = chainResearchGroups.filter(rg => !genesisJSON.research_groups.some(researchGroup => researchGroup.account == rg.account)).map(rg => {
+  const snapshotTeams = chainTeams.filter(rg => !genesisJSON.teams.some(team => team.account == rg.account)).map(rg => {
 
     function getKeys() {
       const { owner: privKey, ownerPubkey: pubKey } = deipRpc.auth.getPrivateKeys(
@@ -168,11 +168,11 @@ const run = async ({
         ['owner']
       );
 
-      console.log(TENANT + " ---> ", { privKey, pubKey });
+      console.log(PORTAL + " ---> ", { privKey, pubKey });
       return { privKey, pubKey };
     }
 
-    const public_key = rg.daoId == TENANT ? getKeys().pubKey : undefined;
+    const public_key = rg.daoId == PORTAL ? getKeys().pubKey : undefined;
     // const public_key = rg.daoId == "fa81a9ab079d34b383db5935ce18cafc96f36dc5" ? "DEIP8G25xQk3dPCdBqdihEppiZ4Rjw7Dcc5DbjGgX6tDgWFL29zepJ"
     //   : rg.daoId == "00067e21d5b12b2393677e87d3fbbc52adcfbb28" ? "DEIP8FiSkbrAEHtk3GMLjEi23kdiG8QRNbUrjcC4vHasTM8FQmanNd"
     //   : rg.daoId == "e7b3aabc542e77062b599d24a00b60ea6122850d" ? "DEIP8feUU1MigFXQtd5aebrrucQZx4QiaWn6WCJR5a2re1zZbDPzny"
@@ -183,40 +183,40 @@ const run = async ({
       "account": rg.daoId,
       "creator": rg.creator,
       "description": rg.description,
-      "members": chainResearchGroupMembershipTokensMap[rg.daoId],
-      "tenant": TENANT,
+      "members": chainTeamMembershipTokensMap[rg.daoId],
+      "portal": PORTAL,
       "public_key": public_key
     }
   });
 
-  const snapshotResearches = chainResearches.map(r => {
+  const snapshotProjects = chainProjects.map(r => {
     return {
-      "external_id": r.external_id,
-      "account": r.research_group.external_id,
+      "_id": r._id,
+      "account": r.teamId,
       "description": r.description,
       "is_finished": r.is_finished,
       "is_private": r.is_private,
       "members": r.members.filter(member => !blackListUsers.some(name => name == member)),
-      "disciplines": r.disciplines.map(d => {
-        if (r.external_id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
+      "domains": r.domains.map(d => {
+        if (r._id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
           return "fd60bc92d9255aa27f356c3381ad84c6f29220a8";
         }
-        if (r.external_id == "c1525afb6f39d76a094d8875c043cf6b00e4fb7d") {
+        if (r._id == "c1525afb6f39d76a094d8875c043cf6b00e4fb7d") {
           return "bd2f73aa965f1b49da800656cd37abfade9898db";
         }
-        if (r.external_id == "f22f619c1911c38a89c01df97fe2bf881b8edab3") {
+        if (r._id == "f22f619c1911c38a89c01df97fe2bf881b8edab3") {
           return "073ac406ef75dc83d577add7e87488ff40b45848";
         }
-        return d.external_id;
+        return d._id;
       })
     }
   });
 
-  const snapshotResearchContents = chainResearchContents.map(rc => {
-    const research = chainResearches.find(r => r.external_id == rc.research_external_id);
+  const snapshotProjectContents = chainProjectContents.map(rc => {
+    const project = chainProjects.find(r => r._id == rc.projectId);
     return {
-      "external_id": rc.external_id,
-      "research_external_id": research.external_id,
+      "_id": rc._id,
+      "projectId": project._id,
       "description": rc.description,
       "content": rc.content,
       "type": PROJECT_CONTENT_TYPES[rc.content_type.toUpperCase()],
@@ -225,13 +225,13 @@ const run = async ({
     }
   });
 
-  const snapshotResearchContentReviews = chainResearchContentsReviews.filter(r => !blackListUsers.some(name => name == r.author) && !genesisJSON.research_contents_reviews.some(review => review.external_id == r.external_id)).map(review => {
+  const snapshotProjectContentReviews = chainProjectContentsReviews.filter(r => !blackListUsers.some(name => name == r.author) && !genesisJSON.projectContentsReviews.some(review => review._id == r._id)).map(review => {
     return {
-      "external_id": review.external_id,
-      "research_content_external_id": review.research_content_external_id,
+      "_id": review._id,
+      "projectContentId": review.projectContentId,
       "content": review.content,
       "author": review.author,
-      "disciplines": review.disciplines.map(d => d.external_id),
+      "domains": review.domains.map(d => d._id),
       "scores": review.scores
     }
   });
@@ -240,7 +240,7 @@ const run = async ({
   
   const snapshotProposals = chainProposalsStates.filter((p) => p.status == 1 || p.status == 5).map((p) => {
     return {
-      external_id: p.external_id,
+      _id: p._id,
       proposer: p.proposer,
       review_period_seconds: p.review_period_seconds ? p.review_period_seconds : undefined,
       expiration_time: expirationTime,
@@ -251,9 +251,9 @@ const run = async ({
     }
   });
 
-  const outdatedProposals = chainProposalsStates.filter((p) => p.status != 1 && p.status != 5).map((p) => p.external_id);
+  const outdatedProposals = chainProposalsStates.filter((p) => p.status != 1 && p.status != 5).map((p) => p._id);
 
-  let init_supply = 0;
+  let initSupply = 0;
   const snapshotAccountBallances = [].concat.apply([], chainAssetsBallances.map((chainAssetBallances) => {
     const balances = chainAssetBallances.map((chainAssetBallance) => {
       const isCoreAsset = symbol == 'DEIP' || symbol == 'TESTS';
@@ -261,7 +261,7 @@ const run = async ({
         "owner": chainAssetBallance.account,
         "amount": chainAssetBallance.amount,
         "symbol": isCoreAsset ? undefined : chainAssetBallance.symbol,
-        "tokenized_research": chainAssetBallance.tokenized_research || undefined
+        "tokenizedProject": chainAssetBallance.tokenizedProject || undefined
       };
     });
 
@@ -269,15 +269,15 @@ const run = async ({
   }));
   snapshotAccountBallances.sort((a, b) => (a.owner > b.owner) ? 1 : ((b.owner > a.owner) ? -1 : 0))
 
-  genesisJSON.init_supply = init_supply;
+  genesisJSON.initSupply = initSupply;
   genesisJSON.accounts.push(...snapshotUsers);
-  genesisJSON.disciplines.push(...snapshotDisciplines);
+  genesisJSON.domains.push(...snapshotDomains);
   genesisJSON.assets.push(...snapshotAssets);
-  genesisJSON.account_balances.push(...snapshotAccountBallances);
-  genesisJSON.research_groups.push(...snapshotResearchGroups);
-  genesisJSON.researches.push(...snapshotResearches);
-  genesisJSON.research_contents.push(...snapshotResearchContents);
-  genesisJSON.research_contents_reviews.push(...snapshotResearchContentReviews);
+  genesisJSON.accountBalances.push(...snapshotAccountBallances);
+  genesisJSON.teams.push(...snapshotTeams);
+  genesisJSON.projects.push(...snapshotProjects);
+  genesisJSON.projectContents.push(...snapshotProjectContents);
+  genesisJSON.projectContentsReviews.push(...snapshotProjectContentReviews);
   genesisJSON.proposals.push(...snapshotProposals);
 
 
@@ -291,37 +291,37 @@ const run = async ({
   }, {});
   const collectionsNames = Object.keys(collectionsDocsMap);
 
-  const tenantSettingsStr = await readFile('./tenant.settings.json', 'utf8');
-  const tenantSettings = JSON.parse(tenantSettingsStr);
+  const portalSettingsStr = await readFile('./portal.settings.json', 'utf8');
+  const portalSettings = JSON.parse(portalSettingsStr);
 
-  const oldTenantDoc = await mongoose.connection.db.collection('tenants-profiles').findOne({ _id: TENANT });
-  const oldSettings = oldTenantDoc.settings;
+  const oldPortalDoc = await mongoose.connection.db.collection('portals').findOne({ _id: PORTAL });
+  const oldSettings = oldPortalDoc.settings;
 
   const docs = await Promise.all(collections.map(collection => collection.find({}).toArray()));
   for (let i = 0; i < collectionsNames.length; i++) {
     let collectionName = collectionsNames[i];
     collectionsDocsMap[collectionName].push(...docs[i].map((doc) => {
-      if (collectionName == 'tenants-profiles') {
+      if (collectionName == 'portals') {
         if (doc._id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c") {
-          return { ...doc, name: "Ariel Scientific Innovations Ltd", shortName: "Ariel Scientific Innovations Ltd", settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes.filter(attr => attr._id != privateAttr._id), networkAccessAttr, privateAttr] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+          return { ...doc, name: "Ariel Scientific Innovations Ltd", shortName: "Ariel Scientific Innovations Ltd", settings: { ...portalSettings, attributes: [...doc.settings.attributes.filter(attr => attr._id != privateAttr._id), networkAccessAttr, privateAttr] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
         }
-        return { ...doc, settings: { ...tenantSettings, researchAttributes: [...doc.settings.researchAttributes.filter(attr => attr._id != privateAttr._id), networkAccessAttr, privateAttr ] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
+        return { ...doc, settings: { ...portalSettings, attributes: [...doc.settings.attributes.filter(attr => attr._id != privateAttr._id), networkAccessAttr, privateAttr ] }, serverUrl: DEIP_SERVER_URL, network: { ...doc.network, nodes: [], scope: [] } }
       }
       else if (collectionName == 'proposals') {
         if (outdatedProposals.some(id => doc._id == id)) {
           return null;
         }
-        return { ...doc, tenantId: TENANT, tenantIdsScope: [TENANT] }
+        return { ...doc, portalId: PORTAL, portalIdsScope: [PORTAL] }
       }
       else if (collectionName == 'user-notifications') {
         if (blackListUsers.some(name => doc.username == name)) {
           return null;
         }
-        return { ...doc, tenantId: TENANT, tenantIdsScope: [TENANT] }
+        return { ...doc, portalId: PORTAL, portalIdsScope: [PORTAL] }
       }
-      else if (collectionName == 'researches') {
+      else if (collectionName == 'projects') {
         const attributes = doc.attributes;
-        const disciplinesAttrId = "5f62d4fa98f46d2938dde1eb";
+        const domainsAttrId = "5f62d4fa98f46d2938dde1eb";
 
         if (!attributes.some(attr => attr.attributeId == privateAttr._id)) {
           attributes.push({
@@ -331,44 +331,44 @@ const run = async ({
         }
         
         if (doc._id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
-          const disciplinesAttr = attributes.find(attr => attr.attributeId == disciplinesAttrId);
-          disciplinesAttr.value = ["fd60bc92d9255aa27f356c3381ad84c6f29220a8"]; 
+          const domainsAttr = attributes.find(attr => attr.attributeId == domainsAttrId);
+          domainsAttr.value = ["fd60bc92d9255aa27f356c3381ad84c6f29220a8"]; 
         }
 
         if (doc._id == "c1525afb6f39d76a094d8875c043cf6b00e4fb7d") {
-          const disciplinesAttr = attributes.find(attr => attr.attributeId == disciplinesAttrId);
-          disciplinesAttr.value = ["bd2f73aa965f1b49da800656cd37abfade9898db"];
+          const domainsAttr = attributes.find(attr => attr.attributeId == domainsAttrId);
+          domainsAttr.value = ["bd2f73aa965f1b49da800656cd37abfade9898db"];
         }
 
         if (doc._id == "f22f619c1911c38a89c01df97fe2bf881b8edab3") {
-          const disciplinesAttr = attributes.find(attr => attr.attributeId == disciplinesAttrId);
-          disciplinesAttr.value = ["073ac406ef75dc83d577add7e87488ff40b45848"];
+          const domainsAttr = attributes.find(attr => attr.attributeId == domainsAttrId);
+          domainsAttr.value = ["073ac406ef75dc83d577add7e87488ff40b45848"];
         }
 
-        return { ...doc, attributes: attributes, tenantId: TENANT, status: oldSettings.researchBlacklist.some(id => id == doc._id) ? PROJECT_STATUS.DELETED : doc.status, tenantCriterias: undefined, milestones: undefined, partners: undefined }
+        return { ...doc, attributes: attributes, portalId: PORTAL, status: oldSettings.projectBlacklist.some(id => id == doc._id) ? PROJECT_STATUS.DELETED : doc.status, portalCriterias: undefined, milestones: undefined, partners: undefined }
       }
-      else if (collectionName == 'research-contents') {
-        return { ...doc, tenantId: TENANT, tenantIdsScope: [TENANT], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)) }
+      else if (collectionName == 'project-contents') {
+        return { ...doc, portalId: PORTAL, portalIdsScope: [PORTAL], authors: doc.authors.filter(a => !blackListUsers.some(name => a == name)) }
       }
       else if (collectionName == 'user-profiles') {
         if (blackListUsers.some(name => doc._id == name)) {
           return null;
         }
       }
-      else if (collectionName == 'research-groups') {
+      else if (collectionName == 'teams') {
         if (blackListUsers.some(name => doc._id == name)) {
           return null;
         }
         if (doc._id == "8c5081e73c0af4c232a78417bc1b573ebe70c40c") {
-          return { ...doc, name: "Ariel Scientific Innovations Ltd", tenantId: TENANT };
+          return { ...doc, name: "Ariel Scientific Innovations Ltd", portalId: PORTAL };
         }
       }
       else if (collectionName == 'reviews') {
         if (blackListUsers.some(name => doc.author == name)) {
           return null;
         }
-        const researchContent = snapshotResearchContents.find(researchContent => researchContent.external_id == doc.researchContentExternalId)
-        return { ...doc, tenantId: TENANT, researchExternalId: researchContent.research_external_id };
+        const projectContent = snapshotProjectContents.find(projectContent => projectContent._id == doc.projectContentId)
+        return { ...doc, portalId: PORTAL, projectId: projectContent.projectId };
       }
       else if (collectionName == 'review-requests') {
         if (blackListUsers.some(name => doc.expert == name || doc.requestor == name)) {
@@ -382,7 +382,7 @@ const run = async ({
         if (outdatedProposals.some(id => doc._id == id)) {
           return null;
         }
-        return { ...doc, tenantId: TENANT, expiration: new Date().getTime() + 86400000 * 365 * 3 }
+        return { ...doc, portalId: PORTAL, expiration: new Date().getTime() + 86400000 * 365 * 3 }
       }
       else if (collectionName == 'user-bookmarks') {
         if (blackListUsers.some(name => doc.username == name)) {
@@ -390,7 +390,7 @@ const run = async ({
         }
       }
       
-      return { ...doc, tenantId: TENANT };
+      return { ...doc, portalId: PORTAL };
       
     }).filter(doc => !!doc));
   }
@@ -401,7 +401,7 @@ const run = async ({
   const collections2 = await mongoose.connection.db.collections();
   const collections2Names = collections2.map(collection => collection.collectionName);
 
-  await Promise.all(collections2.map(collection => collection.collectionName == 'tenants-profiles' ? collection.deleteOne({ _id: TENANT }) : collection.deleteMany({ tenantId: TENANT })));
+  await Promise.all(collections2.map(collection => collection.collectionName == 'portals' ? collection.deleteOne({ _id: PORTAL }) : collection.deleteMany({ portalId: PORTAL })));
   await Promise.all(collectionsNames.filter(collectionName => !collections2Names.some(name => name == collectionName)).map(collectionName => mongoose.connection.db.createCollection(collectionName)));
   await Promise.all(collectionsNames.map(collectionName => collectionsDocsMap[collectionName].length ? mongoose.connection.db.collection(collectionName).insertMany(collectionsDocsMap[collectionName]) : Promise.resolve()));
   await mongoose.disconnect();
@@ -412,7 +412,7 @@ const q = queue({ concurrency: 1 });
 
 const network = [
   {
-    TENANT: "fa81a9ab079d34b383db5935ce18cafc96f36dc5",
+    PORTAL: "fa81a9ab079d34b383db5935ce18cafc96f36dc5",
     // DEIP_FULL_NODE_URL: "https://jcu-full-node.deip.world",
     // DEIP_FULL_NODE_URL: "http://127.0.0.1:9092",
     DEIP_FULL_NODE_URL: "http://127.0.0.1:7093",
@@ -424,7 +424,7 @@ const network = [
     DEIP_SERVER_URL: "https://jcu-web-server.deip.world"
     // DEIP_SERVER_URL: "https://jcu-testnet-web-server.deip.co"
   }, {
-    TENANT: "00067e21d5b12b2393677e87d3fbbc52adcfbb28",
+    PORTAL: "00067e21d5b12b2393677e87d3fbbc52adcfbb28",
     // DEIP_FULL_NODE_URL: "https://uni-lj-full-node.deip.world",
     // DEIP_FULL_NODE_URL: "http://127.0.0.1:9093",
     DEIP_FULL_NODE_URL: "http://127.0.0.1:7094",
@@ -436,7 +436,7 @@ const network = [
     DEIP_SERVER_URL: "https://uni-lj-web-server.deip.world"
     // DEIP_SERVER_URL: "https://uni-lj-testnet-web-server.deip.co"
   }, {
-    TENANT: "e7b3aabc542e77062b599d24a00b60ea6122850d",
+    PORTAL: "e7b3aabc542e77062b599d24a00b60ea6122850d",
     // DEIP_FULL_NODE_URL: "https://geiger-full-node.deip.world",
     // DEIP_FULL_NODE_URL: "http://127.0.0.1:9091",
     DEIP_FULL_NODE_URL: "http://127.0.0.1:7092",
@@ -448,7 +448,7 @@ const network = [
     DEIP_SERVER_URL: "https://geiger-web-server.deip.world"
     // DEIP_SERVER_URL: "https://geiger-testnet-web-server.deip.co"
   }, {
-    TENANT: "8c5081e73c0af4c232a78417bc1b573ebe70c40c",
+    PORTAL: "8c5081e73c0af4c232a78417bc1b573ebe70c40c",
     // DEIP_FULL_NODE_URL: "https://ariel-full-node.deip.world",
     // DEIP_FULL_NODE_URL: "http://127.0.0.1:9090",
     DEIP_FULL_NODE_URL: "http://127.0.0.1:7091",
@@ -481,7 +481,7 @@ q.push(
       return async function (cb) {
         try {
           await run(conf);
-          console.log(`Successfully finished for ${conf.TENANT}`);
+          console.log(`Successfully finished for ${conf.PORTAL}`);
           cb(null, 0);
         } catch (err) {
           cb(err, 1);

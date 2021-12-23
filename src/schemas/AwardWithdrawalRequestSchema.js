@@ -4,11 +4,11 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const AwardWithdrawalRequestSchema = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "filename": { type: String, required: true },
   "folder": { type: String, required: false },
-  "researchId": { type: String, required: true },
-  "researchGroupId": { type: String, required: true },
+  "projectId": { type: String, required: true },
+  "teamId": { type: String, required: true },
   "paymentNumber": { type: String, required: true },
   "awardNumber": { type: String, required: true },
   "subawardNumber": { type: String, required: true },
@@ -19,7 +19,7 @@ const AwardWithdrawalRequestSchema = new Schema({
     "hash": { type: String, required: true },
     "ext": { type: String, required: true },
   }],
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
 
 AwardWithdrawalRequestSchema.index({ awardNumber: 1, paymentNumber: 1 }, { unique: true });

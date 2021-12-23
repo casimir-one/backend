@@ -14,8 +14,8 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
-const Research = require('./../schemas/research');
+const PortalProfile = require('./../schemas/PortalSchema');
+const Project = require('./../schemas/ProjectSchema');
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -24,8 +24,8 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 const run = async () => {
   const MULTI_SELECT = "multi-select";
 
-  const tenantPromises = [];
-  const tenants = await TenantProfile.find({});
+  const portalPromises = [];
+  const portals = await PortalProfile.find({});
   
   const categoriesAttribute = {
     _id: mongoose.Types.ObjectId("5f68be1d54f1da26e538b996"),
@@ -41,11 +41,11 @@ const run = async () => {
   };
 
 
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
 
-    for (let j = 0; j < tenantProfile.settings.researchCategories.length; j++) {
-      let cat = tenantProfile.settings.researchCategories[j];
+    for (let j = 0; j < portalProfile.settings.projectCategories.length; j++) {
+      let cat = portalProfile.settings.projectCategories[j];
 
       categoriesAttribute.valueOptions.push({
         "value" : cat._id,
@@ -55,34 +55,34 @@ const run = async () => {
       });
     }
 
-    tenantProfile.settings.researchAttributes.push(categoriesAttribute);
-    tenantPromises.push(tenantProfile.save());
+    portalProfile.settings.projectAttributes.push(categoriesAttribute);
+    portalPromises.push(portalProfile.save());
   }
   
   
-  const researchPromises = [];
-  const researches = await Research.find({});
+  const projectPromises = [];
+  const projects = await Project.find({});
 
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
     
-    if (research.tenantCategory) {
-      let opt = categoriesAttribute.valueOptions.find(c => c.value.toString() == research.tenantCategory._id.toString());
+    if (project.portalCategory) {
+      let opt = categoriesAttribute.valueOptions.find(c => c.value.toString() == project.portalCategory._id.toString());
       
-      research.attributes.push({
+      project.attributes.push({
         value: [opt.value],
         attributeId: categoriesAttribute._id
       });
     }
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(tenantPromises);
-  await Promise.all(researchPromises);
+  await Promise.all(portalPromises);
+  await Promise.all(projectPromises);
 
-  await Research.update({}, { $unset: { "tenantCategory": "" } }, { multi: true });
-  await TenantProfile.update({}, { $unset: { "settings.researchCategories": "" } }, { multi: true });
+  await Project.update({}, { $unset: { "portalCategory": "" } }, { multi: true });
+  await PortalProfile.update({}, { $unset: { "settings.projectCategories": "" } }, { multi: true });
 
 };
 

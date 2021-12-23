@@ -17,23 +17,23 @@ const projectDtoService = new ProjectDtoService();
 
 attributeEventHandler.register(APP_EVENT.ATTRIBUTE_CREATED, async (event) => {
 
-  const { tenantId, attribute } = event.getEventPayload();
+  const { portalId, attribute } = event.getEventPayload();
 
-  const newAttribute = await attributeService.createAttribute(tenantId, attribute);
+  const newAttribute = await attributeService.createAttribute(portalId, attribute);
 });
 
 attributeEventHandler.register(APP_EVENT.ATTRIBUTE_UPDATED, async (event) => {
 
-  const { tenantId, attribute } = event.getEventPayload();
+  const { portalId, attribute } = event.getEventPayload();
 
-  const updatedAttribute = await attributeService.updateAttribute(tenantId, attribute);
+  const updatedAttribute = await attributeService.updateAttribute(portalId, attribute);
 });
 
 attributeEventHandler.register(APP_EVENT.ATTRIBUTE_DELETED, async (event) => {
 
-  const { tenantId, attributeId } = event.getEventPayload();
+  const { portalId, attributeId } = event.getEventPayload();
 
-  const newAttribute = await attributeService.deleteAttribute(tenantId, { _id: attributeId });
+  const newAttribute = await attributeService.deleteAttribute(portalId, { _id: attributeId });
 });
 
 module.exports = attributeEventHandler;

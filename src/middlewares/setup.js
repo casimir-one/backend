@@ -11,8 +11,8 @@ function setup(options) {
     ctx.state.proposalsStack = [];
     ctx.state.proposalsStackFrame = null;
 
-    const tenant = await portalDtoService.getPortal(config.TENANT);
-    ctx.state.tenant = tenant;
+    const portal = await portalDtoService.getPortal(config.TENANT);
+    ctx.state.portal = portal;
 
     await next();
   };

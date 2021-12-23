@@ -32,9 +32,9 @@ class ReviewDtoService extends BaseService {
 
       return {
         _id: review._id,
-        tenantId: review.tenantId,
-        projectId: review.researchExternalId,
-        projectContentId: review.researchContentExternalId,
+        portalId: review.portalId,
+        projectId: review.projectId,
+        projectContentId: review.projectContentId,
         author: review.author,
         content: review.content,
         domains: domains,
@@ -45,18 +45,12 @@ class ReviewDtoService extends BaseService {
 
 
         // @deprecated
-        external_id: review._id,
-        research_content_external_id: review.researchContentExternalId,
+        // external_id: review._id,
+        // project_content_external_id: review.projectContentId,
         is_positive: isPositive,
         reviewRef: review,
         created_at: review.createdAt || review.created_at,
-        disciplines: domains.map((domainId) => {
-          return {
-            external_id: domainId,
-            name: domainId
-          }
-        }),
-        expertise_tokens_amount_by_discipline: eciMap,
+        expertise_tokens_amount_by_domain: eciMap,
         assessment_model_v: assessment.type,
         scores: assessment.model.scores
       };
@@ -72,14 +66,14 @@ class ReviewDtoService extends BaseService {
   }
 
   async getReviewsByProject(projectId) {
-    const reviews = await this.findMany({ researchExternalId: projectId });
+    const reviews = await this.findMany({ projectId: projectId });
     if (!reviews.length) return [];
     const result = await this.mapReviews(reviews);
     return result;
   }
 
   async getReviewsByProjectContent(projectContentId) {
-    const reviews = await this.findMany({ researchContentExternalId: projectContentId })
+    const reviews = await this.findMany({ projectContentId: projectContentId })
     if (!reviews.length) return [];
     const result = await this.mapReviews(reviews);
     return result;

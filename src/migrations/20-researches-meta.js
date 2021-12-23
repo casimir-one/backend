@@ -23,31 +23,31 @@ const run = async () => {
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc()
 
-  const researchesPromises = [];
-  const chainResearches = await chainRpc.getProjectsListAsync();
+  const projectsPromises = [];
+  const chainProjects = await chainRpc.getProjectsListAsync();
   
-  for (let i = 0; i < chainResearches.length; i++) {
-    const chainResearch = chainResearches[i];
+  for (let i = 0; i < chainProjects.length; i++) {
+    const chainProject = chainProjects[i];
 
-    // const research = await Research.findOne({ _id: chainResearch.external_id });
+    // const project = await Project.findOne({ _id: chainProject._id });
 
-    // const titleAttr = research.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString());
+    // const titleAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString());
     // const title = titleAttr ? titleAttr.value : "";
-    const title = chainResearch.title;
+    const title = chainProject.title;
 
-    // const descriptionAttr = research.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString());
+    // const descriptionAttr = project.attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString());
     // const description = descriptionAttr ? descriptionAttr.value : "";
-    const description = chainResearch.abstract;
+    const description = chainProject.abstract;
 
     const meta = { title: title, description: description };
     const hash = crypto.createHash('sha256').update(JSON.stringify(meta)).digest("hex");
 
-    console.log({ id: chainResearch.projectId, hash });
+    console.log({ id: chainProject.projectId, hash });
 
-    // researchesPromises.push(research.save());
+    // projectsPromises.push(project.save());
   }
 
-  await Promise.all(researchesPromises);
+  await Promise.all(projectsPromises);
 
 };
 

@@ -45,7 +45,7 @@ const BlockchainFieldMeta = new Schema({
 });
 
 const AttributeSchema = new Schema({
-  "tenantId": { type: String, default: null },
+  "portalId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Schema.Types.Mixed,
@@ -86,7 +86,7 @@ const UserRole = new Schema({
   "_id": false,
   "role": { type: String, required: true, trim: true },
   "label": { type: String, trim: true },
-  "researchGroupExternalId": { type: String, required: true }
+  "teamId": { type: String, required: true }
 });
 
 const WebPage = new Schema({
@@ -145,11 +145,11 @@ const ForeignId = new Schema({
 
 const UserProfileMigratingSchema = new Schema({
   "_id": { type: String },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "signUpPubKey": { type: String, default: null },
   "status": { type: String, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
-  "tenant": { type: String, default: undefined },
+  "portal": { type: String, default: undefined },
   "avatar": { type: String, default: undefined },
   "firstName": { type: String, default: undefined },
   "lastName": { type: String, default: undefined },
@@ -191,7 +191,7 @@ const UserSchema = mongoose.model('user-profile', UserProfileMigratingSchema);
 const USER_SYSTEM_ATTRIBUTES = {
   FIRST_NAME: {
     "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f5"),
-    "tenantId": null,
+    "portalId": null,
     "isGlobalScope": true,
     "isSystem": true,
     "isFilterable": false,
@@ -214,7 +214,7 @@ const USER_SYSTEM_ATTRIBUTES = {
   },
   LAST_NAME: {
     "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f6"),
-    "tenantId": null,
+    "portalId": null,
     "isGlobalScope": true,
     "isSystem": true,
     "isFilterable": false,
@@ -242,7 +242,7 @@ const USER_CUSTOM_ATTRIBUTES = {
   "0000000000000000000000000000000000000000": {
     BIRTHDAY: {
       "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b5"),
-      "tenantId": "0000000000000000000000000000000000000000",
+      "portalId": "0000000000000000000000000000000000000000",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -260,7 +260,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     BIO: {
       "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b6"),
-      "tenantId": "0000000000000000000000000000000000000000",
+      "portalId": "0000000000000000000000000000000000000000",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -278,7 +278,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     COUNTRY: {
       "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b7"),
-      "tenantId": "0000000000000000000000000000000000000000",
+      "portalId": "0000000000000000000000000000000000000000",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -296,7 +296,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     CITY: {
       "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b8"),
-      "tenantId": "0000000000000000000000000000000000000000",
+      "portalId": "0000000000000000000000000000000000000000",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -314,7 +314,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     AVATAR: {
       "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1b9"),
-      "tenantId": "0000000000000000000000000000000000000000",
+      "portalId": "0000000000000000000000000000000000000000",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -332,7 +332,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EDUCATION: {
       "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1ba"),
-      "tenantId": "0000000000000000000000000000000000000000",
+      "portalId": "0000000000000000000000000000000000000000",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -350,7 +350,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EMPLOYMENT: {
       "_id": mongoose.Types.ObjectId("60806660716ce634e22cd1bb"),
-      "tenantId": "0000000000000000000000000000000000000000",
+      "portalId": "0000000000000000000000000000000000000000",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -371,7 +371,7 @@ const USER_CUSTOM_ATTRIBUTES = {
   "1169d704f8a908016033efe8cce6df93f618a265": {
     BIRTHDAY: {
       "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f7"),
-      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "portalId": "1169d704f8a908016033efe8cce6df93f618a265",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -393,7 +393,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     BIO: {
       "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f8"),
-      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "portalId": "1169d704f8a908016033efe8cce6df93f618a265",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -415,7 +415,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     COUNTRY: {
       "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8fa"),
-      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "portalId": "1169d704f8a908016033efe8cce6df93f618a265",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -437,7 +437,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     CITY: {
       "_id": mongoose.Types.ObjectId("606712cb9f80ae5a1899c8f9"),
-      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "portalId": "1169d704f8a908016033efe8cce6df93f618a265",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -459,7 +459,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     AVATAR: {
       "_id": mongoose.Types.ObjectId("6068e6a95d09311a7845e32e"),
-      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "portalId": "1169d704f8a908016033efe8cce6df93f618a265",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -481,7 +481,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EDUCATION: {
       "_id": mongoose.Types.ObjectId("606e2a7a7c25dd3bf0207aca"),
-      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "portalId": "1169d704f8a908016033efe8cce6df93f618a265",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -503,7 +503,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EMPLOYMENT: {
       "_id": mongoose.Types.ObjectId("606e2a7a7c25dd3bf0207acb"),
-      "tenantId": "1169d704f8a908016033efe8cce6df93f618a265",
+      "portalId": "1169d704f8a908016033efe8cce6df93f618a265",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -528,7 +528,7 @@ const USER_CUSTOM_ATTRIBUTES = {
   "58e3bfd753fcb860a66b82635e43524b285ab708": {
     BIRTHDAY: {
       "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3da"),
-      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "portalId": "58e3bfd753fcb860a66b82635e43524b285ab708",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -546,7 +546,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     BIO: {
       "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3db"),
-      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "portalId": "58e3bfd753fcb860a66b82635e43524b285ab708",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -564,7 +564,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     COUNTRY: {
       "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3dc"),
-      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "portalId": "58e3bfd753fcb860a66b82635e43524b285ab708",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -582,7 +582,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     CITY: {
       "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3dd"),
-      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "portalId": "58e3bfd753fcb860a66b82635e43524b285ab708",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -600,7 +600,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     AVATAR: {
       "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3de"),
-      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "portalId": "58e3bfd753fcb860a66b82635e43524b285ab708",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -618,7 +618,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EDUCATION: {
       "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3df"),
-      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "portalId": "58e3bfd753fcb860a66b82635e43524b285ab708",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -636,7 +636,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EMPLOYMENT: {
       "_id": mongoose.Types.ObjectId("6080668636aa443505fcd3e0"),
-      "tenantId": "58e3bfd753fcb860a66b82635e43524b285ab708",
+      "portalId": "58e3bfd753fcb860a66b82635e43524b285ab708",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -657,7 +657,7 @@ const USER_CUSTOM_ATTRIBUTES = {
   "c8a87b12c23f53866acd397f43b591fd4e631419": {
     BIRTHDAY: {
       "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4c"),
-      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "portalId": "c8a87b12c23f53866acd397f43b591fd4e631419",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -676,7 +676,7 @@ const USER_CUSTOM_ATTRIBUTES = {
 
     BIO: {
       "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4d"),
-      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "portalId": "c8a87b12c23f53866acd397f43b591fd4e631419",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -694,7 +694,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     COUNTRY: {
       "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4e"),
-      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "portalId": "c8a87b12c23f53866acd397f43b591fd4e631419",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -712,7 +712,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     CITY: {
       "_id": mongoose.Types.ObjectId("608066962fdde9352193bc4f"),
-      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "portalId": "c8a87b12c23f53866acd397f43b591fd4e631419",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -730,7 +730,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     AVATAR: {
       "_id": mongoose.Types.ObjectId("608066962fdde9352193bc50"),
-      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "portalId": "c8a87b12c23f53866acd397f43b591fd4e631419",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -748,7 +748,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EDUCATION: {
       "_id": mongoose.Types.ObjectId("608066962fdde9352193bc51"),
-      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "portalId": "c8a87b12c23f53866acd397f43b591fd4e631419",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -766,7 +766,7 @@ const USER_CUSTOM_ATTRIBUTES = {
     },
     EMPLOYMENT: {
       "_id": mongoose.Types.ObjectId("608066962fdde9352193bc52"),
-      "tenantId": "c8a87b12c23f53866acd397f43b591fd4e631419",
+      "portalId": "c8a87b12c23f53866acd397f43b591fd4e631419",
       "isSystem": false,
       "isFilterable": false,
       "isEditable": true,
@@ -852,36 +852,36 @@ const run = async () => {
         value: user.lastName
       },
       {
-        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].BIRTHDAY._id,
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.portalId].BIRTHDAY._id,
         value: userBirthdate
       },
       {
-        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].BIO._id,
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.portalId].BIO._id,
         value: user.bio
       },
       {
-        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].COUNTRY._id,
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.portalId].COUNTRY._id,
         value: user.location ? user.location.country : ''
       },
       {
-        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].CITY._id,
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.portalId].CITY._id,
         value: user.location ? user.location.city : ''
       },
       {
-        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].AVATAR._id,
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.portalId].AVATAR._id,
         value: user.avatar
       },
       {
-        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].EDUCATION._id,
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.portalId].EDUCATION._id,
         value: user.education
       },
       {
-        attributeId: USER_CUSTOM_ATTRIBUTES[user.tenantId].EMPLOYMENT._id,
+        attributeId: USER_CUSTOM_ATTRIBUTES[user.portalId].EMPLOYMENT._id,
         value: user.employment
       }
     ];
 
-    userProfileDoc.tenant = undefined;
+    userProfileDoc.portal = undefined;
     userProfileDoc.avatar = undefined;
     userProfileDoc.firstName = undefined;
     userProfileDoc.lastName = undefined;

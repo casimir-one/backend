@@ -48,7 +48,7 @@ const run = async () => {
     const startTime = investmentOppObj.startTime;
     const endTime = investmentOppObj.endTime;
     
-    investmentOpp.teamId = investmentOppObj.teamId || project.researchGroupExternalId;
+    investmentOpp.teamId = investmentOppObj.teamId || project.teamId;
     investmentOpp.projectId = investmentOppObj.projectId;
     investmentOpp.startTime = startTime;
     investmentOpp.endTime = endTime;

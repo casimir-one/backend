@@ -4,7 +4,7 @@ import mongoose from 'mongoose';
 const Schema = mongoose.Schema;
 
 const ReviewRequestSchema = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "expert": { type: String, required: true, index: true },
   "requestor": { type: String, required: true },
   "projectContentId": { type: String, required: true },
@@ -13,8 +13,8 @@ const ReviewRequestSchema = new Schema({
     enum: [...Object.values(REVIEW_REQUEST_STATUS)],
     required: true
   },
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
-const model = mongoose.model('review-requests', ReviewRequestSchema);
+const model = mongoose.model('review-request', ReviewRequestSchema);
 
 module.exports = model;

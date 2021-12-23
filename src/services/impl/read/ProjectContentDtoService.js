@@ -38,9 +38,9 @@ class ProjectContentDtoService extends BaseService {
 
       return {
         _id: projectContent._id,
-        tenantId: projectContent.tenantId,
-        projectId: projectContent.researchExternalId,
-        teamId: projectContent.researchGroupExternalId,
+        portalId: projectContent.portalId,
+        projectId: projectContent.projectId,
+        teamId: projectContent.teamId,
         title: projectContent.title,
         folder: projectContent.folder,
         authors: projectContent.authors,
@@ -60,12 +60,12 @@ class ProjectContentDtoService extends BaseService {
         
         
         // @deprecated
-        external_id: projectContent._id,
-        research_external_id: projectContent.researchExternalId,
+        // external_id: projectContent._id,
+        // project_external_id: projectContent.projectId,
         content: projectContent.hash,
         description: metadata,
-        researchContentRef: projectContent,
-        eci_per_discipline: eciMap,
+        projectContentRef: projectContent,
+        eci_per_domain: eciMap,
         created_at: projectContent.createdAt || projectContent.created_at
       };
     });
@@ -94,50 +94,50 @@ class ProjectContentDtoService extends BaseService {
   }
 
   async getProjectContentsByProject(projectId) {
-    const projectContents = await this.findMany({ researchExternalId: projectId });
+    const projectContents = await this.findMany({ projectId: projectId });
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
-  async getProjectContentsByTenant(tenantId) {
+  async getProjectContentsByPortal(portalId) {
     const available = await this.findMany({});
-    const projectContents = available.filter(r => r.tenantId == tenantId);
+    const projectContents = available.filter(r => r.portalId == portalId);
     if (!projectContents.length) return [];
     const result = await this.mapProjectContents(projectContents);
     return result;
   }
 
   async findPublishedProjectContentRefsByProject(projectId) {
-    const result = await this.findMany({ researchExternalId: projectId });
+    const result = await this.findMany({ projectId: projectId });
     return result;
   }
 
-  async getProjectContentRef(externalId) {
-    const result = await this.findOne({ _id: externalId });
+  async getProjectContentRef(projectId) {
+    const result = await this.findOne({ _id: projectId });
     return result;
   }
 
   async findProjectContentRefByHash(projectId, hash) {
-    const result = await this.findOne({ researchExternalId: projectId, hash });
+    const result = await this.findOne({ projectId: projectId, hash });
     return result;
   }
 
   async getProjectContentReferencesGraph(projectContentId) {
     const projectContent = await this.getProjectContent(projectContentId);
-    const project = await projectDtoService.getProject(projectContent.research_external_id);
-    const team = await teamDtoService.getTeam(project.research_group.external_id);
+    const project = await projectDtoService.getProject(projectContent.projectId);
+    const team = await teamDtoService.getTeam(project.teamId);
 
-    const ref = await this.getProjectContentRef(projectContent.external_id);
+    const ref = await this.getProjectContentRef(projectContent._id);
 
     const authorsProfiles = await userDtoService.getUsers(projectContent.authors);
 
     const root = {
       isRoot: true,
       refType: 'root',
-      researchContent: { ...projectContent, authorsProfiles },
-      research: project,
-      researchGroup: team,
+      projectContent: { ...projectContent, authorsProfiles },
+      project,
+      team,
       ref,
       contentType: this.getProjectContentType(projectContent.content_type)
     };
@@ -150,7 +150,7 @@ class ProjectContentDtoService extends BaseService {
 
     const references = [...innerReferences, root, ...outerReferences];
     const nodes = references.reduce((acc, ref) => {
-      if (acc.some((r) => r.researchContent.external_id === ref.researchContent.external_id)) {
+      if (acc.some((r) => r.projectContent._id === ref.projectContent._id)) {
         return acc;
       }
       return [...acc, ref];
@@ -165,12 +165,12 @@ class ProjectContentDtoService extends BaseService {
       const type = ref.isOuter ? 'needs' : 'depends';
 
       const source = nodes.findIndex((node) => (ref.isOuter
-        ? node.researchContent.external_id === ref.researchContent.external_id
-        : node.researchContent.external_id === ref.to));
+        ? node.projectContent._id === ref.projectContent._id
+        : node.projectContent._id === ref.to));
 
       const target = nodes.findIndex((node) => (ref.isOuter
-        ? node.researchContent.external_id === ref.to
-        : node.researchContent.external_id === ref.researchContent.external_id));
+        ? node.projectContent._id === ref.to
+        : node.projectContent._id === ref.projectContent._id));
 
       const link = { source, target, type };
 
@@ -184,7 +184,7 @@ class ProjectContentDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const outerReferences = await chainRpc.getContentsReferToContent2Async(projectContent.external_id);
+    const outerReferences = await chainRpc.getContentsReferToContent2Async(projectContent._id);
 
     for (let i = 0; i < outerReferences.length; i++) {
       const item = outerReferences[i];
@@ -202,12 +202,12 @@ class ProjectContentDtoService extends BaseService {
 
       const outerRefProject = await projectDtoService.getProject(projectId);
       if (!outerRefProject) {
-        continue; // deleted research\content
+        continue; // deleted project\content
       }
-      const outerRefTeam = await teamDtoService.getTeam(outerRefProject.research_group.external_id);
+      const outerRefTeam = await teamDtoService.getTeam(outerRefProject.teamId);
       const outerRefProjectContent = await this.getProjectContent(projectContentId);
 
-      const ref = await this.getProjectContentRef(outerRefProjectContent.external_id);
+      const ref = await this.getProjectContentRef(outerRefProjectContent._id);
 
       const authorsProfiles = await userDtoService.getUsers(outerRefProjectContent.authors);
 
@@ -215,9 +215,9 @@ class ProjectContentDtoService extends BaseService {
         isOuter: true,
         refType: 'out',
         to: referenceprojectContentId,
-        researchGroup: outerRefTeam,
-        research: outerRefProject,
-        researchContent: { ...outerRefProjectContent, authorsProfiles },
+        team: outerRefTeam,
+        project: outerRefProject,
+        projectContent: { ...outerRefProjectContent, authorsProfiles },
         ref,
         contentType: this.getProjectContentType(outerRefProjectContent.content_type)
       });
@@ -230,7 +230,7 @@ class ProjectContentDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const innerReferences = await chainRpc.getContentReferences2Async(projectContent.external_id);
+    const innerReferences = await chainRpc.getContentReferences2Async(projectContent._id);
 
     for (let i = 0; i < innerReferences.length; i++) {
       const item = innerReferences[i];
@@ -242,19 +242,19 @@ class ProjectContentDtoService extends BaseService {
       const {
         research_external_id: projectId,
         research_content_external_id: projectContentId,
-        research_reference_external_id: referenceProjectExternalId,
+        research_reference_external_id: referenceProjectId,
         research_content_reference_external_id: referenceprojectContentId
       } = payload;
 
-      const innerRefProject = await projectDtoService.getProject(referenceProjectExternalId);
+      const innerRefProject = await projectDtoService.getProject(referenceProjectId);
       if (!innerRefProject) {
-        continue; // deleted research\content
+        continue; // deleted project\content
       }
       
-      const innerRefTeam = await teamDtoService.getTeam(innerRefProject.research_group.external_id);
+      const innerRefTeam = await teamDtoService.getTeam(innerRefProject.teamId);
       const innerRefProjectContent = await this.getProjectContent(referenceprojectContentId);
 
-      const ref = await this.getProjectContentRef(innerRefProjectContent.external_id);
+      const ref = await this.getProjectContentRef(innerRefProjectContent._id);
 
       const authorsProfiles = await userDtoService.getUsers(innerRefProjectContent.authors);
 
@@ -262,9 +262,9 @@ class ProjectContentDtoService extends BaseService {
         isInner: true,
         refType: 'in',
         to: projectContentId,
-        researchGroup: innerRefTeam,
-        research: innerRefProject,
-        researchContent: { ...innerRefProjectContent, authorsProfiles },
+        team: innerRefTeam,
+        project: innerRefProject,
+        projectContent: { ...innerRefProjectContent, authorsProfiles },
         ref,
         contentType: this.getProjectContentType(innerRefProjectContent.content_type)
       });

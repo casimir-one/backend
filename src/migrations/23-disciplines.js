@@ -21,7 +21,7 @@ require("@babel/register")({
 
 const config = require('./../config');
 const mongoose = require('mongoose');
-const Discipline = require('./../schemas/DomainSchema');
+const Domain = require('./../schemas/DomainSchema');
 const { ChainService } = require('@deip/chain-service');
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -30,23 +30,23 @@ const run = async () => {
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc();
 
-  const chainDisciplines = await chainRpc.lookupDisciplinesAsync(0, 10000);
-  const disciplinesPromises = [];
+  const chainDomains = await chainRpc.lookupDomainsAsync(0, 10000);
+  const domainsPromises = [];
 
-  for (let i = 0; i < chainDisciplines.length; i++) {
-    const chainDiscipline = chainDisciplines[i];
+  for (let i = 0; i < chainDomains.length; i++) {
+    const chainDomain = chainDomains[i];
 
-    const discipline = new Discipline({
-      _id: chainDiscipline.external_id,
-      parentExternalId: chainDiscipline.parent_external_id,
-      name: chainDiscipline.name,
+    const domain = new Domain({
+      _id: chainDomain.external_id,
+      parentId: chainDomain.parent_external_id,
+      name: chainDomain.name,
       isGlobalScope: true
     });
 
-    disciplinesPromises.push(discipline.save());
+    domainsPromises.push(domain.save());
   }
 
-  await Promise.all(disciplinesPromises);
+  await Promise.all(domainsPromises);
 
 };
 

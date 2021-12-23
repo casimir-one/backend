@@ -38,36 +38,36 @@ import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAut
 const protected_route = koa_router()
 const public_route = koa_router()
 
-async function tenantRoute(ctx, next) {
-  ctx.state.isTenantRoute = true;
+async function portalRoute(ctx, next) {
+  ctx.state.isPortalRoute = true;
   await next();
 }
 
-async function tenantAdminGuard(ctx, next) {
-  ctx.assert(ctx.state.isTenantAdmin, 401);
+async function portalAdminGuard(ctx, next) {
+  ctx.assert(ctx.state.isPortalAdmin, 401);
   await next();
 }
 
 public_route.get('/expertise/user/:username/tokens', expertise.getAccountExpertiseTokens)
-public_route.get('/expertise/discipline/:disciplineExternalId/tokens', expertise.getDisciplineExpertiseTokens)
+public_route.get('/expertise/domain/:domainId/tokens', expertise.getDomainExpertiseTokens)
 
 public_route.get('/expertise/user/:username/history', expertise.getAccountEciHistory)
 public_route.get('/expertise/user/:username/stats', expertise.getAccountEciStats)
 public_route.get('/expertise/users/stats', expertise.getAccountsEciStats)
-public_route.get('/expertise/research/:research/history', expertise.getResearchEciHistory)
-public_route.get('/expertise/research/:research/stats', expertise.getResearchEciStats)
-public_route.get('/expertise/research/stats', expertise.getResearchesEciStats)
-public_route.get('/expertise/research-content/:researchContent/history', expertise.getResearchContentEciHistory)
-public_route.get('/expertise/research-content/:researchContent/stats', expertise.getResearchContentEciStats)
-public_route.get('/expertise/research-content/stats', expertise.getResearchContentsEciStats)
-public_route.get('/expertise/disciplines/history', expertise.getDisciplineEciHistory)
-public_route.get('/expertise/disciplines/stats-history', expertise.getDisciplinesEciStatsHistory)
-public_route.get('/expertise/disciplines/stats', expertise.getDisciplinesEciLastStats)
-public_route.get('/expertise/content/:contentId/discipline/:disciplineId/history', expertise.getEciHistoryByResearchContentAndDiscipline)
-public_route.get('/expertise/research/:researchId', expertise.getExpertiseContributionsByResearch)
-public_route.get('/expertise/research/:researchId/discipline/:disciplineId', expertise.getExpertiseContributionsByResearchAndDiscipline)
-public_route.get('/expertise/content/:contentId/discipline/:disciplineId', expertise.getExpertiseContributionByResearchContentAndDiscipline)
-public_route.get('/expertise/content/:contentId', expertise.getExpertiseContributionsByResearchContent)
+public_route.get('/expertise/project/:project/history', expertise.getProjectEciHistory)
+public_route.get('/expertise/project/:project/stats', expertise.getProjectEciStats)
+public_route.get('/expertise/project/stats', expertise.getProjectesEciStats)
+public_route.get('/expertise/project-content/:projectContent/history', expertise.getProjectContentEciHistory)
+public_route.get('/expertise/project-content/:projectContent/stats', expertise.getProjectContentEciStats)
+public_route.get('/expertise/project-content/stats', expertise.getProjectContentsEciStats)
+public_route.get('/expertise/domains/history', expertise.getDomainEciHistory)
+public_route.get('/expertise/domains/stats-history', expertise.getDomainsEciStatsHistory)
+public_route.get('/expertise/domains/stats', expertise.getDomainsEciLastStats)
+public_route.get('/expertise/content/:contentId/domain/:domainId/history', expertise.getEciHistoryByProjectContentAndDomain)
+public_route.get('/expertise/project/:projectId', expertise.getExpertiseContributionsByProject)
+public_route.get('/expertise/project/:projectId/domain/:domainId', expertise.getExpertiseContributionsByProjectAndDomain)
+public_route.get('/expertise/content/:contentId/domain/:domainId', expertise.getExpertiseContributionByProjectContentAndDomain)
+public_route.get('/expertise/content/:contentId', expertise.getExpertiseContributionsByProjectContent)
 
 protected_route.get('/v2/notifications/user/:username', notificationsCtrl.getNotificationsByUser)
 protected_route.put('/v2/notifications/mark-read', notificationsCtrl.markUserNotificationsAsRead)
@@ -84,8 +84,8 @@ protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', gr
 public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
 protected_route.post('/award-withdrawal-requests/upload-attachments', grants.createAwardWithdrawalRequest)
 
-public_route.get('/network/tenants/listing', portalCtrl.getNetworkPortals)
-public_route.get('/network/tenants/:portal', portalCtrl.getNetworkPortal)
+public_route.get('/network/portals/listing', portalCtrl.getNetworkPortals)
+public_route.get('/network/portals/:portal', portalCtrl.getNetworkPortal)
 
 /* V2 */
 public_route.get('/v2/project/:projectId', projectsCtrl.getProject)
@@ -97,7 +97,7 @@ protected_route.put('/v2/project/delete', compose([projectCmdProxy()]), projects
 public_route.get('/v2/projects/listing', projectsCtrl.getPublicProjectsListing)
 protected_route.get('/v2/projects/user/listing/:username', projectsCtrl.getUserProjectsListing)
 protected_route.get('/v2/projects/team/listing/:teamId', projectsCtrl.getTeamProjectsListing)
-public_route.get('/v2/projects/tenant/listing', projectsCtrl.getPortalProjectsListing)
+public_route.get('/v2/projects/portal/listing', projectsCtrl.getPortalProjectsListing)
 
 protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam)
 protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
@@ -107,7 +107,7 @@ protected_route.post('/v2/team/leave',  teamsCtrl.leaveTeam)
 public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
 public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
-public_route.get('/v2/teams/tenant/:portalId', teamsCtrl.getTeamsByTenant)
+public_route.get('/v2/teams/portal/:portalId', teamsCtrl.getTeamsByPortal)
 public_route.get('/team/logo/:teamId', compose([teamLogoProxy()]), teamsCtrl.getTeamLogo)
 protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)// temp: need change to cmd
 
@@ -117,9 +117,9 @@ public_route.get('/v2/attributes/scope/network/:scope', attributesCtrl.getNetwor
 public_route.get('/v2/attribute/:id', attributesCtrl.getAttribute);
 public_route.get('/v2/attributes/network', attributesCtrl.getNetworkAttributes);
 public_route.get('/v2/attributes/system', attributesCtrl.getSystemAttributes);
-protected_route.post('/v2/attribute', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.createAttribute);
-protected_route.put('/v2/attribute', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.updateAttribute);
-protected_route.put('/v2/attribute/delete', compose([tenantRoute, tenantAdminGuard]), attributesCtrl.deleteAttribute);
+protected_route.post('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
+protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
+protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
 public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', compose([attributeFileProxy()]), attributesCtrl.getAttributeFile);
 
 public_route.get('/v2/assets/id/:assetId', assetsCtrl.getAssetById)
@@ -147,7 +147,7 @@ public_route.get('/v2/user/email/:email', usersCtrl.getUserByEmail)
 public_route.get('/v2/users', usersCtrl.getUsers)
 public_route.get('/v2/users/listing', usersCtrl.getUsersListing)
 public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
-public_route.get('/v2/users/tenant/:portalId', usersCtrl.getUsersByTenant)
+public_route.get('/v2/users/portal/:portalId', usersCtrl.getUsersByPortal)
 
 protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
 protected_route.put('/v2/user/update/password', compose([userCmdProxy()]), usersCtrl.updateUserPassword)
@@ -178,7 +178,7 @@ public_route.get('/v2/project-content/listing', projectContentsCtrl.getPublicPro
 public_route.get('/v2/project-content/drafts/project/:projectId', projectContentsCtrl.getDraftsByProject)
 public_route.get('/v2/project-content/:projectContentId', projectContentsCtrl.getProjectContent)
 public_route.get('/v2/project-content/project/:projectId', projectContentsCtrl.getProjectContentsByProject)
-public_route.get('/v2/project-content/tenant/:portalId', projectContentsCtrl.getProjectContentsByTenant)
+public_route.get('/v2/project-content/portal/:portalId', projectContentsCtrl.getProjectContentsByPortal)
 public_route.get('/v2/project-content/draft/:draftId', projectContentsCtrl.getDraft)
 public_route.get('/v2/project-content/ref/:refId', projectContentsCtrl.getProjectContentRef)
 public_route.get('/v2/project-content/ref/graph/:contentId', projectContentsCtrl.getProjectContentReferencesGraph)

@@ -5,7 +5,7 @@ const Schema = mongoose.Schema;
 
 const ProposalSchema = new Schema({
   "_id": { type: String, required: true },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "creator": { type: String, required: false /* temp */ },
   "cmd": { type: Object, required: false /* temp */ },
   "status": { type: Number, required: true },
@@ -14,8 +14,8 @@ const ProposalSchema = new Schema({
   "decisionMakers": { type: Array, default: [] },
   "approvers": { type: Array, default: [] },
   "rejectors": { type: Array, default: [] },
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
+}, { timestamps: true });
 
-const model = mongoose.model('proposals', ProposalSchema);
+const model = mongoose.model('proposal', ProposalSchema);
 
 module.exports = model;

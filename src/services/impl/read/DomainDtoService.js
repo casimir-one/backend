@@ -14,13 +14,13 @@ class DomainDtoService extends BaseService {
     return domains.map((domain) => {
       return {
         _id: domain._id,
-        tenantId: domain.tenantId,
+        portalId: domain.portalId,
         name: domain.name,
 
         // @deprecated
-        entityId: domain._id,
-        externalId: domain._id,
-        parentExternalId: domain.parentExternalId
+        // entityId: domain._id,
+        // externalId: domain._id,
+        parentId: domain.parentId
       }
     });
   }

@@ -14,8 +14,8 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
-const Research = require('./../schemas/research');
+const PortalProfile = require('./../schemas/PortalSchema');
+const Project = require('./../schemas/ProjectSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 const ChainService = require('@deip/chain-service').ChainService;
@@ -24,53 +24,53 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const run = async () => {
-  const DISCIPLINES_LIST = "disciplines-list";
+  const DOMAINS_LIST = "domains-list";
   const USERS_LIST = "users-list";
 
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc()
 
-  await TenantProfile.update({}, { $set: { "settings.researchAttributes.$[].isBlockchainMeta": false } }, { multi: true });
+  await PortalProfile.update({}, { $set: { "settings.projectAttributes.$[].isBlockchainMeta": false } }, { multi: true });
 
-  const tenantPromises = [];
-  const tenants = await TenantProfile.find({});
+  const portalPromises = [];
+  const portals = await PortalProfile.find({});
 
 
-  const researchDisciplinesAttribute = {
+  const projectDomainsAttribute = {
     _id: mongoose.Types.ObjectId("5f62d4fa98f46d2938dde1eb"),
-    type: DISCIPLINES_LIST,
+    type: DOMAINS_LIST,
     isVisible: true,
     isRequired: true,
     isFilterable: true,
-    title: "Disciplines",
-    shortTitle: "Disciplines",
+    title: "Domains",
+    shortTitle: "Domains",
     description: "",
     valueOptions: [],
     defaultValue: null,
     blockchainFieldMeta: {
       isPartial: false,
-      field: "disciplines"
+      field: "domains"
     }
   };
 
-  const researchGroupAttribute = {
+  const projectGroupAttribute = {
     _id: mongoose.Types.ObjectId("5f690af5cdaaa53a27af4a30"),
-    type: ATTR_TYPES.RESEARCH_GROUP,
+    type: ATTR_TYPES.TEAM,
     isVisible: true,
     isRequired: true,
     isFilterable: true,
-    title: "Research group",
-    shortTitle: "Research group",
+    title: "Team",
+    shortTitle: "Team",
     description: "",
     valueOptions: [],
     defaultValue: null,
     blockchainFieldMeta: {
       isPartial: false,
-      field: "research_group"
+      field: "team"
     }
   };
 
-  const researchVisibilityAttribute = {
+  const projectVisibilityAttribute = {
     _id: mongoose.Types.ObjectId("5f68d4fa98f36d2938dde5ec"),
     type: ATTR_TYPES.SWITCH,
     isVisible: true,
@@ -87,7 +87,7 @@ const run = async () => {
     }
   };
 
-  const researchInventorsAttribute = {
+  const projectInventorsAttribute = {
     _id: mongoose.Types.ObjectId("5f690af5cdaaa53a27af4a31"),
     type: USERS_LIST,
     isVisible: true,
@@ -105,7 +105,7 @@ const run = async () => {
   };
 
 
-  const researchLicensingAssociateAttribute = {
+  const projectLicensingAssociateAttribute = {
     _id: mongoose.Types.ObjectId("5f68d4fa98f36d2938dde5ed"),
     type: ATTR_TYPES.USER,
     isVisible: true,
@@ -123,51 +123,51 @@ const run = async () => {
   };
 
   
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
 
-    tenantProfile.settings.researchAttributes.push(researchDisciplinesAttribute);
-    tenantProfile.settings.researchAttributes.push(researchGroupAttribute);
-    tenantProfile.settings.researchAttributes.push(researchVisibilityAttribute);
-    tenantProfile.settings.researchAttributes.push(researchInventorsAttribute);
-    tenantProfile.settings.researchAttributes.push(researchLicensingAssociateAttribute);
+    portalProfile.settings.projectAttributes.push(projectDomainsAttribute);
+    portalProfile.settings.projectAttributes.push(projectGroupAttribute);
+    portalProfile.settings.projectAttributes.push(projectVisibilityAttribute);
+    portalProfile.settings.projectAttributes.push(projectInventorsAttribute);
+    portalProfile.settings.projectAttributes.push(projectLicensingAssociateAttribute);
 
-    tenantPromises.push(tenantProfile.save());
+    portalPromises.push(portalProfile.save());
   }
   
-  const researchPromises = [];
-  const researches = await Research.find({});
-  const chainResearches = await Promise.all(researches.map(r => chainRpc.getProjectAsync(r._id)));
+  const projectPromises = [];
+  const projects = await Project.find({});
+  const chainProjects = await Promise.all(projects.map(r => chainRpc.getProjectAsync(r._id)));
 
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
-    let chainResearch = chainResearches.find(r => r.projectId == research._id.toString());
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
+    let chainProject = chainProjects.find(r => r.projectId == project._id.toString());
     
-    research.attributes.push({
-      value: chainResearch.disciplines.map(d => d),
-      attributeId: researchDisciplinesAttribute._id
+    project.attributes.push({
+      value: chainProject.disciplines.map(d => d),
+      attributeId: projectDomainsAttribute._id
     });
 
-    research.attributes.push({
-      value: chainResearch.teamId,
-      attributeId: researchGroupAttribute._id
+    project.attributes.push({
+      value: chainProject.teamId,
+      attributeId: projectGroupAttribute._id
     });
 
-    research.attributes.push({
-      value: chainResearch.isPrivate,
-      attributeId: researchVisibilityAttribute._id
+    project.attributes.push({
+      value: chainProject.isPrivate,
+      attributeId: projectVisibilityAttribute._id
     });
 
-    research.attributes.push({
-      value: chainResearch.members || [],
-      attributeId: researchInventorsAttribute._id
+    project.attributes.push({
+      value: chainProject.members || [],
+      attributeId: projectInventorsAttribute._id
     });
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(tenantPromises);
-  await Promise.all(researchPromises);
+  await Promise.all(portalPromises);
+  await Promise.all(projectPromises);
 
 };
 

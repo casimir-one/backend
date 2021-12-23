@@ -14,7 +14,7 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const ResearchContent = require('./../schemas/researchContent');
+const ProjectContent = require('./../schemas/ProjectContentSchema');
 const ChainService = require('@deip/chain-service').ChainService;
 const crypto = require('crypto');
 
@@ -25,25 +25,25 @@ const run = async () => {
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc()
 
-  const researchContentsPromises = [];
-  const chainResearchContents = await chainRpc.getProjectContentsListAsync();
+  const projectContentsPromises = [];
+  const chainProjectContents = await chainRpc.getProjectContentsListAsync();
   
-  for (let i = 0; i < chainResearchContents.length; i++) {
-    const chainResearchContent = chainResearchContents[i];
+  for (let i = 0; i < chainProjectContents.length; i++) {
+    const chainProjectContent = chainProjectContents[i];
 
-    const researchContentRef = await ResearchContent.findOne({ _id: chainResearchContent.external_id });
+    const projectContentRef = await ProjectContent.findOne({ _id: chainProjectContent.external_id });
 
-    const title = researchContentRef.title;
+    const title = projectContentRef.title;
 
     const meta = { title: title };
     const hash = crypto.createHash('sha256').update(JSON.stringify(meta)).digest("hex");
 
-    console.log({ id: chainResearchContent.external_id, hash, title });
+    console.log({ id: chainProjectContent.external_id, hash, title });
 
-    // researchContentsPromises.push(researchContentRef.save());
+    // projectContentsPromises.push(projectContentRef.save());
   }
 
-  await Promise.all(researchContentsPromises);
+  await Promise.all(projectContentsPromises);
 
 };
 

@@ -26,7 +26,7 @@ class ReviewRequestDtoService extends BaseService {
   }
 
   async getReviewRequestsByExpertAndProjectContent(expert, projectContentId) {
-    const q = { expert, researchContentExternalId: projectContentId };
+    const q = { expert, projectContentId: projectContentId };
     const result = await this.findOne(q);
     return result;
   }

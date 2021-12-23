@@ -15,7 +15,7 @@ class PortalController extends BaseController {
   getPortalImgs = this.query({
     h: async (ctx) => {
       try {
-        const portalId = ctx.state.tenant.id;
+        const portalId = ctx.state.portal.id;
         const portal = await portalService.getPortal(portalId);
         const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
         const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
@@ -26,7 +26,7 @@ class PortalController extends BaseController {
         let buff;
         const resizeParams = [];
 
-        if (ctx.originalUrl.includes('/tenant/logo')) {
+        if (ctx.originalUrl.includes('/portal/logo')) {
           const defaultLogo = FileStorage.getPortalDefaultLogoFilePath(); // logo
           
           if (portal.logo) {
@@ -40,7 +40,7 @@ class PortalController extends BaseController {
           } else {
             src = defaultLogo;
           }
-        } else if (ctx.originalUrl.includes('/tenant/banner')) {
+        } else if (ctx.originalUrl.includes('/portal/banner')) {
           const defaultBanner = FileStorage.getPortalDefaultBannerFilePath(); //banner
     
           if (portal.banner) {
@@ -111,7 +111,7 @@ class PortalController extends BaseController {
   getPortal = this.query({
     h: async (ctx) => {
       try {
-        const portalId = ctx.state.tenant.id;
+        const portalId = ctx.state.portal.id;
         const portal = await portalDtoService.getPortal(portalId);
         if (!portal) {
           throw new NotFoundError(`Portal '${portalId}' does not exist`);
@@ -173,7 +173,7 @@ class PortalController extends BaseController {
   getPortalAttributeSettings = this.query({
     h: async (ctx) => {
       try {
-        const portalId = ctx.state.tenant.id;
+        const portalId = ctx.state.portal.id;
         const result = await portalDtoService.getPortalAttributeSettings(portalId);
         ctx.status = 200;
         ctx.body = result;
@@ -188,7 +188,7 @@ class PortalController extends BaseController {
   getPortalLayouts = this.query({
     h: async (ctx) => {
       try {
-        const portalId = ctx.state.tenant.id;
+        const portalId = ctx.state.portal.id;
         const result = await portalDtoService.getPortalLayouts(portalId);
         ctx.status = 200;
         ctx.body = result;
@@ -203,7 +203,7 @@ class PortalController extends BaseController {
   getPortalLayoutSettings = this.query({
     h: async (ctx) => {
       try {
-        const portalId = ctx.state.tenant.id;
+        const portalId = ctx.state.portal.id;
         const result = await portalDtoService.getPortalLayoutSettings(portalId);
         ctx.status = 200;
         ctx.body = result;

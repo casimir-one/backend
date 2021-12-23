@@ -5,7 +5,7 @@ import { USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE } from '@deip/constant
 const Schema = mongoose.Schema;
 
 const UserNotificationSchema = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "username": { type: String, required: true, index: true },
   "status": {
     type: Number,
@@ -19,12 +19,9 @@ const UserNotificationSchema = new Schema({
   },
   "metadata": { _id: false, type: Object, default: {} },
 }, {
-  "timestamps": {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-  }
+  "timestamps": true
 });
 
-const model = mongoose.model('user-notifications', UserNotificationSchema);
+const model = mongoose.model('user-notification', UserNotificationSchema);
 
 module.exports = model;

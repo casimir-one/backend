@@ -11,7 +11,7 @@ class UserService extends BaseService {
 
   async createUser({
     username,
-    tenant,
+    portal,
     signUpPubKey,
     status,
     email,
@@ -26,7 +26,7 @@ class UserService extends BaseService {
       status: status,
       email: email,
       attributes: attributes,
-      tenant: tenant,
+      portal: portal,
       teams: teams,
       roles: roles
     });
@@ -62,9 +62,9 @@ class UserService extends BaseService {
     return profile;
   }
 
-  hasRole(user, role, tenantId = config.TENANT) {
+  hasRole(user, role, portalId = config.TENANT) {
     return user.profile.roles
-      .some((userRole) => tenantId == userRole.teamId && role == userRole.role);
+      .some((userRole) => portalId == userRole.teamId && role == userRole.role);
   }
 }
 

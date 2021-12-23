@@ -14,8 +14,8 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
-const Research = require('./../schemas/research');
+const PortalProfile = require('./../schemas/PortalSchema');
+const Project = require('./../schemas/ProjectSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 
@@ -24,12 +24,12 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
   
-  await TenantProfile.update({}, { $set: { "settings.researchAttributes.$[].isBlockchainMeta": false } }, { multi: true });
+  await PortalProfile.update({}, { $set: { "settings.projectAttributes.$[].isBlockchainMeta": false } }, { multi: true });
 
-  const tenantPromises = [];
-  const tenants = await TenantProfile.find({});
+  const portalPromises = [];
+  const portals = await PortalProfile.find({});
   
-  const researchTitleAttribute = {
+  const projectTitleAttribute = {
     _id: mongoose.Types.ObjectId("5f68be39c579c726e93a3006"),
     type: ATTR_TYPES.TEXT,
     isVisible: true,
@@ -44,7 +44,7 @@ const run = async () => {
   };
 
 
-  const researchDescriptionAttribute = {
+  const projectDescriptionAttribute = {
     _id: mongoose.Types.ObjectId("5f68be39c579c726e93a3007"),
     type: ATTR_TYPES.TEXTAREA,
     isVisible: true,
@@ -59,40 +59,40 @@ const run = async () => {
   };
 
 
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
 
-    tenantProfile.settings.researchAttributes.push(researchTitleAttribute);
-    tenantProfile.settings.researchAttributes.push(researchDescriptionAttribute);
+    portalProfile.settings.projectAttributes.push(projectTitleAttribute);
+    portalProfile.settings.projectAttributes.push(projectDescriptionAttribute);
     
-    tenantPromises.push(tenantProfile.save());
+    portalPromises.push(portalProfile.save());
   }
   
   
-  const researchPromises = [];
-  const researches = await Research.find({});
+  const projectPromises = [];
+  const projects = await Project.find({});
 
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
     
-    research.attributes.push({
-      value: research.title,
-      attributeId: researchTitleAttribute._id
+    project.attributes.push({
+      value: project.title,
+      attributeId: projectTitleAttribute._id
     });
 
-    research.attributes.push({
-      value: research.abstract,
-      attributeId: researchDescriptionAttribute._id
+    project.attributes.push({
+      value: project.abstract,
+      attributeId: projectDescriptionAttribute._id
     });
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(tenantPromises);
-  await Promise.all(researchPromises);
+  await Promise.all(portalPromises);
+  await Promise.all(projectPromises);
 
-  await Research.update({}, { $unset: { "title": false } }, { multi: true });
-  await Research.update({}, { $unset: { "abstract": false } }, { multi: true });
+  await Project.update({}, { $unset: { "title": false } }, { multi: true });
+  await Project.update({}, { $unset: { "abstract": false } }, { multi: true });
 
 };
 

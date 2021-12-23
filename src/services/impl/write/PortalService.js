@@ -15,7 +15,6 @@ class PortalService {
   }, {
     signUpPolicy,
     faq,
-    researchAttributes,
     layouts
   }) {
 
@@ -30,7 +29,6 @@ class PortalService {
       settings: {
         signUpPolicy,
         faq,
-        researchAttributes: researchAttributes || [],
         layouts: layouts || {}
       }
     });

@@ -2,20 +2,20 @@ import multer from 'koa-multer';
 import { getFileStorageUploader } from './../storage';
 import { v4 as uuidv4 } from 'uuid';
 
-const RESEARCH_ID_HEADER = "research-external-id";
+const PROJECT_ID_HEADER = "project-id";
 
 
 const destinationHandler = (fileStorage, sessionId) => function () {
   return async function (req, file, callback) {
-    const researchExternalId = req.headers[RESEARCH_ID_HEADER];
+    const projectId = req.headers[PROJECT_ID_HEADER];
 
-    const researchFilesTempStorage = fileStorage.getResearchAwardWithdrawalRequestsTempDirPath(researchExternalId, sessionId);
-    const exists = await fileStorage.exists(researchFilesTempStorage);
+    const projectFilesTempStorage = fileStorage.getProjectAwardWithdrawalRequestsTempDirPath(projectId, sessionId);
+    const exists = await fileStorage.exists(projectFilesTempStorage);
     if (!exists) {
-      await fileStorage.mkdir(researchFilesTempStorage);
+      await fileStorage.mkdir(projectFilesTempStorage);
     }
 
-    callback(null, researchFilesTempStorage);
+    callback(null, projectFilesTempStorage);
   };
 }
 
@@ -43,8 +43,6 @@ const GrantAwardPaymentForm = async (ctx) => {
   const formHandler = filesUploader.any();
   return formHandler(ctx, () => new Promise((resolve, reject) => {
     try {
-      console.log(ctx.req.files);
-
       resolve({
         tempDestinationPath: ctx.req.files[0].destination,
         paymentNumber: ctx.req.body.paymentNumber,

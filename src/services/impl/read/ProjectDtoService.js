@@ -1,6 +1,7 @@
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import AttributeDtoService from './AttributeDtoService';
+import AssetDtoService from './AssetDtoService';
 import TeamDtoService from './TeamDtoService';
 import ContractAgreementDtoService from './ContractAgreementDtoService';
 import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from './../../../constants';
@@ -21,13 +22,14 @@ class ProjectDtoService extends BaseService {
   async mapProjects(projects, filterObj) {
     const contractAgreementDtoService = new ContractAgreementDtoService();
     const attributeDtoService = new AttributeDtoService();
+    const assetDtoService = new AssetDtoService();
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
     const filter = {
       searchTerm: "",
-      researchAttributes: [],
-      tenantIds: [],
+      projectAttributes: [],
+      portalIds: [],
       isDefault: undefined,
       ...filterObj
     }
@@ -35,14 +37,13 @@ class ProjectDtoService extends BaseService {
     const projectLicenses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE });
     const projectAccesses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_ACCESS });
     const projectsAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
-    const teams = await Promise.all(projects.map((project) => teamDtoService.getTeam(project.researchGroupExternalId)));
+    const teams = await Promise.all(projects.map((project) => teamDtoService.getTeam(project.teamId)));
     const teamsMembers = teams.filter((team) => !!team).map((team) => ({ teamId: team._id, members: team.members }));
 
     const chainProjects = await chainRpc.getProjectsAsync(projects.map(p => p._id));
-    const chainProjectNfts = await Promise.all(projects.map(p => chainRpc.getProjectAssetsAsync(p._id)));
-
+    const chainProjectNfts = await assetDtoService.getAssetsByProjects(projects.map(({ _id }) => _id));
     return projects.map((project) => {
-      const teamMembers = teamsMembers.find((t) => t.teamId == project.researchGroupExternalId);
+      const teamMembers = teamsMembers.find((t) => t.teamId == project.teamId);
       const members = teamMembers ? teamMembers.members : [];
 
       const chainProject = chainProjects.find((chainProject) => chainProject && chainProject.projectId == project._id);
@@ -65,28 +66,28 @@ class ProjectDtoService extends BaseService {
         return acc;
       }, []);
 
-      const nfts = chainProjectNfts.map((chainProjectNft) => {
-        return {
-          assetId: chainProjectNft.assetId,
+      const nfts = chainProjectNfts
+        .filter((chainProjectNft) => chainProjectNft.settings.projectId === project._id)
+        .map(chainProjectNft => ({
+          assetId: chainProjectNft._id,
           symbol: chainProjectNft.symbol,
           precision: chainProjectNft.precision,
           currentSupply: chainProjectNft.currentSupply,
 
 
           // @deprecated
-          id: chainProjectNft.assetId,
+          id: chainProjectNft._id,
           amount: chainProjectNft.currentSupply
-        }
-      });
+        }));
 
       return {
         _id: project._id,
-        tenantId: project.tenantId,
+        portalId: project.portalId,
         isPrivate: isPrivate || false,
         members: members,
         attributes: attributes,
         isDefault: project.isDefault,
-        teamId: project.researchGroupExternalId,
+        teamId: project.teamId,
         isFinished: chainProject ? chainProject.isFinished : "",
         domains: chainProject ? chainProject.domains : [],
         eciMap: chainProject ? chainProject.eciMap : {},
@@ -102,24 +103,23 @@ class ProjectDtoService extends BaseService {
 
 
         // @deprecated
-        external_id: project._id,
+        // external_id: project._id,
         entityId: project._id,
         description: chainProject ? chainProject.metadata : "",
-        disciplines: chainProject ? chainProject.domains : [],
-        eci_per_discipline: chainProject ? chainProject.eciMap : {},
+        eci_per_domain: chainProject ? chainProject.eciMap : {},
         number_of_positive_reviews: chainProject ? chainProject.positiveReviewCount : 0,
         number_of_negative_reviews: chainProject ? chainProject.negativeReviewCount : 0,
-        number_of_research_contents: chainProject ? chainProject.projectContentCount : 0,
-        research_group: {
-          external_id: project.researchGroupExternalId,
-        },
+        number_of_project_contents: chainProject ? chainProject.projectContentCount : 0,
+        // team: {
+        //   external_id: project.teamId,
+        // },
         title: attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString())
           ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString()).value.toString()
           : "Not Specified",
         abstract: attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString())
           ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString()).value.toString()
           : "Not Specified",
-        researchRef: {
+        projectRef: {
           ...project,
           expressLicenses,
           grantedAccess
@@ -144,10 +144,10 @@ class ProjectDtoService extends BaseService {
 
         return false;
       }))
-      .filter(p => !filter.tenantIds.length || filter.tenantIds.some(tenantId => {
-        return p.tenantId == tenantId;
+      .filter(p => !filter.portalIds.length || filter.portalIds.some(portalId => {
+        return p.portalId == portalId;
       }))
-      .filter(p => !filter.researchAttributes.length || filter.researchAttributes.every(fAttr => {
+      .filter(p => !filter.projectAttributes.length || filter.projectAttributes.every(fAttr => {
         const attribute = projectsAttributes.find(attr => attr._id.toString() === fAttr.attributeId.toString());
         if (!attribute)
           return false;
@@ -204,16 +204,16 @@ class ProjectDtoService extends BaseService {
 
 
   async getProjectsByTeam(daoId) {
-    const projects = await this.findMany({ researchGroupExternalId: daoId, status: PROJECT_STATUS.APPROVED });
+    const projects = await this.findMany({ teamId: daoId, status: PROJECT_STATUS.APPROVED });
     if (!projects.length) return [];
     const result = await this.mapProjects(projects, { isDefault: false });
     return result;
   }
 
 
-  async getProjectsByTenant(tenantId) {
+  async getProjectsByPortal(portalId) {
     const available = await this.findMany({ status: PROJECT_STATUS.APPROVED });
-    const projects = available.filter(p => p.tenantId == tenantId);
+    const projects = available.filter(p => p.portalId == portalId);
     if (!projects.length) return [];
     const result = await this.mapProjects(projects, { isDefault: false });
     return result;
@@ -238,7 +238,7 @@ class ProjectDtoService extends BaseService {
 
 
   async getDefaultProject(daoId) {
-    const project = await this.findOne({ isDefault: true, researchGroupExternalId: daoId });
+    const project = await this.findOne({ isDefault: true, teamId: daoId });
     if (!project) return null;
     const results = await this.mapProjects([project], { isDefault: true });
     const [result] = results;

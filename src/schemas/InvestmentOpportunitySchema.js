@@ -7,7 +7,7 @@ const Schema = mongoose.Schema;
 
 const InvestmentOpportunitySchema = new Schema({
   "_id": { type: String, required: true },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "projectId": { type: String, required: true },
   "title": { type: String },
   "metadata": { type: Object },

@@ -8,11 +8,10 @@ class ProjectContentService extends BaseService {
   }
 
   async createProjectContentRef({
-    externalId,
+    id,
     projectId,
     teamId,
     folder,
-    researchId, // legacy internal id
     title,
     hash,
     algo,
@@ -26,11 +25,10 @@ class ProjectContentService extends BaseService {
   }) {
 
     const result = await this.createOne({
-      _id: externalId,
-      researchExternalId: projectId,
-      researchGroupExternalId: teamId,
+      _id: id,
+      projectId,
+      teamId,
       folder,
-      researchId, // legacy internal id
       title,
       hash,
       algo,
@@ -47,7 +45,7 @@ class ProjectContentService extends BaseService {
   }
 
 
-  async updateProjectContentRef(externalId, {
+  async updateProjectContentRef(id, {
     folder,
     title,
     hash,
@@ -61,7 +59,7 @@ class ProjectContentService extends BaseService {
     foreignReferences
   }) {
 
-    const result = await this.updateOne({ _id: externalId }, {
+    const result = await this.updateOne({ _id: id }, {
       folder,
       title,
       hash,
@@ -78,13 +76,13 @@ class ProjectContentService extends BaseService {
     return result;
   }
 
-  async removeProjectContentRefById(externalId) {
-    const result = await this.deleteOne({ _id: externalId });
+  async removeProjectContentRefById(id) {
+    const result = await this.deleteOne({ _id: id });
     return result;
   }
   
   async removeProjectContentRefByHash(projectId, hash) {
-    const result = await this.deleteOne({ researchExternalId: projectId, hash });
+    const result = await this.deleteOne({ projectId: projectId, hash });
     return result;
   }
 

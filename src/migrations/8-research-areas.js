@@ -14,7 +14,7 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
+const PortalProfile = require('./../schemas/PortalSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 
@@ -24,66 +24,66 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 const run = async () => {
   const MULTI_SELECT = "multi-select";
 
-  const tenantsPromises = [];
-  const tenants = await TenantProfile.find({});
+  const portalsPromises = [];
+  const portals = await PortalProfile.find({});
 
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
 
-    let researchDetailsRightSidebar = [];
-    let researchCard = [];
-    let researchDetailsMain = [];
+    let projectDetailsRightSidebar = [];
+    let projectCard = [];
+    let projectDetailsMain = [];
 
-    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenantProfile.settings.researchAttributes[j];
+    for (let j = 0; j < portalProfile.settings.projectAttributes.length; j++) {
+      let projectAttribute = portalProfile.settings.projectAttributes[j];
 
-      if (researchAttribute.type == ATTR_TYPES.STEPPER) {
-        researchDetailsRightSidebar.push(researchAttribute._id);
-        researchCard.push(researchAttribute._id)
+      if (projectAttribute.type == ATTR_TYPES.STEPPER) {
+        projectDetailsRightSidebar.push(projectAttribute._id);
+        projectCard.push(projectAttribute._id)
       }
 
-      if (researchAttribute.type == ATTR_TYPES.TEXT || researchAttribute.type == ATTR_TYPES.TEXTAREA) {
-        researchDetailsMain.push(researchAttribute._id)
+      if (projectAttribute.type == ATTR_TYPES.TEXT || projectAttribute.type == ATTR_TYPES.TEXTAREA) {
+        projectDetailsMain.push(projectAttribute._id)
       }
 
-      if (researchAttribute.type == ATTR_TYPES.SELECT || researchAttribute.type == MULTI_SELECT) {
-        researchDetailsRightSidebar.push(researchAttribute._id);
+      if (projectAttribute.type == ATTR_TYPES.SELECT || projectAttribute.type == MULTI_SELECT) {
+        projectDetailsRightSidebar.push(projectAttribute._id);
       }
 
-      if (researchAttribute.type == ATTR_TYPES.URL || researchAttribute.type == ATTR_TYPES.VIDEO_URL) {
-        researchDetailsMain.push(researchAttribute._id);
+      if (projectAttribute.type == ATTR_TYPES.URL || projectAttribute.type == ATTR_TYPES.VIDEO_URL) {
+        projectDetailsMain.push(projectAttribute._id);
       }
 
-      if (researchAttribute.type == ATTR_TYPES.SWITCH || researchAttribute.type == ATTR_TYPES.CHECKBOX) {
-        researchDetailsRightSidebar.push(researchAttribute._id);
-        researchCard.push(researchAttribute._id)
+      if (projectAttribute.type == ATTR_TYPES.SWITCH || projectAttribute.type == ATTR_TYPES.CHECKBOX) {
+        projectDetailsRightSidebar.push(projectAttribute._id);
+        projectCard.push(projectAttribute._id)
       }
 
-      if (researchAttribute.type == ATTR_TYPES.ROADMAP) {
-        researchDetailsMain.push(researchAttribute._id);
+      if (projectAttribute.type == ATTR_TYPES.ROADMAP) {
+        projectDetailsMain.push(projectAttribute._id);
       }
 
-      if (researchAttribute.type == ATTR_TYPES.PARTNERS) {
-        researchDetailsRightSidebar.push(researchAttribute._id);
+      if (projectAttribute.type == ATTR_TYPES.PARTNERS) {
+        projectDetailsRightSidebar.push(projectAttribute._id);
       }
     }
 
-    let researchAttributesAreas = {
-      researchDetailsRightSidebar: researchDetailsRightSidebar,
-      researchDetailsBody: researchDetailsMain,
-      researchCard: researchCard,
-      researchDetailsHeader: [],
-      researchForm: []
+    let projectAttributesAreas = {
+      projectDetailsRightSidebar: projectDetailsRightSidebar,
+      projectDetailsBody: projectDetailsMain,
+      projectCard: projectCard,
+      projectDetailsHeader: [],
+      projectForm: []
     }
 
-    tenantProfile.settings.researchAttributesAreas = researchAttributesAreas;
-    tenantsPromises.push(tenantProfile.save());
+    portalProfile.settings.projectAttributesAreas = projectAttributesAreas;
+    portalsPromises.push(portalProfile.save());
   }
 
-  await Promise.all(tenantsPromises);
+  await Promise.all(portalsPromises);
 
-  await TenantProfile.update({}, { $unset: { "settings.researchAttributes.$[].areas": "" } }, { multi: true });
-  await TenantProfile.update({}, { $unset: { "settings.researchAttributes.$[].order": "" } }, { multi: true });
+  await PortalProfile.update({}, { $unset: { "settings.projectAttributes.$[].areas": "" } }, { multi: true });
+  await PortalProfile.update({}, { $unset: { "settings.projectAttributes.$[].order": "" } }, { multi: true });
 
 };
 

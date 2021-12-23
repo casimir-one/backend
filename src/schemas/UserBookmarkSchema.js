@@ -4,7 +4,7 @@ import { USER_BOOKMARK_TYPE } from '@deip/constants';
 const Schema = mongoose.Schema;
 
 const UserBookmarkSchema = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "username": { type: String, required: true },
   "type": {
     type: Number,
@@ -12,7 +12,7 @@ const UserBookmarkSchema = new Schema({
     required: true,
   },
   "ref": { type: String, required: true }
-}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
+}, { timestamps: true });
 
 UserBookmarkSchema.index({ username: 1, type: 1, ref: 1 }, { unique: true });
 
