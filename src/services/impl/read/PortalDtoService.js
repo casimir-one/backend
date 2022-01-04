@@ -44,8 +44,7 @@ class PortalDtoService {
       id: portal._id, 
       account: chainAccount,
       profile: { 
-        ...portal, 
-        settings: { researchAttributes: portal.settings.researchAttributes } 
+        ...portal,
       }, 
       network: undefined 
     };
@@ -64,8 +63,7 @@ class PortalDtoService {
         id: portal._id,
         account: chainAccount,
         profile: { 
-          ...portal,
-          settings: { researchAttributes: portal.settings.researchAttributes }
+          ...portal
         }, 
         network: undefined 
       };

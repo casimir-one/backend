@@ -11,7 +11,6 @@ const destinationHandler = (fileStorage) => function () {
     const username = req.headers[USERNAME_HEADER];
     let folderPath = "";
     let filePath = "";
-
     const parts = file.originalname.split(USER_ATTRIBUTE_ID_SPLITTER);
     const userAttrId = parts[0];
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(userAttrId)) {

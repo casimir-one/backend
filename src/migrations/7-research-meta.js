@@ -14,7 +14,7 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const Research = require('./../schemas/research');
+const Project = require('./../schemas/ProjectSchema');
 
 const ChainService = require('@deip/chain-service').ChainService;
 
@@ -27,23 +27,23 @@ const run = async () => {
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc()
 
-  const researchPromises = [];
-  const researches = await Research.find({});
-  const chainResearches = await Promise.all(researches.map(r => chainRpc.getProjectAsync(r._id)));
+  const projectPromises = [];
+  const projects = await Project.find({});
+  const chainProjects = await Promise.all(projects.map(r => chainRpc.getProjectAsync(r._id)));
 
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
-    let chainResearch = chainResearches.find(r => r.projectId == research._id);
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
+    let chainProject = chainProjects.find(r => r.projectId == project._id);
 
-    if (chainResearch) {
-      research.title = chainResearch.title;
-      research.abstract = chainResearch.abstract;
+    if (chainProject) {
+      project.title = chainProject.title;
+      project.abstract = chainProject.abstract;
     }
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(researchPromises);
+  await Promise.all(projectPromises);
 
 };
 

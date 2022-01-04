@@ -14,7 +14,7 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const Research = require('./../schemas/research');
+const Project = require('./../schemas/ProjectSchema');
 
 const ChainService = require('@deip/chain-service').ChainService;
 
@@ -28,31 +28,31 @@ const run = async () => {
   const chainRpc = chainService.getChainRpc()
 
 
-  const researchPromises = [];
-  const researches = await Research.find({});
-  const chainResearches = await Promise.all(researches.map(r => chainRpc.getProjectAsync(r._id)));
+  const projectPromises = [];
+  const projects = await Project.find({});
+  const chainProjects = await Promise.all(projects.map(r => chainRpc.getProjectAsync(r._id)));
 
-  const disciplinesAttributeId = "5f62d4fa98f46d2938dde1eb";
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
-    let chainResearch = chainResearches.find(r => r.projectId == research._id.toString());
-    let disciplines = chainResearch.disciplines.map(d => d);
+  const domainsAttributeId = "5f62d4fa98f46d2938dde1eb";
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
+    let chainProject = chainProjects.find(r => r.projectId == project._id.toString());
+    let domains = chainProject.disciplines.map(d => d);
 
-    const attribute = research.attributes.find(attr => attr.attributeId.toString() == disciplinesAttributeId);
+    const attribute = project.attributes.find(attr => attr.attributeId.toString() == domainsAttributeId);
 
     if (attribute) {
-      attribute.value = disciplines;
+      attribute.value = domains;
     } else {
-      research.attributes.push({
-        value: disciplines,
-        attributeId: mongoose.Types.ObjectId(disciplinesAttributeId),
+      project.attributes.push({
+        value: domains,
+        attributeId: mongoose.Types.ObjectId(domainsAttributeId),
       });
     }
     
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(researchPromises);
+  await Promise.all(projectPromises);
 
 };
 

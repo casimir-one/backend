@@ -9,22 +9,22 @@ const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
 
-const researchDir = 'research-projects';
-const researchDirPath = (baseDir, researchExternalId) => `${baseDir}/${researchDir}/${researchExternalId}`;
-const researchFilePath = (baseDir, researchExternalId, filename) => `${researchDirPath(baseDir, researchExternalId)}/${filename}`;
-const researchAttributeDirPath = (baseDir, researchExternalId, attributeId) => `${researchDirPath(baseDir, researchExternalId)}/${attributeId}`;
-const researchAttributeFilePath = (baseDir, researchExternalId, attributeId, filename) => `${researchAttributeDirPath(baseDir, researchExternalId, attributeId)}/${filename}`;
-const researchContentPackageDirPath = (baseDir, researchExternalId, packageHash) => `${researchDirPath(baseDir, researchExternalId)}/${packageHash}`;
-const researchContentPackageFilePath = (baseDir, researchExternalId, packageHash, fileHash) => `${researchContentPackageDirPath(baseDir, researchExternalId, packageHash)}/${fileHash}`;
-const researchDarArchiveDirPath = (baseDir, researchExternalId, archiveName) => `${researchDirPath(baseDir, researchExternalId)}/${archiveName}`;
-const researchDarArchiveFilePath = (baseDir, researchExternalId, archiveName, filename) => `${researchDarArchiveDirPath(baseDir, researchExternalId, archiveName)}/${filename}`;
-const researchContentPackageTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
-const researchBlankDarArchiveDirPath = () => path.join(__dirname, `./../../default/dar-blank`);
+const projectDir = 'projects';
+const projectDirPath = (baseDir, projectId) => `${baseDir}/${projectDir}/${projectId}`;
+const projectFilePath = (baseDir, projectId, filename) => `${projectDirPath(baseDir, projectId)}/${filename}`;
+const projectAttributeDirPath = (baseDir, projectId, attributeId) => `${projectDirPath(baseDir, projectId)}/${attributeId}`;
+const projectAttributeFilePath = (baseDir, projectId, attributeId, filename) => `${projectAttributeDirPath(baseDir, projectId, attributeId)}/${filename}`;
+const projectContentPackageDirPath = (baseDir, projectId, packageHash) => `${projectDirPath(baseDir, projectId)}/${packageHash}`;
+const projectContentPackageFilePath = (baseDir, projectId, packageHash, fileHash) => `${projectContentPackageDirPath(baseDir, projectId, packageHash)}/${fileHash}`;
+const projectDarArchiveDirPath = (baseDir, projectId, archiveName) => `${projectDirPath(baseDir, projectId)}/${archiveName}`;
+const projectDarArchiveFilePath = (baseDir, projectId, archiveName, filename) => `${projectDarArchiveDirPath(baseDir, projectId, archiveName)}/${filename}`;
+const projectContentPackageTempDirPath = (baseDir, projectId, sessionId) => `${projectDirPath(baseDir, projectId)}/temp-${sessionId}`;
+const projectBlankDarArchiveDirPath = () => path.join(__dirname, `./../../default/dar-blank`);
 
-const researchAwardWithdrawalRequestsDirPath = (baseDir, researchExternalId) => `${researchDirPath(baseDir, researchExternalId)}`;
-const researchAwardWithdrawalRequestsTempDirPath = (baseDir, researchExternalId, sessionId) => `${researchAwardWithdrawalRequestsDirPath(baseDir, researchExternalId)}/temp-${sessionId}`;
-const researchAwardWithdrawalRequestsPackageDirPath = (baseDir, researchExternalId, packageHash) => `${researchAwardWithdrawalRequestsDirPath(baseDir, researchExternalId)}/award-withdrawal-${packageHash}`
-const researchAwardWithdrawalRequestsPackageFilePath = (baseDir, researchExternalId, packageHash, fileHash) => `${researchAwardWithdrawalRequestsPackageDirPath(baseDir, researchExternalId, packageHash)}/${fileHash}`
+const projectAwardWithdrawalRequestsDirPath = (baseDir, projectId) => `${projectDirPath(baseDir, projectId)}`;
+const projectAwardWithdrawalRequestsTempDirPath = (baseDir, projectId, sessionId) => `${projectAwardWithdrawalRequestsDirPath(baseDir, projectId)}/temp-${sessionId}`;
+const projectAwardWithdrawalRequestsPackageDirPath = (baseDir, projectId, packageHash) => `${projectAwardWithdrawalRequestsDirPath(baseDir, projectId)}/award-withdrawal-${packageHash}`
+const projectAwardWithdrawalRequestsPackageFilePath = (baseDir, projectId, packageHash, fileHash) => `${projectAwardWithdrawalRequestsPackageDirPath(baseDir, projectId, packageHash)}/${fileHash}`
 
 const accountDir = 'accounts';
 const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
@@ -35,21 +35,21 @@ const accountAvatarFilePath = (baseDir, username, picture) => `${accountDirPath(
 const accountDefaultAvatarFilePath = () => path.join(__dirname, `./../../default/default-avatar.png`);
 
 
-const researchGroupDir = 'research-groups';
-const researchGroupDirPath = (baseDir, researchGroupExternalId) => `${baseDir}/${researchGroupDir}/${researchGroupExternalId}`;
-const researchGroupFilePath = (baseDir, researchGroupExternalId, filename) => `${researchGroupDirPath(baseDir, researchGroupExternalId)}/${filename}`;
-const researchGroupAttributeDirPath = (baseDir, researchGroupExternalId, attributeId) => `${researchGroupDirPath(baseDir, researchGroupExternalId)}/${attributeId}`;
-const researchGroupAttributeFilePath = (baseDir, researchGroupExternalId, attributeId, filename) => `${researchGroupAttributeDirPath(baseDir, researchGroupExternalId, attributeId)}/${filename}`;
-const researchGroupLogoFilePath = (baseDir, researchGroupExternalId) => `${researchGroupDirPath(baseDir, researchGroupExternalId)}/logo.png`;
-const researchGroupDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-research-group-logo.png`);
+const teamDir = 'teams';
+const teamDirPath = (baseDir, teamId) => `${baseDir}/${teamDir}/${teamId}`;
+const teamFilePath = (baseDir, teamId, filename) => `${teamDirPath(baseDir, teamId)}/${filename}`;
+const teamAttributeDirPath = (baseDir, teamId, attributeId) => `${teamDirPath(baseDir, teamId)}/${attributeId}`;
+const teamAttributeFilePath = (baseDir, teamId, attributeId, filename) => `${teamAttributeDirPath(baseDir, teamId, attributeId)}/${filename}`;
+const teamLogoFilePath = (baseDir, teamId) => `${teamDirPath(baseDir, teamId)}/logo.png`;
+const teamDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-team-logo.png`);
 
 
-const tenantDir = 'tenants';
-const tenantDirPath = (baseDir, tenantExternalId) => `${baseDir}/${tenantDir}/${tenantExternalId}`;
-const tenantBannerFilePath = (baseDir, tenantExternalId, filename) => `${tenantDirPath(baseDir, tenantExternalId)}/${filename}`;
-const tenantLogoFilePath = (baseDir, tenantExternalId, filename) => `${tenantDirPath(baseDir, tenantExternalId)}/${filename}`;
-const tenantDefaultBannerFilePath = () => path.join(__dirname, `./../../default/default-tenant-banner.png`);
-const tenantDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-tenant-logo.png`);
+const portalDir = 'portals';
+const portalDirPath = (baseDir, portalId) => `${baseDir}/${portalDir}/${portalId}`;
+const portalBannerFilePath = (baseDir, portalId, filename) => `${portalDirPath(baseDir, portalId)}/${filename}`;
+const portalLogoFilePath = (baseDir, portalId, filename) => `${portalDirPath(baseDir, portalId)}/${filename}`;
+const portalDefaultBannerFilePath = () => path.join(__dirname, `./../../default/default-portal-banner.png`);
+const portalDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-portal-logo.png`);
 
 const contractAgreementDir = 'contracts';
 const contractAgreementDirPath = (baseDir) => `${baseDir}/${contractAgreementDir}`;
@@ -89,44 +89,44 @@ class BaseFileStorage {
   async putPassThroughStream(remotePath, passThroughSteam, options = {}) { throw new Error("Not implemented"); }
 
 
-  getResearchDirPath(researchExternalId) {
-    return researchDirPath(this._baseDirPath, researchExternalId);
+  getProjectDirPath(projectId) {
+    return projectDirPath(this._baseDirPath, projectId);
   }
 
-  getResearchFilePath(researchExternalId, filename) {
-    return researchFilePath(this._baseDirPath, researchExternalId, filename);
+  getProjectFilePath(projectId, filename) {
+    return projectFilePath(this._baseDirPath, projectId, filename);
   }
 
-  getResearchAttributeDirPath(researchExternalId, attributeId) {
-    return researchAttributeDirPath(this._baseDirPath, researchExternalId, attributeId);
+  getProjectAttributeDirPath(projectId, attributeId) {
+    return projectAttributeDirPath(this._baseDirPath, projectId, attributeId);
   }
 
-  getResearchAttributeFilePath(researchExternalId, attributeId, filename) {
-    return researchAttributeFilePath(this._baseDirPath, researchExternalId, attributeId, filename);
+  getProjectAttributeFilePath(projectId, attributeId, filename) {
+    return projectAttributeFilePath(this._baseDirPath, projectId, attributeId, filename);
   }
 
-  getResearchContentPackageDirPath(researchExternalId, packageHash) {
-    return researchContentPackageDirPath(this._baseDirPath, researchExternalId, packageHash);
+  getProjectContentPackageDirPath(projectId, packageHash) {
+    return projectContentPackageDirPath(this._baseDirPath, projectId, packageHash);
   }
 
-  getResearchContentPackageFilePath(researchExternalId, packageHash, fileHash) {
-    return researchContentPackageFilePath(this._baseDirPath, researchExternalId, packageHash, fileHash);
+  getProjectContentPackageFilePath(projectId, packageHash, fileHash) {
+    return projectContentPackageFilePath(this._baseDirPath, projectId, packageHash, fileHash);
   }
 
-  getResearchDarArchiveDirPath(researchExternalId, archiveName) {
-    return researchDarArchiveDirPath(this._baseDirPath, researchExternalId, archiveName);
+  getProjectDarArchiveDirPath(projectId, archiveName) {
+    return projectDarArchiveDirPath(this._baseDirPath, projectId, archiveName);
   }
 
-  getResearchDarArchiveFilePath(researchExternalId, archiveName, filename) {
-    return researchDarArchiveFilePath(this._baseDirPath, researchExternalId, archiveName, filename);
+  getProjectDarArchiveFilePath(projectId, archiveName, filename) {
+    return projectDarArchiveFilePath(this._baseDirPath, projectId, archiveName, filename);
   }
 
-  getResearchBlankDarArchiveDirPath() {
-    return researchBlankDarArchiveDirPath();
+  getProjectBlankDarArchiveDirPath() {
+    return projectBlankDarArchiveDirPath();
   }
   
-  getResearchContentPackageTempDirPath(researchExternalId, sessionId) {
-    return researchContentPackageTempDirPath(this._baseDirPath, researchExternalId, sessionId);
+  getProjectContentPackageTempDirPath(projectId, sessionId) {
+    return projectContentPackageTempDirPath(this._baseDirPath, projectId, sessionId);
   }
 
   getAccountDirPath(username) {
@@ -153,60 +153,60 @@ class BaseFileStorage {
     return accountDefaultAvatarFilePath();
   }
 
-  getResearchGroupDirPath(researchGroupExternalId) {
-    return researchGroupDirPath(this._baseDirPath, researchGroupExternalId);
+  getTeamDirPath(teamId) {
+    return teamDirPath(this._baseDirPath, teamId);
   }
 
-  getResearchGroupAttributeDirPath(researchGroupExternalId, attributeId) {
-    return researchGroupAttributeDirPath(this._baseDirPath, researchGroupExternalId, attributeId);
+  getTeamAttributeDirPath(teamId, attributeId) {
+    return teamAttributeDirPath(this._baseDirPath, teamId, attributeId);
   }
 
-  getResearchGroupAttributeFilePath(researchGroupExternalId, attributeId, filename) {
-    return researchGroupAttributeFilePath(this._baseDirPath, researchGroupExternalId, attributeId, filename);
+  getTeamAttributeFilePath(teamId, attributeId, filename) {
+    return teamAttributeFilePath(this._baseDirPath, teamId, attributeId, filename);
   }
 
-  getResearchGroupFilePath(researchGroupExternalId, filename) {
-    return researchGroupFilePath(this._baseDirPath, researchGroupExternalId, filename);
+  getTeamFilePath(teamId, filename) {
+    return teamFilePath(this._baseDirPath, teamId, filename);
   }
 
-  getResearchGroupLogoFilePath(researchGroupExternalId) {
-    return researchGroupLogoFilePath(this._baseDirPath, researchGroupExternalId);
+  getTeamLogoFilePath(teamId) {
+    return teamLogoFilePath(this._baseDirPath, teamId);
   }
 
-  getResearchGroupDefaultLogoFilePath() {
-    return researchGroupDefaultLogoFilePath();
+  getTeamDefaultLogoFilePath() {
+    return teamDefaultLogoFilePath();
   }
 
-  getPortalDirPath(tenantExternalId) {
-    return tenantDirPath(this._baseDirPath, tenantExternalId);
+  getPortalDirPath(portalId) {
+    return portalDirPath(this._baseDirPath, portalId);
   }
 
-  getPortalBannerFilePath(tenantExternalId, filename) {
-    return tenantBannerFilePath(this._baseDirPath, tenantExternalId, filename);
+  getPortalBannerFilePath(portalId, filename) {
+    return portalBannerFilePath(this._baseDirPath, portalId, filename);
   }
 
-  getPortalLogoFilePath(tenantExternalId, filename) {
-    return tenantLogoFilePath(this._baseDirPath, tenantExternalId, filename);
+  getPortalLogoFilePath(portalId, filename) {
+    return portalLogoFilePath(this._baseDirPath, portalId, filename);
   }
 
   getPortalDefaultBannerFilePath() {
-    return tenantDefaultBannerFilePath();
+    return portalDefaultBannerFilePath();
   }
 
   getPortalDefaultLogoFilePath() {
-    return tenantDefaultLogoFilePath();
+    return portalDefaultLogoFilePath();
   }
 
-  getResearchAwardWithdrawalRequestsPackageDirPath(researchExternalId, packageHash) {
-    return researchAwardWithdrawalRequestsPackageDirPath(this._baseDirPath, researchExternalId, packageHash);
+  getProjectAwardWithdrawalRequestsPackageDirPath(projectId, packageHash) {
+    return projectAwardWithdrawalRequestsPackageDirPath(this._baseDirPath, projectId, packageHash);
   }
 
-  getResearchAwardWithdrawalRequestsTempDirPath(researchExternalId, sessionId) {
-    return researchAwardWithdrawalRequestsTempDirPath(this._baseDirPath, researchExternalId, sessionId);
+  getProjectAwardWithdrawalRequestsTempDirPath(projectId, sessionId) {
+    return projectAwardWithdrawalRequestsTempDirPath(this._baseDirPath, projectId, sessionId);
   }
 
-  getResearchAwardWithdrawalRequestsPackageFilePath(researchExternalId, packageHash, fileHash) {
-    return researchAwardWithdrawalRequestsPackageFilePath(this._baseDirPath, researchExternalId, packageHash, fileHash);
+  getProjectAwardWithdrawalRequestsPackageFilePath(projectId, packageHash, fileHash) {
+    return projectAwardWithdrawalRequestsPackageFilePath(this._baseDirPath, projectId, packageHash, fileHash);
   }
 
   getContractAgreementDirPath() {

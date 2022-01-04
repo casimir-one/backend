@@ -7,21 +7,21 @@ import { TextEncoder } from 'util';
 
 const requestPromise = util.promisify(request);
 
-async function getPortalAccessToken(requestedTenant) {
-  const clientTenantId = config.TENANT;
-  const requestedTenantId = requestedTenant.id;
+async function getPortalAccessToken(requestedPortal) {
+  const clientPortalId = config.TENANT;
+  const requestedPortalId = requestedPortal.id;
 
   const secretKey = crypto.PrivateKey.from(config.TENANT_PRIV_KEY);
   const secretSig = secretKey.sign(new TextEncoder("utf-8").encode(config.SIG_SEED).buffer);
   const secretSigHex = crypto.hexify(secretSig);
 
   const options = {
-    url: `${requestedTenant.profile.serverUrl}/auth/tenant/sign-in`,
+    url: `${requestedPortal.profile.serverUrl}/auth/portal/sign-in`,
     method: "post",
     headers: {
       "content-type": "application/json"
     },
-    body: JSON.stringify({ clientTenantId, secretSigHex })
+    body: JSON.stringify({ clientPortalId, secretSigHex })
   };
 
   const response = await requestPromise(options);

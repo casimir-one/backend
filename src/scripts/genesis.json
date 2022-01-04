@@ -1,6 +1,6 @@
 {
   "initial_timestamp": "2021-01-01T00:00:00",
-  "init_supply": 0,
+  "initSupply": 0,
   "registrar_account": {
     "name": "regacc",
     "recovery_account": "",
@@ -8,18 +8,18 @@
   },
   "accounts": [],
   "assets": [],
-  "account_balances": [],
+  "accountBalances": [],
   "witness_candidates": [
     {
       "owner_name": "initdelegate",
       "block_signing_key": "DEIP65oa2rotvjpJH8FLPEvVGEzHhErqM4A1e5GuQVHuVP7iy7nwFJ"
     }
   ],
-  "disciplines": [],
+  "domains": [],
   "expert_tokens": [],
-  "research_groups": [],
-  "researches": [],
-  "research_contents": [],
-  "research_contents_reviews": [],
+  "teams": [],
+  "projects": [],
+  "projectContents": [],
+  "projectContentsReviews": [],
   "proposals": []
 }

@@ -102,19 +102,19 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (
   const { projectId, draftId, formatType, ctx } = event.getEventPayload();
 
   if (formatType === PROJECT_CONTENT_FORMAT.DAR || formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
-    const externalId = mongoose.Types.ObjectId(draftId);
+    const _id = mongoose.Types.ObjectId(draftId);
     
     if (formatType == PROJECT_CONTENT_FORMAT.DAR) { 
-      const darPath = FileStorage.getResearchDarArchiveDirPath(projectId, externalId);
-    const blankDarPath = FileStorage.getResearchBlankDarArchiveDirPath();
+      const darPath = FileStorage.getProjectDarArchiveDirPath(projectId, _id);
+      const blankDarPath = FileStorage.getProjectBlankDarArchiveDirPath();
     
-    await cloneArchive(blankDarPath, darPath, true);
+      await cloneArchive(blankDarPath, darPath, true);
     }
     const files = ctx.req.files;
     if (formatType == PROJECT_CONTENT_FORMAT.PACKAGE && files.length > 0) {
       const tempDestinationPath = files[0].destination;
       
-      const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
+      const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(projectId, _id);
       
       await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
     }
@@ -129,7 +129,7 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (
 
   if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
     const opts = {}
-    const archiveDir = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
+    const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
     const version = await writeArchive(archiveDir, xmlDraft, {
       versioning: opts.versioning
     })
@@ -142,10 +142,10 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED, async (
   const draft = await draftService.getDraft(draftId)
 
   if (draft.type === PROJECT_CONTENT_FORMAT.DAR) {
-    const darPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draft.folder);
+    const darPath = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
     await FileStorage.rmdir(darPath);
   } else if (draft.type === PROJECT_CONTENT_FORMAT.PACKAGE) {
-    const packagePath = FileStorage.getResearchContentPackageDirPath(draft.projectId, draft.hash);
+    const packagePath = FileStorage.getProjectContentPackageDirPath(draft.projectId, draft.hash);
     await FileStorage.rmdir(packagePath);
   }
 });

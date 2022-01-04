@@ -245,11 +245,11 @@ class UsersController extends BaseController {
     }
   });
 
-  getUsersByTenant = this.query({
+  getUsersByPortal = this.query({
     h: async (ctx) => {
       try {
         const portalId = ctx.params.portalId;
-        const users = await userDtoService.getUsersByTenant(portalId);
+        const users = await userDtoService.getUsersByPortal(portalId);
         ctx.status = 200;
         ctx.body = users;
       } catch (err) {
@@ -403,8 +403,8 @@ class UsersController extends BaseController {
             ({
               type,
               title,
-              tenantId
-            }) => title === 'Avatar' && type === ATTR_TYPES.IMAGE && tenantId === user.tenantId
+              portalId
+            }) => title === 'Avatar' && type === ATTR_TYPES.IMAGE && portalId === user.portalId
           );
           const userAttr = user.profile.attributes.find(({
             attributeId

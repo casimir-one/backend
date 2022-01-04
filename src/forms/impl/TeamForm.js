@@ -15,12 +15,12 @@ const destinationHandler = (fileStorage) => function () {
     const parts = file.originalname.split(TEAM_ATTRIBUTE_ID_SPLITTER);
     const teamAttrId = parts[0];
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(teamAttrId)) {
-      folderPath = fileStorage.getResearchGroupAttributeDirPath(teamId, teamAttrId);
+      folderPath = fileStorage.getTeamAttributeDirPath(teamId, teamAttrId);
       const name = file.originalname.substring(`${teamAttrId}${TEAM_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
-      filePath = fileStorage.getResearchGroupAttributeFilePath(teamId, teamAttrId, name);
+      filePath = fileStorage.getTeamAttributeFilePath(teamId, teamAttrId, name);
     } else {
-      folderPath = fileStorage.getResearchGroupDirPath(teamId);
-      filePath = fileStorage.getResearchGroupFilePath(teamId, file.originalname);
+      folderPath = fileStorage.getTeamDirPath(teamId);
+      filePath = fileStorage.getTeamFilePath(teamId, file.originalname);
     }
 
     const folderExists = await fileStorage.exists(folderPath);

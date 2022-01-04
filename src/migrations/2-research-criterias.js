@@ -14,7 +14,7 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const Research = require('./../schemas/research');
+const Project = require('./../schemas/ProjectSchema');
 const { ATTR_TYPES } = require('@deip/constants');
 
 
@@ -29,23 +29,23 @@ function getRandomInt(min, max) {
 
 const run = async () => {
 
-  await Research.update({}, { $set: { "tenantCriterias": [] } }, { multi: true });
-  await Research.update({}, { $unset: { "trl": "" } }, { multi: true });
+  await Project.update({}, { $set: { "portalCriterias": [] } }, { multi: true });
+  await Project.update({}, { $unset: { "trl": "" } }, { multi: true });
 
-  const researches = await Research.find({});
+  const projects = await Project.find({});
   let promises = [];
 
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
     const trlIndex = getRandomInt(0, 7);
     const marlIndex = getRandomInt(0, 7);
     const srlIndex = getRandomInt(0, 7);
-    research.tenantCriterias = [
+    project.portalCriterias = [
       { "component": "5ebd469a2cea71001f84345a", "type": ATTR_TYPES.STEPPER, "value": { index: trlIndex } },
       { "component": "5ebd47762cea71001f843460", "type": ATTR_TYPES.STEPPER, "value": { index: marlIndex } },
       { "component": "5ebd4b842cea71001f843467", "type": ATTR_TYPES.STEPPER, "value": { index: srlIndex } },
     ];
-    promises.push(research.save());
+    promises.push(project.save());
   }
 
   return Promise.all(promises);

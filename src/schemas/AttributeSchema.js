@@ -20,7 +20,7 @@ const BlockchainFieldMeta = new Schema({
 });
 
 const AttributeSchema = new Schema({
-  "tenantId": { type: String, default: null },
+  "portalId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Number,

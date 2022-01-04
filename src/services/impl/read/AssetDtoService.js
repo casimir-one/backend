@@ -25,19 +25,20 @@ class AssetDtoService extends BaseService {
 
       return { 
         _id: asset._id,
-        tenantId: asset.tenantId,
+        portalId: asset.portalId,
         symbol: asset.symbol,
         precision: asset.precision,
         issuer: asset.issuer,
         description: asset.description,
         settings: { ...asset.settings },
         type: asset.type,
+        currentSupply: chainAsset ? chainAsset.currentSupply : null,
         
         // @deprecated
         max_supply: chainAsset ? chainAsset.currentSupply : null,
         current_supply: chainAsset ? chainAsset.currentSupply : null,
         string_symbol: chainAsset ? chainAsset.symbol : null,
-        tokenized_research: asset.settings.projectId || null,
+        tokenized_project: asset.settings.projectId || null,
         tokenizedProject: asset.settings.projectId || null,
         license_revenue_holders_share: asset.settings.licenseRevenueHoldersShare || null
       }
@@ -68,6 +69,12 @@ class AssetDtoService extends BaseService {
     const result = await this.mapAssets(assets);
     return result;
   }
+
+  async getAssetsByProjects(projectsIds) {
+    const assets = await this.findMany({ "settings.projectId": { $in: projectsIds } });
+    const result = await this.mapAssets(assets);
+    return result;
+  }
   
   async lookupAssets() {
     const assets = await this.findMany({});
@@ -93,6 +100,7 @@ class AssetDtoService extends BaseService {
       owner: chainBalance.account,
       symbol: chainBalance.symbol,
       precision: chainBalance.precision,
+      type: asset.type,
       // TODO: infer 'tokenizedProject' from balance object
       tokenizedProject: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null,
 
@@ -100,7 +108,7 @@ class AssetDtoService extends BaseService {
       id: chainBalance.assetId, // should be '_id' of account balance object
       asset_id: chainBalance.assetId,
       asset_symbol: chainBalance.symbol || "",
-      tokenized_research: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null
+      tokenized_project: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null
     }
   }
 
@@ -130,7 +138,7 @@ class AssetDtoService extends BaseService {
         id: chainBalance.assetId, // should be '_id' of account balance object
         asset_id: chainBalance.assetId,
         asset_symbol: chainBalance.symbol || "",
-        tokenized_research: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null,
+        tokenized_project: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null,
       }
     });
   }
@@ -162,7 +170,7 @@ class AssetDtoService extends BaseService {
         // should be '_id' of account balance object
         asset_id: chainBalance.assetId,
         asset_symbol: chainBalance.symbol || "",
-        tokenized_research: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null
+        tokenized_project: asset && asset.settings && asset.settings.projectId ? asset.settings.projectId : null
       };
     });
   }

@@ -26,7 +26,6 @@ const filenameHandler = () => function () {
 
 const fileFilterHandler = (req, file, callback) => {
   const allowedAvatarMimeTypes = ['image/png', 'image/jpeg', 'image/jpg'];
-  console.log(file.mimetype, 'file.mimetypefile.mimetype')
   if (!allowedAvatarMimeTypes.some(mime => mime === file.mimetype)) {
     return callback(new Error('Only the following mime types are allowed: ' + allowedAvatarMimeTypes.join(', ')), false);
   }
@@ -46,7 +45,6 @@ class PortalSettingsForm extends BaseForm {
 
     const formHandler = (ctx) => multerHandler(ctx, () => new Promise((resolve, reject) => {
       try {
-        console.log(ctx.req.files, 'ctx.req.filesctx.req.filesctx.req.files')
         resolve({ files: ctx.req.files });
       } catch (err) {
         reject(err);

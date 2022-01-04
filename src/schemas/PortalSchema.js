@@ -55,14 +55,14 @@ const AppModuleMap = new Schema({
 
 const UserRoleModuleMap = new Schema({
   "_id": false,
-  "roleGroupExternalId": { type: String, required: false, default: null },
+  "teamId": { type: String, required: false, default: null },
   "label": { type: String, required: true, trim: true },
   "role": { type: String, required: true, trim: true },
   "modules": AppModuleMap
 });
 
 const GlobalNetworkSettings = new Schema({
-  "visibleTenantIds": { type: [String], default: [] } ,
+  "visiblePortalIds": { type: [String], default: [] } ,
   "isGlobalScopeVisible": { type: Boolean, default: false }
 });
 
@@ -71,17 +71,17 @@ const ReviewQuestion = new Schema({
   "contentTypes": [Number]
 });
 
-const ResearchContentAssessmentCriteria = new Schema({
+const ProjectContentAssessmentCriteria = new Schema({
   "_id": false,
   "id": { type: Number, required: true },
   "title": { type: String, required: true },
   "max": { type: Number, required: true }
 });
 
-const ResearchContentAssessmentCriterias = new Schema({
+const ProjectContentAssessmentCriterias = new Schema({
   "_id": false,
   "contentType": { type: Number, required: true },
-  "values": [ResearchContentAssessmentCriteria]
+  "values": [ProjectContentAssessmentCriteria]
 });
 
 const PortalSchema = new Schema({
@@ -91,7 +91,7 @@ const PortalSchema = new Schema({
   "shortName": { type: String },
   "description": { type: String },
   "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
-  "logo": { type: String, default: "default_tenant_logo.png" },
+  "logo": { type: String, default: "default_portal_logo.png" },
   "banner": { type: String, default: "default_banner_logo.png" },
   "network": GlobalNetworkSettings,
   "settings": {
@@ -109,7 +109,7 @@ const PortalSchema = new Schema({
       ]
     },
     "assesmentCriterias": {
-      type: [ResearchContentAssessmentCriterias],
+      type: [ProjectContentAssessmentCriterias],
       default: [{
         contentType: PROJECT_CONTENT_TYPES.UNKNOWN,
         values: [
@@ -128,8 +128,8 @@ const PortalSchema = new Schema({
     "modules": AppModuleMap,
     "roles": [UserRoleModuleMap]
   }
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' }, minimize: false });
+}, { timestamps: true, minimize: false });
 
-const model = mongoose.model('tenants-profiles', PortalSchema);
+const model = mongoose.model('portal', PortalSchema);
 
 module.exports = model;

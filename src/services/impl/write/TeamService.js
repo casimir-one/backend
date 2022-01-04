@@ -10,7 +10,7 @@ class TeamService extends BaseService {
   }
 
   async createTeam({
-    externalId,
+    _id,
     creator,
     attributes,
     members
@@ -24,12 +24,12 @@ class TeamService extends BaseService {
     if (teamAttr && !attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
       attributes.push({
         attributeId: teamAttr._id.toString(),
-        value: `Team ${externalId}`
+        value: `Team ${_id}`
       })
     }
 
     const result = await this.createOne({
-      _id: externalId,
+      _id,
       creator,
       attributes,
       members
@@ -38,12 +38,12 @@ class TeamService extends BaseService {
     return result;
   }
 
-  async updateTeam(externalId, {
+  async updateTeam(teamId, {
     attributes,
     members
   }) {
 
-    const result = this.updateOne({ _id: externalId }, {
+    const result = this.updateOne({ _id: teamId }, {
       attributes,
       members
     });

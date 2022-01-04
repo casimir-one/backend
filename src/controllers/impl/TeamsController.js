@@ -58,9 +58,9 @@ class TeamsController extends BaseController {
     h: async (ctx) => {
       try {
 
-        const { withTenantTeam } = qs.parse(ctx.query);
+        const { withPortalTeam } = qs.parse(ctx.query);
 
-        const result = await teamDtoService.getTeamsListing(withTenantTeam);
+        const result = await teamDtoService.getTeamsListing(withPortalTeam);
         ctx.status = 200;
         ctx.body = result;
 
@@ -74,10 +74,10 @@ class TeamsController extends BaseController {
   getTeamsByUser = this.query({
     h: async (ctx) => {
       try {
-        const { withTenantTeam } = qs.parse(ctx.query);
+        const { withPortalTeam } = qs.parse(ctx.query);
 
         const username = ctx.params.username;
-        const result = await teamDtoService.getTeamsByUser(username, withTenantTeam);
+        const result = await teamDtoService.getTeamsByUser(username, withPortalTeam);
         ctx.status = 200;
         ctx.body = result;
 
@@ -88,13 +88,13 @@ class TeamsController extends BaseController {
     }
   });
 
-  getTeamsByTenant = this.query({
+  getTeamsByPortal = this.query({
     h: async (ctx) => {
       try {
-        const { withTenantTeam } = qs.parse(ctx.query);
+        const { withPortalTeam } = qs.parse(ctx.query);
 
         const portalId = ctx.params.portalId;
-        const result = await teamDtoService.getTeamsByTenant(portalId, withTenantTeam);
+        const result = await teamDtoService.getTeamsByPortal(portalId, withPortalTeam);
         ctx.status = 200;
         ctx.body = result;
 
@@ -290,13 +290,13 @@ class TeamsController extends BaseController {
         const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
         const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
 
-        let src = FileStorage.getResearchGroupLogoFilePath(teamId);
-        const defaultTeamLogo = FileStorage.getResearchGroupDefaultLogoFilePath();
+        let src = FileStorage.getTeamLogoFilePath(teamId);
+        const defaultTeamLogo = FileStorage.getTeamDefaultLogoFilePath();
 
         let buff;
 
         if (src != defaultTeamLogo) {
-          const filepath = FileStorage.getResearchGroupLogoFilePath(teamId);
+          const filepath = FileStorage.getTeamLogoFilePath(teamId);
           const exists = await FileStorage.exists(filepath);
           if (exists) {
             buff = await FileStorage.get(filepath);

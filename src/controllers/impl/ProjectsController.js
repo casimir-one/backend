@@ -122,8 +122,8 @@ class ProjectsController extends BaseController {
   getPortalProjectsListing = this.query({
     h: async (ctx) => {
       try {
-        const tenantId = ctx.state.tenant.id;
-        const result = await projectDtoService.getProjectsByTenant(tenantId);
+        const portalId = ctx.state.portal.id;
+        const result = await projectDtoService.getProjectsByPortal(portalId);
         ctx.status = 200;
         ctx.body = result.filter(r => !r.isPrivate);
       } catch (err) {

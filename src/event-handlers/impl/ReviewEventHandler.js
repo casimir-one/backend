@@ -58,7 +58,7 @@ reviewEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) => {
 
   await reviewService.createReview({
     reviewId,
-    projectId: projectContentRef.researchExternalId,
+    projectId: projectContentRef.projectId,
     projectContentId,
     author,
     content

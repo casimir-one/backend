@@ -23,7 +23,7 @@ class ContractAgreementDtoService extends BaseService {
 
       return {
         _id: agreement._id,
-        tenantId: agreement.tenantId,
+        portalId: agreement.portalId,
         status: agreement.status,
         creator: agreement.creator,
         parties: agreement.parties,

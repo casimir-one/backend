@@ -12,7 +12,7 @@ const SignerSchema = new Schema({
 
 const ContractAgreementSchema = new Schema({
   "_id": { type: String },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "status": { type: Number, enum: [...Object.values(CONTRACT_AGREEMENT_STATUS)], required: true, default: CONTRACT_AGREEMENT_STATUS.PENDING },
   "creator": { type: String, required: true},
   "parties": { type: Array, required: true },

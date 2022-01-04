@@ -34,7 +34,7 @@ const run = async () => {
   for (let i = 0; i < attributes.length; i++) {
     const attribute = attributes[i];
     const attributeObj = attribute.toObject();
-    attribute.isGlobalScope = attributeObj.tenantId ? false : true;
+    attribute.isGlobalScope = attributeObj.portalId ? false : true;
     attributesPromises.push(attribute.save());
   }
 

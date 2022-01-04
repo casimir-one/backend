@@ -14,7 +14,7 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
+const PortalProfile = require('./../schemas/PortalSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 
@@ -22,50 +22,50 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const run = async () => {
-  const RESEARCH_GROUPS_LIST = "research-groups-list";
-  const DISCIPLINES_LIST = "disciplines-list";
+  const TEAMS_LIST = "teams-list";
+  const DOMAINS_LIST = "domains-list";
 
-  const tenantPromises = [];
-  const tenants = await TenantProfile.find({});
+  const portalPromises = [];
+  const portals = await PortalProfile.find({});
 
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
 
-    tenantProfile.researchCategories = undefined;
-    tenantProfile.researchComponents = undefined;
+    portalProfile.projectCategories = undefined;
+    portalProfile.projectComponents = undefined;
 
-    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenantProfile.settings.researchAttributes[j];
+    for (let j = 0; j < portalProfile.settings.projectAttributes.length; j++) {
+      let projectAttribute = portalProfile.settings.projectAttributes[j];
 
-      researchAttribute.isPublished = researchAttribute.isVisible;
+      projectAttribute.isPublished = projectAttribute.isVisible;
 
-      researchAttribute.isVisible = undefined
-      researchAttribute.isBlockchainMeta = undefined;
-      researchAttribute.component = undefined;
+      projectAttribute.isVisible = undefined
+      projectAttribute.isBlockchainMeta = undefined;
+      projectAttribute.component = undefined;
 
-      if (researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == ATTR_TYPES.RESEARCH_GROUP) {
-        researchAttribute.isHidden = true;
+      if (projectAttribute.type == TEAMS_LIST || projectAttribute.type == ATTR_TYPES.TEAM) {
+        projectAttribute.isHidden = true;
       } else {
-        researchAttribute.isHidden = false;
+        projectAttribute.isHidden = false;
       }
 
-      if (researchAttribute.type == DISCIPLINES_LIST || researchAttribute.type == ATTR_TYPES.DISCIPLINE || researchAttribute.type == RESEARCH_GROUPS_LIST || researchAttribute.type == ATTR_TYPES.RESEARCH_GROUP) {
-        researchAttribute.isEditable = false;
+      if (projectAttribute.type == DOMAINS_LIST || projectAttribute.type == ATTR_TYPES.DOMAIN || projectAttribute.type == TEAMS_LIST || projectAttribute.type == ATTR_TYPES.TEAM) {
+        projectAttribute.isEditable = false;
       } else {
-        researchAttribute.isEditable = true;
+        projectAttribute.isEditable = true;
       }
     }
 
-    for (let j = 0; j < tenantProfile.settings.faq.length; j++) {
-      let qa = tenantProfile.settings.faq[j];
+    for (let j = 0; j < portalProfile.settings.faq.length; j++) {
+      let qa = portalProfile.settings.faq[j];
       qa.isPublished = qa.isVisible;
       qa.isVisible = undefined;
     }
 
-    tenantPromises.push(tenantProfile.save());
+    portalPromises.push(portalProfile.save());
   }
 
-  await Promise.all(tenantPromises);
+  await Promise.all(portalPromises);
 
 };
 

@@ -26,7 +26,7 @@ teamEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
   } = event.getEventPayload();
 
   const team = await teamService.createTeam({
-    externalId: accountId,
+    _id: accountId,
     creator: creator,
     name: description, // TODO: extract from attributes
     description: description,

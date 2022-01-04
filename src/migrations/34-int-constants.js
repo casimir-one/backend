@@ -37,7 +37,7 @@ const Schema = mongoose.Schema;
 // const ReviewRequestSchema = require('../schemas/ReviewRequestSchema');
 
 const DraftSchemaClass = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "projectId": { type: String, required: true },
   "teamId": { type: String, required: true },
   "folder": { type: String, required: true },
@@ -65,11 +65,10 @@ const DraftSchemaClass = new Schema({
 
 const ProjectContentSchemaClass = new Schema({
   "_id": { type: String },
-  "tenantId": { type: String, required: true },
-  "researchExternalId": { type: String, required: true },
-  "researchGroupExternalId": { type: String, required: true },
+  "portalId": { type: String, required: true },
+  "projectId": { type: String, required: true },
+  "teamId": { type: String, required: true },
   "folder": { type: String, required: true },
-  "researchId": { type: Number}, // legacy internal id
   "title": { type: String, required: true },
   "hash": { type: String, index: true },
   "algo": { type: String },
@@ -99,8 +98,8 @@ const AttributeValueSchema = new Schema({
 });
 const ProjectSchemaClass = new Schema({
   "_id": { type: String, required: true },
-  "tenantId": { type: String, required: true },
-  "researchGroupExternalId": { type: String, required: true },
+  "portalId": { type: String, required: true },
+  "teamId": { type: String, required: true },
   "attributes": [AttributeValueSchema],
   "status": { type: Schema.Types.Mixed, required: false },
   "isDefault": { type: Boolean, default: false }
@@ -108,10 +107,10 @@ const ProjectSchemaClass = new Schema({
 
 const UserInviteSchemaClass = new Schema({
   "_id": { type: String },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "invitee": { type: String, required: true, index: true },
   "creator": { type: String },
-  "researchGroupExternalId": { type: String, required: true, index: true },
+  "teamId": { type: String, required: true, index: true },
   "notes": { type: String, required: false, trim: true },
   "rewardShare": { type: String, default: undefined },
   "failReason": { type: String },
@@ -123,7 +122,7 @@ const UserInviteSchemaClass = new Schema({
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } })
 
 const UserNotificationSchemaClass = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "username": { type: String, required: true, index: true },
   "status": {
     type: Schema.Types.Mixed,
@@ -145,11 +144,11 @@ const UserRole = new Schema({
   "_id": false,
   "role": { type: String, required: true, trim: true },
   "label": { type: String, trim: true },
-  "researchGroupExternalId": { type: String, required: true }
+  "teamId": { type: String, required: true }
 });
 const UserSchemaClass = new Schema({
   "_id": { type: String },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "signUpPubKey": { type: String, default: null },
   "status": { type: Schema.Types.Mixed, required: true },
@@ -159,7 +158,7 @@ const UserSchemaClass = new Schema({
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const UserBookmarkSchemaClass = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "username": { type: String, required: true },
   "type": {
     type: Schema.Types.Mixed,
@@ -169,7 +168,7 @@ const UserBookmarkSchemaClass = new Schema({
 }, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
 
 const ReviewRequestSchemaClass = new Schema({
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "expert": { type: String, required: true, index: true },
   "requestor": { type: String, required: true },
   "projectContentId": { type: String, required: true },
@@ -228,14 +227,14 @@ const AppModuleMap = new Schema({
 
 const UserRoleModuleMap = new Schema({
   "_id": false,
-  "roleGroupExternalId": { type: String, required: false, default: null },
+  "teamId": { type: String, required: false, default: null },
   "label": { type: String, required: true, trim: true },
   "role": { type: String, required: true, trim: true },
   "modules": AppModuleMap
 });
 
 const GlobalNetworkSettings = new Schema({
-  "visibleTenantIds": { type: [String], default: [] } ,
+  "visiblePortalIds": { type: [String], default: [] } ,
   "isGlobalScopeVisible": { type: Boolean, default: false }
 });
 
@@ -244,27 +243,27 @@ const ReviewQuestion = new Schema({
   "contentTypes": [Number]
 });
 
-const ResearchContentAssessmentCriteria = new Schema({
+const ProjectContentAssessmentCriteria = new Schema({
   "_id": false,
   "id": { type: Number, required: true },
   "title": { type: String, required: true },
   "max": { type: Number, required: true }
 });
 
-const ResearchContentAssessmentCriterias = new Schema({
+const ProjectContentAssessmentCriterias = new Schema({
   "_id": false,
   "contentType": { type: Number, required: true },
-  "values": [ResearchContentAssessmentCriteria]
+  "values": [ProjectContentAssessmentCriteria]
 });
 
-const TenantSchemaClass = new Schema({
+const PortalSchemaClass = new Schema({
   "_id": { type: String },
   "name": { type: String },
   "serverUrl": { type: String, required: true },
   "shortName": { type: String },
   "description": { type: String },
   "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
-  "logo": { type: String, default: "default_tenant_logo.png" },
+  "logo": { type: String, default: "default_portal_logo.png" },
   "banner": { type: String, default: "default_banner_logo.png" },
   "network": GlobalNetworkSettings,
   "settings": {
@@ -272,7 +271,7 @@ const TenantSchemaClass = new Schema({
       type: Schema.Types.Mixed,
       required: true
     },
-    "newResearchPolicy": {
+    "newProjectPolicy": {
       type: Schema.Types.Mixed
     },
     "reviewQuestions": {
@@ -284,7 +283,7 @@ const TenantSchemaClass = new Schema({
       ]
     },
     "assesmentCriterias": {
-      type: [ResearchContentAssessmentCriterias],
+      type: [ProjectContentAssessmentCriterias],
       default: [{
         contentType: PROJECT_CONTENT_TYPES.UNKNOWN,
         values: [
@@ -306,14 +305,14 @@ const TenantSchemaClass = new Schema({
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' }, minimize: false });
 
 const DraftSchema = mongoose.model('draft', DraftSchemaClass);
-const ProjectContentSchema = mongoose.model('research-content', ProjectContentSchemaClass);
-const ProjectSchema = mongoose.model('research', ProjectSchemaClass);
+const ProjectContentSchema = mongoose.model('project-content', ProjectContentSchemaClass);
+const ProjectSchema = mongoose.model('project', ProjectSchemaClass);
 const UserInviteSchema = mongoose.model('user-invites', UserInviteSchemaClass);
 const UserNotificationSchema = mongoose.model('user-notifications', UserNotificationSchemaClass);
 const UserSchema = mongoose.model('user-profile', UserSchemaClass);
 const UserBookmarkSchema = mongoose.model('user-bookmark', UserBookmarkSchemaClass);
 const ReviewRequestSchema = mongoose.model('review-requests', ReviewRequestSchemaClass);
-const TenantSchema = mongoose.model('tenants-profiles', TenantSchemaClass);
+const PortalSchema = mongoose.model('portal', PortalSchemaClass);
 
 const PROJECT_CONTENT_STATUS = {
   IN_PROGRESS: "in-progress",
@@ -358,11 +357,11 @@ const USER_NOTIFICATION_TYPE = {
   INVITATION_APPROVED: "invitation-approved",
   INVITATION_REJECTED: "invitation-rejected",
   EXCLUSION_APPROVED: "exclusion-approved",
-  PROJECT_CONTENT_EXPERT_REVIEW: "research-content-expert-review",
-  PROJECT_CONTENT_EXPERT_REVIEW_REQUEST: "research-content-expert-review-request",
-  PROJECT_NDA_PROPOSED: "research-nda-request",
-  PROJECT_NDA_SIGNED: "research-nda-signed",
-  PROJECT_NDA_REJECTED: "research-nda-rejected",
+  PROJECT_CONTENT_EXPERT_REVIEW: "project-content-expert-review",
+  PROJECT_CONTENT_EXPERT_REVIEW_REQUEST: "project-content-expert-review-request",
+  PROJECT_NDA_PROPOSED: "project-nda-request",
+  PROJECT_NDA_SIGNED: "project-nda-signed",
+  PROJECT_NDA_REJECTED: "project-nda-rejected",
   "proposal": 1,
   "proposal-accepted": 2,
   "invitation": 3,
@@ -415,7 +414,7 @@ const run = async () => {
   const usersPromises = [];
   const userBookmarksPromises = [];
   const reviewRequestsPromises = [];
-  const tenantsPromises = [];
+  const portalsPromises = [];
 
   const drafts = await DraftSchema.find({});
   const projectContents = await ProjectContentSchema.find({});
@@ -425,7 +424,7 @@ const run = async () => {
   const users = await UserSchema.find({});
   const userBookmarks = await UserBookmarkSchema.find({});
   const reviewRequests = await ReviewRequestSchema.find({});
-  const tenants = await TenantSchema.find({});
+  const portals = await PortalSchema.find({});
 
   for (let i = 0; i < drafts.length; i++) {
     const draft = drafts[i];
@@ -500,15 +499,15 @@ const run = async () => {
     }
   }
 
-  for (let i = 0; i < tenants.length; i++) {
-    const tenant = tenants[i];
-    if (SIGN_UP_POLICY[tenant.settings.signUpPolicy]) {
-      tenant.settings.signUpPolicy = SIGN_UP_POLICY[tenant.settings.signUpPolicy];
+  for (let i = 0; i < portals.length; i++) {
+    const portal = portals[i];
+    if (SIGN_UP_POLICY[portal.settings.signUpPolicy]) {
+      portal.settings.signUpPolicy = SIGN_UP_POLICY[portal.settings.signUpPolicy];
     }
-    if (tenant.settings.newResearchPolicy && SIGN_UP_POLICY[tenant.settings.newResearchPolicy]) {
-      tenant.settings.newResearchPolicy = SIGN_UP_POLICY[tenant.settings.newResearchPolicy];
+    if (portal.settings.newProjectPolicy && SIGN_UP_POLICY[portal.settings.newProjectPolicy]) {
+      portal.settings.newProjectPolicy = SIGN_UP_POLICY[portal.settings.newProjectPolicy];
     }
-    tenantsPromises.push(tenant.save());
+    portalsPromises.push(portal.save());
   }
 
   await Promise.all(draftsPromises);
@@ -519,7 +518,7 @@ const run = async () => {
   await Promise.all(usersPromises);
   await Promise.all(userBookmarksPromises);
   await Promise.all(reviewRequestsPromises);
-  await Promise.all(tenantsPromises);
+  await Promise.all(portalsPromises);
 };
 
 run()

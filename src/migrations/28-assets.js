@@ -62,7 +62,7 @@ const run = async () => {
         "licenseRevenueHoldersShare": chainAsset.license_revenue_holders_share || undefined
       },
       "isGlobalScope": !!!chainAsset.tokenized_research,
-      "tenantId": chainAsset.tokenized_research ? projects.find(p => p._id.toString() == chainAsset.tokenized_research).tenantId : undefined,
+      "portalId": chainAsset.tokenized_research ? projects.find(p => p._id.toString() == chainAsset.tokenized_research).portalId : undefined,
     }
 
     const asset = new AssetSchema(payload);

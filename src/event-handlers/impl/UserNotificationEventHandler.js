@@ -54,10 +54,10 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
     attributes
   } = event.getEventPayload();
 
-  const tenant = await portalDtoService.getPortal(config.TENANT);
+  const portal = await portalDtoService.getPortal(config.TENANT);
   const project = await projectDtoService.getProject(projectId); // TODO: replace with a call to project read schema
   const team = await teamDtoService.getTeam(teamId);
-  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const notifiableUsers = await userDtoService.getUsers(portal.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
   // TODO: replace with a call to project read schema
@@ -75,8 +75,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
       metadata: {
         isProposalAutoAccepted: true, // legacy
         proposal: { action: 14, data: { title }, is_completed: true }, // legacy
-        researchGroup: team,
-        research: project,
+        team,
+        project,
         emitter: teamCreator
       }
     });
@@ -90,9 +90,9 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
 userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event) => {
   const { teamId, attributes } = event.getEventPayload();
 
-  const tenant = await portalDtoService.getPortal(config.TENANT);
+  const portal = await portalDtoService.getPortal(config.TENANT);
   const team = await teamDtoService.getTeam(teamId);
-  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const notifiableUsers = await userDtoService.getUsers(portal.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
   // TODO: replace with a call to project read schema
@@ -110,8 +110,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
       metadata: {
         isProposalAutoAccepted: false, // legacy
         proposal: { action: 14, data: { title } }, // legacy
-        researchGroup: team,
-        research: null, // legacy
+        team,
+        project: null, // legacy
         emitter: teamCreator
       }
     });
@@ -124,10 +124,10 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async 
 userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async (event) => {
   const { projectId, teamId } = event.getEventPayload();
 
-  const tenant = await portalDtoService.getPortal(config.TENANT);
+  const portal = await portalDtoService.getPortal(config.TENANT);
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
-  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const notifiableUsers = await userDtoService.getUsers(portal.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
   const notifications = [];
@@ -140,8 +140,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_ACCEPTED, async
       metadata: {
         isProposalAutoAccepted: true, // legacy
         proposal: { action: 14, data: { title: project.title }, is_completed: true }, // legacy
-        researchGroup: team,
-        research: project,
+        team,
+        project,
         emitter: teamCreator
       }
     });
@@ -157,12 +157,12 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
     teamId
   } = event.getEventPayload();
 
-  const tenant = await portalDtoService.getPortal(config.TENANT);
+  const portal = await portalDtoService.getPortal(config.TENANT);
   const project = await projectDtoService.getProject(projectId);
   const team = await teamDtoService.getTeam(teamId);
   const teamCreator = await userDtoService.getUser(team.creator);
 
-  const notifiableUsers = await userDtoService.getUsers([...tenant.admins, ...project.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
+  const notifiableUsers = await userDtoService.getUsers([...portal.admins, ...project.members].reduce((acc, name) => !acc.includes(name) ? [name, ...acc] : acc, []));
 
   const notifications = [];
   for (let i = 0; i < notifiableUsers.length; i++) {
@@ -174,8 +174,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
       metadata: {
         isProposalAutoAccepted: true, // legacy
         proposal: { action: 15, is_completed: true }, // legacy
-        researchGroup: team,
-        research: project,
+        team,
+        project,
         emitter: teamCreator
       }
     });
@@ -188,10 +188,10 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATED, async (event) =
 userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event) => {
   const { teamId, projectId } = event.getEventPayload();
 
-  const tenant = await portalDtoService.getPortal(config.TENANT);
+  const portal = await portalDtoService.getPortal(config.TENANT);
   const team = await teamDtoService.getTeam(teamId);
   const project = await projectDtoService.getProject(projectId);
-  const notifiableUsers = await userDtoService.getUsers(tenant.admins);
+  const notifiableUsers = await userDtoService.getUsers(portal.admins);
   const teamCreator = await userDtoService.getUser(team.creator);
 
   const notifications = [];
@@ -204,8 +204,8 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
       metadata: {
         isProposalAutoAccepted: false, // legacy
         proposal: { action: 15, is_completed: false }, // legacy
-        researchGroup: team,
-        research: project,
+        team,
+        project,
         emitter: teamCreator
       }
     });
@@ -236,7 +236,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (even
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
         proposal: { action: 12, is_completed: true }, // legacy
-        researchGroup: team,
+        team,
         invitee: inviteeUser,
         emitter: currentUser
       }
@@ -248,7 +248,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (even
     status: USER_NOTIFICATION_STATUS.UNREAD,
     type: USER_NOTIFICATION_TYPE.INVITATION,
     metadata: {
-      researchGroup: team,
+      team,
       invitee: inviteeUser
     }
   });
@@ -277,7 +277,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_ACCEPTED, async (eve
         status: USER_NOTIFICATION_STATUS.UNREAD,
         type: USER_NOTIFICATION_TYPE.INVITATION_APPROVED,
         metadata: {
-          researchGroup: team,
+          team,
           invitee: inviteeUser
         }
       });
@@ -307,7 +307,7 @@ userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_DECLINED, async (eve
       status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.INVITATION_REJECTED,
       metadata: {
-        researchGroup: team,
+        team,
         invitee: inviteeUser
       }
     });
@@ -335,9 +335,9 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
       type: USER_NOTIFICATION_TYPE.PROPOSAL, // legacy
       metadata: {
         isProposalAutoAccepted: false, // legacy
-        proposal: { action: 19, data: { research_id: project.id } }, // legacy
-        researchGroup: team,
-        research: project,
+        proposal: { action: 19, data: { project_id: project.id } }, // legacy
+        team,
+        project,
         tokenSale: null,
         emitter: emitterUser
       }
@@ -367,9 +367,9 @@ userNotificationEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, 
       status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
-        proposal: { action: 19, data: { research_id: project.id }, is_completed: true }, // legacy
-        researchGroup: team,
-        research: project,
+        proposal: { action: 19, data: { project_id: project.id }, is_completed: true }, // legacy
+        team,
+        project,
         tokenSale,
         emitter: emitterUser
       }
@@ -396,10 +396,10 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (
       status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROPOSAL_ACCEPTED, // legacy
       metadata: {
-        proposal: { action: 16, data: { research_id: project.id }, is_completed: true }, // legacy
-        researchGroup: team,
-        research: project,
-        researchContent: projectContent,
+        proposal: { action: 16, data: { project_id: project.id }, is_completed: true }, // legacy
+        team,
+        project,
+        projectContent,
         emitter: emitterUser
       }
     });
@@ -415,8 +415,8 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (e
   const expert = await userDtoService.getUser(expertId);
   const projectContent = await projectContentDtoService.getProjectContent(projectContentId);
   
-  const project = await projectDtoService.getProject(projectContent.research_external_id);
-  const team = await teamDtoService.getTeam(project.researchRef.researchGroupExternalId);
+  const project = await projectDtoService.getProject(projectContent.projectId);
+  const team = await teamDtoService.getTeam(project.teamId);
 
   await userNotificationService.createUserNotifications([{
     username: expert.account.name,
@@ -425,9 +425,9 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (e
     metadata: {
       requestor,
       expert,
-      researchGroup: team,
-      research: project,
-      researchContent: projectContent
+      team,
+      project,
+      projectContent
     }
   }]);
 });
@@ -442,10 +442,10 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
   let reviewer = await userDtoService.getUser(author);
   let projectContent = await projectContentDtoService.getProjectContent(projectContentId);
 
-  let project = await projectDtoService.getProject(projectContent.researchContentRef.researchExternalId);
+  let project = await projectDtoService.getProject(projectContent.projectId);
   let review = await reviewDtoService.getReview(reviewId);
 
-  let team = await teamDtoService.getTeam(project.researchRef.researchGroupExternalId);
+  let team = await teamDtoService.getTeam(project.teamId);
   const { members } = team;
 
   const notifications = [];
@@ -457,9 +457,9 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) =>
       type: USER_NOTIFICATION_TYPE.PROJECT_CONTENT_EXPERT_REVIEW,
       metadata: {
         review,
-        researchContent: projectContent,
-        research: project,
-        researchGroup: team,
+        projectContent,
+        project,
+        team,
         reviewer
       }
     });
@@ -476,7 +476,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, as
 
   const project = await projectDtoService.getProject(projectId);
   const emitter = await userDtoService.getUser(creator);
-  const tenant = await portalDtoService.getPortal(emitter.tenantId);
+  const portal = await portalDtoService.getPortal(emitter.portalId);
 
   const notifications = [];
   for (let i = 0; i < project.members.length; i++) {
@@ -486,9 +486,9 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED, as
       status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROJECT_NDA_PROPOSED,
       metadata: {
-        research: project,
+        project,
         emitter,
-        tenant
+        portal
       }
     });
   }
@@ -504,7 +504,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (even
 
   const project = await projectDtoService.getProject(projectId);
   const creator = await userDtoService.getUser(creatorUsername);
-  const tenant = await portalDtoService.getPortal(creator.tenantId);
+  const portal = await portalDtoService.getPortal(creator.portalId);
 
   const notifications = [];
   for (let i = 0; i < [...project.members, creatorUsername].length; i++) {
@@ -514,9 +514,9 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_CREATED, async (even
       status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROJECT_NDA_SIGNED,
       metadata: {
-        research: project,
+        project,
         creator,
-        tenant
+        portal
       }
     });
   }
@@ -532,7 +532,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, a
 
   const project = await projectDtoService.getProject(projectId);
   const creator = await userDtoService.getUser(creatorUsername);
-  const tenant = await portalDtoService.getPortal(creator.tenantId);
+  const portal = await portalDtoService.getPortal(creator.portalId);
 
   const notifications = [];
   for (let i = 0; i < [...project.members, creatorUsername].length; i++) {
@@ -542,9 +542,9 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED, a
       status: USER_NOTIFICATION_STATUS.UNREAD,
       type: USER_NOTIFICATION_TYPE.PROJECT_NDA_REJECTED,
       metadata: {
-        research: project,
+        project,
         creator,
-        tenant
+        portal
       }
     });
   }

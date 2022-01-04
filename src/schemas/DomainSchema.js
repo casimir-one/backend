@@ -5,12 +5,12 @@ const Schema = mongoose.Schema;
 
 const DomainSchema = new Schema({
   "_id": { type: String, required: true },
-  "parentExternalId": { type: String, required: false },
+  "portalId": { type: String, required: false },
+  "parentId": { type: String, required: false },
   "name": { type: String, required: true },
-  "tenantId": { type: String, required: false },
   "isGlobalScope": { type: Boolean, default: true }
 });
 
-const model = mongoose.model('discipline', DomainSchema);
+const model = mongoose.model('domain', DomainSchema);
 
 module.exports = model;

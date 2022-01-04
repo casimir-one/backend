@@ -9,7 +9,7 @@ const destinationHandler = (fileStorage, sessionId) => function () {
   return async function (req, file, callback) {
     const projectId = req.headers[PROJECT_HEADER];
 
-    const projectFilesTempStorage = fileStorage.getResearchContentPackageTempDirPath(projectId, sessionId);
+    const projectFilesTempStorage = fileStorage.getProjectContentPackageTempDirPath(projectId, sessionId);
     const exists = await fileStorage.exists(projectFilesTempStorage);
     if (!exists) {
       await fileStorage.mkdir(projectFilesTempStorage);

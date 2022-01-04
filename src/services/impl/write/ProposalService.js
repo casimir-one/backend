@@ -27,7 +27,7 @@ class ProposalService extends BaseService {
     status,
     type,
     details,
-    tenantIdsScope,
+    portalIdsScope,
     creator,
     decisionMakers
   }) {
@@ -39,7 +39,7 @@ class ProposalService extends BaseService {
       status: status,
       creator: creator,
       details: details,
-      tenantIdsScope: tenantIdsScope,
+      portalIdsScope: portalIdsScope,
       decisionMakers: decisionMakers,
       approvers: [],
       rejectors: []

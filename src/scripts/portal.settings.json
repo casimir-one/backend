@@ -1,8 +1,7 @@
 {
   "signUpPolicy": 1,
-  "newResearchPolicy": 1,
+  "newProjectPolicy": 1,
   "faq": [],
-  "researchAttributes": [],
   "modules": {
     "app-eci": false,
     "app-crowdfunding": true,
@@ -135,7 +134,7 @@
                                   },
                                   "attrs": {},
                                   "props": {
-                                    "attribute": "@research.researchRef.attributes.5f68be39c579c726e93a3006"
+                                    "attribute": "@project.attributes.5f68be39c579c726e93a3006"
                                   },
                                   "moduleId": "6f5982fc2d6e43b2137cfc88",
                                   "type": "attribute",
@@ -168,7 +167,7 @@
                                 {
                                   "component": "span",
                                   "name": "Creation date",
-                                  "text": "@research.researchRef.created_at",
+                                  "text": "@project.created_at",
                                   "icon": "mdi-calendar-text",
                                   "moduleId": "33f0d98c7bdc4f8cf5173fb3",
                                   "type": "attribute",
@@ -211,7 +210,7 @@
                                   },
                                   "attrs": {},
                                   "props": {
-                                    "attribute": "@research.researchRef.attributes.5f6e7130de9b7c11c42963ec"
+                                    "attribute": "@project.attributes.5f6e7130de9b7c11c42963ec"
                                   },
                                   "moduleId": "5f8e58480a1c7adfc69264a",
                                   "type": "attribute",
@@ -245,7 +244,7 @@
                                   "component": "ProjectDetailsFollowCta",
                                   "icon": "mdi-bookmark-multiple-outline",
                                   "props": {
-                                    "project": "@research"
+                                    "project": "@project"
                                   },
                                   "moduleId": "1f97870315d6ea5ca5393356",
                                   "type": "staticComponent",
@@ -256,7 +255,7 @@
                                   "component": "ProjectDetailsEditCta",
                                   "icon": "mdi-circle-edit-outline",
                                   "props": {
-                                    "project": "@research"
+                                    "project": "@project"
                                   },
                                   "moduleId": "871afac1dc585fd35c493ee2",
                                   "type": "staticComponent",
@@ -292,7 +291,7 @@
                           "isHidden": false,
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f68be12ae115a26e475fb92"
+                            "attribute": "@project.attributes.5f68be12ae115a26e475fb92"
                           },
                           "moduleId": "2826034457ba4926cbe172c7",
                           "type": "attribute",
@@ -444,7 +443,7 @@
                               },
                               "attrs": {},
                               "props": {
-                                "attribute": "@research.researchRef.attributes.5f68be39c579c726e93a3007"
+                                "attribute": "@project.attributes.5f68be39c579c726e93a3007"
                               },
                               "moduleId": "a093855c4c0fb249a154a285",
                               "type": "attribute",
@@ -494,7 +493,7 @@
                           "isHidden": false,
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f68be12ae115a26e475fb90"
+                            "attribute": "@project.attributes.5f68be12ae115a26e475fb90"
                           },
                           "moduleId": "54215f30aade48e5ff74ba56",
                           "type": "attribute",
@@ -558,7 +557,7 @@
                                 }
                               },
                               "props": {
-                                "attribute": "@research.researchRef.attributes.5f6e73f4de9b7c11c42963fa"
+                                "attribute": "@project.attributes.5f6e73f4de9b7c11c42963fa"
                               },
                               "moduleId": "a22f6d8160766d6c976e6f08",
                               "type": "attribute",
@@ -627,7 +626,7 @@
                                 }
                               },
                               "props": {
-                                "attribute": "@research.researchRef.attributes.5f6e741dde9b7c11c42963fc"
+                                "attribute": "@project.attributes.5f6e741dde9b7c11c42963fc"
                               },
                               "moduleId": "6c8541122d20048f12433804",
                               "type": "attribute",
@@ -675,7 +674,7 @@
                           "name": "Publications",
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f6e71a2de9b7c11c42963ee"
+                            "attribute": "@project.attributes.5f6e71a2de9b7c11c42963ee"
                           },
                           "moduleId": "69fe4fb0c533345ca177e2f8",
                           "type": "attribute",
@@ -718,7 +717,7 @@
                           "name": "Intellectual property status",
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f6e7396de9b7c11c42963f6"
+                            "attribute": "@project.attributes.5f6e7396de9b7c11c42963f6"
                           },
                           "moduleId": "339d0a17d5357aaf3e7da8f8",
                           "type": "attribute",
@@ -761,7 +760,7 @@
                           "name": "External links",
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f6e73cdde9b7c11c42963f8"
+                            "attribute": "@project.attributes.5f6e73cdde9b7c11c42963f8"
                           },
                           "moduleId": "c96ab0a6fc76083f59ad6277",
                           "type": "attribute",
@@ -804,7 +803,7 @@
                           "component": "ProjectDetailsContents",
                           "icon": "mdi-file-document-multiple-outline",
                           "props": {
-                            "project": "@research"
+                            "project": "@project"
                           },
                           "moduleId": "3e088d10eb4e926b115c657d",
                           "type": "staticComponent",
@@ -822,7 +821,7 @@
                       "component": "ProjectDetailsReviews",
                       "icon": "mdi-comment-processing-outline",
                       "props": {
-                        "project": "@research"
+                        "project": "@project"
                       },
                       "moduleId": "11af3f2645af20737650d540",
                       "type": "staticComponent",
@@ -863,11 +862,11 @@
                   },
                   "children": [
                     {
-                      "component": "TenantBadge",
-                      "name": "Tenant",
+                      "component": "PortalBadge",
+                      "name": "Portal",
                       "icon": "mdi-account-network-outline",
                       "props": {
-                        "tenantId": "@research.tenantId"
+                        "portalId": "@project.portalId"
                       },
                       "moduleId": "d9c6732145cd7c9e31cb860b",
                       "type": "attribute",
@@ -903,8 +902,8 @@
                     "title": "Content assess"
                   },
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f69be12ae115a26e475fb96",
-                    "project": "@research"
+                    "attribute": "@project.attributes.5f69be12ae115a26e475fb96",
+                    "project": "@project"
                   },
                   "moduleId": "c6740190d10b6b58dc21b2e0",
                   "type": "attribute",
@@ -947,7 +946,7 @@
                           "name": "Inventors",
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f690af5cdaaa53a27af4a31"
+                            "attribute": "@project.attributes.5f690af5cdaaa53a27af4a31"
                           },
                           "moduleId": "24ebbd4641d282b7d4156a27",
                           "type": "attribute",
@@ -958,7 +957,7 @@
                           "name": "Licensing associate",
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f68d4fa98f36d2938dde5ed"
+                            "attribute": "@project.attributes.5f68d4fa98f36d2938dde5ed"
                           },
                           "moduleId": "393b837ef3e478cb37e2c67",
                           "type": "attribute",
@@ -996,7 +995,7 @@
                       "isHidden": false,
                       "component": "AttributesRead",
                       "props": {
-                        "attribute": "@research.researchRef.attributes.5f7ec161fbb737001f1bacf1"
+                        "attribute": "@project.attributes.5f7ec161fbb737001f1bacf1"
                       },
                       "moduleId": "96651d3357a7c304a1c974d6",
                       "type": "attribute",
@@ -1028,7 +1027,7 @@
                       "component": "ProjectDetailsAssets",
                       "icon": "mdi-currency-sign",
                       "props": {
-                        "project": "@research"
+                        "project": "@project"
                       },
                       "moduleId": "ebf2646d54749ebf3ef6c8f1",
                       "type": "staticComponent",
@@ -1058,8 +1057,8 @@
                       "name": "Fund stats",
                       "icon": "mdi-cash-refund",
                       "props": {
-                        "researchId": "@research.externalId",
-                        "project": "@research"
+                        "projectId": "@project._Id",
+                        "project": "@project"
                       },
                       "moduleId": "e063f7364417d13d9114cefb",
                       "type": "staticComponent",
@@ -1102,7 +1101,7 @@
                         }
                       },
                       "props": {
-                        "attribute": "@research.researchRef.attributes.5ebd469a2cea71001f84345a"
+                        "attribute": "@project.attributes.5ebd469a2cea71001f84345a"
                       },
                       "moduleId": "2e1e328f1cb50d72bbfce5e6",
                       "type": "attribute",
@@ -1136,7 +1135,7 @@
                       "isHidden": false,
                       "component": "AttributesRead",
                       "props": {
-                        "attribute": "@research.researchRef.attributes.5f6e732fde9b7c11c42963f0"
+                        "attribute": "@project.attributes.5f6e732fde9b7c11c42963f0"
                       },
                       "moduleId": "5a2d0b8f2e776c83b491b3b8",
                       "type": "attribute",
@@ -1168,7 +1167,7 @@
                       "name": "TTO Categories",
                       "component": "AttributesRead",
                       "props": {
-                        "attribute": "@research.researchRef.attributes.5f62d4fa98f46d2938dde1eb"
+                        "attribute": "@project.attributes.5f62d4fa98f46d2938dde1eb"
                       },
                       "moduleId": "3cc7ded3d2eb0e3488f0be69",
                       "type": "attribute",
@@ -1202,7 +1201,7 @@
                       "isHidden": false,
                       "component": "AttributesRead",
                       "props": {
-                        "attribute": "@research.researchRef.attributes.5f68d4fa98f36d2938dde5ec"
+                        "attribute": "@project.attributes.5f68d4fa98f36d2938dde5ec"
                       },
                       "moduleId": "50bdb48aa1d12aaf47da5d73",
                       "type": "attribute",
@@ -1254,7 +1253,7 @@
               "isRequired": false,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f58d4fa97f36d3938dde1ed",
+              "model": "attributes.5f58d4fa97f36d3938dde1ed",
               "props": {
                 "attribute": "@attributes.5f58d4fa97f36d3938dde1ed"
               },
@@ -1268,7 +1267,7 @@
               "isRequired": true,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f68be39c579c726e93a3006",
+              "model": "attributes.5f68be39c579c726e93a3006",
               "props": {
                 "attribute": "@attributes.5f68be39c579c726e93a3006"
               },
@@ -1306,7 +1305,7 @@
                       "icon": "mdi-form-textbox",
                       "name": "REF",
                       "component": "AttributesSet",
-                      "model": "researchRef.attributes.5f6e7130de9b7c11c42963ec",
+                      "model": "attributes.5f6e7130de9b7c11c42963ec",
                       "props": {
                         "attribute": "@attributes.5f6e7130de9b7c11c42963ec"
                       },
@@ -1335,7 +1334,7 @@
               "isRequired": true,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f68d4fa98f36d2938dde5ec",
+              "model": "attributes.5f68d4fa98f36d2938dde5ec",
               "props": {
                 "attribute": "@attributes.5f68d4fa98f36d2938dde5ec"
               },
@@ -1367,7 +1366,7 @@
                   "isRequired": false,
                   "isHidden": false,
                   "component": "AttributesSet",
-                  "model": "researchRef.attributes.5f7ec161fbb737001f1bacf1",
+                  "model": "attributes.5f7ec161fbb737001f1bacf1",
                   "props": {
                     "attribute": "@attributes.5f7ec161fbb737001f1bacf1"
                   },
@@ -1391,7 +1390,7 @@
               "isRequired": true,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f68be39c579c726e93a3007",
+              "model": "attributes.5f68be39c579c726e93a3007",
               "props": {
                 "attribute": "@attributes.5f68be39c579c726e93a3007"
               },
@@ -1405,7 +1404,7 @@
               "isRequired": false,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f68be12ae115a26e475fb90",
+              "model": "attributes.5f68be12ae115a26e475fb90",
               "props": {
                 "attribute": "@attributes.5f68be12ae115a26e475fb90"
               },
@@ -1417,7 +1416,7 @@
               "icon": "mdi-form-textarea",
               "name": "Applications",
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f6e73f4de9b7c11c42963fa",
+              "model": "attributes.5f6e73f4de9b7c11c42963fa",
               "props": {
                 "attribute": "@attributes.5f6e73f4de9b7c11c42963fa"
               },
@@ -1429,7 +1428,7 @@
               "icon": "mdi-form-textarea",
               "name": "Advantages",
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f6e741dde9b7c11c42963fc",
+              "model": "attributes.5f6e741dde9b7c11c42963fc",
               "props": {
                 "attribute": "@attributes.5f6e741dde9b7c11c42963fc"
               },
@@ -1441,7 +1440,7 @@
               "icon": "mdi-link-variant-plus",
               "name": "Publications",
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f6e71a2de9b7c11c42963ee",
+              "model": "attributes.5f6e71a2de9b7c11c42963ee",
               "props": {
                 "attribute": "@attributes.5f6e71a2de9b7c11c42963ee"
               },
@@ -1453,7 +1452,7 @@
               "icon": "mdi-link-variant-plus",
               "name": "Intellectual property status",
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f6e7396de9b7c11c42963f6",
+              "model": "attributes.5f6e7396de9b7c11c42963f6",
               "props": {
                 "attribute": "@attributes.5f6e7396de9b7c11c42963f6"
               },
@@ -1465,7 +1464,7 @@
               "icon": "mdi-link-variant-plus",
               "name": "External links",
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f6e73cdde9b7c11c42963f8",
+              "model": "attributes.5f6e73cdde9b7c11c42963f8",
               "props": {
                 "attribute": "@attributes.5f6e73cdde9b7c11c42963f8"
               },
@@ -1479,7 +1478,7 @@
               "isRequired": false,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f68be12ae115a26e475fb92",
+              "model": "attributes.5f68be12ae115a26e475fb92",
               "props": {
                 "attribute": "@attributes.5f68be12ae115a26e475fb92"
               },
@@ -1493,7 +1492,7 @@
               "isRequired": true,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f690af5cdaaa53a27af4a31",
+              "model": "attributes.5f690af5cdaaa53a27af4a31",
               "props": {
                 "attribute": "@attributes.5f690af5cdaaa53a27af4a31"
               },
@@ -1507,7 +1506,7 @@
               "isRequired": true,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f62d4fa98f46d2938dde1eb",
+              "model": "attributes.5f62d4fa98f46d2938dde1eb",
               "props": {
                 "attribute": "@attributes.5f62d4fa98f46d2938dde1eb"
               },
@@ -1521,7 +1520,7 @@
               "isRequired": false,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f6e732fde9b7c11c42963f0",
+              "model": "attributes.5f6e732fde9b7c11c42963f0",
               "props": {
                 "attribute": "@attributes.5f6e732fde9b7c11c42963f0"
               },
@@ -1535,7 +1534,7 @@
               "isRequired": false,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5ebd469a2cea71001f84345a",
+              "model": "attributes.5ebd469a2cea71001f84345a",
               "props": {
                 "attribute": "@attributes.5ebd469a2cea71001f84345a"
               },
@@ -1549,7 +1548,7 @@
               "isRequired": true,
               "isHidden": false,
               "component": "AttributesSet",
-              "model": "researchRef.attributes.5f68d4fa98f36d2938dde5ed",
+              "model": "attributes.5f68d4fa98f36d2938dde5ed",
               "props": {
                 "attribute": "@attributes.5f68d4fa98f36d2938dde5ed"
               },
@@ -1568,7 +1567,7 @@
           "isRequired": true,
           "isHidden": false,
           "component": "AttributesSet",
-          "model": "researchRef.attributes.5f69be12ae115a26e475fb96",
+          "model": "attributes.5f69be12ae115a26e475fb96",
           "props": {
             "attribute": "@attributes.5f69be12ae115a26e475fb96"
           },
@@ -1578,11 +1577,11 @@
         },
         {
           "icon": "mdi-account-box-outline",
-          "name": "Research group",
+          "name": "Team",
           "isRequired": true,
           "isHidden": true,
           "component": "AttributesSet",
-          "model": "researchRef.attributes.5f690af5cdaaa53a27af4a30",
+          "model": "attributes.5f690af5cdaaa53a27af4a30",
           "props": {
             "attribute": "@attributes.5f690af5cdaaa53a27af4a30"
           },
@@ -1623,7 +1622,7 @@
             "aspectRatio": "2"
           },
           "props": {
-            "attribute": "@research.researchRef.attributes.5f58d4fa97f36d3938dde1ed"
+            "attribute": "@project.attributes.5f58d4fa97f36d3938dde1ed"
           },
           "moduleId": "83866f6c59dcc86da6c5a8ad",
           "type": "attribute",
@@ -1678,11 +1677,11 @@
                   },
                   "children": [
                     {
-                      "component": "TenantBadge",
-                      "name": "Network tenant",
+                      "component": "PortalBadge",
+                      "name": "Network portal",
                       "icon": "mdi-account-network-outline",
                       "props": {
-                        "tenantId": "@research.tenantId"
+                        "portalId": "@project.portalId"
                       },
                       "moduleId": "b90bb1be3ea43f8e43c1459e",
                       "type": "attribute",
@@ -1832,7 +1831,7 @@
                         "clamped": "2"
                       },
                       "props": {
-                        "attribute": "@research.researchRef.attributes.5f68be39c579c726e93a3006"
+                        "attribute": "@project.attributes.5f68be39c579c726e93a3006"
                       },
                       "moduleId": "6f5982fc2d6e43b2137cfc88",
                       "type": "attribute",
@@ -1869,7 +1868,7 @@
                         "clamped": "4"
                       },
                       "props": {
-                        "attribute": "@research.researchRef.attributes.5f68be39c579c726e93a3007"
+                        "attribute": "@project.attributes.5f68be39c579c726e93a3007"
                       },
                       "moduleId": "a093855c4c0fb249a154a285",
                       "type": "attribute",
@@ -1922,7 +1921,7 @@
                           "name": "TTO Categories",
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f62d4fa98f46d2938dde1eb"
+                            "attribute": "@project.attributes.5f62d4fa98f46d2938dde1eb"
                           },
                           "moduleId": "3cc7ded3d2eb0e3488f0be69",
                           "type": "attribute",
@@ -1953,7 +1952,7 @@
                           "name": "Keywords",
                           "component": "AttributesRead",
                           "props": {
-                            "attribute": "@research.researchRef.attributes.5f6e732fde9b7c11c42963f0"
+                            "attribute": "@project.attributes.5f6e732fde9b7c11c42963f0"
                           },
                           "moduleId": "ebe9c6539a6b6a78b5150e61",
                           "type": "attribute",
@@ -1989,7 +1988,7 @@
                     "viewType": "small"
                   },
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5ebd469a2cea71001f84345a"
+                    "attribute": "@project.attributes.5ebd469a2cea71001f84345a"
                   },
                   "moduleId": "1991d24c632769a3fc65fd39",
                   "type": "attribute",
@@ -2051,7 +2050,7 @@
                 {
                   "component": "span",
                   "name": "Creation date",
-                  "text": "@research.researchRef.created_at",
+                  "text": "@project.created_at",
                   "icon": "mdi-calendar-text",
                   "moduleId": "33f0d98c7bdc4f8cf5173fb3",
                   "type": "attribute",
@@ -2093,7 +2092,7 @@
                   },
                   "attrs": {},
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f6e7130de9b7c11c42963ec"
+                    "attribute": "@project.attributes.5f6e7130de9b7c11c42963ec"
                   },
                   "moduleId": "5f8e58480a1c7adfc69264a",
                   "type": "attribute",
@@ -2154,7 +2153,7 @@
                   },
                   "attrs": {},
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f6e7130de9b7c11c42963ec"
+                    "attribute": "@project.attributes.5f6e7130de9b7c11c42963ec"
                   },
                   "moduleId": "5f8e58480a1c7adfc69264a",
                   "type": "attribute",
@@ -2330,7 +2329,7 @@
                     "clamped": "2"
                   },
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f68be39c579c726e93a3006"
+                    "attribute": "@project.attributes.5f68be39c579c726e93a3006"
                   },
                   "moduleId": "6f5982fc2d6e43b2137cfc88",
                   "type": "attribute",
@@ -2368,7 +2367,7 @@
                   "isHidden": false,
                   "component": "AttributesRead",
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f62d4fa98f46d2938dde1eb"
+                    "attribute": "@project.attributes.5f62d4fa98f46d2938dde1eb"
                   },
                   "moduleId": "ae4d8ce55109132db2e59baa",
                   "type": "attribute",
@@ -2418,7 +2417,7 @@
                     "viewType": "small"
                   },
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5ebd469a2cea71001f84345a"
+                    "attribute": "@project.attributes.5ebd469a2cea71001f84345a"
                   },
                   "moduleId": "1991d24c632769a3fc65fd39",
                   "type": "attribute",
@@ -2460,7 +2459,7 @@
                   "isHidden": false,
                   "component": "AttributesRead",
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f6e732fde9b7c11c42963f0"
+                    "attribute": "@project.attributes.5f6e732fde9b7c11c42963f0"
                   },
                   "moduleId": "62582fc149548c59e68010ee",
                   "type": "attribute",
@@ -2494,7 +2493,7 @@
                 {
                   "component": "span",
                   "name": "Creation date",
-                  "text": "@research.researchRef.created_at",
+                  "text": "@project.created_at",
                   "icon": "mdi-calendar-text",
                   "moduleId": "33f0d98c7bdc4f8cf5173fb3",
                   "type": "attribute",
@@ -2559,7 +2558,7 @@
                     }
                   },
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f6e7130de9b7c11c42963ec"
+                    "attribute": "@project.attributes.5f6e7130de9b7c11c42963ec"
                   },
                   "moduleId": "fb5295c8936fb300b484aeb8",
                   "type": "attribute",
@@ -2610,7 +2609,7 @@
                     "clamped": "2"
                   },
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f68be39c579c726e93a3006"
+                    "attribute": "@project.attributes.5f68be39c579c726e93a3006"
                   },
                   "moduleId": "6f5982fc2d6e43b2137cfc88",
                   "type": "attribute",
@@ -2652,7 +2651,7 @@
                   "isHidden": false,
                   "component": "AttributesRead",
                   "props": {
-                    "attribute": "@research.researchRef.attributes.5f62d4fa98f46d2938dde1eb"
+                    "attribute": "@project.attributes.5f62d4fa98f46d2938dde1eb"
                   },
                   "moduleId": "a9f5b05cb5d85323d3332e0",
                   "type": "attribute",
@@ -2690,7 +2689,7 @@
                 {
                   "component": "span",
                   "name": "Creation date",
-                  "text": "@research.researchRef.created_at",
+                  "text": "@project.created_at",
                   "icon": "mdi-calendar-text",
                   "moduleId": "33f0d98c7bdc4f8cf5173fb3",
                   "type": "attribute",

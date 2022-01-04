@@ -33,8 +33,8 @@ const VIDEO_URL = "video-url";
 const SWITCH = "switch";
 const CHECKBOX = "checkbox";
 const USER = "user";
-const DISCIPLINE = "discipline";
-const RESEARCH_GROUP = "research-group";
+const DOMAIN = "domain";
+const TEAM = "team";
 
 const IMAGE = "image";
 const FILE = "file";
@@ -58,8 +58,8 @@ const LEGACY_ATTR_TYPES = {
   SWITCH,
   CHECKBOX,
   USER,
-  DISCIPLINE,
-  RESEARCH_GROUP,
+  DOMAIN,
+  TEAM,
   IMAGE,
   FILE,
   EXPRESS_LICENSING,
@@ -91,7 +91,7 @@ const BlockchainFieldMeta = new Schema({
 });
 
 const AttributeSchema = new Schema({
-  "tenantId": { type: String, default: null },
+  "portalId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Schema.Types.Mixed,
@@ -172,12 +172,12 @@ const run = async () => {
         type = ATTR_TYPES.USER;
         break;
       }
-      case LEGACY_ATTR_TYPES.DISCIPLINE: {
-        type = ATTR_TYPES.DISCIPLINE;
+      case LEGACY_ATTR_TYPES.DOMAIN: {
+        type = ATTR_TYPES.DOMAIN;
         break;
       }
-      case LEGACY_ATTR_TYPES.RESEARCH_GROUP: {
-        type = ATTR_TYPES.RESEARCH_GROUP;
+      case LEGACY_ATTR_TYPES.TEAM: {
+        type = ATTR_TYPES.TEAM;
         break;
       }
       case LEGACY_ATTR_TYPES.IMAGE: {

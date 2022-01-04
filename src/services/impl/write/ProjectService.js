@@ -27,7 +27,7 @@ class ProjectService extends BaseService {
 
     const attributeDtoService = new AttributeDtoService();
     const systemAttributes = await attributeDtoService.getSystemAttributes();
-    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.PROJECT && attr.type == ATTR_TYPES.RESEARCH_GROUP);
+    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.PROJECT && attr.type == ATTR_TYPES.TEAM);
     
     // Team attribute is required
     if (!attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
@@ -45,7 +45,7 @@ class ProjectService extends BaseService {
     const mappedAttributes = await this.mapAttributes(attributes);
     const result = await this.createOne({
       _id: projectId,
-      researchGroupExternalId: teamId,
+      teamId: teamId,
       status: status,
       isDefault: isDefault,
       attributes: mappedAttributes
@@ -126,15 +126,15 @@ class ProjectService extends BaseService {
           break;
         }
         case ATTR_TYPES.USER: {
-          rAttrValue = rAttr.value.map(v => v.toString()); // username / external_id
+          rAttrValue = rAttr.value.map(v => v.toString()); // username / id
           break;
         }
-        case ATTR_TYPES.DISCIPLINE: {
-          rAttrValue = rAttr.value.map(v => v.toString()); // external_id
+        case ATTR_TYPES.DOMAIN: {
+          rAttrValue = rAttr.value.map(v => v.toString()); // id
           break;
         }
-        case ATTR_TYPES.RESEARCH_GROUP: {
-          rAttrValue = rAttr.value.map(v => v.toString()); // external_id
+        case ATTR_TYPES.TEAM: {
+          rAttrValue = rAttr.value.map(v => v.toString()); // id
           break;
         }
         case ATTR_TYPES.IMAGE: {
@@ -171,19 +171,19 @@ class ProjectService extends BaseService {
     })
   }
 
-  async addAttributeToResearches({ attributeId, type, defaultValue }) {
+  async addAttributeToProjects({ attributeId, type, defaultValue }) {
     const result = await this.updateMany({}, { $push: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId), type, value: defaultValue } } });
     return result;
   }
 
 
-  async removeAttributeFromResearches({ attributeId }) {
+  async removeAttributeFromProjects({ attributeId }) {
     const result = await this.updateMany({}, { $pull: { attributes: { attributeId: mongoose.Types.ObjectId(attributeId) } } });
     return result;
   }
 
 
-  async updateAttributeInResearches({ attributeId, type, valueOptions, defaultValue }) {
+  async updateAttributeInProjects({ attributeId, type, valueOptions, defaultValue }) {
     if (type == ATTR_TYPES.STEPPER || type == ATTR_TYPES.SELECT) {
       const result = await this.updateMany(
         {

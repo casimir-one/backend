@@ -192,18 +192,18 @@ class AttributesController extends BaseController {
         let filepath = '';
         switch (parseInt(scope)) {
           case ATTR_SCOPES.PROJECT:
-            filepath = isEntityRootFolder ? FileStorage.getResearchFilePath(entityId, filename) : FileStorage.getResearchAttributeFilePath(entityId, attributeId, filename);
+            filepath = isEntityRootFolder ? FileStorage.getProjectFilePath(entityId, filename) : FileStorage.getProjectAttributeFilePath(entityId, attributeId, filename);
             const fileExists = await FileStorage.exists(filepath);
             if (!fileExists) {
               throw new NotFoundError(`${filepath} is not found`);
             }
             break;
           case ATTR_SCOPES.TEAM:
-            filepath = isEntityRootFolder ? FileStorage.getResearchGroupFilePath(entityId, filename) : FileStorage.getResearchGroupAttributeFilePath(entityId, attributeId, filename);
+            filepath = isEntityRootFolder ? FileStorage.getTeamFilePath(entityId, filename) : FileStorage.getTeamAttributeFilePath(entityId, attributeId, filename);
             if (imageQuery) {
               const exists = await FileStorage.exists(filepath);
               if (!exists) {
-                filepath = FileStorage.getResearchGroupDefaultLogoFilePath();
+                filepath = FileStorage.getTeamDefaultLogoFilePath();
               }
             }
             break;

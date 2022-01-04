@@ -25,7 +25,7 @@ class UserDtoService extends BaseService {
       return config.PROTOCOL === PROTOCOL_CHAIN.GRAPHENE || (value.length === 40 && /^[0-9a-fA-F]+$/.test(value));
     };
     const chainAccounts = await chainRpc.getAccountsAsync(users.map(user => isValidChainId(user._id) ? user._id : genRipemd160Hash(user.email)));
-    const tenantProfile = await this.getPortalInstance();
+    const portalProfile = await this.getPortalInstance();
     const chainBalances = await Promise.all(users.map((user) => chainRpc.getAssetsBalancesByOwnerAsync(user._id)));
 
     return users.map((user) => {
@@ -48,17 +48,17 @@ class UserDtoService extends BaseService {
         console.warn(`User account with ID '${user._id}' is not found in the Chain`);
       }
 
-      const appModules = tenantProfile.settings.modules;
-      const roleInfo = tenantProfile.settings.roles.find((appRole) => user.roles.some((userRole) => appRole.role == userRole.role));
+      const appModules = portalProfile.settings.modules;
+      const roleInfo = portalProfile.settings.roles.find((appRole) => user.roles.some((userRole) => appRole.role == userRole.role));
       const roles = user.roles.map(r => ({
         role: r.role,
-        teamId: r.researchGroupExternalId
+        teamId: r.teamId
       }));
       const modules = roleInfo && roleInfo.modules ? roleInfo.modules : appModules;
 
       return {
         _id: user._id,
-        tenantId: user.tenantId,
+        portalId: user.portalId,
         email: user.email,
         attributes: user.attributes,
         balances: balances,
@@ -142,9 +142,9 @@ class UserDtoService extends BaseService {
   }
 
 
-  async getUsersByTenant(tenantId) {
+  async getUsersByPortal(portalId) {
     const available = await this.findMany({ status: USER_PROFILE_STATUS.APPROVED });
-    const users = available.filter(p => p.tenantId == tenantId);
+    const users = available.filter(p => p.portalId == portalId);
     if (!users.length) return [];
     const result = await this.mapUsers(users);
     return result;

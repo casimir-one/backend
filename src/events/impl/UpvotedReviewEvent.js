@@ -9,7 +9,7 @@ class UpvotedReviewEvent extends BaseEvent {
       entityId: upvoteReviewId,
       voter,
       reviewId,
-      disciplineId,
+      domainId,
       weight
     } = eventPayload;
 

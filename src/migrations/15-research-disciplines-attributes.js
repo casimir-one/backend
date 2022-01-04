@@ -14,8 +14,8 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
-const Research = require('./../schemas/research');
+const PortalProfile = require('./../schemas/PortalSchema');
+const Project = require('./../schemas/ProjectSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 
@@ -24,50 +24,50 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const run = async () => {
-  const DISCIPLINES_LIST = "disciplines-list";
+  const DOMAINS_LIST = "domains-list";
 
-  const tenantProfile = await TenantProfile.findOne({ _id: "0000000000000000000000000000000000000000" });
+  const portalProfile = await PortalProfile.findOne({ _id: "0000000000000000000000000000000000000000" });
 
-  if (tenantProfile) {
+  if (portalProfile) {
 
-    let categoriesAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "TTO Categories");
-    let disciplinesAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == DISCIPLINES_LIST && attr.title == "ORIP Disciplines");
+    let categoriesAttr = portalProfile.settings.projectAttributes.find(attr => attr.type == DOMAINS_LIST && attr.title == "TTO Categories");
+    let domainsAttr = portalProfile.settings.projectAttributes.find(attr => attr.type == DOMAINS_LIST && attr.title == "ORIP Domains");
 
-    const researchPromises = [];
-    const researches = await Research.find({});
+    const projectPromises = [];
+    const projects = await Project.find({});
 
-    for (let i = 0; i < researches.length; i++) {
-      let research = researches[i];
+    for (let i = 0; i < projects.length; i++) {
+      let project = projects[i];
 
-      let categoriesA = research.attributes.find(a => a.attributeId.toString() == categoriesAttr._id.toString());
-      let disciplinesA = research.attributes.find(a => a.attributeId.toString() == disciplinesAttr._id.toString());
+      let categoriesA = project.attributes.find(a => a.attributeId.toString() == categoriesAttr._id.toString());
+      let domainsA = project.attributes.find(a => a.attributeId.toString() == domainsAttr._id.toString());
 
-      if (disciplinesA && !categoriesA) {
-        research.attributes = research.attributes.filter(a => a.attributeId.toString() != disciplinesAttr._id.toString());
-        research.attributes.push({
-          value: disciplinesA.value.external_id,
+      if (domainsA && !categoriesA) {
+        project.attributes = project.attributes.filter(a => a.attributeId.toString() != domainsAttr._id.toString());
+        project.attributes.push({
+          value: domainsA.value._id,
           attributeId: categoriesAttr._id
         })
       }
 
-      let researchGroupAttr = tenantProfile.settings.researchAttributes.find(attr => attr.type == ATTR_TYPES.RESEARCH_GROUP);
-      let researchGroupA = research.attributes.find(a => a.attributeId.toString() == researchGroupAttr._id.toString());
+      let teamAttr = portalProfile.settings.projectAttributes.find(attr => attr.type == ATTR_TYPES.TEAM);
+      let teamA = project.attributes.find(a => a.attributeId.toString() == teamAttr._id.toString());
 
-      if (researchGroupA) {
-        research.attributes = research.attributes.filter(a => a.attributeId.toString() != researchGroupAttr._id.toString());
-        research.attributes.push({
-          value: researchGroupA.value.external_id,
-          attributeId: researchGroupAttr._id
+      if (teamA) {
+        project.attributes = project.attributes.filter(a => a.attributeId.toString() != teamAttr._id.toString());
+        project.attributes.push({
+          value: teamA.value._id,
+          attributeId: teamAttr._id
         })
       }
       
-      researchPromises.push(research.save());
+      projectPromises.push(project.save());
     }
 
-    tenantProfile.settings.researchAttributes = tenantProfile.settings.researchAttributes.filter(attr => attr.title != "ORIP Disciplines");
+    portalProfile.settings.projectAttributes = portalProfile.settings.projectAttributes.filter(attr => attr.title != "ORIP Domains");
 
-    await tenantProfile.save();
-    await Promise.all(researchPromises);
+    await portalProfile.save();
+    await Promise.all(projectPromises);
   }
 };
 

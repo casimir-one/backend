@@ -4,7 +4,7 @@ import { PortalService } from './../../../services';
 
 function grantAwardWithdrawalRequestReadAuth(options = {}) {
   return async function (ctx, next) {
-    const currentTenant = ctx.state.tenant;
+    const currentPortal = ctx.state.portal;
     const awardNumber = ctx.params.awardNumber;
     const paymentNumber = ctx.params.paymentNumber;
 
@@ -15,13 +15,13 @@ function grantAwardWithdrawalRequestReadAuth(options = {}) {
 
     ctx.assert(!!withdrawal, 404);
 
-    if (withdrawal.tenantId == currentTenant.id) {
+    if (withdrawal.portalId == currentPortal.id) {
       /* TODO: check access for requested file */
       await next();
     } else {
-      const requestedTenant = await portalService.getPortal(withdrawal.tenantId);
-      if (true) { /* TODO: check access for the requested source and chunk an access token to request the different tenant's server */
-        ctx.redirect(`${requestedTenant.serverUrl}${ctx.request.originalUrl}`);
+      const requestedPortal = await portalService.getPortal(withdrawal.portalId);
+      if (true) { /* TODO: check access for the requested source and chunk an access token to request the different portal's server */
+        ctx.redirect(`${requestedPortal.serverUrl}${ctx.request.originalUrl}`);
         return;
       } else {
         ctx.assert(false, 403);

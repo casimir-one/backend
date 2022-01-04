@@ -34,7 +34,7 @@ const run = async () => {
   for (let i = 0; i < teams.length; i++) {
     const team = teams[i];
     const teamObj = team.toObject();
-    team.isTenantTeam = teamObj.tenantId === teamObj._id ? true : false;
+    team.isPortalTeam = teamObj.portalId === teamObj._id ? true : false;
     teamsPromises.push(team.save());
   }
 

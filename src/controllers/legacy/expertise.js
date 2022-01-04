@@ -17,7 +17,7 @@ const getAccountEciHistory = async (ctx) => {
     const records = await chainRpc.getAccountEciHistoryAsync(
       username,
       0, // cursor
-      filter.discipline || undefined,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -47,7 +47,7 @@ const getAccountEciStats = async (ctx) => {
     const chainRpc = chainService.getChainRpc();
     const stat = await chainRpc.getAccountEciStatsAsync(
       username,
-      filter.discipline || undefined, 
+      filter.domain || undefined, 
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -77,7 +77,7 @@ const getAccountsEciStats = async (ctx) => {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const stats = await chainRpc.getAccountsEciStatsAsync(
-      filter.discipline || undefined,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -104,18 +104,18 @@ const getAccountsEciStats = async (ctx) => {
 }
 
 
-const getResearchEciHistory = async (ctx) => {
+const getProjectEciHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-  const researchExternalId = ctx.params.research;
+  const projectId = ctx.params.project;
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const records = await chainRpc.getProjectEciHistoryAsync(
-      researchExternalId,
+      projectId,
       0, // cursor
-      filter.discipline || undefined,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -135,17 +135,17 @@ const getResearchEciHistory = async (ctx) => {
 }
 
 
-const getResearchEciStats = async (ctx) => {
+const getProjectEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-  const researchExternalId = ctx.params.research;
+  const projectId = ctx.params.project;
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const stat = await chainRpc.getProjectEciStatsAsync(
-      researchExternalId,
-      filter.discipline || undefined,
+      projectId,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -165,7 +165,7 @@ const getResearchEciStats = async (ctx) => {
 }
 
 
-const getResearchesEciStats = async (ctx) => {
+const getProjectesEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
@@ -173,7 +173,7 @@ const getResearchesEciStats = async (ctx) => {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const stats = await chainRpc.getProjectsEciStatsAsync(
-      filter.discipline || undefined,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -193,18 +193,18 @@ const getResearchesEciStats = async (ctx) => {
 }
 
 
-const getResearchContentEciHistory = async (ctx) => {
+const getProjectContentEciHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-  const researchContentExternalId = ctx.params.researchContent;
+  const projectContentId = ctx.params.projectContent;
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const records = await chainRpc.getProjectContentEciHistoryAsync(
-      researchContentExternalId,
+      projectContentId,
       0, // cursor
-      filter.discipline || undefined,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -224,17 +224,17 @@ const getResearchContentEciHistory = async (ctx) => {
 }
 
 
-const getResearchContentEciStats = async (ctx) => {
+const getProjectContentEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
-  const researchContentExternalId = ctx.params.researchContent;
+  const projectContentId = ctx.params.projectContent;
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const stat = await chainRpc.getProjectContentEciStatsAsync(
-      researchContentExternalId,
-      filter.discipline || undefined,
+      projectContentId,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -254,7 +254,7 @@ const getResearchContentEciStats = async (ctx) => {
 }
 
 
-const getResearchContentsEciStats = async (ctx) => {
+const getProjectContentsEciStats = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
@@ -262,7 +262,7 @@ const getResearchContentsEciStats = async (ctx) => {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const stats = await chainRpc.getProjectContentsEciStatsAsync(
-      filter.discipline || undefined,
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -282,15 +282,15 @@ const getResearchContentsEciStats = async (ctx) => {
 }
 
 
-const getDisciplineEciHistory = async (ctx) => {
+const getDomainEciHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const result = await chainRpc.getDisciplineEciHistoryAsync(
-      filter.discipline || undefined,
+    const result = await chainRpc.getDomainEciHistoryAsync(
+      filter.domain || undefined,
       filter.from || undefined,
       filter.to || undefined,
       filter.contribution || undefined,
@@ -308,14 +308,14 @@ const getDisciplineEciHistory = async (ctx) => {
 }
 
 
-const getDisciplinesEciStatsHistory = async (ctx) => {
+const getDomainsEciStatsHistory = async (ctx) => {
   const query = qs.parse(ctx.query);
   const filter = query.filter;
 
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const result = await chainRpc.getDisciplinesEciStatsHistoryAsync(
+    const result = await chainRpc.getDomainsEciStatsHistoryAsync(
       filter.from || undefined,
       filter.to || undefined,
       filter.step || undefined
@@ -332,11 +332,11 @@ const getDisciplinesEciStatsHistory = async (ctx) => {
 }
 
 
-const getDisciplinesEciLastStats = async (ctx) => {
+const getDomainsEciLastStats = async (ctx) => {
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const result = await chainRpc.getDisciplinesEciLastStatsAsync();
+    const result = await chainRpc.getDomainsEciLastStatsAsync();
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -363,12 +363,12 @@ const getAccountExpertiseTokens = async (ctx) => {
 }
 
 
-const getDisciplineExpertiseTokens = async (ctx) => {
-  const disciplineExternalId = ctx.params.disciplineExternalId;
+const getDomainExpertiseTokens = async (ctx) => {
+  const domainId = ctx.params.domainId;
   try {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const result = await chainRpc.getExpertTokensByDisciplineAsync(disciplineExternalId);
+    const result = await chainRpc.getExpertTokensByDomainAsync(domainId);
     ctx.status = 200;
     ctx.body = result;
   } catch (err) {
@@ -378,10 +378,10 @@ const getDisciplineExpertiseTokens = async (ctx) => {
   }
 }
 
-const getEciHistoryByResearchContentAndDiscipline = async (ctx) => {
-  const { contentId, disciplineId } = ctx.params;
+const getEciHistoryByProjectContentAndDomain = async (ctx) => {
+  const { contentId, domainId } = ctx.params;
   try {
-    const history = await expertiseService.getEciHistoryByResearchContentAndDiscipline(contentId, disciplineId);
+    const history = await expertiseService.getEciHistoryByProjectContentAndDomain(contentId, domainId);
     if (!history) {
       ctx.status = 404;
       ctx.body = null;
@@ -397,10 +397,10 @@ const getEciHistoryByResearchContentAndDiscipline = async (ctx) => {
   }
 }
 
-const getExpertiseContributionsByResearch = async (ctx) => {
-  const researchId = ctx.params.researchId;
+const getExpertiseContributionsByProject = async (ctx) => {
+  const projectId = ctx.params.projectId;
   try {
-    const expertise = await expertiseService.getExpertiseContributionsByResearch(researchId);
+    const expertise = await expertiseService.getExpertiseContributionsByProject(projectId);
     if (!expertise) {
       ctx.status = 404;
       ctx.body = null;
@@ -416,10 +416,10 @@ const getExpertiseContributionsByResearch = async (ctx) => {
   }
 }
 
-const getExpertiseContributionsByResearchAndDiscipline = async (ctx) => {
-  const { researchId, disciplineId } = ctx.params;
+const getExpertiseContributionsByProjectAndDomain = async (ctx) => {
+  const { projectId, domainId } = ctx.params;
   try {
-    const expertise = await expertiseService.getExpertiseContributionsByResearchAndDiscipline(researchId, disciplineId);
+    const expertise = await expertiseService.getExpertiseContributionsByProjectAndDomain(projectId, domainId);
     if (!expertise) {
       ctx.status = 404;
       ctx.body = null;
@@ -435,10 +435,10 @@ const getExpertiseContributionsByResearchAndDiscipline = async (ctx) => {
   }
 }
 
-const getExpertiseContributionByResearchContentAndDiscipline = async (ctx) => {
-  const { contentId, disciplineId } = ctx.params;
+const getExpertiseContributionByProjectContentAndDomain = async (ctx) => {
+  const { contentId, domainId } = ctx.params;
   try {
-    const expertise = await expertiseService.getExpertiseContributionByResearchContentAndDiscipline(contentId, disciplineId);
+    const expertise = await expertiseService.getExpertiseContributionByProjectContentAndDomain(contentId, domainId);
     if (!expertise) {
       ctx.status = 404;
       ctx.body = null;
@@ -454,10 +454,10 @@ const getExpertiseContributionByResearchContentAndDiscipline = async (ctx) => {
   }
 }
 
-const getExpertiseContributionsByResearchContent = async (ctx) => {
+const getExpertiseContributionsByProjectContent = async (ctx) => {
   const contentId = ctx.params.contentId;
   try {
-    const expertise = await expertiseService.getExpertiseContributionsByResearchContent(contentId);
+    const expertise = await expertiseService.getExpertiseContributionsByProjectContent(contentId);
     if (!expertise) {
       ctx.status = 404;
       ctx.body = null;
@@ -481,23 +481,23 @@ export default {
   getAccountEciStats,
   getAccountsEciStats,
 
-  getResearchEciHistory,
-  getResearchEciStats,
-  getResearchesEciStats,
+  getProjectEciHistory,
+  getProjectEciStats,
+  getProjectesEciStats,
 
-  getResearchContentEciHistory,
-  getResearchContentEciStats,
-  getResearchContentsEciStats,
+  getProjectContentEciHistory,
+  getProjectContentEciStats,
+  getProjectContentsEciStats,
 
-  getDisciplineEciHistory,
-  getDisciplinesEciStatsHistory,
-  getDisciplinesEciLastStats,
+  getDomainEciHistory,
+  getDomainsEciStatsHistory,
+  getDomainsEciLastStats,
 
   getAccountExpertiseTokens,
-  getDisciplineExpertiseTokens,
-  getEciHistoryByResearchContentAndDiscipline,
-  getExpertiseContributionsByResearch,
-  getExpertiseContributionsByResearchAndDiscipline,
-  getExpertiseContributionByResearchContentAndDiscipline,
-  getExpertiseContributionsByResearchContent
+  getDomainExpertiseTokens,
+  getEciHistoryByProjectContentAndDomain,
+  getExpertiseContributionsByProject,
+  getExpertiseContributionsByProjectAndDomain,
+  getExpertiseContributionByProjectContentAndDomain,
+  getExpertiseContributionsByProjectContent
 }

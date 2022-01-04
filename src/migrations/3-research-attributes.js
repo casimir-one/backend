@@ -14,8 +14,8 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
-const Research = require('./../schemas/research');
+const PortalProfile = require('./../schemas/PortalSchema');
+const Project = require('./../schemas/ProjectSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 
@@ -24,30 +24,30 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
 
-  await Research.update({}, { $rename: { tenantCriterias: "attributes" } }, { multi: true });
-  await TenantProfile.update({}, { $rename: { "settings.researchComponents": "settings.researchAttributes" } }, { multi: true });
+  await Project.update({}, { $rename: { portalCriterias: "attributes" } }, { multi: true });
+  await PortalProfile.update({}, { $rename: { "settings.projectComponents": "settings.projectAttributes" } }, { multi: true });
 
-  let tenantPromises = [];
-  let allResearchAttributes = [];
+  let portalPromises = [];
+  let allProjectAttributes = [];
 
-  const tenants = await TenantProfile.find({});
+  const portals = await PortalProfile.find({});
   
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
 
-    let researchAttributes = [];
-    for (let j = 0; j < tenantProfile.settings.researchAttributes.length; j++) {
-      let researchAttribute = tenantProfile.settings.researchAttributes[j];
+    let projectAttributes = [];
+    for (let j = 0; j < portalProfile.settings.projectAttributes.length; j++) {
+      let projectAttribute = portalProfile.settings.projectAttributes[j];
       let attribute = {
-        _id: researchAttribute._id,
-        type: researchAttribute.type,
-        isVisible: researchAttribute.isVisible,
+        _id: projectAttribute._id,
+        type: projectAttribute.type,
+        isVisible: projectAttribute.isVisible,
         isEditable: true,
         isFilterable: true,
-        title: researchAttribute.type == ATTR_TYPES.STEPPER ? researchAttribute.component.readinessLevelTitle : '',
-        shortTitle: researchAttribute.type == ATTR_TYPES.STEPPER ? researchAttribute.component.readinessLevelShortTitle : '',
+        title: projectAttribute.type == ATTR_TYPES.STEPPER ? projectAttribute.component.readinessLevelTitle : '',
+        shortTitle: projectAttribute.type == ATTR_TYPES.STEPPER ? projectAttribute.component.readinessLevelShortTitle : '',
         description: '',
-        valueOptions: researchAttribute.type == ATTR_TYPES.STEPPER ? researchAttribute.component.readinessLevels.map(rl => {
+        valueOptions: projectAttribute.type == ATTR_TYPES.STEPPER ? projectAttribute.component.readinessLevels.map(rl => {
           return {
             title: rl.title,
             shortTitle: '',
@@ -57,30 +57,30 @@ const run = async () => {
         }) : [],
         defaultValue: null
       };
-      researchAttributes.push(attribute);
+      projectAttributes.push(attribute);
     }
 
-    tenantProfile.settings.researchAttributes = researchAttributes;
-    tenantPromises.push(tenantProfile.save());
-    allResearchAttributes.push(...researchAttributes)
+    portalProfile.settings.projectAttributes = projectAttributes;
+    portalPromises.push(portalProfile.save());
+    allProjectAttributes.push(...projectAttributes)
   }
 
-  await Promise.all(tenantPromises);
+  await Promise.all(portalPromises);
   
-  const researches = await Research.find({});
-  let researchPromises = [];
+  const projects = await Project.find({});
+  let projectPromises = [];
 
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
 
-    let trlAttribute = allResearchAttributes.find(a => a._id.toString() == mongoose.Types.ObjectId("5ebd469a2cea71001f84345a").toString());
-    let marlAttribute = allResearchAttributes.find(a => a._id.toString() == mongoose.Types.ObjectId("5ebd47762cea71001f843460").toString());
-    let srlAttribute = allResearchAttributes.find(a => a._id.toString() == mongoose.Types.ObjectId("5ebd4b842cea71001f843467").toString());
+    let trlAttribute = allProjectAttributes.find(a => a._id.toString() == mongoose.Types.ObjectId("5ebd469a2cea71001f84345a").toString());
+    let marlAttribute = allProjectAttributes.find(a => a._id.toString() == mongoose.Types.ObjectId("5ebd47762cea71001f843460").toString());
+    let srlAttribute = allProjectAttributes.find(a => a._id.toString() == mongoose.Types.ObjectId("5ebd4b842cea71001f843467").toString());
 
 
-    let trlValue = research.attributes.find(a => a.component.toString() == trlAttribute._id.toString());
-    let marlValue = research.attributes.find(a => a.component.toString() == marlAttribute._id.toString());
-    let srlValue = research.attributes.find(a => a.component.toString() == srlAttribute._id.toString());
+    let trlValue = project.attributes.find(a => a.component.toString() == trlAttribute._id.toString());
+    let marlValue = project.attributes.find(a => a.component.toString() == marlAttribute._id.toString());
+    let srlValue = project.attributes.find(a => a.component.toString() == srlAttribute._id.toString());
 
     let attributes = [];
 
@@ -96,12 +96,12 @@ const run = async () => {
       attributes.push({ attributeId: mongoose.Types.ObjectId(srlValue.component.toString()), value: srlValue.value ? srlAttribute.valueOptions[srlValue.value.index].value : null })
     }
 
-    research.attributes = attributes;
+    project.attributes = attributes;
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(researchPromises);
+  await Promise.all(projectPromises);
 
 };
 

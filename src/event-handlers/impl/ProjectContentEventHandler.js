@@ -57,18 +57,18 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
 
   const project = await projectDtoService.getProject(projectId);
 
-  const externalId = mongoose.Types.ObjectId(draftId);
+  const _id = mongoose.Types.ObjectId(draftId);
 
   const draftData = {
-    externalId,
-    title: title || externalId,
+    _id,
+    title: title || _id,
     projectId,
-    teamId: project.research_group.external_id,
+    teamId: project.teamId,
     hash: '',
     algo: 'sha256',
     contentType,
     formatType,
-    folder: externalId,
+    folder: _id,
     status: PROJECT_CONTENT_STATUS.IN_PROGRESS,
     authors: authors || [],
     references: references || [],
@@ -82,7 +82,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     draftData.hash = packageHash;
     draftData.packageFiles = [];
   } else {
-    const projectContentPackageDirPath = FileStorage.getResearchContentPackageDirPath(projectId, externalId);
+    const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(projectId, _id);
     const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
     const hashes = hashObj.children.map(f => f.hash);
     hashes.sort();
@@ -104,7 +104,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, asy
   if (formatType === PROJECT_CONTENT_FORMAT.JSON) {
     packageHash = genSha256Hash(JSON.stringify(jsonData));
   } else if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
-    const projectContentPackageDirPath = FileStorage.getResearchDarArchiveDirPath(draft.projectId, draftId);
+    const projectContentPackageDirPath = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draftId);
     const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
     const hashes = hashObj.children.map(f => f.hash);
     hashes.sort();
@@ -151,7 +151,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
 
     const projectContent = await projectContentService.createProjectContentRef({
       ...draft,
-      externalId: entityId,
+      _id: entityId,
       projectId,
       teamId,
       title,

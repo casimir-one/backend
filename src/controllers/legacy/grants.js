@@ -1,7 +1,7 @@
 import path from 'path'
 import AwardWithdrawalRequestSchema from './../../schemas/AwardWithdrawalRequestSchema';
 import GrantAwardPaymentForm from './../../forms/legacy/grantAwardPaymentForm';
-import ResearchService from './../../services/impl/read/ProjectDtoService';
+import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import GrantService from './../../services/legacy/grants';
 import crypto from 'crypto';
 import slug from 'limax';
@@ -47,7 +47,7 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
 
 
   const filename = file.filename;
-  const filepath = FileStorage.getResearchAwardWithdrawalRequestsPackageFilePath(withdrawal.researchId, withdrawal.hash, filename);
+  const filepath = FileStorage.getProjectAwardWithdrawalRequestsPackageFilePath(withdrawal.projectId, withdrawal.hash, filename);
   const ext = filename.substr(filename.lastIndexOf('.') + 1);
   const name = filename.substr(0, filename.lastIndexOf('.'));
   const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
@@ -78,14 +78,14 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
 
 
 const createAwardWithdrawalRequest = async (ctx) => {
-  const researchId = ctx.request.header['research-external-id'];
-  const tenant = ctx.state.tenant;
+  const projectId = ctx.request.header['project-id'];
+  const portal = ctx.state.portal;
 
   try {
-    const researchService = new ResearchService();
+    const projectDtoService = new ProjectDtoService();
     const grantsService = new GrantService();
 
-    const research = await researchService.getProject(researchId);
+    const project = await projectDtoService.getProject(projectId);
 
     const { tempDestinationPath, awardNumber, subawardNumber, paymentNumber } = await GrantAwardPaymentForm(ctx);
 
@@ -97,16 +97,16 @@ const createAwardWithdrawalRequest = async (ctx) => {
     const packageHash = crypto.createHash('sha256').update(hashes.join(",")).digest("hex");
 
     const withdrawal = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
-    const researchAwardWithdrawalRequestsPackageDirPath = FileStorage.getResearchAwardWithdrawalRequestsPackageDirPath(researchId, packageHash);
-    const researchAwardWithdrawalRequestsPackageDirExists = await FileStorage.exists(researchAwardWithdrawalRequestsPackageDirPath);
+    const projectAwardWithdrawalRequestsPackageDirPath = FileStorage.getProjectAwardWithdrawalRequestsPackageDirPath(projectId, packageHash);
+    const projectAwardWithdrawalRequestsPackageDirExists = await FileStorage.exists(projectAwardWithdrawalRequestsPackageDirPath);
 
-    if (researchAwardWithdrawalRequestsPackageDirExists) {
+    if (projectAwardWithdrawalRequestsPackageDirExists) {
       console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
       await FileStorage.delete(tempDestinationPath);
       ctx.status = 200;
       ctx.body = withdrawal;
     } else {
-      await FileStorage.rename(tempDestinationPath, researchAwardWithdrawalRequestsPackageDirPath);
+      await FileStorage.rename(tempDestinationPath, projectAwardWithdrawalRequestsPackageDirPath);
 
       if (withdrawal) {
         withdrawal.filename = `package [${packageHash}]`;
@@ -116,12 +116,12 @@ const createAwardWithdrawalRequest = async (ctx) => {
         ctx.body = updatedWithdrawal;
       } else {
         const withdrawal = new AwardWithdrawalRequestSchema({
-          "tenantId": tenant.id,
+          "portalId": portal.id,
           "filename": `package [${packageHash}]`,
           "folder": packageHash,
           "title": packageHash,
-          "researchId": researchId,
-          "researchGroupId": research.research_group.external_id,
+          "projectId": projectId,
+          "teamId": project.teamId,
           "paymentNumber": paymentNumber,
           "awardNumber": awardNumber,
           "subawardNumber": subawardNumber,

@@ -21,10 +21,10 @@ userInviteEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (event) => 
   const { proposalId, expirationTime, invitee, inviter, teamId, notes } = event.getEventPayload();
 
   await userInviteService.createUserInvite({
-    externalId: proposalId,
+    _id: proposalId,
     invitee: invitee,
     creator: inviter,
-    researchGroupExternalId: teamId,
+    teamId: teamId,
     status: USER_INVITE_STATUS.SENT,
     notes: notes,
     expiration: expirationTime

@@ -14,8 +14,8 @@ require("@babel/register")({
 const config = require('./../config');
 
 const mongoose = require('mongoose');
-const TenantProfile = require('./../schemas/tenant');
-const Research = require('./../schemas/research');
+const PortalProfile = require('./../schemas/PortalSchema');
+const Project = require('./../schemas/ProjectSchema');
 
 const { ATTR_TYPES } = require('@deip/constants');
 
@@ -24,11 +24,11 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
    
-  await TenantProfile.update({}, { $set: { "settings.researchAttributes.$[].isEditable": true } }, { multi: true });
-  await TenantProfile.update({}, { $set: { "settings.researchAttributes.$[].isFilterable": true } }, { multi: true });
+  await PortalProfile.update({}, { $set: { "settings.projectAttributes.$[].isEditable": true } }, { multi: true });
+  await PortalProfile.update({}, { $set: { "settings.projectAttributes.$[].isFilterable": true } }, { multi: true });
 
-  let tenantPromises = [];
-  const tenants = await TenantProfile.find({});
+  let portalPromises = [];
+  const portals = await PortalProfile.find({});
 
   const roadmapAttribute = {
     _id: mongoose.Types.ObjectId("5f68be12ae115a26e475fb90"),
@@ -69,40 +69,40 @@ const run = async () => {
     defaultValue: null
   };
 
-  let allTenantsAttributesIds = [];
-  for (let i = 0; i < tenants.length; i++) {
-    let tenantProfile = tenants[i];
-    tenantProfile.settings.researchAttributes.push(roadmapAttribute);
-    tenantProfile.settings.researchAttributes.push(partnersAttribute);
-    tenantProfile.settings.researchAttributes.push(videoSrcAttribute);
-    tenantPromises.push(tenantProfile.save());
+  let allPortalsAttributesIds = [];
+  for (let i = 0; i < portals.length; i++) {
+    let portalProfile = portals[i];
+    portalProfile.settings.projectAttributes.push(roadmapAttribute);
+    portalProfile.settings.projectAttributes.push(partnersAttribute);
+    portalProfile.settings.projectAttributes.push(videoSrcAttribute);
+    portalPromises.push(portalProfile.save());
 
-    allTenantsAttributesIds.push(...tenantProfile.settings.researchAttributes.map(a => a._id));
+    allPortalsAttributesIds.push(...portalProfile.settings.projectAttributes.map(a => a._id));
   }
 
-  await Promise.all(tenantPromises);
+  await Promise.all(portalPromises);
   
-  const researches = await Research.find({});
-  let researchPromises = [];
+  const projects = await Project.find({});
+  let projectPromises = [];
 
-  for (let i = 0; i < researches.length; i++) {
-    let research = researches[i];
+  for (let i = 0; i < projects.length; i++) {
+    let project = projects[i];
 
-    research.attributes.push({ attributeId: roadmapAttribute._id, value: research.milestones.length ? research.milestones : null });
-    research.attributes.push({ attributeId: partnersAttribute._id, value: research.partners.length ? research.partners : null });
-    research.attributes.push({ attributeId: videoSrcAttribute._id, value: research.videoSrc ? research.videoSrc : null });
+    project.attributes.push({ attributeId: roadmapAttribute._id, value: project.milestones.length ? project.milestones : null });
+    project.attributes.push({ attributeId: partnersAttribute._id, value: project.partners.length ? project.partners : null });
+    project.attributes.push({ attributeId: videoSrcAttribute._id, value: project.videoSrc ? project.videoSrc : null });
 
-    research.attributes = research.attributes.filter(a => allTenantsAttributesIds.some(_id => _id.toString() == a.attributeId.toString()));
+    project.attributes = project.attributes.filter(a => allPortalsAttributesIds.some(_id => _id.toString() == a.attributeId.toString()));
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
 
-  await Promise.all(researchPromises);
+  await Promise.all(projectPromises);
 
-  await Research.update({}, { $unset: { "milestones": "" } }, { multi: true });
-  await Research.update({}, { $unset: { "partners": "" } }, { multi: true });
-  await Research.update({}, { $unset: { "videoSrc": "" } }, { multi: true });
-  await TenantProfile.update({}, { $unset: { "settings.researchComponents": "" } }, { multi: true });
+  await project.update({}, { $unset: { "milestones": "" } }, { multi: true });
+  await project.update({}, { $unset: { "partners": "" } }, { multi: true });
+  await project.update({}, { $unset: { "videoSrc": "" } }, { multi: true });
+  await PortalProfile.update({}, { $unset: { "settings.projectComponents": "" } }, { multi: true });
 };
 
 run()

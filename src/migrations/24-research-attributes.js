@@ -52,7 +52,7 @@ const BlockchainFieldMeta = new Schema({
 });
 
 const AttributeSchema = new Schema({
-  "tenantId": { type: String, default: null },
+  "portalId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: Schema.Types.Mixed,
@@ -86,19 +86,19 @@ const Attribute = mongoose.model('attribute', AttributeSchema);
 const AttributeValueSchema = new Schema({
   "_id": false,
   "attributeId": { type: Schema.Types.ObjectId, required: false },
-  "researchAttributeId": { type: Schema.Types.ObjectId, required: false, default: undefined },
+  "attributeId": { type: Schema.Types.ObjectId, required: false, default: undefined },
   "value": { type: Schema.Types.Mixed, default: null }
 });
 
-const ResearchMigratingSchema = new Schema({
+const ProjectMigratingSchema = new Schema({
   "_id": { type: String, required: true },
-  "tenantId": { type: String, required: true },
-  "researchGroupExternalId": { type: String, required: true },
+  "portalId": { type: String, required: true },
+  "teamId": { type: String, required: true },
   "attributes": [AttributeValueSchema],
   "status": { type: String, enum: [...Object.values(PROJECT_STATUS)], required: false },
 
   // To remove
-  "tenantCriterias": { type: [Object], default: undefined },
+  "portalCriterias": { type: [Object], default: undefined },
   "milestones": { type: [Object], default: undefined },
   "partners": { type: [Object], default: undefined },
   "abstract": { type: String, default: undefined },
@@ -106,7 +106,7 @@ const ResearchMigratingSchema = new Schema({
 
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
-const Research = mongoose.model('research', ResearchMigratingSchema);
+const Project = mongoose.model('project', ProjectMigratingSchema);
 
 
 const FAQ = new Schema({
@@ -156,7 +156,7 @@ const AppModuleMap = new Schema({
 
 const UserRoleModuleMap = new Schema({
   "_id": false,
-  "roleGroupExternalId": { type: String, required: false, default: null },
+  "teamId": { type: String, required: false, default: null },
   "label": { type: String, required: true, trim: true },
   "role": { type: String, required: true, trim: true },
   "modules": AppModuleMap
@@ -172,27 +172,27 @@ const ReviewQuestion = new Schema({
   "contentTypes": [Number]
 });
 
-const ResearchContentAssessmentCriteria = new Schema({
+const ProjectContentAssessmentCriteria = new Schema({
   "_id": false,
   "id": { type: Number, required: true },
   "title": { type: String, required: true },
   "max": { type: Number, required: true }
 });
 
-const ResearchContentAssessmentCriterias = new Schema({
+const ProjectContentAssessmentCriterias = new Schema({
   "_id": false,
   "contentType": { type: Number, required: true },
-  "values": [ResearchContentAssessmentCriteria]
+  "values": [ProjectContentAssessmentCriteria]
 });
 
-const TenantProfileMigratingSchema = new Schema({
+const PortalProfileMigratingSchema = new Schema({
   "_id": { type: String },
   "name": { type: String },
   "serverUrl": { type: String, required: false }, // set later
   "shortName": { type: String },
   "description": { type: String },
   "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
-  "logo": { type: String, default: "default_tenant_logo.png" },
+  "logo": { type: String, default: "default_portal_logo.png" },
   "banner": { type: String, default: "default_banner_logo.png" },
   "network": GlobalNetworkSettings,
   "settings": {
@@ -210,7 +210,7 @@ const TenantProfileMigratingSchema = new Schema({
       ]
     },
     "assesmentCriterias": {
-      type: [ResearchContentAssessmentCriterias],
+      type: [ProjectContentAssessmentCriterias],
       default: [{
         contentType: PROJECT_CONTENT_TYPES.UNKNOWN,
         values: [
@@ -222,90 +222,90 @@ const TenantProfileMigratingSchema = new Schema({
     },
     "attributeOverwrites": [AttributeOverwrite],
     "layouts": { type: Object },
-    "researchLayouts": { type: Object },
+    "layouts": { type: Object },
     "faq": [FAQ],
     "theme": { type: Object },
     "modules": AppModuleMap,
     "roles": [UserRoleModuleMap],
-    "researchAttributes": { type: [Object], default: undefined }
+    "attributes": { type: [Object], default: undefined }
   }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' }, minimize: false });
 
 
-const TenantProfile = mongoose.model('tenants-profiles', TenantProfileMigratingSchema);
+const PortalProfile = mongoose.model('portal', PortalProfileMigratingSchema);
 
 
 
 const run = async () => {
 
-  const tenantProfiles = await TenantProfile.find({});
+  const portalProfiles = await PortalProfile.find({});
 
-  const researchAttributesPromises = [];
-  const tenantProfilesPromises = [];
+  const attributesPromises = [];
+  const portalProfilesPromises = [];
 
-  tenantProfiles[0].settings.researchAttributes.forEach(attr => {
+  portalProfiles[0].settings.attributes.forEach(attr => {
     if (systemAttributes.includes(attr._id.toString())) {
-      const researchAttribute = new Attribute({
-        tenantId: null,
+      const attribute = new Attribute({
+        portalId: null,
         isSystem: true,
         scope: ATTR_SCOPES.PROJECT,
         isGlobalScope: true,
         ...attr
       });
       
-      researchAttributesPromises.push(researchAttribute.save());
+      attributesPromises.push(attribute.save());
     }
   })
 
-  for (let i = 0; i < tenantProfiles.length; i++) {
-    [...tenantProfiles[i].settings.researchAttributes].forEach((attr) => {
+  for (let i = 0; i < portalProfiles.length; i++) {
+    [...portalProfiles[i].settings.attributes].forEach((attr) => {
       if(!systemAttributes.includes(attr._id.toString())) {
         delete attr._id;
-        const researchAttribute = new Attribute({
-          tenantId: tenantProfiles[i]._id,
+        const attribute = new Attribute({
+          portalId: portalProfiles[i]._id,
           isSystem: false,
           scope: ATTR_SCOPES.PROJECT,
           isGlobalScope: false,
           ...attr
         });
 
-        researchAttributesPromises.push(researchAttribute.save());
+        attributesPromises.push(attribute.save());
       }
     })
 
-    tenantProfiles[i].settings.researchAttributes = undefined;
-    tenantProfiles[i].settings.layouts = tenantProfiles[i].settings.researchLayouts;
-    tenantProfiles[i].settings.researchLayouts = undefined;
+    portalProfiles[i].settings.attributes = undefined;
+    portalProfiles[i].settings.layouts = portalProfiles[i].settings.layouts;
+    portalProfiles[i].settings.layouts = undefined;
     
-    tenantProfilesPromises.push(tenantProfiles[i].save());
+    portalProfilesPromises.push(portalProfiles[i].save());
   }
 
 
-  const researchPromises = [];  
-  const researches = await Research.find({});
-  for (let i = 0; i < researches.length; i++) {
-    const research = researches[i];    
-    const attributes = research.attributes.map(attr => ({ attributeId: attr.researchAttributeId, value: attr.value }));
-    research.attributes = attributes;
+  const projectPromises = [];  
+  const projects = await Project.find({});
+  for (let i = 0; i < projects.length; i++) {
+    const project = projects[i];    
+    const attributes = project.attributes.map(attr => ({ attributeId: attr.attributeId, value: attr.value }));
+    project.attributes = attributes;
 
-    for (let j = 0; j < research.attributes.length; j++) {
-      research.attributes[j].researchAttributeId = undefined;
+    for (let j = 0; j < project.attributes.length; j++) {
+      project.attributes[j].attributeId = undefined;
     }
 
-    research.tenantCriterias = undefined;
-    research.milestones = undefined;
-    research.partners = undefined;
-    research.abstract = undefined;
-    research.videoSrc = undefined;
+    project.portalCriterias = undefined;
+    project.milestones = undefined;
+    project.partners = undefined;
+    project.abstract = undefined;
+    project.videoSrc = undefined;
 
-    researchPromises.push(research.save());
+    projectPromises.push(project.save());
   }
   
 
-  await Promise.all(researchAttributesPromises);
-  await Promise.all(researchPromises);
-  await Promise.all(tenantProfilesPromises);
-  await TenantProfile.update({}, { $rename: { "settings.researchLayouts": "settings.layouts" } }, { multi: true });
+  await Promise.all(attributesPromises);
+  await Promise.all(projectPromises);
+  await Promise.all(portalProfilesPromises);
+  await PortalProfile.update({}, { $rename: { "settings.layouts": "settings.layouts" } }, { multi: true });
     
 };
 

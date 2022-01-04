@@ -65,7 +65,7 @@ projectEventHandler.register(APP_EVENT.PROJECT_DELETED, async (event) => {
 
 projectEventHandler.register(APP_EVENT.ATTRIBUTE_UPDATED, async (event) => {
   const { attribute } = event.getEventPayload();
-  await projectService.updateAttributeInResearches({
+  await projectService.updateAttributeInProjects({
     attributeId: attribute._id,
     type: attribute.type,
     valueOptions: attribute.valueOptions,
@@ -77,7 +77,7 @@ projectEventHandler.register(APP_EVENT.ATTRIBUTE_UPDATED, async (event) => {
 projectEventHandler.register(APP_EVENT.ATTRIBUTE_DELETED, async (event) => {
   const { attributeId } = event.getEventPayload();
 
-  await projectService.removeAttributeFromResearches({
+  await projectService.removeAttributeFromProjects({
     attributeId
   });
 });

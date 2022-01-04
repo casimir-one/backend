@@ -10,12 +10,12 @@ const UserRole = new Schema({
   "_id": false,
   "role": { type: String, required: true, trim: true },
   "label": { type: String, trim: true },
-  "researchGroupExternalId": { type: String, required: true }
+  "teamId": { type: String, required: true }
 });
 
 const UserSchema = new Schema({
   "_id": { type: String },
-  "tenantId": { type: String, required: true },
+  "portalId": { type: String, required: true },
   "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "signUpPubKey": { type: String, default: null },
   "status": { type: Number, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
@@ -24,6 +24,6 @@ const UserSchema = new Schema({
   "roles": [UserRole],
 }, { timestamps: true });
 
-const model = mongoose.model('user-profile', UserSchema);
+const model = mongoose.model('users-dao', UserSchema);
 
 module.exports = model;
