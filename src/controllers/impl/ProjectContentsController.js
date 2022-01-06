@@ -443,7 +443,7 @@ class ProjectContentsController extends BaseController {
   });
 
   updateDraft = this.command({
-    h: async (ctx) => {
+    form: ProjectContentPackageForm, h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
           const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DRAFT);
