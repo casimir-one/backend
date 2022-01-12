@@ -108,12 +108,10 @@ class UsersController extends BaseController {
           await accountCmdHandler.process(msg, ctx, validate);
         }
 
-        ctx.status = 200;
-        ctx.body = { entityId };
+        ctx.successRes({ entityId });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -126,13 +124,11 @@ class UsersController extends BaseController {
         if (!user) {
           throw new NotFoundError(`User "${username}" username is not found`);
         }
-        ctx.status = 200;
-        ctx.body = user;
+        ctx.successRes(user);
 
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -143,13 +139,11 @@ class UsersController extends BaseController {
         const query = qs.parse(ctx.query);
         const usernames = query.usernames ? Object.values(query.usernames) : [];
         const users = await userDtoService.getUsers(usernames);
-        ctx.status = 200;
-        ctx.body = users;
+        ctx.successRes(users);
 
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -162,12 +156,10 @@ class UsersController extends BaseController {
         if (!user) {
           throw new NotFoundError(`User "${email}" email is not found`);
         }
-        ctx.status = 200;
-        ctx.body = user;
+        ctx.successRes(user);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -180,12 +172,10 @@ class UsersController extends BaseController {
         if (!userProfile) {
           throw new NotFoundError(`User "${username}" username is not found`);
         }
-        ctx.status = 200;
-        ctx.body = userProfile;
+        ctx.successRes(userProfile);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -205,13 +195,11 @@ class UsersController extends BaseController {
 
         const usersProfiles = await userDtoService.findUserProfiles(accounts);
 
-        ctx.status = 200;
-        ctx.body = usersProfiles;
+        ctx.successRes(usersProfiles);
 
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -220,12 +208,10 @@ class UsersController extends BaseController {
     h: async (ctx) => {
       try {
         const activeUsersProfiles = await userDtoService.findUserProfilesByStatus(USER_PROFILE_STATUS.APPROVED);
-        ctx.status = 200;
-        ctx.body = activeUsersProfiles;
+        ctx.successRes(activeUsersProfiles);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -235,12 +221,10 @@ class UsersController extends BaseController {
       try {
         const teamId = ctx.params.teamId;
         const members = await userDtoService.getUsersByTeam(teamId);
-        ctx.status = 200;
-        ctx.body = members;
+        ctx.successRes(members);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -250,12 +234,10 @@ class UsersController extends BaseController {
       try {
         const portalId = ctx.params.portalId;
         const users = await userDtoService.getUsersByPortal(portalId);
-        ctx.status = 200;
-        ctx.body = users;
+        ctx.successRes(users);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -265,12 +247,10 @@ class UsersController extends BaseController {
       try {
         const query = qs.parse(ctx.query);
         const users = await userDtoService.getUsersListing(query.status);
-        ctx.status = 200;
-        ctx.body = users;
+        ctx.successRes(users);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -300,14 +280,10 @@ class UsersController extends BaseController {
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO);
         const entityId = appCmd.getCmdPayload().entityId;
 
-        ctx.status = 200;
-        ctx.body = {
-          entityId
-        };
+        ctx.successRes({ entityId });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -369,14 +345,10 @@ class UsersController extends BaseController {
 
         const { entityId } = alterDaoAuthorityCmd.getCmdPayload();
 
-        ctx.status = 200;
-        ctx.body = {
-          entityId
-        };
+        ctx.successRes({ entityId });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -463,12 +435,11 @@ class UsersController extends BaseController {
         }
 
         ctx.type = 'image/png';
-        ctx.body = avatar;
+        ctx.successRes(avatar);
 
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
 
     }

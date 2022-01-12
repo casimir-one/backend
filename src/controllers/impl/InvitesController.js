@@ -17,12 +17,10 @@ class InvitesController extends BaseController {
         }
     
         const activeInvites = await userInviteService.findUserPendingInvites(username);
-        ctx.status = 200;
-        ctx.body = activeInvites;
+        ctx.successRes(activeInvites);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -34,12 +32,10 @@ class InvitesController extends BaseController {
         const teamId = ctx.params.teamId;
         
         const invites = await userInviteService.findTeamPendingInvites(teamId);
-        ctx.status = 200;
-        ctx.body = invites;
+        ctx.successRes(invites);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

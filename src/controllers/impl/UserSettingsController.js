@@ -19,13 +19,11 @@ class UserSettingsController extends BaseController {
           throw new ForbiddenError(`You have no permission to get '${username}' bookmarks`);
         }
         const bookmarks = await userBookmarkService.getUserBookmarks(username, type, ref);
-        ctx.status = 200;
-        ctx.body = bookmarks;
+        ctx.successRes(bookmarks);
 
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -48,14 +46,10 @@ class UserSettingsController extends BaseController {
         const msg = ctx.state.msg;
         await userSettingsCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -78,14 +72,10 @@ class UserSettingsController extends BaseController {
         const msg = ctx.state.msg;
         await userSettingsCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

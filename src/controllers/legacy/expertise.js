@@ -26,13 +26,11 @@ const getAccountEciHistory = async (ctx) => {
 
     const result = records;
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -57,13 +55,11 @@ const getAccountEciStats = async (ctx) => {
     const user = await userDtoService.getUser(username);
     const result = { user, ...stat };
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -93,13 +89,11 @@ const getAccountsEciStats = async (ctx) => {
 
     result.sort((a, b) => b.eci - a.eci);
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -124,13 +118,11 @@ const getProjectEciHistory = async (ctx) => {
 
     const result = records;
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -154,13 +146,11 @@ const getProjectEciStats = async (ctx) => {
 
     const result = { ...stat };
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -182,13 +172,11 @@ const getProjectesEciStats = async (ctx) => {
 
     const result = stats;
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -213,13 +201,11 @@ const getProjectContentEciHistory = async (ctx) => {
 
     const result = records;
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -243,13 +229,11 @@ const getProjectContentEciStats = async (ctx) => {
 
     const result = { ...stat };
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -271,13 +255,11 @@ const getProjectContentsEciStats = async (ctx) => {
 
     const result = stats;
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -297,13 +279,11 @@ const getDomainEciHistory = async (ctx) => {
       filter.criteria || undefined
     );
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -321,13 +301,11 @@ const getDomainsEciStatsHistory = async (ctx) => {
       filter.step || undefined
     );
 
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -337,12 +315,10 @@ const getDomainsEciLastStats = async (ctx) => {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const result = await chainRpc.getDomainsEciLastStatsAsync();
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -353,12 +329,10 @@ const getAccountExpertiseTokens = async (ctx) => {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const result = await chainRpc.getExpertTokensByAccountNameAsync(username);
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -369,12 +343,10 @@ const getDomainExpertiseTokens = async (ctx) => {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const result = await chainRpc.getExpertTokensByDomainAsync(domainId);
-    ctx.status = 200;
-    ctx.body = result;
+    ctx.successRes(result);
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -382,18 +354,11 @@ const getEciHistoryByProjectContentAndDomain = async (ctx) => {
   const { contentId, domainId } = ctx.params;
   try {
     const history = await expertiseService.getEciHistoryByProjectContentAndDomain(contentId, domainId);
-    if (!history) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-    ctx.body = history;
-    ctx.status = 200;
+    ctx.successRes(history);
   }
   catch(err) {
     console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
+    ctx.errorRes(err);
   }
 }
 
@@ -401,18 +366,11 @@ const getExpertiseContributionsByProject = async (ctx) => {
   const projectId = ctx.params.projectId;
   try {
     const expertise = await expertiseService.getExpertiseContributionsByProject(projectId);
-    if (!expertise) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-    ctx.body = expertise;
-    ctx.status = 200;
+    ctx.successRes(expertise);
   }
   catch(err) {
     console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
+    ctx.errorRes(err);
   }
 }
 
@@ -420,18 +378,11 @@ const getExpertiseContributionsByProjectAndDomain = async (ctx) => {
   const { projectId, domainId } = ctx.params;
   try {
     const expertise = await expertiseService.getExpertiseContributionsByProjectAndDomain(projectId, domainId);
-    if (!expertise) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-    ctx.body = expertise;
-    ctx.status = 200;
+    ctx.successRes(expertise);
   }
   catch(err) {
     console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
+    ctx.errorRes(err);
   }
 }
 
@@ -439,18 +390,11 @@ const getExpertiseContributionByProjectContentAndDomain = async (ctx) => {
   const { contentId, domainId } = ctx.params;
   try {
     const expertise = await expertiseService.getExpertiseContributionByProjectContentAndDomain(contentId, domainId);
-    if (!expertise) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-    ctx.body = expertise;
-    ctx.status = 200;
+    ctx.successRes(expertise);
   }
   catch(err) {
     console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
+    ctx.errorRes(err);
   }
 }
 
@@ -458,18 +402,11 @@ const getExpertiseContributionsByProjectContent = async (ctx) => {
   const contentId = ctx.params.contentId;
   try {
     const expertise = await expertiseService.getExpertiseContributionsByProjectContent(contentId);
-    if (!expertise) {
-      ctx.status = 404;
-      ctx.body = null;
-      return;
-    }
-    ctx.body = expertise;
-    ctx.status = 200;
+    ctx.successRes(expertise);
   }
   catch(err) {
     console.log(err);
-    ctx.status = 500;
-    ctx.body = err;
+    ctx.errorRes(err);
   }
 }
 

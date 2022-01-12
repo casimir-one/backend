@@ -98,12 +98,11 @@ class PortalController extends BaseController {
         }
     
         ctx.type = 'image/png';
-        ctx.body = img;
+        ctx.successRes(img);
     
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -116,12 +115,10 @@ class PortalController extends BaseController {
         if (!portal) {
           throw new NotFoundError(`Portal '${portalId}' does not exist`);
         }
-        ctx.status = 200;
-        ctx.body = portal;
+        ctx.successRes(portal);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -131,12 +128,10 @@ class PortalController extends BaseController {
       try {
         const portalId = ctx.params.portal;
         const result = await portalDtoService.getNetworkPortal(portalId);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -146,12 +141,10 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const result = await portalDtoService.getNetworkPortals();
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -160,12 +153,10 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const pendingUsersProfiles = await userDtoService.findUserProfilesByStatus(USER_PROFILE_STATUS.PENDING);
-        ctx.status = 200;
-        ctx.body = pendingUsersProfiles;
+        ctx.successRes(pendingUsersProfiles);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -175,12 +166,10 @@ class PortalController extends BaseController {
       try {
         const portalId = ctx.state.portal.id;
         const result = await portalDtoService.getPortalAttributeSettings(portalId);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -190,12 +179,10 @@ class PortalController extends BaseController {
       try {
         const portalId = ctx.state.portal.id;
         const result = await portalDtoService.getPortalLayouts(portalId);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -205,12 +192,10 @@ class PortalController extends BaseController {
       try {
         const portalId = ctx.state.portal.id;
         const result = await portalDtoService.getPortalLayoutSettings(portalId);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -229,14 +214,10 @@ class PortalController extends BaseController {
         const msg = ctx.state.msg;
         await portalCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -254,14 +235,10 @@ class PortalController extends BaseController {
         const msg = ctx.state.msg;
         await portalCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -279,14 +256,10 @@ class PortalController extends BaseController {
         const msg = ctx.state.msg;
         await portalCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -304,14 +277,10 @@ class PortalController extends BaseController {
         const msg = ctx.state.msg;
         await portalCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -338,14 +307,10 @@ class PortalController extends BaseController {
         const msg = ctx.state.msg;
         await portalCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -363,14 +328,10 @@ class PortalController extends BaseController {
         const msg = ctx.state.msg;
         await portalCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -388,14 +349,10 @@ class PortalController extends BaseController {
         const msg = ctx.state.msg;
         await portalCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

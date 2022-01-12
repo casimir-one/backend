@@ -3,6 +3,7 @@ import AwardWithdrawalRequestSchema from './../../schemas/AwardWithdrawalRequest
 import GrantAwardPaymentForm from './../../forms/legacy/grantAwardPaymentForm';
 import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
 import GrantService from './../../services/legacy/grants';
+import { NotFoundError } from './../../errors';
 import crypto from 'crypto';
 import slug from 'limax';
 import FileStorage from './../../storage';
@@ -14,11 +15,9 @@ const getAwardWithdrawalRequestRefByHash = async (ctx) => {
   try {
     const grantsService = new GrantService();
     const ref = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
-    ctx.status = 200;
-    ctx.body = ref;
+    ctx.successRes(ref);
   } catch (err) {
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -33,16 +32,12 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
 
   const withdrawal = await grantsService.findAwardWithdrawalRequest(awardNumber, paymentNumber);
   if (!withdrawal) {
-    ctx.status = 404;
-    ctx.body = `File "${fileHash}" is not found`
-    return;
+    throw new NotFoundError(`File "${fileHash}" is not found`);
   }
 
   const file = withdrawal.packageFiles.find(f => f.hash == fileHash);
   if (!file) {
-    ctx.status = 404;
-    ctx.body = `File "${fileHash}" is not found`
-    return;
+    throw new NotFoundError(`File "${fileHash}" is not found`);
   }
 
 
@@ -67,13 +62,11 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
 
   const fileExists = await FileStorage.exists(filepath);
   if (!fileExists) {
-    ctx.status = 404;
-    ctx.body = `${filepath} is not found`;
-    return;
+    throw new NotFoundError(`${filepath} is not found`);
   }
 
   const buff = await FileStorage.get(filepath);
-  ctx.body = buff;
+  ctx.successRes(buff);
 }
 
 
@@ -103,8 +96,7 @@ const createAwardWithdrawalRequest = async (ctx) => {
     if (projectAwardWithdrawalRequestsPackageDirExists) {
       console.log(`Folder ${packageHash} already exists! Removing the uploaded files...`);
       await FileStorage.delete(tempDestinationPath);
-      ctx.status = 200;
-      ctx.body = withdrawal;
+      ctx.successRes(withdrawal);
     } else {
       await FileStorage.rename(tempDestinationPath, projectAwardWithdrawalRequestsPackageDirPath);
 
@@ -112,8 +104,7 @@ const createAwardWithdrawalRequest = async (ctx) => {
         withdrawal.filename = `package [${packageHash}]`;
         withdrawal.folder = packageHash;
         const updatedWithdrawal = await withdrawal.save();
-        ctx.status = 200;
-        ctx.body = updatedWithdrawal;
+        ctx.successRes(updatedWithdrawal);
       } else {
         const withdrawal = new AwardWithdrawalRequestSchema({
           "portalId": portal.id,
@@ -131,15 +122,13 @@ const createAwardWithdrawalRequest = async (ctx) => {
           })
         });
         const savedWithdrawal = await withdrawal.save();
-        ctx.status = 200;
-        ctx.body = savedWithdrawal;
+        ctx.successRes(savedWithdrawal);
       }
     }
 
   } catch (err) {
     console.error(err);
-    ctx.status = 500;
-    ctx.body = err;
+    ctx.errorRes(err);
   }
 }
 

@@ -16,13 +16,11 @@ class ProjectNdaController extends BaseController {
         if (!result) {
           throw new NotFoundError(`ProjectNda "${ndaId}" id is not found`);
         }
-        ctx.body = result;
-        ctx.status = 200;
+        ctx.successRes(result);
       }
       catch(err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -32,13 +30,11 @@ class ProjectNdaController extends BaseController {
       try {
         const creator = ctx.params.username;
         const result = await projectNdaDtoService.getProjectNdaListByCreator(creator);
-        ctx.body = result;
-        ctx.status = 200;
+        ctx.successRes(result);
       }
       catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -48,13 +44,11 @@ class ProjectNdaController extends BaseController {
       try {
         const hash = ctx.params.hash;
         const result = await projectNdaDtoService.getProjectNdaListByHash(hash);
-        ctx.body = result;
-        ctx.status = 200;
+        ctx.successRes(result);
       }
       catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -64,13 +58,11 @@ class ProjectNdaController extends BaseController {
       try {
         const projectId = ctx.params.projectId;
         const result = await projectNdaDtoService.getProjectNdaListByProject(projectId);
-        ctx.body = result;
-        ctx.status = 200;
+        ctx.successRes(result);
       }
       catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -93,14 +85,10 @@ class ProjectNdaController extends BaseController {
 
         await projectNdaCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

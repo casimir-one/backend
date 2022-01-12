@@ -14,12 +14,10 @@ class DocumentTemplatesController extends BaseController {
       try {
         const documentTemplateId = ctx.params.documentTemplateId;
         const documentTemplate = await documentTemplateDtoService.getDocumentTemplate(documentTemplateId);
-        ctx.status = 200
-        ctx.body = documentTemplate;
+        ctx.successRes(documentTemplate);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -29,12 +27,10 @@ class DocumentTemplatesController extends BaseController {
       try {
         const account = ctx.params.account;
         const documentTemplates = await documentTemplateDtoService.getDocumentTemplatesByAccount(account);
-        ctx.status = 200
-        ctx.body = documentTemplates;
+        ctx.successRes(documentTemplates);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -54,14 +50,10 @@ class DocumentTemplatesController extends BaseController {
 
         await documentTemplateCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -89,14 +81,10 @@ class DocumentTemplatesController extends BaseController {
 
         await documentTemplateCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -129,14 +117,10 @@ class DocumentTemplatesController extends BaseController {
 
         await documentTemplateCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

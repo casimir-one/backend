@@ -5,6 +5,7 @@ import serve from 'koa-static';
 import koa_bodyparser from "koa-bodyparser";
 import cors from '@koa/cors';
 import config from './config';
+import jsonResponse from './response';
 import { ChainService } from '@deip/chain-service';
 
 if (!config.TENANT) throw new Error(`Portal is not specified`);
@@ -17,6 +18,7 @@ const app = new Koa();
 require('./database');
 require('./queue');
 
+app.use(jsonResponse());
 app.use(cors());
 
 app.use(koa_bodyparser());

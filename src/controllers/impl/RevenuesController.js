@@ -9,18 +9,11 @@ class RevenuesController extends BaseController {
       try {
         const { symbol, cursor } = ctx.params;
         const history = await revenueDtoService.getAssetRevenueHistory(symbol, cursor);
-        if (!history) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = history;
-        ctx.status = 200;
+        ctx.successRes(history);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -31,18 +24,11 @@ class RevenuesController extends BaseController {
       try {
         const { account, symbol, step, cursor, targetAsset } = ctx.params;
         const history = await revenueDtoService.getAccountRevenueHistoryByAsset(account, symbol, step, cursor, targetAsset);
-        if (!history) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = history;
-        ctx.status = 200;
+        ctx.successRes(history);
       }
       catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -53,18 +39,11 @@ class RevenuesController extends BaseController {
       try {
         const { account, cursor } = ctx.params;
         const history = await revenueDtoService.getAccountRevenueHistory(account, cursor);
-        if (!history) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = history;
-        ctx.status = 200;
+        ctx.successRes(history);
       }
       catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });

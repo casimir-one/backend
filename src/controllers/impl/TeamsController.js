@@ -24,12 +24,10 @@ class TeamsController extends BaseController {
         if (!team) {
           throw new NotFoundError(`Team "${teamId}" id is not found`);
         }
-        ctx.status = 200;
-        ctx.body = team;
+        ctx.successRes(team);
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -44,12 +42,10 @@ class TeamsController extends BaseController {
         }
         
         const result = await teamDtoService.getTeams(teamsIds);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -61,12 +57,10 @@ class TeamsController extends BaseController {
         const { withPortalTeam } = qs.parse(ctx.query);
 
         const result = await teamDtoService.getTeamsListing(withPortalTeam);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -78,12 +72,10 @@ class TeamsController extends BaseController {
 
         const username = ctx.params.username;
         const result = await teamDtoService.getTeamsByUser(username, withPortalTeam);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -95,12 +87,10 @@ class TeamsController extends BaseController {
 
         const portalId = ctx.params.portalId;
         const result = await teamDtoService.getTeamsByPortal(portalId, withPortalTeam);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -130,14 +120,10 @@ class TeamsController extends BaseController {
 
         await accountCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          entityId
-        };
+        ctx.successRes({ entityId });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -181,14 +167,10 @@ class TeamsController extends BaseController {
 
         await accountCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          entityId
-        };
+        ctx.successRes({ entityId });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -225,14 +207,10 @@ class TeamsController extends BaseController {
 
         await accountCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -269,14 +247,10 @@ class TeamsController extends BaseController {
 
         await accountCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -350,11 +324,10 @@ class TeamsController extends BaseController {
         }
 
         ctx.type = 'image/png';
-        ctx.body = logo;
+        ctx.successRes(logo);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
 
     }

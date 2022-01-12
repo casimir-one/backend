@@ -22,13 +22,11 @@ class ContractAgreementController extends BaseController {
           throw new NotFoundError(`ContractAgreement "${contractAgreementId}" contractAgreementId is not found`);
         }
 
-        ctx.body = contractAgreement;
-        ctx.status = 200;
+        ctx.successRes(contractAgreement);
       }
       catch(err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -39,13 +37,11 @@ class ContractAgreementController extends BaseController {
         const query = qs.parse(ctx.query);
         const contractAgreements = await contractAgreementDtoService.getContractAgreements(query);
 
-        ctx.body = contractAgreements;
-        ctx.status = 200;
+        ctx.successRes(contractAgreements);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -72,12 +68,11 @@ class ContractAgreementController extends BaseController {
           ctx.response.set('Content-Type', `application/${ext}`);
           ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
         }
-        ctx.body = buff;
+        ctx.successRes(buff);
       }
       catch(err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -115,14 +110,10 @@ class ContractAgreementController extends BaseController {
         const msg = ctx.state.msg;
         await contractAgreementCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -140,14 +131,10 @@ class ContractAgreementController extends BaseController {
         const msg = ctx.state.msg;
         await contractAgreementCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -165,14 +152,10 @@ class ContractAgreementController extends BaseController {
         const msg = ctx.state.msg;
         await contractAgreementCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

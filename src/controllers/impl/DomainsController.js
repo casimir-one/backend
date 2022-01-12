@@ -9,13 +9,11 @@ class DomainsController extends BaseController {
     h: async (ctx) => {
       try {
         const domains = await domainDtoService.getDomains();
-        ctx.status = 200
-        ctx.body = domains;
+        ctx.successRes(domains);
     
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -25,13 +23,11 @@ class DomainsController extends BaseController {
       try {
         const projectId = ctx.params.projectId;
         const domains = await domainDtoService.getDomainsByProject(projectId);
-        ctx.status = 200;
-        ctx.body = domains;
+        ctx.successRes(domains);
     
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
