@@ -123,16 +123,23 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (
 
 fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (event) => {
 
-  const { _id: draftId, xmlDraft } = event.getEventPayload();
+  const { _id: draftId, xmlDraft, uploadedFiles } = event.getEventPayload();
 
   const draft = await draftService.getDraft(draftId);
 
-  if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+  if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR) {
     const opts = {}
     const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
     const version = await writeArchive(archiveDir, xmlDraft, {
       versioning: opts.versioning
     })
+  }
+  if (draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+    const filesPathToDelete = draft.packageFiles
+      .filter(({ filename }) => !uploadedFiles.some(({ originalname }) => originalname === filename))
+      .map(({ filename }) => FileStorage.getProjectContentPackageFilePath(draft.projectId, draft.folder, filename));
+
+    await Promise.all(filesPathToDelete.map(filePath => FileStorage.delete(filePath)));
   }
 });
 
