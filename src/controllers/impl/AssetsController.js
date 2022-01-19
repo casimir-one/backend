@@ -1,7 +1,7 @@
 import BaseController from '../base/BaseController';
 import { APP_CMD } from '@deip/constants';
 import qs from 'qs';
-import { BadRequestError } from './../../errors';
+import { BadRequestError, ForbiddenError, NotFoundError } from './../../errors';
 import { AssetDtoService, UserDtoService } from '../../services';
 import { assetCmdHandler } from './../../command-handlers';
 
@@ -22,19 +22,15 @@ class AssetsController extends BaseController {
         if (account != username) {
           const users = await userDtoService.getUsersByTeam(account);
           if (!users.find(u => u.username == username)) {
-            ctx.status = 403;
-            ctx.body = `You have no permission to get info about '${account}' account or ${account} doesn't exist`;
-            return;
+            throw new ForbiddenError(`You have no permission to get info about '${account}' account or ${account} doesn't exist`);
           }
         }
         const history = await assetDtoService.getAccountDepositHistory(account, status);
-        ctx.body = history;
-        ctx.status = 200;
+        ctx.successRes(history);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -46,17 +42,13 @@ class AssetsController extends BaseController {
         const assetId = ctx.params.assetId;
         const asset = await assetDtoService.getAssetById(assetId);
         if (!asset) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
+          throw new NotFoundError(`Asset "${assetId}" is not found`);
         }
-        ctx.body = asset;
-        ctx.status = 200;
+        ctx.successRes(asset);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -68,17 +60,13 @@ class AssetsController extends BaseController {
         const symbol = ctx.params.symbol;
         const assets = await assetDtoService.getAssetBySymbol(symbol);
         if (!assets) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
+          throw new NotFoundError(`Asset "${symbol}" is not found`);
         }
-        ctx.body = assets;
-        ctx.status = 200;
+        ctx.successRes(assets);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -89,18 +77,11 @@ class AssetsController extends BaseController {
       try {
         const type = ctx.params.type;
         const assets = await assetDtoService.getAssetsByType(type);
-        if (!assets) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = assets;
-        ctx.status = 200;
+        ctx.successRes(assets);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -111,18 +92,11 @@ class AssetsController extends BaseController {
       try {
         const issuer = ctx.params.issuer;
         const assets = await assetDtoService.getAssetsByIssuer(issuer);
-        if (!assets) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = assets;
-        ctx.status = 200;
+        ctx.successRes(assets);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -133,18 +107,11 @@ class AssetsController extends BaseController {
       try {
         const { lowerBoundSymbol, limit } = ctx.params;
         const assets = await assetDtoService.lookupAssets(lowerBoundSymbol, limit);
-        if (!assets) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = assets;
-        ctx.status = 200;
+        ctx.successRes(assets);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -156,17 +123,13 @@ class AssetsController extends BaseController {
         const { owner, symbol } = ctx.params;
         const asset = await assetDtoService.getAccountAssetBalance(owner, symbol);
         if (!asset) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
+          throw new NotFoundError(`Asset "${symbol}" is not found`);
         }
-        ctx.body = asset;
-        ctx.status = 200;
+        ctx.successRes(asset);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -177,18 +140,11 @@ class AssetsController extends BaseController {
       try {
         const owner = ctx.params.owner;
         const asset = await assetDtoService.getAccountAssetsBalancesByOwner(owner);
-        if (!asset) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = asset;
-        ctx.status = 200;
+        ctx.successRes(asset);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -199,18 +155,11 @@ class AssetsController extends BaseController {
       try {
         const symbol = ctx.params.symbol;
         const assets = await assetDtoService.getAccountsAssetBalancesByAsset(symbol);
-        if (!assets) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = assets;
-        ctx.status = 200;
+        ctx.successRes(assets);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -236,14 +185,10 @@ class AssetsController extends BaseController {
 
         await assetCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -268,14 +213,10 @@ class AssetsController extends BaseController {
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -294,14 +235,10 @@ class AssetsController extends BaseController {
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -320,14 +257,10 @@ class AssetsController extends BaseController {
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

@@ -23,12 +23,9 @@ class ProjectsController extends BaseController {
         if (!project) {
           throw new NotFoundError(`Project "${projectId}" id is not found`);
         }
-        ctx.status = 200;
-        ctx.body = project;
-
+        ctx.successRes(project);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -38,12 +35,9 @@ class ProjectsController extends BaseController {
       try {
         const accountId = ctx.params.accountId;
         const result = await projectDtoService.getDefaultProject(accountId);
-        ctx.status = 200;
-        ctx.body = result;
-
+        ctx.successRes(result);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -58,12 +52,9 @@ class ProjectsController extends BaseController {
         }
 
         const result = await projectDtoService.getProjects(projectsIds);
-        ctx.status = 200;
-        ctx.body = result;
-
+        ctx.successRes(result);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -74,12 +65,10 @@ class ProjectsController extends BaseController {
         const query = qs.parse(ctx.query);
         const filter = query.filter;
         const result = await projectDtoService.lookupProjects(filter);
-        ctx.status = 200;
-        ctx.body = result.filter(r => !r.isPrivate);
+        ctx.successRes(result.filter(r => !r.isPrivate));
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
 
     }
@@ -91,12 +80,10 @@ class ProjectsController extends BaseController {
         const jwtUsername = ctx.state.user.username;
         const member = ctx.params.username;
         const result = await projectDtoService.getProjectsForMember(member)
-        ctx.status = 200;
-        ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
+        ctx.successRes(result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername)));
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
 
     }
@@ -108,12 +95,10 @@ class ProjectsController extends BaseController {
         const jwtUsername = ctx.state.user.username;
         const teamId = ctx.params.teamId;
         const result = await projectDtoService.getProjectsByTeam(teamId);
-        ctx.status = 200;
-        ctx.body = result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername));
+        ctx.successRes(result.filter(r => !r.isPrivate || r.members.some(m => m == jwtUsername)));
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
 
     }
@@ -124,12 +109,10 @@ class ProjectsController extends BaseController {
       try {
         const portalId = ctx.state.portal.id;
         const result = await projectDtoService.getProjectsByPortal(portalId);
-        ctx.status = 200;
-        ctx.body = result.filter(r => !r.isPrivate);
+        ctx.successRes(result.filter(r => !r.isPrivate));
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -155,14 +138,10 @@ class ProjectsController extends BaseController {
         const msg = ctx.state.msg;
         await projectCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -188,14 +167,10 @@ class ProjectsController extends BaseController {
         const msg = ctx.state.msg;
         await projectCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -224,14 +199,10 @@ class ProjectsController extends BaseController {
         const msg = ctx.state.msg;
         await projectCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

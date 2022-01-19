@@ -1,6 +1,7 @@
 import { JsonDataMsg, MultFormDataMsg } from '@deip/message-models';
 import config from '../../config';
 import { ChainService } from '@deip/chain-service';
+import { BadRequestError } from './../../errors';
 
 
 class MessageHandler {
@@ -16,8 +17,7 @@ class MessageHandler {
       const metadata = chainInfo.metadata;
 
       if ((isMultipartForm && !ctx.state.form.envelope) && !ctx.request.body.envelope) {
-        ctx.status = 400;
-        throw new Error("Server accepts messages with app commands only");
+        throw new BadRequestError("Server accepts messages with app commands only");
       }
 
       ctx.state.msg = isMultipartForm

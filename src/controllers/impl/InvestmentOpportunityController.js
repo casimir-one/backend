@@ -2,7 +2,7 @@ import BaseController from '../base/BaseController';
 import { InvestmentOpportunityDtoService, InvestmentOpportunityParticipationDtoService } from '../../services';
 import { invstOppCmdHandler } from './../../command-handlers';
 import { APP_CMD } from '@deip/constants';
-import { BadRequestError } from './../../errors';
+import { BadRequestError, NotFoundError } from './../../errors';
 
 const invstOppDtoService = new InvestmentOpportunityDtoService();
 const invstOppParticipationDtoService = new InvestmentOpportunityParticipationDtoService();
@@ -31,12 +31,10 @@ class InvestmentOpportunityController extends BaseController {
 
         await invstOppCmdHandler.process(msg, ctx, validate);
         
-        ctx.status = 200;
-        ctx.body = { model: 'ok' };
+        ctx.successRes();
         
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -57,14 +55,10 @@ class InvestmentOpportunityController extends BaseController {
 
         await invstOppCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -76,17 +70,13 @@ class InvestmentOpportunityController extends BaseController {
         const { investmentOpportunityId } = ctx.params;
         const tokeSale = await invstOppDtoService.getInvstOpp(investmentOpportunityId);
         if (!tokeSale) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
+          throw new NotFoundError(`InvstOpp "${investmentOpportunityId}" is not found`);
         }
-        ctx.body = tokeSale;
-        ctx.status = 200;
+        ctx.successRes(tokeSale);
       }
       catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -97,12 +87,10 @@ class InvestmentOpportunityController extends BaseController {
       try {
         const projectId = ctx.params.projectId;
         const tokenSales = await invstOppDtoService.getInvstOppByProject(projectId);
-        ctx.status = 200;
-        ctx.body = tokenSales;
+        ctx.successRes(tokenSales);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -113,12 +101,10 @@ class InvestmentOpportunityController extends BaseController {
       try {
         const investmentOpportunityId = ctx.params.investmentOpportunityId;
         const investments = await invstOppParticipationDtoService.getInvstOppParticipations(investmentOpportunityId);
-        ctx.status = 200;
-        ctx.body = investments;
+        ctx.successRes(investments);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -129,12 +115,10 @@ class InvestmentOpportunityController extends BaseController {
       try {
         const projectId = ctx.params.projectId;
         const investments = await invstOppParticipationDtoService.getInvstOppParticipationsByProject(projectId);
-        ctx.status = 200;
-        ctx.body = investments;
+        ctx.successRes(investments);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -145,18 +129,11 @@ class InvestmentOpportunityController extends BaseController {
       try {
         const { account } = ctx.params;
         const history = await invstOppParticipationDtoService.getInvstOppParticipationsHistoryByAccount(account);
-        if (!history) {
-          ctx.status = 404;
-          ctx.body = null;
-          return;
-        }
-        ctx.body = history;
-        ctx.status = 200;
+        ctx.successRes(history);
       }
       catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });

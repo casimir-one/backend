@@ -8,14 +8,15 @@ function errorsHandler(options) {
       }
       console.error(err);
       if (401 === err.status) {
-        ctx.status = 401;
-        ctx.body = {
-          success: false,
-          token: null,
-          info: 'Protected resource, use "Authorization" header to get access'
-        };
+        ctx.errorRes(err, {
+          extraInfo: {
+            success: false,
+            token: null,
+            info: 'Protected resource, use "Authorization" header to get access'
+          }
+        })
       } else {
-        throw err;
+        ctx.errorRes(err)
       }
     }
   }

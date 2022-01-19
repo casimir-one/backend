@@ -34,11 +34,9 @@ class ProjectContentsController extends BaseController {
         if (!projectContent) {
           throw new NotFoundError(`ProjectContent "${projectContentId}" is not found`);
         }
-        ctx.status = 200;
-        ctx.body = projectContent;
+        ctx.successRes(projectContent);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -56,11 +54,9 @@ class ProjectContentsController extends BaseController {
 
         const result = projectContents.map(pc => ({ ...pc, isDraft: false }))
 
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -70,12 +66,10 @@ class ProjectContentsController extends BaseController {
       try {
         const portalId = ctx.params.portalId;
         const result = await projectContentDtoService.getProjectContentsByPortal(portalId)
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -95,11 +89,9 @@ class ProjectContentsController extends BaseController {
         const publicProjectsIds = projects.filter(r => !r.isPrivate).map(r => r._id);
         const result = projectContents.filter(projectContent => publicProjectsIds.some(id => id == projectContent.projectId))
 
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -121,19 +113,18 @@ class ProjectContentsController extends BaseController {
         if (isImage) {
           ctx.response.set('Content-Type', `image/${ext}`);
           ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-          ctx.body = buff;
+          ctx.successRes(buff);
         } else if (isPdf) {
           ctx.response.set('Content-Type', `application/${ext}`);
           ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-          ctx.body = buff;
+          ctx.successRes(buff);
         } else {
           ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-          ctx.body = buff;
+          ctx.successRes(buff);
         }
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -143,11 +134,9 @@ class ProjectContentsController extends BaseController {
       try {
         const refId = ctx.params.refId;
         const projectContentRef = await projectContentDtoService.getProjectContentRef(refId);
-        ctx.status = 200;
-        ctx.body = projectContentRef;
+        ctx.successRes(projectContentRef);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -157,11 +146,9 @@ class ProjectContentsController extends BaseController {
       try {
         const contentId = ctx.params.contentId;
         const graph = await projectContentDtoService.getProjectContentReferencesGraph(contentId);
-        ctx.status = 200;
-        ctx.body = graph;
+        ctx.successRes(graph);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -233,10 +220,9 @@ class ProjectContentsController extends BaseController {
         }
 
         const buff = await FileStorage.get(filepath);
-        ctx.body = buff;
+        ctx.successRes(buff);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -284,11 +270,9 @@ class ProjectContentsController extends BaseController {
             record.data = `${config.DEIP_SERVER_URL}/api/v2/project-content/texture/${projectContentId}/assets/${record.path}?authorization=${jwt}`;
           }
         })
-        ctx.status = 200;
-        ctx.body = rawArchive;
+        ctx.successRes(rawArchive);
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -299,12 +283,10 @@ class ProjectContentsController extends BaseController {
 
         const projectId = ctx.params.projectId;
         const result = await draftService.getDraftsByProject(projectId);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -315,12 +297,10 @@ class ProjectContentsController extends BaseController {
 
         const draftId = ctx.params.draftId;
         const result = await draftService.getDraft(draftId);
-        ctx.status = 200;
-        ctx.body = result;
+        ctx.successRes(result);
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -339,14 +319,10 @@ class ProjectContentsController extends BaseController {
 
         await projectContentCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -401,14 +377,10 @@ class ProjectContentsController extends BaseController {
         const msg = ctx.state.msg;
         await projectContentCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -430,14 +402,12 @@ class ProjectContentsController extends BaseController {
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DRAFT);
         const draftId = mongoose.Types.ObjectId(appCmd.getCmdPayload().draftId);
 
-        ctx.status = 200;
-        ctx.body = {
+        ctx.successRes({
           _id: draftId
-        };
+        });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -488,14 +458,12 @@ class ProjectContentsController extends BaseController {
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DRAFT);
         const draftId = appCmd.getCmdPayload()._id;
 
-        ctx.status = 200;
-        ctx.body = {
+        ctx.successRes({
           _id: draftId
-        };
+        });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -533,14 +501,10 @@ class ProjectContentsController extends BaseController {
         const msg = ctx.state.msg;
         await projectContentCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -563,14 +527,12 @@ class ProjectContentsController extends BaseController {
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DRAFT);
         const draftId = appCmd.getCmdPayload().draftId;
 
-        ctx.status = 200;
-        ctx.body = {
+        ctx.successRes({
           _id: draftId
-        };
+        });
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });

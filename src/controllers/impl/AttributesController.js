@@ -15,12 +15,10 @@ class AttributesController extends BaseController {
     h: async (ctx) => {
       try {
         const attributes = await attributeDtoService.getAttributes();
-        ctx.status = 200
-        ctx.body = attributes;
+        ctx.successRes(attributes);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -30,12 +28,10 @@ class AttributesController extends BaseController {
       try {
         const scope = ctx.params.scope;
         const attributes = await attributeDtoService.getAttributesByScope(scope);
-        ctx.status = 200
-        ctx.body = attributes;
+        ctx.successRes(attributes);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -45,12 +41,10 @@ class AttributesController extends BaseController {
       try {
         const scope = ctx.params.scope;
         const attributes = await attributeDtoService.getNetworkAttributesByScope(scope);
-        ctx.status = 200
-        ctx.body = attributes;
+        ctx.successRes(attributes);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -60,12 +54,10 @@ class AttributesController extends BaseController {
       try {
         const attributeId = ctx.params.id;
         const attributes = await attributeDtoService.getAttribute(attributeId);
-        ctx.status = 200
-        ctx.body = attributes;
+        ctx.successRes(attributes);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -74,12 +66,10 @@ class AttributesController extends BaseController {
     h: async (ctx) => {
       try {
         const attributes = await attributeDtoService.getNetworkAttributes();
-        ctx.status = 200
-        ctx.body = attributes;
+        ctx.successRes(attributes);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -88,12 +78,10 @@ class AttributesController extends BaseController {
     h: async (ctx) => {
       try {
         const attributes = await attributeDtoService.getSystemAttributes();
-        ctx.status = 200
-        ctx.body = attributes;
+        ctx.successRes(attributes);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -113,14 +101,10 @@ class AttributesController extends BaseController {
 
         await attributeCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -140,14 +124,10 @@ class AttributesController extends BaseController {
 
         await attributeCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -167,14 +147,10 @@ class AttributesController extends BaseController {
 
         await attributeCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -265,8 +241,7 @@ class AttributesController extends BaseController {
             image = await round(width);
           }
           ctx.type = 'image/png';
-          ctx.status = 200;
-          ctx.body = image;
+          ctx.successRes(image);
         } else {
           const isDownload = ctx.query.download === 'true';
           const ext = filename.substr(filename.lastIndexOf('.') + 1);
@@ -275,24 +250,23 @@ class AttributesController extends BaseController {
           const isPdf = ['pdf'].some(e => e == ext);
           if (isDownload) {
             ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
+            ctx.successRes(buff);
           } else if (isImage) {
             ctx.response.set('Content-Type', `image/${ext}`);
             ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
+            ctx.successRes(buff);
           } else if (isPdf) {
             ctx.response.set('Content-Type', `application/${ext}`);
             ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
+            ctx.successRes(buff);
           } else {
             ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-            ctx.body = buff;
+            ctx.successRes(buff);
           }
         }
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });

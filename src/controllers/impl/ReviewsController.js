@@ -18,19 +18,16 @@ class ReviewsController extends BaseController {
         const status = ctx.query.status;
 
         if (expert !== jwtUsername) {
-          ctx.status = 200;
-          ctx.body = [];
+          ctx.successRes([]);
           return;
         }
     
         const reviewRequests = await reviewRequestDtoService.getReviewRequestsByExpert(expert, status);
-        ctx.status = 200;
-        ctx.body = reviewRequests;
+        ctx.successRes(reviewRequests);
     
       } catch(err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -43,19 +40,16 @@ class ReviewsController extends BaseController {
         const requestor = ctx.params.username;
         const status = ctx.query.status;
         if (requestor !== jwtUsername) {
-          ctx.status = 200;
-          ctx.body = [];
+          ctx.successRes([]);
           return;
         }
     
         const reviewRequests = await reviewRequestDtoService.getReviewRequestsByRequestor(requestor, status);
-        ctx.status = 200;
-        ctx.body = reviewRequests;
+        ctx.successRes(reviewRequests);
     
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -93,14 +87,10 @@ class ReviewsController extends BaseController {
 
         await reviewCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -128,14 +118,10 @@ class ReviewsController extends BaseController {
 
         await reviewCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -150,13 +136,11 @@ class ReviewsController extends BaseController {
           throw new NotFoundError(`Review "${reviewId}" id is not found`);
         }
     
-        ctx.status = 200;
-        ctx.body = review;
+        ctx.successRes(review);
     
       } catch (err) {
         console.error(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -166,13 +150,11 @@ class ReviewsController extends BaseController {
       try {
         const projectId = ctx.params.projectId;
         const reviews = await reviewDtoService.getReviewsByProject(projectId);
-        ctx.status = 200;
-        ctx.body = reviews;
+        ctx.successRes(reviews);
     
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -182,13 +164,11 @@ class ReviewsController extends BaseController {
       try {
         const projectContentId = ctx.params.projectContentId;
         const reviews = await reviewDtoService.getReviewsByProjectContent(projectContentId);
-        ctx.status = 200;
-        ctx.body = reviews;
+        ctx.successRes(reviews);
     
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -198,12 +178,10 @@ class ReviewsController extends BaseController {
       try {
         const author = ctx.params.author;
         const reviews = await reviewDtoService.getReviewsByAuthor(author);
-        ctx.status = 200;
-        ctx.body = reviews;
+        ctx.successRes(reviews);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -213,12 +191,10 @@ class ReviewsController extends BaseController {
       try {
         const reviewId = ctx.params.reviewId;
         const reviews = await reviewDtoService.getReviewUpvotes(reviewId);
-        ctx.status = 200;
-        ctx.body = reviews;
+        ctx.successRes(reviews);
       } catch (err) {
         console.error(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -238,14 +214,10 @@ class ReviewsController extends BaseController {
 
         await reviewCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -265,14 +237,10 @@ class ReviewsController extends BaseController {
 
         await reviewCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

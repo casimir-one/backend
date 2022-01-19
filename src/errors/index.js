@@ -3,6 +3,7 @@ import BadRequestError from './http/BadRequestError';
 import NotFoundError from './http/NotFoundError';
 import ConflictError from './http/ConflictError';
 import ForbiddenError from './http/ForbiddenError';
+import UnauthorizedError from './http/UnauthorizedError';
 
 
 module.exports = {
@@ -10,5 +11,6 @@ module.exports = {
   BadRequestError,
   NotFoundError,
   ConflictError,
-  ForbiddenError
+  ForbiddenError,
+  UnauthorizedError
 }

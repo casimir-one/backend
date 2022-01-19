@@ -16,11 +16,10 @@ class ProposalsController extends BaseController {
         result.sort(function (a, b) {
           return new Date(b.proposal.created_at) - new Date(a.proposal.created_at);
         });
-        ctx.body = status && status != 0 ? result.filter(p => p.proposal.status == status) : result;
+        ctx.successRes(status && status != 0 ? result.filter(p => p.proposal.status == status) : result);
       } catch (err) {
         console.log(err);
-        ctx.status = 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -33,11 +32,10 @@ class ProposalsController extends BaseController {
         if (!proposal) {
           throw new NotFoundError(`Proposal "${proposalId}" id is not found`);
         }
-        ctx.body = proposal;
+        ctx.successRes(proposal);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err;
+        ctx.errorRes(err);
       }
     }
   });
@@ -48,14 +46,10 @@ class ProposalsController extends BaseController {
         const msg = ctx.state.msg;
         await proposalCmdHandler.process(msg, ctx);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -67,14 +61,10 @@ class ProposalsController extends BaseController {
         const msg = ctx.state.msg;
         await proposalCmdHandler.process(msg, ctx);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

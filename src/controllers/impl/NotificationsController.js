@@ -18,12 +18,10 @@ class NotificationsController extends BaseController {
         }
     
         const notifications = await userNotificationService.getUserNotifications(username, unreadOnly ? USER_NOTIFICATION_STATUS.UNREAD : undefined);
-        ctx.status = 200;
-        ctx.body = notifications;
+        ctx.successRes(notifications);
       } catch (err) {
         console.log(err);
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });
@@ -46,14 +44,10 @@ class NotificationsController extends BaseController {
         const msg = ctx.state.msg;
         await userSettingsCmdHandler.process(msg, ctx, validate);
 
-        ctx.status = 200;
-        ctx.body = {
-          model: "ok"
-        };
+        ctx.successRes();
 
       } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
+        ctx.errorRes(err);
       }
     }
   });

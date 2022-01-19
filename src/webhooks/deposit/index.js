@@ -6,6 +6,7 @@ import { DEPOSIT_REQUEST_STATUS } from './../../constants';
 import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 import { ChainService } from '@deip/chain-service';
 import { IssueAssetCmd } from '@deip/command-models';
+import { UnauthorizedError, BadRequestError, NotFoundError } from './../../errors'; 
 import { AssetDtoService } from './../../services';
 
 
@@ -39,31 +40,23 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
     const chainTxBuilder = chainService.getChainTxBuilder();
 
     if (!currency || !SUPPORTED_CURRENCIES.includes(currency)) {
-      ctx.status = 400;
-      ctx.body = `Asset with symbol ${currency} is not supported`;
-      return;
+      throw new BadRequestError(`Asset with symbol ${currency} is not supported`);
     }
 
     const asset = await assetDtoService.getAssetBySymbol(currency);
     if (!asset) {
-      ctx.status = 400;
-      ctx.body = `Asset with symbol ${currency} is not found`;
-      return;
+      throw new BadRequestError(`Asset with symbol ${currency} is not found`);
     }
 
     if (!amount || amount < MIN_AMOUNT) {
-      ctx.status = 400;
-      ctx.body = `Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(2)} ${currency}`;
-      return;
+      throw new BadRequestError(`Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(2)} ${currency}`);
     }
 
     const depositor = await chainRpc.getAccountAsync(username);
     const balanceOwner = await chainRpc.getAccountAsync(account);
 
     if (!depositor || !balanceOwner) {
-      ctx.status = 404;
-      ctx.body = `${username} or ${account} account is not found`;
-      return;
+      throw new NotFoundError(`${username} or ${account} account is not found`);
     }
 
     const depositorPubKey = depositor.authority.owner.auths
@@ -72,9 +65,7 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
 
     const isValidSig = chainService.verifySignature(depositorPubKey, sigSource, sigHex);
     if (!isValidSig) {
-      ctx.status = 400;
-      ctx.body = `Signature ${sigSource} is invalid for public key ${depositorPubKey}`;
-      return;
+      throw new BadRequestError(`Signature ${sigSource} is invalid for public key ${depositorPubKey}`);
     }
 
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
@@ -126,14 +117,12 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
 
     const redirectToPaymentUrl = `${config.DEIP_PAYMENT_SERVICE_URL}?${query}`;
 
-    ctx.status = 200;
-    ctx.body = {
+    ctx.successRes({
       redirectUrl: redirectToPaymentUrl,
       depositRequest
-    }
+    });
   } catch (err) {
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -155,31 +144,23 @@ const createAssetDepositRequest = async (ctx) => {
     const chainRpc = chainService.getChainRpc();
 
     if (!currency || !SUPPORTED_CURRENCIES.includes(currency)) {
-      ctx.status = 400;
-      ctx.body = `Asset with symbol ${currency} is not supported`;
-      return;
+      throw new BadRequestError(`Asset with symbol ${currency} is not supported`);
     }
 
     const asset = await assetDtoService.getAssetBySymbol(currency);
     if (!asset) {
-      ctx.status = 400;
-      ctx.body = `Asset with symbol ${currency} is not found`;
-      return;
+      throw new BadRequestError(`Asset with symbol ${currency} is not found`);
     }
 
     if (!amount || amount < MIN_AMOUNT) {
-      ctx.status = 400;
-      ctx.body = `Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(asset.precision)} ${currency}`;
-      return;
+      throw new BadRequestError(`Amount to deposit is less than min required amount which is ${(MIN_AMOUNT / 100).toFixed(asset.precision)} ${currency}`);
     }
 
     const depositor = await chainRpc.getAccountAsync(username);
     const balanceOwner = await chainRpc.getAccountAsync(account);
     
     if (!depositor || !balanceOwner) {
-      ctx.status = 404;
-      ctx.body = `${username} or ${account} account is not found`;
-      return;
+      throw new NotFoundError(`${username} or ${account} account is not found`);
     }
 
     const depositorPubKey = depositor.authority.owner.auths
@@ -188,9 +169,7 @@ const createAssetDepositRequest = async (ctx) => {
 
     const isValidSig = chainService.verifySignature(depositorPubKey, sigSource, sigHex);
     if (!isValidSig) {
-      ctx.status = 400;
-      ctx.body = `Signature ${sigSource} is invalid for public key ${depositorPubKey}`;
-      return;
+      throw new BadRequestError(`Signature ${sigSource} is invalid for public key ${depositorPubKey}`);
     }
 
     const depositRequestDoc = await (new AssetDepositRequest({
@@ -217,14 +196,12 @@ const createAssetDepositRequest = async (ctx) => {
 
     const redirectToPaymentUrl = `${config.DEIP_PAYMENT_SERVICE_URL}?${query}`;
    
-    ctx.status = 200;
-    ctx.body = {
+    ctx.successRes({
       redirectUrl: redirectToPaymentUrl,
       depositRequest
-    }
+    })
   } catch (err) {
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -256,16 +233,12 @@ const confirmAssetDepositRequest = async (ctx) => {
 
     depositRequestDoc = await AssetDepositRequest.findOne({ requestToken });
     if (!depositRequestDoc) {
-      ctx.status = 404;
-      ctx.body = `Deposit request with ${requestToken} is not found`;
-      return;
+      throw new NotFoundError(`Deposit request with ${requestToken} is not found`);
     }
 
     const depositRequest = depositRequestDoc.toObject();
     if (depositRequest.status != DEPOSIT_REQUEST_STATUS.PENDING) {
-      ctx.status = 400;
-      ctx.body = `Deposit request with ${requestToken} has been already resolved`;
-      return;
+      throw new BadRequestError(`Deposit request with ${requestToken} has been already resolved`);
     }
 
     try {
@@ -273,9 +246,7 @@ const confirmAssetDepositRequest = async (ctx) => {
       const payloadStr = JSON.stringify(invoice, Object.keys(invoice).sort())
       publicKey.verify(Encodeuint8arr(payloadStr).buffer, crypto.unhexify(sig).buffer);
     } catch (err) {
-      ctx.status = 401;
-      ctx.body = `Provided signature is not valid for provided invoice`;
-      return;
+      throw new UnauthorizedError(`Provided signature is not valid for provided invoice`);
     }
 
     const asset = await assetDtoService.getAssetBySymbol(depositRequest.currency.toUpperCase());
@@ -307,8 +278,7 @@ const confirmAssetDepositRequest = async (ctx) => {
     depositRequestDoc.invoice = invoice;
     const approvedDepositRequest = await depositRequestDoc.save();
 
-    ctx.status = 200;
-    ctx.body = "OK";
+    ctx.successRes({ message: 'OK' });
 
   } catch (err) {
 
@@ -318,8 +288,7 @@ const confirmAssetDepositRequest = async (ctx) => {
       const rejectedDepositRequest = await depositRequestDoc.save();
     }
 
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
@@ -329,25 +298,19 @@ const getDepositRequestByToken = async (ctx) => {
 
     const requestToken = ctx.params.requestToken;
     if (!requestToken) {
-      ctx.status = 400;
-      ctx.body = `Request token is not specified`;
-      return;
+      throw new BadRequestError(`Request token is not specified`);
     }
 
     const depositRequestDoc = await AssetDepositRequest.findOne({ requestToken });
     if (!depositRequestDoc) {
-      ctx.status = 404;
-      ctx.body = `Deposit request with ${requestToken} is not found`;
-      return;
+      throw new NotFoundError(`Deposit request with ${requestToken} is not found`);
     }
 
     const depositRequest = depositRequestDoc.toObject();
-    ctx.status = 200;
-    ctx.body = depositRequest;
+    ctx.successRes(depositRequest);
 
   } catch (err) {
-    ctx.status = 500;
-    ctx.body = err.message;
+    ctx.errorRes(err);
   }
 }
 
