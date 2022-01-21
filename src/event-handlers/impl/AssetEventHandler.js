@@ -15,7 +15,7 @@ class AssetEventHandler extends BaseEventHandler {
 const assetEventHandler = new AssetEventHandler();
 const assetService = new AssetService();
 
-assetEventHandler.register(APP_EVENT.ASSET_CREATED, async (event) => {
+assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
 
   const {
     entityId,
@@ -25,7 +25,7 @@ assetEventHandler.register(APP_EVENT.ASSET_CREATED, async (event) => {
     maxSupply,
     minBallance,
     description,
-    projectTokenOption
+    projectTokenSettings
   } = event.getEventPayload();
 
   const settings = {
@@ -35,13 +35,11 @@ assetEventHandler.register(APP_EVENT.ASSET_CREATED, async (event) => {
     minBallance
   };
 
-  if (projectTokenOption) {
-    const { projectId, licenseRevenue } = projectTokenOption;
+  if (projectTokenSettings) { // keep this until we have working F-NFT
+    const { projectId, licenseRevenue } = projectTokenSettings;
     settings.projectId = projectId;
     settings.licenseRevenueHoldersShare = licenseRevenue ? licenseRevenue.holdersShare : undefined;
   }
-
-  const type = settings.projectId ? ASSET_TYPE.NFT : ASSET_TYPE.COIN;
 
   await assetService.createAsset({
     entityId,
@@ -49,7 +47,38 @@ assetEventHandler.register(APP_EVENT.ASSET_CREATED, async (event) => {
     precision,
     issuer,
     description,
-    type,
+    type: ASSET_TYPE.FT,
+    settings
+  });
+});
+
+assetEventHandler.register(APP_EVENT.NFT_CREATED, async (event) => {
+
+  const {
+    entityId,
+    issuer,
+    symbol,
+    description,
+    projectTokenSettings
+  } = event.getEventPayload();
+
+  const settings = {
+    projectId: undefined,
+    licenseRevenueHoldersShare: undefined,
+  };
+
+  if (projectTokenSettings) { // keep this until we have working F-NFT
+    const { projectId, licenseRevenue } = projectTokenSettings;
+    settings.projectId = projectId;
+    settings.licenseRevenueHoldersShare = licenseRevenue ? licenseRevenue.holdersShare : undefined;
+  }
+
+  await assetService.createAsset({
+    entityId,
+    symbol,
+    issuer,
+    description,
+    type: ASSET_TYPE.NFT,
     settings
   });
 });

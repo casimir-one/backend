@@ -14,7 +14,7 @@ class TeamDtoService extends BaseService {
     const chainRpc = chainService.getChainRpc();
 
     const chainAccounts = await chainRpc.getAccountsAsync(teams.map(team => team._id));
-    const chainBalances = await Promise.all(teams.map(team => chainRpc.getAssetsBalancesByOwnerAsync(team._id)));
+    const chainBalances = await Promise.all(teams.map(team => chainRpc.getFungibleTokenBalancesByOwnerAsync(team._id)));
 
     return teams.map((team) => {
       const chainAccount = chainAccounts.find((chainAccount) => chainAccount && chainAccount.daoId == team._id);

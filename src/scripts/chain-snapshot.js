@@ -125,10 +125,10 @@ const run = async ({
   const chainProjectContentsReviewsByProject = await Promise.all(chainProjects.map(r => chainRpc.getReviewsByProjectAsync(r._id)));
   const chainProjectContentsReviews = [].concat.apply([], chainProjectContentsReviewsByProject);
 
-  const chainAssets = await chainRpc.getAssetsListAsync();
+  const chainFungibleTokens = await chainRpc.getFungibleTokenListAsync();
   const chainDomains = await chainRpc.lookupDomainsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainProposalsStates = await chainRpc.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
-  const chainAssetsBallances = await Promise.all(chainAssets.map(chainAsset => chainRpc.getAssetBalancesByAssetSymbolAsync(chainAsset.symbol)));
+  const chainAssetsBallances = await Promise.all(chainFungibleTokens.map(chainAsset => chainRpc.getFungibleTokenBalancesBySymbolAsync(chainAsset.symbol)));
 
   const snapshotUsers = chainUserAccounts.filter(a => !blackListUsers.some(name => name == a.name) && !genesisJSON.accounts.some(ac => ac.name == a.name)).map(a => {
     const key = a.authority.owner.auths
@@ -150,7 +150,7 @@ const run = async ({
     };
   });
 
-  const snapshotAssets = chainAssets.filter(a => a.string_symbol != 'DEIP' && a.string_symbol != 'TESTS' && !genesisJSON.assets.some(asset => asset.symbol == a.string_symbol)).map((asset) => {
+  const snapshotAssets = chainFungibleTokens.filter(a => a.string_symbol != 'DEIP' && a.string_symbol != 'TESTS' && !genesisJSON.assets.some(asset => asset.symbol == a.string_symbol)).map((asset) => {
     return {
       "symbol": asset.string_symbol,
       "precision": asset.precision,

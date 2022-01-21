@@ -15,7 +15,7 @@ const AssetSchema = new Schema({
   "_id": { type: String, required: true },
   "portalId": { type: String, required: false },
   "symbol": { type: String, required: true },
-  "precision": { type: Number, required: true },
+  "precision": { type: Number, required: false },
   "issuer": { type: String, required: true },
   "description": { type: String, required: false },
   "settings": AssetSettingsSchema,
@@ -23,7 +23,7 @@ const AssetSchema = new Schema({
     type: Number,
     enum: [...Object.values(ASSET_TYPE)],
     required: true,
-    default: ASSET_TYPE.COIN
+    default: ASSET_TYPE.FT
   },
   "isGlobalScope": { type: Boolean, default: false }
 });
