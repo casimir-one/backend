@@ -1,7 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { TeamService, AttributeDtoService } from './../../services';
-import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 class TeamEventHandler extends BaseEventHandler {
 

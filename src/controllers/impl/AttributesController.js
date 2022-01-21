@@ -1,4 +1,6 @@
-import { APP_CMD, ATTR_SCOPES } from '@deip/constants';
+// import { APP_CMD, ATTR_SCOPES } from '@deip/constants';
+import { APP_CMD } from '@deip/constants'; //temp
+import { ATTR_SCOPES } from './../../constants'; //temp
 import BaseController from './../base/BaseController';
 import { BadRequestError, NotFoundError } from './../../errors';
 import {attributeCmdHandler} from './../../command-handlers';

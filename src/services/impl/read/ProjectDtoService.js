@@ -7,7 +7,9 @@ import ContractAgreementDtoService from './ContractAgreementDtoService';
 import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from './../../../constants';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
-import { CONTRACT_AGREEMENT_TYPE, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+// import { CONTRACT_AGREEMENT_TYPE, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants'; //temp
+import { ATTR_SCOPES, ATTR_TYPES } from './../../../constants'; //temp
 
 
 const teamDtoService = new TeamDtoService();

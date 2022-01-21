@@ -1,5 +1,6 @@
 import AttributeSchema from './../../../schemas/AttributeSchema';
-import { ATTR_SCOPES } from '@deip/constants';
+// import { ATTR_SCOPES } from '@deip/constants';
+import { ATTR_SCOPES } from './../../../constants'; //temp
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 

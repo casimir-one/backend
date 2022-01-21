@@ -14,6 +14,7 @@ import DEPOSIT_REQUEST_STATUS from './assetDepositRequestStatus';
 import INVESTMENT_OPPORTUNITY_TYPE from './investmentOpportunityType';
 import ASSET_TYPE from './assetTypes';
 import REVIEW_REQUEST_STATUS from './reviewRequestStatus';
+import { ATTR_TYPES, ATTR_SCOPES } from './attributes';
 
 export {
   CHAIN_CONSTANTS,
@@ -33,4 +34,6 @@ export {
   INVESTMENT_OPPORTUNITY_TYPE,
   ASSET_TYPE,
   REVIEW_REQUEST_STATUS,
+  ATTR_TYPES,
+  ATTR_SCOPES
 }
