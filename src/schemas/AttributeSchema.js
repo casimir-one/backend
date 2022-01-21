@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
-import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+// import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+import { ATTR_SCOPES, ATTR_TYPES } from './../constants'; //temp
 
 
 const Schema = mongoose.Schema;
@@ -23,7 +24,7 @@ const AttributeSchema = new Schema({
   "portalId": { type: String, default: null },
   "isSystem": { type: Boolean, default: false },
   "type": {
-    type: Number,
+    type: String,
     enum: [...Object.values(ATTR_TYPES)],
     required: true
   },
@@ -41,7 +42,7 @@ const AttributeSchema = new Schema({
   "blockchainFieldMeta": BlockchainFieldMeta,
   "schemas": { type: Object, required: false, default: {} },
   "scope": {
-    type: Number,
+    type: String,
     enum: [...Object.values(ATTR_SCOPES)],
     required: true
   },

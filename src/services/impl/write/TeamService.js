@@ -1,7 +1,8 @@
 import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
 import AttributeDtoService from './../read/AttributeDtoService';
-import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+// import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+import { ATTR_SCOPES, ATTR_TYPES } from './../../../constants'; //temp
 
 class TeamService extends BaseService {
 

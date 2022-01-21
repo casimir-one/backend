@@ -6,7 +6,9 @@ import config from '../../config';
 import FileStorage from './../../storage';
 import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
 import { USER_PROFILE_STATUS, USER_ROLES } from './../../constants';
-import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN } from '@deip/constants';
+// import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN } from '@deip/constants';
+import { APP_CMD, PROTOCOL_CHAIN } from '@deip/constants'; //temp
+import { ATTR_SCOPES, ATTR_TYPES } from './../../constants'; //temp
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
 import { ChainService } from '@deip/chain-service';

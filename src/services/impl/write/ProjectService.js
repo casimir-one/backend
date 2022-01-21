@@ -3,7 +3,8 @@ import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema';
 import AttributeDtoService from './../read/AttributeDtoService';
 import { logWarn } from './../../../utils/log';
-import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+// import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+import { ATTR_SCOPES, ATTR_TYPES } from './../../../constants'; //temp
 
 
 class ProjectService extends BaseService {
@@ -92,77 +93,78 @@ class ProjectService extends BaseService {
         };
       }
 
-      switch (attribute.type) {
-        case ATTR_TYPES.STEPPER: {
-          rAttrValue = mongoose.Types.ObjectId(rAttr.value.toString()); // _id
-          break;
-        }
-        case ATTR_TYPES.TEXT: {
-          rAttrValue = rAttr.value.toString(); // text
-          break;
-        }
-        case ATTR_TYPES.TEXTAREA: {
-          rAttrValue = rAttr.value.toString(); // text
-          break;
-        }
-        case ATTR_TYPES.SELECT: {
-          rAttrValue = rAttr.value.map(v => mongoose.Types.ObjectId(v.toString())); // _id
-          break;
-        }
-        case ATTR_TYPES.URL: {
-          rAttrValue = rAttr.value.map(v => v); // schema
-          break;
-        }
-        case ATTR_TYPES.VIDEO_URL: {
-          rAttrValue = rAttr.value.toString(); // url
-          break;
-        }
-        case ATTR_TYPES.SWITCH: {
-          rAttrValue = rAttr.value == true || rAttr.value === 'true';
-          break;
-        }
-        case ATTR_TYPES.CHECKBOX: {
-          rAttrValue = rAttr.value == true || rAttr.value === 'true';
-          break;
-        }
-        case ATTR_TYPES.USER: {
-          rAttrValue = rAttr.value.map(v => v.toString()); // username / id
-          break;
-        }
-        case ATTR_TYPES.DOMAIN: {
-          rAttrValue = rAttr.value.map(v => v.toString()); // id
-          break;
-        }
-        case ATTR_TYPES.TEAM: {
-          rAttrValue = rAttr.value.map(v => v.toString()); // id
-          break;
-        }
-        case ATTR_TYPES.IMAGE: {
-          rAttrValue = rAttr.value.toString(); // image name
-          break;
-        }
-        case ATTR_TYPES.FILE: {
-          rAttrValue = rAttr.value.toString(); // file name
-          break;
-        }
-        case ATTR_TYPES.EXPRESS_LICENSING: {
-          rAttrValue = rAttr.value.map(v => v); // schema
-          break;
-        }
-        case ATTR_TYPES.ROADMAP: {
-          rAttrValue = rAttr.value.map(v => v); // schema
-          break;
-        }
-        case ATTR_TYPES.PARTNERS: {
-          rAttrValue = rAttr.value.map(v => v); // schema
-          break;
-        }
-        default: {
-          logWarn(`WARNING: Unhandeled value '${rAttr.value}' for attribute type ${ATTR_TYPES[attribute.type]}`);
-          rAttrValue = rAttr.value;
-          break;
-        }
-      }
+      rAttrValue = rAttr.value; //temp
+      // switch (attribute.type) {
+      //   case ATTR_TYPES.STEPPER: {
+      //     rAttrValue = mongoose.Types.ObjectId(rAttr.value.toString()); // _id
+      //     break;
+      //   }
+      //   case ATTR_TYPES.TEXT: {
+      //     rAttrValue = rAttr.value.toString(); // text
+      //     break;
+      //   }
+      //   case ATTR_TYPES.TEXTAREA: {
+      //     rAttrValue = rAttr.value.toString(); // text
+      //     break;
+      //   }
+      //   case ATTR_TYPES.SELECT: {
+      //     rAttrValue = rAttr.value.map(v => mongoose.Types.ObjectId(v.toString())); // _id
+      //     break;
+      //   }
+      //   case ATTR_TYPES.URL: {
+      //     rAttrValue = rAttr.value.map(v => v); // schema
+      //     break;
+      //   }
+      //   case ATTR_TYPES.VIDEO_URL: {
+      //     rAttrValue = rAttr.value.toString(); // url
+      //     break;
+      //   }
+      //   case ATTR_TYPES.SWITCH: {
+      //     rAttrValue = rAttr.value == true || rAttr.value === 'true';
+      //     break;
+      //   }
+      //   case ATTR_TYPES.CHECKBOX: {
+      //     rAttrValue = rAttr.value == true || rAttr.value === 'true';
+      //     break;
+      //   }
+      //   case ATTR_TYPES.USER: {
+      //     rAttrValue = rAttr.value.map(v => v.toString()); // username / id
+      //     break;
+      //   }
+      //   case ATTR_TYPES.DOMAIN: {
+      //     rAttrValue = rAttr.value.map(v => v.toString()); // id
+      //     break;
+      //   }
+      //   case ATTR_TYPES.TEAM: {
+      //     rAttrValue = rAttr.value.map(v => v.toString()); // id
+      //     break;
+      //   }
+      //   case ATTR_TYPES.IMAGE: {
+      //     rAttrValue = rAttr.value.toString(); // image name
+      //     break;
+      //   }
+      //   case ATTR_TYPES.FILE: {
+      //     rAttrValue = rAttr.value.toString(); // file name
+      //     break;
+      //   }
+      //   case ATTR_TYPES.EXPRESS_LICENSING: {
+      //     rAttrValue = rAttr.value.map(v => v); // schema
+      //     break;
+      //   }
+      //   case ATTR_TYPES.ROADMAP: {
+      //     rAttrValue = rAttr.value.map(v => v); // schema
+      //     break;
+      //   }
+      //   case ATTR_TYPES.PARTNERS: {
+      //     rAttrValue = rAttr.value.map(v => v); // schema
+      //     break;
+      //   }
+      //   default: {
+      //     logWarn(`WARNING: Unhandeled value '${rAttr.value}' for attribute type ${ATTR_TYPES[attribute.type]}`);
+      //     rAttrValue = rAttr.value;
+      //     break;
+      //   }
+      // }
 
       return {
         attributeId: rAttrId,
