@@ -4,8 +4,6 @@ import ProjectDeletedEvent from './impl/ProjectDeletedEvent';
 import DaoMemberAddedEvent from './impl/DaoMemberAddedEvent';
 import DaoMemberRemovedEvent from './impl/DaoMemberRemovedEvent';
 
-import TeamCreatedEvent from './impl/TeamCreatedEvent';
-import TeamUpdatedEvent from './impl/TeamUpdatedEvent';
 import TeamUpdateProposalCreatedEvent from './impl/TeamUpdateProposalCreatedEvent';
 import TeamUpdateProposalAcceptedEvent from './impl/TeamUpdateProposalAcceptedEvent';
 import TeamUpdateProposalDeclinedEvent from './impl/TeamUpdateProposalDeclinedEvent';
@@ -30,9 +28,9 @@ import AttributeCreatedEvent from './impl/AttributeCreatedEvent';
 import AttributeUpdatedEvent from './impl/AttributeUpdatedEvent';
 import AttributeDeletedEvent from './impl/AttributeDeletedEvent';
 
-import UserUpdatedEvent from './impl/UserUpdatedEvent';
 import UserAuthorityAlteredEvent from './impl/UserAuthorityAlteredEvent';
-import UserCreatedEvent from './impl/UserCreatedEvent';
+import DaoCreatedEvent from './impl/DaoCreatedEvent';
+import DaoUpdatedEvent from './impl/DaoUpdatedEvent';
 
 import ProjectTokenSaleProposalCreatedEvent from './impl/ProjectTokenSaleProposalCreatedEvent';
 import ProjectTokenSaleProposalAcceptedEvent from './impl/ProjectTokenSaleProposalAcceptedEvent';
@@ -97,9 +95,6 @@ module.exports = {
   DaoMemberAddedEvent,
   DaoMemberRemovedEvent,
 
-  TeamCreatedEvent,
-  TeamUpdatedEvent,
-
   ProposalCreatedEvent,
   ProposalAcceptedEvent,
   ProposalDeclinedEvent,
@@ -124,9 +119,10 @@ module.exports = {
   AttributeUpdatedEvent,
   AttributeDeletedEvent,
 
-  UserUpdatedEvent,
+  DaoCreatedEvent,
+  DaoUpdatedEvent,
+
   UserAuthorityAlteredEvent,
-  UserCreatedEvent,
   UserProfileDeletedEvent,
 
   ProjectTokenSaleProposalCreatedEvent,

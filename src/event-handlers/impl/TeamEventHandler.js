@@ -15,38 +15,44 @@ const teamService = new TeamService();
 const attributeDtoService = new AttributeDtoService();
 
 
-teamEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
+teamEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
 
   const {
-    accountId,
+    isTeamAccount,
+    daoId,
     creator,
     description,
     attributes
   } = event.getEventPayload();
 
-  const team = await teamService.createTeam({
-    _id: accountId,
-    creator: creator,
-    name: description, // TODO: extract from attributes
-    description: description,
-    attributes: attributes,
-    members: [creator]
-  });
+  if (isTeamAccount) {
+    const team = await teamService.createTeam({
+      _id: daoId,
+      creator: creator,
+      name: description, // TODO: extract from attributes
+      description: description,
+      attributes: attributes,
+      members: [creator]
+    });
+  }
 
 });
 
-teamEventHandler.register(APP_EVENT.TEAM_UPDATED, async (event) => {
+teamEventHandler.register(APP_EVENT.DAO_UPDATED, async (event) => {
 
   const {
-    accountId,
+    isTeamAccount,
+    daoId,
     creator,
     description,
     attributes
   } = event.getEventPayload();
 
-  const team = await teamService.updateTeam(accountId, {
-    attributes: attributes
-  });
+  if (isTeamAccount) {
+    const team = await teamService.updateTeam(daoId, {
+      attributes: attributes
+    });
+  }
 
 });
 

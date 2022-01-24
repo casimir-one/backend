@@ -17,67 +17,66 @@ class UserEventHandler extends BaseEventHandler {
 const userEventHandler = new UserEventHandler();
 const userService = new UserService();
 
-userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
+userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
 
   const {
-    username,
+    isTeamAccount,
+    daoId,
+    creator,
     status,
     pubKey,
-    portalId,
     email,
     attributes,
     roles
   } = event.getEventPayload();
 
-  const createdUserProfile = await userService.createUser({
-    username,
-    status,
-    signUpPubKey: pubKey,
-    portal: portalId,
-    email,
-    attributes,
-    roles: roles.map(r => ({
-      role: r.role,
-      teamId: r.teamId || portalId
-    }))
-  });
+  if (isTeamAccount) {
+    const userInfo = await userService.getUser(creator);
+
+    if (userInfo) { 
+      const updatedUserProfile = await userService.updateUser(creator, {
+        status: userInfo.status,
+        email: userInfo.email,
+        attributes: userInfo.attributes,
+        teams: [...userInfo.teams, daoId],
+        roles: [...userInfo.roles, { role: USER_ROLES.TEAMADMIN,  teamId: daoId }]
+      });
+    }
+  } else {
+    const createdUserProfile = await userService.createUser({
+      username: daoId,
+      status,
+      signUpPubKey: pubKey,
+      email,
+      attributes,
+      roles: roles.map(r => ({
+        role: r.role,
+        teamId: r.teamId
+      }))
+    });
+  }
 });
 
-userEventHandler.register(APP_EVENT.USER_UPDATED, async (event) => {
+userEventHandler.register(APP_EVENT.DAO_UPDATED, async (event) => {
 
   const {
-    username,
+    isTeamAccount,
+    daoId,
     status,
     email,
     attributes
   } = event.getEventPayload();
 
-  const updatedUserProfile = await userService.updateUser(username, {
-    status,
-    email,
-    attributes
-  });
+  if (!isTeamAccount) {
+    const updatedUserProfile = await userService.updateUser(daoId, {
+      status,
+      email,
+      attributes
+    });
+  }
 });
 
 userEventHandler.register(APP_EVENT.USER_AUTHORITY_ALTERED, async (event) => {
-
-});
-
-userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
-
-  const { creator, accountId } = event.getEventPayload();
-
-  const userInfo = await userService.getUser(creator);
-
-  if (userInfo) { 
-    const updatedUserProfile = await userService.updateUser(creator, {
-      status: userInfo.status,
-      email: userInfo.email,
-      attributes: userInfo.attributes,
-      teams: [...userInfo.teams, accountId],
-      roles: [...userInfo.roles, { role: USER_ROLES.TEAM_ADMIN,  teamId: accountId }]
-    });
-  }
 
 });
 
