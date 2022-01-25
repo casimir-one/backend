@@ -2,7 +2,7 @@ import config from './../../config';
 import qs from 'qs';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import { DEPOSIT_REQUEST_STATUS } from './../../constants';
+import { DEPOSIT_REQUEST_STATUS } from '@deip/constants';
 import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 import { ChainService } from '@deip/chain-service';
 import { IssueAssetCmd } from '@deip/command-models';

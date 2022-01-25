@@ -113,14 +113,14 @@ class ProjectContentsController extends BaseController {
         if (isImage) {
           ctx.response.set('Content-Type', `image/${ext}`);
           ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-          ctx.successRes(buff);
+          ctx.successRes(buff, { withoutWrap: true });
         } else if (isPdf) {
           ctx.response.set('Content-Type', `application/${ext}`);
           ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-          ctx.successRes(buff);
+          ctx.successRes(buff, { withoutWrap: true });
         } else {
           ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-          ctx.successRes(buff);
+          ctx.successRes(buff, { withoutWrap: true });
         }
 
       } catch (err) {
@@ -220,7 +220,7 @@ class ProjectContentsController extends BaseController {
         }
 
         const buff = await FileStorage.get(filepath);
-        ctx.successRes(buff);
+        ctx.successRes(buff, { withoutWrap: true });
       } catch (err) {
         ctx.errorRes(err);
       }
@@ -270,7 +270,7 @@ class ProjectContentsController extends BaseController {
             record.data = `${config.DEIP_SERVER_URL}/api/v2/project-content/texture/${projectContentId}/assets/${record.path}?authorization=${jwt}`;
           }
         })
-        ctx.successRes(rawArchive);
+        ctx.successRes(rawArchive, { withoutWrap: true });
       } catch (err) {
         ctx.errorRes(err);
       }

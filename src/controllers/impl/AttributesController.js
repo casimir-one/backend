@@ -1,6 +1,4 @@
-// import { APP_CMD, ATTR_SCOPES } from '@deip/constants';
-import { APP_CMD } from '@deip/constants'; //temp
-import { ATTR_SCOPES } from './../../constants'; //temp
+import { APP_CMD, ATTR_SCOPES } from '@deip/constants';
 import BaseController from './../base/BaseController';
 import { BadRequestError, NotFoundError } from './../../errors';
 import {attributeCmdHandler} from './../../command-handlers';
@@ -168,15 +166,15 @@ class AttributesController extends BaseController {
         const isEntityRootFolder = entityId == attributeId;
         const imageQuery = ctx.query.image === 'true';
         let filepath = '';
-        switch (parseInt(scope)) {
-          case ATTR_SCOPES.PROJECT:
+        switch (scope) {
+          case ATTR_SCOPES.PROJECT || 'project':
             filepath = isEntityRootFolder ? FileStorage.getProjectFilePath(entityId, filename) : FileStorage.getProjectAttributeFilePath(entityId, attributeId, filename);
             const fileExists = await FileStorage.exists(filepath);
             if (!fileExists) {
               throw new NotFoundError(`${filepath} is not found`);
             }
             break;
-          case ATTR_SCOPES.TEAM:
+          case ATTR_SCOPES.TEAM || 'team':
             filepath = isEntityRootFolder ? FileStorage.getTeamFilePath(entityId, filename) : FileStorage.getTeamAttributeFilePath(entityId, attributeId, filename);
             if (imageQuery) {
               const exists = await FileStorage.exists(filepath);
@@ -185,7 +183,7 @@ class AttributesController extends BaseController {
               }
             }
             break;
-          case ATTR_SCOPES.USER:
+          case ATTR_SCOPES.USER || 'user':
             filepath = isEntityRootFolder ? FileStorage.getAccountFilePath(entityId, filename) : FileStorage.getAccountAttributeFilePath(entityId, attributeId, filename);
             if (imageQuery) {
               const exists = await FileStorage.exists(filepath);
@@ -198,7 +196,6 @@ class AttributesController extends BaseController {
             throw new BadRequestError(`Unknown ${scope} scope`);
         }
         const buff = await FileStorage.get(filepath);
-
         if (imageQuery) {
           const width = ctx.query.width ? parseInt(ctx.query.width) : 1440;
           const height = ctx.query.height ? parseInt(ctx.query.height) : 430;
@@ -243,7 +240,7 @@ class AttributesController extends BaseController {
             image = await round(width);
           }
           ctx.type = 'image/png';
-          ctx.successRes(image);
+          ctx.successRes(image, { withoutWrap: true });
         } else {
           const isDownload = ctx.query.download === 'true';
           const ext = filename.substr(filename.lastIndexOf('.') + 1);
@@ -252,18 +249,18 @@ class AttributesController extends BaseController {
           const isPdf = ['pdf'].some(e => e == ext);
           if (isDownload) {
             ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-            ctx.successRes(buff);
+            ctx.successRes(buff, { withoutWrap: true });
           } else if (isImage) {
             ctx.response.set('Content-Type', `image/${ext}`);
             ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-            ctx.successRes(buff);
+            ctx.successRes(buff, { withoutWrap: true });
           } else if (isPdf) {
             ctx.response.set('Content-Type', `application/${ext}`);
             ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-            ctx.successRes(buff);
+            ctx.successRes(buff, { withoutWrap: true });
           } else {
             ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-            ctx.successRes(buff);
+            ctx.successRes(buff, { withoutWrap: true });
           }
         }
       } catch (err) {

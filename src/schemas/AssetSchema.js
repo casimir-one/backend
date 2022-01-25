@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ASSET_TYPE } from './../constants';
+import { ASSET_TYPE } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 

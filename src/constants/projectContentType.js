@@ -1,28 +1,4 @@
-import { createEnum } from '@deip/toolbox';
-
-const PROJECT_CONTENT_TYPES = createEnum({
-  UNKNOWN: 0,
-  ANNOUNCEMENT: 1,
-  // FINAL_RESULT: 2,
-  MILESTONE_ARTICLE: 3,
-  MILESTONE_BOOK: 4,
-  MILESTONE_CHAPTER: 5,
-  MILESTONE_CODE: 6,
-  MILESTONE_CONFERENCE_PAPER: 7,
-  MILESTONE_COVER_PAGE: 8,
-  MILESTONE_DATA: 9,
-  MILESTONE_EXPERIMENT_FINDINGS: 10,
-  MILESTONE_METHOD: 11,
-  MILESTONE_NEGATIVE_RESULTS: 12,
-  MILESTONE_PATENT: 13,
-  MILESTONE_POSTER: 14,
-  MILESTONE_PREPRINT: 15,
-  MILESTONE_PRESENTATION: 16,
-  MILESTONE_RAW_DATA: 17,
-  MILESTONE_PROJECT_PROPOSAL: 18,
-  MILESTONE_TECHNICAL_REPORT: 19,
-  MILESTONE_THESIS: 20,
-});
+import { PROJECT_CONTENT_TYPES } from '@deip/constants';
 
 let contentTypesMap = {
   [PROJECT_CONTENT_TYPES.ANNOUNCEMENT]: { text: 'Announcement', order: 1 },
@@ -57,4 +33,4 @@ contentTypesMap = Object.keys(contentTypesMap).reduce((obj, key) => {
 }, {});
 const CONTENT_TYPES_MAP = [...Object.values(contentTypesMap)].sort((a, b) => a.order - b.order);
 
-export { CONTENT_TYPES_MAP, PROJECT_CONTENT_TYPES };
+export default CONTENT_TYPES_MAP;

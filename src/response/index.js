@@ -27,22 +27,31 @@ const errorRes = (ctx) => (err, {
   });
 }
 
-const successRes = (ctx) => (data = {}, extraInfo = {}, status = 200) => {
-  const resData = {};
-  if (Array.isArray(data)) {
-    resData.data = {
-      items: data,
-      ...extraInfo
-    }
+const successRes = (ctx) => (data = {}, {
+  extraInfo = {},
+  withoutWrap = false, // only for files
+  status = 200
+} = {}) => {
+  if (withoutWrap) {
+    ctx.status = status;
+    ctx.body = data;
   } else {
-    resData.data = {
-      ...data,
-      ...extraInfo
+    const resData = {};
+    if (Array.isArray(data)) {
+      resData.data = {
+        items: data,
+        ...extraInfo
+      }
+    } else {
+      resData.data = {
+        ...data,
+        ...extraInfo
+      }
     }
-  }
 
-  ctx.status = status;
-  ctx.body = makeDefaultResponse(resData);
+    ctx.status = status;
+    ctx.body = makeDefaultResponse(resData);
+  }
 }
 
 const jsonResponse = () => async(ctx, next) => {

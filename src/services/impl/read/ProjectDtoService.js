@@ -7,9 +7,7 @@ import ContractAgreementDtoService from './ContractAgreementDtoService';
 import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from './../../../constants';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
-// import { CONTRACT_AGREEMENT_TYPE, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
-import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants'; //temp
-import { ATTR_SCOPES, ATTR_TYPES } from './../../../constants'; //temp
+import { CONTRACT_AGREEMENT_TYPE, ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 
 const teamDtoService = new TeamDtoService();
@@ -38,7 +36,7 @@ class ProjectDtoService extends BaseService {
 
     const projectLicenses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE });
     const projectAccesses = await contractAgreementDtoService.getContractAgreements({ type: CONTRACT_AGREEMENT_TYPE.PROJECT_ACCESS });
-    const projectsAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
+    const projectsAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT || 'project');
     const teams = await Promise.all(projects.map((project) => teamDtoService.getTeam(project.teamId)));
     const teamsMembers = teams.filter((team) => !!team).map((team) => ({ teamId: team._id, members: team.members }));
 
@@ -141,7 +139,7 @@ class ProjectDtoService extends BaseService {
         if (rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString() || rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString()) 
           return `${rAttr.value}`.toLowerCase().includes(filter.searchTerm.toLowerCase());
 
-        if (attribute.type == ATTR_TYPES.USER) 
+        if (attribute.type == ATTR_TYPES.USER || attribute.type == 'userSelect') 
           return p.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
 
         return false;
@@ -159,7 +157,7 @@ class ProjectDtoService extends BaseService {
           if (!rAttr || !rAttr.value) 
             return !v || v === 'false';
           
-          if (attribute.type == ATTR_TYPES.EXPRESS_LICENSING) {
+          if (attribute.type == ATTR_TYPES.EXPRESS_LICENSING || attribute.type == 'expressLicensing') {
             if (v == true || v === 'true') {
               return rAttr.value.length != 0;
             } else {

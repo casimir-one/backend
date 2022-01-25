@@ -1,6 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
-import { USER_ROLES } from './../../constants';
+import { SYSTEM_ROLE as USER_ROLES } from '@deip/constants';
 import {
   UserService
 } from './../../services';
@@ -75,7 +75,7 @@ userEventHandler.register(APP_EVENT.TEAM_CREATED, async (event) => {
       email: userInfo.email,
       attributes: userInfo.attributes,
       teams: [...userInfo.teams, accountId],
-      roles: [...userInfo.roles, { role: USER_ROLES.TEAMADMIN,  teamId: accountId }]
+      roles: [...userInfo.roles, { role: USER_ROLES.TEAM_ADMIN,  teamId: accountId }]
     });
   }
 

@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { DEPOSIT_REQUEST_STATUS } from './../constants';
+import { DEPOSIT_REQUEST_STATUS } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
