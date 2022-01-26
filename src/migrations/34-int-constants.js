@@ -22,7 +22,8 @@ require("@babel/register")({
 const config = require('../config');
 
 const mongoose = require('mongoose');
-const { PROJECT_CONTENT_TYPES, ASSESSMENT_CRITERIA_TYPE } = require('./../constants');
+const { ASSESSMENT_CRITERIA_TYPE, PROJECT_CONTENT_TYPES } = require('@deip/constants');
+
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const Schema = mongoose.Schema;

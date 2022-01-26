@@ -20,7 +20,8 @@ const CryptoJS = require("crypto-js");
 
 
 const CHAIN_CONSTANTS = require('./../constants/chainConstants').default;
-const { PROJECT_CONTENT_TYPES, PROJECT_STATUS } = require('./../constants');
+const { PROJECT_STATUS } = require('./../constants');
+const { PROJECT_CONTENT_TYPES } = require('@deip/constants');
 
 const readFile = util.promisify(fs.readFile);
 const writeFile = util.promisify(fs.writeFile);

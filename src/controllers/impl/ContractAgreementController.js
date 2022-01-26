@@ -68,7 +68,7 @@ class ContractAgreementController extends BaseController {
           ctx.response.set('Content-Type', `application/${ext}`);
           ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
         }
-        ctx.successRes(buff);
+        ctx.successRes(buff, { withoutWrap: true });
       }
       catch(err) {
         console.log(err);

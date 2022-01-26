@@ -1,7 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { AssetService } from './../../services';
-import { ASSET_TYPE } from './../../constants/';
+import { ASSET_TYPE } from '@deip/constants';
 
 
 class AssetEventHandler extends BaseEventHandler {

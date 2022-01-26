@@ -98,7 +98,7 @@ class PortalController extends BaseController {
         }
     
         ctx.type = 'image/png';
-        ctx.successRes(img);
+        ctx.successRes(img, { withoutWrap: true });
     
       } catch (err) {
         console.log(err);

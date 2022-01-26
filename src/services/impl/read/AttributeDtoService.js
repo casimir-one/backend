@@ -1,6 +1,5 @@
 import AttributeSchema from './../../../schemas/AttributeSchema';
-// import { ATTR_SCOPES } from '@deip/constants';
-import { ATTR_SCOPES } from './../../../constants'; //temp
+import { ATTR_SCOPES } from '@deip/constants';
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 
@@ -25,14 +24,14 @@ class AttributeDtoService extends BaseService {
     return mapAttributes;
   }
   
-  async getAttributesByScope(scope = ATTR_SCOPES.PROJECT) {
+  async getAttributesByScope(scope = ATTR_SCOPES.PROJECT || 'project') {
     const result = await this.findMany({ scope });
     if (!result.length) return [];
     const mapAttributes = await this.mapAttributes(result);
     return mapAttributes;
   }
   
-  async getNetworkAttributesByScope(scope = ATTR_SCOPES.PROJECT) {
+  async getNetworkAttributesByScope(scope = ATTR_SCOPES.PROJECT || 'project') {
     const result = await this.findMany({ scope })
     if (!result.length) return [];
     const mapAttributes = await this.mapAttributes(result);

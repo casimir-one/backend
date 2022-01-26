@@ -120,7 +120,7 @@ class TeamsController extends BaseController {
 
         await accountCmdHandler.process(msg, ctx, validate);
 
-        ctx.successRes({ entityId });
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -167,7 +167,7 @@ class TeamsController extends BaseController {
 
         await accountCmdHandler.process(msg, ctx, validate);
 
-        ctx.successRes({ entityId });
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -324,7 +324,7 @@ class TeamsController extends BaseController {
         }
 
         ctx.type = 'image/png';
-        ctx.successRes(logo);
+        ctx.successRes(logo, { withoutWrap: true });
       } catch (err) {
         console.log(err);
         ctx.errorRes(err);

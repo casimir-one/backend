@@ -5,10 +5,8 @@ import qs from 'qs';
 import config from '../../config';
 import FileStorage from './../../storage';
 import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
-import { USER_PROFILE_STATUS, USER_ROLES } from './../../constants';
-// import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN } from '@deip/constants';
-import { APP_CMD, PROTOCOL_CHAIN } from '@deip/constants'; //temp
-import { ATTR_SCOPES, ATTR_TYPES } from './../../constants'; //temp
+import { USER_PROFILE_STATUS } from './../../constants';
+import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_ROLES } from '@deip/constants';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
@@ -110,7 +108,7 @@ class UsersController extends BaseController {
           await accountCmdHandler.process(msg, ctx, validate);
         }
 
-        ctx.successRes({ entityId });
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -282,7 +280,7 @@ class UsersController extends BaseController {
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO);
         const entityId = appCmd.getCmdPayload().entityId;
 
-        ctx.successRes({ entityId });
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -347,7 +345,7 @@ class UsersController extends BaseController {
 
         const { entityId } = alterDaoAuthorityCmd.getCmdPayload();
 
-        ctx.successRes({ entityId });
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -372,13 +370,13 @@ class UsersController extends BaseController {
 
         if (user && user.profile && user.profile.attributes) {
           // temp solution //
-          const attrs = await attributeDtoService.getNetworkAttributesByScope(ATTR_SCOPES.USER);
+          const attrs = await attributeDtoService.getNetworkAttributesByScope(ATTR_SCOPES.USER || 'user');
           const attr = attrs.find(
             ({
               type,
               title,
               portalId
-            }) => title === 'Avatar' && type === ATTR_TYPES.IMAGE && portalId === user.portalId
+            }) => title === 'Avatar' && (type === ATTR_TYPES.IMAGE || type === 'image') && portalId === user.portalId
           );
           const userAttr = user.profile.attributes.find(({
             attributeId
@@ -437,7 +435,7 @@ class UsersController extends BaseController {
         }
 
         ctx.type = 'image/png';
-        ctx.successRes(avatar);
+        ctx.successRes(avatar, { withoutWrap: true });
 
       } catch (err) {
         console.log(err);

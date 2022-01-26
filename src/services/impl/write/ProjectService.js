@@ -3,8 +3,7 @@ import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema';
 import AttributeDtoService from './../read/AttributeDtoService';
 import { logWarn } from './../../../utils/log';
-// import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
-import { ATTR_SCOPES, ATTR_TYPES } from './../../../constants'; //temp
+import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 
 class ProjectService extends BaseService {
@@ -28,7 +27,7 @@ class ProjectService extends BaseService {
 
     const attributeDtoService = new AttributeDtoService();
     const systemAttributes = await attributeDtoService.getSystemAttributes();
-    const teamAttr = systemAttributes.find(attr => attr.scope == ATTR_SCOPES.PROJECT && attr.type == ATTR_TYPES.TEAM);
+    const teamAttr = systemAttributes.find(attr => (attr.scope == ATTR_SCOPES.PROJECT || attr.scope == 'project') && (attr.type == ATTR_TYPES.TEAM || attr.type == 'teamSelect'));
     
     // Team attribute is required
     if (!attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
@@ -74,7 +73,7 @@ class ProjectService extends BaseService {
   
   async mapAttributes(attributes) {
     const attributeDtoService = new AttributeDtoService();
-    const projectAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT);
+    const projectAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT || 'project');
 
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.attributeId.toString());
@@ -186,7 +185,7 @@ class ProjectService extends BaseService {
 
 
   async updateAttributeInProjects({ attributeId, type, valueOptions, defaultValue }) {
-    if (type == ATTR_TYPES.STEPPER || type == ATTR_TYPES.SELECT) {
+    if (type == ATTR_TYPES.STEPPER || type == ATTR_TYPES.SELECT || type == 'stepper' || type == 'select') {
       const result = await this.updateMany(
         {
           $and: [

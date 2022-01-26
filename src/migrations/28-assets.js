@@ -22,7 +22,7 @@ require("@babel/register")({
 const { ChainService } = require('@deip/chain-service');
 
 const config = require('./../config');
-const ASSET_TYPE = require('./../constants').ASSET_TYPE;
+const { ASSET_TYPE } = require('@deip/constants');
 
 const mongoose = require('mongoose');
 const AssetSchema = require('./../schemas/AssetSchema');

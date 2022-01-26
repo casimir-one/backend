@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-// import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
-import { ATTR_SCOPES, ATTR_TYPES } from './../constants'; //temp
+import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
 
 
 const Schema = mongoose.Schema;

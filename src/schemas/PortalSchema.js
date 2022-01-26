@@ -1,8 +1,6 @@
 
 import mongoose from 'mongoose';
-import { ASSESSMENT_CRITERIA_TYPE } from './../constants';
-import { SIGN_UP_POLICY } from '@deip/constants';
-import { PROJECT_CONTENT_TYPES } from './../constants';
+import { SIGN_UP_POLICY, ASSESSMENT_CRITERIA_TYPE, PROJECT_CONTENT_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 

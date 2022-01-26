@@ -66,7 +66,7 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
   }
 
   const buff = await FileStorage.get(filepath);
-  ctx.successRes(buff);
+  ctx.successRes(buff, { withoutWrap: true });
 }
 
 
