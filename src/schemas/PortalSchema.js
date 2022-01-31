@@ -94,7 +94,7 @@ const PortalSchema = new Schema({
   "network": GlobalNetworkSettings,
   "settings": {
     "signUpPolicy": {
-      type: String,
+      type: Number,
       enum: [...Object.values(SIGN_UP_POLICY)],
       required: true
     },

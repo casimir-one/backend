@@ -37,15 +37,6 @@ module.exports = {
     { h: proposalEventHandler, await: true }
   ],
 
-  [APP_EVENT.TEAM_CREATED]: [
-    { h: teamEventHandler, await: true },
-    { h: userEventHandler, await: true }
-  ],
-
-  [APP_EVENT.TEAM_UPDATED]: [
-    { h: teamEventHandler, await: true }
-  ],
-
   [APP_EVENT.PROJECT_CREATED]: [
     { h: projectEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
@@ -137,11 +128,13 @@ module.exports = {
     { h: projectEventHandler, await: true },
   ],
 
-  [APP_EVENT.USER_CREATED]: [
+  [APP_EVENT.DAO_CREATED]: [
+    { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
   ],
 
-  [APP_EVENT.USER_UPDATED]: [
+  [APP_EVENT.DAO_UPDATED]: [
+    { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
   ],
 

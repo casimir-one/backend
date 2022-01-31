@@ -1,10 +1,8 @@
 import { APP_CMD, USER_PROFILE_STATUS } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import {
-  TeamCreatedEvent,
-  TeamUpdatedEvent,
-  UserCreatedEvent,
-  UserUpdatedEvent,
+  DaoCreatedEvent,
+  DaoUpdatedEvent,
   DaoMemberAddedEvent,
   DaoMemberRemovedEvent,
   UserAuthorityAlteredEvent
@@ -36,37 +34,26 @@ accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
     roles
   } = cmd.getCmdPayload();
 
-  
+  const daoInfo = {
+    daoId: entityId,
+    attributes,
+    isTeamAccount,
+  };
+
   if (isTeamAccount) {
-
-    ctx.state.appEvents.push(new TeamCreatedEvent({
-      creator: creator,
-      accountId: entityId,
-      attributes: attributes,
-      isTeamAccount: isTeamAccount,
-      description: description,
-      proposalCtx: ctx.state.proposalsStackFrame
-    }));
-
+    daoInfo.creator = creator;
+    daoInfo.description = description;
   } else {
-
-    const portal = ctx.state.portal;
-    ctx.state.appEvents.push(new UserCreatedEvent({
-      username: entityId,
-      status: USER_PROFILE_STATUS.APPROVED,
-      pubKey: authority.owner.auths[0].key,
-      portalId: portal.id,
-      email,
-      attributes,
-      roles
-    }));
-
+    daoInfo.status = USER_PROFILE_STATUS.APPROVED;
+    daoInfo.pubKey = authority.owner.auths[0].key;
+    daoInfo.email = email;
+    daoInfo.roles = roles;
   }
 
+  ctx.state.appEvents.push(new DaoCreatedEvent(daoInfo));
 });
 
 accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
-
   const { 
     entityId,
     creator,
@@ -77,28 +64,21 @@ accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
     status
   } = cmd.getCmdPayload();
 
-  
+  const daoInfo = {
+    daoId: entityId,
+    attributes,
+    isTeamAccount
+  };
+
   if (isTeamAccount) {
-
-    ctx.state.appEvents.push(new TeamUpdatedEvent({
-      creator: creator,
-      accountId: entityId,
-      attributes: attributes,
-      isTeamAccount: isTeamAccount,
-      description: description,
-      proposalCtx: ctx.state.proposalsStackFrame
-    }));
-    
+    daoInfo.creator = creator;
+    daoInfo.description = description;
   } else {
-
-    ctx.state.appEvents.push(new UserUpdatedEvent({
-      username: entityId,
-      attributes,
-      email,
-      status
-    }));
-
+    daoInfo.status = status;
+    daoInfo.email = email;
   }
+
+  ctx.state.appEvents.push(new DaoUpdatedEvent(daoInfo));
 });
 
 accountCmdHandler.register(APP_CMD.ALTER_DAO_AUTHORITY, (cmd, ctx) => {
