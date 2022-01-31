@@ -15,7 +15,8 @@ import {
   contractAgreementEventHandler,
   fileUploadEventHandler,
   portalEventHandler,
-  userSettingsEventHandler
+  userSettingsEventHandler,
+  layoutEventHandler
 } from './index';
 
 
@@ -285,10 +286,6 @@ module.exports = {
     { h: fileUploadEventHandler, await: true },
     { h: portalEventHandler, await: true }
   ],
-  
-  [APP_EVENT.LAYOUT_UPDATED]: [
-    { h: portalEventHandler, await: true },
-  ],
 
   [APP_EVENT.LAYOUT_SETTINGS_UPDATED]: [
     { h: portalEventHandler, await: true },
@@ -316,5 +313,17 @@ module.exports = {
 
   [APP_EVENT.NOTIFICATIONS_MARKED_AS_READ]: [
     { h: userNotificationEventHandler, await: true },
+  ],
+
+  [APP_EVENT.LAYOUT_CREATED]: [
+    { h: layoutEventHandler, await: true },
+  ],
+
+  [APP_EVENT.LAYOUT_UPDATED]: [
+    { h: layoutEventHandler, await: true },
+  ],
+
+  [APP_EVENT.LAYOUT_DELETED]: [
+    { h: layoutEventHandler, await: true },
   ],
 };

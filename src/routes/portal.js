@@ -17,7 +17,6 @@ public_route.get('/logo', portalRoute, portalCtrl.getPortalImgs);
 public_route.post('/sign-in', portalRoute, auth.signIn);
 public_route.get('/settings/attribute-settings', portalCtrl.getPortalAttributeSettings);
 public_route.get('/settings/layout-settings', portalCtrl.getPortalLayoutSettings);
-public_route.get('/settings/layouts', portalCtrl.getPortalLayouts);
 
 
 async function portalAdminGuard(ctx, next) {
@@ -30,7 +29,6 @@ protected_route.put('/settings', compose([portalRoute, portalAdminGuard]), porta
 protected_route.put('/network-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalNetworkSettings);
 protected_route.put('/settings/attribute-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalAttributeSettings);
 protected_route.put('/settings/layout-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalLayoutSettings);
-protected_route.put('/settings/layouts', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalLayouts);
 
 protected_route.post('/v2/registry/sign-up', compose([portalRoute, portalAdminGuard]), usersCtrl.createUser);
 // TODO: replace with specific command handlers

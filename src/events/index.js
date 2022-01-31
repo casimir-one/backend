@@ -77,7 +77,6 @@ import ContractAgreementRejectedEvent from './impl/ContractAgreementRejectedEven
 
 import AttributeSettingsUpdatedEvent from './impl/AttributeSettingsUpdatedEvent';
 import LayoutSettingsUpdatedEvent from './impl/LayoutSettingsUpdatedEvent';
-import LayoutUpdatedEvent from './impl/LayoutUpdatedEvent';
 import NetworkSettingsUpdatedEvent from './impl/NetworkSettingsUpdatedEvent';
 import PortalProfileUpdatedEvent from './impl/PortalProfileUpdatedEvent';
 import PortalSettingsUpdatedEvent from './impl/PortalSettingsUpdatedEvent';
@@ -87,6 +86,10 @@ import UserProfileDeletedEvent from './impl/UserProfileDeletedEvent';
 import BookmarkCreatedEvent from './impl/BookmarkCreatedEvent';
 import BookmarkDeletedEvent from './impl/BookmarkDeletedEvent';
 import NotificationsMarkedAsReadEvent from './impl/NotificationsMarkedAsReadEvent';
+
+import LayoutCreatedEvent from './impl/LayoutCreatedEvent';
+import LayoutUpdatedEvent from './impl/LayoutUpdatedEvent';
+import LayoutDeletedEvent from './impl/LayoutDeletedEvent';
 
 module.exports = {
   ProjectCreatedEvent,
@@ -170,12 +173,15 @@ module.exports = {
 
   AttributeSettingsUpdatedEvent,
   LayoutSettingsUpdatedEvent,
-  LayoutUpdatedEvent,
   NetworkSettingsUpdatedEvent,
   PortalProfileUpdatedEvent,
   PortalSettingsUpdatedEvent,
 
   BookmarkCreatedEvent,
   BookmarkDeletedEvent,
-  NotificationsMarkedAsReadEvent
+  NotificationsMarkedAsReadEvent,
+
+  LayoutCreatedEvent,
+  LayoutUpdatedEvent,
+  LayoutDeletedEvent
 }
