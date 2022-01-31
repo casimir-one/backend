@@ -14,6 +14,7 @@ import contractAgreementEventHandler from './impl/ContractAgreementEventHandler'
 import fileUploadEventHandler from './impl/FileUploadEventHandler';
 import portalEventHandler from './impl/PortalEventHandler';
 import userSettingsEventHandler from './impl/UserSettingsEventHandler';
+import layoutEventHandler from './impl/LayoutEventHandler';
 
 
 module.exports = {
@@ -32,5 +33,6 @@ module.exports = {
   contractAgreementEventHandler,
   fileUploadEventHandler,
   portalEventHandler,
-  userSettingsEventHandler
+  userSettingsEventHandler,
+  layoutEventHandler
 };

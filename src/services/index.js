@@ -33,6 +33,8 @@ import PortalService from './impl/write/PortalService';
 import UserBookmarkService from './impl/write/UserBookmarkService';
 import UserNotificationService from './impl/write/UserNotificationService';
 import UserInviteService from './impl/write/UserInviteService';
+import LayoutDtoService from './impl/read/LayoutDtoService';
+import LayoutService from './impl/write/LayoutService';
 
 module.exports = {
   TeamService,
@@ -84,5 +86,8 @@ module.exports = {
 
   UserBookmarkService,
   UserNotificationService,
-  UserInviteService
+  UserInviteService,
+
+  LayoutDtoService,
+  LayoutService
 }

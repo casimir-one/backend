@@ -6,11 +6,14 @@ class LayoutUpdatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      portalId,
-      layout
+      _id: layoutId,
+      name,
+      value
     } = eventPayload;
 
-    assert(!!layout, "'layout' is required");
+    assert(!!layoutId, "'layoutId' is required");
+    assert(!!name, "'name' is required");
+    assert(!!value && Array.isArray(value), "'value' is required and should be aray");
 
     super(APP_EVENT.LAYOUT_UPDATED, eventPayload);
   }

@@ -21,7 +21,8 @@ import {
   portalCtrl,
   userSettingsCtrl,
   notificationsCtrl,
-  invitesCtrl
+  invitesCtrl,
+  layoutsCtrl
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
@@ -217,6 +218,13 @@ protected_route.post('/v2/contract-agreement/reject', contractAgreementCtrl.reje
 protected_route.get('/v2/contract-agreement/:contractAgreementId', contractAgreementCtrl.getContractAgreement);
 protected_route.get('/v2/contract-agreements', contractAgreementCtrl.getContractAgreements);
 public_route.get('/contract-agreement/file/:filename', contractAgreementCtrl.getContractAgreementFile);
+
+public_route.get('/v2/layout/:layoutId', layoutsCtrl.getLayout);
+public_route.get('/v2/layouts', layoutsCtrl.getLayouts);
+public_route.get('/v2/layouts/scope/:scope', layoutsCtrl.getLayoutsByScope);
+protected_route.post('/v2/layout', compose([portalAdminGuard]), layoutsCtrl.createLayout);
+protected_route.put('/v2/layout', compose([portalAdminGuard]), layoutsCtrl.updateLayout);
+protected_route.put('/v2/layout/delete', compose([portalAdminGuard]), layoutsCtrl.deleteLayout);
 
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),

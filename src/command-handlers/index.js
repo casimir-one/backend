@@ -12,6 +12,7 @@ import contractAgreementCmdHandler from './impl/ContractAgreementCmdHandler';
 import portalCmdHandler from './impl/PortalCmdHandler';
 import userSettingsCmdHandler from './impl/UserSettingsCmdHandler';
 import notificationCmdHandler from './impl/NotificationCmdHandler';
+import layoutCmdHandler from './impl/LayoutCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -27,5 +28,6 @@ module.exports = {
   contractAgreementCmdHandler,
   portalCmdHandler,
   userSettingsCmdHandler,
-  notificationCmdHandler
+  notificationCmdHandler,
+  layoutCmdHandler
 }

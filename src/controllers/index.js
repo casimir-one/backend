@@ -16,6 +16,7 @@ import portalCtrl from './impl/PortalController';
 import userSettingsCtrl from './impl/UserSettingsController';
 import notificationsCtrl from './impl/NotificationsController';
 import invitesCtrl from './impl/InvitesController';
+import layoutsCtrl from './impl/LayoutsController';
 
 module.exports = {
   projectsCtrl,
@@ -35,5 +36,6 @@ module.exports = {
   portalCtrl,
   userSettingsCtrl,
   notificationsCtrl,
-  invitesCtrl
+  invitesCtrl,
+  layoutsCtrl
 }

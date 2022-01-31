@@ -13,7 +13,8 @@ import {
   contractAgreementCmdHandler,
   portalCmdHandler,
   userSettingsCmdHandler,
-  notificationCmdHandler
+  notificationCmdHandler,
+  layoutCmdHandler
 } from './index';
 
 
@@ -54,12 +55,14 @@ module.exports = {
   [APP_CMD.REJECT_CONTRACT_AGREEMENT]: contractAgreementCmdHandler,
   [APP_CMD.UPDATE_PORTAL_PROFILE]: portalCmdHandler,
   [APP_CMD.UPDATE_PORTAL_SETTINGS]: portalCmdHandler,
-  [APP_CMD.UPDATE_LAYOUT]: portalCmdHandler,
   [APP_CMD.UPDATE_LAYOUT_SETTINGS]: portalCmdHandler,
   [APP_CMD.UPDATE_ATTRIBUTE_SETTINGS]: portalCmdHandler,
   [APP_CMD.UPDATE_NETWORK_SETTINGS]: portalCmdHandler,
   [APP_CMD.DELETE_USER_PROFILE]: portalCmdHandler,
   [APP_CMD.CREATE_BOOKMARK]: userSettingsCmdHandler,
   [APP_CMD.DELETE_BOOKMARK]: userSettingsCmdHandler,
-  [APP_CMD.MARK_NOTIFICATIONS_AS_READ]: notificationCmdHandler
+  [APP_CMD.MARK_NOTIFICATIONS_AS_READ]: notificationCmdHandler,
+  [APP_CMD.CREATE_LAYOUT]: layoutCmdHandler,
+  [APP_CMD.UPDATE_LAYOUT]: layoutCmdHandler,
+  [APP_CMD.DELETE_LAYOUT]: layoutCmdHandler,
 };
