@@ -7,6 +7,7 @@ import cors from '@koa/cors';
 import config from './config';
 import jsonResponse from './response';
 import { ChainService } from '@deip/chain-service';
+import QueueService from "./queue/QueueService";
 
 if (!config.TENANT) throw new Error(`Portal is not specified`);
 
@@ -48,6 +49,12 @@ app.use(require('./middlewares/auth/portalAuth.js')());
 app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/portal.js').protected.routes());
 app.use(require('./routes/webhook').protected.routes());
+
+QueueService.getInstanceAsync(config).then(() => {
+  console.log("QueueService started");
+}).catch(err => {
+  console.log("QueueService error", err.message)
+})
 
 ChainService.getInstanceAsync({
   PROTOCOL: config.PROTOCOL,
