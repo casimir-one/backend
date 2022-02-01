@@ -115,10 +115,9 @@ class TeamsController extends BaseController {
         };
 
         const msg = ctx.state.msg;
-        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
-        const entityId = appCmd.getCmdPayload().entityId;
-
         await accountCmdHandler.process(msg, ctx, validate);
+
+        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_DAO);
 
         ctx.successRes({ _id: entityId });
 

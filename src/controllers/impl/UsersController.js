@@ -277,8 +277,7 @@ class UsersController extends BaseController {
         const msg = ctx.state.msg;
         await accountCmdHandler.process(msg, ctx, validate);
 
-        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO);
-        const entityId = appCmd.getCmdPayload().entityId;
+        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_DAO);
 
         ctx.successRes({ _id: entityId });
 

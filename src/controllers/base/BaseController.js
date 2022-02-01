@@ -2,6 +2,7 @@ import { JsonDataMsg, MultFormDataMsg } from '@deip/message-models';
 import config from '../../config';
 import { ChainService } from '@deip/chain-service';
 import { BadRequestError } from './../../errors';
+import { APP_CMD } from '@deip/constants';
 
 
 class MessageHandler {
@@ -80,6 +81,20 @@ class BaseController {
 
   query({ h: actionHandler }) {
     return new ActionHandler(actionHandler);
+  }
+
+  extractEntityId(msg, cmdNum, key='entityId') {
+    const { appCmds } = msg;
+    const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == cmdNum || cmd.getCmdNum() == APP_CMD.CREATE_PROPOSAL);
+
+    if (appCmd && appCmd.getCmdNum() == cmdNum) {
+      return appCmd.getCmdPayload()[key];
+    } else if (appCmd && appCmd.getCmdNum() == APP_CMD.CREATE_PROPOSAL) {
+      const cmd = appCmd.getProposedCmds().find(c => c.getCmdNum() == cmdNum);
+      return cmd.getCmdPayload()[key];
+    } else {
+      return null;
+    }
   }
 
 }
