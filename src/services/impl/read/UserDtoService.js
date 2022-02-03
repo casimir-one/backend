@@ -37,7 +37,7 @@ class UserDtoService extends BaseService {
 
       if (chainAccount) {
 
-        const userBalances = chainBalances.filter((chainBalance) => chainBalances && chainBalance.account === chainAccount.daoId);
+        const userBalances = chainBalances.flat().filter((chainBalance) => chainBalances && chainBalance.account === chainAccount.daoId);
         balances.push(...userBalances);
 
         pubKey = chainAccount.authority.owner.auths
