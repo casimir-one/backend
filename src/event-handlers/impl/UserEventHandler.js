@@ -39,7 +39,7 @@ userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
         email: userInfo.email,
         attributes: userInfo.attributes,
         teams: [...userInfo.teams, daoId],
-        roles: [...userInfo.roles, { role: USER_ROLES.TEAMADMIN,  teamId: daoId }]
+        roles: [...userInfo.roles, { role: USER_ROLES.TEAM_ADMIN,  teamId: daoId }]
       });
     }
   } else {

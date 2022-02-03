@@ -154,17 +154,9 @@ class TeamsController extends BaseController {
         };
 
         const msg = ctx.state.msg;
-        const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-        let entityId = '';
-        if (appCmd.getCmdNum() === APP_CMD.UPDATE_DAO) {
-          entityId = appCmd.getCmdPayload().entityId;
-        } else if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
-          const proposedCmds = appCmd.getProposedCmds();
-          const updateCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO)
-          entityId = updateCmd.getCmdPayload().entityId;
-        }
-
         await accountCmdHandler.process(msg, ctx, validate);
+
+        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_DAO);
 
         ctx.successRes({ _id: entityId });
 

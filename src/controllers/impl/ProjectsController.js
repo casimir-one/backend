@@ -169,7 +169,9 @@ class ProjectsController extends BaseController {
         const msg = ctx.state.msg;
         await projectCmdHandler.process(msg, ctx, validate);
 
-        ctx.successRes();
+        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_PROJECT);
+
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
