@@ -21,7 +21,7 @@ class TeamDtoService extends BaseService {
 
       const balances = [];
       if (chainAccount) {
-        const teamBalances = chainBalances.filter((chainBalance) => chainBalance && chainBalance.account === team._id);
+        const teamBalances = chainBalances.flat().filter((chainBalance) => chainBalance && chainBalance.account === team._id);
         balances.push(...teamBalances);
       } else {
         console.warn(`Team account with ID '${team._id}' is not found in the Chain`);
