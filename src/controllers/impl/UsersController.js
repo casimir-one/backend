@@ -10,7 +10,7 @@ import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_R
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
-import { TransferAssetCmd } from '@deip/command-models';
+import { TransferAssetCmd } from '@deip/commands';
 
 
 const userDtoService = new UserDtoService();

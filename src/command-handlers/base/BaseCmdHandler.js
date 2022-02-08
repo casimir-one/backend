@@ -7,7 +7,7 @@ import ProposalService from './../../services/impl/write/ProposalService';
 import assert from 'assert';
 import config from './../../config';
 import { QUEUE_TOPIC } from './../../constants';
-import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@deip/command-models';
+import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
 import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
 import {
   logError,
