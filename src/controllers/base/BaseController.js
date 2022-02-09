@@ -1,4 +1,4 @@
-import { JsonDataMsg, MultFormDataMsg } from '@deip/message-models';
+import { JsonDataMsg, MultFormDataMsg } from '@deip/messages';
 import config from '../../config';
 import { ChainService } from '@deip/chain-service';
 import { BadRequestError } from './../../errors';
