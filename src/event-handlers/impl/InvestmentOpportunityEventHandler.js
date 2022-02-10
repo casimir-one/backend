@@ -1,7 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
 import { InvestmentOpportunityService, InvestmentOpportunityParticipationService } from './../../services';
-import { TS_TYPES } from '@deip/constants';
+import { INVESTMENT_OPPORTUNITY_STATUS } from '@deip/constants';
 
 
 class InvestmentOpportunityEventHandler extends BaseEventHandler {
@@ -45,7 +45,7 @@ invstOppEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED, async (e
       amount: '0'
     },
     metadata,
-    status: TS_TYPES.INACTIVE
+    status: INVESTMENT_OPPORTUNITY_STATUS.INACTIVE
   });
 });
 
@@ -70,7 +70,7 @@ invstOppEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, asy
 
   if(Number(updatedData.totalInvested.amount) >= Number(invstOpp.hardCap.amount)) {
     updatedData.totalInvested.amount = invstOpp.hardCap.amount;
-    updatedData.status = TS_TYPES.FINISHED;
+    updatedData.status = INVESTMENT_OPPORTUNITY_STATUS.FINISHED;
   }
 
   await invstOppService.updateInvstOpp({
