@@ -1,7 +1,7 @@
 import jwt from 'jsonwebtoken';
 import config from './../../config';
 import { UserDtoService, PortalDtoService } from './../../services';
-import { UnauthorizedError } from './../../errors';
+import { UnauthorizedError, BadRequestError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
 
 

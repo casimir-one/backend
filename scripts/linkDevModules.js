@@ -9,7 +9,11 @@ const inquirer = require('inquirer');
 
 const prompt = inquirer.createPromptModule();
 
-const monorepoPath = path.join(__dirname, '..', '..', 'casimir-frontend');
+let monorepoPath = path.join(__dirname, '..', '..', 'casimir-frontend');
+
+if(!fs.existsSync(monorepoPath)) {
+  monorepoPath = path.join(__dirname, '..', '..', 'deip-modules');
+}
 
 // eslint-disable-next-line import/no-dynamic-require
 const packages = require(

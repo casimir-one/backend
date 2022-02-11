@@ -104,14 +104,13 @@ protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam
 protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
 public_route.get('/v2/teams', teamsCtrl.getTeams)
 protected_route.post('/v2/team/join', teamsCtrl.joinTeam)
-protected_route.post('/v2/team/leave',  teamsCtrl.leaveTeam)
+protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)
 public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
 public_route.get('/v2/teams/listing-paginated', teamsCtrl.getTeamsListingPaginated)
 public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
 public_route.get('/v2/teams/portal/:portalId', teamsCtrl.getTeamsByPortal)
 public_route.get('/team/logo/:teamId', compose([teamLogoProxy()]), teamsCtrl.getTeamLogo)
-protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)// temp: need change to cmd
 
 public_route.get('/v2/attributes', attributesCtrl.getAttributes);
 public_route.get('/v2/attributes/scope/:scope', attributesCtrl.getAttributesByScope);
