@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import AssetValueSchema from './AssetValueSchema';
 import { INVESTMENT_OPPORTUNITY_TYPE } from './../constants';
-import { TS_TYPES } from '@deip/constants';
+import { INVESTMENT_OPPORTUNITY_STATUS } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -27,9 +27,9 @@ const InvestmentOpportunitySchema = new Schema({
   },
   "status": {
     type: Number,
-    enum: [...Object.values(TS_TYPES)],
+    enum: [...Object.values(INVESTMENT_OPPORTUNITY_STATUS)],
     required: true,
-    default: TS_TYPES.INACTIVE
+    default: INVESTMENT_OPPORTUNITY_STATUS.INACTIVE
   },
 }, { timestamps: true });
 
