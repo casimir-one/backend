@@ -8,7 +8,7 @@ class ProjectContentService extends BaseService {
   }
 
   async createProjectContentRef({
-    id,
+    _id,
     projectId,
     teamId,
     folder,
@@ -25,7 +25,7 @@ class ProjectContentService extends BaseService {
   }) {
 
     const result = await this.createOne({
-      _id: id,
+      _id,
       projectId,
       teamId,
       folder,
