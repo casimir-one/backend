@@ -80,6 +80,10 @@ class BaseCmdHandler extends EventEmitter {
 
     // TODO: Use Apache Kafka producer
     const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
+
+    //set events issuer for sending results to the sockets
+    for (const event of events) event.setEventIssuer(ctx)
+
     this.logEvents(events);
 
     const queueService = await QueueService.getInstanceAsync(config.QUEUE_SERVICE);
