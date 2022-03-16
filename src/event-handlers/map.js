@@ -169,11 +169,19 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.ASSET_CREATED]: [
+  [APP_EVENT.FT_CREATED]: [
     { h: assetEventHandler, await: false }
   ],
 
-  [APP_EVENT.ASSET_ISSUED]: [
+  [APP_EVENT.NFT_CREATED]: [
+    { h: assetEventHandler, await: false }
+  ],
+
+  [APP_EVENT.FT_ISSUED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.NFT_ISSUED]: [
     { h: userNotificationEventHandler, await: false }
   ],
 

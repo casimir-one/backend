@@ -40,8 +40,10 @@ import InvestmentOpportunityCreatedEvent from './impl/InvestmentOpportunityCreat
 import InvestmentOpportunityParticipatedEvent from './impl/InvestmentOpportunityParticipatedEvent';
 
 import AssetTransferedEvent from './impl/AssetTransferedEvent';
-import AssetCreatedEvent from './impl/AssetCreatedEvent';
-import AssetIssuedEvent from './impl/AssetIssuedEvent';
+import FungibleTokenCreatedEvent from './impl/FungibleTokenCreatedEvent';
+import NonFungibleTokenCreatedEvent from './impl/NonFungibleTokenCreatedEvent';
+import FungibleTokenIssuedEvent from './impl/FungibleTokenIssuedEvent';
+import NonFungibleTokenIssuedEvent from './impl/NonFungibleTokenIssuedEvent';
 import AssetTransferProposalCreatedEvent from './impl/AssetTransferProposalCreatedEvent';
 import AssetTransferProposalAcceptedEvent from './impl/AssetTransferProposalAcceptedEvent';
 import AssetTransferProposalDeclinedEvent from './impl/AssetTransferProposalDeclinedEvent';
@@ -136,8 +138,10 @@ module.exports = {
   InvestmentOpportunityParticipatedEvent,
 
   AssetTransferedEvent,
-  AssetCreatedEvent,
-  AssetIssuedEvent,
+  FungibleTokenCreatedEvent,
+  NonFungibleTokenCreatedEvent,
+  FungibleTokenIssuedEvent,
+  NonFungibleTokenIssuedEvent,
   AssetTransferProposalCreatedEvent,
   AssetTransferProposalAcceptedEvent,
   AssetTransferProposalDeclinedEvent,

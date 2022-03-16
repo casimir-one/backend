@@ -117,11 +117,11 @@ class AssetsController extends BaseController {
   });
   
 
-  getAccountAssetBalance = this.query({
+  getFungibleTokenBalance = this.query({
     h: async (ctx) => {
       try {
         const { owner, symbol } = ctx.params;
-        const asset = await assetDtoService.getAccountAssetBalance(owner, symbol);
+        const asset = await assetDtoService.getFungibleTokenBalance(owner, symbol);
         if (!asset) {
           throw new NotFoundError(`Asset "${symbol}" is not found`);
         }
@@ -135,11 +135,11 @@ class AssetsController extends BaseController {
   });
   
 
-  getAccountAssetsBalancesByOwner = this.query({
+  getFungibleTokenBalancesByOwner = this.query({
     h: async (ctx) => {
       try {
         const owner = ctx.params.owner;
-        const asset = await assetDtoService.getAccountAssetsBalancesByOwner(owner);
+        const asset = await assetDtoService.getFungibleTokenBalancesByOwner(owner);
         ctx.successRes(asset);
       }
       catch(err) {
@@ -150,11 +150,11 @@ class AssetsController extends BaseController {
   });
   
 
-  getAccountsAssetBalancesByAsset = this.query({
+  getFungibleTokenBalancesBySymbol = this.query({
     h: async (ctx) => {
       try {
         const symbol = ctx.params.symbol;
-        const assets = await assetDtoService.getAccountsAssetBalancesByAsset(symbol);
+        const assets = await assetDtoService.getFungibleTokenBalancesBySymbol(symbol);
         ctx.successRes(assets);
       }
       catch(err) {
@@ -222,11 +222,11 @@ class AssetsController extends BaseController {
   });
 
 
-  createAsset = this.command({
+  createFungibleToken = this.command({
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ASSET);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_FT);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
@@ -243,12 +243,62 @@ class AssetsController extends BaseController {
     }
   });
   
-
-  issueAsset = this.command({
+  createNonFungibleToken = this.command({
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ISSUE_ASSET);
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_NFT);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+  
+
+  issueFungibleToken = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ISSUE_FT);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.status = 200;
+        ctx.body = {
+          model: "ok"
+        };
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
+      }
+    }
+  });
+
+  issueNonFungibleToken = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ISSUE_NFT);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }

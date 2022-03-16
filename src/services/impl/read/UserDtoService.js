@@ -26,7 +26,7 @@ class UserDtoService extends BaseService {
     };
     const chainAccounts = await chainRpc.getAccountsAsync(users.map(user => isValidChainId(user._id) ? user._id : genRipemd160Hash(user.email)));
     const portalProfile = await this.getPortalInstance();
-    const chainBalances = await Promise.all(users.map((user) => chainRpc.getAssetsBalancesByOwnerAsync(user._id)));
+    const chainBalances = await Promise.all(users.map((user) => chainRpc.getFungibleTokenBalancesByOwnerAsync(user._id)));
 
     return users.map((user) => {
 

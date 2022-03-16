@@ -37,7 +37,7 @@ const run = async () => {
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc();
 
-  const chainAssets = await chainRpc.getAssetsListAsync();
+  const chainAssets = await chainRpc.getFungibleTokenListAsync();
   const assetsPromises = [];
 
   const projects = await Promise.all(chainAssets.filter((chainAsset) => !!chainAsset.tokenized_research).map((chainAsset) => {
@@ -54,7 +54,7 @@ const run = async () => {
       "precision": chainAsset.precision,
       "issuer": chainAsset.issuer,
       "description": chainAsset.description,
-      "type": chainAsset.tokenized_research ? ASSET_TYPE.NFT : ASSET_TYPE.COIN,
+      "type": chainAsset.tokenized_research ? ASSET_TYPE.NFT : ASSET_TYPE.FT,
       "settings": {
         "projectId": chainAsset.tokenized_research || null,
         "maxSupply": parseInt(chainAsset.max_supply),
