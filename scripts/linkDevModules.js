@@ -9,7 +9,7 @@ const inquirer = require('inquirer');
 
 const prompt = inquirer.createPromptModule();
 
-const monorepoPath = path.join(__dirname, '..', '..', 'deip-modules');
+const monorepoPath = path.join(__dirname, '..', '..', 'casimir-frontend');
 
 // eslint-disable-next-line import/no-dynamic-require
 const packages = require(
@@ -85,7 +85,7 @@ prompt([{
     return Promise.all(linkModulesPromises);
   })
   .then(() => {
-    const globalPath = path.join(__dirname, '..', '..', 'deip-modules', 'node_modules', modulesToRemoveNamesGlob);
+    const globalPath = path.join(__dirname, '..', '..', 'casimir-frontend', 'node_modules', modulesToRemoveNamesGlob);
     rimraf(globalPath, {}, () => {
       console.info(`${modulesToRemove} removed from @deip`);
     });
