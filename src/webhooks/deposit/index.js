@@ -251,17 +251,17 @@ const confirmAssetDepositRequest = async (ctx) => {
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
-        const issueAssetCmd = new IssueAssetCmd({
+
+        const issueFungibleTokenCmd = new IssueFungibleTokenCmd({
           issuer: regacc,
-          asset: {
-            id: asset._id,
-            symbol: asset.symbol,
-            precision: asset.precision,
-            amount: amount / 100 // cents
-          },
+          tokenId: asset._id,
+          symbol: asset.symbol,
+          precision: asset.precision,
+          amount: amount / 100, // cents
           recipient: account
         });
-        txBuilder.addCmd(issueAssetCmd);
+
+        txBuilder.addCmd(issueFungibleTokenCmd);
         return txBuilder.end();
       })
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));

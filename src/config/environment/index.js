@@ -14,10 +14,11 @@ require('dotenv').config({
 });
 
 
-function parseJsonEnvVar(jsonEnvVarName) {
+function parseJsonEnvVar(jsonEnvVarName, defaultValue) {
   const jsonEnvVar = process.env[jsonEnvVarName];
-  if (!jsonEnvVar) throw new Error(jsonEnvVarName + " json environment variable is not defined");
-  return JSON.parse(jsonEnvVar);
+  if (!jsonEnvVar && defaultValue === undefined)
+    throw new Error(jsonEnvVarName + " json environment variable is not defined. Specify it in the config or provide a default value");
+  return jsonEnvVar ? JSON.parse(jsonEnvVar) : defaultValue;
 }
 
 

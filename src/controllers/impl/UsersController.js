@@ -71,7 +71,7 @@ class UsersController extends BaseController {
         const isPostFunding = config.PROTOCOL === PROTOCOL_CHAIN.GRAPHENE && !!faucetFundingAmount;
 
         const fundUserAccount = async () => {
-          const fundingTx = await chainTxBuilder.begin({ ignorePortalSig: true })
+          const fundingTx = await chainTxBuilder.begin()
             .then((txBuilder) => {
 
               if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
