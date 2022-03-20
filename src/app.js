@@ -49,7 +49,13 @@ app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/portal.js').protected.routes());
 app.use(require('./routes/webhook').protected.routes());
 
-ChainService.getInstanceAsync(config)
+ChainService.getInstanceAsync({
+  PROTOCOL: config.PROTOCOL,
+  DEIP_FULL_NODE_URL: config.DEIP_FULL_NODE_URL,
+  CORE_ASSET: config.CORE_ASSET,
+  CHAIN_ID: config.CHAIN_ID,
+  PORTAL_ID: config.TENANT
+})
   .then(() => {
     console.log(config);
     app.listen(PORT, HOST, () => {

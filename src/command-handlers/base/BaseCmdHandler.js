@@ -53,8 +53,12 @@ class BaseCmdHandler extends EventEmitter {
       const chainService = await ChainService.getInstanceAsync(config);
       const chainRpc = chainService.getChainRpc();
       const chainNodeClient = chainService.getChainNodeClient();
-      await tx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);      
-      const txInfo = await tx.sendAsync(chainRpc);
+      const verifiedTxPromise = tx.isOnBehalfPortal()
+        ? tx.verifyByPortalAsync({ verificationPubKey: config.TENANT_PORTAL.pubKey, verificationPrivKey: config.TENANT_PORTAL.privKey }, chainNodeClient)
+        : Promise.resolve(tx.getSignedRawTx());
+      const verifiedTx = await verifiedTxPromise;
+
+      const txInfo = await chainRpc.sendTxAsync(verifiedTx);
       await waitChainBlockAsync(); // This must be replaced with chain Domain event subscriber
       return txInfo;
     },

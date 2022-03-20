@@ -71,7 +71,7 @@ class UsersController extends BaseController {
         const isPostFunding = config.PROTOCOL === PROTOCOL_CHAIN.GRAPHENE && !!faucetFundingAmount;
 
         const fundUserAccount = async () => {
-          const fundingTx = await chainTxBuilder.begin()
+          const fundingTx = await chainTxBuilder.begin({ ignorePortalSig: true })
             .then((txBuilder) => {
 
               if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
@@ -79,7 +79,10 @@ class UsersController extends BaseController {
                 const seedFundingCmd = new TransferAssetCmd({
                   from: faucetUsername,
                   to: pubKey,
-                  asset: { ...config.CORE_ASSET, amount: faucetFundingAmount }
+                  tokenId: config.CORE_ASSET.id,
+                  symbol: config.CORE_ASSET.symbol,
+                  precision: config.CORE_ASSET.precision,
+                  amount: faucetFundingAmount,
                 });
                 txBuilder.addCmd(seedFundingCmd);
               }
@@ -87,7 +90,10 @@ class UsersController extends BaseController {
               const daoFundingCmd = new TransferAssetCmd({
                 from: faucetUsername,
                 to: entityId,
-                asset: { ...config.CORE_ASSET, amount: faucetFundingAmount }
+                tokenId: config.CORE_ASSET.id,
+                symbol: config.CORE_ASSET.symbol,
+                precision: config.CORE_ASSET.precision,
+                amount: faucetFundingAmount
               });
               txBuilder.addCmd(daoFundingCmd);
 
