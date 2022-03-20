@@ -5,7 +5,7 @@ import { TextEncoder } from 'util';
 import { DEPOSIT_REQUEST_STATUS } from '@deip/constants';
 import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 import { ChainService } from '@deip/chain-service';
-import { IssueAssetCmd } from '@deip/commands';
+import { IssueFungibleTokenCmd } from '@deip/commands';
 import { UnauthorizedError, BadRequestError, NotFoundError } from './../../errors'; 
 import { AssetDtoService } from './../../services';
 
@@ -71,14 +71,12 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
-        const issueAssetCmd = new IssueAssetCmd({
+        const issueAssetCmd = new IssueFungibleTokenCmd({
           issuer: regacc,
-          asset: {
-            id: asset._id,
-            symbol: asset.symbol,
-            precision: asset.precision,
-            amount: amount / 100 // cents
-          },
+          tokenId: asset._id,
+          symbol: asset.symbol,
+          precision: asset.precision,
+          amount: amount / 100, // cents
           recipient: account
         });
         txBuilder.addCmd(issueAssetCmd);
@@ -87,8 +85,8 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));
 
     const { tx: trx } = tx.getPayload();
-    await trx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
-    const txInfo = await tx.sendAsync(chainRpc);
+    const verifiedTx = await trx.verifyByPortalAsync({ verificationPubKey: config.TENANT_PORTAL.pubKey, verificationPrivKey: config.TENANT_PORTAL.privKey }, chainNodeClient);
+    const txInfo = await chainRpc.sendTxAsync(verifiedTx);
 
     const depositRequestDoc = await (new AssetDepositRequest({
       assetId: asset._id,
@@ -268,10 +266,9 @@ const confirmAssetDepositRequest = async (ctx) => {
       })
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));
 
-
     const { tx: trx } = tx.getPayload();
-    await trx.signByTenantAsync({ tenant: config.TENANT, tenantPrivKey: config.TENANT_PRIV_KEY }, chainNodeClient);
-    const txInfo = await tx.sendAsync(chainRpc);
+    const verifiedTx = await trx.verifyByPortalAsync({ verificationPubKey: config.TENANT_PORTAL.pubKey, verificationPrivKey: config.TENANT_PORTAL.privKey }, chainNodeClient);
+    const txInfo = await chainRpc.sendTxAsync(verifiedTx);
 
     depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.APPROVED;
     depositRequestDoc.txInfo = txInfo;

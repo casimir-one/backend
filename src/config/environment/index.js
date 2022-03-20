@@ -13,6 +13,14 @@ require('dotenv').config({
     (env == 'production' ? '.prod.env' : env == 'development' ? '.dev.env' : process.env.DEIP_CONFIG ? ('.' + process.env.DEIP_CONFIG + '.env') : '.local.env')
 });
 
+
+function parseJsonEnvVar(jsonEnvVarName) {
+  const jsonEnvVar = process.env[jsonEnvVarName];
+  if (!jsonEnvVar) throw new Error(jsonEnvVarName + " json environment variable is not defined");
+  return JSON.parse(jsonEnvVar);
+}
+
+
 const config = {
   ENVIRONMENT: env,
   PROTOCOL: process.env.PROTOCOL ? parseInt(process.env.PROTOCOL) : PROTOCOL_CHAIN.GRAPHENE,
@@ -23,7 +31,8 @@ const config = {
   TENANT_SFTP_PASSWORD: process.env.TENANT_SFTP_PASSWORD,
   TENANT_FILES_DIR: process.env.TENANT_FILES_DIR || 'files',
   TENANT_LOG_DIR: process.env.TENANT_LOG_DIR || 'logs',
-  
+  TENANT_PORTAL: parseJsonEnvVar('TENANT_PORTAL'),
+
   DEIP_MONGO_STORAGE_CONNECTION_URL: process.env.DEIP_MONGO_STORAGE_CONNECTION_URL,
 
   DEIP_FULL_NODE_URL: process.env.DEIP_FULL_NODE_URL,
@@ -32,12 +41,13 @@ const config = {
   TENANT_PRIV_KEY: process.env.TENANT_PRIV_KEY,
   CHAIN_ID: process.env.CHAIN_ID,
   CHAIN_BLOCK_INTERVAL_MILLIS: process.env.CHAIN_BLOCK_INTERVAL_MILLIS ? parseInt(process.env.CHAIN_BLOCK_INTERVAL_MILLIS) : 3000,
-  FAUCET_ACCOUNT: JSON.parse(process.env.FAUCET_ACCOUNT),
-  CORE_ASSET: JSON.parse(process.env.CORE_ASSET),
+  FAUCET_ACCOUNT: parseJsonEnvVar('FAUCET_ACCOUNT'),
+  CORE_ASSET: parseJsonEnvVar('CORE_ASSET'),
   DEIP_SERVER_URL: process.env.DEIP_SERVER_URL,
   DEIP_CLIENT_URL: process.env.DEIP_CLIENT_URL,
   SIG_SEED: process.env.SIG_SEED,
   JWT_SECRET: process.env.JWT_SECRET
 };
+
 
 module.exports = config;
