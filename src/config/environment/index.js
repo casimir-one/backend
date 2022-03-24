@@ -47,7 +47,13 @@ const config = {
   DEIP_SERVER_URL: process.env.DEIP_SERVER_URL,
   DEIP_CLIENT_URL: process.env.DEIP_CLIENT_URL,
   SIG_SEED: process.env.SIG_SEED,
-  JWT_SECRET: process.env.JWT_SECRET
+  JWT_SECRET: process.env.JWT_SECRET,
+
+  QUEUE_SERVICE: process.env.QUEUE_SERVICE || "pubsub", //kafka | pubsub
+  KAFKA_CLIENT_ID: "offchain-server",
+  KAFKA_BROKER_URL: process.env.KAFKA_BROKER_URL,
+  KAFKA_USER: process.env.KAFKA_USER,
+  KAFKA_PASSWORD: process.env.KAFKA_PASSWORD
 };
 
 

@@ -1,5 +1,6 @@
 .DS_Store
 .vscode
+.idea
 vscode-profile*
 node_modules/
 dist/

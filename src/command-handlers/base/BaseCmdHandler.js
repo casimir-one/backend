@@ -1,5 +1,4 @@
 import EventEmitter from 'events';
-import PubSub from 'pubsub-js';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
@@ -13,21 +12,18 @@ import {
   logError,
   logWarn,
   logCmdInfo
-} from './../../utils/log';
+} from '../../utils/log';
 import { ChainService } from '@deip/chain-service';
-import { waitChainBlockAsync } from './../../utils/network';
+import { waitChainBlockAsync } from '../../utils/network';
+import QueueService from "../../queue/QueueService";
 
 
 const proposalService = new ProposalService({ scoped: false });
-
 class BaseCmdHandler extends EventEmitter {
-
   constructor() {
     super();
   }
-
   registered = [];
-
   isRegistered(eventNum) {
     return this.registered.includes(eventNum);
   }
@@ -85,7 +81,9 @@ class BaseCmdHandler extends EventEmitter {
     // TODO: Use Apache Kafka producer
     const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
     this.logEvents(events);
-    PubSub.publishSync(QUEUE_TOPIC.APP_EVENT_TOPIC, events);
+
+    const queueService = await QueueService.getInstanceAsync(config.QUEUE_SERVICE);
+    await queueService.sendEvents(QUEUE_TOPIC.APP_EVENT_TOPIC, events);
   };
 
 

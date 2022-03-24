@@ -1,17 +1,18 @@
-import PubSub from 'pubsub-js';
-import cron from 'node-cron';
 import BaseEventHandler from './../event-handlers/base/BaseEventHandler';
 import { QUEUE_TOPIC } from './../constants';
+import QueueService from "./QueueService";
+import config from "../config";
 
 // TODO: Use Apache Kafka consumer
 
 var isBroadcasting = false;
 const eventsBuffer = [];
 
-PubSub.subscribe(QUEUE_TOPIC.APP_EVENT_TOPIC, async function (topic, events) {
-  // eventsBuffer.push(...events);
-  await BaseEventHandler.Broadcast(events);
-});
+QueueService.getInstanceAsync(config).then(async queueService => {
+  await queueService.subscribeEach(QUEUE_TOPIC.APP_EVENT_TOPIC, async (topic, event) => {
+    await BaseEventHandler.Broadcast([event]);
+  })
+})
 
 // cron.schedule('*/0.5 * * * * *', async () => {
 
@@ -25,5 +26,5 @@ PubSub.subscribe(QUEUE_TOPIC.APP_EVENT_TOPIC, async function (topic, events) {
 //     }
 //     isBroadcasting = false;
 //   }
-  
+
 // });
