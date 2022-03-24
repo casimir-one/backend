@@ -1,10 +1,11 @@
 import EventEmitter from 'events';
 import { APP_PROPOSAL } from '@deip/constants';
+import { socketServer } from "../../websocket";
 import {
   logError,
   logWarn,
   logEventInfo
- } from './../../utils/log';
+} from '../../utils/log';
 
 
 class BaseEventHandler extends EventEmitter {
@@ -22,7 +23,7 @@ class BaseEventHandler extends EventEmitter {
   register(eventNum, handler) {
     this.registered.push(eventNum);
     this.on(eventNum, (event, ctx, reply) => {
-      return BaseEventHandler.PromisfyEventHandler(event, ctx, reply, handler)
+      return BaseEventHandler.PromisifyEventHandler(event, ctx, reply, handler)
     });
   }
 
@@ -37,15 +38,20 @@ class BaseEventHandler extends EventEmitter {
     })
       .then(() => {
         logEventInfo(`Event ${event.getEventName()} is handled by ${this.constructor.name} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''}`);
+        this.sendToSockets(event);
       })
       .catch((err) => {
         logError(`Event ${event.getEventName()} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''} failed with an error:`, err);
+        this.sendToSockets(event, err);
         throw err;
-      });
+      })
   }
 
+  sendToSockets(event, err) {
+    return socketServer.sendEvent(event, err)
+  }
 
-  static async PromisfyEventHandler(event, ctx, reply, handler) {
+  static async PromisifyEventHandler(event, ctx, reply, handler) {
     if (reply) {
       const { success, failure } = reply;
       try {
