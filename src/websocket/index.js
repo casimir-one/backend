@@ -43,12 +43,12 @@ const _send = (msg, payload, username) => {
   if (client) client.send(msg, payload);
 }
 
-const sendEvent = (event, err) => {
+const sendEvent = (event, errors) => {
   const eventIssuerUsername = event.getEventIssuer();
   if (!eventIssuerUsername) return;
 
-  const message = `Event${err ? "Error" : "Success"}`;
-  const payload = { event, err: err?.message };
+  const message = `Event${errors.length ? "Error" : "Success"}`;
+  const payload = { event: JSON.parse(event.toString()), errors};
 
   return _send(message, payload, eventIssuerUsername)
 }

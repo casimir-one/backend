@@ -38,11 +38,9 @@ class BaseEventHandler extends EventEmitter {
     })
       .then(() => {
         logEventInfo(`Event ${event.getEventName()} is handled by ${this.constructor.name} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''}`);
-        this.sendToSockets(event);
       })
       .catch((err) => {
         logError(`Event ${event.getEventName()} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''} failed with an error:`, err);
-        this.sendToSockets(event, err);
         throw err;
       })
   }
@@ -71,6 +69,7 @@ class BaseEventHandler extends EventEmitter {
     let chain = new Promise((start) => { start() });
 
     for (let i = 0; i < events.length; i++) {
+      const processingErrors = [];
       const event = events[i];
       const eventHandlers = APP_EVENT_HANDLERS_MAP[event.getEventNum()];
       if (!eventHandlers || !eventHandlers.length) {
@@ -81,11 +80,15 @@ class BaseEventHandler extends EventEmitter {
       for (let j = 0; j < eventHandlers.length; j++) {
         const { h: eventHandler, await: shouldAwait } = eventHandlers[j];
         if (eventHandler.isRegistered(event.getEventNum())) {
-          chain = chain.then(() => eventHandler.handle(shouldAwait, event, ctx));
+          chain = chain.then(() => eventHandler.handle(shouldAwait, event, ctx))
+            .catch(err => {
+              processingErrors.push({[eventHandler.constructor.name]: err.message})
+            })
         } else {
           logWarn(`WARNING: No event handler registered for ${event.getEventName()} event in ${eventHandler.constructor.name}`);
         }
       }
+      chain = chain.then(() => socketServer.sendEvent(event, processingErrors));
     }
 
     await chain;

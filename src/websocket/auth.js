@@ -1,4 +1,5 @@
 import jwt from 'jsonwebtoken';
+import url from 'url';
 import config from "../config";
 import { logError } from "../utils/log";
 
@@ -13,8 +14,8 @@ const verifyToken = (token) => {
 }
 
 export const verifySocketClient = (info, cb) => {
-  const token = info.req.headers.token;
-
+  const queryObject = url.parse(info.req.url, true).query;
+  const token = queryObject?.access_token;
   const validationResult = verifyToken(token);
   if (validationResult) {
     info.req.info = validationResult;
