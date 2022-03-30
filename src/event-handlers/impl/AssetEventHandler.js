@@ -1,6 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import APP_EVENT from './../../events/base/AppEvent';
-import { AssetService } from './../../services';
+import { AssetService, NonFungibleTokenService, NonFungibleTokenDtoService, FungibleTokenService } from './../../services';
 import { ASSET_TYPE } from '@deip/constants';
 
 
@@ -14,6 +14,9 @@ class AssetEventHandler extends BaseEventHandler {
 
 const assetEventHandler = new AssetEventHandler();
 const assetService = new AssetService();
+const fungibleTokenService = new FungibleTokenService();
+const nonFungibleTokenService = new NonFungibleTokenService();
+const nonFungibleTokenDtoService = new NonFungibleTokenDtoService();
 
 assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
 
@@ -25,7 +28,7 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
     maxSupply,
     minBallance,
     description,
-    projectTokenSettings
+    metadata
   } = event.getEventPayload();
 
   const settings = {
@@ -35,11 +38,21 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
     minBallance
   };
 
-  if (projectTokenSettings) { // keep this until we have working F-NFT
-    const { projectId, licenseRevenue } = projectTokenSettings;
+  if (metadata) { // keep this until we have working F-NFT
+    const { projectId, licenseRevenue } = metadata;
     settings.projectId = projectId;
     settings.licenseRevenueHoldersShare = licenseRevenue ? licenseRevenue.holdersShare : undefined;
   }
+
+  await fungibleTokenService.createFungibleToken({
+    entityId,
+    symbol,
+    precision,
+    issuer,
+    description,
+    type: ASSET_TYPE.FT,
+    metadata: settings
+  });
 
   await assetService.createAsset({
     entityId,
@@ -47,8 +60,7 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
     precision,
     issuer,
     description,
-    type: ASSET_TYPE.FT,
-    settings
+    type: ASSET_TYPE.FT
   });
 });
 
@@ -58,29 +70,47 @@ assetEventHandler.register(APP_EVENT.NFT_CREATED, async (event) => {
     entityId,
     issuer,
     symbol,
+    name,
     description,
-    projectTokenSettings
+    metadata,
+    metadataHash
   } = event.getEventPayload();
 
-  const settings = {
-    projectId: undefined,
-    licenseRevenueHoldersShare: undefined,
-  };
-
-  if (projectTokenSettings) { // keep this until we have working F-NFT
-    const { projectId, licenseRevenue } = projectTokenSettings;
-    settings.projectId = projectId;
-    settings.licenseRevenueHoldersShare = licenseRevenue ? licenseRevenue.holdersShare : undefined;
-  }
+  await nonFungibleTokenService.createNonFungibleToken({
+    classId: entityId,
+    instancesCount: 0,
+    metadata,
+    metadataHash,
+    issuer,
+    name,
+    description
+  })
 
   await assetService.createAsset({
     entityId,
     symbol,
     issuer,
     description,
-    type: ASSET_TYPE.NFT,
-    settings
+    type: ASSET_TYPE.NFT
   });
+});
+
+assetEventHandler.register(APP_EVENT.NFT_ISSUED, async (event) => {
+
+  const {
+    issuer,
+    classId,
+    instanceId,
+    recipient,
+    metadata,
+    metadataHash
+  } = event.getEventPayload();
+  const nft = await nonFungibleTokenDtoService.getNonFungibleTokenClass(classId);
+
+  await nonFungibleTokenService.updateNonFungibleToken({
+    classId,
+    instancesCount: nft.instancesCount + 1
+  })
 });
 
 

@@ -35,6 +35,10 @@ import UserNotificationService from './impl/write/UserNotificationService';
 import UserInviteService from './impl/write/UserInviteService';
 import LayoutDtoService from './impl/read/LayoutDtoService';
 import LayoutService from './impl/write/LayoutService';
+import NonFungibleTokenDtoService from './impl/read/NonFungibleTokenDtoService';
+import NonFungibleTokenService from './impl/write/NonFungibleTokenService';
+import FungibleTokenDtoService from './impl/read/FungibleTokenDtoService';
+import FungibleTokenService from './impl/write/FungibleTokenService';
 
 module.exports = {
   TeamService,
@@ -89,5 +93,10 @@ module.exports = {
   UserInviteService,
 
   LayoutDtoService,
-  LayoutService
+  LayoutService,
+
+  NonFungibleTokenDtoService,
+  NonFungibleTokenService,
+  FungibleTokenDtoService,
+  FungibleTokenService
 }

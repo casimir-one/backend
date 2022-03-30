@@ -165,7 +165,11 @@ module.exports = {
     { h: projectEventHandler, await: false }
   ],
 
-  [APP_EVENT.ASSET_TRANSFERED]: [
+  [APP_EVENT.FT_TRANSFERED]: [
+    { h: userNotificationEventHandler, await: false }
+  ],
+
+  [APP_EVENT.NFT_TRANSFERED]: [
     { h: userNotificationEventHandler, await: false }
   ],
 
@@ -182,6 +186,7 @@ module.exports = {
   ],
 
   [APP_EVENT.NFT_ISSUED]: [
+    { h: assetEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
   ],
 

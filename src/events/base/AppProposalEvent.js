@@ -24,13 +24,16 @@ import ProjectTokenSaleProposalCreatedEvent from './../impl/ProjectTokenSaleProp
 import ProjectTokenSaleProposalAcceptedEvent from './../impl/ProjectTokenSaleProposalAcceptedEvent';
 import ProjectTokenSaleProposalDeclinedEvent from './../impl/ProjectTokenSaleProposalDeclinedEvent';
 
-import AssetTransferProposalCreatedEvent from './../impl/AssetTransferProposalCreatedEvent';
-import AssetTransferProposalAcceptedEvent from './../impl/AssetTransferProposalAcceptedEvent';
-import AssetTransferProposalDeclinedEvent from './../impl/AssetTransferProposalDeclinedEvent';
+import FungibleTokenTransferProposalCreatedEvent from './../impl/FungibleTokenTransferProposalCreatedEvent';
+import FungibleTokenTransferProposalAcceptedEvent from '../impl/FungibleTokenTransferProposalAcceptedEvent';
+import FungibleTokenTransferProposalDeclinedEvent from '../impl/FungibleTokenTransferProposalDeclinedEvent';
+import NonFungibleTokenTransferProposalCreatedEvent from './../impl/NonFungibleTokenTransferProposalCreatedEvent';
+import NonFungibleTokenTransferProposalAcceptedEvent from '../impl/NonFungibleTokenTransferProposalAcceptedEvent';
+import NonFungibleTokenTransferProposalDeclinedEvent from '../impl/NonFungibleTokenTransferProposalDeclinedEvent';
 
-import AssetExchangeProposalCreatedEvent from './../impl/AssetExchangeProposalCreatedEvent';
-import AssetExchangeProposalAcceptedEvent from './../impl/AssetExchangeProposalAcceptedEvent';
-import AssetExchangeProposalDeclinedEvent from './../impl/AssetExchangeProposalDeclinedEvent';
+import TokenSwapProposalCreatedEvent from '../impl/TokenSwapProposalCreatedEvent';
+import TokenSwapProposalAcceptedEvent from '../impl/TokenSwapProposalAcceptedEvent';
+import TokenSwapProposalDeclinedEvent from '../impl/TokenSwapProposalDeclinedEvent';
 
 import ProjectContentProposalCreatedEvent from './../impl/ProjectContentProposalCreatedEvent';
 import ProjectContentProposalAcceptedEvent from './../impl/ProjectContentProposalAcceptedEvent';
@@ -75,15 +78,20 @@ module.exports = {
     ACCEPTED: ProjectTokenSaleProposalAcceptedEvent,
     DECLINED: ProjectTokenSaleProposalDeclinedEvent
   },
-  [APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL]: {
-    CREATED: AssetTransferProposalCreatedEvent,
-    ACCEPTED: AssetTransferProposalAcceptedEvent,
-    DECLINED: AssetTransferProposalDeclinedEvent
+  [APP_PROPOSAL.FT_TRANSFER_PROPOSAL]: {
+    CREATED: FungibleTokenTransferProposalCreatedEvent,
+    ACCEPTED: FungibleTokenTransferProposalAcceptedEvent,
+    DECLINED: FungibleTokenTransferProposalDeclinedEvent
   },
-  [APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL]: {
-    CREATED: AssetExchangeProposalCreatedEvent,
-    ACCEPTED: AssetExchangeProposalAcceptedEvent,
-    DECLINED: AssetExchangeProposalDeclinedEvent
+  [APP_PROPOSAL.NFT_TRANSFER_PROPOSAL]: {
+    CREATED: NonFungibleTokenTransferProposalCreatedEvent,
+    ACCEPTED: NonFungibleTokenTransferProposalAcceptedEvent,
+    DECLINED: NonFungibleTokenTransferProposalDeclinedEvent
+  },
+  [APP_PROPOSAL.TOKENS_SWAP_PROPOSAL]: {
+    CREATED: TokenSwapProposalCreatedEvent,
+    ACCEPTED: TokenSwapProposalAcceptedEvent,
+    DECLINED: TokenSwapProposalDeclinedEvent
   },
   [APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL]: {
     CREATED: ProjectContentProposalCreatedEvent,

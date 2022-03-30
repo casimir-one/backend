@@ -564,11 +564,29 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCE
   // add notify
 });
 
-userNotificationEventHandler.register(APP_EVENT.ASSET_TRANSFERED, async (event) => {
+userNotificationEventHandler.register(APP_EVENT.FT_TRANSFERED, async (event) => {
   // add notify
 });
 
-userNotificationEventHandler.register(APP_EVENT.ASSET_ISSUED, async (event) => {
+userNotificationEventHandler.register(APP_EVENT.NFT_TRANSFERED, async (event) => {
+  // add notify
+});
+
+
+userNotificationEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
+  // add notify
+});
+
+
+userNotificationEventHandler.register(APP_EVENT.NFT_CREATED, async (event) => {
+  // add notify
+});
+
+userNotificationEventHandler.register(APP_EVENT.FT_ISSUED, async (event) => {
+  // add notify
+});
+
+userNotificationEventHandler.register(APP_EVENT.NFT_ISSUED, async (event) => {
   // add notify
 });
 

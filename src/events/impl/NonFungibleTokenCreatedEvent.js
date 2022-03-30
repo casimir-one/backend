@@ -8,23 +8,16 @@ class NonFungibleTokenCreatedEvent extends BaseEvent {
     const {
       entityId,
       issuer,
-      symbol,
+      name,
       description,
-      projectTokenSettings
+      metadata
     } = eventPayload;
 
     assert(!!issuer, "'issuer' is required");
-    assert(!!symbol, "'symbol' is required");
 
-    if (projectTokenSettings) { // keep this until we have working F-NFT
-      const { projectId, teamId, licenseRevenue } = projectTokenSettings;
+    if (metadata) { // keep this until we have working F-NFT
+      const { projectId } = metadata;
       assert(!!projectId, "'projectId' is required for project token");
-      assert(!!teamId, "'teamId' is required for project token");
-
-      if (licenseRevenue) {
-        const { holdersShare } = licenseRevenue;
-        assert(!!holdersShare, "'holdersShare' is required for project 'licenseRevenue' option");
-      }
     }
 
     super(APP_EVENT.NFT_CREATED, eventPayload);

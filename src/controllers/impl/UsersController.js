@@ -10,7 +10,7 @@ import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_R
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
-import { TransferAssetCmd } from '@deip/commands';
+import { TransferFungibleTokenCmd } from '@deip/commands';
 
 
 const userDtoService = new UserDtoService();
@@ -76,23 +76,19 @@ class UsersController extends BaseController {
 
               if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
                 const { owner: { auths: [{ key: pubKey }]} } = authority;
-                const seedFundingCmd = new TransferAssetCmd({
+                const seedFundingCmd = new TransferFungibleTokenCmd({
                   from: faucetUsername,
                   to: pubKey,
                   tokenId: config.CORE_ASSET.id,
-                  symbol: config.CORE_ASSET.symbol,
-                  precision: config.CORE_ASSET.precision,
                   amount: faucetFundingAmount,
                 });
                 txBuilder.addCmd(seedFundingCmd);
               }
 
-              const daoFundingCmd = new TransferAssetCmd({
+              const daoFundingCmd = new TransferFungibleTokenCmd({
                 from: faucetUsername,
                 to: entityId,
                 tokenId: config.CORE_ASSET.id,
-                symbol: config.CORE_ASSET.symbol,
-                precision: config.CORE_ASSET.precision,
                 amount: faucetFundingAmount
               });
               txBuilder.addCmd(daoFundingCmd);
@@ -329,10 +325,11 @@ class UsersController extends BaseController {
             .then((txBuilder) => {
               const { authority } = alterDaoAuthorityCmd.getCmdPayload();
               const { owner: { auths: [{ key: pubKey }] } } = authority;
-              const seedFundingCmd = new TransferAssetCmd({
+              const seedFundingCmd = new TransferFungibleTokenCmd({
                 from: faucetUsername,
                 to: pubKey,
-                asset: { ...config.CORE_ASSET, amount: faucetFundingAmount }
+                tokenId: config.CORE_ASSET.id,
+                amount: faucetFundingAmount
               });
               txBuilder.addCmd(seedFundingCmd);
               return txBuilder.end();

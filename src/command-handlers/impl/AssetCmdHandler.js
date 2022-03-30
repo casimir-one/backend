@@ -1,7 +1,8 @@
 import { APP_CMD } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import {
-  AssetTransferedEvent,
+  FungibleTokenTransferedEvent,
+  NonFungibleTokenTransferedEvent,
   FungibleTokenCreatedEvent,
   NonFungibleTokenCreatedEvent,
   FungibleTokenIssuedEvent,
@@ -18,11 +19,18 @@ class AssetCmdHandler extends BaseCmdHandler {
 
 const assetCmdHandler = new AssetCmdHandler();
 
-assetCmdHandler.register(APP_CMD.TRANSFER_ASSET, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.TRANSFER_FT, (cmd, ctx) => {
 
   const transferData = cmd.getCmdPayload();
   
-  ctx.state.appEvents.push(new AssetTransferedEvent(transferData));
+  ctx.state.appEvents.push(new FungibleTokenTransferedEvent(transferData));
+});
+
+assetCmdHandler.register(APP_CMD.TRANSFER_NFT, (cmd, ctx) => {
+
+  const transferData = cmd.getCmdPayload();
+  
+  ctx.state.appEvents.push(new NonFungibleTokenTransferedEvent(transferData));
 });
 
 assetCmdHandler.register(APP_CMD.CREATE_FT, (cmd, ctx) => {
