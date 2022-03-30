@@ -24,7 +24,6 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
   const { proposalId, creator, status, proposalCmd, type } = event.getEventPayload();
   const chainService = await ChainService.getInstanceAsync(config);
   const chainRpc = chainService.getChainRpc();
-
   const chainProposal = await chainRpc.getProposalAsync(proposalId);
   const portalIdsScope = [];
   const decisionMakers = [];
@@ -51,7 +50,6 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
     });
     details = typedEvent.getEventPayload();
   } 
-
   await proposalService.createProposal({
     proposalId: proposalId,
     proposalCmd: proposalCmd,

@@ -7,10 +7,10 @@ import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 import { ChainService } from '@deip/chain-service';
 import { IssueFungibleTokenCmd } from '@deip/commands';
 import { UnauthorizedError, BadRequestError, NotFoundError } from './../../errors'; 
-import { AssetDtoService } from './../../services';
+import { FungibleTokenDtoService } from './../../services';
 
 
-const assetDtoService = new AssetDtoService();
+const fungibleTokenDtoService = new FungibleTokenDtoService();
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -43,7 +43,7 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
       throw new BadRequestError(`Asset with symbol ${currency} is not supported`);
     }
 
-    const asset = await assetDtoService.getAssetBySymbol(currency);
+    const asset = await fungibleTokenDtoService.getFungibleTokenBySymbol(currency);
     if (!asset) {
       throw new BadRequestError(`Asset with symbol ${currency} is not found`);
     }
@@ -74,8 +74,6 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
         const issueAssetCmd = new IssueFungibleTokenCmd({
           issuer: regacc,
           tokenId: asset._id,
-          symbol: asset.symbol,
-          precision: asset.precision,
           amount: amount / 100, // cents
           recipient: account
         });
@@ -145,7 +143,7 @@ const createAssetDepositRequest = async (ctx) => {
       throw new BadRequestError(`Asset with symbol ${currency} is not supported`);
     }
 
-    const asset = await assetDtoService.getAssetBySymbol(currency);
+    const asset = await fungibleTokenDtoService.getFungibleTokenBySymbol(currency);
     if (!asset) {
       throw new BadRequestError(`Asset with symbol ${currency} is not found`);
     }
@@ -247,7 +245,7 @@ const confirmAssetDepositRequest = async (ctx) => {
       throw new UnauthorizedError(`Provided signature is not valid for provided invoice`);
     }
 
-    const asset = await assetDtoService.getAssetBySymbol(depositRequest.currency.toUpperCase());
+    const asset = await fungibleTokenDtoService.getFungibleTokenBySymbol(depositRequest.currency.toUpperCase());
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
@@ -255,8 +253,6 @@ const confirmAssetDepositRequest = async (ctx) => {
         const issueFungibleTokenCmd = new IssueFungibleTokenCmd({
           issuer: regacc,
           tokenId: asset._id,
-          symbol: asset.symbol,
-          precision: asset.precision,
           amount: amount / 100, // cents
           recipient: account
         });

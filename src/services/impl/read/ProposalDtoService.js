@@ -202,11 +202,14 @@ class ProposalDtoService extends BaseService {
     const contractAgreementContracts = await this.extendContractAgreementProposals(grouped[APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL] || []);
     result.push(...contractAgreementContracts);
 
-    const assetExchangesProposals = await this.extendAssetExchangeProposals(grouped[APP_PROPOSAL.ASSET_EXCHANGE_PROPOSAL] || []);
-    result.push(...assetExchangesProposals);
+    const tokenSwapsProposals = await this.extendTokenSwapProposals(grouped[APP_PROPOSAL.TOKENS_SWAP_PROPOSAL] || []);
+    result.push(...tokenSwapsProposals);
 
-    const assetTransfersProposals = await this.extendAssetTransferProposals(grouped[APP_PROPOSAL.ASSET_TRANSFER_PROPOSAL] || []);
-    result.push(...assetTransfersProposals);
+    const fungibleTokenTransfersProposals = await this.extendFungibleTokenTransferProposals(grouped[APP_PROPOSAL.FT_TRANSFER_PROPOSAL] || []);
+    result.push(...fungibleTokenTransfersProposals);
+
+    const nonFungibleTokenTransfersProposals = await this.extendNonFungibleTokenTransferProposals(grouped[APP_PROPOSAL.NFT_TRANSFER_PROPOSAL] || []);
+    result.push(...nonFungibleTokenTransfersProposals);
 
     const projectProposals = await this.extendProjectProposals(grouped[APP_PROPOSAL.PROJECT_PROPOSAL] || []);
     result.push(...projectProposals);
@@ -265,7 +268,7 @@ class ProposalDtoService extends BaseService {
     })
   }
 
-  async extendAssetExchangeProposals(proposals) {
+  async extendTokenSwapProposals(proposals) {
     const accountNames = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.party1)) {
         acc.push(proposal.details.party1);
@@ -287,7 +290,29 @@ class ProposalDtoService extends BaseService {
     });
   }
 
-  async extendAssetTransferProposals(proposals) {
+  async extendFungibleTokenTransferProposals(proposals) {
+    const accountNames = proposals.reduce((acc, proposal) => {
+      if (!acc.some(a => a == proposal.details.party1)) {
+        acc.push(proposal.details.party1);
+      }
+      if (!acc.some(a => a == proposal.details.party2)) {
+        acc.push(proposal.details.party2);
+      }
+      return acc;
+    }, []);
+
+    const users = await userDtoService.getUsers(accountNames);
+    const teams = await teamDtoService.getTeams(accountNames)
+
+    return proposals.map((proposal) => {
+      const party1 = teams.find(team => team._id == proposal.details.party1) || users.find(user => user._id == proposal.details.party1);
+      const party2 = teams.find(team => team._id == proposal.details.party2) || users.find(user => user._id == proposal.details.party2);
+      const extendedDetails = { party1, party2 };
+      return { ...proposal, extendedDetails };
+    })
+  }
+
+  async extendNonFungibleTokenTransferProposals(proposals) {
     const accountNames = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.party1)) {
         acc.push(proposal.details.party1);

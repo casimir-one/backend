@@ -13,9 +13,9 @@ class AssetService extends BaseService {
     symbol,
     precision,
     issuer,
+    name,
     description,
     type,
-    settings
   }) {
 
     const result = await this.createOne({
@@ -24,8 +24,8 @@ class AssetService extends BaseService {
       precision,
       issuer,
       description,
+      name,
       type,
-      settings
     });
 
     return result;

@@ -12,7 +12,7 @@ class FungibleTokenCreatedEvent extends BaseEvent {
       precision,
       maxSupply,
       description,
-      projectTokenSettings
+      metadata
     } = eventPayload;
 
     assert(!!issuer, "'issuer' is required");
@@ -20,8 +20,8 @@ class FungibleTokenCreatedEvent extends BaseEvent {
     assert(Number.isInteger(precision) && precision >= 0, "'precision' must be a positive number");
     assert(!!maxSupply, "'maxSupply' is required");
 
-    if (projectTokenSettings) { // keep this until we have working F-NFT
-      const { projectId, teamId, licenseRevenue } = projectTokenSettings;
+    if (metadata) { // keep this until we have working F-NFT
+      const { projectId, teamId, licenseRevenue } = metadata;
       assert(!!projectId, "'projectId' is required for project token");
       assert(!!teamId, "'teamId' is required for project token");
 

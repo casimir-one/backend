@@ -2,24 +2,25 @@ import BaseEvent from '../base/BaseEvent';
 import APP_EVENT from '../base/AppEvent';
 import assert from 'assert';
 
-class FungibleTokenIssuedEvent extends BaseEvent {
+
+class FungibleTokenTransferedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      issuer,
+      from,
+      to,
       tokenId,
-      amount,
-      recipient
+      amount
     } = eventPayload;
 
-    assert(!!issuer, "'issuer' is required");
+    assert(!!from, "'from' is required");
+    assert(!!to, "'to' is required");
     assert(!!tokenId, "FT 'tokenId' is required");
     assert(!!amount, "FT 'amount' is required");
-    assert(!!recipient, "'recipient' is required");
 
-    super(APP_EVENT.FT_ISSUED, eventPayload);
+    super(APP_EVENT.FT_TRANSFERED, eventPayload);
   }
 
 }
 
-module.exports = FungibleTokenIssuedEvent;
+module.exports = FungibleTokenTransferedEvent;

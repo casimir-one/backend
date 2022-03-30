@@ -1,7 +1,7 @@
 import BaseService from './../../base/BaseService';
 import ProjectSchema from './../../../schemas/ProjectSchema'; // TODO: separate read/write schemas
 import AttributeDtoService from './AttributeDtoService';
-import AssetDtoService from './AssetDtoService';
+import FungibleTokenDtoService from './FungibleTokenDtoService';
 import TeamDtoService from './TeamDtoService';
 import ContractAgreementDtoService from './ContractAgreementDtoService';
 import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from './../../../constants';
@@ -22,7 +22,7 @@ class ProjectDtoService extends BaseService {
   async mapProjects(projects, filterObj) {
     const contractAgreementDtoService = new ContractAgreementDtoService();
     const attributeDtoService = new AttributeDtoService();
-    const assetDtoService = new AssetDtoService();
+    const fungibleTokenDtoService = new FungibleTokenDtoService();
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
@@ -41,7 +41,7 @@ class ProjectDtoService extends BaseService {
     const teamsMembers = teams.filter((team) => !!team).map((team) => ({ teamId: team._id, members: team.members }));
 
     const chainProjects = await chainRpc.getProjectsAsync(projects.map(p => p._id));
-    const chainProjectNfts = await assetDtoService.getAssetsByProjects(projects.map(({ _id }) => _id));
+    const chainProjectNfts = await fungibleTokenDtoService.getFungibleTokensByProjects(projects.map(({ _id }) => _id));
     return projects.map((project) => {
       const teamMembers = teamsMembers.find((t) => t.teamId == project.teamId);
       const members = teamMembers ? teamMembers.members : [];

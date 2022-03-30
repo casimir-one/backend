@@ -39,17 +39,21 @@ import ProjectTokenSaleProposalDeclinedEvent from './impl/ProjectTokenSalePropos
 import InvestmentOpportunityCreatedEvent from './impl/InvestmentOpportunityCreatedEvent';
 import InvestmentOpportunityParticipatedEvent from './impl/InvestmentOpportunityParticipatedEvent';
 
-import AssetTransferedEvent from './impl/AssetTransferedEvent';
+import FungibleTokenTransferedEvent from './impl/FungibleTokenTransferedEvent';
+import NonFungibleTokenTransferedEvent from './impl/NonFungibleTokenTransferedEvent';
 import FungibleTokenCreatedEvent from './impl/FungibleTokenCreatedEvent';
 import NonFungibleTokenCreatedEvent from './impl/NonFungibleTokenCreatedEvent';
 import FungibleTokenIssuedEvent from './impl/FungibleTokenIssuedEvent';
 import NonFungibleTokenIssuedEvent from './impl/NonFungibleTokenIssuedEvent';
-import AssetTransferProposalCreatedEvent from './impl/AssetTransferProposalCreatedEvent';
-import AssetTransferProposalAcceptedEvent from './impl/AssetTransferProposalAcceptedEvent';
-import AssetTransferProposalDeclinedEvent from './impl/AssetTransferProposalDeclinedEvent';
-import AssetExchangeProposalCreatedEvent from './impl/AssetExchangeProposalCreatedEvent';
-import AssetExchangeProposalAcceptedEvent from './impl/AssetExchangeProposalAcceptedEvent';
-import AssetExchangeProposalDeclinedEvent from './impl/AssetExchangeProposalDeclinedEvent';
+import FungibleTokenTransferProposalCreatedEvent from './impl/FungibleTokenTransferProposalCreatedEvent';
+import FungibleTokenTransferProposalAcceptedEvent from './impl/FungibleTokenTransferProposalAcceptedEvent';
+import FungibleTokenTransferProposalDeclinedEvent from './impl/FungibleTokenTransferProposalDeclinedEvent';
+import NonFungibleTokenTransferProposalCreatedEvent from './impl/NonFungibleTokenTransferProposalCreatedEvent';
+import NonFungibleTokenTransferProposalAcceptedEvent from './impl/NonFungibleTokenTransferProposalAcceptedEvent';
+import NonFungibleTokenTransferProposalDeclinedEvent from './impl/NonFungibleTokenTransferProposalDeclinedEvent';
+import TokenSwapProposalCreatedEvent from './impl/TokenSwapProposalCreatedEvent';
+import TokenSwapProposalAcceptedEvent from './impl/TokenSwapProposalAcceptedEvent';
+import TokenSwapProposalDeclinedEvent from './impl/TokenSwapProposalDeclinedEvent';
 
 import DocumentTemplateCreatedEvent from './impl/DocumentTemplateCreatedEvent';
 import DocumentTemplateUpdatedEvent from './impl/DocumentTemplateUpdatedEvent';
@@ -137,17 +141,21 @@ module.exports = {
   InvestmentOpportunityCreatedEvent,
   InvestmentOpportunityParticipatedEvent,
 
-  AssetTransferedEvent,
+  FungibleTokenTransferedEvent,
+  NonFungibleTokenTransferedEvent,
   FungibleTokenCreatedEvent,
   NonFungibleTokenCreatedEvent,
   FungibleTokenIssuedEvent,
   NonFungibleTokenIssuedEvent,
-  AssetTransferProposalCreatedEvent,
-  AssetTransferProposalAcceptedEvent,
-  AssetTransferProposalDeclinedEvent,
-  AssetExchangeProposalCreatedEvent,
-  AssetExchangeProposalAcceptedEvent,
-  AssetExchangeProposalDeclinedEvent,
+  FungibleTokenTransferProposalCreatedEvent,
+  FungibleTokenTransferProposalAcceptedEvent,
+  FungibleTokenTransferProposalDeclinedEvent,
+  NonFungibleTokenTransferProposalCreatedEvent,
+  NonFungibleTokenTransferProposalAcceptedEvent,
+  NonFungibleTokenTransferProposalDeclinedEvent,
+  TokenSwapProposalCreatedEvent,
+  TokenSwapProposalAcceptedEvent,
+  TokenSwapProposalDeclinedEvent,
 
   DocumentTemplateCreatedEvent,
   DocumentTemplateUpdatedEvent,
