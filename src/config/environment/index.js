@@ -53,7 +53,9 @@ const config = {
   KAFKA_CLIENT_ID: "offchain-server",
   KAFKA_BROKER_URL: process.env.KAFKA_BROKER_URL,
   KAFKA_USER: process.env.KAFKA_USER,
-  KAFKA_PASSWORD: process.env.KAFKA_PASSWORD
+  KAFKA_PASSWORD: process.env.KAFKA_PASSWORD,
+  KAFKA_APP_GROUP_ID: process.env.KAFKA_APP_GROUP_ID,
+  KAFKA_CHAIN_GROUP_ID: process.env.KAFKA_CHAIN_GROUP_ID
 };
 
 

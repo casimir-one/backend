@@ -2,20 +2,20 @@ import EventEmitter from 'events';
 import fs from 'fs';
 import util from 'util';
 import path from 'path';
-import ProposalService from './../../services/impl/write/ProposalService';
 import assert from 'assert';
+import { ChainService } from '@deip/chain-service';
+import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
+import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
+import ProposalService from './../../services/impl/write/ProposalService';
 import config from './../../config';
 import { QUEUE_TOPIC } from './../../constants';
-import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
-import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
 import {
   logError,
   logWarn,
   logCmdInfo
 } from '../../utils/log';
-import { ChainService } from '@deip/chain-service';
-import { waitChainBlockAsync } from '../../utils/network';
 import QueueService from "../../queue/QueueService";
+import { processManager } from "../../process-manager";
 
 
 const proposalService = new ProposalService({ scoped: false });
@@ -55,13 +55,13 @@ class BaseCmdHandler extends EventEmitter {
       const verifiedTx = await verifiedTxPromise;
 
       const txInfo = await chainRpc.sendTxAsync(verifiedTx);
-      await waitChainBlockAsync(); // This must be replaced with chain Domain event subscriber
+      await processManager.waitForCommands(msg.appCmds);
       return txInfo;
     },
   ) {
 
     const { tx, appCmds } = msg;
-    
+
     await validate(appCmds, ctx);
 
     if (tx) { // Until we have blockchain-emitted events and a saga we have to validate write model separately
@@ -78,7 +78,6 @@ class BaseCmdHandler extends EventEmitter {
     // The rest code must be synchronous
     BaseCmdHandler.Dispatch(appCmds, ctx);
 
-    // TODO: Use Apache Kafka producer
     const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
 
     //set events issuer for sending results to the sockets
@@ -87,7 +86,7 @@ class BaseCmdHandler extends EventEmitter {
     this.logEvents(events);
 
     const queueService = await QueueService.getInstanceAsync(config.QUEUE_SERVICE);
-    await queueService.sendEvents(QUEUE_TOPIC.APP_EVENT_TOPIC, events);
+    await queueService.sendEvents(QUEUE_TOPIC.APP_EVENT, events);
   };
 
 
@@ -167,8 +166,8 @@ class BaseCmdHandler extends EventEmitter {
       let proposalCmd = newProposalsCmds[i];
       proposalUpdates.push(...proposalCmd.getProposedCmds().filter(cmd => {
         return cmd instanceof AcceptProposalCmd || cmd instanceof DeclineProposalCmd;
-      }).map(cmd => ({ 
-        cmd, 
+      }).map(cmd => ({
+        cmd,
         isNewProposal: newProposalsCmds.some((proposalCmd) => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()),
         isAccepted: cmd instanceof AcceptProposalCmd,
         isDeclined: cmd instanceof DeclineProposalCmd

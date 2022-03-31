@@ -15,6 +15,7 @@ import fileUploadEventHandler from './impl/FileUploadEventHandler';
 import portalEventHandler from './impl/PortalEventHandler';
 import userSettingsEventHandler from './impl/UserSettingsEventHandler';
 import layoutEventHandler from './impl/LayoutEventHandler';
+import onChainEventHandler from './impl/OnChainEventHandler';
 
 
 module.exports = {
@@ -34,5 +35,6 @@ module.exports = {
   fileUploadEventHandler,
   portalEventHandler,
   userSettingsEventHandler,
-  layoutEventHandler
+  layoutEventHandler,
+  onChainEventHandler,
 };

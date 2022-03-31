@@ -16,7 +16,8 @@ import {
   fileUploadEventHandler,
   portalEventHandler,
   userSettingsEventHandler,
-  layoutEventHandler
+  layoutEventHandler,
+  onChainEventHandler
 } from './index';
 
 
@@ -159,7 +160,7 @@ module.exports = {
     { h: investmentOpportunityEventHandler, await: true },
     { h: projectEventHandler, await: false }
   ],
-  
+
   [APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED]: [
     { h: investmentOpportunityEventHandler, await: true },
     { h: projectEventHandler, await: false }
@@ -234,7 +235,7 @@ module.exports = {
     { h: projectContentEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
   ],
-  
+
   [APP_EVENT.REVIEW_REQUEST_CREATED]: [
     { h: reviewEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
@@ -264,7 +265,7 @@ module.exports = {
   [APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED]: [
     { h: userNotificationEventHandler, await: false }
   ],
-  
+
   [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED]: [
     { h: contractAgreementEventHandler, await: true },
     { h: fileUploadEventHandler, await: true }
@@ -311,7 +312,7 @@ module.exports = {
   [APP_EVENT.NETWORK_SETTINGS_UPDATED]: [
     { h: portalEventHandler, await: true },
   ],
-  
+
   [APP_EVENT.USER_PROFILE_DELETED]: [
     { h: userEventHandler, await: true },
   ],
@@ -339,4 +340,16 @@ module.exports = {
   [APP_EVENT.LAYOUT_DELETED]: [
     { h: layoutEventHandler, await: true },
   ],
+
+  [APP_EVENT.CHAIN_BLOCK_CREATED]: [
+    {h: onChainEventHandler, await: false }
+  ],
+
+  [APP_EVENT.CHAIN_PROJECT_CREATED]: [
+    {h: onChainEventHandler, await: false }
+  ],
+
+  [APP_EVENT.CHAIN_DAO_CREATE]: [
+    {h: onChainEventHandler, await: true }
+  ]
 };

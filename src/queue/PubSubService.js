@@ -22,10 +22,10 @@ export default class PubSubService extends Singleton {
   }
 
 
-  async subscribeEach(topic, subF) {
-    return PubSub.subscribe(topic, async function (topic, events) {
+  async subscribeEach(groupId, topic, subF) {
+    return PubSub.subscribe(topic, async (topic, events) => {
       for (const event of events) {
-        return subF(topic, event);
+        await subF(topic, event);
       }
     });
   }
