@@ -4,7 +4,7 @@ import APP_EVENT from "../events/base/AppEvent";
 
 const APP_CMD_TO_BC_EVENT_PROCESSOR = {
   [APP_CMD.CREATE_DAO]: {
-    eventNum: APP_EVENT.CHAIN_DAO_CREATE, matchF: (cmd, event) => {
+    eventNum: APP_EVENT.CHAIN_DAO_CREATE, matchF: (txInfo, cmd, event) => {
       const cmdDaoId = cmd.getCmdPayload().entityId;
       const eventDaoId = Buffer.from(event.getEventPayload().dao.id).toString('hex');
       return cmdDaoId === eventDaoId;
@@ -25,7 +25,16 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
   // [APP_CMD.REMOVE_DAO_MEMBER]: { class: RemoveDaoMemberCmd },
   // [APP_CMD.CREATE_INVESTMENT_OPPORTUNITY]: { class: CreateInvestmentOpportunityCmd },
   // [APP_CMD.INVEST]: { class: InvestCmd },
-  [APP_CMD.TRANSFER_ASSET]: { eventNum: APP_EVENT.CHAIN_BLOCK_CREATED } //TODO match function based on txInfo
+  [APP_CMD.TRANSFER_FT]: { eventNum: APP_EVENT.CHAIN_BLOCK_CREATED, matchF: (txInfo, cmd, event) => {
+    console.log("MATCH TRANSFER_FT", {txInfo, cmd: cmd.getCmdPayload(), event: event.getEventPayload()});
+    //TODO add match f
+    return true;
+  } },
+  [APP_CMD.TRANSFER_NFT]: { eventNum: APP_EVENT.CHAIN_BLOCK_CREATED, matchF: (txInfo, cmd, event) => {
+      console.log("MATCH TRANSFER_NFT", {txInfo, cmd: cmd.getCmdPayload(), event: event.getEventPayload()});
+    //TODO add match f
+    return true;
+  } }
   // [APP_CMD.CREATE_DOCUMENT_TEMPLATE]: { class: CreateDocumentTemplateCmd },
   // [APP_CMD.UPDATE_DOCUMENT_TEMPLATE]: { class: UpdateDocumentTemplateCmd },
   // [APP_CMD.DELETE_DOCUMENT_TEMPLATE]: { class: DeleteDocumentTemplateCmd },

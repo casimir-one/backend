@@ -53,7 +53,7 @@ const waitForEvent = (appCmd, matchF) => new Promise(async (res, rej) => {
   }
 })
 
-const waitForCommand = async (appCmd) => {
+const waitForCommand = async (txInfo, appCmd) => {
   const cmdName = appCmd.getCmdName();
   const cmdNum = appCmd.getCmdNum();
   const { eventNum, matchF } = APP_CMD_TO_BC_EVENT_PROCESSOR[cmdNum] || {};
@@ -67,7 +67,7 @@ const waitForCommand = async (appCmd) => {
   return waitForEvent(appCmd, (event) => {
     console.log(`Process manager is waiting for event: ${eventNum}, received event: ${event.getEventNum()}`);
     if (event.getEventNum() === eventNum) {
-      const isMatched = matchF ? matchF(appCmd, event) : true;
+      const isMatched = matchF ? matchF(txInfo, appCmd, event) : true;
       if (isMatched) {
         console.log(`Process manager, event ${eventNum} matched success`)
         return event;
@@ -76,9 +76,9 @@ const waitForCommand = async (appCmd) => {
   });
 }
 
-const waitForCommands = async (appCmds) => {
+const waitForCommands = async (txInfo, appCmds) => {
   for (const appCmd of appCmds) { //TODO: replace with promise all for events that contains data for more than one command
-    await waitForCommand(appCmd).catch(err => {
+    await waitForCommand(txInfo, appCmd).catch(err => {
       logError("Process manager, waitForCommand error", err);
       throw err;
     })

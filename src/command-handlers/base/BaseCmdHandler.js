@@ -55,7 +55,7 @@ class BaseCmdHandler extends EventEmitter {
       const verifiedTx = await verifiedTxPromise;
 
       const txInfo = await chainRpc.sendTxAsync(verifiedTx);
-      await processManager.waitForCommands(msg.appCmds);
+      await processManager.waitForCommands(txInfo, msg.appCmds);
       return txInfo;
     },
   ) {

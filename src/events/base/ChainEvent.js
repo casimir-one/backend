@@ -6,14 +6,14 @@ import { logWarn } from "../../utils/log";
 
 export const parseChainEvent = (rawEvent) => {
   assert(!!rawEvent.name, "ChainEvent should have name");
-  const eventNum = chainEventNameToAppEvent[rawEvent.name];
+  const eventNum = chainEventToAppEvent[rawEvent.name];
   if (!eventNum) {
     logWarn(`ChainEvent '${rawEvent.name}' is not supported!`);
   } else
     return new BaseEvent(eventNum, rawEvent.data)
 }
 
-const chainEventNameToAppEvent = createEnum({
+const chainEventToAppEvent = createEnum({
   "block_created": APP_EVENT.CHAIN_BLOCK_CREATED,
   // "proposal_proposed": 0,
   // "proposal_approved": 1,
