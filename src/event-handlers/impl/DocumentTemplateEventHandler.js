@@ -1,5 +1,5 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import APP_EVENT from './../../events/base/AppEvent';
+import { APP_EVENT } from '@deip/constants';
 import { DocumentTemplateService } from './../../services';
 
 

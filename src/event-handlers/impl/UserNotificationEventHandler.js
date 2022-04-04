@@ -1,8 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import config from './../../config';
 import { PROJECT_ATTRIBUTE } from './../../constants';
-import { USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE } from '@deip/constants';
-import APP_EVENT from './../../events/base/AppEvent';
+import { USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE, APP_EVENT } from '@deip/constants';
 import {
   TeamDtoService,
   UserDtoService,

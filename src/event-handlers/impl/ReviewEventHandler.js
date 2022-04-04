@@ -1,5 +1,5 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import APP_EVENT from './../../events/base/AppEvent';
+import { APP_EVENT } from '@deip/constants';
 import { ReviewRequestService, ReviewRequestDtoService, ProjectContentDtoService, ReviewService } from './../../services';
 import { REVIEW_REQUEST_STATUS } from './../../constants';
 

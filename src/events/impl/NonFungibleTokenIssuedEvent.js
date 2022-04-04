@@ -1,5 +1,5 @@
 import BaseEvent from '../base/BaseEvent';
-import APP_EVENT from '../base/AppEvent';
+import { APP_EVENT } from '@deip/constants';
 import assert from 'assert';
 
 class NonFungibleTokenIssuedEvent extends BaseEvent {

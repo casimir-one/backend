@@ -1,4 +1,4 @@
-import APP_EVENT from './../events/base/AppEvent';
+import { APP_EVENT } from '@deip/constants';
 import { 
   projectEventHandler, 
   proposalEventHandler, 

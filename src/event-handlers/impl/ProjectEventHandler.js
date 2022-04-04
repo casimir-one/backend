@@ -1,7 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import APP_EVENT from './../../events/base/AppEvent';
 import { PROJECT_STATUS, PROJECT_ATTRIBUTE } from './../../constants';
-import { INVESTMENT_OPPORTUNITY_STATUS as TOKEN_SALE_STATUS } from '@deip/constants';
+import { INVESTMENT_OPPORTUNITY_STATUS as TOKEN_SALE_STATUS, APP_EVENT } from '@deip/constants';
 import { ProjectService, InvestmentOpportunityDtoService } from './../../services';
 import config from './../../config';
 import { ChainService } from '@deip/chain-service';

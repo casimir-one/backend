@@ -1,6 +1,5 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import APP_EVENT from './../../events/base/AppEvent';
-import { SYSTEM_ROLE as USER_ROLES } from '@deip/constants';
+import { SYSTEM_ROLE as USER_ROLES, APP_EVENT } from '@deip/constants';
 import {
   UserService
 } from './../../services';

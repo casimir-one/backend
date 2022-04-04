@@ -1,7 +1,6 @@
 import BaseEvent from './../base/BaseEvent';
-import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
-import { ATTR_SCOPES } from '@deip/constants';
+import { ATTR_SCOPES, APP_EVENT } from '@deip/constants';
 
 class LayoutCreatedEvent extends BaseEvent {
 
