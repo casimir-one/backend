@@ -15,7 +15,12 @@ import fileUploadEventHandler from './impl/FileUploadEventHandler';
 import portalEventHandler from './impl/PortalEventHandler';
 import userSettingsEventHandler from './impl/UserSettingsEventHandler';
 import layoutEventHandler from './impl/LayoutEventHandler';
-import onChainEventHandler from './impl/OnChainEventHandler';
+import onChainBlockEventHandler from './impl/OnChainBlockEventHandler';
+import onChainProposalEventHandler from './impl/OnChainProposalEventHandler';
+import onChainProjectEventHandler from './impl/OnChainProjectEventHandler';
+import onChainContractAgreementEventHandler from './impl/OnChainContractAgreementEventHandler';
+import onChainDaoEventHandler from './impl/OnChainDaoEventHandler';
+import onChainAssetEventHandler from './impl/OnChainAssetEventHandler';
 
 
 module.exports = {
@@ -36,5 +41,11 @@ module.exports = {
   portalEventHandler,
   userSettingsEventHandler,
   layoutEventHandler,
-  onChainEventHandler,
+  //CHAIN PROPOSAL PROJECT CONTRACT_AGREEMENT DAO ASSET
+  onChainBlockEventHandler,
+  onChainProposalEventHandler,
+  onChainProjectEventHandler,
+  onChainContractAgreementEventHandler,
+  onChainDaoEventHandler,
+  onChainAssetEventHandler
 };
