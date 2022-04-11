@@ -47,8 +47,8 @@ class NonFungibleTokenDtoService extends BaseService {
     return result;
   }
 
-  async getNonFungibleTokenClasses() {
-    const nfts = await this.findMany({});
+  async getNonFungibleTokenClasses(query) {
+    const nfts = await this.findMany(query);
     const result = await this.mapNonFungibleTokens(nfts);
     return result;
   }
