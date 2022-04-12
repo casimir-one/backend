@@ -1,5 +1,4 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import APP_EVENT from './../../events/base/AppEvent';
 import {
   ProjectDtoService,
   ProjectContentService,
@@ -7,7 +6,7 @@ import {
 } from './../../services';
 import { genSha256Hash } from '@deip/toolbox';
 import FileStorage from './../../storage';
-import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
+import { APP_EVENT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import path from 'path';

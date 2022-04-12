@@ -1,7 +1,5 @@
-import { CONTRACT_AGREEMENT_STATUS } from '@deip/constants';
 
 import BaseEventHandler from '../base/BaseEventHandler';
-import APP_EVENT from '../../events/base/AppEvent';
 import { ContractAgreementDtoService, PortalService, DraftService } from '../../services';
 import FileStorage from '../../storage';
 import cloneArchive from './../../dar/cloneArchive'
@@ -9,7 +7,7 @@ import writeArchive from './../../dar/writeArchive';
 import { generatePdf } from '../../utils/pdf';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
-import { PROJECT_CONTENT_FORMAT } from '@deip/constants';
+import { CONTRACT_AGREEMENT_STATUS, APP_EVENT, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 
 const getContractFilePath = async (filename) => {
   const contractAgreementDir = FileStorage.getContractAgreementDirPath();

@@ -1,7 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import APP_EVENT from './../../events/base/AppEvent';
 import { AssetService, NonFungibleTokenService, NonFungibleTokenDtoService, FungibleTokenService } from './../../services';
-import { ASSET_TYPE } from '@deip/constants';
+import { ASSET_TYPE, APP_EVENT } from '@deip/constants';
 
 
 class AssetEventHandler extends BaseEventHandler {

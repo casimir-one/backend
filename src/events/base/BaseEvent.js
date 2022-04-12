@@ -1,4 +1,4 @@
-import APP_EVENT from './AppEvent';
+import { APP_EVENT } from '@deip/constants';
 
 class BaseEvent {
 

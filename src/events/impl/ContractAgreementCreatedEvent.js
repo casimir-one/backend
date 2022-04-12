@@ -1,7 +1,6 @@
 import BaseEvent from './../base/BaseEvent';
-import APP_EVENT from './../../events/base/AppEvent';
 import assert from 'assert';
-import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
+import { CONTRACT_AGREEMENT_TYPE, APP_EVENT } from '@deip/constants';
 
 class ContractAgreementCreatedEvent extends BaseEvent {
 

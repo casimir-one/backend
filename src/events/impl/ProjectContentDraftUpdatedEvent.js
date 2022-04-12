@@ -1,7 +1,6 @@
 import BaseEvent from './../base/BaseEvent';
-import APP_EVENT from './../../events/base/AppEvent';
+import { APP_EVENT, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import assert from 'assert';
-import { PROJECT_CONTENT_FORMAT } from '@deip/constants';
 
 class ProjectContentDraftUpdatedEvent extends BaseEvent {
 

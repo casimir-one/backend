@@ -1,7 +1,6 @@
 import BaseEventHandler from './../base/BaseEventHandler';
-import APP_EVENT from './../../events/base/AppEvent';
 import { InvestmentOpportunityService, InvestmentOpportunityParticipationService } from './../../services';
-import { INVESTMENT_OPPORTUNITY_STATUS } from '@deip/constants';
+import { INVESTMENT_OPPORTUNITY_STATUS, APP_EVENT } from '@deip/constants';
 
 
 class InvestmentOpportunityEventHandler extends BaseEventHandler {

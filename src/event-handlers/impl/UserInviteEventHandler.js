@@ -1,7 +1,7 @@
 import BaseEventHandler from './../base/BaseEventHandler';
 import { USER_INVITE_STATUS } from './../../constants';
 import { UserInviteService } from './../../services';
-import APP_EVENT from './../../events/base/AppEvent';
+import { APP_EVENT } from '@deip/constants';
 
 
 class UserInviteEventHandler extends BaseEventHandler {
