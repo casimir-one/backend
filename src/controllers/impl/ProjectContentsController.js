@@ -1,26 +1,23 @@
 import { APP_CMD } from '@deip/constants';
+import qs from "qs";
 import BaseController from '../base/BaseController';
 import { ProjectContentPackageForm } from '../../forms';
 import { BadRequestError, NotFoundError, ConflictError, ForbiddenError } from '../../errors';
 import { projectContentCmdHandler } from '../../command-handlers';
 import {
   ProjectDtoService,
-  ProjectContentService,
   ProjectContentDtoService,
   ProjectService,
   TeamDtoService,
   DraftService
-} from './../../services';
+} from '../../services';
 import FileStorage from './../../storage';
 import readArchive from './../../dar/readArchive';
 import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
-import mongoose from 'mongoose';
-import slug from 'limax';
 
 const projectDtoService = new ProjectDtoService();
 const projectService = new ProjectService();
 const projectContentDtoService = new ProjectContentDtoService();
-const projectContentService = new ProjectContentService();
 const teamDtoService = new TeamDtoService();
 const draftService = new DraftService();
 
@@ -90,6 +87,30 @@ class ProjectContentsController extends BaseController {
         const result = projectContents.filter(projectContent => publicProjectsIds.some(id => id == projectContent.projectId))
 
         ctx.successRes(result);
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  getPublicProjectContentListingPaginated = this.query({
+    h: async (ctx) => {
+      try {
+        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
+        const {
+          paginationMeta,
+          result: projectContents
+        } = await projectContentDtoService.lookupProjectContents(filter, sort, { page, pageSize });
+
+        const onlyUniq = (value, index, self) => self.indexOf(value) === index;
+        const projectIds = projectContents.map(x => x.projectId).filter(onlyUniq)
+
+        const projects = await projectDtoService.getProjects(projectIds);
+        const publicProjectsIds = projects.filter(r => !r.isPrivate).map(r => r._id);
+
+        const result = projectContents.filter(content => publicProjectsIds.includes(content.projectId))
+
+        ctx.successRes(result, { extraInfo: paginationMeta });
       } catch (err) {
         ctx.errorRes(err);
       }
@@ -348,7 +369,7 @@ class ProjectContentsController extends BaseController {
                 throw new NotFoundError(`Draft for "${draftHash}" hash is not found`);
               }
               const projectContent = await projectContentDtoService.findProjectContentRefByHash(draft.projectId, draftHash);
-              
+
               if (projectContent) {
                 throw new ConflictError(`Project content with "${draftHash}" hash already exist`);
               }
@@ -431,7 +452,7 @@ class ProjectContentsController extends BaseController {
           if (draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
             throw new BadRequestError(`Draft "${draftId}" is locked for updates`);
           }
-      
+
           const username = ctx.state.user.username;
           const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.teamId, username)
           if (!isAuthorized) {
@@ -441,7 +462,7 @@ class ProjectContentsController extends BaseController {
           if (draft.status == PROJECT_CONTENT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
-          
+
           if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
             const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
             const exists = await FileStorage.exists(archiveDir);

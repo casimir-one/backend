@@ -1,11 +1,10 @@
 import qs from 'qs';
 import { APP_CMD } from '@deip/constants';
 import BaseController from './../base/BaseController';
-import { TeamForm } from './../../forms';
-import { BadRequestError, NotFoundError, ConflictError } from './../../errors';
-import { accountCmdHandler } from './../../command-handlers';
-import { TeamDtoService, TeamService, UserService } from './../../services';
-import sharp from 'sharp'
+import { TeamForm } from '../../forms';
+import { BadRequestError, NotFoundError, ConflictError } from '../../errors';
+import { accountCmdHandler } from '../../command-handlers';
+import { TeamDtoService, TeamService, UserService } from '../../services';
 import FileStorage from './../../storage';
 
 
@@ -40,7 +39,7 @@ class TeamsController extends BaseController {
         if (!Array.isArray(teamsIds)) {
           throw new BadRequestError(`TeamsIds must be an array of ids`);
         }
-        
+
         const result = await teamDtoService.getTeams(teamsIds);
         ctx.successRes(result);
 
@@ -59,6 +58,20 @@ class TeamsController extends BaseController {
         const result = await teamDtoService.getTeamsListing(withPortalTeam);
         ctx.successRes(result);
 
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  getTeamsListingPaginated = this.query({
+    h: async (ctx) => {
+      try {
+        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
+
+        const { result, paginationMeta } = await teamDtoService.lookupTeams(filter, sort, { page, pageSize });
+
+        ctx.successRes(result, { extraInfo: paginationMeta });
       } catch (err) {
         ctx.errorRes(err);
       }

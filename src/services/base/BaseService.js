@@ -78,6 +78,89 @@ class BaseService {
     return results;
   }
 
+  async getMatchStage(searchQuery = {}) {
+    const scopeQuery = await this.getBaseScopeQuery();
+
+    const parseMongodbQueryOperator = (key, value) => { //from 'authors.$in', 'id1,id2'
+      const mongoOperatorRegex = /\$[a-z]*/;
+      if (!key.match(mongoOperatorRegex)) return null;
+      const keySplit = key.split('.');
+      if (keySplit.length > 2) throw new Error(`Match operator ${key} contains more than 2 stages`);
+
+      const [matchKey, matchOperator] = key.split('.');
+      const allowedOperators = ['$in', '$nin'];
+      if (!allowedOperators.includes(matchOperator)) throw new Error(`Match operator ${matchOperator} is not allowed`);
+
+
+      const arrayOperators = ['$in', '$nin'];
+      let matchValue = value;
+      if (arrayOperators.includes(matchOperator)) {
+        matchValue = matchValue.split(',').filter(Boolean)
+      }
+      return { [matchKey]: { [matchOperator]: matchValue } }; //to {authors: {$in: [id1, id2]}}
+    }
+
+    const userMatch = Object.entries(searchQuery).reduce((acc, [key, value]) => {
+      const mongoOperator = parseMongodbQueryOperator(key, value)
+      if (mongoOperator) return { ...acc, ...mongoOperator };
+      else return { ...acc, [key]: value }
+    }, {});
+
+    const match = { ...userMatch, ...scopeQuery };
+    return { $match: match }
+  }
+
+  getSortStage(sortParams) {
+    if (!sortParams) return null;
+    const sort = Object.entries(sortParams).reduce((acc, [key, value]) => {
+      const sortDirection = value === 'asc' ? 1 : value === 'desc' ? -1 : null;
+      if (!sortDirection) throw new Error(`Sort param ${key} must be 'asc' or 'desc'`)
+      return { ...acc, [key]: sortDirection };
+    }, {})
+    return { $sort: sort };
+  }
+
+  getPaginationStage(paginationParams) {
+    const page = +paginationParams.page || 0;
+    const pageSize = +paginationParams.pageSize || 10;
+
+    assert(page > -1, "Pagination param 'page' must be 0 or above");
+    assert(pageSize > 0 && pageSize < 100, "Pagination param 'pageSize' must be from 1 to 100");
+
+    const stage = {
+      $facet: {
+        paginationInfo: [
+          { $count: "totalItems" },
+        ],
+        data: [
+          { $skip: page * pageSize },
+          { $limit: pageSize }
+        ],
+      }
+    };
+    return { stage, extraInfo: { page, pageSize } };
+  }
+
+  async findManyWithPagination(searchQuery, sortParams, paginationParams) {
+    const matchStage = await this.getMatchStage(searchQuery);
+    const sortStage = this.getSortStage(sortParams);
+    const pagination = this.getPaginationStage(paginationParams);
+
+    const pipeline = [matchStage, sortStage, pagination.stage].filter(Boolean);
+
+    const { extraInfo: { page, pageSize } } = pagination;
+
+    const aggregationResult = await this._schema.aggregate(pipeline)
+      .then(x => x[0])
+
+    const data = aggregationResult.data;
+    const totalItems = aggregationResult.paginationInfo[0]?.totalItems;
+    const totalPages = totalItems ? Math.ceil(totalItems / pageSize) : 0;
+    const paginationMeta = { page, totalItems, totalPages };
+
+    return { paginationMeta, result: data };
+  }
+
 
   async createOne(fields) {
     const portalProfile = await this.getPortalInstance();
@@ -105,7 +188,7 @@ class BaseService {
 
   async createMany(objects) {
     const portalProfile = await this.getPortalInstance();
-    
+
     const payloads = [];
     for (let i = 0; i < objects.length; i++) {
       const fields = objects[i];
@@ -125,7 +208,7 @@ class BaseService {
       } else {
         payload.portalId = portalProfile._id;
       }
-      
+
       payloads.push(payload);
     }
 
@@ -172,7 +255,7 @@ class BaseService {
     return result;
   }
 
-  
+
   async deleteOne(searchQuery) {
     const portalProfile = await this.getPortalInstance();
 
