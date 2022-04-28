@@ -53,8 +53,9 @@ class ProjectContentDtoService extends BaseService {
         foreignReferences: projectContent.foreignReferences,
         createdAt: projectContent.createdAt || projectContent.created_at,
         updatedAt: projectContent.updatedAt || projectContent.updated_at,
-        metadata: metadata,
+        chainMetadata: metadata,
         eciMap: eciMap,
+        metadata: projectContent.metadata,
         contentType: projectContent.contentType,
         formatType: projectContent.formatType,
         

@@ -19,6 +19,7 @@ class ProjectContentService extends BaseService {
     formatType,
     packageFiles,
     jsonData,
+    metadata,
     authors,
     references,
     foreignReferences
@@ -36,6 +37,7 @@ class ProjectContentService extends BaseService {
       formatType,
       packageFiles,
       jsonData,
+      metadata,
       authors,
       references,
       foreignReferences
@@ -54,6 +56,7 @@ class ProjectContentService extends BaseService {
     formatType,
     packageFiles,
     jsonData,
+    metadata,
     authors,
     references,
     foreignReferences
@@ -68,6 +71,7 @@ class ProjectContentService extends BaseService {
       formatType,
       packageFiles,
       jsonData,
+      metadata,
       authors,
       references,
       foreignReferences

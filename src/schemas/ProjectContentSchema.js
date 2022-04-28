@@ -16,7 +16,7 @@ const ProjectContentSchema = new Schema({
   "contentType": {
     type: Number,
     enum: [...Object.values(PROJECT_CONTENT_TYPES)],
-    required: true
+    default: PROJECT_CONTENT_TYPES.ANNOUNCEMENT
   },
   "formatType": {
     type: Number,
@@ -30,6 +30,7 @@ const ProjectContentSchema = new Schema({
     "ext": { type: String, required: true },
   }],
   "jsonData": { type: Object },
+  "metadata": { type: Object },
   "authors": [{ type: String }],
   "references": [{ type: String }],
   "foreignReferences": [{ type: String }],

@@ -25,7 +25,6 @@ class ProjectContentProposalDeclinedEvent extends BaseEvent {
     assert(!!projectId, `'projectId' is required`);
     assert(!!teamId, `'teamId' is required`);
     assert(!!content, `'content' is required`);
-    assert(!!contentType, `'contentType' is required`);
     assert(!!authors && authors.length, `'authors' is required`);
     assert(!!title, `'title' is required`);
 
