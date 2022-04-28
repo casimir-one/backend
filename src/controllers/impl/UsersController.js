@@ -135,6 +135,24 @@ class UsersController extends BaseController {
     }
   });
 
+  checkIfUserExists = this.query({
+    h: async (ctx) => {
+      try {
+        const usernameOrEmail = ctx.params.usernameOrEmail;
+        let user;
+        if (usernameOrEmail.includes('@')) {
+          user = await userDtoService.getUserByEmail(usernameOrEmail);
+        } else {
+          user = await userDtoService.getUser(usernameOrEmail);
+        }
+        ctx.successRes({ exists: user ? true : false });
+      } catch (err) {
+        console.log(err);
+        ctx.errorRes(err);
+      }
+    }
+  });
+
   getUsers = this.query({
     h: async (ctx) => {
       try {
