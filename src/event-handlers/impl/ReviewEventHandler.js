@@ -61,7 +61,9 @@ reviewEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) => {
     projectId: projectContentRef.projectId,
     projectContentId,
     author,
-    content
+    content,
+    assessment,
+    domains
   });
 
   const expertReviewRequests = await reviewRequestDtoService.getReviewRequestsByExpert(author, REVIEW_REQUEST_STATUS.PENDING);
