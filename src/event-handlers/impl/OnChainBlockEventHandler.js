@@ -12,7 +12,7 @@ class OnChainBlockEventHandler extends BaseEventHandler {
 const onChainEventHandler = new OnChainBlockEventHandler();
 
 onChainEventHandler.register(APP_EVENT.CHAIN_BLOCK_CREATED, async (event) => {
-  console.log("CHAIN_BLOCK_CREATED", event.getEventPayload())
+  // console.log("CHAIN_BLOCK_CREATED", event.getEventPayload())
 });
 
 module.exports = onChainEventHandler;

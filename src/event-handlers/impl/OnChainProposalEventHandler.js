@@ -13,7 +13,13 @@ const onChainProposalEventHandler = new OnChainProposalEventHandler();
 
 
 onChainProposalEventHandler.register(APP_EVENT.CHAIN_PROPOSAL_PROPOSED, async (event) => {
-  console.log("CHAIN_PROPOSAL_PROPOSED", event.getEventPayload())
+  const {author, batch, proposal_id} = event.getEventPayload();
+  console.log("CHAIN_PROPOSAL_PROPOSED", {
+    author,
+    proposal_id,
+    batch
+  })
+  console.log('batch', batch);
 });
 
 onChainProposalEventHandler.register(APP_EVENT.CHAIN_PROPOSAL_APPROVED, async (event) => {
@@ -25,7 +31,13 @@ onChainProposalEventHandler.register(APP_EVENT.CHAIN_PROPOSAL_REVOKED_APPROVAL, 
 });
 
 onChainProposalEventHandler.register(APP_EVENT.CHAIN_PROPOSAL_RESOLVED, async (event) => {
-  console.log("CHAIN_PROPOSAL_RESOLVED", event.getEventPayload())
+  const {member, proposal_id, state} = event.getEventPayload();
+  console.log('CHAIN_PROPOSAL_RESOLVED', {
+    member,
+    proposal_id,
+    state
+  })
+  console.log("state", state)
 });
 
 onChainProposalEventHandler.register(APP_EVENT.CHAIN_PROPOSAL_EXPIRED, async (event) => {

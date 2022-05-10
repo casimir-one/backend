@@ -14,10 +14,10 @@ export default class KafkaService extends Singleton {
   constructor(config) {
     super();
     assert(!!config.KAFKA_CLIENT_ID, `Kafka connection param is missed, KAFKA_CLIENT_ID`);
-    assert(!!config.KAFKA_BROKER_URL, `Kafka connection param is missed, KAFKA_BROKER_URL`);
+    assert(!!config.KAFKA_BROKER_URLS, `Kafka connection param is missed, KAFKA_BROKER_URLS`);
 
     this.clientId = config.KAFKA_CLIENT_ID;
-    this.brokers = [config.KAFKA_BROKER_URL];
+    this.brokers = [...config.KAFKA_BROKER_URLS];
     // assert(!!config.KAFKA_USER, `Kafka auth param is missed, KAFKA_USER`);
     // assert(!!config.KAFKA_PASSWORD, `Kafka auth param is missed, KAFKA_PASSWORD`);
   }

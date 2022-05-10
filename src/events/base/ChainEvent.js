@@ -69,6 +69,3 @@ const chainEventToAppEvent = createEnum({
   "asset_transferred_approved": APP_EVENT.CHAIN_ASSET_TRANSFERRED_APPROVED,
   "asset_status_changed": APP_EVENT.CHAIN_ASSET_STATUS_CHANGED
 });
-
-
-// module.exports = ChainEvent;

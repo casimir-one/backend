@@ -12,7 +12,10 @@ class OnChainAssetEventHandler extends BaseEventHandler {
 const onChainAssetEventHandler = new OnChainAssetEventHandler();
 
 onChainAssetEventHandler.register(APP_EVENT.CHAIN_ASSET_CLASS_CREATED, async (event) => {
-  console.log("CHAIN_ASSET_CLASS_CREATED", event.getEventPayload())
+  console.log("CHAIN_ASSET_CLASS_CREATED");
+  const { asset_id, creator, owner } = event.getEventPayload();
+  
+
 });
 
 onChainAssetEventHandler.register(APP_EVENT.CHAIN_ASSET_ISSUED, async (event) => {
@@ -56,7 +59,11 @@ onChainAssetEventHandler.register(APP_EVENT.CHAIN_ASSET_CLASS_FORCE_CREATED, asy
 });
 
 onChainAssetEventHandler.register(APP_EVENT.CHAIN_ASSET_METADATA_SET, async (event) => {
-  console.log("CHAIN_ASSET_METADATA_SET", event.getEventPayload())
+  console.log("CHAIN_ASSET_METADATA_SET", event.getEventPayload());
+  const { asset_id, name, symbol, decimals, is_frozen } = event.getEventPayload();
+  const nameString = Buffer.from(name).toString('hex');
+  const symbolString = Buffer.from(symbol).toString('hex');
+  // console.log({ asset_id, nameString, symbolString, decimals });
 });
 
 onChainAssetEventHandler.register(APP_EVENT.CHAIN_OCTOPUS, async (event) => {
