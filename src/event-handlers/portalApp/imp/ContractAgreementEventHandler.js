@@ -1,8 +1,8 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import { ContractAgreementService, ContractAgreementDtoService } from './../../services';
-import { APP_PROPOSAL, APP_CMD, APP_EVENT, CONTRACT_AGREEMENT_STATUS } from '@deip/constants';
+import { APP_CMD, APP_EVENT, APP_PROPOSAL, CONTRACT_AGREEMENT_STATUS } from '@deip/constants';
+import { ContractAgreementDtoService, ContractAgreementService } from '../../../services';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
-class ContractAgreementEventHandler extends BaseEventHandler {
+class ContractAgreementEventHandler extends PortalAppEventHandler {
   constructor() {
     super();
   }
@@ -51,8 +51,8 @@ contractAgreementEventHandler.register(APP_EVENT.PROPOSAL_ACCEPTED, async (event
   if (proposalType === APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL) {
     const createContractAgreementCmd = proposedCmds.find(p => p.getCmdNum() === APP_CMD.CREATE_CONTRACT_AGREEMENT);
     const { entityId: contractAgreementId } = createContractAgreementCmd.getCmdPayload();
-    
-    const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId); 
+
+    const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId);
     if (!contractAgreement.signers.some(s => s.id === account)) {
       const date = new Date().getTime();
       const updatedContractAgreement = await contractAgreementService.updateContractAgreement({

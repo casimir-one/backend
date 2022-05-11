@@ -1,9 +1,9 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import { APP_EVENT } from '@deip/constants';
-import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
-import { TeamDtoService, ProposalService } from './../../services';
-import config from './../../config';
 import { ChainService } from '@deip/chain-service';
+import { APP_EVENT } from '@deip/constants';
+import config from '../../../config';
+import APP_PROPOSAL_EVENT from '../../../events/base/AppProposalEvent';
+import { ProposalService, TeamDtoService } from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 
 class ProposalEventHandler extends BaseEventHandler {
@@ -49,7 +49,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
       proposalCtx: { proposalId, type, proposedCmds }
     });
     details = typedEvent.getEventPayload();
-  } 
+  }
   await proposalService.createProposal({
     proposalId: proposalId,
     proposalCmd: proposalCmd,
@@ -60,7 +60,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
     creator: creator,
     decisionMakers: decisionMakers
   });
-  
+
 });
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_ACCEPTED, async (event) => {

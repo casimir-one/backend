@@ -1,24 +1,12 @@
 import { APP_EVENT } from '@deip/constants';
-import { 
-  projectEventHandler, 
-  proposalEventHandler, 
-  teamEventHandler, 
-  userNotificationEventHandler, 
-  userInviteEventHandler,
+import {
+  assetEventHandler,
   attributeEventHandler,
   contractAgreementEventHandler,
   documentTemplateEventHandler,
   fileUploadEventHandler,
   investmentOpportunityEventHandler,
   layoutEventHandler,
-
-  onChainBlockEventHandler,
-  onChainProposalEventHandler,
-  onChainProjectEventHandler,
-  onChainContractAgreementEventHandler,
-  onChainDaoEventHandler,
-  onChainAssetEventHandler,
-
   portalEventHandler,
   projectContentEventHandler,
   projectEventHandler,
@@ -28,9 +16,8 @@ import {
   userEventHandler,
   userInviteEventHandler,
   userNotificationEventHandler,
-  userSettingsEventHandler,
+  userSettingsEventHandler
 } from './index';
-
 
 /* Priority is defined by the order of handlers */
 
@@ -349,158 +336,5 @@ module.exports = {
 
   [APP_EVENT.LAYOUT_DELETED]: [
     { h: layoutEventHandler, await: true },
-  ],
-
-//ON_CHAIN
-  [APP_EVENT.CHAIN_BLOCK_CREATED]: [
-    { h: onChainBlockEventHandler, await: false }
-  ],
-
-// PROPOSAL
-  [APP_EVENT.CHAIN_PROPOSAL_PROPOSED]: [
-    { h: onChainProposalEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROPOSAL_APPROVED]: [
-    { h: onChainProposalEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROPOSAL_REVOKED_APPROVAL]: [
-    { h: onChainProposalEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROPOSAL_RESOLVED]: [
-    { h: onChainProposalEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROPOSAL_EXPIRED]: [
-    { h: onChainProposalEventHandler, await: false }
-  ],
-
-// PROJECT
-  [APP_EVENT.CHAIN_PROJECT_CREATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_REMOVED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_UPDATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_CONTENT_CREATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_NDA_CREATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_NDA_ACCESS_REQUEST_CREATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_NDA_ACCESS_REQUEST_FULFILLED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_NDA_ACCESS_REQUEST_REJECTED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_DOMAIN_ADDED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_REVIEW_CREATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_REVIEW_UPVOTED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_TOKEN_SALE_CREATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_TOKEN_SALE_ACTIVATED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_TOKEN_SALE_FINISHED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_TOKEN_SALE_EXPIRED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_PROJECT_TOKEN_SALE_CONTRIBUTED]: [
-    { h: onChainProjectEventHandler, await: false }
-  ],
-
-// CONTRACT_AGREEMENT
-  [APP_EVENT.CHAIN_DEIP_CONTRACT_AGREEMENT_CREATED]: [
-    { h: onChainContractAgreementEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_DEIP_CONTRACT_AGREEMENT_ACCEPTED]: [
-    { h: onChainContractAgreementEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_DEIP_CONTRACT_AGREEMENT_FINALIZED]: [
-    { h: onChainContractAgreementEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_DEIP_CONTRACT_AGREEMENT_REJECTED]: [
-    { h: onChainContractAgreementEventHandler, await: false }
-  ],
-
-// DAO
-  [APP_EVENT.CHAIN_DAO_CREATE]: [
-    { h: onChainDaoEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_DAO_ALTER_AUTHORITY]: [
-    { h: onChainDaoEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_DAO_METADATA_UPDATED]: [
-    { h: onChainDaoEventHandler, await: false }
-  ],
-
-// ASSET
-  [APP_EVENT.CHAIN_ASSET_CLASS_CREATED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_ISSUED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_TRANSFERRED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_BURNED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_TEAM_CHANGED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_OWNER_CHANGED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_ACCOUNT_FROZEN]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_ACCOUNT_THAWED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_FROZEN]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_THAWED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_CLASS_DESTROYED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_CLASS_FORCE_CREATED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_METADATA_SET]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_OCTOPUS]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_METADATA_CLEARED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_APPROVED_TRANSFER]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_TRANSFERRED_APPROVED]: [
-    { h: onChainAssetEventHandler, await: false }
-  ],
-  [APP_EVENT.CHAIN_ASSET_STATUS_CHANGED]: [
-    { h: onChainAssetEventHandler, await: false }
   ],
 };

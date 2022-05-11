@@ -1,9 +1,9 @@
-import BaseEventHandler from './../base/BaseEventHandler';
 import { APP_EVENT } from '@deip/constants';
-import { AttributeService, ProjectDtoService } from './../../services';
+import { AttributeService, ProjectDtoService } from '../../../services';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class AttributeEventHandler extends BaseEventHandler {
+class AttributeEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

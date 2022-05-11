@@ -1,9 +1,7 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import { PROJECT_STATUS, PROJECT_ATTRIBUTE } from './../../constants';
-import { INVESTMENT_OPPORTUNITY_STATUS as TOKEN_SALE_STATUS, APP_EVENT } from '@deip/constants';
-import { ProjectService, InvestmentOpportunityDtoService } from './../../services';
-import config from './../../config';
-import { ChainService } from '@deip/chain-service';
+import { APP_EVENT, INVESTMENT_OPPORTUNITY_STATUS as TOKEN_SALE_STATUS } from '@deip/constants';
+import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from '../../../constants';
+import { InvestmentOpportunityDtoService, ProjectService } from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 
 class ProjectEventHandler extends BaseEventHandler {

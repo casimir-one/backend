@@ -1,9 +1,9 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import { InvestmentOpportunityService, InvestmentOpportunityParticipationService } from './../../services';
-import { INVESTMENT_OPPORTUNITY_STATUS, APP_EVENT } from '@deip/constants';
+import { APP_EVENT, INVESTMENT_OPPORTUNITY_STATUS } from '@deip/constants';
+import { InvestmentOpportunityParticipationService, InvestmentOpportunityService } from '../../../services';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class InvestmentOpportunityEventHandler extends BaseEventHandler {
+class InvestmentOpportunityEventHandler extends PortalAppEventHandler {
   constructor() {
     super();
   }
@@ -67,7 +67,7 @@ invstOppEventHandler.register(APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED, asy
     }
   };
 
-  if(Number(updatedData.totalInvested.amount) >= Number(invstOpp.hardCap.amount)) {
+  if (Number(updatedData.totalInvested.amount) >= Number(invstOpp.hardCap.amount)) {
     updatedData.totalInvested.amount = invstOpp.hardCap.amount;
     updatedData.status = INVESTMENT_OPPORTUNITY_STATUS.FINISHED;
   }

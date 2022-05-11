@@ -1,6 +1,6 @@
-import BaseEventHandler from './../base/BaseEventHandler';
 import { APP_EVENT } from '@deip/constants';
-import { PortalService } from './../../services';
+import { PortalService } from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 
 class PortalEventHandler extends BaseEventHandler {
@@ -25,17 +25,17 @@ portalEventHandler.register(APP_EVENT.PORTAL_PROFILE_UPDATED, async (event) => {
     },
     portalId
   } = event.getEventPayload();
-  
+
   const portal = await portalService.getPortal(portalId);
   const updatedPortalProfile = await portalService.updatePortalProfile(
-    portalId, 
+    portalId,
     {
       ...portal,
       name,
       shortName,
       description,
       email
-    }, 
+    },
     {
       ...portal.settings,
       faq
@@ -64,7 +64,7 @@ portalEventHandler.register(APP_EVENT.LAYOUT_UPDATED, async (event) => {
 
 portalEventHandler.register(APP_EVENT.LAYOUT_SETTINGS_UPDATED, async (event) => {
   const { portalId, layoutSettings } = event.getEventPayload();
-  
+
   const updatedPortalProfile = await portalService.updatePortalLayoutSettings(
     portalId,
     layoutSettings

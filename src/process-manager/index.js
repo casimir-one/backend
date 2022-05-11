@@ -1,5 +1,5 @@
 import config from "../config";
-import BaseEventHandler from "../event-handlers/base/BaseEventHandler";
+import ChainDomainEventHandler from "../event-handlers/base/ChainDomainEventHandler";
 import APP_CMD_TO_BC_EVENT_PROCESSOR from './AppCmdToBlockchainEvent';
 import { QUEUE_TOPIC } from "../constants";
 import { logError, logWarn } from "../utils/log";
@@ -9,7 +9,7 @@ import { waitChainBlockAsync } from "../utils/network";
 
 QueueService.getInstanceAsync(config).then(async queueService => {
   await queueService.subscribeEach(config.KAFKA_CHAIN_GROUP_ID, QUEUE_TOPIC.BLOCKCHAIN, async (topic, event) => {
-    await BaseEventHandler.Broadcast([event]);
+    await ChainDomainEventHandler.Broadcast([event]);
     await fire(event);
   })
 });
