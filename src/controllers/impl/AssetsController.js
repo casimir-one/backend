@@ -103,7 +103,8 @@ class AssetsController extends BaseController {
   getNonFungibleTokenClasses = this.query({
     h: async (ctx) => {
       try {
-        const assets = await nonFungibleTokenDtoService.getNonFungibleTokenClasses();
+        const query = qs.parse(ctx.query);
+        const assets = await nonFungibleTokenDtoService.getNonFungibleTokenClasses(query);
         ctx.successRes(assets);
       }
       catch(err) {
