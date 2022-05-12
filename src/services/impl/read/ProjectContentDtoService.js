@@ -26,7 +26,7 @@ class ProjectContentDtoService extends BaseService {
 
     return projectsContents.map((projectContent) => {
       const chainProjectContent = chainProjectsContents.find((chainProjectContent) => !!chainProjectContent && chainProjectContent.contentId == projectContent._id);
-      
+
       let metadata = null;
       let eciMap = {};
       if (chainProjectContent) {
@@ -58,8 +58,8 @@ class ProjectContentDtoService extends BaseService {
         metadata: projectContent.metadata,
         contentType: projectContent.contentType,
         formatType: projectContent.formatType,
-        
-        
+
+
         // @deprecated
         // external_id: projectContent._id,
         // project_external_id: projectContent.projectId,
@@ -87,11 +87,11 @@ class ProjectContentDtoService extends BaseService {
     return result;
   }
 
-  async lookupProjectContents() {
-    const projectContents = await this.findMany({});
-    if (!projectContents.length) return [];
+  async lookupProjectContents(filter, sort, pagination) {
+    const { paginationMeta, result: projectContents } = await this.findManyWithPagination(filter, sort, pagination);
+
     const result = await this.mapProjectContents(projectContents);
-    return result;
+    return { paginationMeta, result };
   }
 
   async getProjectContentsByProject(projectId) {
@@ -251,7 +251,7 @@ class ProjectContentDtoService extends BaseService {
       if (!innerRefProject) {
         continue; // deleted project\content
       }
-      
+
       const innerRefTeam = await teamDtoService.getTeam(innerRefProject.teamId);
       const innerRefProjectContent = await this.getProjectContent(referenceprojectContentId);
 
@@ -276,7 +276,7 @@ class ProjectContentDtoService extends BaseService {
   getProjectContentType(type) {
     return CONTENT_TYPES_MAP.find((t) => t.type === type || t.id === type);
   }
- 
+
 }
 
 export default ProjectContentDtoService;

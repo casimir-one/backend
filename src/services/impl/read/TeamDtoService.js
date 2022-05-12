@@ -5,7 +5,7 @@ import { ChainService } from '@deip/chain-service';
 
 
 class TeamDtoService extends BaseService {
-  constructor(options = { scoped: true }) { 
+  constructor(options = { scoped: true }) {
     super(TeamSchema, options);
   }
 
@@ -58,6 +58,16 @@ class TeamDtoService extends BaseService {
     const teams = await this.findMany({ isPortalTeam: withPortalTeam });
     const result = await this.mapTeams(teams);
     return result;
+  }
+
+
+  async lookupTeams(filter, sort, pagination) {
+    if(!filter.isPortalTeam) filter.isPortalTeam = false;
+
+    const { paginationMeta, result: teams } = await this.findManyWithPagination(filter, sort, pagination);
+
+    const result = await this.mapTeams(teams);
+    return { paginationMeta, result };
   }
 
 

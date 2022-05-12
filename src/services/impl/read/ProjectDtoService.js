@@ -14,7 +14,7 @@ const teamDtoService = new TeamDtoService();
 
 class ProjectDtoService extends BaseService {
 
-  constructor(options = { scoped: true }) { 
+  constructor(options = { scoped: true }) {
     super(ProjectSchema, options);
   }
 
@@ -133,13 +133,13 @@ class ProjectDtoService extends BaseService {
       .filter(p => filter.isDefault === undefined || filter.isDefault === p.isDefault)
       .filter(p => !filter.searchTerm || p.attributes.some(rAttr => {
         const attribute = projectsAttributes.find(attr => attr._id.toString() === rAttr.attributeId.toString());
-        if (!attribute || !rAttr.value) 
+        if (!attribute || !rAttr.value)
           return false;
 
-        if (rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString() || rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString()) 
+        if (rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString() || rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.DESCRIPTION.toString())
           return `${rAttr.value}`.toLowerCase().includes(filter.searchTerm.toLowerCase());
 
-        if (attribute.type == ATTR_TYPES.USER || attribute.type == 'userSelect') 
+        if (attribute.type == ATTR_TYPES.USER || attribute.type == 'userSelect')
           return p.members.some(m => m.toLowerCase().includes(filter.searchTerm.toLowerCase()));
 
         return false;
@@ -154,9 +154,9 @@ class ProjectDtoService extends BaseService {
 
         const rAttr = p.attributes.find(rAttr => rAttr.attributeId.toString() === fAttr.attributeId.toString());
         return fAttr.values.some((v) => {
-          if (!rAttr || !rAttr.value) 
+          if (!rAttr || !rAttr.value)
             return !v || v === 'false';
-          
+
           if (attribute.type == ATTR_TYPES.EXPRESS_LICENSING || attribute.type == 'expressLicensing') {
             if (v == true || v === 'true') {
               return rAttr.value.length != 0;
@@ -165,16 +165,16 @@ class ProjectDtoService extends BaseService {
             }
           }
 
-          if (Array.isArray(rAttr.value)) 
+          if (Array.isArray(rAttr.value))
             return rAttr.value.some(rAttrV => rAttrV.toString() === v.toString());
 
-          if (typeof rAttr.value === 'string') 
+          if (typeof rAttr.value === 'string')
             return rAttr.value.includes(v.toString());
 
           return rAttr.value.toString() === v.toString();
         });
       }))
-      .sort((a, b) => b.createdAat - a.createdAt);
+      .sort((a, b) => b.createdAt - a.createdAt);
   }
 
 
