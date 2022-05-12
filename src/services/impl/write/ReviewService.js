@@ -12,7 +12,9 @@ class ReviewService extends BaseService {
     projectId,
     projectContentId,
     author,
-    content
+    content,
+    assessment,
+    domains
   }) {
 
     const result = await this.createOne({
@@ -20,7 +22,9 @@ class ReviewService extends BaseService {
       projectContentId,
       projectId,
       author,
-      content
+      content,
+      assessment,
+      domains
     });
 
     return result;

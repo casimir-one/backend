@@ -27,6 +27,7 @@ class ReviewDtoService extends BaseService {
         eciMap = chainReview.eciMap;
         assessment = chainReview.assessment;
       } else {
+        domains = review.domains
         console.warn(`Review with ID '${review._id}' is not found in the Chain`);
       }
 
@@ -39,7 +40,8 @@ class ReviewDtoService extends BaseService {
         content: review.content,
         domains: domains,
         eciMap: eciMap,
-        assessment: assessment,
+        assessment: review.assessment,
+        chainAssessment: assessment,
         createdAt: review.createdAt || review.created_at,
         updatedAt: review.updatedAt || review.updated_at,
 
