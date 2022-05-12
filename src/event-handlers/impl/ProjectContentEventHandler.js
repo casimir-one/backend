@@ -6,7 +6,7 @@ import {
 } from './../../services';
 import { genSha256Hash } from '@deip/toolbox';
 import FileStorage from './../../storage';
-import { APP_EVENT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
+import { APP_EVENT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
 import mongoose from 'mongoose';
 import crypto from 'crypto';
 import path from 'path';
@@ -35,7 +35,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, 
     projectId,
     teamId,
     content: draftId,
-    contentType,
+    contentType = PROJECT_CONTENT_TYPES.ANNOUNCEMENT,
     authors,
     title,
     proposalCtx
@@ -52,7 +52,17 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, 
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (event) => {
 
-  const { projectId, draftId, contentType, formatType, authors, references, title, jsonData, ctx } = event.getEventPayload();
+  const {
+    projectId,
+    draftId,
+    contentType = PROJECT_CONTENT_TYPES.ANNOUNCEMENT,
+    formatType,
+    authors,
+    references,
+    title,
+    jsonData,
+    metadata
+  } = event.getEventPayload();
 
   const project = await projectDtoService.getProject(projectId);
 
@@ -72,7 +82,8 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     authors: authors || [],
     references: references || [],
     packageFiles: [],
-    foreignReferences: []
+    foreignReferences: [],
+    metadata
   }
 
   if (formatType === PROJECT_CONTENT_FORMAT.JSON) {
@@ -95,7 +106,18 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
 
 projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (event) => {
 
-  const { _id: draftId, authors, title, contentType, formatType, references, status, jsonData, xmlDraft } = event.getEventPayload();
+  const {
+    _id: draftId,
+    authors,
+    title,
+    contentType = PROJECT_CONTENT_TYPES.ANNOUNCEMENT,
+    formatType,
+    references,
+    status,
+    jsonData,
+    metadata,
+    xmlDraft
+  } = event.getEventPayload();
 
   const draft = await draftService.getDraft(draftId);
   let packageHash = '';
@@ -119,6 +141,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, asy
     references,
     status,
     jsonData,
+    metadata,
     hash: packageHash,
     packageFiles
   })
@@ -135,13 +158,14 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
   const {
     projectId,
     teamId,
-    contentType,
+    contentType = PROJECT_CONTENT_TYPES.ANNOUNCEMENT,
     description,
     content,
     authors,
     references,
     title,
-    entityId
+    entityId,
+    metadata
   } = event.getEventPayload();
 
     const draft = await draftService.getDraftByHash(content)
@@ -156,7 +180,11 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
       title,
       contentType,
       authors,
-      references
+      references,
+      metadata: {
+        ...draft.metadata,
+        ...metadata
+      }
     });
 });
 
