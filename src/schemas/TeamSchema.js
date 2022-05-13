@@ -6,6 +6,7 @@ const Schema = mongoose.Schema;
 const TeamSchema = new Schema({
   "_id": { type: String, required: true },
   "portalId": { type: String, required: true },
+  "address": { type: String, required: false },
   "creator": { type: String, required: true },
   "attributes": [AttributeValueSchema],
   "members": { type: [String], required: true },

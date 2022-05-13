@@ -16,6 +16,7 @@ const UserRole = new Schema({
 const UserSchema = new Schema({
   "_id": { type: String },
   "portalId": { type: String, required: true },
+  "address": { type: String, required: false },
   "email": { type: String, required: true, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "signUpPubKey": { type: String, default: null },
   "status": { type: Number, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },

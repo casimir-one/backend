@@ -1,13 +1,12 @@
 
-import BaseEventHandler from '../base/BaseEventHandler';
-import { ContractAgreementDtoService, PortalService, DraftService } from '../../services';
-import FileStorage from '../../storage';
-import cloneArchive from './../../dar/cloneArchive'
-import writeArchive from './../../dar/writeArchive';
-import { generatePdf } from '../../utils/pdf';
+import { APP_EVENT, CONTRACT_AGREEMENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import mongoose from 'mongoose';
-import crypto from 'crypto';
-import { CONTRACT_AGREEMENT_STATUS, APP_EVENT, PROJECT_CONTENT_FORMAT } from '@deip/constants';
+import cloneArchive from '../../../dar/cloneArchive';
+import writeArchive from '../../../dar/writeArchive';
+import { ContractAgreementDtoService, DraftService, PortalService } from '../../../services';
+import FileStorage from '../../../storage';
+import { generatePdf } from '../../../utils/pdf';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 const getContractFilePath = async (filename) => {
   const contractAgreementDir = FileStorage.getContractAgreementDirPath();
@@ -34,7 +33,7 @@ const saveContractPdf = async (content, filename) => {
   await FileStorage.put(filePath, pdfBuffer);
 };
 
-class FileUploadEventHandler extends BaseEventHandler {
+class FileUploadEventHandler extends PortalAppEventHandler {
   constructor() {
     super();
   }
@@ -73,7 +72,7 @@ fileUploadEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_CREATED, async (eve
 
 fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
   const { banner, logo, portalId } = event.getEventPayload();
-  
+
   const portal = await portalService.getPortal(portalId);
   const oldBanner = portal.banner;
   const oldLogo = portal.logo;
@@ -101,19 +100,19 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (
 
   if (formatType === PROJECT_CONTENT_FORMAT.DAR || formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
     const _id = mongoose.Types.ObjectId(draftId);
-    
-    if (formatType == PROJECT_CONTENT_FORMAT.DAR) { 
+
+    if (formatType == PROJECT_CONTENT_FORMAT.DAR) {
       const darPath = FileStorage.getProjectDarArchiveDirPath(projectId, _id);
       const blankDarPath = FileStorage.getProjectBlankDarArchiveDirPath();
-    
+
       await cloneArchive(blankDarPath, darPath, true);
     }
     const files = ctx.req.files;
     if (formatType == PROJECT_CONTENT_FORMAT.PACKAGE && files.length > 0) {
       const tempDestinationPath = files[0].destination;
-      
+
       const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(projectId, _id);
-      
+
       await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
     }
   }

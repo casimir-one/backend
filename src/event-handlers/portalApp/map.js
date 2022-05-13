@@ -1,25 +1,23 @@
 import { APP_EVENT } from '@deip/constants';
-import { 
-  projectEventHandler, 
-  proposalEventHandler, 
-  teamEventHandler, 
-  userNotificationEventHandler, 
-  userInviteEventHandler,
-  attributeEventHandler,
-  userEventHandler,
-  documentTemplateEventHandler,
-  investmentOpportunityEventHandler,
+import {
   assetEventHandler,
-  projectContentEventHandler,
-  reviewEventHandler,
+  attributeEventHandler,
   contractAgreementEventHandler,
+  documentTemplateEventHandler,
   fileUploadEventHandler,
+  investmentOpportunityEventHandler,
+  layoutEventHandler,
   portalEventHandler,
-  userSettingsEventHandler,
-  layoutEventHandler
+  projectContentEventHandler,
+  projectEventHandler,
+  proposalEventHandler,
+  reviewEventHandler,
+  teamEventHandler,
+  userEventHandler,
+  userInviteEventHandler,
+  userNotificationEventHandler,
+  userSettingsEventHandler
 } from './index';
-
-
 
 /* Priority is defined by the order of handlers */
 
@@ -159,7 +157,7 @@ module.exports = {
     { h: investmentOpportunityEventHandler, await: true },
     { h: projectEventHandler, await: false }
   ],
-  
+
   [APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED]: [
     { h: investmentOpportunityEventHandler, await: true },
     { h: projectEventHandler, await: false }
@@ -234,7 +232,7 @@ module.exports = {
     { h: projectContentEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
   ],
-  
+
   [APP_EVENT.REVIEW_REQUEST_CREATED]: [
     { h: reviewEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
@@ -264,7 +262,7 @@ module.exports = {
   [APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED]: [
     { h: userNotificationEventHandler, await: false }
   ],
-  
+
   [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED]: [
     { h: contractAgreementEventHandler, await: true },
     { h: fileUploadEventHandler, await: true }
@@ -311,7 +309,7 @@ module.exports = {
   [APP_EVENT.NETWORK_SETTINGS_UPDATED]: [
     { h: portalEventHandler, await: true },
   ],
-  
+
   [APP_EVENT.USER_PROFILE_DELETED]: [
     { h: userEventHandler, await: true },
   ],

@@ -1,8 +1,8 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import { SYSTEM_ROLE as USER_ROLES, APP_EVENT } from '@deip/constants';
+import { APP_EVENT, SYSTEM_ROLE as USER_ROLES } from '@deip/constants';
 import {
   UserService
-} from './../../services';
+} from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 
 class UserEventHandler extends BaseEventHandler {
@@ -32,13 +32,13 @@ userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
   if (isTeamAccount) {
     const userInfo = await userService.getUser(creator);
 
-    if (userInfo) { 
+    if (userInfo) {
       const updatedUserProfile = await userService.updateUser(creator, {
         status: userInfo.status,
         email: userInfo.email,
         attributes: userInfo.attributes,
         teams: [...userInfo.teams, daoId],
-        roles: [...userInfo.roles, { role: USER_ROLES.TEAM_ADMIN,  teamId: daoId }]
+        roles: [...userInfo.roles, { role: USER_ROLES.TEAM_ADMIN, teamId: daoId }]
       });
     }
   } else {

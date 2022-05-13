@@ -19,6 +19,7 @@ const app = new Koa();
 require('./database');
 require('./queue');
 require('./websocket');
+require('./process-manager');
 
 app.use(jsonResponse());
 app.use(cors());

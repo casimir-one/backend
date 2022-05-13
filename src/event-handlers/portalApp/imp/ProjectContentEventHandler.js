@@ -1,15 +1,12 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import {
-  ProjectDtoService,
-  ProjectContentService,
-  DraftService
-} from './../../services';
+import { APP_EVENT, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_TYPES } from '@deip/constants';
 import { genSha256Hash } from '@deip/toolbox';
-import FileStorage from './../../storage';
-import { APP_EVENT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
 import mongoose from 'mongoose';
-import crypto from 'crypto';
 import path from 'path';
+import {
+  DraftService, ProjectContentService, ProjectDtoService
+} from '../../../services';
+import FileStorage from '../../../storage';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
 
@@ -168,24 +165,24 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
     metadata
   } = event.getEventPayload();
 
-    const draft = await draftService.getDraftByHash(content)
+  const draft = await draftService.getDraftByHash(content)
 
-    await draftService.deleteDraft(draft._id);
+  await draftService.deleteDraft(draft._id);
 
-    const projectContent = await projectContentService.createProjectContentRef({
-      ...draft,
-      _id: entityId,
-      projectId,
-      teamId,
-      title,
-      contentType,
-      authors,
-      references,
-      metadata: {
-        ...draft.metadata,
-        ...metadata
-      }
-    });
+  const projectContent = await projectContentService.createProjectContentRef({
+    ...draft,
+    _id: entityId,
+    projectId,
+    teamId,
+    title,
+    contentType,
+    authors,
+    references,
+    metadata: {
+      ...draft.metadata,
+      ...metadata
+    }
+  });
 });
 
 

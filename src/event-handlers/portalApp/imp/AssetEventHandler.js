@@ -1,9 +1,9 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import { AssetService, NonFungibleTokenService, NonFungibleTokenDtoService, FungibleTokenService } from './../../services';
-import { ASSET_TYPE, APP_EVENT } from '@deip/constants';
+import { APP_EVENT, ASSET_TYPE } from '@deip/constants';
+import { AssetService, FungibleTokenService, NonFungibleTokenDtoService, NonFungibleTokenService } from '../../../services';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class AssetEventHandler extends BaseEventHandler {
+class AssetEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

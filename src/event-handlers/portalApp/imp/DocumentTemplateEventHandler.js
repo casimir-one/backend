@@ -1,9 +1,9 @@
-import BaseEventHandler from './../base/BaseEventHandler';
 import { APP_EVENT } from '@deip/constants';
-import { DocumentTemplateService } from './../../services';
+import { DocumentTemplateService } from '../../../services';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class DocumentTemplateEventHandler extends BaseEventHandler {
+class DocumentTemplateEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

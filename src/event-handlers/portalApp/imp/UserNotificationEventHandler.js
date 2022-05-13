@@ -1,17 +1,17 @@
-import BaseEventHandler from './../base/BaseEventHandler';
-import config from './../../config';
-import { PROJECT_ATTRIBUTE } from './../../constants';
-import { USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE, APP_EVENT } from '@deip/constants';
+import { ChainService } from '@deip/chain-service';
+import { APP_EVENT, USER_NOTIFICATION_STATUS, USER_NOTIFICATION_TYPE } from '@deip/constants';
+import config from '../../../config';
+import { PROJECT_ATTRIBUTE } from '../../../constants';
 import {
-  TeamDtoService,
-  UserDtoService,
+  PortalDtoService,
+  ProjectContentDtoService,
   ProjectDtoService,
   ReviewDtoService,
-  ProjectContentDtoService,
-  PortalDtoService,
+  TeamDtoService,
+  UserDtoService,
   UserNotificationService
-} from './../../services';
-import { ChainService } from '@deip/chain-service';
+} from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 class UserNotificationEventHandler extends BaseEventHandler {
 
@@ -63,7 +63,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_CREATED, async (event) =
   const title = attributes.some(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString())
     ? attributes.find(rAttr => rAttr.attributeId.toString() == PROJECT_ATTRIBUTE.TITLE.toString()).value
     : "Not Specified";
-    
+
   const notifications = [];
   for (let i = 0; i < notifiableUsers.length; i++) {
     let user = notifiableUsers[i];
@@ -215,7 +215,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED,
 
 
 userNotificationEventHandler.register(APP_EVENT.TEAM_INVITE_CREATED, async (event) => {
-  const { 
+  const {
     invitee,
     teamId,
     inviter
@@ -342,7 +342,7 @@ userNotificationEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREA
       }
     });
   }
-  
+
   await userNotificationService.createUserNotifications(notifications);
 });
 
@@ -413,7 +413,7 @@ userNotificationEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (e
   const requestor = await userDtoService.getUser(requestorId);
   const expert = await userDtoService.getUser(expertId);
   const projectContent = await projectContentDtoService.getProjectContent(projectContentId);
-  
+
   const project = await projectDtoService.getProject(projectContent.projectId);
   const team = await teamDtoService.getTeam(project.teamId);
 

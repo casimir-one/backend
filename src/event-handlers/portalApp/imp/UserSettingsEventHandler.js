@@ -1,8 +1,6 @@
-import BaseEventHandler from './../base/BaseEventHandler';
 import { APP_EVENT } from '@deip/constants';
-import {
-  UserBookmarkService
-} from './../../services';
+import { UserBookmarkService } from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 
 class UserSettingsEventHandler extends BaseEventHandler {

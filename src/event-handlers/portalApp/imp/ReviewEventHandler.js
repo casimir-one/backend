@@ -1,7 +1,12 @@
-import BaseEventHandler from './../base/BaseEventHandler';
 import { APP_EVENT } from '@deip/constants';
-import { ReviewRequestService, ReviewRequestDtoService, ProjectContentDtoService, ReviewService } from './../../services';
-import { REVIEW_REQUEST_STATUS } from './../../constants';
+import { REVIEW_REQUEST_STATUS } from '../../../constants';
+import {
+  ProjectContentDtoService,
+  ReviewRequestDtoService,
+  ReviewRequestService,
+  ReviewService
+} from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 class ReviewEventHandler extends BaseEventHandler {
 
@@ -73,7 +78,7 @@ reviewEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) => {
       _id: reviewRequest._id,
       status: REVIEW_REQUEST_STATUS.APPROVED
     })
-  } 
+  }
 });
 
 module.exports = reviewEventHandler;

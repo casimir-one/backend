@@ -1,4 +1,4 @@
-import { APP_EVENT } from '@deip/constants';
+import { APP_EVENT, DOMAIN_EVENT } from '@deip/constants';
 
 class BaseEvent {
 
@@ -15,7 +15,7 @@ class BaseEvent {
   }
 
   getEventName() {
-    return APP_EVENT[this._eventNum];
+    return APP_EVENT[this._eventNum] || DOMAIN_EVENT[this._eventNum];
   }
 
   getEventPayload() {
@@ -44,10 +44,10 @@ class BaseEvent {
   }
 
   toString() {
-    return JSON.stringify({ 
-      timestamp: this.getTimestamp(), 
-      eventNum: this.getEventNum(), 
-      eventName: this.getEventName(), 
+    return JSON.stringify({
+      timestamp: this.getTimestamp(),
+      eventNum: this.getEventNum(),
+      eventName: this.getEventName(),
       eventPayload: this.getEventPayload(),
       eventIssuer: this.getEventIssuer(),
       proposalCtx: this.getProposalCtx()

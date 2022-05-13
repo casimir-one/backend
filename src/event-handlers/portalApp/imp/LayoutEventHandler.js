@@ -1,6 +1,6 @@
-import BaseEventHandler from './../base/BaseEventHandler';
 import { APP_EVENT } from '@deip/constants';
-import { LayoutService } from './../../services';
+import { LayoutService } from '../../../services';
+import BaseEventHandler from '../../base/BaseEventHandler';
 
 class LayoutEventHandler extends BaseEventHandler {
   constructor() {

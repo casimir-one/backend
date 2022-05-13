@@ -64,14 +64,15 @@ class BaseEventHandler extends EventEmitter {
   }
 
   static async Broadcast(events, ctx) {
-    const APP_EVENT_HANDLERS_MAP = require('./../../event-handlers/map');
+    const handlers = this.getHandlers();
+    if (!handlers) throw new Error("Cannot find handlers");
 
     let chain = new Promise((start) => { start() });
 
     for (let i = 0; i < events.length; i++) {
       const processingErrors = [];
       const event = events[i];
-      const eventHandlers = APP_EVENT_HANDLERS_MAP[event.getEventNum()];
+      const eventHandlers = handlers[event.getEventNum()];
       if (!eventHandlers || !eventHandlers.length) {
         logWarn(`WARNING: No event handlers registered for ${event.getEventName()} event`);
         continue;
@@ -82,7 +83,7 @@ class BaseEventHandler extends EventEmitter {
         if (eventHandler.isRegistered(event.getEventNum())) {
           chain = chain.then(() => eventHandler.handle(shouldAwait, event, ctx))
             .catch(err => {
-              processingErrors.push({[eventHandler.constructor.name]: err.message})
+              processingErrors.push({ [eventHandler.constructor.name]: err.message })
             })
         } else {
           logWarn(`WARNING: No event handler registered for ${event.getEventName()} event in ${eventHandler.constructor.name}`);

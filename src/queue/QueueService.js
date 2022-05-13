@@ -2,30 +2,30 @@ import { Singleton } from '@deip/toolbox';
 import KafkaService from "./KafkaService";
 import PubSubService from "./PubSubService";
 
-
 export default class QueueService extends Singleton {
-  constructor({ QUEUE_SERVICE }) {
+  constructor(config) {
     super();
     let impl;
-    switch ( QUEUE_SERVICE ) {
+
+    switch ( config.QUEUE_SERVICE ) {
       case "kafka": {
-        impl = KafkaService.getInstance({});
+        impl = KafkaService.getInstance(config);
         break;
       }
       case 'pubsub': {
-        impl = PubSubService.getInstance({});
+        impl = PubSubService.getInstance(config);
         break;
       }
       default: {
-        throw new Error(`Unknown queue service ${QUEUE_SERVICE}. Possible values: kafka | pubsub`);
+        throw new Error(`Unknown queue service ${config.QUEUE_SERVICE}. Possible values: kafka | pubsub`);
       }
     }
 
     return impl;
   }
 
-  static getInstanceAsync({ QUEUE_SERVICE }) {
-    const queueService = QueueService.getInstance({ QUEUE_SERVICE });
+  static getInstanceAsync(config) {
+    const queueService = QueueService.getInstance(config);
     return queueService.init();
   }
 
