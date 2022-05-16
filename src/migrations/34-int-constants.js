@@ -315,7 +315,7 @@ const UserBookmarkSchema = mongoose.model('user-bookmark', UserBookmarkSchemaCla
 const ReviewRequestSchema = mongoose.model('review-requests', ReviewRequestSchemaClass);
 const PortalSchema = mongoose.model('portal', PortalSchemaClass);
 
-const PROJECT_CONTENT_STATUS = {
+const PROJECT_CONTENT_DRAFT_STATUS = {
   IN_PROGRESS: "in-progress",
   PROPOSED: "proposed",
   PUBLISHED: "published",
@@ -429,8 +429,8 @@ const run = async () => {
 
   for (let i = 0; i < drafts.length; i++) {
     const draft = drafts[i];
-    if (PROJECT_CONTENT_STATUS[draft.status]) {
-      draft.status = PROJECT_CONTENT_STATUS[draft.status];
+    if (PROJECT_CONTENT_DRAFT_STATUS[draft.status]) {
+      draft.status = PROJECT_CONTENT_DRAFT_STATUS[draft.status];
     }
     if (PROJECT_CONTENT_FORMAT[draft.type]) {
       draft.type = PROJECT_CONTENT_FORMAT[draft.type];
@@ -440,8 +440,8 @@ const run = async () => {
 
   for (let i = 0; i < projectContents.length; i++) {
     const projectContent = projectContents[i];
-    if (PROJECT_CONTENT_STATUS[projectContent.status]) {
-      projectContent.status = PROJECT_CONTENT_STATUS[projectContent.status];
+    if (PROJECT_CONTENT_DRAFT_STATUS[projectContent.status]) {
+      projectContent.status = PROJECT_CONTENT_DRAFT_STATUS[projectContent.status];
     }
     if (PROJECT_CONTENT_FORMAT[projectContent.type]) {
       projectContent.type = PROJECT_CONTENT_FORMAT[projectContent.type];

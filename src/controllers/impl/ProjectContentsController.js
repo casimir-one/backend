@@ -1,4 +1,5 @@
-import { APP_CMD, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_STATUS } from '@deip/constants';
+import { APP_CMD, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DRAFT_STATUS } from '@deip/constants';
+import slug from 'limax';
 import mongoose from 'mongoose';
 import qs from "qs";
 import { projectContentCmdHandler } from '../../command-handlers';
@@ -11,8 +12,6 @@ import {
 import BaseController from '../base/BaseController';
 import readArchive from './../../dar/readArchive';
 import FileStorage from './../../storage';
-import slug from 'limax';
-
 
 const projectDtoService = new ProjectDtoService();
 const projectService = new ProjectService();
@@ -372,7 +371,7 @@ class ProjectContentsController extends BaseController {
               if (projectContent) {
                 throw new ConflictError(`Project content with "${draftHash}" hash already exist`);
               }
-              if (draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
+              if (draft.status != PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS) {
                 throw new BadRequestError(`Project content "${draft.projectId}" is in '${draft.status}' status`);
               }
             }
@@ -388,7 +387,7 @@ class ProjectContentsController extends BaseController {
             if (projectContent) {
               throw new ConflictError(`Project content with "${draftHash}" hash already exist`);
             }
-            if (draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
+            if (draft.status != PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS) {
               throw new BadRequestError(`Project content "${draft.projectId}" is in '${draft.status}' status`);
             }
           }
@@ -448,7 +447,7 @@ class ProjectContentsController extends BaseController {
           if (!draft) {
             throw new NotFoundError(`Draft for "${draftId}" id is not found`);
           }
-          if (draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
+          if (draft.status != PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS) {
             throw new BadRequestError(`Draft "${draftId}" is locked for updates`);
           }
 
@@ -458,7 +457,7 @@ class ProjectContentsController extends BaseController {
             throw new ForbiddenError(`"${username}" is not permitted to edit "${projectId}" project`);
           }
 
-          if (draft.status == PROJECT_CONTENT_STATUS.PROPOSED) {
+          if (draft.status == PROJECT_CONTENT_DRAFT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
 
@@ -512,7 +511,7 @@ class ProjectContentsController extends BaseController {
 
           // if there is a proposal for this content (no matter is it approved or still in voting progress)
           // we must respond with an error as blockchain hashed data should not be modified
-          if (draft.status == PROJECT_CONTENT_STATUS.PROPOSED) {
+          if (draft.status == PROJECT_CONTENT_DRAFT_STATUS.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
 
@@ -557,6 +556,65 @@ class ProjectContentsController extends BaseController {
     }
   });
 
+
+  udpateProjectContent = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd =>
+            cmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_STATUS ||
+            cmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_METADATA
+          );
+
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+          
+          const { status, _id, metadata } = appCmd.getCmdPayload();
+          const projectContent = await projectContentDtoService.getProjectContent(_id);
+
+          if (!projectContent) {
+            throw new NotFoundError(`ProjectContent for "${_id}" id is not found`);
+          }
+
+          //TODO: Replace this validation with role based permission system
+          const jwtUsername = ctx.state.user.username;
+          const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
+          const isModerator = moderators.includes(jwtUsername);
+          const isAuthorized = await teamDtoService.authorizeTeamAccount(projectContent.teamId, jwtUsername)
+
+          if (appCmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_STATUS) {
+            if (!PROJECT_CONTENT_STATUS[status]) {
+              throw new BadRequestError(`This endpoint assepts only project-content status`)
+            }
+            if (metadata) {
+              throw new BadRequestError(`Bad cmd`);
+            }
+            if (!isModerator) {
+              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
+            }
+          }
+
+          if (appCmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_METADATA) {
+            if (status) {
+              throw new BadRequestError(`Bad cmd`);
+            }
+            if (!(isAuthorized || isModerator)) {
+              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit metadata`);
+            }
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await projectContentCmdHandler.process(msg, ctx, validate);
+
+        ctx.successRes();
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
 }
 
 const projectContentsCtrl = new ProjectContentsController();

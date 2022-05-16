@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
+import { PROJECT_CONTENT_DRAFT_STATUS, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -24,7 +24,7 @@ const DraftSchema = new Schema({
   },
   "status": {
     type: Number,
-    enum: [...Object.values(PROJECT_CONTENT_STATUS)],
+    enum: [...Object.values(PROJECT_CONTENT_DRAFT_STATUS)],
     required: true
   },
   "packageFiles": [{
