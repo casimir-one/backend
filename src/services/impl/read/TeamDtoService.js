@@ -61,10 +61,10 @@ class TeamDtoService extends BaseService {
   }
 
 
-  async lookupTeams(filter, sort, pagination) {
+  async lookupTeamsPaginated(filter, sort, pagination) {
     if(!filter.isPortalTeam) filter.isPortalTeam = false;
 
-    const { paginationMeta, result: teams } = await this.findManyWithPagination(filter, sort, pagination);
+    const { paginationMeta, result: teams } = await this.findManyPaginated(filter, sort, pagination);
 
     const result = await this.mapTeams(teams);
     return { paginationMeta, result };
