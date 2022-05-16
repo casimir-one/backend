@@ -1,19 +1,17 @@
-import { APP_CMD } from '@deip/constants';
+import { APP_CMD, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_STATUS } from '@deip/constants';
+import mongoose from 'mongoose';
 import qs from "qs";
-import BaseController from '../base/BaseController';
-import { ProjectContentPackageForm } from '../../forms';
-import { BadRequestError, NotFoundError, ConflictError, ForbiddenError } from '../../errors';
 import { projectContentCmdHandler } from '../../command-handlers';
+import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from '../../errors';
+import { ProjectContentPackageForm } from '../../forms';
 import {
-  ProjectDtoService,
-  ProjectContentDtoService,
-  ProjectService,
-  TeamDtoService,
-  DraftService
+  DraftService, ProjectContentDtoService, ProjectDtoService, ProjectService,
+  TeamDtoService
 } from '../../services';
-import FileStorage from './../../storage';
+import BaseController from '../base/BaseController';
 import readArchive from './../../dar/readArchive';
-import { PROJECT_CONTENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
+import FileStorage from './../../storage';
+
 
 const projectDtoService = new ProjectDtoService();
 const projectService = new ProjectService();
@@ -365,7 +363,7 @@ class ProjectContentsController extends BaseController {
             } else {
               const draftHash = createProjectContentCmd.getCmdPayload().content;
               const draft = await draftService.getDraftByHash(draftHash);
-              if(!draft) {
+              if (!draft) {
                 throw new NotFoundError(`Draft for "${draftHash}" hash is not found`);
               }
               const projectContent = await projectContentDtoService.findProjectContentRefByHash(draft.projectId, draftHash);
@@ -373,7 +371,7 @@ class ProjectContentsController extends BaseController {
               if (projectContent) {
                 throw new ConflictError(`Project content with "${draftHash}" hash already exist`);
               }
-              if(draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
+              if (draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
                 throw new BadRequestError(`Project content "${draft.projectId}" is in '${draft.status}' status`);
               }
             }
@@ -381,7 +379,7 @@ class ProjectContentsController extends BaseController {
             const draftHash = appCmd.getCmdPayload().content;
             const draft = await draftService.getDraftByHash(draftHash);
 
-            if(!draft) {
+            if (!draft) {
               throw new NotFoundError(`Draft for "${draftHash}" hash is not found`);
             }
             const projectContent = await projectContentDtoService.findProjectContentRefByHash(draft.projectId, draftHash);
@@ -389,7 +387,7 @@ class ProjectContentsController extends BaseController {
             if (projectContent) {
               throw new ConflictError(`Project content with "${draftHash}" hash already exist`);
             }
-            if(draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
+            if (draft.status != PROJECT_CONTENT_STATUS.IN_PROGRESS) {
               throw new BadRequestError(`Project content "${draft.projectId}" is in '${draft.status}' status`);
             }
           }
