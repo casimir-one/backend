@@ -57,8 +57,22 @@ class UserService extends BaseService {
     return result;
   }
 
-  async getUser(username) {
-    const profile = await this.findOne({ _id: username, status: USER_PROFILE_STATUS.APPROVED });
+  async getUser(username, status) {
+    const query = { _id: username };
+    if (status) {
+      query.status = status;
+    }
+    const profile = await this.findOne(query);
+    return profile;
+  }
+
+  async getUserByEmail(email, status) {
+    const query = { email };
+    if (status) {
+      query.status = status;
+    }
+    const profile = await this.findOne(query);
+    if (!profile) return null;
     return profile;
   }
 

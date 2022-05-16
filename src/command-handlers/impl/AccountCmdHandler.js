@@ -7,7 +7,7 @@ import {
   DaoMemberRemovedEvent,
   UserAuthorityAlteredEvent
 } from './../../events';
-
+import config from './../../config';
 
 class AccountCmdHandler extends BaseCmdHandler {
 

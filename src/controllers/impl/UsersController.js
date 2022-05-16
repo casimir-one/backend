@@ -1,20 +1,33 @@
 import BaseController from '../base/BaseController';
-import { UserDtoService, AttributeDtoService, UserService } from '../../services';
+import { UserDtoService, AttributeDtoService, UserService, TokenService } from '../../services';
 import sharp from 'sharp';
 import qs from 'qs';
 import config from '../../config';
 import FileStorage from './../../storage';
 import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
-import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, USER_PROFILE_STATUS, SYSTEM_ROLE as USER_ROLES } from '@deip/constants';
+import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_ROLES, USER_PROFILE_STATUS } from '@deip/constants';
 import { UserForm } from './../../forms';
-import { BadRequestError, NotFoundError, ForbiddenError, ConflictError } from './../../errors';
+import { BadRequestError, NotFoundError, FailedDependencyError, ConflictError, ForbiddenError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
 import { TransferFungibleTokenCmd } from '@deip/commands';
+import { transporter } from './../../nodemailer';
+import { genSha256Hash, genRipemd160Hash } from '@deip/toolbox';
 
 
 const userDtoService = new UserDtoService();
 const attributeDtoService = new AttributeDtoService();
 const userService = new UserService();
+const tokenService = new TokenService();
+
+const validateEmail = (email) => {
+  const patternStr = ['^(([^<>()[\\]\\.,;:\\s@"]+(\\.[^<>()\\[\\]\\.,;:\\s@"]+)*)',
+    '|(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.',
+    '[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+',
+    '[a-zA-Z]{2,}))$'].join('');
+  const pattern = new RegExp(patternStr);
+
+  return pattern.test(email) && email.split('@')[0].length <= 64;
+}
 
 
 class UsersController extends BaseController {
@@ -33,7 +46,7 @@ class UsersController extends BaseController {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
 
-          const { entityId, email, roles, creator } = appCmd.getCmdPayload();
+          const { entityId, email, roles, creator, confirmationCode } = appCmd.getCmdPayload();
           if (Array.isArray(roles) && roles.find(({ role }) => role === USER_ROLES.ADMIN)) {
             throw new BadRequestError(`Can't create admin account`);
           }
@@ -42,14 +55,23 @@ class UsersController extends BaseController {
             throw new BadRequestError(`'entityId', 'creator' fields are required`);
           }
 
-          const pattern = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-          if (!pattern.test(email)) {
+          if (!validateEmail(email)) {
             throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
           }
 
           const existingProfile = await userService.getUser(entityId);
           if (existingProfile) {
             throw new ConflictError(`Profile for '${entityId}' is under consideration or has been approved already`);
+          }
+          if (config.NEED_CONFIRM_REGISTRATION) {
+            if (!confirmationCode) {
+              throw new BadRequestError(`'confirmationCode' field are required`);
+            }
+
+            const token = await tokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
+            if (token && token.refId !== genRipemd160Hash(email)) {
+              throw new ForbiddenError(`Incorrect confirmation code`);
+            }
           }
         };
 
@@ -110,6 +132,35 @@ class UsersController extends BaseController {
         }
 
         ctx.successRes({ _id: entityId });
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  sendRegistrationCodeByEmail = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.SEND_REGISTRATION_CODE_BY_EMAIL);
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+          const { email } = appCmd.getCmdPayload();
+          if (!validateEmail(email)) {
+            throw new BadRequestError(`Invalid email address`);
+          }
+          const isTransporterCanConnect = await transporter.verify();
+          if (!isTransporterCanConnect) {
+            throw new FailedDependencyError(`Can't send email for confirm registration, please try again later`);
+          }
+        };
+
+        const msg = ctx.state.msg;
+        await accountCmdHandler.process(msg, ctx, validate);
+
+        ctx.successRes();
 
       } catch (err) {
         ctx.errorRes(err);

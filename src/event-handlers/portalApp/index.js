@@ -15,6 +15,7 @@ import fileUploadEventHandler from './imp/FileUploadEventHandler';
 import portalEventHandler from './imp/PortalEventHandler';
 import userSettingsEventHandler from './imp/UserSettingsEventHandler';
 import layoutEventHandler from './imp/LayoutEventHandler';
+import mailEventHandler from './imp/MailEventHandler';
 
 
 module.exports = {
@@ -35,4 +36,5 @@ module.exports = {
   portalEventHandler,
   userSettingsEventHandler,
   layoutEventHandler,
+  mailEventHandler
 };

@@ -8,6 +8,7 @@ import CONTENT_TYPES_MAP from './projectContentType';
 import QUEUE_TOPIC from './queueTopic';
 import INVESTMENT_OPPORTUNITY_TYPE from './investmentOpportunityType';
 import REVIEW_REQUEST_STATUS from './reviewRequestStatus';
+import { TOKEN_LIFETIME } from './token';
 
 export {
   CHAIN_CONSTANTS,
@@ -19,5 +20,6 @@ export {
   CONTENT_TYPES_MAP,
   QUEUE_TOPIC,
   INVESTMENT_OPPORTUNITY_TYPE,
-  REVIEW_REQUEST_STATUS
+  REVIEW_REQUEST_STATUS,
+  TOKEN_LIFETIME
 }

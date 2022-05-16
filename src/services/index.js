@@ -39,6 +39,7 @@ import NonFungibleTokenDtoService from './impl/read/NonFungibleTokenDtoService';
 import NonFungibleTokenService from './impl/write/NonFungibleTokenService';
 import FungibleTokenDtoService from './impl/read/FungibleTokenDtoService';
 import FungibleTokenService from './impl/write/FungibleTokenService';
+import TokenService from './impl/write/TokenService';
 
 module.exports = {
   TeamService,
@@ -98,5 +99,7 @@ module.exports = {
   NonFungibleTokenDtoService,
   NonFungibleTokenService,
   FungibleTokenDtoService,
-  FungibleTokenService
+  FungibleTokenService,
+
+  TokenService
 }
