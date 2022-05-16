@@ -100,7 +100,7 @@ class ProjectContentsController extends BaseController {
         const {
           paginationMeta,
           result: projectContents
-        } = await projectContentDtoService.lookupProjectContents(filter, sort, { page, pageSize });
+        } = await projectContentDtoService.lookupProjectContentsWithPagination(filter, sort, { page, pageSize });
 
         const onlyUniq = (value, index, self) => self.indexOf(value) === index;
         const projectIds = projectContents.map(x => x.projectId).filter(onlyUniq)

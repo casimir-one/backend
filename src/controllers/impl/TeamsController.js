@@ -69,7 +69,7 @@ class TeamsController extends BaseController {
       try {
         const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
 
-        const { result, paginationMeta } = await teamDtoService.lookupTeams(filter, sort, { page, pageSize });
+        const { result, paginationMeta } = await teamDtoService.lookupTeamsPaginated(filter, sort, { page, pageSize });
 
         ctx.successRes(result, { extraInfo: paginationMeta });
       } catch (err) {

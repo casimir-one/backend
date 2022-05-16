@@ -141,7 +141,7 @@ class BaseService {
     return { stage, extraInfo: { page, pageSize } };
   }
 
-  async findManyWithPagination(searchQuery, sortParams, paginationParams) {
+  async findManyPaginated(searchQuery, sortParams, paginationParams) {
     const matchStage = await this.getMatchStage(searchQuery);
     const sortStage = this.getSortStage(sortParams);
     const pagination = this.getPaginationStage(paginationParams);

@@ -87,8 +87,16 @@ class ProjectContentDtoService extends BaseService {
     return result;
   }
 
-  async lookupProjectContents(filter, sort, pagination) {
-    const { paginationMeta, result: projectContents } = await this.findManyWithPagination(filter, sort, pagination);
+  async lookupProjectContents() {
+    const projectContents = await this.findMany({});
+    if(!projectContents.length) return [];
+
+    const result = await this.mapProjectContents(projectContents);
+    return result;
+  }
+
+  async lookupProjectContentsWithPagination(filter, sort, pagination) {
+    const { paginationMeta, result: projectContents } = await this.findManyPaginated(filter, sort, pagination);
 
     const result = await this.mapProjectContents(projectContents);
     return { paginationMeta, result };
