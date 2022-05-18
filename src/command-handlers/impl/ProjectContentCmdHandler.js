@@ -21,7 +21,7 @@ projectContentCmdHandler.register(APP_CMD.CREATE_DRAFT, (cmd, ctx) => {
 
   const draftData = cmd.getCmdPayload();
   
-  ctx.state.appEvents.push(new ProjectContentDraftCreatedEvent({ ...draftData, ctx }));
+  ctx.state.appEvents.push(new ProjectContentDraftCreatedEvent({ ...draftData, uploadedFiles: ctx.req.files }));
 });
 
 projectContentCmdHandler.register(APP_CMD.UPDATE_DRAFT, (cmd, ctx) => {

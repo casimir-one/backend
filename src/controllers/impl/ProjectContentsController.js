@@ -11,6 +11,7 @@ import {
 import BaseController from '../base/BaseController';
 import readArchive from './../../dar/readArchive';
 import FileStorage from './../../storage';
+import slug from 'limax';
 
 
 const projectDtoService = new ProjectDtoService();
@@ -395,8 +396,8 @@ class ProjectContentsController extends BaseController {
 
         const msg = ctx.state.msg;
         await projectContentCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
+        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_PROJECT_CONTENT);
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
