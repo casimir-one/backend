@@ -12,7 +12,7 @@ class BlockEventHandler extends ChainDomainEventHandler {
 const blockEventHandler = new BlockEventHandler();
 
 blockEventHandler.register(DOMAIN_EVENT.BLOCK_CREATED, async (event) => {
-  console.log("CHAIN_BLOCK_CREATED", event.getEventPayload())
+  // console.log("CHAIN_BLOCK_CREATED", event.getEventPayload())
 });
 
 module.exports = blockEventHandler;
