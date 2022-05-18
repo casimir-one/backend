@@ -2,12 +2,12 @@ import { APP_EVENT, DOMAIN_EVENT } from '@deip/constants';
 
 class BaseEvent {
 
-  constructor(eventNum, eventPayload) {
+  constructor(eventNum, eventPayload, eventIssuer) {
     this._eventNum = eventNum;
     this._eventPayload = eventPayload;
     this._proposalCtx = eventPayload.proposalCtx || null;
     this._timestamp = Date.now();
-    this._eventIssuer = null;
+    this._eventIssuer = eventIssuer;
   }
 
   getEventNum() {

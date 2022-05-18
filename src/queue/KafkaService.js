@@ -56,8 +56,13 @@ export default class KafkaService extends Singleton {
     }
   }
 
-  parseAppEvent = (rawEvent) => rawEvent.eventNum && new BaseEvent(rawEvent.eventNum, rawEvent.eventPayload);
-  parseChainEvent = (rawEvent) => rawEvent.type && parseChainEvent(rawEvent);
+  parseAppEvent = (rawEvent) => {
+    const { eventNum, eventPayload, eventIssuer } = rawEvent;
+    return eventNum && new BaseEvent(eventNum, eventPayload, eventIssuer);
+  }
+
+  parseChainEvent = (rawEvent) =>
+    rawEvent.type && parseChainEvent(rawEvent);
 
 
   processMessage(message) {
