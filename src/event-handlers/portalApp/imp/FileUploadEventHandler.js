@@ -96,7 +96,7 @@ fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event)
 
 fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (event) => {
 
-  const { projectId, draftId, formatType, ctx } = event.getEventPayload();
+  const { projectId, draftId, formatType, uploadedFiles } = event.getEventPayload();
 
   if (formatType === PROJECT_CONTENT_FORMAT.DAR || formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
     const _id = mongoose.Types.ObjectId(draftId);
@@ -107,9 +107,8 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (
 
       await cloneArchive(blankDarPath, darPath, true);
     }
-    const files = ctx.req.files;
-    if (formatType == PROJECT_CONTENT_FORMAT.PACKAGE && files.length > 0) {
-      const tempDestinationPath = files[0].destination;
+    if (formatType == PROJECT_CONTENT_FORMAT.PACKAGE && uploadedFiles.length > 0) {
+      const tempDestinationPath = uploadedFiles[0].destination;
 
       const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(projectId, _id);
 
