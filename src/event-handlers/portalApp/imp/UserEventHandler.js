@@ -2,10 +2,10 @@ import { APP_EVENT, SYSTEM_ROLE as USER_ROLES } from '@deip/constants';
 import {
   UserService
 } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class UserEventHandler extends BaseEventHandler {
+class UserEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

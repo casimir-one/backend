@@ -11,9 +11,9 @@ import {
   UserDtoService,
   UserNotificationService
 } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
-class UserNotificationEventHandler extends BaseEventHandler {
+class UserNotificationEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

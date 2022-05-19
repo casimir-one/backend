@@ -1,9 +1,9 @@
 import { APP_EVENT } from '@deip/constants';
 import { UserBookmarkService } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class UserSettingsEventHandler extends BaseEventHandler {
+class UserSettingsEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

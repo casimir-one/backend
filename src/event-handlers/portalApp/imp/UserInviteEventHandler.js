@@ -1,10 +1,10 @@
 import { APP_EVENT } from '@deip/constants';
 import { USER_INVITE_STATUS } from '../../../constants';
 import { UserInviteService } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class UserInviteEventHandler extends BaseEventHandler {
+class UserInviteEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();
