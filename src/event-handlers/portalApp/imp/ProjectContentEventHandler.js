@@ -6,11 +6,11 @@ import {
   DraftService, ProjectContentService, ProjectDtoService
 } from '../../../services';
 import FileStorage from '../../../storage';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
 
-class ProjectContentEventHandler extends BaseEventHandler {
+class ProjectContentEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

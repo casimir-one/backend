@@ -1,10 +1,10 @@
 import { APP_EVENT, INVESTMENT_OPPORTUNITY_STATUS as TOKEN_SALE_STATUS } from '@deip/constants';
 import { PROJECT_ATTRIBUTE, PROJECT_STATUS } from '../../../constants';
 import { InvestmentOpportunityDtoService, ProjectService } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class ProjectEventHandler extends BaseEventHandler {
+class ProjectEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

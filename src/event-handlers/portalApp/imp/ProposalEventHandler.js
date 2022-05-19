@@ -3,10 +3,10 @@ import { APP_EVENT } from '@deip/constants';
 import config from '../../../config';
 import APP_PROPOSAL_EVENT from '../../../events/base/AppProposalEvent';
 import { ProposalService, TeamDtoService } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class ProposalEventHandler extends BaseEventHandler {
+class ProposalEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

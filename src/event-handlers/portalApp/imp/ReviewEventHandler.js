@@ -6,9 +6,9 @@ import {
   ReviewRequestService,
   ReviewService
 } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
-class ReviewEventHandler extends BaseEventHandler {
+class ReviewEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

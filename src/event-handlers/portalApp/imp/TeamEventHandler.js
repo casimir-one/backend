@@ -1,8 +1,8 @@
 import { APP_EVENT } from '@deip/constants';
 import { AttributeDtoService, TeamService } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
-class TeamEventHandler extends BaseEventHandler {
+class TeamEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();

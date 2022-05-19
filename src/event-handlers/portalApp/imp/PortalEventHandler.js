@@ -1,9 +1,9 @@
 import { APP_EVENT } from '@deip/constants';
 import { PortalService } from '../../../services';
-import BaseEventHandler from '../../base/BaseEventHandler';
+import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
-class PortalEventHandler extends BaseEventHandler {
+class PortalEventHandler extends PortalAppEventHandler {
 
   constructor() {
     super();
