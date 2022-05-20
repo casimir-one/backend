@@ -233,6 +233,14 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
+  [APP_EVENT.PROJECT_CONTENT_STATUS_UPDATED]: [
+    { h: projectContentEventHandler, await: true },
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_METADATA_UPDATED]: [
+    { h: projectContentEventHandler, await: true },
+  ],
+
   [APP_EVENT.REVIEW_REQUEST_CREATED]: [
     { h: reviewEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }

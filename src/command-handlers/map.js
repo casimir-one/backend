@@ -48,6 +48,8 @@ module.exports = {
   [APP_CMD.UPDATE_DRAFT]: projectContentCmdHandler,
   [APP_CMD.DELETE_DRAFT]: projectContentCmdHandler,
   [APP_CMD.CREATE_PROJECT_CONTENT]: projectContentCmdHandler,
+  [APP_CMD.UPDATE_PROJECT_CONTENT_STATUS]: projectContentCmdHandler,
+  [APP_CMD.UPDATE_PROJECT_CONTENT_METADATA]: projectContentCmdHandler,
   [APP_CMD.CREATE_REVIEW_REQUEST]: reviewCmdHandler,
   [APP_CMD.DECLINE_REVIEW_REQUEST]: reviewCmdHandler,
   [APP_CMD.CREATE_REVIEW]: reviewCmdHandler,

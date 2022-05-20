@@ -1,4 +1,10 @@
-import { APP_EVENT, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_TYPES } from '@deip/constants';
+import {
+  APP_EVENT,
+  PROJECT_CONTENT_DRAFT_STATUS,
+  PROJECT_CONTENT_FORMAT,
+  PROJECT_CONTENT_STATUS,
+  PROJECT_CONTENT_TYPES
+} from '@deip/constants';
 import { genSha256Hash } from '@deip/toolbox';
 import mongoose from 'mongoose';
 import path from 'path';
@@ -43,7 +49,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED, 
     authors,
     title,
     contentType,
-    status: PROJECT_CONTENT_STATUS.PROPOSED
+    status: PROJECT_CONTENT_DRAFT_STATUS.PROPOSED
   })
 });
 
@@ -75,7 +81,7 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, asy
     contentType,
     formatType,
     folder: _id,
-    status: PROJECT_CONTENT_STATUS.IN_PROGRESS,
+    status: PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS,
     authors: authors || [],
     references: references || [],
     packageFiles: [],
@@ -162,12 +168,17 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
     references,
     title,
     entityId,
-    metadata
+    metadata,
+    moderationRequired
   } = event.getEventPayload();
 
   const draft = await draftService.getDraftByHash(content)
 
   await draftService.deleteDraft(draft._id);
+
+  const status = moderationRequired ?
+    PROJECT_CONTENT_STATUS.MODERATION_REQUIRED :
+    PROJECT_CONTENT_STATUS.MODERATION_PASSED;
 
   const projectContent = await projectContentService.createProjectContentRef({
     ...draft,
@@ -178,11 +189,31 @@ projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_CREATED, async (ev
     contentType,
     authors,
     references,
+    status,
     metadata: {
       ...draft.metadata,
       ...metadata
     }
-  });
+  })
+});
+
+projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_STATUS_UPDATED, async (event) => {
+  const {
+    _id,
+    status
+  } = event.getEventPayload();
+
+  await projectContentService.updateProjectContentRef(_id, { status });
+});
+
+
+projectContentEventHandler.register(APP_EVENT.PROJECT_CONTENT_METADATA_UPDATED, async (event) => {
+  const {
+    _id,
+    metadata
+  } = event.getEventPayload();
+
+  await projectContentService.updateProjectContentRef(_id, { metadata });
 });
 
 

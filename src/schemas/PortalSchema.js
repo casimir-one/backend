@@ -1,6 +1,6 @@
 
+import { ASSESSMENT_CRITERIA_TYPE, PROJECT_CONTENT_TYPES, SIGN_UP_POLICY } from '@deip/constants';
 import mongoose from 'mongoose';
-import { SIGN_UP_POLICY, ASSESSMENT_CRITERIA_TYPE, PROJECT_CONTENT_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -60,7 +60,7 @@ const UserRoleModuleMap = new Schema({
 });
 
 const GlobalNetworkSettings = new Schema({
-  "visiblePortalIds": { type: [String], default: [] } ,
+  "visiblePortalIds": { type: [String], default: [] },
   "isGlobalScopeVisible": { type: Boolean, default: false }
 });
 
@@ -80,6 +80,11 @@ const ProjectContentAssessmentCriterias = new Schema({
   "_id": false,
   "contentType": { type: Number, required: true },
   "values": [ProjectContentAssessmentCriteria]
+});
+
+const PortalModerationConfigSchema = new Schema({
+  "projectContentModerationRequired": { type: Boolean, required: false },
+  "moderators": { type: Array, required: false }
 });
 
 const PortalSchema = new Schema({
@@ -124,7 +129,11 @@ const PortalSchema = new Schema({
     "faq": [FAQ],
     "theme": { type: Object },
     "modules": AppModuleMap,
-    "roles": [UserRoleModuleMap]
+    "roles": [UserRoleModuleMap],
+    "moderation": {
+      type: PortalModerationConfigSchema,
+      default: {}
+    }
   }
 }, { timestamps: true, minimize: false });
 

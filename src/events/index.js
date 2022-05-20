@@ -63,6 +63,8 @@ import ProjectContentDraftCreatedEvent from './impl/ProjectContentDraftCreatedEv
 import ProjectContentDraftDeletedEvent from './impl/ProjectContentDraftDeletedEvent';
 import ProjectContentDraftUpdatedEvent from './impl/ProjectContentDraftUpdatedEvent';
 import ProjectContentCreatedEvent from './impl/ProjectContentCreatedEvent';
+import ProjectContentStatusUpdatedEvent from './impl/ProjectContentStatusUpdatedEvent';
+import ProjectContentMetadataUpdatedEvent from './impl/ProjectContentMetadataUpdatedEvent';
 
 import ReviewRequestCreatedEvent from './impl/ReviewRequestCreatedEvent';
 import ReviewRequestDeclinedEvent from './impl/ReviewRequestDeclinedEvent';
@@ -165,6 +167,8 @@ module.exports = {
   ProjectContentDraftDeletedEvent,
   ProjectContentDraftUpdatedEvent,
   ProjectContentCreatedEvent,
+  ProjectContentStatusUpdatedEvent,
+  ProjectContentMetadataUpdatedEvent,
 
   ReviewRequestCreatedEvent,
   ReviewRequestDeclinedEvent,

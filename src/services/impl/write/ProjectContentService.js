@@ -22,7 +22,8 @@ class ProjectContentService extends BaseService {
     metadata,
     authors,
     references,
-    foreignReferences
+    foreignReferences,
+    status
   }) {
 
     const result = await this.createOne({
@@ -40,7 +41,8 @@ class ProjectContentService extends BaseService {
       metadata,
       authors,
       references,
-      foreignReferences
+      foreignReferences,
+      status
     });
 
     return result;
@@ -59,7 +61,8 @@ class ProjectContentService extends BaseService {
     metadata,
     authors,
     references,
-    foreignReferences
+    foreignReferences,
+    status,
   }) {
 
     const result = await this.updateOne({ _id: id }, {
@@ -74,7 +77,8 @@ class ProjectContentService extends BaseService {
       metadata,
       authors,
       references,
-      foreignReferences
+      foreignReferences,
+      status
     });
 
     return result;

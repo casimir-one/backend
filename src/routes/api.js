@@ -203,6 +203,7 @@ protected_route.get('/v2/project-content/texture/:projectContentId', projectCont
 protected_route.get('/v2/project-content/texture/:projectContentId/assets/:file', compose([projectContentCmdProxy()]), projectContentsCtrl.getProjectContentDarArchiveStaticFiles)
 protected_route.put('/v2/project-content/texture', compose([draftCmdProxy()]), projectContentsCtrl.updateDraft)
 protected_route.post('/v2/project-content/texture', compose([projectContentCmdProxy()]), projectContentsCtrl.createDraft)
+protected_route.post('/v2/project-content/update', projectContentsCtrl.udpateProjectContent)
 protected_route.post('/v2/project-content/package', compose([projectContentCmdProxy()]), projectContentsCtrl.uploadProjectContentPackage)
 protected_route.get('/v2/project-content/package/:projectContentId/:fileHash', projectContentsCtrl.getProjectContentPackageFile)
 

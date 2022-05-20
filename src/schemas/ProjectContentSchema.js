@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
+import { PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES, PROJECT_CONTENT_STATUS } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -29,6 +29,11 @@ const ProjectContentSchema = new Schema({
     "hash": { type: String, required: true },
     "ext": { type: String, required: true },
   }],
+  "status": {
+    type: Number,
+    enum: [...Object.values(PROJECT_CONTENT_STATUS)],
+    required: true,
+  },
   "jsonData": { type: Object },
   "metadata": { type: Object },
   "authors": [{ type: String }],
