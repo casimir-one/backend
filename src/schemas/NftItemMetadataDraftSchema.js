@@ -1,15 +1,18 @@
 
 import mongoose from 'mongoose';
 import { PROJECT_CONTENT_DRAFT_STATUS, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
+import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
 
-const DraftSchema = new Schema({
+const NftItemMetadataDraftSchema = new Schema({
   "portalId": { type: String, required: true },
-  "projectId": { type: String, required: true },
-  "teamId": { type: String, required: true },
+  "nftCollectionId": { type: String, required: true },
+  "owner": { type: String, required: true },
+  "owneredByTeam": { type: Boolean, default: false },
   "folder": { type: String, required: true },
   "title": { type: String, required: true },
+  "attributes": [AttributeValueSchema],
   "hash": { type: String, index: true },
   "algo": { type: String },
   "contentType": {
@@ -41,6 +44,6 @@ const DraftSchema = new Schema({
   "moderationMessage": { type: String },
 }, { timestamps: true });
 
-const model = mongoose.model('draft', DraftSchema);
+const model = mongoose.model('nft-item-metadata-draft', NftItemMetadataDraftSchema);
 
 module.exports = model;

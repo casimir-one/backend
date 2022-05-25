@@ -1,17 +1,19 @@
-import BaseService from './../../base/BaseService';
-import DraftSchema from './../../../schemas/DraftSchema';
+import BaseService from '../../base/BaseService';
+import NftItemMetadataDraftSchema from '../../../schemas/NftItemMetadataDraftSchema';
 
-class DraftService extends BaseService {
+class NftItemMetadataDraftService extends BaseService {
 
   constructor(options = { scoped: true }) { 
-    super(DraftSchema, options);
+    super(NftItemMetadataDraftSchema, options);
   }
 
-  async createDraft({
+  async createNftItemMetadataDraft({
     _id,
-    projectId,
-    teamId,
+    nftCollectionId,
+    owner,
+    owneredByTeam,
     folder,
+    attributes,
     title,
     hash,
     algo,
@@ -27,10 +29,12 @@ class DraftService extends BaseService {
   }) {
     const draft = await this.createOne({
       _id,
-      projectId,
-      teamId,
+      nftCollectionId,
+      owner,
+      owneredByTeam,
       folder,
       title,
+      attributes,
       hash,
       algo,
       contentType,
@@ -47,10 +51,11 @@ class DraftService extends BaseService {
     return draft;
   }
 
-  async updateDraft({
+  async updateNftItemMetadataDraft({
     _id: id,
     folder,
     title,
+    attributes,
     hash,
     algo,
     contentType,
@@ -67,6 +72,7 @@ class DraftService extends BaseService {
     const updatedDraft = await this.updateOne({ _id: id }, {
       folder,
       title,
+      attributes,
       hash,
       algo,
       contentType,
@@ -84,35 +90,35 @@ class DraftService extends BaseService {
     return updatedDraft;
   }
 
-  async deleteDraft(id) {
+  async deleteNftItemMetadataDraft(id) {
     const deletedDraft = await this.deleteOne({ _id: id});
     return deletedDraft;
   }
 
-  async deleteDraftByHash(projectId, hash) {
-    const deletedDraft = await this.deleteOne({ projectId, hash });
+  async deleteNftItemMetadataDraftByHash(nftCollectionId, hash) {
+    const deletedDraft = await this.deleteOne({ nftCollectionId, hash });
     return deletedDraft;
   }
 
-  async getDraft(id) {
+  async getNftItemMetadataDraft(id) {
     const draft = await this.findOne({ _id: id });
     return draft;
   }
 
-  async getDraftByHash(hash) {
+  async getNftItemMetadataDraftByHash(hash) {
     const draft = await this.findOne({ hash });
     return draft;
   }
 
-  async getDraftsByProject(projectId) {
-    const drafts = await this.findMany({ projectId });
+  async getNftItemMetadataDraftsByNftCollection(nftCollectionId) {
+    const drafts = await this.findMany({ nftCollectionId });
     return drafts;
   }
 
-  async lookupDraftsWithPagination(filter, sort, pagination) {
+  async lookupNftItemMetadataDraftsWithPagination(filter, sort, pagination) {
     const drafts = await this.findManyPaginated(filter, sort, pagination);
     return drafts;
   }
 }
 
-export default DraftService;
+export default NftItemMetadataDraftService;

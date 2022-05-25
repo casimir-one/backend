@@ -52,8 +52,8 @@ nonFungibleTokenEventHandler.register(DOMAIN_EVENT.NFT_CLASS_THAWED, async (even
   console.log("NFT_CLASS_THAWED", event.getEventPayload())
 });
 
-nonFungibleTokenEventHandler.register(DOMAIN_EVENT.NFT_CREATED, async (event) => {
-  console.log("NFT_CREATED", event.getEventPayload())
+nonFungibleTokenEventHandler.register(DOMAIN_EVENT.NFT_COLLECTION_CREATED, async (event) => {
+  console.log("NFT_COLLECTION_CREATED", event.getEventPayload())
 });
 
 nonFungibleTokenEventHandler.register(DOMAIN_EVENT.NFT_DESTROYED, async (event) => {

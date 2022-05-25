@@ -1,8 +1,8 @@
-import BaseEvent from './../base/BaseEvent';
+import BaseEvent from '../base/BaseEvent';
 import { APP_EVENT, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import assert from 'assert';
 
-class ProjectContentDraftUpdatedEvent extends BaseEvent {
+class NftItemMetadataDraftUpdatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -16,9 +16,9 @@ class ProjectContentDraftUpdatedEvent extends BaseEvent {
       assert(!!jsonData, `'jsonData' is required for ${formatType} formatType`);
     }
 
-    super(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, eventPayload);
+    super(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, eventPayload);
   }
 
 }
 
-module.exports = ProjectContentDraftUpdatedEvent;
+module.exports = NftItemMetadataDraftUpdatedEvent;

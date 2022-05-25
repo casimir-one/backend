@@ -1,7 +1,7 @@
 import TeamService from './impl/write/TeamService';
 import TeamDtoService from './impl/read/TeamDtoService';
-import ProjectService from './impl/write/ProjectService';
-import ProjectDtoService from './impl/read/ProjectDtoService';
+import NftCollectionMetadataService from './impl/write/NftCollectionMetadataService';
+import NftCollectionDtoService from './impl/read/NftCollectionDtoService';
 import ProposalService from './impl/write/ProposalService';
 import ProposalDtoService from './impl/read/ProposalDtoService';
 import AttributeService from './impl/write/AttributeService';
@@ -17,9 +17,9 @@ import InvestmentOpportunityParticipationDtoService from './impl/read/Investment
 import InvestmentOpportunityParticipationService from './impl/write/InvestmentOpportunityParticipationService';
 import DocumentTemplateDtoService from './impl/read/DocumentTemplateDtoService';
 import DocumentTemplateService from './impl/write/DocumentTemplateService';
-import ProjectContentDtoService from './impl/read/ProjectContentDtoService';
-import ProjectContentService from './impl/write/ProjectContentService';
-import DraftService from './impl/write/DraftService';
+import NftItemDtoService from './impl/read/NftItemDtoService';
+import NftItemMetadataService from './impl/write/NftItemMetadataService';
+import NftItemMetadataDraftService from './impl/write/NftItemMetadataDraftService';
 import ReviewRequestDtoService from './impl/read/ReviewRequestDtoService';
 import ReviewRequestService from './impl/write/ReviewRequestService';
 import ReviewDtoService from './impl/read/ReviewDtoService';
@@ -35,8 +35,6 @@ import UserNotificationService from './impl/write/UserNotificationService';
 import UserInviteService from './impl/write/UserInviteService';
 import LayoutDtoService from './impl/read/LayoutDtoService';
 import LayoutService from './impl/write/LayoutService';
-import NonFungibleTokenDtoService from './impl/read/NonFungibleTokenDtoService';
-import NonFungibleTokenService from './impl/write/NonFungibleTokenService';
 import FungibleTokenDtoService from './impl/read/FungibleTokenDtoService';
 import FungibleTokenService from './impl/write/FungibleTokenService';
 
@@ -44,8 +42,8 @@ module.exports = {
   TeamService,
   TeamDtoService,
 
-  ProjectService,
-  ProjectDtoService,
+  NftCollectionMetadataService,
+  NftCollectionDtoService,
 
   ProposalService,
   ProposalDtoService,
@@ -69,9 +67,9 @@ module.exports = {
   DocumentTemplateDtoService,
   DocumentTemplateService,
 
-  ProjectContentDtoService,
-  ProjectContentService,
-  DraftService,
+  NftItemDtoService,
+  NftItemMetadataService,
+  NftItemMetadataDraftService,
 
   ReviewRequestDtoService,
   ReviewRequestService,
@@ -95,8 +93,6 @@ module.exports = {
   LayoutDtoService,
   LayoutService,
 
-  NonFungibleTokenDtoService,
-  NonFungibleTokenService,
   FungibleTokenDtoService,
   FungibleTokenService
 }

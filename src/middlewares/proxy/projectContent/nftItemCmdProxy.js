@@ -1,26 +1,26 @@
-import { ProjectService, ProjectContentDtoService, ContractAgreementDtoService, PortalService } from './../../../services';
-import { getPortalAccessToken } from './../../../utils/network';
+import { NftCollectionMetadataService, NftItemMetadataService, ContractAgreementDtoService, PortalService } from '../../../services';
+import { getPortalAccessToken } from '../../../utils/network';
 import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
 
 const portalService = new PortalService();
-const projectService = new ProjectService();
-const projectContentDtoService = new ProjectContentDtoService();
+const nftCollectionMetadataService = new NftCollectionMetadataService();
+const nftItemMetadataService = new NftItemMetadataService();
 const contractAgreementDtoService = new ContractAgreementDtoService();
 
 
-function projectContentCmdProxy(options = {}) {
+function nftItemCmdProxy(options = {}) {
   return async function (ctx, next) {
     const currentPortal = ctx.state.portal;
     const projectContentId = ctx.request.header['entity-id'];
-    const projectId = ctx.request.header['project-id'];
+    const nftCollectionId = ctx.request.header['nft-collection-id'];
 
     if (ctx.req.method === "POST" || ctx.req.method === "PUT") {
-      ctx.assert(!!projectId, 404);
-      const project = await projectService.getProject(projectId);
+      ctx.assert(!!nftCollectionId, 404);
+      const project = await nftCollectionMetadataService.getNftCollectionMetadata(nftCollectionId);
       ctx.assert(!!project, 404);
     }
 
-    const projectContent = await projectContentDtoService.getProjectContent(projectContentId);
+    const projectContent = await nftItemMetadataService.getNftItemMetadata(projectContentId);
     if (ctx.req.method === "PUT") {
       ctx.assert(!!projectContent, 404);
     }
@@ -56,4 +56,4 @@ function projectContentCmdProxy(options = {}) {
 }
 
 
-module.exports = projectContentCmdProxy;
+module.exports = nftItemCmdProxy;

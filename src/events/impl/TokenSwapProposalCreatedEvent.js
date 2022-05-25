@@ -27,10 +27,10 @@ class TokenSwapProposalCreatedEvent extends BaseEvent {
     if (tokenSwapCmd1.getCmdNum() === APP_CMD.TRANSFER_NFT) {
       assert(
         !!token1
-        && token1.classId
-        && token1.instanceId
-        && !isNaN(token1.instanceId),
-        "'token1' is required and should contains 'classId', 'instanceId' fields"
+        && token1.nftCollectionId
+        && token1.nftItemId
+        && !isNaN(token1.nftItemId),
+        "'token1' is required and should contains 'nftCollectionId', 'nftItemId' fields"
       )
     } else {
       assert(
@@ -44,10 +44,10 @@ class TokenSwapProposalCreatedEvent extends BaseEvent {
     if (tokenSwapCmd2.getCmdNum() === APP_CMD.TRANSFER_NFT) {
       assert(
         !!token2
-        && token2.classId
-        && token2.instanceId
-        && !isNaN(token2.instanceId),
-        "'token2' is required and should contains 'classId', 'instanceId' fields"
+        && token2.nftCollectionId
+        && token2.nftItemId
+        && !isNaN(token2.nftItemId),
+        "'token2' is required and should contains 'nftCollectionId', 'nftItemId' fields"
       )
     } else {
       assert(

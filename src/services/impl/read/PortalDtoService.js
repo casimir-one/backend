@@ -16,6 +16,7 @@ class PortalDtoService {
     const chainRpc = chainService.getChainRpc();
     const portal = doc.toObject();
     const chainAccount = await chainRpc.getAccountAsync(id);
+    const getAccountsListAsync = await chainRpc.getAccountsListAsync();
     const team = await teamDtoService.getTeam(id);
     const { members: admins } = team;
     const pubKey = chainAccount.authority.owner.auths

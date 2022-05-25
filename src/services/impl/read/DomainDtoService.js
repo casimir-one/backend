@@ -1,4 +1,4 @@
-import ProjectDtoService from './ProjectDtoService';
+import NftCollectionDtoService from './NftCollectionDtoService';
 import { DOMAINS } from '../../../constants';
 import DomainSchema from '../../../schemas/DomainSchema';
 import BaseService from '../../base/BaseService';
@@ -34,8 +34,8 @@ class DomainDtoService extends BaseService {
   }
 
   async getDomainsByProject(projectId) {
-    const projectDtoService = new ProjectDtoService();
-    const project = await projectDtoService.getProject(projectId);
+    const nftCollectionDtoService = new NftCollectionDtoService();
+    const project = await nftCollectionDtoService.getNftCollection(projectId);
     const domains = await this.findMany({ _id: { $in: [...project.domains] } });
     const result = this.mapDomains(domains);
     return result;

@@ -2,7 +2,7 @@ import BaseEvent from '../base/BaseEvent';
 import { APP_EVENT } from '@deip/constants';
 import assert from 'assert';
 
-class ProjectContentDraftModerationMessageUpdatedEvent extends BaseEvent {
+class NftItemMetadataDraftModerationMsgUpdatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -13,9 +13,9 @@ class ProjectContentDraftModerationMessageUpdatedEvent extends BaseEvent {
     assert(!!_id, "'_id' is required");
     assert(!!moderationMessage, "'moderationMessage' is required");
 
-    super(APP_EVENT.PROJECT_CONTENT_DRAFT_MODERATION_MESSAGE_UPDATED, eventPayload);
+    super(APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDATED, eventPayload);
   }
 
 }
 
-module.exports = ProjectContentDraftModerationMessageUpdatedEvent;
+module.exports = NftItemMetadataDraftModerationMsgUpdatedEvent;

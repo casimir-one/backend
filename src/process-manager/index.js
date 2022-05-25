@@ -5,6 +5,7 @@ import QueueService from "../queue/QueueService";
 import { logInfo, logWarn } from "../utils/log";
 import { waitChainBlockAsync } from "../utils/network";
 import APP_CMD_TO_BC_EVENT_PROCESSOR from './AppCmdToBlockchainEvent';
+import { logError } from "../utils/log";
 
 
 QueueService.getInstanceAsync(config).then(async queueService => {

@@ -1,15 +1,15 @@
-import { ProjectDtoService, PortalService } from './../../../services';
+import { NftCollectionMetadataService, PortalService } from '../../../services';
 
 const portalService = new PortalService();
-const projectDtoService = new ProjectDtoService();
+const nftCollectionMetadataService = new NftCollectionMetadataService();
 
 
-function projectCmdProxy(options = {}) {
+function nftCollectionCmdProxy(options = {}) {
   return async function (ctx, next) {
     const currentPortal = ctx.state.portal;
     const projectId = ctx.request.header['entity-id'];
 
-    const project = await projectDtoService.getProject(projectId);
+    const project = await nftCollectionMetadataService.getNftCollectionMetadata(projectId);
     if (ctx.req.method === "PUT") {
       ctx.assert(!!project, 404);
     }
@@ -30,4 +30,4 @@ function projectCmdProxy(options = {}) {
 }
 
 
-module.exports = projectCmdProxy;
+module.exports = nftCollectionCmdProxy;

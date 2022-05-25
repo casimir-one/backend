@@ -8,8 +8,6 @@ import {
   investmentOpportunityEventHandler,
   layoutEventHandler,
   portalEventHandler,
-  projectContentEventHandler,
-  projectEventHandler,
   proposalEventHandler,
   reviewEventHandler,
   teamEventHandler,
@@ -36,18 +34,14 @@ module.exports = {
     { h: proposalEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_CREATED]: [
-    { h: projectEventHandler, await: true },
-    { h: userNotificationEventHandler, await: false }
+  [APP_EVENT.NFT_COLLECTION_METADATA_CREATED]: [
+    { h: assetEventHandler, await: true },
+    // { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_UPDATED]: [
-    { h: projectEventHandler, await: true },
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_DELETED]: [
-    { h: projectEventHandler, await: true }
+  [APP_EVENT.NFT_COLLECTION_METADATA_UPDATED]: [
+    { h: assetEventHandler, await: true },
+    // { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.PROJECT_PROPOSAL_CREATED]: [
@@ -118,13 +112,11 @@ module.exports = {
   ],
 
   [APP_EVENT.ATTRIBUTE_UPDATED]: [
-    { h: attributeEventHandler, await: true },
-    { h: projectEventHandler, await: true }
+    { h: attributeEventHandler, await: true }
   ],
 
   [APP_EVENT.ATTRIBUTE_DELETED]: [
-    { h: attributeEventHandler, await: true },
-    { h: projectEventHandler, await: true },
+    { h: attributeEventHandler, await: true }
   ],
 
   [APP_EVENT.DAO_CREATED]: [
@@ -154,20 +146,18 @@ module.exports = {
   ],
 
   [APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED]: [
-    { h: investmentOpportunityEventHandler, await: true },
-    { h: projectEventHandler, await: false }
+    { h: investmentOpportunityEventHandler, await: true }
   ],
 
   [APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED]: [
-    { h: investmentOpportunityEventHandler, await: true },
-    { h: projectEventHandler, await: false }
+    { h: investmentOpportunityEventHandler, await: true }
   ],
 
   [APP_EVENT.FT_TRANSFERED]: [
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.NFT_TRANSFERED]: [
+  [APP_EVENT.NFT_TRANSFERRED]: [
     { h: userNotificationEventHandler, await: false }
   ],
 
@@ -175,16 +165,15 @@ module.exports = {
     { h: assetEventHandler, await: false }
   ],
 
-  [APP_EVENT.NFT_CREATED]: [
-    { h: assetEventHandler, await: false }
+  [APP_EVENT.NFT_COLLECTION_CREATED]: [
+    { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.FT_ISSUED]: [
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.NFT_ISSUED]: [
-    { h: assetEventHandler, await: true },
+  [APP_EVENT.NFT_ITEM_CREATED]: [
     { h: userNotificationEventHandler, await: false }
   ],
 
@@ -200,31 +189,31 @@ module.exports = {
     { h: documentTemplateEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED]: [
+  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED]: [
     { h: fileUploadEventHandler, await: true },
-    { h: projectContentEventHandler, await: true }
+    { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED]: [
+  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED]: [
     { h: fileUploadEventHandler, await: true },
-    { h: projectContentEventHandler, await: true }
+    { h: assetEventHandler, await: true }
   ],
 
   [APP_EVENT.PROJECT_CONTENT_DRAFT_STATUS_UPDATED]: [
-    { h: projectContentEventHandler, await: true }
+    { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_CONTENT_DRAFT_MODERATION_MESSAGE_UPDATED]: [
-    { h: projectContentEventHandler, await: true }
+  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDATED]: [
+    { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED]: [
+  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED]: [
     { h: fileUploadEventHandler, await: true },
-    { h: projectContentEventHandler, await: true }
+    { h: assetEventHandler, await: true }
   ],
 
   [APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED]: [
-    { h: projectContentEventHandler, await: true },
+    { h: assetEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
   ],
 
@@ -236,8 +225,8 @@ module.exports = {
     { h: userNotificationEventHandler, await: false }
   ],
 
-  [APP_EVENT.PROJECT_CONTENT_CREATED]: [
-    { h: projectContentEventHandler, await: true },
+  [APP_EVENT.NFT_ITEM_METADATA_CREATED]: [
+    { h: assetEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
   ],
 

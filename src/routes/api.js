@@ -4,7 +4,6 @@ import expertise from '../controllers/legacy/expertise'
 import grants from '../controllers/legacy/grants'
 
 import {
-  projectsCtrl,
   proposalsCtrl,
   teamsCtrl,
   attributesCtrl,
@@ -13,7 +12,6 @@ import {
   usersCtrl,
   invstOppCtrl,
   documentTemplatesCtrl,
-  projectContentsCtrl,
   reviewsCtrl,
   projectNdaCtrl,
   contractAgreementCtrl,
@@ -26,9 +24,9 @@ import {
 } from '../controllers';
 
 import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
-import projectCmdProxy from './../middlewares/proxy/project/projectCmdProxy';
-import projectContentCmdProxy from './../middlewares/proxy/projectContent/projectContentCmdProxy';
-import draftCmdProxy from '../middlewares/proxy/projectContent/draftCmdProxy';
+import nftCollectionCmdProxy from '../middlewares/proxy/project/nftCollectionCmdProxy';
+import nftItemCmdProxy from '../middlewares/proxy/projectContent/nftItemCmdProxy';
+import nftItemMetadataDraftCmdProxy from '../middlewares/proxy/projectContent/nftItemMetadataDraftCmdProxy';
 import teamCmdProxy from './../middlewares/proxy/team/teamCmdProxy';
 import teamLogoProxy from './../middlewares/proxy/team/teamLogoProxy';
 import userCmdProxy from './../middlewares/proxy/user/userCmdProxy';
@@ -89,16 +87,6 @@ public_route.get('/network/portals/listing', portalCtrl.getNetworkPortals)
 public_route.get('/network/portals/:portal', portalCtrl.getNetworkPortal)
 
 /* V2 */
-public_route.get('/v2/project/:projectId', projectsCtrl.getProject)
-public_route.get('/v2/project/default/:accountId', projectsCtrl.getDefaultProject)
-public_route.get('/v2/projects', projectsCtrl.getProjects)
-protected_route.post('/v2/project', compose([projectCmdProxy()]), projectsCtrl.createProject)
-protected_route.put('/v2/project', compose([projectCmdProxy()]), projectsCtrl.updateProject)
-protected_route.put('/v2/project/delete', compose([projectCmdProxy()]), projectsCtrl.deleteProject)
-public_route.get('/v2/projects/listing', projectsCtrl.getPublicProjectsListing)
-protected_route.get('/v2/projects/user/listing/:username', projectsCtrl.getUserProjectsListing)
-protected_route.get('/v2/projects/team/listing/:teamId', projectsCtrl.getTeamProjectsListing)
-public_route.get('/v2/projects/portal/listing', projectsCtrl.getPortalProjectsListing)
 
 protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam)
 protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
@@ -127,10 +115,24 @@ protected_route.get('/v2/assets/deposit/history/account/:account', assetsCtrl.ge
 public_route.get('/v2/assets/type/:type', assetsCtrl.getAssetsByType)
 protected_route.get('/v2/assets/issuer/:issuer', assetsCtrl.getAssetsByIssuer)
 public_route.get('/v2/assets/limit/:limit', assetsCtrl.lookupAssets)
-public_route.get('/v2/tokens/nfts/class/:classId', assetsCtrl.getNonFungibleTokenClass)
-public_route.get('/v2/tokens/nfts/classes', assetsCtrl.getNonFungibleTokenClasses)
-protected_route.get('/v2/tokens/nfts/instances/owner/:account/class/:classId', assetsCtrl.getNonFungibleTokenClassInstancesByOwner)
-protected_route.get('/v2/tokens/nfts/instances/owner/:account', assetsCtrl.getNonFungibleTokenClassesInstancesByOwner)
+
+public_route.get('/v2/tokens/nft/:nftCollectionId', assetsCtrl.getNftCollection)
+public_route.get('/v2/tokens/nft/default/:issuer', assetsCtrl.getDefaultNftCollection)
+public_route.get('/v2/tokens/nfts', assetsCtrl.getNftCollections)
+public_route.get('/v2/tokens/nfts/listing', assetsCtrl.getPublicNftCollectionsListing)
+protected_route.get('/v2/tokens/nfts/listing/issuer/:issuer', assetsCtrl.getNftCollectionsByIssuer)
+public_route.get('/v2/tokens/nfts/portal/listing', assetsCtrl.getNftCollectionsByPortal)
+
+public_route.get('/v2/tokens/nft/items/listing', assetsCtrl.getPublicNftItemsListing)
+public_route.get('/v2/tokens/nft/items/listing-paginated', assetsCtrl.getNftItemsListingPaginated)
+public_route.get('/v2/tokens/nft/items/drafts/listing-paginated', assetsCtrl.getNftItemsMetadataDraftsListingPaginated)
+public_route.get('/v2/tokens/nft/items/drafts/nft-collection/:nftCollectionId', assetsCtrl.getNftItemMetadataDraftsByNftCollection)
+public_route.get('/v2/tokens/nft/item/:nftItemId', assetsCtrl.getNftItem)
+public_route.get('/v2/tokens/nft/items/nft-collection/:nftCollectionId', assetsCtrl.getNftItemsByNftCollection)
+public_route.get('/v2/tokens/nft/items/portal/:portalId', assetsCtrl.getNftItemsByPortal)
+public_route.get('/v2/tokens/nft/item/draft/:nftItemDraftId', assetsCtrl.getNftItemMetadataDraft)
+public_route.get('/v2/tokens/nft/item/package/:nftItemId/:fileHash', assetsCtrl.getNftItemPackageFile)
+
 public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFungibleTokenById)
 public_route.get('/v2/tokens/ft/symbol/:symbol', assetsCtrl.getFungibleTokenBySymbol)
 public_route.get('/v2/tokens/ft/issuer/:issuer', assetsCtrl.getFungibleTokensByIssuer)
@@ -142,9 +144,16 @@ protected_route.post('/v2/tokens/ft/transfer', assetsCtrl.createFungibleTokenTra
 protected_route.post('/v2/tokens/nft/transfer', assetsCtrl.createNonFungibleTokenTransferRequest)
 protected_route.post('/v2/tokens/swap', assetsCtrl.createTokenSwapRequest)
 protected_route.post('/v2/tokens/ft/create', assetsCtrl.createFungibleToken)
-protected_route.post('/v2/tokens/nft/create', assetsCtrl.createNonFungibleToken)
+protected_route.post('/v2/tokens/nft/create', assetsCtrl.createNftCollection)
+protected_route.post('/v2/tokens/nft/metadata/create', assetsCtrl.createNftCollectionMetadata)
+protected_route.put('/v2/tokens/nft/metadata/update', compose([nftCollectionCmdProxy()]), assetsCtrl.updateNftCollectionMetadata)
 protected_route.post('/v2/tokens/ft/issue', assetsCtrl.issueFungibleToken)
-protected_route.post('/v2/tokens/nft/issue', assetsCtrl.issueNonFungibleToken)
+protected_route.post('/v2/tokens/nft/item/create', assetsCtrl.createNftItem)
+protected_route.post('/v2/tokens/nft/item/metadata/create', compose([nftItemCmdProxy()]), assetsCtrl.createNftItemMetadata)
+protected_route.post('/v2/tokens/nft/item/metadata/draft/create', compose([nftItemMetadataDraftCmdProxy()]), assetsCtrl.createNftItemMetadataDraft)
+protected_route.put('/v2/tokens/nft/item/metadata/draft/update', compose([nftItemMetadataDraftCmdProxy()]), assetsCtrl.updateNftItemMetadataDraft)
+protected_route.put('/v2/tokens/nft/item/metadata/draft/delete', compose([nftItemMetadataDraftCmdProxy()]), assetsCtrl.deleteNftItemMetadataDraft)
+protected_route.put('/v2/tokens/nft/item/metadata/draft/moderate', assetsCtrl.moderateNftItemMetadataDraft)
 
 public_route.get('/v2/domains', domainsCtrl.getDomains)
 public_route.get('/v2/domains/project/:projectId', domainsCtrl.getDomainsByProject)
@@ -184,28 +193,6 @@ public_route.get('/v2/document-templates/account/:account', documentTemplatesCtr
 protected_route.post('/v2/document-template', documentTemplatesCtrl.createDocumentTemplate)
 protected_route.put('/v2/document-template', documentTemplatesCtrl.updateDocumentTemplate)
 protected_route.put('/v2/document-template/delete', documentTemplatesCtrl.deleteDocumentTemplate)
-
-public_route.get('/v2/project-content/listing', projectContentsCtrl.getPublicProjectContentListing)
-public_route.get('/v2/project-content/listing-paginated', projectContentsCtrl.getPublicProjectContentListingPaginated)
-public_route.get('/v2/project-content/drafts/project/:projectId', projectContentsCtrl.getDraftsByProject)
-public_route.get('/v2/project-content/drafts-paginated', projectContentsCtrl.getDraftsPaginated)
-public_route.get('/v2/project-content/:projectContentId', projectContentsCtrl.getProjectContent)
-public_route.get('/v2/project-content/project/:projectId', projectContentsCtrl.getProjectContentsByProject)
-public_route.get('/v2/project-content/portal/:portalId', projectContentsCtrl.getProjectContentsByPortal)
-public_route.get('/v2/project-content/draft/:draftId', projectContentsCtrl.getDraft)
-public_route.get('/v2/project-content/ref/:refId', projectContentsCtrl.getProjectContentRef)
-public_route.get('/v2/project-content/ref/graph/:contentId', projectContentsCtrl.getProjectContentReferencesGraph)
-
-protected_route.post('/v2/project-content/ref/publish', compose([projectContentCmdProxy()]), projectContentsCtrl.createProjectContent)
-protected_route.put('/v2/project-content/draft/unlock', compose([draftCmdProxy()]), projectContentsCtrl.unlockDraft)
-protected_route.put('/v2/project-content/draft/delete', compose([draftCmdProxy()]), projectContentsCtrl.deleteDraft)
-protected_route.put('/v2/project-content/draft/moderate', projectContentsCtrl.moderateDraft)
-protected_route.get('/v2/project-content/texture/:projectContentId', projectContentsCtrl.getProjectContentDar)
-protected_route.get('/v2/project-content/texture/:projectContentId/assets/:file', compose([projectContentCmdProxy()]), projectContentsCtrl.getProjectContentDarArchiveStaticFiles)
-protected_route.put('/v2/project-content/texture', compose([draftCmdProxy()]), projectContentsCtrl.updateDraft)
-protected_route.post('/v2/project-content/texture', compose([projectContentCmdProxy()]), projectContentsCtrl.createDraft)
-protected_route.post('/v2/project-content/package', compose([projectContentCmdProxy()]), projectContentsCtrl.uploadProjectContentPackage)
-protected_route.get('/v2/project-content/package/:projectContentId/:fileHash', projectContentsCtrl.getProjectContentPackageFile)
 
 public_route.get('/v2/review/:reviewId', reviewsCtrl.getReview)
 public_route.get('/v2/review/votes/:reviewId', reviewsCtrl.getReviewUpvotes)

@@ -1,5 +1,5 @@
 import { APP_EVENT } from '@deip/constants';
-import { AttributeService, ProjectDtoService } from '../../../services';
+import { AttributeService, NftCollectionDtoService } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 
@@ -13,7 +13,7 @@ class AttributeEventHandler extends PortalAppEventHandler {
 
 const attributeEventHandler = new AttributeEventHandler();
 const attributeService = new AttributeService();
-const projectDtoService = new ProjectDtoService();
+const nftCollectionDtoService = new NftCollectionDtoService();
 
 attributeEventHandler.register(APP_EVENT.ATTRIBUTE_CREATED, async (event) => {
 

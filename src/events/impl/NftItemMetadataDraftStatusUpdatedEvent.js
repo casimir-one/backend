@@ -2,7 +2,7 @@ import BaseEvent from '../base/BaseEvent';
 import { APP_EVENT, PROJECT_CONTENT_DRAFT_STATUS } from '@deip/constants';
 import assert from 'assert';
 
-class ProjectContentDraftStatusUpdatedEvent extends BaseEvent {
+class NftItemMetadataDraftStatusUpdatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -19,4 +19,4 @@ class ProjectContentDraftStatusUpdatedEvent extends BaseEvent {
 
 }
 
-module.exports = ProjectContentDraftStatusUpdatedEvent;
+module.exports = NftItemMetadataDraftStatusUpdatedEvent;
