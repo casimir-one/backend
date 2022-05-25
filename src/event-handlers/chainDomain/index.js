@@ -9,6 +9,8 @@ import projectInvestmentOpportunityEventHandler from './impl/ProjectInvestmentOp
 import projectNdaEventHandler from './impl/ProjectNdaEventHandler';
 import projectReviewEventHandler from './impl/ProjectReviewEventHandler';
 import proposalEventHandler from './impl/ProposalEventHandler';
+import nativeFungibleTokenEventHandler from './impl/NativeFungibleTokenEventHandler';
+import nonFungibleTokenEventHandler from './impl/NonFungibleTokenEventHandler';
 
 
 
@@ -24,4 +26,6 @@ module.exports = {
     projectNdaEventHandler,
     projectReviewEventHandler,
     proposalEventHandler,
+    nativeFungibleTokenEventHandler,
+    nonFungibleTokenEventHandler,
 }

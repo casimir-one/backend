@@ -15,15 +15,21 @@ export const parseChainEvent = (rawEvent) => {
 }
 
 const chainEventNameToDomainEventNum = createEnum({
+  // BASE
   "block_created": DOMAIN_EVENT.BLOCK_CREATED,
   "octopus": DOMAIN_EVENT.OCTOPUS,
 
+  // NATIVE FT
+  "native_ft_transfer": DOMAIN_EVENT.NATIVE_FT_TRANSFER,
+
+  // PROPOSAL
   "proposal_proposed": DOMAIN_EVENT.PROPOSAL_PROPOSED,
   "proposal_approved": DOMAIN_EVENT.PROPOSAL_APPROVED,
   "proposal_revokedApproval": DOMAIN_EVENT.PROPOSAL_REVOKED_APPROVAL,
   "proposal_resolved": DOMAIN_EVENT.PROPOSAL_RESOLVED,
   "proposal_expired": DOMAIN_EVENT.PROPOSAL_EXPIRED,
 
+  // PROJECT
   "project_created": DOMAIN_EVENT.PROJECT_CREATED,
   "project_removed": DOMAIN_EVENT.PROJECT_REMOVED,
   "project_updated": DOMAIN_EVENT.PROJECT_UPDATED,
@@ -41,15 +47,18 @@ const chainEventNameToDomainEventNum = createEnum({
   "project_tokenSaleExpired": DOMAIN_EVENT.PROJECT_TOKEN_SALE_EXPIRED,
   "project_tokenSaleContributed": DOMAIN_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED,
 
+  // CONTRACT_AGREEMENT
   "deip_contractAgreementCreated": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_CREATED,
   "deip_contractAgreementAccepted": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_ACCEPTED,
   "deip_contractAgreementFinalized": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_FINALIZED,
   "deip_contractAgreementRejected": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_REJECTED,
 
+  // DAO
   "dao_create": DOMAIN_EVENT.DAO_CREATE,
   "dao_alterAuthority": DOMAIN_EVENT.DAO_ALTER_AUTHORITY,
   "dao_metadataUpdated": DOMAIN_EVENT.DAO_METADATA_UPDATED,
 
+  // FT
   "asset_class_created": DOMAIN_EVENT.FT_CLASS_CREATED,
   "asset_issued": DOMAIN_EVENT.FT_ISSUED,
   "asset_transferred": DOMAIN_EVENT.FT_TRANSFERRED,
@@ -67,5 +76,30 @@ const chainEventNameToDomainEventNum = createEnum({
   "asset_approved_transfer": DOMAIN_EVENT.FT_APPROVED_TRANSFER,
   "asset_approval_cancelled": DOMAIN_EVENT.FT_APPROVAL_CANCELLED,
   "asset_transferred_approved": DOMAIN_EVENT.FT_TRANSFERRED_APPROVED,
-  "asset_status_changed": DOMAIN_EVENT.FT_STATUS_CHANGED
+  "asset_status_changed": DOMAIN_EVENT.FT_STATUS_CHANGED,
+
+  //NFT
+  "uniques_approval_canceled": DOMAIN_EVENT.NFT_APPROVAL_CANCELED,
+  "uniques_approved_transfer": DOMAIN_EVENT.NFT_APPROVED_TRANSFER,
+  "uniques_asset_status_changed": DOMAIN_EVENT.NFT_ASSET_STATUS_CHANGED,
+  "uniques_attribute_cleared": DOMAIN_EVENT.NFT_ATTRIBUTE_CLEARED,
+  "uniques_attribute_set": DOMAIN_EVENT.NFT_ATTRIBUTE_SET,
+  "uniques_burned": DOMAIN_EVENT.NFT_BURNED,
+  "uniques_class_frozen": DOMAIN_EVENT.NFT_CLASS_FROZEN,
+  "uniques_class_metadata_cleared": DOMAIN_EVENT.NFT_CLASS_METADATA_CLEARED,
+  "uniques_class_metadata_set": DOMAIN_EVENT.NFT_CLASS_METADATA_SET,
+  "uniques_class_thawed": DOMAIN_EVENT.NFT_CLASS_THAWED,
+  "uniques_created": DOMAIN_EVENT.NFT_CREATED,
+  "uniques_destroyed": DOMAIN_EVENT.NFT_DESTROYED,
+  "uniques_force_created": DOMAIN_EVENT.NFT_FORCE_CREATED,
+  "uniques_frozen": DOMAIN_EVENT.NFT_FROZEN,
+  "uniques_issued": DOMAIN_EVENT.NFT_ISSUED,
+  "uniques_metadata_cleared": DOMAIN_EVENT.NFT_METADATA_CLEARED,
+  "uniques_metadata_set": DOMAIN_EVENT.NFT_METADATA_SET,
+  "uniques_owner_changed": DOMAIN_EVENT.NFT_OWNER_CHANGED,
+  "uniques_redeposited": DOMAIN_EVENT.NFT_REDEPOSITED,
+  "uniques_team_changed": DOMAIN_EVENT.NFT_TEAM_CHANGED,
+  "uniques_thawed": DOMAIN_EVENT.NFT_THAWED,
+  "uniques_transferred": DOMAIN_EVENT.NFT_TRANSFERRED
+
 });

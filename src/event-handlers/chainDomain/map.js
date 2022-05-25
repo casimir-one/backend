@@ -1,5 +1,5 @@
 import { DOMAIN_EVENT } from '@deip/constants';
-import { 
+import {
   fungibleTokenEventHandler,
   blockEventHandler,
   contractAgreementEventHandler,
@@ -11,6 +11,8 @@ import {
   projectNdaEventHandler,
   projectReviewEventHandler,
   proposalEventHandler,
+  nativeFungibleTokenEventHandler,
+  nonFungibleTokenEventHandler,
 } from './index';
 
 
@@ -22,13 +24,17 @@ module.exports = {
   [DOMAIN_EVENT.BLOCK_CREATED]: [
     { h: blockEventHandler, await: false }
   ],
+
   // ## OCTOPIS
-  [DOMAIN_EVENT.OCTOPUS]: [
-    { h: fungibleTokenEventHandler, await: false }
+  [DOMAIN_EVENT.OCTOPUS]: [],
+
+  // ## NATIVE_FT
+  [DOMAIN_EVENT.NATIVE_FT_TRANSFER]: [
+    { h: nativeFungibleTokenEventHandler, await: false }
   ],
-  
+
   // ## PROPOSAL
-  
+
   [DOMAIN_EVENT.PROPOSAL_PROPOSED]: [
     { h: proposalEventHandler, await: false }
   ],
@@ -178,5 +184,73 @@ module.exports = {
   ],
   [DOMAIN_EVENT.FT_STATUS_CHANGED]: [
     { h: fungibleTokenEventHandler, await: false }
+  ],
+  
+  // ## NFT
+  [DOMAIN_EVENT.NFT_APPROVAL_CANCELED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_APPROVED_TRANSFER]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_ASSET_STATUS_CHANGED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_ATTRIBUTE_CLEARED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_ATTRIBUTE_SET]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_BURNED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_CLASS_FROZEN]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_CLASS_METADATA_CLEARED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_CLASS_METADATA_SET]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_CLASS_THAWED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_CREATED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_DESTROYED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_FORCE_CREATED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_FROZEN]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_ISSUED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_METADATA_CLEARED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_METADATA_SET]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_OWNER_CHANGED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_REDEPOSITED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_TEAM_CHANGED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_THAWED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
+  ],
+  [DOMAIN_EVENT.NFT_TRANSFERRED]: [
+    { h: nonFungibleTokenEventHandler, await: false }
   ],
 };
