@@ -51,7 +51,7 @@ const config = {
 
   QUEUE_SERVICE: process.env.QUEUE_SERVICE || 'pubsub', //kafka | pubsub
   KAFKA_CLIENT_ID: 'offchain-server',
-  KAFKA_BROKER_URLS: parseJsonEnvVar('KAFKA_BROKER_URLS'),
+  KAFKA_BROKER_URLS: process.env.QUEUE_SERVICE === 'kafka' ? parseJsonEnvVar('KAFKA_BROKER_URLS') : [],
   KAFKA_USER: process.env.KAFKA_USER,
   KAFKA_PASSWORD: process.env.KAFKA_PASSWORD,
   KAFKA_APP_GROUP_ID: process.env.KAFKA_APP_GROUP_ID,
