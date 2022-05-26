@@ -81,6 +81,12 @@ class BaseService {
   async getMatchStage(searchQuery = {}) {
     const scopeQuery = await this.getBaseScopeQuery();
 
+    const onlyUniq = (value, index, self) => self.indexOf(value) === index;
+    const addNumberValues = (stringArr) =>
+      stringArr.reduce((acc, cur) => [...acc, cur, +cur], [])
+        .filter(Boolean)
+        .filter(onlyUniq);
+
     const parseMongodbQueryOperator = (key, value) => { //from 'authors.$in', 'id1,id2'
       const mongoOperatorRegex = /\$[a-z]*/;
       if (!key.match(mongoOperatorRegex)) return null;
@@ -95,7 +101,7 @@ class BaseService {
       const arrayOperators = ['$in', '$nin'];
       let matchValue = value;
       if (arrayOperators.includes(matchOperator)) {
-        matchValue = matchValue.split(',').filter(Boolean)
+        matchValue = addNumberValues(matchValue.split(','))
       }
       return { [matchKey]: { [matchOperator]: matchValue } }; //to {authors: {$in: [id1, id2]}}
     }
@@ -103,9 +109,8 @@ class BaseService {
     const userMatch = Object.entries(searchQuery).reduce((acc, [key, value]) => {
       const mongoOperator = parseMongodbQueryOperator(key, value)
       if (mongoOperator) return { ...acc, ...mongoOperator };
-      else return { ...acc, [key]: value }
+      else return { ...acc, [key]: { $in: addNumberValues([value]) } }
     }, {});
-
     const match = { ...userMatch, ...scopeQuery };
     return { $match: match }
   }
