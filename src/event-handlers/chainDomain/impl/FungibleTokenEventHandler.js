@@ -59,9 +59,8 @@ fungibleTokenEventHandler.register(DOMAIN_EVENT.FT_CLASS_FORCE_CREATED, async (e
 fungibleTokenEventHandler.register(DOMAIN_EVENT.FT_METADATA_SET, async (event) => {
   console.log("FT_METADATA_SET", event.getEventPayload());
   const { asset_id, name, symbol, decimals, is_frozen } = event.getEventPayload();
-  const nameString = Buffer.from(name).toString('hex');
-  const symbolString = Buffer.from(symbol).toString('hex');
-  console.log({ asset_id, nameString, symbolString, decimals });
+  const nameString = Buffer.from(name).toString('utf8');
+  const symbolString = Buffer.from(symbol).toString('utf8');
 });
 
 fungibleTokenEventHandler.register(DOMAIN_EVENT.FT_METADATA_CLEARED, async (event) => {
