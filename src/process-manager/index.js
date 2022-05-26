@@ -1,10 +1,10 @@
 import config from "../config";
-import ChainDomainEventHandler from "../event-handlers/base/ChainDomainEventHandler";
-import APP_CMD_TO_BC_EVENT_PROCESSOR from './AppCmdToBlockchainEvent';
 import { QUEUE_TOPIC } from "../constants";
-import { logError, logWarn } from "../utils/log";
+import ChainDomainEventHandler from "../event-handlers/base/ChainDomainEventHandler";
 import QueueService from "../queue/QueueService";
+import { logInfo, logWarn } from "../utils/log";
 import { waitChainBlockAsync } from "../utils/network";
+import APP_CMD_TO_BC_EVENT_PROCESSOR from './AppCmdToBlockchainEvent';
 
 
 QueueService.getInstanceAsync(config).then(async queueService => {
@@ -19,9 +19,12 @@ const getCmdHash = (cmd) => JSON.stringify(cmd.getCmdPayload());
 
 const subscribe = (subId, matchF, res, rej) => {
   if (handlers.has(subId)) {
-    throw new Error("Process manager handler key duplication");
+    throw new Error(`Process manager handlers already contain ${subId} subscription`);
   }
-  handlers.set(subId, { matchF, res, rej });
+
+  const expiredAt = Date.now() + config.PROCESS_MANAGER_WAITING_FOR_MILLIS;
+
+  handlers.set(subId, { matchF, res, rej, expiredAt });
 }
 const unsubscribe = (key) => {
   handlers.delete(key);
@@ -29,14 +32,20 @@ const unsubscribe = (key) => {
 
 const fire = async (event) => {
   if (!handlers.size) return;
+
   for (const handler of handlers) {
-    const [key, { matchF, res, rej }] = handler;
+    const [key, { matchF, res, rej, expiredAt }] = handler;
     try {
+      const isExpired = Date.now() > expiredAt;
       if (matchF(event)) {
         unsubscribe(key);
         await res(event);
+      } else if (isExpired) {
+        unsubscribe(key);
+        logError("Process manager handler expired");
+        rej(new Error("Process manager handler expired"));
       }
-    } catch(err) {
+    } catch (err) {
       rej(err);
     }
   }
@@ -53,37 +62,32 @@ const waitForEvent = (appCmd, matchF) => new Promise(async (res, rej) => {
   }
 })
 
-const waitForCommand = async (txInfo, appCmd) => {
+const waitForCommand = (txInfo) => async (appCmd) => {
   const cmdName = appCmd.getCmdName();
   const cmdNum = appCmd.getCmdNum();
-  const { eventNum, matchF } = APP_CMD_TO_BC_EVENT_PROCESSOR[cmdNum] || {};
+  const eventProcessors = APP_CMD_TO_BC_EVENT_PROCESSOR[cmdNum] || [];
 
-  if (!eventNum) {
+  if (!eventProcessors || eventProcessors.length === 0) {
     logWarn(`Process manager, cmd ${cmdName}:${cmdNum} is not supported yet!`)
-    return;
+    return waitChainBlockAsync();
   }
 
-  console.log(`Process manager, CMD - ${cmdName}:${cmdNum}, waiting for event ${eventNum}`);
   return waitForEvent(appCmd, (event) => {
-    console.log(`Process manager is waiting for event: ${eventNum}, received event: ${event.getEventNum()}`);
-    if (event.getEventNum() === eventNum) {
-      const isMatched = matchF ? matchF(txInfo, appCmd, event) : true;
-      if (isMatched) {
-        console.log(`Process manager, event ${eventNum} matched success`)
-        return event;
+    for (const eventProcessor of eventProcessors) {
+      const { eventNum, matchF } = eventProcessor;
+
+      if (event.getEventNum() === eventNum) {
+        const isMatched = matchF ? matchF(txInfo, appCmd, event) : true;
+        if (isMatched) {
+          logInfo(`Process manager, event matched success`, { cmdName, eventNum })
+          return event;
+        }
       }
     }
   });
 }
 
-const waitForCommands = async (txInfo, appCmds) => {
-  for (const appCmd of appCmds) { //TODO: replace with promise all for events that contains data for more than one command
-    await waitForCommand(txInfo, appCmd).catch(err => {
-      logError("Process manager, waitForCommand error", err);
-      throw err;
-    })
-  }
-}
+const waitForCommands = (txInfo, appCmds) => Promise.all(appCmds.map(waitForCommand(txInfo)));
 
 export const processManager = {
   waitForCommands,
