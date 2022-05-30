@@ -15,7 +15,7 @@ class FungibleTokenTransferedEvent extends BaseEvent {
 
     assert(!!from, "'from' is required");
     assert(!!to, "'to' is required");
-    assert(!!tokenId, "FT 'tokenId' is required");
+    assert(tokenId !== undefined, "FT 'tokenId' is required");
     assert(!!amount, "FT 'amount' is required");
 
     super(APP_EVENT.FT_TRANSFERED, eventPayload);
