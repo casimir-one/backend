@@ -28,11 +28,10 @@ class NonFungibleTokenDtoService extends BaseService {
         instancesCount: chainNonFungibleToken ? chainNonFungibleToken.instancesCount : nonFungibleToken.instancesCount,
         classId: nonFungibleToken._id,
         issuer: nonFungibleToken.issuer,
+        description: nonFungibleToken.description,
         name: nonFungibleToken.name,
-        symbol: nonFungibleToken.symbol,
         metadata: nonFungibleToken.metadata,
         metadataHash: nonFungibleToken.metadataHash,
-        type: nonFungibleToken.type,
 
         // @deprecated
         settings: nonFungibleToken.metadata

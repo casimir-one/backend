@@ -1,0 +1,7999 @@
+{
+  "swagger": "2.0",
+  "info": {
+    "description": "This is a DEIP server API.",
+    "version": "1.0.0",
+    "title": "DEIP",
+    "contact": {
+      "email": "yahor.tsaryk@deip.world"
+    }
+  },
+  "tags": [
+    {
+      "name": "auth",
+      "description": "auth",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "proposal",
+      "description": "proposal",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "invites",
+      "description": "invites",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "project",
+      "description": "Everything about Projects",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "team",
+      "description": "Everything about Teams",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "attribute",
+      "description": "Everything about Attributes",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "asset",
+      "description": "Everything about Assets",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "domain",
+      "description": "Everything about Domains",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "user",
+      "description": "Everything about Users",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "bookmark",
+      "description": "Everything about Bookmarks",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "notification",
+      "description": "Everything about Notifications",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "investment",
+      "description": "Everything about Investments",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "documentTemplate",
+      "description": "Everything about DocumentTemplates",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "projectContent",
+      "description": "Everything about ProjectContents",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "review",
+      "description": "Everything about Reviews",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "reviewRequest",
+      "description": "Everything about ReviewRequests",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "nda",
+      "description": "Everything about Ndas",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "contractAgreement",
+      "description": "Everything about ContractAgreements",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    },
+    {
+      "name": "layout",
+      "description": "Everything about Layouts",
+      "externalDocs": {
+        "description": "Find out more",
+        "url": "http://swagger.io"
+      }
+    }
+  ],
+  "paths": {
+    "/auth/sign-in": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Sign in",
+        "description": "",
+        "operationId": "authService.signIn",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Sign in",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "username": {
+                  "type": "string"
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": []
+      }
+    },
+    "/auth/v2/sign-up": {
+      "post": {
+        "tags": [
+          "auth"
+        ],
+        "summary": "Sign up",
+        "description": "",
+        "operationId": "authService.signUp",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Sign up",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {},
+                      "attributeId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "roles": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "role": {
+                        "type": "string"
+                      },
+                      "label": {
+                        "type": "string"
+                      },
+                      "teamId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "password": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": []
+      }
+    },
+    "/api/v2/proposals/update": {
+      "put": {
+        "tags": [
+          "proposal"
+        ],
+        "summary": "Accept Proposal",
+        "description": "",
+        "operationId": "proposalsService.accept",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Accept Proposal",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "proposalId": {
+                  "type": "string"
+                },
+                "account": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/proposals/decline": {
+      "put": {
+        "tags": [
+          "proposal"
+        ],
+        "summary": "Decline Proposal",
+        "description": "",
+        "operationId": "proposalsService.decline",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Decline Proposal",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "proposalId": {
+                  "type": "string"
+                },
+                "account": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/proposals/{proposalId}": {
+      "get": {
+        "tags": [
+          "proposal"
+        ],
+        "summary": "Find proposal",
+        "description": "Return a proposal",
+        "operationId": "getProposalById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "proposalId",
+            "in": "path",
+            "description": "ID of project to return",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Proposal"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Proposal not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/proposals/{username}/{status}": {
+      "get": {
+        "tags": [
+          "proposal"
+        ],
+        "summary": "Find proposals",
+        "description": "Return an array of proposals",
+        "operationId": "getProposalsByUsernameAndStatus",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "status",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Proposal"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Proposal not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/invites/{username}": {
+      "get": {
+        "tags": [
+          "invites"
+        ],
+        "summary": "Find invites",
+        "description": "Return an array of invites",
+        "operationId": "getInvitesByUsername",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Invite"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Invites not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/invites/team/{teamId}": {
+      "get": {
+        "tags": [
+          "invites"
+        ],
+        "summary": "Find invites",
+        "description": "Return an array of invites",
+        "operationId": "getInvitesByTeamId",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Invite"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Invites not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project/{projectId}": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Find project by ID",
+        "description": "Returns a single project",
+        "operationId": "getProjectById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "ID of project to return",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Project"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project/default/{accountId}": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Find user projects by accountId",
+        "description": "Returns an array of projects",
+        "operationId": "getTeamDefaultProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "accountId",
+            "in": "path",
+            "description": "accountId of the user whose projects you want to get",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Project"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/projects": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Find all projects",
+        "description": "Returns an array of projects",
+        "operationId": "getProjects",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Project"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/projects/listing": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Find all public projects",
+        "description": "Returns an array of projects",
+        "operationId": "getProjectsListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Project"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/projects/portal/listing": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Find all portal projects",
+        "description": "Returns an array of projects",
+        "operationId": "getProjectsPortalListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Project"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/projects/user/listing/{username}": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Find user projects by username",
+        "description": "Returns an array of projects",
+        "operationId": "getUserProjectsListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username of the user whose projects you want to get",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Project"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/projects/team/listing/{teamId}": {
+      "get": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Find team projects by teamId",
+        "description": "Returns an array of projects",
+        "operationId": "getTeamProjectsListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "teamId of the team whose projects you want to get",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Project"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project": {
+      "post": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Create new project",
+        "description": "",
+        "operationId": "projectService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Project object that needs to be added to the BD",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "isAdmin": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "teamId": {
+                  "type": "string"
+                },
+                "creator": {
+                  "type": "string"
+                },
+                "domains": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "isPrivate": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {},
+                      "attributeId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposal": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "isProposalApproved": {
+                      "type": "boolean"
+                    },
+                    "proposalLifetime": {
+                      "type": "number",
+                      "default": 1770000000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Update project",
+        "description": "",
+        "operationId": "projectService.update",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Project object that needs to be updated in the BD",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "teamId": {
+                  "type": "string"
+                },
+                "isPrivate": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "members": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {},
+                      "attributeId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposal": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "isProposalApproved": {
+                      "type": "boolean"
+                    },
+                    "proposalLifetime": {
+                      "type": "number",
+                      "default": 1770000000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project/delete": {
+      "put": {
+        "tags": [
+          "project"
+        ],
+        "summary": "Delete project",
+        "description": "",
+        "operationId": "projectService.delete",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Project object that needs to be updated in the BD",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/teams": {
+      "get": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Find teams",
+        "description": "Return an array of teams",
+        "operationId": "getTeams",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/teams/listing": {
+      "get": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Find teams listing",
+        "description": "Return an array of teams",
+        "operationId": "getTeamsListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/team/{teamId}": {
+      "get": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Find team by teamId",
+        "description": "Return a team",
+        "operationId": "getTeamById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "ID of team to return",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Team"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/team": {
+      "post": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Create new team",
+        "description": "",
+        "operationId": "teamService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Team object that needs to be added to the BD",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/TeamPost"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Update team",
+        "description": "",
+        "operationId": "teamService.update",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Team object that needs to be updated in the BD",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/Team"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/team/join": {
+      "post": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Invite new team member",
+        "description": "",
+        "operationId": "teamService.addTeamMember",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "teamId": {
+                  "type": "string"
+                },
+                "member": {
+                  "type": "string"
+                },
+                "isThresholdPreserved": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/team/leave": {
+      "post": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Remove team member",
+        "description": "",
+        "operationId": "teamService.removeTeamMember",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "teamId": {
+                  "type": "string"
+                },
+                "member": {
+                  "type": "string"
+                },
+                "isThresholdPreserved": {
+                  "type": "boolean"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/teams/member/{username}": {
+      "get": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Find teams",
+        "description": "Return an array of teams",
+        "operationId": "getTeamsByMember",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username of team member to return",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/teams/portal/{portalId}": {
+      "get": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Find teams",
+        "description": "Return an array of portal teams",
+        "operationId": "getTeamsByPortal",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "portalId",
+            "in": "path",
+            "description": "portalId of teams to return",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Team"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/team/logo/{teamId}": {
+      "get": {
+        "tags": [
+          "team"
+        ],
+        "summary": "Find team logo",
+        "description": "Return team logo",
+        "operationId": "getTeamLogo",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "teamId of team",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Team"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Team not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attributes": {
+      "get": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Find all attributes",
+        "description": "Return an array of attributes",
+        "operationId": "getAttributes",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attribute"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Attributes not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attributes/scope/{scope}": {
+      "get": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Find attributes",
+        "description": "Return an array of attributes",
+        "operationId": "getAttributesByScope",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "description": "scope of attributes",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attribute"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Attributes not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attributes/scope/network/{scope}": {
+      "get": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Find network attributes",
+        "description": "Return an array of network attributes",
+        "operationId": "getNetworkAttributesByScope",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "description": "scope of attributes",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attribute"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Attributes not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attribute/{id}": {
+      "get": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Find attribute",
+        "description": "Return an attribute",
+        "operationId": "getAttributeById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "id",
+            "in": "path",
+            "description": "id of attribute",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Attribute"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Attribute not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attribute": {
+      "post": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Create attribute",
+        "description": "",
+        "operationId": "attributesService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "type": {
+                  "type": "string"
+                },
+                "isPublished": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isFilterable": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isHidden": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isMultiple": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "title": {
+                  "type": "string"
+                },
+                "shortTitle": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "valueOptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "shortTitle": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "defaultValue": {},
+                "schemas": {
+                  "type": "object"
+                },
+                "isEditable": {
+                  "type": "boolean"
+                },
+                "isRequired": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "scope": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Update attribute",
+        "description": "",
+        "operationId": "attributesService.update",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                },
+                "isPublished": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isFilterable": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isHidden": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isMultiple": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "title": {
+                  "type": "string"
+                },
+                "shortTitle": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "valueOptions": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "title": {
+                        "type": "string"
+                      },
+                      "shortTitle": {
+                        "type": "string"
+                      },
+                      "description": {
+                        "type": "string"
+                      },
+                      "value": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "defaultValue": {},
+                "schemas": {
+                  "type": "object"
+                },
+                "isEditable": {
+                  "type": "boolean"
+                },
+                "isRequired": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "isSystem": {
+                  "type": "boolean",
+                  "default": false
+                },
+                "scope": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attribute/delete": {
+      "put": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Delete attribute",
+        "description": "",
+        "operationId": "attributesService.delete",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attributes/network": {
+      "get": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Find all network attributes",
+        "description": "Return an array of all network attributes",
+        "operationId": "getNetworkAttributes",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attribute"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Attributes not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/attributes/system": {
+      "get": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Find all system attributes",
+        "description": "Return an array of all system attributes",
+        "operationId": "getSystemAttributes",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Attribute"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Attributes not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/attribute/file/{scope}/{entityId}/{attributeId}/{filename}": {
+      "get": {
+        "tags": [
+          "attribute"
+        ],
+        "summary": "Find attribute",
+        "description": "Return an attribute",
+        "operationId": "getAttributeFile",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "description": "scope of attribute",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "entityId",
+            "in": "path",
+            "description": "id of entity",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "attributeId",
+            "in": "path",
+            "description": "id of attribute",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "filename",
+            "in": "path",
+            "description": "name of file",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Attribute"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Attribute not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/assets/deposit/history/account/{account}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find assets",
+        "description": "Return an array of assets",
+        "operationId": "getAccountDepositHistory",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "account",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Deposit"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Asset not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/assets/type/{type}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find assets",
+        "description": "Return assets",
+        "operationId": "getAssetsByType",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "type",
+            "in": "path",
+            "description": "type of asset",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Asset"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Asset not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/assets/issuer/{issuer}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find assets",
+        "description": "Return assets",
+        "operationId": "getAssetsByIssuer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "issuer",
+            "in": "path",
+            "description": "issuer of asset",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Asset"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Asset not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/assets/limit/{limit}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find assets",
+        "description": "Return assets",
+        "operationId": "getAssetsListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "issuer",
+            "in": "path",
+            "description": "issuer of asset",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Asset"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Asset not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/nfts/class/{classId}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find NonFungibleTokens",
+        "description": "Return NonFungibleTokens",
+        "operationId": "getNonFungibleTokensByClassId",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "classId",
+            "in": "path",
+            "description": "classId of NonFungibleToken",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/NonFungibleToken"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "NonFungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/nfts/classes": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find NonFungibleTokens",
+        "description": "Return NonFungibleTokens",
+        "operationId": "getNonFungibleTokensListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/NonFungibleToken"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "NonFungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/nfts/instances/owner/{account}/class/{classId}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find NonFungibleTokensInstances",
+        "description": "Return NonFungibleTokensInstances",
+        "operationId": "getNonFungibleTokensInstancesByOwnerAndClassId",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "NonFungibleToken owner",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "classId",
+            "in": "path",
+            "description": "classId of NonFungibleToken",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/NonFungibleTokenBalance"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "NonFungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/nfts/instances/owner/{account}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find NonFungibleTokensInstances",
+        "description": "Return NonFungibleTokensInstances",
+        "operationId": "getNonFungibleTokensInstancesByOwner",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "NonFungibleToken owner",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/NonFungibleTokenBalance"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "NonFungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/id/{tokenId}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleToken",
+        "description": "Return FungibleToken",
+        "operationId": "getFungibleTokenById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "tokenId",
+            "in": "path",
+            "description": "Id of FungibleToken",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/FungibleToken"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/symbol/{symbol}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleTokens",
+        "description": "Return an array of FungibleTokens",
+        "operationId": "getFungibleTokensBySymbol",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "description": "symbol",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FungibleToken"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/issuer/{issuer}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleTokens",
+        "description": "Return an array of FungibleTokens",
+        "operationId": "getFungibleTokensByIssuer",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "issuer",
+            "in": "path",
+            "description": "issuer",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FungibleToken"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/limit/{limit}/": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleTokens",
+        "description": "Return an array of FungibleTokens",
+        "operationId": "getFungibleTokensByLimit",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "path",
+            "description": "limit",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FungibleToken"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/limit/{limit}/{lowerBoundSymbol}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleTokens",
+        "description": "Return an array of FungibleTokens",
+        "operationId": "getFungibleTokensByLimitAndlowerBoundSymbol",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "path",
+            "description": "limit",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "lowerBoundSymbol",
+            "in": "path",
+            "description": "lowerBoundSymbol",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FungibleToken"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/owner/{owner}/symbol/{symbol}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleTokens",
+        "description": "Return an array of FungibleTokens",
+        "operationId": "getAccountFungibleTokenBalance",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "description": "owner",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "in": "path",
+            "description": "symbol",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/FungibleTokenBalance"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/owner/{owner}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleTokens",
+        "description": "Return an array of FungibleTokens",
+        "operationId": "getAccountFungibleTokensBalancesByOwner",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "owner",
+            "in": "path",
+            "description": "owner",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FungibleTokenBalance"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/accounts/symbol/{symbol}": {
+      "get": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Find FungibleTokens",
+        "description": "Return an array of FungibleTokens",
+        "operationId": "getAccountsFungibleTokenBalancesByFungibleToken",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "description": "symbol",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/FungibleTokenBalance"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "FungibleToken not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/transfer": {
+      "post": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Transfer FungibleToken",
+        "description": "",
+        "operationId": "fungibleTokenService.transfer",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Transfer FungibleToken",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposal": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "isProposalApproved": {
+                      "type": "boolean"
+                    },
+                    "proposalLifetime": {
+                      "type": "number",
+                      "default": 1770000000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/nft/transfer": {
+      "post": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Transfer NonFungibleToken",
+        "description": "",
+        "operationId": "nonFungibleTokenService.transfer",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Transfer NonFungibleToken",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "from": {
+                  "type": "string"
+                },
+                "to": {
+                  "type": "string"
+                },
+                "token": {
+                  "type": "object",
+                  "properties": {
+                    "classId": {
+                      "type": "string"
+                    },
+                    "instanceId": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposal": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "isProposalApproved": {
+                      "type": "boolean"
+                    },
+                    "proposalLifetime": {
+                      "type": "number",
+                      "default": 1770000000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/swap": {
+      "post": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Swap NonFungibleToken",
+        "description": "",
+        "operationId": "commonTokenService.createTokensSwapProposal",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Tokens swap",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "party1": {
+                  "type": "string"
+                },
+                "party2": {
+                  "type": "string"
+                },
+                "token1": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "amount": {
+                      "type": "string"
+                    },
+                    "type": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "token2": {
+                  "type": "object",
+                  "properties": {
+                    "classId": {
+                      "type": "string"
+                    },
+                    "instanceId": {
+                      "type": "number"
+                    },
+                    "type": {
+                      "type": "number"
+                    }
+                  }
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposalApproved": {
+                      "type": "boolean"
+                    },
+                    "proposalLifetime": {
+                      "type": "number",
+                      "default": 1770000000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/create": {
+      "post": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Create FungibleToken",
+        "description": "",
+        "operationId": "fungibleTokenService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Create FungibleToken",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "symbol": {
+                  "type": "string"
+                },
+                "issuer": {
+                  "type": "string"
+                },
+                "precision": {
+                  "type": "number"
+                },
+                "maxSupply": {
+                  "type": "string"
+                },
+                "minBalance": {
+                  "type": "string"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object"
+                },
+                "holders": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "account": {
+                        "type": "string"
+                      },
+                      "token": {
+                        "type": "object",
+                        "properties": {
+                          "amount": {
+                            "type": "string"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/nft/create": {
+      "post": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Create NonFungibleToken",
+        "description": "",
+        "operationId": "nonFungibleTokenService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Create NonFungibleToken",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "issuer": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object"
+                },
+                "description": {
+                  "type": "string"
+                },
+                "holders": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "account": {
+                        "type": "string"
+                      },
+                      "metadata": {
+                        "type": "object"
+                      },
+                      "instanceId": {
+                        "type": "number"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/ft/issue": {
+      "post": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Issue FungibleToken",
+        "description": "",
+        "operationId": "fungibleTokenService.issue",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Issue FungibleToken",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "issuer": {
+                  "type": "string"
+                },
+                "tokenId": {
+                  "type": "string"
+                },
+                "amount": {
+                  "type": "string"
+                },
+                "recipient": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/tokens/nft/issue": {
+      "post": {
+        "tags": [
+          "asset"
+        ],
+        "summary": "Issue NonFungibleToken",
+        "description": "",
+        "operationId": "nonFungibleTokenService.issue",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Issue NonFungibleToken",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "issuer": {
+                  "type": "string"
+                },
+                "classId": {
+                  "type": "string"
+                },
+                "instanceId": {
+                  "type": "number"
+                },
+                "recipient": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/domains": {
+      "get": {
+        "tags": [
+          "domain"
+        ],
+        "summary": "Find domains",
+        "description": "Return an array of domains",
+        "operationId": "getDomains",
+        "produces": [
+          "application/json"
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Domain"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Domains not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/domains/project/{projectId}": {
+      "get": {
+        "tags": [
+          "domain"
+        ],
+        "summary": "Find domains",
+        "description": "Return an array of domains",
+        "operationId": "getDomainsByProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "projectId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Domain"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Domains not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/user/profile/{username}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find user profile",
+        "description": "Return a profile of user",
+        "operationId": "getUserProfile",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserProfile"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/profile": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find users",
+        "description": "Return an array of users profile",
+        "operationId": "getUsersProfilesByQuery",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "accounts",
+            "in": "query",
+            "description": "accounts",
+            "required": true,
+            "type": "array",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserProfile"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/active": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find users",
+        "description": "Return an array of active users",
+        "operationId": "getUsersActiveProfiles",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/UserProfile"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/user/name/{username}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find user",
+        "description": "Return an user",
+        "operationId": "getUserByUsername",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/user/email/{email}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find user",
+        "description": "Return an user",
+        "operationId": "getUserByEmail",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "email",
+            "in": "path",
+            "description": "email",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find users",
+        "description": "Return an array of users",
+        "operationId": "getUsersByQuery",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "usernames",
+            "in": "query",
+            "description": "usernames",
+            "required": true,
+            "type": "array",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/listing": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find users",
+        "description": "Return an array of users",
+        "operationId": "getUsersListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "description": "status",
+            "required": true,
+            "type": "array",
+            "collectionFormat": "multi"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/team/{teamId}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find users",
+        "description": "Return an array of users",
+        "operationId": "getUsersByTeam",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "teamId",
+            "in": "path",
+            "description": "teamId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/users/portal/{portalId}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find users",
+        "description": "Return an array of users",
+        "operationId": "getUsersByPortal",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "portalId",
+            "in": "path",
+            "description": "portalId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/User"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/user/update": {
+      "put": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Update user",
+        "description": "",
+        "operationId": "userService.update",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Update user",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "email": {
+                  "type": "string"
+                },
+                "status": {
+                  "type": "number"
+                },
+                "attributes": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "value": {},
+                      "attributeId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/user/avatar/{username}": {
+      "get": {
+        "tags": [
+          "user"
+        ],
+        "summary": "Find users",
+        "description": "Return an array of users",
+        "operationId": "getUserAvatar",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "User not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/notifications/user/{username}": {
+      "get": {
+        "tags": [
+          "notification"
+        ],
+        "summary": "Find notifications",
+        "description": "Return an array of notifications",
+        "operationId": "getUserNotifications",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "unreadOnly",
+            "in": "query",
+            "description": "unreadOnly",
+            "required": false,
+            "type": "boolean"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Notification"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Notification not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/notifications/mark-read": {
+      "put": {
+        "tags": [
+          "notification"
+        ],
+        "summary": "Mark read notifications",
+        "description": "",
+        "operationId": "notificationService.markUserNotificationAsRead",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Notifications that needs to be marked as read",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/NotificationMarked"
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Notification not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/bookmarks/user/{username}": {
+      "get": {
+        "tags": [
+          "bookmark"
+        ],
+        "summary": "Find bookmarks",
+        "description": "Return an array of bookmarks",
+        "operationId": "getBookmarksByUsername",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "type",
+            "in": "query",
+            "description": "type",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "ref",
+            "in": "query",
+            "description": "ref",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Bookmark"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Bookmark not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/bookmarks": {
+      "post": {
+        "tags": [
+          "bookmark"
+        ],
+        "summary": "Create bookmark",
+        "description": "",
+        "operationId": "bookmarkService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Create bookmark",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BookmarkPost"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/bookmarks/delete": {
+      "post": {
+        "tags": [
+          "bookmark"
+        ],
+        "summary": "Delete bookmark",
+        "description": "",
+        "operationId": "bookmarkService.delete",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Delete bookmark",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/BookmarkDelete"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/project/{projectId}": {
+      "get": {
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investments",
+        "description": "Return an array of investments",
+        "operationId": "getInvstOppByProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "projectId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/InvestmentOpportunitie"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investments not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments": {
+      "post": {
+        "tags": [
+          "investment"
+        ],
+        "summary": "Create investment",
+        "description": "",
+        "operationId": "investmentOpportunityService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Create investment",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "teamId": {
+                  "type": "string"
+                },
+                "projectId": {
+                  "type": "string"
+                },
+                "startTime": {
+                  "type": "number"
+                },
+                "endTime": {
+                  "type": "number"
+                },
+                "shares": {
+                  "type": "number",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "id": {
+                        "type": "string"
+                      },
+                      "symbol": {
+                        "type": "string"
+                      },
+                      "precision": {
+                        "type": "number"
+                      },
+                      "amount": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                },
+                "softCap": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "precision": {
+                      "type": "number"
+                    },
+                    "amount": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "hardCap": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "precision": {
+                      "type": "number"
+                    },
+                    "amount": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "title": {
+                  "type": "string"
+                },
+                "metadata": {
+                  "type": "object"
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposal": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "isProposalApproved": {
+                      "type": "boolean"
+                    },
+                    "proposalLifetime": {
+                      "type": "number",
+                      "default": 1770000000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/contributions": {
+      "post": {
+        "tags": [
+          "investment"
+        ],
+        "summary": "Invest",
+        "description": "",
+        "operationId": "investmentOpportunityService.invest",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "Invest",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "investmentOpportunityId": {
+                  "type": "string"
+                },
+                "investor": {
+                  "type": "string"
+                },
+                "asset": {
+                  "type": "object",
+                  "properties": {
+                    "id": {
+                      "type": "string"
+                    },
+                    "symbol": {
+                      "type": "string"
+                    },
+                    "precision": {
+                      "type": "number"
+                    },
+                    "amount": {
+                      "type": "string"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/project/{projectId}/contributions": {
+      "get": {
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investments",
+        "description": "Return an array of investments",
+        "operationId": "getInvstOppParticipationsByProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "projectId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Investment"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investments not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/investment-opportunity/{investmentOpportunityId}": {
+      "get": {
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investment",
+        "description": "Return an investment",
+        "operationId": "getInvstOpp",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "investmentOpportunityId",
+            "in": "path",
+            "description": "investmentOpportunityId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/InvestmentOpportunitie"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investment not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/history/account/{account}/{symbol}/{step}/{cursor}/asset/{targetAsset}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investments",
+        "description": "Return an array of investments",
+        "operationId": "getAccountRevenueHistoryByAsset",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "account",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "symbol",
+            "in": "path",
+            "description": "symbol",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "step",
+            "in": "path",
+            "description": "step",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "cursor",
+            "in": "path",
+            "description": "cursor",
+            "required": false,
+            "type": "string"
+          },
+          {
+            "name": "targetAsset",
+            "in": "path",
+            "description": "targetAsset",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investments not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/history/account/{account}/{cursor}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investments",
+        "description": "Return an array of investments",
+        "operationId": "getAccountRevenueHistory",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "account",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cursor",
+            "in": "path",
+            "description": "cursor",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investments not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/history/contributions/account/{account}": {
+      "get": {
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investments",
+        "description": "Return an array of investments",
+        "operationId": "getInvstOppParticipationsHistoryByAccount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "account",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Investment"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investments not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/history/contributions/investment-opportunity/{investmentOpportunityId}": {
+      "get": {
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investments",
+        "description": "Return an array of investments",
+        "operationId": "getInvstOppParticipations",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "investmentOpportunityId",
+            "in": "path",
+            "description": "investmentOpportunityId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Investment"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investments not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/investments/history/symbol/{symbol}/{cursor}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "investment"
+        ],
+        "summary": "Find investments",
+        "description": "Return an array of investments",
+        "operationId": "getAssetRevenueHistory",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "symbol",
+            "in": "path",
+            "description": "symbol",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "cursor",
+            "in": "path",
+            "description": "cursor",
+            "required": false,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Investments not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/document-template/{documentTemplateId}": {
+      "get": {
+        "tags": [
+          "documentTemplate"
+        ],
+        "summary": "Find document template",
+        "description": "Return a document template",
+        "operationId": "getDocumentTemplateById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "documentTemplateId",
+            "in": "path",
+            "description": "documentTemplateId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/DocumentTemplate"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "DocumentTemplates not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/document-templates/account/{account}": {
+      "get": {
+        "tags": [
+          "documentTemplate"
+        ],
+        "summary": "Find document templates",
+        "description": "Return an array of document templates",
+        "operationId": "getDocumentTemplatesByAccount",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "account",
+            "in": "path",
+            "description": "account",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/DocumentTemplate"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "DocumentTemplates not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/document-template": {
+      "post": {
+        "tags": [
+          "documentTemplate"
+        ],
+        "summary": "Create document template",
+        "description": "",
+        "operationId": "documentTemplateService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "account": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "documentTemplate"
+        ],
+        "summary": "Update document template",
+        "description": "",
+        "operationId": "documentTemplateService.update",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "body": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/document-template/delete": {
+      "put": {
+        "tags": [
+          "documentTemplate"
+        ],
+        "summary": "Delete document template",
+        "description": "",
+        "operationId": "documentTemplateService.delete",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/listing": {
+      "get": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find project contents",
+        "description": "Return an array of project contents",
+        "operationId": "getProjectContentListing",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProjectContent"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "ProjectContents not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/drafts/project/{projectId}": {
+      "get": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find drafts",
+        "description": "Return an array of drafts",
+        "operationId": "getDraftsByProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "projectId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Draft"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Drafts not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/{projectContentId}": {
+      "get": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find project content",
+        "description": "Return a project content",
+        "operationId": "getProjectContentById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectContentId",
+            "in": "path",
+            "description": "projectContentId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ProjectContent"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "ProjectContent not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/project/{projectId}": {
+      "get": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find project contents",
+        "description": "Return an array of project contents",
+        "operationId": "getProjectContentsByProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "projectId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProjectContent"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project contents not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/portal/{portalId}": {
+      "get": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find project contents",
+        "description": "Return an array of project contents",
+        "operationId": "getProjectContentsByPortal",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "portalId",
+            "in": "path",
+            "description": "portalId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ProjectContent"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project contents not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/draft/{draftId}": {
+      "get": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find draft",
+        "description": "Return a draft",
+        "operationId": "getDraftById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "draftId",
+            "in": "path",
+            "description": "draftId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Draft"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Draft not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/ref/{refId}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find project content ref",
+        "description": "Return a project content ref",
+        "operationId": "getProjectContentRef",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "refId",
+            "in": "path",
+            "description": "refId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Draft"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Draft not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/ref/graph/{contentId}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find project content ref",
+        "description": "Return a project content ref",
+        "operationId": "getProjectContentRefGraph",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "contentId",
+            "in": "path",
+            "description": "contentId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object",
+              "properties": {
+                "links": {},
+                "nodes": {}
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Draft not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/ref/publish": {
+      "post": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Publish content",
+        "description": "",
+        "operationId": "projectContentService.createContent",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "projectId": {
+                  "type": "string"
+                },
+                "teamId": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "number"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "authors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "references": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposal": {
+                      "type": "boolean",
+                      "default": false
+                    },
+                    "isProposalApproved": {
+                      "type": "boolean"
+                    },
+                    "proposalLifetime": {
+                      "type": "number",
+                      "default": 1770000000000
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/draft/unlock": {
+      "put": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Unlock draft",
+        "description": "",
+        "operationId": "projectContentService.unlockDraft",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "formatType": {
+                  "type": "number"
+                },
+                "jsonData": {
+                  "type": "object"
+                },
+                "status": {
+                  "type": "number"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/draft/delete": {
+      "put": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Delete draft",
+        "description": "",
+        "operationId": "projectContentService.deleteDraft",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/texture": {
+      "post": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Create draft",
+        "description": "",
+        "operationId": "projectContentService.createDraft",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "projectId": {
+                  "type": "string"
+                },
+                "title": {
+                  "type": "string"
+                },
+                "contentType": {
+                  "type": "number"
+                },
+                "authors": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "references": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                "formatType": {
+                  "type": "number"
+                },
+                "files": {
+                  "type": "array",
+                  "items": {
+                    "type": "file"
+                  }
+                },
+                "jsonData": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Update draft",
+        "description": "",
+        "operationId": "projectContentService.updateDraft",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "formatType": {
+                  "type": "number"
+                },
+                "jsonData": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project not found"
+          },
+          "405": {
+            "description": "Validation exception"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/project-content/package/{projectContentId}/{fileHash}": {
+      "get": {
+        "tags": [
+          "projectContent"
+        ],
+        "summary": "Find project content",
+        "description": "Return a project content package",
+        "operationId": "getProjectContentPackage",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectContentId",
+            "in": "path",
+            "description": "projectContentId",
+            "required": true,
+            "type": "string"
+          },
+          {
+            "name": "fileHash",
+            "in": "path",
+            "description": "fileHash",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Project content not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/review/{reviewId}": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Find review",
+        "description": "Return a review",
+        "operationId": "getReviewById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "description": "reviewId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Review"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/review/votes/{reviewId}": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Find review",
+        "description": "Return a review",
+        "operationId": "getReviewVotes",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "reviewId",
+            "in": "path",
+            "description": "reviewId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Review"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Review not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/reviews/project/{projectId}": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Find reviews",
+        "description": "Return an array of reviews",
+        "operationId": "getReviewsByProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "projectId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Review"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Reviews not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/reviews/project-content/{projectContentId}": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Find reviews",
+        "description": "Return an array of reviews",
+        "operationId": "getReviewsByProjectContent",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectContentId",
+            "in": "path",
+            "description": "projectContentId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Review"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Reviews not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/reviews/author/{author}": {
+      "get": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Find reviews",
+        "description": "Return an array of reviews",
+        "operationId": "getReviewsByAuthor",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "author",
+            "in": "path",
+            "description": "author",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Review"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Reviews not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/review": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Create review",
+        "description": "",
+        "operationId": "reviewService.createReview",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "projectContentId": {
+                  "type": "string"
+                },
+                "content": {
+                  "type": "string"
+                },
+                "assessment": {
+                  "type": "object"
+                },
+                "domains": {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/review/upvote": {
+      "post": {
+        "tags": [
+          "review"
+        ],
+        "summary": "Upvote review",
+        "description": "",
+        "operationId": "reviewService.upvote",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reviewId": {
+                  "type": "string"
+                },
+                "domainId": {
+                  "type": "string"
+                },
+                "weight": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/review-request": {
+      "post": {
+        "tags": [
+          "reviewRequest"
+        ],
+        "summary": "Create review request",
+        "description": "",
+        "operationId": "reviewService.createRequest",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "projectContentId": {
+                  "type": "string"
+                },
+                "expert": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/review-requests/expert/{username}": {
+      "get": {
+        "tags": [
+          "reviewRequest"
+        ],
+        "summary": "Find review requests",
+        "description": "Return an array of review requests",
+        "operationId": "getReviewRequestsByExpert",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ReviewRequest"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Review requests not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/review-requests/requestor/{username}": {
+      "get": {
+        "tags": [
+          "reviewRequest"
+        ],
+        "summary": "Find review requests",
+        "description": "Return an array of review requests",
+        "operationId": "getReviewRequestsByRequestor",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ReviewRequest"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Review requests not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/nda": {
+      "post": {
+        "deprecated": true,
+        "tags": [
+          "nda"
+        ],
+        "summary": "Create nda",
+        "description": "",
+        "operationId": "projectNdaService.createProjectNda",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object"
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/nda/{ndaId}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "nda"
+        ],
+        "summary": "Find nda",
+        "description": "Return a nda",
+        "operationId": "getNdaById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "ndaId",
+            "in": "path",
+            "description": "ndaId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "object"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Ndas not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/nda/creator/{username}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "nda"
+        ],
+        "summary": "Find ndas",
+        "description": "Return an array of ndas",
+        "operationId": "getNdaByCreator",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "username",
+            "in": "path",
+            "description": "username",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Ndas not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/nda/project/{projectId}": {
+      "get": {
+        "deprecated": true,
+        "tags": [
+          "nda"
+        ],
+        "summary": "Find ndas",
+        "description": "Return an array of ndas",
+        "operationId": "getNdaByProject",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "projectId",
+            "in": "path",
+            "description": "projectId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "type": "object"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Ndas not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/contract-agreement": {
+      "post": {
+        "tags": [
+          "contractAgreement"
+        ],
+        "summary": "Propose contract agreement",
+        "description": "",
+        "operationId": "contractAgreementService.propose",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "creator": {
+                  "type": "string"
+                },
+                "terms": {
+                  "type": "object"
+                },
+                "hash": {
+                  "type": "string"
+                },
+                "parties": {
+                  "type": "array",
+                  "item": {
+                    "type": "string"
+                  }
+                },
+                "activationTime": {
+                  "type": "number"
+                },
+                "expirationTime": {
+                  "type": "number"
+                },
+                "type": {
+                  "type": "number"
+                },
+                "pdfContent": {
+                  "type": "string"
+                },
+                "proposalInfo": {
+                  "type": "object",
+                  "properties": {
+                    "isProposal": {
+                      "type": "boolean"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/contract-agreement/accept": {
+      "post": {
+        "tags": [
+          "contractAgreement"
+        ],
+        "summary": "Accept contract agreement",
+        "description": "",
+        "operationId": "contractAgreementService.accept",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/contract-agreement/reject": {
+      "post": {
+        "tags": [
+          "contractAgreement"
+        ],
+        "summary": "Reject contract agreement",
+        "description": "",
+        "operationId": "contractAgreementService.reject",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/contract-agreement/{contractAgreementId}": {
+      "get": {
+        "tags": [
+          "contractAgreement"
+        ],
+        "summary": "Find contract agreement",
+        "description": "Return a contract agreement",
+        "operationId": "getContractAgreementById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "contractAgreementId",
+            "in": "path",
+            "description": "contractAgreementId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ContractAgreement"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Contract agreement not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/contract-agreements": {
+      "get": {
+        "tags": [
+          "contractAgreement"
+        ],
+        "summary": "Find contract agreements",
+        "description": "Return an array of contract agreements",
+        "operationId": "getContractAgreements",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/ContractAgreement"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Contract agreements not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/contract-agreement/file/{filename}": {
+      "get": {
+        "tags": [
+          "contractAgreement"
+        ],
+        "summary": "Find contract agreement file",
+        "description": "Return a contract agreement file",
+        "operationId": "getContractAgreementFile",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "filename",
+            "in": "path",
+            "description": "filename",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/ContractAgreement"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Contract agreement not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/layout/{layoutId}": {
+      "get": {
+        "tags": [
+          "layout"
+        ],
+        "summary": "Find layout",
+        "description": "Return a layout",
+        "operationId": "getLayoutById",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "layoutId",
+            "in": "path",
+            "description": "layoutId",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "$ref": "#/definitions/Layout"
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Layout not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/layouts": {
+      "get": {
+        "tags": [
+          "layout"
+        ],
+        "summary": "Find layouts",
+        "description": "Return an array of layouts",
+        "operationId": "getLayouts",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Layout"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Layouts not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/layouts/scope/{scope}": {
+      "get": {
+        "tags": [
+          "layout"
+        ],
+        "summary": "Find layouts",
+        "description": "Return an array of layouts",
+        "operationId": "getLayoutsByScope",
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "name": "scope",
+            "in": "path",
+            "description": "scope",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "successful operation",
+            "schema": {
+              "type": "array",
+              "items": {
+                "$ref": "#/definitions/Layout"
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid ID supplied"
+          },
+          "404": {
+            "description": "Layouts not found"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/layout": {
+      "post": {
+        "tags": [
+          "layout"
+        ],
+        "summary": "Create layout",
+        "description": "",
+        "operationId": "layoutService.create",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "array"
+                },
+                "scope": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      },
+      "put": {
+        "tags": [
+          "layout"
+        ],
+        "summary": "Update layout",
+        "description": "",
+        "operationId": "layoutService.update",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                },
+                "name": {
+                  "type": "string"
+                },
+                "value": {
+                  "type": "array"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    },
+    "/api/v2/layout/delete": {
+      "put": {
+        "tags": [
+          "layout"
+        ],
+        "summary": "Delete layout",
+        "description": "",
+        "operationId": "layoutService.remove",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json"
+        ],
+        "parameters": [
+          {
+            "in": "body",
+            "name": "body",
+            "description": "",
+            "required": true,
+            "schema": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        ],
+        "responses": {
+          "405": {
+            "description": "Invalid input"
+          }
+        },
+        "security": [
+          {
+            "Bearer": []
+          }
+        ]
+      }
+    }
+  },
+  "securityDefinitions": {
+    "Bearer": {
+      "type": "apiKey",
+      "name": "Authorization",
+      "in": "header"
+    }
+  },
+  "definitions": {
+    "Proposal": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "cmd": {
+          "type": "object",
+          "properties": {
+            "CMD_NUM": {
+              "type": "number"
+            },
+            "CMD_PAYLOAD": {
+              "type": "string"
+            }
+          }
+        },
+        "proposer": {
+          "type": "string"
+        },
+        "parties": {
+          "type": "object",
+          "properties": {
+            "isProposer": {
+              "type": "boolean"
+            },
+            "status": {
+              "type": "number"
+            },
+            "account": {
+              "type": "object",
+              "properties": {
+                "_id": {
+                  "type": "string"
+                }
+              }
+            },
+            "isHidden": {
+              "type": "boolean"
+            },
+            "signers": {
+              "type": "object",
+              "properties": {
+                "signer": {
+                  "type": "object",
+                  "properties": {
+                    "_id": {
+                      "type": "string"
+                    }
+                  }
+                },
+                "txInfo": {}
+              }
+            }
+          }
+        },
+        "type": {
+          "type": "number"
+        },
+        "status": {
+          "type": "number"
+        },
+        "decisionMakers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "approvers": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "rejectors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "Invite": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "invitee": {
+          "type": "string"
+        },
+        "creator": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "notes": {
+          "type": "string"
+        },
+        "rewardShare": {
+          "type": "string"
+        },
+        "failReason": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "expiration": {
+          "type": "number"
+        }
+      }
+    },
+    "Project": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "isPrivate": {
+          "type": "boolean",
+          "default": false
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {},
+              "attributeId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "isDefault": {
+          "type": "boolean",
+          "default": false
+        },
+        "isFinished": {
+          "type": "boolean",
+          "default": false
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "eciMap": {
+          "type": "object"
+        },
+        "positiveReviewCount": {
+          "type": "number"
+        },
+        "negativeReviewCount": {
+          "type": "number"
+        },
+        "projectContentCount": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "nfts": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "assetId": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              },
+              "precision": {
+                "type": "number"
+              },
+              "currentSupply": {
+                "type": "string"
+              },
+              "id": {
+                "type": "string"
+              },
+              "amount": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "expressLicenses": {
+          "type": "array"
+        },
+        "grantedAccess": {
+          "type": "array"
+        },
+        "metadataHash": {
+          "type": "string"
+        }
+      }
+    },
+    "Team": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {},
+              "attributeId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "creator": {
+          "type": "string"
+        },
+        "balances": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "account": {
+                "type": "string"
+              },
+              "assetId": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              },
+              "precision": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "name": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadataHash": {
+          "type": "string"
+        }
+      }
+    },
+    "TeamPost": {
+      "type": "object",
+      "properties": {
+        "members": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {},
+              "attributeId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Attribute": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "isSystem": {
+          "type": "boolean"
+        },
+        "type": {
+          "type": "string"
+        },
+        "isFilterable": {
+          "type": "boolean"
+        },
+        "isEditable": {
+          "type": "boolean"
+        },
+        "isRequired": {
+          "type": "boolean"
+        },
+        "isHidden": {
+          "type": "boolean"
+        },
+        "isMultiple": {
+          "type": "boolean"
+        },
+        "title": {
+          "type": "string"
+        },
+        "shortTitle": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "schemas": {
+          "type": "object"
+        },
+        "valueOptions": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "title": {
+                "type": "string"
+              },
+              "shortTitle": {
+                "type": "string"
+              },
+              "description": {
+                "type": "string"
+              },
+              "value": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "defaultValue": {},
+        "blockchainFieldMeta": {
+          "type": "object",
+          "properties": {
+            "field": {
+              "type": "string"
+            },
+            "isPartial": {
+              "type": "boolean"
+            }
+          }
+        },
+        "scope": {
+          "type": "string"
+        },
+        "isGlobalScope": {
+          "type": "boolean"
+        }
+      }
+    },
+    "Asset": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "precision": {
+          "type": "number"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "type": {
+          "type": "number"
+        }
+      }
+    },
+    "FungibleToken": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "precision": {
+          "type": "number"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "type": {
+          "type": "number"
+        },
+        "currentSupply": {
+          "type": "string"
+        }
+      }
+    },
+    "NonFungibleToken": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "instancesCount": {
+          "type": "number"
+        },
+        "classId": {
+          "type": "string"
+        },
+        "issuer": {
+          "type": "string"
+        },
+        "description": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "metadataHash": {
+          "type": "string"
+        }
+      }
+    },
+    "Deposit": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "assetId": {
+          "type": "string"
+        },
+        "currency": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "number"
+        },
+        "timestamp": {
+          "type": "number"
+        },
+        "account": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "requestToken": {
+          "type": "string"
+        },
+        "txInfo": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "FungibleTokenBalance": {
+      "type": "object",
+      "properties": {
+        "tokenId": {
+          "type": "string"
+        },
+        "amount": {
+          "type": "string"
+        },
+        "owner": {
+          "type": "string"
+        },
+        "symbol": {
+          "type": "string"
+        },
+        "precision": {
+          "type": "number"
+        },
+        "tokenizedProject": {}
+      }
+    },
+    "NonFungibleTokenBalance": {
+      "type": "object",
+      "properties": {
+        "account": {
+          "type": "string"
+        },
+        "classId": {
+          "type": "string"
+        },
+        "instancesIds": {
+          "type": "array",
+          "items": {
+            "type": "number"
+          }
+        },
+        "symbol": {
+          "type": "string"
+        }
+      }
+    },
+    "Domain": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        }
+      }
+    },
+    "UserProfile": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "signUpPubKey": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {},
+              "attributeId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "teamId": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "User": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "email": {
+          "type": "string"
+        },
+        "attributes": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "value": {},
+              "attributeId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "balances": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "account": {
+                "type": "string"
+              },
+              "assetId": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              },
+              "precision": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "modules": {},
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "role": {
+                "type": "string"
+              },
+              "label": {
+                "type": "string"
+              },
+              "teamId": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "pubKey": {
+          "type": "string"
+        },
+        "signUpPubKey": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "teams": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadataHash": {
+          "type": "string"
+        }
+      }
+    },
+    "Bookmark": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "type": {
+          "type": "number"
+        },
+        "ref": {
+          "type": "string"
+        }
+      }
+    },
+    "BookmarkPost": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "type": {
+          "type": "number"
+        }
+      }
+    },
+    "BookmarkDelete": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "bookmarkId": {
+          "type": "string"
+        }
+      }
+    },
+    "Notification": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "username": {
+          "type": "string"
+        },
+        "type": {
+          "type": "number"
+        },
+        "status": {
+          "type": "number"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "NotificationMarked": {
+      "type": "object",
+      "properties": {
+        "username": {
+          "type": "string"
+        },
+        "markAll": {
+          "type": "boolean",
+          "default": false
+        },
+        "notifications": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "InvestmentOpportunitie": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "startTime": {
+          "type": "number"
+        },
+        "endTime": {
+          "type": "number"
+        },
+        "shares": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "symbol": {
+                "type": "string"
+              },
+              "precision": {
+                "type": "number"
+              },
+              "amount": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "softCap": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "symbol": {
+              "type": "string"
+            },
+            "precision": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "string"
+            }
+          }
+        },
+        "hardCap": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "symbol": {
+              "type": "string"
+            },
+            "precision": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "string"
+            }
+          }
+        },
+        "creator": {
+          "type": "string"
+        },
+        "totalInvested": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "symbol": {
+              "type": "string"
+            },
+            "precision": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "string"
+            }
+          }
+        },
+        "type": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "status": {
+          "type": "number"
+        }
+      }
+    },
+    "Investment": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "investmentOpportunityId": {
+          "type": "string"
+        },
+        "investor": {
+          "type": "string"
+        },
+        "asset": {
+          "type": "object",
+          "properties": {
+            "id": {
+              "type": "string"
+            },
+            "symbol": {
+              "type": "string"
+            },
+            "precision": {
+              "type": "number"
+            },
+            "amount": {
+              "type": "string"
+            }
+          }
+        },
+        "timestamp": {
+          "type": "number"
+        }
+      }
+    },
+    "DocumentTemplate": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "account": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "body": {
+          "type": "object"
+        },
+        "creator": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Draft": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "folder": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "hash": {
+          "type": "string"
+        },
+        "algo": {
+          "type": "string"
+        },
+        "contentType": {
+          "type": "number"
+        },
+        "formatType": {
+          "type": "number"
+        },
+        "status": {
+          "type": "number"
+        },
+        "packageFiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string"
+              },
+              "hash": {
+                "type": "string"
+              },
+              "ext": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "jsonData": {
+          "type": "object"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "foreignReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }
+      }
+    },
+    "ProjectContent": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "teamId": {
+          "type": "string"
+        },
+        "title": {
+          "type": "string"
+        },
+        "folder": {
+          "type": "string"
+        },
+        "authors": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hash": {
+          "type": "string"
+        },
+        "algo": {
+          "type": "string"
+        },
+        "type": {
+          "type": "number"
+        },
+        "status": {
+          "type": "number"
+        },
+        "packageFiles": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "filename": {
+                "type": "string"
+              },
+              "hash": {
+                "type": "string"
+              },
+              "ext": {
+                "type": "string"
+              }
+            }
+          }
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "foreignReferences": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "metadata": {
+          "type": "object"
+        },
+        "eciMap": {
+          "type": "object"
+        },
+        "contentType": {
+          "type": "number"
+        },
+        "formatType": {
+          "type": "number"
+        }
+      }
+    },
+    "Review": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "projectId": {
+          "type": "string"
+        },
+        "projectContentId": {
+          "type": "string"
+        },
+        "author": {
+          "type": "string"
+        },
+        "content": {
+          "type": "string"
+        },
+        "domains": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "eciMap": {
+          "type": "object"
+        },
+        "assessment": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ReviewRequest": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "projectContentId": {
+          "type": "string"
+        },
+        "expert": {
+          "type": "string"
+        },
+        "requestor": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "ContractAgreement": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "status": {
+          "type": "number"
+        },
+        "creator": {
+          "type": "string"
+        },
+        "parties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "hash": {
+          "type": "string"
+        },
+        "activationTime": {
+          "type": "number"
+        },
+        "expirationTime": {
+          "type": "number"
+        },
+        "acceptedByParties": {
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "proposalId": {
+          "type": "string"
+        },
+        "signers": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "id": {
+                "type": "string"
+              },
+              "date": {
+                "type": "number"
+              }
+            }
+          }
+        },
+        "type": {
+          "type": "number"
+        },
+        "terms": {
+          "type": "object"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Layout": {
+      "type": "object",
+      "properties": {
+        "_id": {
+          "type": "string"
+        },
+        "portalId": {
+          "type": "string"
+        },
+        "name": {
+          "type": "string"
+        },
+        "value": {
+          "type": "array",
+          "items": {
+            "type": "object"
+          }
+        },
+        "scope": {
+          "type": "string"
+        },
+        "type": {
+          "type": "string"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    }
+  }
+}
