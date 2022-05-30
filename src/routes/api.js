@@ -198,11 +198,11 @@ public_route.get('/v2/project-content/ref/graph/:contentId', projectContentsCtrl
 protected_route.post('/v2/project-content/ref/publish', compose([projectContentCmdProxy()]), projectContentsCtrl.createProjectContent)
 protected_route.put('/v2/project-content/draft/unlock', compose([draftCmdProxy()]), projectContentsCtrl.unlockDraft)
 protected_route.put('/v2/project-content/draft/delete', compose([draftCmdProxy()]), projectContentsCtrl.deleteDraft)
+protected_route.post('/v2/project-content/draft/moderate', projectContentsCtrl.moderateDraft)
 protected_route.get('/v2/project-content/texture/:projectContentId', projectContentsCtrl.getProjectContentDar)
 protected_route.get('/v2/project-content/texture/:projectContentId/assets/:file', compose([projectContentCmdProxy()]), projectContentsCtrl.getProjectContentDarArchiveStaticFiles)
 protected_route.put('/v2/project-content/texture', compose([draftCmdProxy()]), projectContentsCtrl.updateDraft)
 protected_route.post('/v2/project-content/texture', compose([projectContentCmdProxy()]), projectContentsCtrl.createDraft)
-protected_route.post('/v2/project-content/update', projectContentsCtrl.udpateProjectContent)
 protected_route.post('/v2/project-content/package', compose([projectContentCmdProxy()]), projectContentsCtrl.uploadProjectContentPackage)
 protected_route.get('/v2/project-content/package/:projectContentId/:fileHash', projectContentsCtrl.getProjectContentPackageFile)
 

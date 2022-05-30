@@ -1,4 +1,4 @@
-import { APP_CMD, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_STATUS, PROJECT_CONTENT_DRAFT_STATUS } from '@deip/constants';
+import { APP_CMD, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_DRAFT_STATUS } from '@deip/constants';
 import slug from 'limax';
 import mongoose from 'mongoose';
 import qs from "qs";
@@ -295,7 +295,7 @@ class ProjectContentsController extends BaseController {
       }
     }
   });
-
+  //TODO: move all NftItemMetadataDraft logic to the separate controller
   getDraftsByProject = this.query({
     h: async (ctx) => {
       try {
@@ -409,8 +409,21 @@ class ProjectContentsController extends BaseController {
       try {
         const validate = async (appCmds) => {
           const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DRAFT);
+
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+
+          const { status } = appCmd.getCmdPayload();
+          if (status) {
+            const validStatuses = [
+              PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS,
+              PROJECT_CONTENT_DRAFT_STATUS.PROPOSED
+            ];
+
+            if (!validStatuses.includes(status)) {
+              throw new BadRequestError(`Invalid project-content-draft status`);
+            }
           }
         };
 
@@ -431,6 +444,95 @@ class ProjectContentsController extends BaseController {
     }
   });
 
+  moderateDraft = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const validCmds = [APP_CMD.UPDATE_DRAFT_STATUS, APP_CMD.UPDATE_DRAFT_MODERATION_MESSAGE];
+          const appCmd = appCmds.find(cmd => validCmds.includes(cmd.getCmdNum()));
+          if (!appCmd) {
+            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          }
+
+          const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = PROJECT_CONTENT_DRAFT_STATUS;
+          const jwtUsername = ctx.state.user.username;
+          const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
+          const isModerator = moderators.includes(jwtUsername);
+          const { _id: draftId } = appCmd.getCmdPayload();
+          const draft = await draftService.getDraft(draftId);
+          const isAuthorized = await teamDtoService.authorizeTeamAccount(draft?.teamId, jwtUsername);
+          if (!draft)
+            throw new NotFoundError(`Draft for "${draftId}" id is not found`);
+
+          if (!isAuthorized && !isModerator)
+            throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
+
+          if (appCmd.getCmdNum() === APP_CMD.UPDATE_DRAFT_STATUS) {
+            const { status } = appCmd.getCmdPayload();
+
+            if (!PROJECT_CONTENT_DRAFT_STATUS[status])
+              throw new BadRequestError(`This endpoint assepts only project-content draft status`)
+
+            if (draft.status === IN_PROGRESS) {
+              //user can change status from IN_PROGRESS to PROPOSED
+              if (!isAuthorized)
+                throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
+              if (status !== PROPOSED)
+                throw new BadRequestError("Bad status");
+            }
+
+            if (draft.status === PROPOSED) {
+              //moderator can change status to APPROVED or REJECTED
+              if (!isModerator)
+                throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
+              if (status !== APPROVED && status !== REJECTED)
+                throw new BadRequestError("Bad status");
+            }
+
+            if (draft.status === APPROVED) {
+              //moderator can change status from APPROVED to REJECTED
+              if (!isModerator)
+                throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
+              if (status !== REJECTED)
+                throw new BadRequestError("Bad status");
+            }
+
+            if (draft.status === REJECTED) {
+              //moderator can change status from REJECTED to APPROVED
+              //user can change status from REJECTED to IN_PROGRESS
+              if (isModerator && status !== APPROVED)
+                throw new BadRequestError("Bad status");
+              if (isAuthorized && status !== IN_PROGRESS)
+                throw new BadRequestError("Bad status");
+            }
+          }
+
+          if (appCmd.getCmdNum() === APP_CMD.UPDATE_DRAFT_MODERATION_MESSAGE) {
+            //moderator can change message if status is PROPOSED
+            if (!isModerator)
+              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit moderation message`);
+            if (draft.status !== PROPOSED)
+              throw new BadRequestError("Bad status");
+          }
+        };
+        const msg = ctx.state.msg;
+
+        await projectContentCmdHandler.process(msg, ctx, validate);
+
+        //after separate cmd validation all appCmds should have draft _id in payload
+        const appCmd = msg.appCmds[0];
+        const draftId = appCmd.extractEntityId();
+
+        ctx.successRes({
+          _id: draftId
+        });
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  })
+
   updateDraft = this.command({
     form: ProjectContentPackageForm, h: async (ctx) => {
       try {
@@ -440,32 +542,36 @@ class ProjectContentsController extends BaseController {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
 
+          const { IN_PROGRESS, PROPOSED } = PROJECT_CONTENT_DRAFT_STATUS;
+          const jwtUsername = ctx.state.user.username;
+
           const { _id: draftId } = appCmd.getCmdPayload();
-
           const draft = await draftService.getDraft(draftId);
-
-          if (!draft) {
+          const isAuthorized = await teamDtoService.authorizeTeamAccount(draft?.teamId, jwtUsername);
+          
+          if (!draft)
             throw new NotFoundError(`Draft for "${draftId}" id is not found`);
-          }
-          if (draft.status != PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS) {
-            throw new BadRequestError(`Draft "${draftId}" is locked for updates`);
-          }
 
-          const username = ctx.state.user.username;
-          const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.teamId, username)
-          if (!isAuthorized) {
-            throw new ForbiddenError(`"${username}" is not permitted to edit "${projectId}" project`);
-          }
+          if (!isAuthorized)
+            throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
 
-          if (draft.status == PROJECT_CONTENT_DRAFT_STATUS.PROPOSED) {
-            throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
-          }
 
-          if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
-            const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
-            const exists = await FileStorage.exists(archiveDir);
-            if (!exists) {
-              throw new NotFoundError(`Dar "${archiveDir}" is not found`);
+          if (appCmd.getCmdNum() === APP_CMD.UPDATE_DRAFT) {
+            if (draft.status != IN_PROGRESS)
+              throw new BadRequestError(`Draft "${draftId}" is locked for updates`);
+
+            if (!isAuthorized)
+              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
+
+            if (draft.status === PROPOSED)
+              throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
+
+            if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+              const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
+              const exists = await FileStorage.exists(archiveDir);
+              if (!exists) {
+                throw new NotFoundError(`Dar "${archiveDir}" is not found`);
+              }
             }
           }
         };
@@ -474,8 +580,10 @@ class ProjectContentsController extends BaseController {
 
         await projectContentCmdHandler.process(msg, ctx, validate);
 
+        //after separate cmd validation all appCmds should have draft _id in payload
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DRAFT);
-        const draftId = appCmd.getCmdPayload()._id;
+
+        const draftId = appCmd.extractEntityId();
 
         ctx.successRes({
           _id: draftId
@@ -556,65 +664,6 @@ class ProjectContentsController extends BaseController {
     }
   });
 
-
-  udpateProjectContent = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd =>
-            cmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_STATUS ||
-            cmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_METADATA
-          );
-
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          
-          const { status, _id, metadata } = appCmd.getCmdPayload();
-          const projectContent = await projectContentDtoService.getProjectContent(_id);
-
-          if (!projectContent) {
-            throw new NotFoundError(`ProjectContent for "${_id}" id is not found`);
-          }
-
-          //TODO: Replace this validation with role based permission system
-          const jwtUsername = ctx.state.user.username;
-          const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
-          const isModerator = moderators.includes(jwtUsername);
-          const isAuthorized = await teamDtoService.authorizeTeamAccount(projectContent.teamId, jwtUsername)
-
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_STATUS) {
-            if (!PROJECT_CONTENT_STATUS[status]) {
-              throw new BadRequestError(`This endpoint assepts only project-content status`)
-            }
-            if (metadata) {
-              throw new BadRequestError(`Bad cmd`);
-            }
-            if (!isModerator) {
-              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
-            }
-          }
-
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_PROJECT_CONTENT_METADATA) {
-            if (status) {
-              throw new BadRequestError(`Bad cmd`);
-            }
-            if (!(isAuthorized || isModerator)) {
-              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit metadata`);
-            }
-          }
-        };
-
-        const msg = ctx.state.msg;
-        await projectContentCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
 }
 
 const projectContentsCtrl = new ProjectContentsController();

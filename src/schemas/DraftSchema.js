@@ -38,6 +38,7 @@ const DraftSchema = new Schema({
   "authors": [{ type: String }],
   "references": [{ type: String }],
   "foreignReferences": [{ type: String }],
+  "moderationMessage": { type: String },
 }, { timestamps: true });
 
 const model = mongoose.model('draft', DraftSchema);
