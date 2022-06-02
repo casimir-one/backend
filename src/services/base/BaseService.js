@@ -1,4 +1,5 @@
 import assert from 'assert';
+import { isArray, isObject } from '@deip/toolbox';
 import config from './../../config';
 import PortalSchema from './../../schemas/PortalSchema';
 
@@ -81,38 +82,49 @@ class BaseService {
   async getMatchStage(searchQuery = {}) {
     const scopeQuery = await this.getBaseScopeQuery();
 
-    const onlyUniq = (value, index, self) => self.indexOf(value) === index;
-    const addNumberValues = (stringArr) =>
-      stringArr.reduce((acc, cur) => [...acc, cur, +cur], [])
-        .filter(Boolean)
-        .filter(onlyUniq);
+    const isNestedObj = (value) => value && isObject(value);
+    const parseValue = (value) => {
+      //bool
+      if (value === "true") return true;
+      if (value === "false") return false;
+      //number max 16 symbols
+      if (value.match(/^\d{0,16}$/) && !isNaN(+value)) return +value;
+      //date
+      if (!isNaN(new Date(value).valueOf())) return new Date(value);
+      //string
+      return value;
+    }
+    const parseValues = (value) => {
+      return isArray(value) ? value.map(parseValue) : parseValue(value);
+    };
 
-    const parseMongodbQueryOperator = (key, value) => { //from 'authors.$in', 'id1,id2'
+    const matchKey = (key) => {
       const mongoOperatorRegex = /\$[a-z]*/;
       if (!key.match(mongoOperatorRegex)) return null;
-      const keySplit = key.split('.');
-      if (keySplit.length > 2) throw new Error(`Match operator ${key} contains more than 2 stages`);
-
-      const [matchKey, matchOperator] = key.split('.');
-      const allowedOperators = ['$in', '$nin'];
-      if (!allowedOperators.includes(matchOperator)) throw new Error(`Match operator ${matchOperator} is not allowed`);
-
 
       const arrayOperators = ['$in', '$nin'];
-      let matchValue = value;
-      if (arrayOperators.includes(matchOperator)) {
-        matchValue = addNumberValues(matchValue.split(','))
-      }
-      return { [matchKey]: { [matchOperator]: matchValue } }; //to {authors: {$in: [id1, id2]}}
+      const allowedOperators = [...arrayOperators, '$gt', '$lt'];
+      if (!allowedOperators.includes(key)) throw new Error(`Match operator ${key} is not allowed`);
     }
 
-    const userMatch = Object.entries(searchQuery).reduce((acc, [key, value]) => {
-      const mongoOperator = parseMongodbQueryOperator(key, value)
-      if (mongoOperator) return { ...acc, ...mongoOperator };
-      else return { ...acc, [key]: { $in: addNumberValues([value]) } }
-    }, {});
-    const match = { ...userMatch, ...scopeQuery };
-    return { $match: match }
+    const processQueryObj = (input, deep = 0) => {
+      const result = {};
+      if (deep > 2) throw new Error("Match is too deep");
+      for (let [key, value] of Object.entries(input)) {
+        matchKey(key);
+        const isNested = isNestedObj(value);
+        if (!isNested) {
+          const updatedValue = parseValues(value);
+          result[key] = updatedValue;
+        }
+        else
+          result[key] = processQueryObj(value, deep + 1);
+      }
+      return result;
+    }
+
+    const match = processQueryObj(searchQuery);
+    return { $match: { ...match, ...scopeQuery } };
   }
 
   getSortStage(sortParams) {
