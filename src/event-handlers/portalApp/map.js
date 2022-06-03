@@ -210,6 +210,14 @@ module.exports = {
     { h: projectContentEventHandler, await: true }
   ],
 
+  [APP_EVENT.PROJECT_CONTENT_DRAFT_STATUS_UPDATED]: [
+    { h: projectContentEventHandler, await: true }
+  ],
+
+  [APP_EVENT.PROJECT_CONTENT_DRAFT_MODERATION_MESSAGE_UPDATED]: [
+    { h: projectContentEventHandler, await: true }
+  ],
+
   [APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED]: [
     { h: fileUploadEventHandler, await: true },
     { h: projectContentEventHandler, await: true }
@@ -231,14 +239,6 @@ module.exports = {
   [APP_EVENT.PROJECT_CONTENT_CREATED]: [
     { h: projectContentEventHandler, await: true },
     { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_CONTENT_STATUS_UPDATED]: [
-    { h: projectContentEventHandler, await: true },
-  ],
-
-  [APP_EVENT.PROJECT_CONTENT_METADATA_UPDATED]: [
-    { h: projectContentEventHandler, await: true },
   ],
 
   [APP_EVENT.REVIEW_REQUEST_CREATED]: [

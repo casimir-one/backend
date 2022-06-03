@@ -61,7 +61,8 @@ class DraftService extends BaseService {
     metadata,
     authors,
     references,
-    foreignReferences
+    foreignReferences,
+    moderationMessage
   }) {
     const updatedDraft = await this.updateOne({ _id: id }, {
       folder,
@@ -76,7 +77,8 @@ class DraftService extends BaseService {
       metadata,
       authors,
       references,
-      foreignReferences
+      foreignReferences,
+      moderationMessage
     });
 
     return updatedDraft;

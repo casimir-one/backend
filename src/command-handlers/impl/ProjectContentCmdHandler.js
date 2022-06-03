@@ -5,8 +5,8 @@ import {
   ProjectContentDraftDeletedEvent,
   ProjectContentDraftUpdatedEvent,
   ProjectContentCreatedEvent,
-  ProjectContentStatusUpdatedEvent,
-  ProjectContentMetadataUpdatedEvent,
+  ProjectContentDraftStatusUpdatedEvent,
+  ProjectContentDraftModerationMessageUpdatedEvent,
 } from './../../events';
 
 class ProjectContentCmdHandler extends BaseCmdHandler {
@@ -22,8 +22,12 @@ const projectContentCmdHandler = new ProjectContentCmdHandler();
 projectContentCmdHandler.register(APP_CMD.CREATE_DRAFT, (cmd, ctx) => {
 
   const draftData = cmd.getCmdPayload();
-  
-  ctx.state.appEvents.push(new ProjectContentDraftCreatedEvent({ ...draftData, uploadedFiles: ctx.req.files }));
+  //TODO: clarify flow for portal without project-contents-draft moderation
+  // const moderationRequired = !!ctx.state.portal.profile.settings.moderation?.projectContentDraftModerationRequired
+  ctx.state.appEvents.push(new ProjectContentDraftCreatedEvent({
+    ...draftData,
+    uploadedFiles: ctx.req.files,
+  }));
 });
 
 projectContentCmdHandler.register(APP_CMD.UPDATE_DRAFT, (cmd, ctx) => {
@@ -32,6 +36,21 @@ projectContentCmdHandler.register(APP_CMD.UPDATE_DRAFT, (cmd, ctx) => {
 
   ctx.state.appEvents.push(new ProjectContentDraftUpdatedEvent({ ...draftData, uploadedFiles: ctx.req.files }));
 });
+
+projectContentCmdHandler.register(APP_CMD.UPDATE_DRAFT_STATUS, (cmd, ctx) => {
+
+  const { _id, status } = cmd.getCmdPayload();
+
+  ctx.state.appEvents.push(new ProjectContentDraftStatusUpdatedEvent({ _id, status }));
+});
+
+projectContentCmdHandler.register(APP_CMD.UPDATE_DRAFT_MODERATION_MESSAGE, (cmd, ctx) => {
+
+  const { _id, moderationMessage } = cmd.getCmdPayload();
+
+  ctx.state.appEvents.push(new ProjectContentDraftModerationMessageUpdatedEvent({ _id, moderationMessage }));
+});
+
 
 projectContentCmdHandler.register(APP_CMD.DELETE_DRAFT, (cmd, ctx) => {
 
@@ -43,26 +62,12 @@ projectContentCmdHandler.register(APP_CMD.DELETE_DRAFT, (cmd, ctx) => {
 projectContentCmdHandler.register(APP_CMD.CREATE_PROJECT_CONTENT, (cmd, ctx) => {
 
   const projectContent = cmd.getCmdPayload();
-  const portalModeration = ctx.state.portal.profile.settings.moderation;
   ctx.state.appEvents.push(new ProjectContentCreatedEvent({
     ...projectContent,
     creator: ctx.state.user.username,
-    moderationRequired: !!portalModeration?.projectContentModerationRequired,
   }));
 });
 
-projectContentCmdHandler.register(APP_CMD.UPDATE_PROJECT_CONTENT_STATUS, (cmd, ctx) => {
 
-  const { status, _id } = cmd.getCmdPayload();
-
-  ctx.state.appEvents.push(new ProjectContentStatusUpdatedEvent({ status, _id }));
-});
-
-projectContentCmdHandler.register(APP_CMD.UPDATE_PROJECT_CONTENT_METADATA, (cmd, ctx) => {
-
-  const { metadata, _id } = cmd.getCmdPayload();
-
-  ctx.state.appEvents.push(new ProjectContentMetadataUpdatedEvent({ metadata, _id }));
-});
 
 module.exports = projectContentCmdHandler;

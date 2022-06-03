@@ -83,7 +83,7 @@ const ProjectContentAssessmentCriterias = new Schema({
 });
 
 const PortalModerationConfigSchema = new Schema({
-  "projectContentModerationRequired": { type: Boolean, required: false },
+  "projectContentDraftModerationRequired": { type: Boolean, required: false },
   "moderators": { type: Array, required: false }
 });
 

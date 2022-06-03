@@ -13,7 +13,6 @@ class ProjectContentCreatedEvent extends BaseEvent {
       contentType,
       authors,
       title,
-      moderationRequired,
     } = eventPayload;
 
     assert(!!entityId, "'entityId' is required");
