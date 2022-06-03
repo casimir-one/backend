@@ -1,9 +1,8 @@
-import { Singleton } from "@deip/toolbox";
-import { assert } from "@deip/toolbox/lib/validation";
+import { assert, Singleton } from "@deip/toolbox";
 import { Kafka } from "kafkajs";
 import BaseEvent from '../events/base/BaseEvent';
-import { logError } from "../utils/log";
 import { parseChainEvent } from "../events/base/ChainEvent";
+import { logError } from "../utils/log";
 
 
 export default class KafkaService extends Singleton {

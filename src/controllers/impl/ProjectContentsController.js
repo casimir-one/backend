@@ -537,7 +537,7 @@ class ProjectContentsController extends BaseController {
 
         //after separate cmd validation all appCmds should have draft _id in payload
         const appCmd = msg.appCmds[0];
-        const draftId = appCmd.extractEntityId();
+        const draftId = appCmd.getCmdPayload()._id;
 
         ctx.successRes({
           _id: draftId
@@ -599,7 +599,7 @@ class ProjectContentsController extends BaseController {
         //after separate cmd validation all appCmds should have draft _id in payload
         const appCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DRAFT);
 
-        const draftId = appCmd.extractEntityId();
+        const draftId = appCmd.getCmdPayload()._id;
 
         ctx.successRes({
           _id: draftId
