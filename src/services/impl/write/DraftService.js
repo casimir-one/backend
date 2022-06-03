@@ -106,6 +106,11 @@ class DraftService extends BaseService {
     const drafts = await this.findMany({ projectId });
     return drafts;
   }
+
+  async lookupDraftsWithPagination(filter, sort, pagination) {
+    const drafts = await this.findManyPaginated(filter, sort, pagination);
+    return drafts;
+  }
 }
 
 export default DraftService;

@@ -56,6 +56,22 @@ class ProjectContentsController extends BaseController {
     }
   });
 
+  getDraftsPaginated = this.query({
+    h: async (ctx) => {
+      try {
+        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
+        const {
+          paginationMeta,
+          result
+        } = await draftService.lookupDraftsWithPagination(filter, sort, { page, pageSize });
+
+        ctx.successRes(result, { extraInfo: paginationMeta });
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
   getProjectContentsByPortal = this.query({
     h: async (ctx) => {
       try {

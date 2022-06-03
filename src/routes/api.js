@@ -188,6 +188,7 @@ protected_route.put('/v2/document-template/delete', documentTemplatesCtrl.delete
 public_route.get('/v2/project-content/listing', projectContentsCtrl.getPublicProjectContentListing)
 public_route.get('/v2/project-content/listing-paginated', projectContentsCtrl.getPublicProjectContentListingPaginated)
 public_route.get('/v2/project-content/drafts/project/:projectId', projectContentsCtrl.getDraftsByProject)
+public_route.get('/v2/project-content/drafts-paginated', projectContentsCtrl.getDraftsPaginated)
 public_route.get('/v2/project-content/:projectContentId', projectContentsCtrl.getProjectContent)
 public_route.get('/v2/project-content/project/:projectId', projectContentsCtrl.getProjectContentsByProject)
 public_route.get('/v2/project-content/portal/:portalId', projectContentsCtrl.getProjectContentsByPortal)
