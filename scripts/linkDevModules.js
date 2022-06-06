@@ -31,7 +31,7 @@ const packages = require(
     return [...acc, ...pkgs];
   }, []);
 
-const modulesToRemove = ['vue', 'vuetify'];
+const modulesToRemove = [];
 const modulesToRemoveNamesGlob = `+(${modulesToRemove.join('|')})`;
 
 prompt([{
