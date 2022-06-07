@@ -15,12 +15,12 @@
     "dev": "nodemon -w src --exec \"npm run start\""
   },
   "dependencies": {
-    "@deip/chain-service": "1.382.1",
-    "@deip/commands": "1.382.0",
-    "@deip/constants": "1.380.0",
+    "@deip/chain-service": "1.382.2",
+    "@deip/commands": "1.382.2",
+    "@deip/constants": "1.382.2",
     "@deip/lib-crypto": "1.375.1",
-    "@deip/messages": "1.382.1",
-    "@deip/toolbox": "1.380.0",
+    "@deip/messages": "1.382.2",
+    "@deip/toolbox": "1.382.2",
     "@koa/cors": "^2.2.1",
     "axios": "^0.15.3",
     "bcryptjs": "^2.4.0",
