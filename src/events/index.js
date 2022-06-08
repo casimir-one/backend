@@ -99,6 +99,8 @@ import LayoutCreatedEvent from './impl/LayoutCreatedEvent';
 import LayoutUpdatedEvent from './impl/LayoutUpdatedEvent';
 import LayoutDeletedEvent from './impl/LayoutDeletedEvent';
 
+import RegistrationCodeSendedByEmailEvent from './impl/RegistrationCodeSendedByEmailEvent';
+
 module.exports = {
   ProjectCreatedEvent,
   ProjectUpdatedEvent,
@@ -199,5 +201,7 @@ module.exports = {
 
   LayoutCreatedEvent,
   LayoutUpdatedEvent,
-  LayoutDeletedEvent
+  LayoutDeletedEvent,
+
+  RegistrationCodeSendedByEmailEvent
 }

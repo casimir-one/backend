@@ -13,6 +13,7 @@ import portalCmdHandler from './impl/PortalCmdHandler';
 import userSettingsCmdHandler from './impl/UserSettingsCmdHandler';
 import notificationCmdHandler from './impl/NotificationCmdHandler';
 import layoutCmdHandler from './impl/LayoutCmdHandler';
+import mailCmdHandler from './impl/MailCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -29,5 +30,6 @@ module.exports = {
   portalCmdHandler,
   userSettingsCmdHandler,
   notificationCmdHandler,
-  layoutCmdHandler
+  layoutCmdHandler,
+  mailCmdHandler
 }

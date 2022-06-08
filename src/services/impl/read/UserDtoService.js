@@ -88,16 +88,24 @@ class UserDtoService extends BaseService {
   }
 
 
-  async getUserByEmail(email) {
-    const user = await this.findOne({ email: email, status: USER_PROFILE_STATUS.APPROVED });
+  async getUserByEmail(email, status) {
+    const query = { email };
+    if (status) {
+      query.status = status;
+    }
+    const user = await this.findOne(query);
     if (!user) return null;
     const [result] = await this.mapUsers([user]);
     return result;
   }
 
 
-  async getUser(username) {
-    const user = await this.findOne({ _id: username, status: USER_PROFILE_STATUS.APPROVED });
+  async getUser(username, status) {
+    const query = { _id: username };
+    if (status) {
+      query.status = status;
+    }
+    const user = await this.findOne(query);
     if (!user) return null;
     const [result] = await this.mapUsers([user]);
     return result;

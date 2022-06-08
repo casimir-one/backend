@@ -16,7 +16,8 @@ import {
   userEventHandler,
   userInviteEventHandler,
   userNotificationEventHandler,
-  userSettingsEventHandler
+  userSettingsEventHandler,
+  mailEventHandler
 } from './index';
 
 /* Priority is defined by the order of handlers */
@@ -129,7 +130,8 @@ module.exports = {
 
   [APP_EVENT.DAO_CREATED]: [
     { h: teamEventHandler, await: true },
-    { h: userEventHandler, await: true }
+    { h: userEventHandler, await: true },
+    { h: mailEventHandler, await: true },
   ],
 
   [APP_EVENT.DAO_UPDATED]: [
@@ -344,5 +346,9 @@ module.exports = {
 
   [APP_EVENT.LAYOUT_DELETED]: [
     { h: layoutEventHandler, await: true },
+  ],
+
+  [APP_EVENT.REGISTRATION_CODE_SENDED_BY_EMAIL]: [
+    { h: mailEventHandler, await: true }
   ],
 };
