@@ -29,11 +29,6 @@ const chainEventNameToDomainEventNum = createEnum({
   "proposal_resolved": DOMAIN_EVENT.PROPOSAL_RESOLVED,
   "proposal_expired": DOMAIN_EVENT.PROPOSAL_EXPIRED,
 
-  // PROJECT
-  "project_created": DOMAIN_EVENT.PROJECT_CREATED,
-  "project_removed": DOMAIN_EVENT.PROJECT_REMOVED,
-  "project_updated": DOMAIN_EVENT.PROJECT_UPDATED,
-  "project_contentCreated": DOMAIN_EVENT.PROJECT_CONTENT_CREATED,
   "project_ndaCreated": DOMAIN_EVENT.PROJECT_NDA_CREATED,
   "project_ndaAccessRequestCreated": DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_CREATED,
   "project_ndaAccessRequestFulfilled": DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_FULFILLED,
@@ -89,7 +84,7 @@ const chainEventNameToDomainEventNum = createEnum({
   "uniques_class_metadata_cleared": DOMAIN_EVENT.NFT_CLASS_METADATA_CLEARED,
   "uniques_class_metadata_set": DOMAIN_EVENT.NFT_CLASS_METADATA_SET,
   "uniques_class_thawed": DOMAIN_EVENT.NFT_CLASS_THAWED,
-  "uniques_created": DOMAIN_EVENT.NFT_CREATED,
+  "uniques_created": DOMAIN_EVENT.NFT_COLLECTION_CREATED,
   "uniques_destroyed": DOMAIN_EVENT.NFT_DESTROYED,
   "uniques_force_created": DOMAIN_EVENT.NFT_FORCE_CREATED,
   "uniques_frozen": DOMAIN_EVENT.NFT_FROZEN,

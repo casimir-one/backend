@@ -9,16 +9,16 @@ class NonFungibleTokenTransferedEvent extends BaseEvent {
     const {
       from,
       to,
-      classId,
-      instanceId
+      nftCollectionId,
+      nftItemId
     } = eventPayload;
 
     assert(!!from, "'from' is required");
     assert(!!to, "'to' is required");
-    assert(!!classId, "NFT 'classId' is required");
-    assert(!!instanceId && !isNaN(instanceId), "NFT 'instanceId' is required");
+    assert(!!nftCollectionId, "NFT 'nftCollectionId' is required");
+    assert(!!nftItemId && !isNaN(nftItemId), "NFT 'nftItemId' is required");
 
-    super(APP_EVENT.NFT_TRANSFERED, eventPayload);
+    super(APP_EVENT.NFT_TRANSFERRED, eventPayload);
   }
 
 }

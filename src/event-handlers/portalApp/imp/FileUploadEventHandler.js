@@ -3,7 +3,7 @@ import { APP_EVENT, CONTRACT_AGREEMENT_STATUS, PROJECT_CONTENT_FORMAT } from '@d
 import mongoose from 'mongoose';
 import cloneArchive from '../../../dar/cloneArchive';
 import writeArchive from '../../../dar/writeArchive';
-import { ContractAgreementDtoService, DraftService, PortalService } from '../../../services';
+import { ContractAgreementDtoService, NftItemMetadataDraftService, PortalService } from '../../../services';
 import FileStorage from '../../../storage';
 import { generatePdf } from '../../../utils/pdf';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
@@ -42,7 +42,7 @@ class FileUploadEventHandler extends PortalAppEventHandler {
 const fileUploadEventHandler = new FileUploadEventHandler();
 const contractAgreementDtoService = new ContractAgreementDtoService();
 const portalService = new PortalService();
-const draftService = new DraftService();
+const nftItemMetadataDraftService = new NftItemMetadataDraftService();
 
 fileUploadEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED, async (event) => {
   const {
@@ -94,15 +94,15 @@ fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event)
   }
 });
 
-fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (event) => {
+fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (event) => {
 
-  const { projectId, draftId, formatType, uploadedFiles } = event.getEventPayload();
+  const { nftCollectionId, entityId, formatType, uploadedFiles } = event.getEventPayload();
 
   if (formatType === PROJECT_CONTENT_FORMAT.DAR || formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
-    const _id = mongoose.Types.ObjectId(draftId);
+    const _id = mongoose.Types.ObjectId(entityId);
 
     if (formatType == PROJECT_CONTENT_FORMAT.DAR) {
-      const darPath = FileStorage.getProjectDarArchiveDirPath(projectId, _id);
+      const darPath = FileStorage.getProjectDarArchiveDirPath(nftCollectionId, _id);
       const blankDarPath = FileStorage.getProjectBlankDarArchiveDirPath();
 
       await cloneArchive(blankDarPath, darPath, true);
@@ -110,18 +110,18 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_CREATED, async (
     if (formatType == PROJECT_CONTENT_FORMAT.PACKAGE && uploadedFiles.length > 0) {
       const tempDestinationPath = uploadedFiles[0].destination;
 
-      const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(projectId, _id);
+      const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(nftCollectionId, _id);
 
       await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
     }
   }
 });
 
-fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (event) => {
+fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (event) => {
 
   const { _id: draftId, xmlDraft, uploadedFiles } = event.getEventPayload();
 
-  const draft = await draftService.getDraft(draftId);
+  const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(draftId);
 
   if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR) {
     const opts = {}
@@ -139,10 +139,10 @@ fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_UPDATED, async (
   }
 });
 
-fileUploadEventHandler.register(APP_EVENT.PROJECT_CONTENT_DRAFT_DELETED, async (event) => {
-  const { draftId } = event.getEventPayload();
+fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async (event) => {
+  const { _id } = event.getEventPayload();
 
-  const draft = await draftService.getDraft(draftId)
+  const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(_id)
 
   if (draft.type === PROJECT_CONTENT_FORMAT.DAR) {
     const darPath = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);

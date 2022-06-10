@@ -1,4 +1,3 @@
-import projectsCtrl from '../controllers/impl/ProjectsController';
 import proposalsCtrl from '../controllers/impl/ProposalsController';
 import teamsCtrl from '../controllers/impl/TeamsController';
 import attributesCtrl from '../controllers/impl/AttributesController';
@@ -7,7 +6,6 @@ import domainsCtrl from './impl/DomainsController';
 import usersCtrl from './impl/UsersController';
 import invstOppCtrl from './impl/InvestmentOpportunityController';
 import documentTemplatesCtrl from './impl/DocumentTemplatesController';
-import projectContentsCtrl from './impl/ProjectContentsController';
 import reviewsCtrl from './impl/ReviewsController';
 import projectNdaCtrl from './impl/ProjectNdaController';
 import contractAgreementCtrl from './impl/ContractAgreementController';
@@ -19,7 +17,6 @@ import invitesCtrl from './impl/InvitesController';
 import layoutsCtrl from './impl/LayoutsController';
 
 module.exports = {
-  projectsCtrl,
   proposalsCtrl,
   teamsCtrl,
   attributesCtrl,
@@ -28,7 +25,6 @@ module.exports = {
   usersCtrl,
   invstOppCtrl,
   documentTemplatesCtrl,
-  projectContentsCtrl,
   reviewsCtrl,
   projectNdaCtrl,
   contractAgreementCtrl,

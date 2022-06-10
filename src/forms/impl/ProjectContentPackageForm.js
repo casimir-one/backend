@@ -4,12 +4,12 @@ import { getFileStorageUploader } from './../storage';
 import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
-const PROJECT_HEADER = "project-id";
+const NFT_COLLECTION_ID = "nft-collection-id";
 const DRAFT_HEADER = "entity-id";
 
 const destinationHandler = (fileStorage, sessionId) => function () {
   return async function (req, file, callback) {
-    const projectId = req.headers[PROJECT_HEADER];
+    const projectId = req.headers[NFT_COLLECTION_ID];
     const draftId = req.headers[DRAFT_HEADER];
 
     let projectFilesStorage = '';

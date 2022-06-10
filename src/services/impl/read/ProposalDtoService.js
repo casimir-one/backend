@@ -2,7 +2,7 @@ import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
 import ProposalSchema from './../../../schemas/ProposalSchema';
 import { PROJECT_STATUS } from './../../../constants';
-import ProjectDtoService from './ProjectDtoService';
+import NftCollectionDtoService from './NftCollectionDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
 import InvestmentOpportunityDtoService from './InvestmentOpportunityDtoService';
@@ -11,7 +11,7 @@ import { ChainService } from '@deip/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
-const projectDtoService = new ProjectDtoService({ scoped: false });
+const nftCollectionDtoService = new NftCollectionDtoService({ scoped: false });
 const invstOppDtoService = new InvestmentOpportunityDtoService({ scoped: false });
 
 
@@ -257,7 +257,7 @@ class ProposalDtoService extends BaseService {
 
     // currently we allow to buy the license only for user account
     const users = await userDtoService.getUsers(accountNames);
-    const projects = await projectDtoService.getProjects(projectIds, Object.values(PROJECT_STATUS));
+    const projects = await nftCollectionDtoService.getNftCollections(projectIds, Object.values(PROJECT_STATUS));
 
     return requests.map((req) => {
       const extendedDetails = {
@@ -367,7 +367,7 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const teams = await teamDtoService.getTeams(accountNames);
-    const projects = await projectDtoService.getProjects(projectsIds, Object.values(PROJECT_STATUS));
+    const projects = await nftCollectionDtoService.getNftCollections(projectsIds, Object.values(PROJECT_STATUS));
 
     return proposals.map((proposal) => {
       const team = teams.find(team => team._id == proposal.details.teamId);
@@ -411,7 +411,7 @@ class ProposalDtoService extends BaseService {
     }, []);
 
     const teams = await teamDtoService.getTeams(accountNames);
-    const projects = await projectDtoService.getProjects(projectIds, Object.values(PROJECT_STATUS));
+    const projects = await nftCollectionDtoService.getNftCollections(projectIds, Object.values(PROJECT_STATUS));
 
     return proposals.map((proposal) => {
       const team = teams.find(team => team._id == proposal.details.teamId);
@@ -445,7 +445,7 @@ class ProposalDtoService extends BaseService {
 
 
     const teams = await teamDtoService.getTeams(accountNames);
-    const projects = await projectDtoService.getProjects(projectsIds, Object.values(PROJECT_STATUS));
+    const projects = await nftCollectionDtoService.getNftCollections(projectsIds, Object.values(PROJECT_STATUS));
     const invstOpps = await invstOppDtoService.getInvstOpps(invstOppsIds);
 
     return proposals.map((proposal) => {
@@ -523,7 +523,7 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, []);
 
-    const projects = await projectDtoService.getProjects(projectIds, Object.values(PROJECT_STATUS));
+    const projects = await nftCollectionDtoService.getNftCollections(projectIds, Object.values(PROJECT_STATUS));
 
     return proposals.map(proposal => {
       const project = projects.find(project => project._id == proposal.details.projectId);

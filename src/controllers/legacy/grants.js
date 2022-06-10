@@ -1,7 +1,7 @@
 import path from 'path'
 import AwardWithdrawalRequestSchema from './../../schemas/AwardWithdrawalRequestSchema';
 import GrantAwardPaymentForm from './../../forms/legacy/grantAwardPaymentForm';
-import ProjectDtoService from './../../services/impl/read/ProjectDtoService';
+import NftCollectionDtoService from '../../services/impl/read/NftCollectionDtoService';
 import GrantService from './../../services/legacy/grants';
 import { NotFoundError } from './../../errors';
 import crypto from 'crypto';
@@ -71,14 +71,14 @@ const getAwardWithdrawalRequestAttachmentFile = async function (ctx) {
 
 
 const createAwardWithdrawalRequest = async (ctx) => {
-  const projectId = ctx.request.header['project-id'];
+  const projectId = ctx.request.header['nft-collection-id'];
   const portal = ctx.state.portal;
 
   try {
-    const projectDtoService = new ProjectDtoService();
+    const nftCollectionDtoService = new NftCollectionDtoService();
     const grantsService = new GrantService();
 
-    const project = await projectDtoService.getProject(projectId);
+    const project = await nftCollectionDtoService.getNftCollection(projectId);
 
     const { tempDestinationPath, awardNumber, subawardNumber, paymentNumber } = await GrantAwardPaymentForm(ctx);
 

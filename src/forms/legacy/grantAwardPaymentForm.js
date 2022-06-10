@@ -2,12 +2,12 @@ import multer from 'koa-multer';
 import { getFileStorageUploader } from './../storage';
 import { v4 as uuidv4 } from 'uuid';
 
-const PROJECT_ID_HEADER = "project-id";
+const NFT_COLLECTION_ID = "nft-collection-id";
 
 
 const destinationHandler = (fileStorage, sessionId) => function () {
   return async function (req, file, callback) {
-    const projectId = req.headers[PROJECT_ID_HEADER];
+    const projectId = req.headers[NFT_COLLECTION_ID];
 
     const projectFilesTempStorage = fileStorage.getProjectAwardWithdrawalRequestsTempDirPath(projectId, sessionId);
     const exists = await fileStorage.exists(projectFilesTempStorage);

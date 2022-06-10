@@ -4,9 +4,7 @@ import {
   blockEventHandler,
   contractAgreementEventHandler,
   daoEventHandler,
-  projectContentEventHandler,
   projectDomainEventHandler,
-  projectEventHandler,
   projectInvestmentOpportunityEventHandler,
   projectNdaEventHandler,
   projectReviewEventHandler,
@@ -51,21 +49,6 @@ module.exports = {
     { h: proposalEventHandler, await: false }
   ],
 
-  // ## PROJECT
-  [DOMAIN_EVENT.PROJECT_CREATED]: [
-    { h: projectEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_REMOVED]: [
-    { h: projectEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_UPDATED]: [
-    { h: projectEventHandler, await: false }
-  ],
-
-  // ## PROJECT-CONTENT
-  [DOMAIN_EVENT.PROJECT_CONTENT_CREATED]: [
-    { h: projectContentEventHandler, await: false }
-  ],
   // ## PROJECT-NDA
   [DOMAIN_EVENT.PROJECT_NDA_CREATED]: [
     { h: projectNdaEventHandler, await: false }
@@ -217,7 +200,7 @@ module.exports = {
   [DOMAIN_EVENT.NFT_CLASS_THAWED]: [
     { h: nonFungibleTokenEventHandler, await: false }
   ],
-  [DOMAIN_EVENT.NFT_CREATED]: [
+  [DOMAIN_EVENT.NFT_COLLECTION_CREATED]: [
     { h: nonFungibleTokenEventHandler, await: false }
   ],
   [DOMAIN_EVENT.NFT_DESTROYED]: [

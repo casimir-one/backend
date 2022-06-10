@@ -1,4 +1,3 @@
-import projectEventHandler from './imp/ProjectEventHandler';
 import proposalEventHandler from './imp/ProposalEventHandler';
 import teamEventHandler from './imp/TeamEventHandler';
 import userNotificationEventHandler from './imp/UserNotificationEventHandler';
@@ -8,7 +7,6 @@ import userEventHandler from './imp/UserEventHandler';
 import documentTemplateEventHandler from './imp/DocumentTemplateEventHandler';
 import investmentOpportunityEventHandler from './imp/InvestmentOpportunityEventHandler';
 import assetEventHandler from './imp/AssetEventHandler';
-import projectContentEventHandler from './imp/ProjectContentEventHandler';
 import reviewEventHandler from './imp/ReviewEventHandler';
 import contractAgreementEventHandler from './imp/ContractAgreementEventHandler';
 import fileUploadEventHandler from './imp/FileUploadEventHandler';
@@ -19,7 +17,6 @@ import mailEventHandler from './imp/MailEventHandler';
 
 
 module.exports = {
-  projectEventHandler,
   proposalEventHandler,
   teamEventHandler,
   userNotificationEventHandler,
@@ -29,7 +26,6 @@ module.exports = {
   documentTemplateEventHandler,
   investmentOpportunityEventHandler,
   assetEventHandler,
-  projectContentEventHandler,
   reviewEventHandler,
   contractAgreementEventHandler,
   fileUploadEventHandler,

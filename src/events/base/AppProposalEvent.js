@@ -1,13 +1,5 @@
 import { APP_PROPOSAL } from '@deip/constants';
 
-import ProjectProposalCreatedEvent from './../impl/ProjectProposalCreatedEvent';
-import ProjectProposalAcceptedEvent from './../impl/ProjectProposalAcceptedEvent';
-import ProjectProposalDeclinedEvent from './../impl/ProjectProposalDeclinedEvent';
-
-import ProjectUpdateProposalCreatedEvent from './../impl/ProjectUpdateProposalCreatedEvent';
-import ProjectUpdateProposalAcceptedEvent from './../impl/ProjectUpdateProposalAcceptedEvent';
-import ProjectUpdateProposalDeclinedEvent from './../impl/ProjectUpdateProposalDeclinedEvent';
-
 import TeamInviteCreatedEvent from './../impl/TeamInviteCreatedEvent';
 import TeamInviteAcceptedEvent from './../impl/TeamInviteAcceptedEvent';
 import TeamInviteDeclinedEvent from './../impl/TeamInviteDeclinedEvent';
@@ -35,10 +27,6 @@ import TokenSwapProposalCreatedEvent from '../impl/TokenSwapProposalCreatedEvent
 import TokenSwapProposalAcceptedEvent from '../impl/TokenSwapProposalAcceptedEvent';
 import TokenSwapProposalDeclinedEvent from '../impl/TokenSwapProposalDeclinedEvent';
 
-import ProjectContentProposalCreatedEvent from './../impl/ProjectContentProposalCreatedEvent';
-import ProjectContentProposalAcceptedEvent from './../impl/ProjectContentProposalAcceptedEvent';
-import ProjectContentProposalDeclinedEvent from './../impl/ProjectContentProposalDeclinedEvent';
-
 import ProjectNdaProposalCreatedEvent from './../impl/ProjectNdaProposalCreatedEvent';
 import ProjectNdaProposalAcceptedEvent from './../impl/ProjectNdaProposalAcceptedEvent';
 import ProjectNdaProposalDeclinedEvent from './../impl/ProjectNdaProposalDeclinedEvent';
@@ -57,16 +45,6 @@ module.exports = {
     CREATED: TeamLeavingCreatedEvent,
     ACCEPTED: TeamLeavingAcceptedEvent,
     DECLINED: TeamLeavingDeclinedEvent
-  },
-  [APP_PROPOSAL.PROJECT_PROPOSAL]: {
-    CREATED: ProjectProposalCreatedEvent,
-    ACCEPTED: ProjectProposalAcceptedEvent,
-    DECLINED: ProjectProposalDeclinedEvent
-  },
-  [APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL]: {
-    CREATED: ProjectUpdateProposalCreatedEvent,
-    ACCEPTED: ProjectUpdateProposalAcceptedEvent,
-    DECLINED: ProjectUpdateProposalDeclinedEvent
   },
   [APP_PROPOSAL.TEAM_UPDATE_PROPOSAL]: {
     CREATED: TeamUpdateProposalCreatedEvent,
@@ -92,11 +70,6 @@ module.exports = {
     CREATED: TokenSwapProposalCreatedEvent,
     ACCEPTED: TokenSwapProposalAcceptedEvent,
     DECLINED: TokenSwapProposalDeclinedEvent
-  },
-  [APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL]: {
-    CREATED: ProjectContentProposalCreatedEvent,
-    ACCEPTED: ProjectContentProposalAcceptedEvent,
-    DECLINED: ProjectContentProposalDeclinedEvent
   },
   [APP_PROPOSAL.PROJECT_NDA_PROPOSAL]: {
     CREATED: ProjectNdaProposalCreatedEvent,

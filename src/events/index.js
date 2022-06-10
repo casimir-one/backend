@@ -1,6 +1,5 @@
-import ProjectCreatedEvent from './impl/ProjectCreatedEvent';
-import ProjectUpdatedEvent from './impl/ProjectUpdatedEvent';
-import ProjectDeletedEvent from './impl/ProjectDeletedEvent';
+import NftCollectionMetadataCreatedEvent from './impl/NftCollectionMetadataCreatedEvent';
+import NftCollectionMetadataUpdatedEvent from './impl/NftCollectionMetadataUpdatedEvent';
 import DaoMemberAddedEvent from './impl/DaoMemberAddedEvent';
 import DaoMemberRemovedEvent from './impl/DaoMemberRemovedEvent';
 
@@ -11,14 +10,6 @@ import TeamUpdateProposalDeclinedEvent from './impl/TeamUpdateProposalDeclinedEv
 import ProposalCreatedEvent from './impl/ProposalCreatedEvent';
 import ProposalAcceptedEvent from './impl/ProposalAcceptedEvent';
 import ProposalDeclinedEvent from './impl/ProposalDeclinedEvent';
-
-import ProjectProposalCreatedEvent from './impl/ProjectProposalCreatedEvent';
-import ProjectProposalAcceptedEvent from './impl/ProjectProposalAcceptedEvent';
-import ProjectProposalDeclinedEvent from './impl/ProjectProposalDeclinedEvent';
-
-import ProjectUpdateProposalCreatedEvent from './impl/ProjectUpdateProposalCreatedEvent';
-import ProjectUpdateProposalAcceptedEvent from './impl/ProjectUpdateProposalAcceptedEvent';
-import ProjectUpdateProposalDeclinedEvent from './impl/ProjectUpdateProposalDeclinedEvent';
 
 import TeamInviteCreatedEvent from './impl/TeamInviteCreatedEvent';
 import TeamInviteAcceptedEvent from './impl/TeamInviteAcceptedEvent';
@@ -42,9 +33,9 @@ import InvestmentOpportunityParticipatedEvent from './impl/InvestmentOpportunity
 import FungibleTokenTransferedEvent from './impl/FungibleTokenTransferedEvent';
 import NonFungibleTokenTransferedEvent from './impl/NonFungibleTokenTransferedEvent';
 import FungibleTokenCreatedEvent from './impl/FungibleTokenCreatedEvent';
-import NonFungibleTokenCreatedEvent from './impl/NonFungibleTokenCreatedEvent';
+import NftCollectionCreatedEvent from './impl/NftCollectionCreatedEvent';
 import FungibleTokenIssuedEvent from './impl/FungibleTokenIssuedEvent';
-import NonFungibleTokenIssuedEvent from './impl/NonFungibleTokenIssuedEvent';
+import NftItemIssuedEvent from './impl/NftItemIssuedEvent';
 import FungibleTokenTransferProposalCreatedEvent from './impl/FungibleTokenTransferProposalCreatedEvent';
 import FungibleTokenTransferProposalAcceptedEvent from './impl/FungibleTokenTransferProposalAcceptedEvent';
 import FungibleTokenTransferProposalDeclinedEvent from './impl/FungibleTokenTransferProposalDeclinedEvent';
@@ -59,12 +50,12 @@ import DocumentTemplateCreatedEvent from './impl/DocumentTemplateCreatedEvent';
 import DocumentTemplateUpdatedEvent from './impl/DocumentTemplateUpdatedEvent';
 import DocumentTemplateDeletedEvent from './impl/DocumentTemplateDeletedEvent';
 
-import ProjectContentDraftCreatedEvent from './impl/ProjectContentDraftCreatedEvent';
-import ProjectContentDraftDeletedEvent from './impl/ProjectContentDraftDeletedEvent';
-import ProjectContentDraftUpdatedEvent from './impl/ProjectContentDraftUpdatedEvent';
-import ProjectContentDraftModerationMessageUpdatedEvent from './impl/ProjectContentDraftModerationMessageUpdatedEvent';
-import ProjectContentDraftStatusUpdatedEvent from './impl/ProjectContentDraftStatusUpdatedEvent';
-import ProjectContentCreatedEvent from './impl/ProjectContentCreatedEvent';
+import NftItemMetadataDraftModerationMsgUpdatedEvent from './impl/NftItemMetadataDraftModerationMsgUpdatedEvent';
+import NftItemMetadataDraftStatusUpdatedEvent from './impl/NftItemMetadataDraftStatusUpdatedEvent';
+import NftItemMetadataDraftCreatedEvent from './impl/NftItemMetadataDraftCreatedEvent';
+import NftItemMetadataDraftDeletedEvent from './impl/NftItemMetadataDraftDeletedEvent';
+import NftItemMetadataDraftUpdatedEvent from './impl/NftItemMetadataDraftUpdatedEvent';
+import NftItemMetadataCreatedEvent from './impl/NftItemMetadataCreatedEvent';
 
 import ReviewRequestCreatedEvent from './impl/ReviewRequestCreatedEvent';
 import ReviewRequestDeclinedEvent from './impl/ReviewRequestDeclinedEvent';
@@ -102,23 +93,14 @@ import LayoutDeletedEvent from './impl/LayoutDeletedEvent';
 import RegistrationCodeSendedByEmailEvent from './impl/RegistrationCodeSendedByEmailEvent';
 
 module.exports = {
-  ProjectCreatedEvent,
-  ProjectUpdatedEvent,
-  ProjectDeletedEvent,
+  NftCollectionMetadataCreatedEvent,
+  NftCollectionMetadataUpdatedEvent,
   DaoMemberAddedEvent,
   DaoMemberRemovedEvent,
 
   ProposalCreatedEvent,
   ProposalAcceptedEvent,
   ProposalDeclinedEvent,
-
-  ProjectProposalCreatedEvent,
-  ProjectProposalAcceptedEvent,
-  ProjectProposalDeclinedEvent,
-
-  ProjectUpdateProposalCreatedEvent,
-  ProjectUpdateProposalAcceptedEvent,
-  ProjectUpdateProposalDeclinedEvent,
   
   TeamInviteCreatedEvent,
   TeamInviteAcceptedEvent,
@@ -148,9 +130,9 @@ module.exports = {
   FungibleTokenTransferedEvent,
   NonFungibleTokenTransferedEvent,
   FungibleTokenCreatedEvent,
-  NonFungibleTokenCreatedEvent,
+  NftCollectionCreatedEvent,
   FungibleTokenIssuedEvent,
-  NonFungibleTokenIssuedEvent,
+  NftItemIssuedEvent,
   FungibleTokenTransferProposalCreatedEvent,
   FungibleTokenTransferProposalAcceptedEvent,
   FungibleTokenTransferProposalDeclinedEvent,
@@ -165,12 +147,12 @@ module.exports = {
   DocumentTemplateUpdatedEvent,
   DocumentTemplateDeletedEvent,
 
-  ProjectContentDraftCreatedEvent,
-  ProjectContentDraftDeletedEvent,
-  ProjectContentDraftUpdatedEvent,
-  ProjectContentDraftModerationMessageUpdatedEvent,
-  ProjectContentDraftStatusUpdatedEvent,
-  ProjectContentCreatedEvent,
+  NftItemMetadataDraftModerationMsgUpdatedEvent,
+  NftItemMetadataDraftStatusUpdatedEvent,
+  NftItemMetadataDraftCreatedEvent,
+  NftItemMetadataDraftDeletedEvent,
+  NftItemMetadataDraftUpdatedEvent,
+  NftItemMetadataCreatedEvent,
 
   ReviewRequestCreatedEvent,
   ReviewRequestDeclinedEvent,

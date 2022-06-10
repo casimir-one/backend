@@ -1,10 +1,11 @@
 import { APP_EVENT } from '@deip/constants';
 import { REVIEW_REQUEST_STATUS } from '../../../constants';
 import {
-  ProjectContentDtoService,
+  NftItemDtoService,
   ReviewRequestDtoService,
   ReviewRequestService,
-  ReviewService
+  ReviewService,
+  NftItemMetadataService
 } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
@@ -20,7 +21,8 @@ const reviewEventHandler = new ReviewEventHandler();
 const reviewRequestService = new ReviewRequestService();
 const reviewRequestDtoService = new ReviewRequestDtoService();
 const reviewService = new ReviewService();
-const projectContentDtoService = new ProjectContentDtoService();
+const nftItemDtoService = new NftItemDtoService();
+const nftItemMetadataService = new NftItemMetadataService();
 
 reviewEventHandler.register(APP_EVENT.REVIEW_REQUEST_CREATED, async (event) => {
 
@@ -59,7 +61,7 @@ reviewEventHandler.register(APP_EVENT.REVIEW_CREATED, async (event) => {
     domains
   } = event.getEventPayload();
 
-  const projectContentRef = await projectContentDtoService.getProjectContentRef(projectContentId);
+  const projectContentRef = await nftItemMetadataService.getNftItemMetadata(projectContentId);
 
   await reviewService.createReview({
     reviewId,

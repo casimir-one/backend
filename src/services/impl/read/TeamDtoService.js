@@ -89,8 +89,11 @@ class TeamDtoService extends BaseService {
 
   async authorizeTeamAccount(account, member) {
     const team = await this.findOne({ _id: account });
-    const { members } = team;
-    return members.includes(member);
+    if (team) {
+      const { members } = team;
+      return members.includes(member);
+    }
+    return false;
   }
 
 
