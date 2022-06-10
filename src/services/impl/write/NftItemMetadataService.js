@@ -11,7 +11,7 @@ class NftItemMetadataService extends BaseService {
     _id,
     nftCollectionId,
     owner,
-    owneredByTeam,
+    ownedByTeam,
     attributes,
     folder,
     title,
@@ -32,7 +32,7 @@ class NftItemMetadataService extends BaseService {
       _id,
       nftCollectionId,
       owner,
-      owneredByTeam,
+      ownedByTeam,
       attributes,
       folder,
       title,
@@ -56,7 +56,7 @@ class NftItemMetadataService extends BaseService {
   async updateNftItemMetadata({
     _id,
     owner,
-    owneredByTeam,
+    ownedByTeam,
     attributes,
     folder,
     title,
@@ -75,7 +75,7 @@ class NftItemMetadataService extends BaseService {
 
     const result = await this.updateOne({ _id }, {
       owner,
-      owneredByTeam,
+      ownedByTeam,
       attributes,
       folder,
       title,

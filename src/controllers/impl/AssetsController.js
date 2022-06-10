@@ -695,7 +695,7 @@ class AssetsController extends BaseController {
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
-          const { nftCollectionId, owner, owneredByTeam } = appCmd.getCmdPayload();
+          const { nftCollectionId, owner, ownedByTeam } = appCmd.getCmdPayload();
           const nftCollection = await nftCollectionMetadataService.getNftCollectionMetadata(nftCollectionId);
 
           if (!nftCollection) {
@@ -705,7 +705,7 @@ class AssetsController extends BaseController {
           const username = ctx.state.user.username;
 
           if (nftCollection.issuedByTeam) {
-            if (owneredByTeam && owner !== nftCollection.issuer) {
+            if (ownedByTeam && owner !== nftCollection.issuer) {
               throw new BadRequestError(`Can't create nft item metadata draft by other team for team nft collection`);
             }
             const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
@@ -713,7 +713,7 @@ class AssetsController extends BaseController {
               throw new ForbiddenError(`"${username}" is not permitted to create nft item metadata draft`);
             }
           } else {
-            if (owneredByTeam) {
+            if (ownedByTeam) {
               throw new BadRequestError(`Can't create nft item metadata draft by team for user nft collection`);
             }
             if (nftCollection.issuer !== owner || owner !== username) {
@@ -761,7 +761,7 @@ class AssetsController extends BaseController {
 
           const username = ctx.state.user.username;
 
-          if (draft.owneredByTeam) {
+          if (draft.ownedByTeam) {
             const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
             if (!isAuthorized) {
               throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
