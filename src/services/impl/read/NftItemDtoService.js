@@ -39,7 +39,7 @@ class NftItemDtoService extends BaseService {
         _id: nftItemMetadata._id,
         nftItemId: nftItemMetadata._id.nftItemId,
         owner: chainNftItem.account,
-        owneredByTeam: nftItemMetadata.owneredByTeam,
+        ownedByTeam: nftItemMetadata.ownedByTeam,
         nftCollectionId: chainNftItem.nftCollectionId,
         metadata: {
           _id: nftItemMetadata._id,

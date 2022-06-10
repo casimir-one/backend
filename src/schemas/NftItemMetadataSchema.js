@@ -16,7 +16,7 @@ const NftItemMetadataSchema = new Schema({
   "portalId": { type: String, required: true },
   "nftCollectionId": { type: String, required: true },
   "owner": { type: String, required: true },
-  "owneredByTeam": { type: Boolean, default: false },
+  "ownedByTeam": { type: Boolean, default: false },
   "folder": { type: String, required: true },
   "title": { type: String, required: true },
   "hash": { type: String, index: true },
