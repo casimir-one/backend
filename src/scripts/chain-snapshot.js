@@ -30,28 +30,6 @@ const ChainService = require('@deip/chain-service').ChainService;
 
 
 const blackListUsers = ['regacc', 'simonarataj'];
-const newDomains = [
-  {
-    "name": "Information Technology",
-    "_id": "fd60bc92d9255aa27f356c3381ad84c6f29220a8",
-    "parentId": ""
-  },
-  {
-    "name": "Finance",
-    "_id": "bd2f73aa965f1b49da800656cd37abfade9898db",
-    "parentId": ""
-  },
-  {
-    "name": "Music Industry",
-    "_id": "073ac406ef75dc83d577add7e87488ff40b45848",
-    "parentId": ""
-  },
-  {
-    "name": "Microscopy",
-    "_id": "a34214092025a3ca79097a7c13dd8011d74e7336",
-    "parentId": ""
-  }
-];
 
 
 const networkAccessAttr = {
@@ -122,11 +100,7 @@ const run = async ({
     return acc;
   }, {});
 
-  const chainProjectContentsReviewsByProject = await Promise.all(chainProjects.map(r => chainRpc.getReviewsByProjectAsync(r._id)));
-  const chainProjectContentsReviews = [].concat.apply([], chainProjectContentsReviewsByProject);
-
   const chainFungibleTokens = await chainRpc.getFungibleTokenListAsync();
-  const chainDomains = await chainRpc.lookupDomainsAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainProposalsStates = await chainRpc.lookupProposalsStatesAsync(0, CHAIN_CONSTANTS.API_BULK_FETCH_LIMIT);
   const chainAssetsBallances = await Promise.all(chainFungibleTokens.map(chainAsset => chainRpc.getFungibleTokenBalancesBySymbolAsync(chainAsset.symbol)));
 
@@ -140,14 +114,6 @@ const run = async ({
       "recovery_account": a.recovery_account,
       "public_key": key
     }
-  });
-
-  const snapshotDomains = [...chainDomains, ...newDomains].filter(d => !genesisJSON.domains.some(domain => domain._id == d._id)).map((domain) => {
-    return {
-      "name": domain.name,
-      "_id": domain._id,
-      "parentId": domain.parentId
-    };
   });
 
   const snapshotAssets = chainFungibleTokens.filter(a => a.string_symbol != 'DEIP' && a.string_symbol != 'TESTS' && !genesisJSON.assets.some(asset => asset.symbol == a.string_symbol)).map((asset) => {
@@ -197,19 +163,7 @@ const run = async ({
       "description": r.description,
       "is_finished": r.is_finished,
       "is_private": r.is_private,
-      "members": r.members.filter(member => !blackListUsers.some(name => name == member)),
-      "domains": r.domains.map(d => {
-        if (r._id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
-          return "fd60bc92d9255aa27f356c3381ad84c6f29220a8";
-        }
-        if (r._id == "c1525afb6f39d76a094d8875c043cf6b00e4fb7d") {
-          return "bd2f73aa965f1b49da800656cd37abfade9898db";
-        }
-        if (r._id == "f22f619c1911c38a89c01df97fe2bf881b8edab3") {
-          return "073ac406ef75dc83d577add7e87488ff40b45848";
-        }
-        return d._id;
-      })
+      "members": r.members.filter(member => !blackListUsers.some(name => name == member))
     }
   });
 
@@ -223,17 +177,6 @@ const run = async ({
       "type": PROJECT_CONTENT_TYPES[rc.content_type.toUpperCase()],
       "authors": rc.authors.filter(author => !blackListUsers.some(name => name == author)),
       "references": rc.references
-    }
-  });
-
-  const snapshotProjectContentReviews = chainProjectContentsReviews.filter(r => !blackListUsers.some(name => name == r.author) && !genesisJSON.projectContentsReviews.some(review => review._id == r._id)).map(review => {
-    return {
-      "_id": review._id,
-      "projectContentId": review.projectContentId,
-      "content": review.content,
-      "author": review.author,
-      "domains": review.domains.map(d => d._id),
-      "scores": review.scores
     }
   });
 
@@ -272,13 +215,11 @@ const run = async ({
 
   genesisJSON.initSupply = initSupply;
   genesisJSON.accounts.push(...snapshotUsers);
-  genesisJSON.domains.push(...snapshotDomains);
   genesisJSON.assets.push(...snapshotAssets);
   genesisJSON.accountBalances.push(...snapshotAccountBallances);
   genesisJSON.teams.push(...snapshotTeams);
   genesisJSON.projects.push(...snapshotProjects);
   genesisJSON.projectContents.push(...snapshotProjectContents);
-  genesisJSON.projectContentsReviews.push(...snapshotProjectContentReviews);
   genesisJSON.proposals.push(...snapshotProposals);
 
 
@@ -314,36 +255,14 @@ const run = async ({
         }
         return { ...doc, portalId: PORTAL, portalIdsScope: [PORTAL] }
       }
-      else if (collectionName == 'user-notifications') {
-        if (blackListUsers.some(name => doc.username == name)) {
-          return null;
-        }
-        return { ...doc, portalId: PORTAL, portalIdsScope: [PORTAL] }
-      }
       else if (collectionName == 'projects') {
         const attributes = doc.attributes;
-        const domainsAttrId = "5f62d4fa98f46d2938dde1eb";
 
         if (!attributes.some(attr => attr.attributeId == privateAttr._id)) {
           attributes.push({
             attributeId: privateAttr._id,
             value: false
           });
-        }
-        
-        if (doc._id == "51e9dbd5851124cdc853f163a67aeb61ee775967") {
-          const domainsAttr = attributes.find(attr => attr.attributeId == domainsAttrId);
-          domainsAttr.value = ["fd60bc92d9255aa27f356c3381ad84c6f29220a8"]; 
-        }
-
-        if (doc._id == "c1525afb6f39d76a094d8875c043cf6b00e4fb7d") {
-          const domainsAttr = attributes.find(attr => attr.attributeId == domainsAttrId);
-          domainsAttr.value = ["bd2f73aa965f1b49da800656cd37abfade9898db"];
-        }
-
-        if (doc._id == "f22f619c1911c38a89c01df97fe2bf881b8edab3") {
-          const domainsAttr = attributes.find(attr => attr.attributeId == domainsAttrId);
-          domainsAttr.value = ["073ac406ef75dc83d577add7e87488ff40b45848"];
         }
 
         return { ...doc, attributes: attributes, portalId: PORTAL, status: oldSettings.projectBlacklist.some(id => id == doc._id) ? PROJECT_STATUS.DELETED : doc.status, portalCriterias: undefined, milestones: undefined, partners: undefined }
@@ -364,18 +283,6 @@ const run = async ({
           return { ...doc, name: "Ariel Scientific Innovations Ltd", portalId: PORTAL };
         }
       }
-      else if (collectionName == 'reviews') {
-        if (blackListUsers.some(name => doc.author == name)) {
-          return null;
-        }
-        const projectContent = snapshotProjectContents.find(projectContent => projectContent._id == doc.projectContentId)
-        return { ...doc, portalId: PORTAL, projectId: projectContent.projectId };
-      }
-      else if (collectionName == 'review-requests') {
-        if (blackListUsers.some(name => doc.expert == name || doc.requestor == name)) {
-          return null;
-        }
-      }
       else if (collectionName == 'user-invites') {
         if (blackListUsers.some(name => doc.invitee == name || doc.creator == name)) {
           return null;
@@ -384,11 +291,6 @@ const run = async ({
           return null;
         }
         return { ...doc, portalId: PORTAL, expiration: new Date().getTime() + 86400000 * 365 * 3 }
-      }
-      else if (collectionName == 'user-bookmarks') {
-        if (blackListUsers.some(name => doc.username == name)) {
-          return null;
-        }
       }
       
       return { ...doc, portalId: PORTAL };

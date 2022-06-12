@@ -2,12 +2,7 @@ import { DOMAIN_EVENT } from '@deip/constants';
 import {
   fungibleTokenEventHandler,
   blockEventHandler,
-  contractAgreementEventHandler,
   daoEventHandler,
-  projectDomainEventHandler,
-  projectInvestmentOpportunityEventHandler,
-  projectNdaEventHandler,
-  projectReviewEventHandler,
   proposalEventHandler,
   nativeFungibleTokenEventHandler,
   nonFungibleTokenEventHandler,
@@ -47,62 +42,6 @@ module.exports = {
   ],
   [DOMAIN_EVENT.PROPOSAL_EXPIRED]: [
     { h: proposalEventHandler, await: false }
-  ],
-
-  // ## PROJECT-NDA
-  [DOMAIN_EVENT.PROJECT_NDA_CREATED]: [
-    { h: projectNdaEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_CREATED]: [
-    { h: projectNdaEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_FULFILLED]: [
-    { h: projectNdaEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_REJECTED]: [
-    { h: projectNdaEventHandler, await: false }
-  ],
-  // ## PROJECT-DOMAIN
-  [DOMAIN_EVENT.PROJECT_DOMAIN_ADDED]: [
-    { h: projectDomainEventHandler, await: false }
-  ],
-  // ## PROJECT-REVIEW
-  [DOMAIN_EVENT.PROJECT_REVIEW_CREATED]: [
-    { h: projectReviewEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_REVIEW_UPVOTED]: [
-    { h: projectReviewEventHandler, await: false }
-  ],
-
-  // ## PROJECT-INVESTMENT-OPPOTUNITY
-  [DOMAIN_EVENT.PROJECT_TOKEN_SALE_CREATED]: [
-    { h: projectInvestmentOpportunityEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_TOKEN_SALE_ACTIVATED]: [
-    { h: projectInvestmentOpportunityEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_TOKEN_SALE_FINISHED]: [
-    { h: projectInvestmentOpportunityEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_TOKEN_SALE_EXPIRED]: [
-    { h: projectInvestmentOpportunityEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED]: [
-    { h: projectInvestmentOpportunityEventHandler, await: false }
-  ],
-
-  // ## DEIP-CONTRACT-AGREEMENT
-  [DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_CREATED]: [
-    { h: contractAgreementEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_ACCEPTED]: [
-    { h: contractAgreementEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_FINALIZED]: [
-    { h: contractAgreementEventHandler, await: false }
-  ],
-  [DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_REJECTED]: [
-    { h: contractAgreementEventHandler, await: false }
   ],
 
   // ## DAO

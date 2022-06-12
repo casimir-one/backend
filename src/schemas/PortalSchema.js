@@ -25,7 +25,6 @@ const AppModuleMap = new Schema({
   "_id": false,
   "app-eci": { type: Boolean, default: false },
   "app-crowdfunding": { type: Boolean, default: false },
-  "app-expert-review": { type: Boolean, default: false },
   "app-assets-management": { type: Boolean, default: false },
   "app-assets-withdrawal": { type: Boolean, default: false },
   "app-assets-deposit": { type: Boolean, default: false },
@@ -46,7 +45,6 @@ const AppModuleMap = new Schema({
   "admin-panel-attributes-management": { type: Boolean, default: false },
   "admin-panel-attributes-registration": { type: Boolean, default: false },
   "admin-panel-faq-setup": { type: Boolean, default: false },
-  "admin-panel-review-setup": { type: Boolean, default: false },
   "admin-panel-layouts-setup": { type: Boolean, default: false },
   "admin-panel-network-setup": { type: Boolean, default: false }
 });
@@ -62,11 +60,6 @@ const UserRoleModuleMap = new Schema({
 const GlobalNetworkSettings = new Schema({
   "visiblePortalIds": { type: [String], default: [] },
   "isGlobalScopeVisible": { type: Boolean, default: false }
-});
-
-const ReviewQuestion = new Schema({
-  "question": { type: String, required: true },
-  "contentTypes": [Number]
 });
 
 const ProjectContentAssessmentCriteria = new Schema({
@@ -103,14 +96,6 @@ const PortalSchema = new Schema({
       type: Number,
       enum: [...Object.values(SIGN_UP_POLICY)],
       required: true
-    },
-    "reviewQuestions": {
-      type: [ReviewQuestion],
-      default: [
-        { "question": "Do you recommend the submission for funding?", "contentTypes": [] },
-        { "question": "Describe the strength or weaknesses of the submissions", "contentTypes": [] },
-        { "question": "How well does the submission align with the mission?", "contentTypes": [] }
-      ]
     },
     "assesmentCriterias": {
       type: [ProjectContentAssessmentCriterias],

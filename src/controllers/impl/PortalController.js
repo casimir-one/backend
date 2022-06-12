@@ -1,6 +1,6 @@
 import BaseController from '../base/BaseController';
 import { PortalService, PortalDtoService, UserDtoService } from '../../services';
-import { APP_CMD, CONTRACT_AGREEMENT_TYPE, USER_PROFILE_STATUS } from '@deip/constants';
+import { APP_CMD, USER_PROFILE_STATUS } from '@deip/constants';
 import { BadRequestError, NotFoundError } from '../../errors';
 import { portalCmdHandler } from '../../command-handlers';
 import sharp from 'sharp';
@@ -149,17 +149,6 @@ class PortalController extends BaseController {
     }
   });
 
-  getSignUpRequests = this.query({
-    h: async (ctx) => {
-      try {
-        const pendingUsersProfiles = await userDtoService.findUserProfilesByStatus(USER_PROFILE_STATUS.PENDING);
-        ctx.successRes(pendingUsersProfiles);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
 
   getPortalAttributeSettings = this.query({
     h: async (ctx) => {
@@ -271,36 +260,6 @@ class PortalController extends BaseController {
           const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ATTRIBUTE_SETTINGS);
           if (!appCmd) {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-        };
-        
-        const msg = ctx.state.msg;
-        await portalCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  rejectSignUpRequest = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.DELETE_USER_PROFILE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { username } = appCmd.getCmdPayload();
-          const userProfile = await userDtoService.findUserProfileByOwner(username);
-          if (!userProfile) {
-            throw new NotFoundError(`Sign up request for ${username} does not exist`);
-          }
-      
-          if (userProfile.status != USER_PROFILE_STATUS.PENDING) {
-            throw new BadRequestError(`Sign up request for ${username} was already approved and can not be rejected`);
           }
         };
         

@@ -32,10 +32,7 @@ const Schema = mongoose.Schema;
 // const ProjectContentSchema = require('../schemas/ProjectContentSchema');
 // const ProjectSchema = require('../schemas/ProjectSchema');
 // const UserInviteSchema = require('../schemas/UserInviteSchema');
-// const UserNotificationSchema = require('../schemas/UserNotificationSchema');
 // const UserSchema = require('../schemas/UserSchema');
-// const UserBookmarkSchema = require('../schemas/UserBookmarkSchema');
-// const ReviewRequestSchema = require('../schemas/ReviewRequestSchema');
 
 const DraftSchemaClass = new Schema({
   "portalId": { type: String, required: true },
@@ -122,25 +119,6 @@ const UserInviteSchemaClass = new Schema({
   "expiration": { type: Date, required: true, index: true },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } })
 
-const UserNotificationSchemaClass = new Schema({
-  "portalId": { type: String, required: true },
-  "username": { type: String, required: true, index: true },
-  "status": {
-    type: Schema.Types.Mixed,
-    required: true
-  },
-  "type": {
-    type: Schema.Types.Mixed,
-    required: true
-  },
-  "metadata": { _id: false, type: Object, default: {} },
-}, {
-  "timestamps": {
-    createdAt: 'created_at',
-    updatedAt: 'updated_at'
-  }
-});
-
 const UserRole = new Schema({
   "_id": false,
   "role": { type: String, required: true, trim: true },
@@ -156,27 +134,6 @@ const UserSchemaClass = new Schema({
   "teams": { type: [String], default: [] },
   "attributes": [AttributeValueSchema],
   "roles": [UserRole],
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
-
-const UserBookmarkSchemaClass = new Schema({
-  "portalId": { type: String, required: true },
-  "username": { type: String, required: true },
-  "type": {
-    type: Schema.Types.Mixed,
-    required: true
-  },
-  "ref": { type: String, required: true }
-}, { timestamps: { createdAt: 'created_at', updatedAt: 'updated_at' } });
-
-const ReviewRequestSchemaClass = new Schema({
-  "portalId": { type: String, required: true },
-  "expert": { type: String, required: true, index: true },
-  "requestor": { type: String, required: true },
-  "projectContentId": { type: String, required: true },
-  "status": {
-    type: Schema.Types.Mixed,
-    required: true
-  },
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
 
 const FAQ = new Schema({
@@ -200,7 +157,6 @@ const AppModuleMap = new Schema({
   "_id": false,
   "app-eci": { type: Boolean, default: false },
   "app-crowdfunding": { type: Boolean, default: false },
-  "app-expert-review": { type: Boolean, default: false },
   "app-assets-management": { type: Boolean, default: false },
   "app-assets-withdrawal": { type: Boolean, default: false },
   "app-assets-deposit": { type: Boolean, default: false },
@@ -221,7 +177,6 @@ const AppModuleMap = new Schema({
   "admin-panel-attributes-management": { type: Boolean, default: false },
   "admin-panel-attributes-registration": { type: Boolean, default: false },
   "admin-panel-faq-setup": { type: Boolean, default: false },
-  "admin-panel-review-setup": { type: Boolean, default: false },
   "admin-panel-layouts-setup": { type: Boolean, default: false },
   "admin-panel-network-setup": { type: Boolean, default: false }
 });
@@ -237,11 +192,6 @@ const UserRoleModuleMap = new Schema({
 const GlobalNetworkSettings = new Schema({
   "visiblePortalIds": { type: [String], default: [] } ,
   "isGlobalScopeVisible": { type: Boolean, default: false }
-});
-
-const ReviewQuestion = new Schema({
-  "question": { type: String, required: true },
-  "contentTypes": [Number]
 });
 
 const ProjectContentAssessmentCriteria = new Schema({
@@ -275,14 +225,6 @@ const PortalSchemaClass = new Schema({
     "newProjectPolicy": {
       type: Schema.Types.Mixed
     },
-    "reviewQuestions": {
-      type: [ReviewQuestion],
-      default: [
-        { "question": "Do you recommend the submission for funding?", "contentTypes": [] },
-        { "question": "Describe the strength or weaknesses of the submissions", "contentTypes": [] },
-        { "question": "How well does the submission align with the mission?", "contentTypes": [] }
-      ]
-    },
     "assesmentCriterias": {
       type: [ProjectContentAssessmentCriterias],
       default: [{
@@ -309,10 +251,7 @@ const DraftSchema = mongoose.model('draft', DraftSchemaClass);
 const ProjectContentSchema = mongoose.model('project-content', ProjectContentSchemaClass);
 const ProjectSchema = mongoose.model('project', ProjectSchemaClass);
 const UserInviteSchema = mongoose.model('user-invites', UserInviteSchemaClass);
-const UserNotificationSchema = mongoose.model('user-notifications', UserNotificationSchemaClass);
 const UserSchema = mongoose.model('user-profile', UserSchemaClass);
-const UserBookmarkSchema = mongoose.model('user-bookmark', UserBookmarkSchemaClass);
-const ReviewRequestSchema = mongoose.model('review-requests', ReviewRequestSchemaClass);
 const PortalSchema = mongoose.model('portal', PortalSchemaClass);
 
 const PROJECT_CONTENT_DRAFT_STATUS = {
@@ -346,51 +285,11 @@ const USER_INVITE_STATUS = {
   "proposed": 5,
 }
 
-const USER_NOTIFICATION_STATUS = {
-  "unread": 1,
-  "read": 2
-}
-
-const USER_NOTIFICATION_TYPE = {
-  PROPOSAL: "proposal",
-  PROPOSAL_ACCEPTED: "proposal-accepted",
-  INVITATION: "invitation",
-  INVITATION_APPROVED: "invitation-approved",
-  INVITATION_REJECTED: "invitation-rejected",
-  EXCLUSION_APPROVED: "exclusion-approved",
-  PROJECT_CONTENT_EXPERT_REVIEW: "project-content-expert-review",
-  PROJECT_CONTENT_EXPERT_REVIEW_REQUEST: "project-content-expert-review-request",
-  PROJECT_NDA_PROPOSED: "project-nda-request",
-  PROJECT_NDA_SIGNED: "project-nda-signed",
-  PROJECT_NDA_REJECTED: "project-nda-rejected",
-  "proposal": 1,
-  "proposal-accepted": 2,
-  "invitation": 3,
-  "invitation-approved": 4,
-  "invitation-rejected": 5,
-  "exclusion-approved": 6,
-  "research-content-expert-review": 7,
-  "research-content-expert-review-request": 8,
-  "research-nda-request": 9,
-  "research-nda-signed": 10,
-  "research-nda-rejected": 11,
-}
-
 const USER_PROFILE_STATUS = {
   PENDING: "pending",
   APPROVED: "approved",
   "pending": 1,
   "approved": 2,
-}
-
-const USER_BOOKMARK_TYPE = {
-  "research": 1
-};
-
-const REVIEW_REQUEST_STATUS = {
-  "pending": 1,
-  "approved": 2,
-  "denied": 3
 }
 
 const PROJECT_CONTENT_FORMAT = {
@@ -411,20 +310,14 @@ const run = async () => {
   const projectContentsPromises = [];
   const projectsPromises = [];
   const userInvitesPromises = [];
-  const userNotificationsPromises = [];
   const usersPromises = [];
-  const userBookmarksPromises = [];
-  const reviewRequestsPromises = [];
   const portalsPromises = [];
 
   const drafts = await DraftSchema.find({});
   const projectContents = await ProjectContentSchema.find({});
   const projects = await ProjectSchema.find({});
   const userInvites = await UserInviteSchema.find({});
-  const userNotifications = await UserNotificationSchema.find({});
   const users = await UserSchema.find({});
-  const userBookmarks = await UserBookmarkSchema.find({});
-  const reviewRequests = await ReviewRequestSchema.find({});
   const portals = await PortalSchema.find({});
 
   for (let i = 0; i < drafts.length; i++) {
@@ -465,38 +358,11 @@ const run = async () => {
     }
   }
 
-  for (let i = 0; i < userNotifications.length; i++) {
-    const userNotification = userNotifications[i];
-    if (USER_NOTIFICATION_STATUS[userNotification.status]) {
-      userNotification.status = USER_NOTIFICATION_STATUS[userNotification.status];
-    }
-    if (USER_NOTIFICATION_TYPE[userNotification.type]) {
-      userNotification.type = USER_NOTIFICATION_TYPE[userNotification.type];
-    }
-    userNotificationsPromises.push(userNotification.save());
-  }
-
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
     if (USER_PROFILE_STATUS[user.status]) {
       user.status = USER_PROFILE_STATUS[user.status];
       usersPromises.push(user.save());
-    }
-  }
-
-  for (let i = 0; i < userBookmarks.length; i++) {
-    const userBookmark = userBookmarks[i];
-    if (USER_BOOKMARK_TYPE[userBookmark.type]) {
-      userBookmark.type = USER_BOOKMARK_TYPE[userBookmark.type];
-      userBookmarksPromises.push(userBookmark.save());
-    }
-  }
-
-  for (let i = 0; i < reviewRequests.length; i++) {
-    const reviewRequest = reviewRequests[i];
-    if (REVIEW_REQUEST_STATUS[reviewRequest.status]) {
-      reviewRequest.status = REVIEW_REQUEST_STATUS[reviewRequest.status];
-      reviewRequestsPromises.push(reviewRequest.save());
     }
   }
 
@@ -515,10 +381,7 @@ const run = async () => {
   await Promise.all(projectContentsPromises);
   await Promise.all(projectsPromises);
   await Promise.all(userInvitesPromises);
-  await Promise.all(userNotificationsPromises);
   await Promise.all(usersPromises);
-  await Promise.all(userBookmarksPromises);
-  await Promise.all(reviewRequestsPromises);
   await Promise.all(portalsPromises);
 };
 

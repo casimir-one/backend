@@ -59,7 +59,7 @@ const config = {
   PROCESS_MANAGER_WAITING_FOR_MILLIS: process.env.PROCESS_MANAGER_WAITING_FOR_MILLIS ? parseInt(process.env.PROCESS_MANAGER_WAITING_FOR_MILLIS) : 24000, // 8 block time
 
   NEED_CONFIRM_REGISTRATION: process.env.NEED_CONFIRM_REGISTRATION === 'true' ? true : false,
-  EMAIL_CONECTION: parseJsonEnvVar('EMAIL_CONECTION')
+  EMAIL_CONECTION: parseJsonEnvVar('EMAIL_CONECTION', {})
 };
 
 

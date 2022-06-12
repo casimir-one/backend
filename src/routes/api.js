@@ -1,24 +1,15 @@
 import koa_router from 'koa-router'
 import compose from 'koa-compose';
-import expertise from '../controllers/legacy/expertise'
-import grants from '../controllers/legacy/grants'
 
 import {
   proposalsCtrl,
   teamsCtrl,
   attributesCtrl,
   assetsCtrl,
-  domainsCtrl,
   usersCtrl,
-  invstOppCtrl,
   documentTemplatesCtrl,
-  reviewsCtrl,
-  projectNdaCtrl,
-  contractAgreementCtrl,
   revenuesCtrl,
   portalCtrl,
-  userSettingsCtrl,
-  notificationsCtrl,
   invitesCtrl,
   layoutsCtrl
 } from '../controllers';
@@ -31,7 +22,6 @@ import teamCmdProxy from './../middlewares/proxy/team/teamCmdProxy';
 import teamLogoProxy from './../middlewares/proxy/team/teamLogoProxy';
 import userCmdProxy from './../middlewares/proxy/user/userCmdProxy';
 
-import readGrantAwardWithdrawalRequestAuth from './../middlewares/auth/grantAwardWithdrawalRequest/readGrantAwardWithdrawalRequestAuth';
 import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
 
 const protected_route = koa_router()
@@ -47,30 +37,6 @@ async function portalAdminGuard(ctx, next) {
   await next();
 }
 
-public_route.get('/expertise/user/:username/tokens', expertise.getAccountExpertiseTokens)
-public_route.get('/expertise/domain/:domainId/tokens', expertise.getDomainExpertiseTokens)
-
-public_route.get('/expertise/user/:username/history', expertise.getAccountEciHistory)
-public_route.get('/expertise/user/:username/stats', expertise.getAccountEciStats)
-public_route.get('/expertise/users/stats', expertise.getAccountsEciStats)
-public_route.get('/expertise/project/:project/history', expertise.getProjectEciHistory)
-public_route.get('/expertise/project/:project/stats', expertise.getProjectEciStats)
-public_route.get('/expertise/project/stats', expertise.getProjectesEciStats)
-public_route.get('/expertise/project-content/:projectContent/history', expertise.getProjectContentEciHistory)
-public_route.get('/expertise/project-content/:projectContent/stats', expertise.getProjectContentEciStats)
-public_route.get('/expertise/project-content/stats', expertise.getProjectContentsEciStats)
-public_route.get('/expertise/domains/history', expertise.getDomainEciHistory)
-public_route.get('/expertise/domains/stats-history', expertise.getDomainsEciStatsHistory)
-public_route.get('/expertise/domains/stats', expertise.getDomainsEciLastStats)
-public_route.get('/expertise/content/:contentId/domain/:domainId/history', expertise.getEciHistoryByProjectContentAndDomain)
-public_route.get('/expertise/project/:projectId', expertise.getExpertiseContributionsByProject)
-public_route.get('/expertise/project/:projectId/domain/:domainId', expertise.getExpertiseContributionsByProjectAndDomain)
-public_route.get('/expertise/content/:contentId/domain/:domainId', expertise.getExpertiseContributionByProjectContentAndDomain)
-public_route.get('/expertise/content/:contentId', expertise.getExpertiseContributionsByProjectContent)
-
-protected_route.get('/v2/notifications/user/:username', notificationsCtrl.getNotificationsByUser)
-protected_route.put('/v2/notifications/mark-read', notificationsCtrl.markUserNotificationsAsRead)
-
 protected_route.put('/v2/proposals/update', proposalsCtrl.acceptProposal)
 protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
@@ -78,10 +44,6 @@ protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountP
 
 protected_route.get('/v2/invites/:username', invitesCtrl.getUserInvites)
 protected_route.get('/v2/invites/team/:teamId', invitesCtrl.getTeamPendingInvites)
-
-protected_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber', grants.getAwardWithdrawalRequestRefByHash)
-public_route.get('/award-withdrawal-requests/:awardNumber/:paymentNumber/:fileHash', compose([readGrantAwardWithdrawalRequestAuth()]), grants.getAwardWithdrawalRequestAttachmentFile)
-protected_route.post('/award-withdrawal-requests/upload-attachments', grants.createAwardWithdrawalRequest)
 
 public_route.get('/network/portals/listing', portalCtrl.getNetworkPortals)
 public_route.get('/network/portals/:portal', portalCtrl.getNetworkPortal)
@@ -155,9 +117,6 @@ protected_route.put('/v2/tokens/nft/item/metadata/draft/update', compose([nftIte
 protected_route.put('/v2/tokens/nft/item/metadata/draft/delete', compose([nftItemMetadataDraftCmdProxy()]), assetsCtrl.deleteNftItemMetadataDraft)
 protected_route.put('/v2/tokens/nft/item/metadata/draft/moderate', assetsCtrl.moderateNftItemMetadataDraft)
 
-public_route.get('/v2/domains', domainsCtrl.getDomains)
-public_route.get('/v2/domains/project/:projectId', domainsCtrl.getDomainsByProject)
-
 public_route.get('/v2/user/profile/:username', usersCtrl.getUserProfile)
 public_route.get('/v2/users/profile', usersCtrl.getUsersProfiles)
 public_route.get('/v2/users/active', usersCtrl.getActiveUsersProfiles)
@@ -174,51 +133,11 @@ protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.upda
 protected_route.put('/v2/user/update/password', compose([userCmdProxy()]), usersCtrl.updateUserPassword)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
 
-protected_route.post('/v2/bookmarks', userSettingsCtrl.createUserBookmark)
-protected_route.post('/v2/bookmarks/delete', userSettingsCtrl.deleteUserBookmark)
-protected_route.get('/v2/bookmarks/user/:username', userSettingsCtrl.getUserBookmarks)
-
-public_route.get('/v2/investments/project/:projectId', invstOppCtrl.getInvstOppByProject)
-protected_route.post('/v2/investments', invstOppCtrl.createInvstOpp)
-protected_route.post('/v2/investments/contributions', invstOppCtrl.participateInvstOpp)
-protected_route.get('/v2/investments/project/:projectId/contributions', invstOppCtrl.getInvstOppParticipationsByProject)
-protected_route.get('/v2/investments/investment-opportunity/:investmentOpportunityId', invstOppCtrl.getInvstOpp)
-protected_route.get('/v2/investments/history/account/:account/:symbol/:step/:cursor/asset/:targetAsset', revenuesCtrl.getAccountRevenueHistoryByAsset)
-protected_route.get('/v2/investments/history/account/:account/:cursor', revenuesCtrl.getAccountRevenueHistory)
-protected_route.get('/v2/investments/history/contributions/account/:account', invstOppCtrl.getInvstOppParticipationsHistoryByAccount)
-protected_route.get('/v2/investments/history/contributions/investment-opportunity/:investmentOpportunityId', invstOppCtrl.getInvstOppParticipations)
-protected_route.get('/v2/investments/history/symbol/:symbol/:cursor', revenuesCtrl.getAssetRevenueHistory)
-
 public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)
 public_route.get('/v2/document-templates/account/:account', documentTemplatesCtrl.getDocumentTemplatesByAccount)
 protected_route.post('/v2/document-template', documentTemplatesCtrl.createDocumentTemplate)
 protected_route.put('/v2/document-template', documentTemplatesCtrl.updateDocumentTemplate)
 protected_route.put('/v2/document-template/delete', documentTemplatesCtrl.deleteDocumentTemplate)
-
-public_route.get('/v2/review/:reviewId', reviewsCtrl.getReview)
-public_route.get('/v2/review/votes/:reviewId', reviewsCtrl.getReviewUpvotes)
-public_route.get('/v2/reviews/project/:projectId', reviewsCtrl.getReviewsByProject)
-public_route.get('/v2/reviews/project-content/:projectContentId', reviewsCtrl.getReviewsByProjectContent)
-public_route.get('/v2/reviews/author/:author', reviewsCtrl.getReviewsByAuthor)
-protected_route.post('/v2/review', reviewsCtrl.createReview)
-protected_route.post('/v2/review/upvote', reviewsCtrl.upvoteReview)
-
-protected_route.post('/v2/review-request', reviewsCtrl.createReviewRequest);
-protected_route.put('/v2/review-request/deny', reviewsCtrl.denyReviewRequest);
-protected_route.get('/v2/review-requests/expert/:username', reviewsCtrl.getReviewRequestsByExpert);
-protected_route.get('/v2/review-requests/requestor/:username', reviewsCtrl.getReviewRequestsByRequestor);
-
-protected_route.post('/v2/nda', projectNdaCtrl.createProjectNonDisclosureAgreement);
-public_route.get('/v2/nda/:ndaId', projectNdaCtrl.getProjectNonDisclosureAgreement);
-public_route.get('/v2/nda/creator/:username', projectNdaCtrl.getProjectNonDisclosureAgreementsByCreator);
-public_route.get('/v2/nda/project/:projectId', projectNdaCtrl.getProjectNonDisclosureAgreementsByProject);
-
-protected_route.post('/v2/contract-agreement', contractAgreementCtrl.proposeContractAgreement);
-protected_route.post('/v2/contract-agreement/accept', contractAgreementCtrl.acceptContractAgreement);
-protected_route.post('/v2/contract-agreement/reject', contractAgreementCtrl.rejectContractAgreement);
-protected_route.get('/v2/contract-agreement/:contractAgreementId', contractAgreementCtrl.getContractAgreement);
-protected_route.get('/v2/contract-agreements', contractAgreementCtrl.getContractAgreements);
-public_route.get('/contract-agreement/file/:filename', contractAgreementCtrl.getContractAgreementFile);
 
 public_route.get('/v2/layout/:layoutId', layoutsCtrl.getLayout);
 public_route.get('/v2/layouts', layoutsCtrl.getLayouts);

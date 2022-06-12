@@ -25,7 +25,6 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 const run = async () => {
 
   const TEAMS_LIST = "teams-list";
-  const DOMAINS_LIST = "domains-list";
   const USERS_LIST = "users-list";
   const MULTI_SELECT = "multi-select";
 
@@ -39,7 +38,6 @@ const run = async () => {
       let projectAttribute = portalProfile.settings.projectAttributes[j];
 
       if (projectAttribute.type == TEAMS_LIST ||
-        projectAttribute.type == DOMAINS_LIST ||
         projectAttribute.type == USERS_LIST ||
         projectAttribute.type == MULTI_SELECT ||
         projectAttribute.type == ATTR_TYPES.URL) {
@@ -48,8 +46,6 @@ const run = async () => {
 
         if (projectAttribute.type == TEAMS_LIST) {
           projectAttribute.type = ATTR_TYPES.TEAM;
-        } else if (projectAttribute.type == DOMAINS_LIST) {
-          projectAttribute.type = ATTR_TYPES.DOMAIN;
         } else if (projectAttribute.type == USERS_LIST) {
           projectAttribute.type = ATTR_TYPES.USER;
         } else if (projectAttribute.type == MULTI_SELECT) {

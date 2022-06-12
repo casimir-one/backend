@@ -29,25 +29,6 @@ const chainEventNameToDomainEventNum = createEnum({
   "proposal_resolved": DOMAIN_EVENT.PROPOSAL_RESOLVED,
   "proposal_expired": DOMAIN_EVENT.PROPOSAL_EXPIRED,
 
-  "project_ndaCreated": DOMAIN_EVENT.PROJECT_NDA_CREATED,
-  "project_ndaAccessRequestCreated": DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_CREATED,
-  "project_ndaAccessRequestFulfilled": DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_FULFILLED,
-  "project_ndaAccessRequestRejected": DOMAIN_EVENT.PROJECT_NDA_ACCESS_REQUEST_REJECTED,
-  "project_domainAdded": DOMAIN_EVENT.PROJECT_DOMAIN_ADDED,
-  "project_reviewCreated": DOMAIN_EVENT.PROJECT_REVIEW_CREATED,
-  "project_reviewUpvoted": DOMAIN_EVENT.PROJECT_REVIEW_UPVOTED,
-  "project_tokenSaleCreated": DOMAIN_EVENT.PROJECT_TOKEN_SALE_CREATED,
-  "project_tokenSaleActivated": DOMAIN_EVENT.PROJECT_TOKEN_SALE_ACTIVATED,
-  "project_tokenSaleFinished": DOMAIN_EVENT.PROJECT_TOKEN_SALE_FINISHED,
-  "project_tokenSaleExpired": DOMAIN_EVENT.PROJECT_TOKEN_SALE_EXPIRED,
-  "project_tokenSaleContributed": DOMAIN_EVENT.PROJECT_TOKEN_SALE_CONTRIBUTED,
-
-  // CONTRACT_AGREEMENT
-  "deip_contractAgreementCreated": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_CREATED,
-  "deip_contractAgreementAccepted": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_ACCEPTED,
-  "deip_contractAgreementFinalized": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_FINALIZED,
-  "deip_contractAgreementRejected": DOMAIN_EVENT.DEIP_CONTRACT_AGREEMENT_REJECTED,
-
   // DAO
   "dao_create": DOMAIN_EVENT.DAO_CREATE,
   "dao_alterAuthority": DOMAIN_EVENT.DAO_ALTER_AUTHORITY,

@@ -21,11 +21,6 @@ const projectDarArchiveFilePath = (baseDir, projectId, archiveName, filename) =>
 const projectContentPackageTempDirPath = (baseDir, projectId, sessionId) => `${projectDirPath(baseDir, projectId)}/temp-${sessionId}`;
 const projectBlankDarArchiveDirPath = () => path.join(__dirname, `./../../default/dar-blank`);
 
-const projectAwardWithdrawalRequestsDirPath = (baseDir, projectId) => `${projectDirPath(baseDir, projectId)}`;
-const projectAwardWithdrawalRequestsTempDirPath = (baseDir, projectId, sessionId) => `${projectAwardWithdrawalRequestsDirPath(baseDir, projectId)}/temp-${sessionId}`;
-const projectAwardWithdrawalRequestsPackageDirPath = (baseDir, projectId, packageHash) => `${projectAwardWithdrawalRequestsDirPath(baseDir, projectId)}/award-withdrawal-${packageHash}`
-const projectAwardWithdrawalRequestsPackageFilePath = (baseDir, projectId, packageHash, fileHash) => `${projectAwardWithdrawalRequestsPackageDirPath(baseDir, projectId, packageHash)}/${fileHash}`
-
 const accountDir = 'accounts';
 const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
 const accountFilePath = (baseDir, username, filename) => `${accountDirPath(baseDir, username)}/${filename}`;
@@ -50,10 +45,6 @@ const portalBannerFilePath = (baseDir, portalId, filename) => `${portalDirPath(b
 const portalLogoFilePath = (baseDir, portalId, filename) => `${portalDirPath(baseDir, portalId)}/${filename}`;
 const portalDefaultBannerFilePath = () => path.join(__dirname, `./../../default/default-portal-banner.png`);
 const portalDefaultLogoFilePath = () => path.join(__dirname, `./../../default/default-portal-logo.png`);
-
-const contractAgreementDir = 'contracts';
-const contractAgreementDirPath = (baseDir) => `${baseDir}/${contractAgreementDir}`;
-const contractAgreementFilePath = (baseDir, filename) => `${contractAgreementDirPath(baseDir)}/${filename}`;
 
 
 class BaseFileStorage {
@@ -196,27 +187,6 @@ class BaseFileStorage {
   getPortalDefaultLogoFilePath() {
     return portalDefaultLogoFilePath();
   }
-
-  getProjectAwardWithdrawalRequestsPackageDirPath(projectId, packageHash) {
-    return projectAwardWithdrawalRequestsPackageDirPath(this._baseDirPath, projectId, packageHash);
-  }
-
-  getProjectAwardWithdrawalRequestsTempDirPath(projectId, sessionId) {
-    return projectAwardWithdrawalRequestsTempDirPath(this._baseDirPath, projectId, sessionId);
-  }
-
-  getProjectAwardWithdrawalRequestsPackageFilePath(projectId, packageHash, fileHash) {
-    return projectAwardWithdrawalRequestsPackageFilePath(this._baseDirPath, projectId, packageHash, fileHash);
-  }
-
-  getContractAgreementDirPath() {
-    return contractAgreementDirPath(this._baseDirPath);
-  }
-
-  getContractAgreementFilePath(filename) {
-    return contractAgreementFilePath(this._baseDirPath, filename);
-  }
-
 }
 
 

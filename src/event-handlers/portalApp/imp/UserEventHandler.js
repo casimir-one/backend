@@ -111,10 +111,4 @@ userEventHandler.register(APP_EVENT.DAO_MEMBER_REMOVED, async (event) => {
   });
 });
 
-userEventHandler.register(APP_EVENT.USER_PROFILE_DELETED, async (event) => {
-  const { username } = event.getEventPayload();
-
-  await userService.deleteUser(username);
-});
-
 module.exports = userEventHandler;
