@@ -17,9 +17,7 @@ const projectAttributeFilePath = (baseDir, projectId, attributeId, filename) => 
 const projectContentPackageDirPath = (baseDir, projectId, packageHash) => `${projectDirPath(baseDir, projectId)}/${packageHash}`;
 const projectContentPackageFilePath = (baseDir, projectId, packageHash, fileHash) => `${projectContentPackageDirPath(baseDir, projectId, packageHash)}/${fileHash}`;
 const projectDarArchiveDirPath = (baseDir, projectId, archiveName) => `${projectDirPath(baseDir, projectId)}/${archiveName}`;
-const projectDarArchiveFilePath = (baseDir, projectId, archiveName, filename) => `${projectDarArchiveDirPath(baseDir, projectId, archiveName)}/${filename}`;
 const projectContentPackageTempDirPath = (baseDir, projectId, sessionId) => `${projectDirPath(baseDir, projectId)}/temp-${sessionId}`;
-const projectBlankDarArchiveDirPath = () => path.join(__dirname, `./../../default/dar-blank`);
 
 const accountDir = 'accounts';
 const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
@@ -106,14 +104,6 @@ class BaseFileStorage {
 
   getProjectDarArchiveDirPath(projectId, archiveName) {
     return projectDarArchiveDirPath(this._baseDirPath, projectId, archiveName);
-  }
-
-  getProjectDarArchiveFilePath(projectId, archiveName, filename) {
-    return projectDarArchiveFilePath(this._baseDirPath, projectId, archiveName, filename);
-  }
-
-  getProjectBlankDarArchiveDirPath() {
-    return projectBlankDarArchiveDirPath();
   }
   
   getProjectContentPackageTempDirPath(projectId, sessionId) {

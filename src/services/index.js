@@ -15,7 +15,6 @@ import DocumentTemplateService from './impl/write/DocumentTemplateService';
 import NftItemDtoService from './impl/read/NftItemDtoService';
 import NftItemMetadataService from './impl/write/NftItemMetadataService';
 import NftItemMetadataDraftService from './impl/write/NftItemMetadataDraftService';
-import RevenueDtoService from './impl/read/RevenueDtoService';
 import PortalDtoService from './impl/read/PortalDtoService';
 import PortalService from './impl/write/PortalService';
 import LayoutDtoService from './impl/read/LayoutDtoService';
@@ -49,8 +48,6 @@ module.exports = {
   NftItemDtoService,
   NftItemMetadataService,
   NftItemMetadataDraftService,
-
-  RevenueDtoService,
 
   PortalDtoService,
   PortalService,

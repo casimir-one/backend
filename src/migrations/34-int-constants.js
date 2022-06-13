@@ -262,7 +262,6 @@ const USER_PROFILE_STATUS = {
 }
 
 const PROJECT_CONTENT_FORMAT = {
-  "dar": 1,
   "package": 2,
   "file": 3
 }

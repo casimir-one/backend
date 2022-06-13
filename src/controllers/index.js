@@ -4,7 +4,6 @@ import attributesCtrl from '../controllers/impl/AttributesController';
 import assetsCtrl from './impl/AssetsController';
 import usersCtrl from './impl/UsersController';
 import documentTemplatesCtrl from './impl/DocumentTemplatesController';
-import revenuesCtrl from './impl/RevenuesController';
 import portalCtrl from './impl/PortalController';
 import layoutsCtrl from './impl/LayoutsController';
 
@@ -15,7 +14,6 @@ module.exports = {
   assetsCtrl,
   usersCtrl,
   documentTemplatesCtrl,
-  revenuesCtrl,
   portalCtrl,
   layoutsCtrl
 }

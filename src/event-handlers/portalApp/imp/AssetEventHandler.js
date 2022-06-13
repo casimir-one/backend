@@ -51,15 +51,13 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
 
   const settings = {
     projectId: undefined,
-    licenseRevenueHoldersShare: undefined,
     maxSupply,
     minBallance
   };
 
   if (metadata) { // keep this until we have working F-NFT
-    const { projectId, licenseRevenue } = metadata;
+    const { projectId } = metadata;
     settings.projectId = projectId;
-    settings.licenseRevenueHoldersShare = licenseRevenue ? licenseRevenue.holdersShare : undefined;
   }
 
   await fungibleTokenService.createFungibleToken({
@@ -191,7 +189,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (eve
   let packageFiles = [];
   if (formatType === PROJECT_CONTENT_FORMAT.JSON) {
     packageHash = genSha256Hash(JSON.stringify(jsonData));
-  } else if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+  } else if (draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
     const projectContentPackageDirPath = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draftId);
     const hashObj = await FileStorage.calculateDirHash(projectContentPackageDirPath, options);
     const hashes = hashObj.children.map(f => f.hash);

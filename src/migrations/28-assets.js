@@ -58,8 +58,7 @@ const run = async () => {
       "settings": {
         "projectId": chainAsset.tokenized_research || null,
         "maxSupply": parseInt(chainAsset.max_supply),
-        "minBallance": 0,
-        "licenseRevenueHoldersShare": chainAsset.license_revenue_holders_share || undefined
+        "minBallance": 0
       },
       "isGlobalScope": !!!chainAsset.tokenized_research,
       "portalId": chainAsset.tokenized_research ? projects.find(p => p._id.toString() == chainAsset.tokenized_research).portalId : undefined,
