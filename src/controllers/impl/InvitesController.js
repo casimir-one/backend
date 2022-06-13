@@ -2,7 +2,7 @@ import BaseController from '../base/BaseController';
 import { UserInviteService } from '../../services';
 import { BadRequestError, ForbiddenError } from './../../errors';
 import { accountCmdHandler } from './../../command-handlers';
-import { APP_CMD, USER_NOTIFICATION_STATUS } from '@deip/constants';
+import { APP_CMD } from '@deip/constants';
 
 const userInviteService = new UserInviteService();
 

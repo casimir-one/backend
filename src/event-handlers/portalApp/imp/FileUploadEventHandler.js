@@ -1,37 +1,11 @@
 
-import { APP_EVENT, CONTRACT_AGREEMENT_STATUS, PROJECT_CONTENT_FORMAT } from '@deip/constants';
+import { APP_EVENT, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import mongoose from 'mongoose';
 import cloneArchive from '../../../dar/cloneArchive';
 import writeArchive from '../../../dar/writeArchive';
-import { ContractAgreementDtoService, NftItemMetadataDraftService, PortalService } from '../../../services';
+import { NftItemMetadataDraftService, PortalService } from '../../../services';
 import FileStorage from '../../../storage';
-import { generatePdf } from '../../../utils/pdf';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
-
-const getContractFilePath = async (filename) => {
-  const contractAgreementDir = FileStorage.getContractAgreementDirPath();
-  const isDirExists = await FileStorage.exists(contractAgreementDir);
-
-  if (isDirExists) {
-    const filePath = FileStorage.getContractAgreementFilePath(filename);
-    const fileExists = await FileStorage.exists(filePath);
-
-    if (fileExists) {
-      await FileStorage.delete(filePath);
-    }
-  } else {
-    await FileStorage.mkdir(contractAgreementDir);
-  }
-
-  return FileStorage.getContractAgreementFilePath(filename);
-};
-
-const saveContractPdf = async (content, filename) => {
-  const filePath = await getContractFilePath(filename);
-  const pdfBuffer = await generatePdf(content);
-
-  await FileStorage.put(filePath, pdfBuffer);
-};
 
 class FileUploadEventHandler extends PortalAppEventHandler {
   constructor() {
@@ -40,35 +14,8 @@ class FileUploadEventHandler extends PortalAppEventHandler {
 }
 
 const fileUploadEventHandler = new FileUploadEventHandler();
-const contractAgreementDtoService = new ContractAgreementDtoService();
 const portalService = new PortalService();
 const nftItemMetadataDraftService = new NftItemMetadataDraftService();
-
-fileUploadEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED, async (event) => {
-  const {
-    terms,
-    pdfContent
-  } = event.getEventPayload();
-
-  if (pdfContent && terms.filename) {
-    await saveContractPdf(pdfContent, terms.filename);
-  }
-});
-
-fileUploadEventHandler.register(APP_EVENT.CONTRACT_AGREEMENT_CREATED, async (event) => {
-  const {
-    entityId: contractAgreementId,
-    terms,
-    pdfContent
-  } = event.getEventPayload();
-
-  if (pdfContent && terms.filename) {
-    const contractAgreement = await contractAgreementDtoService.getContractAgreement(contractAgreementId);
-    if (!contractAgreement || contractAgreement.status !== CONTRACT_AGREEMENT_STATUS.PROPOSED) {
-      await saveContractPdf(pdfContent, terms.filename);
-    }
-  }
-});
 
 fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
   const { banner, logo, portalId } = event.getEventPayload();

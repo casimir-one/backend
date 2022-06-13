@@ -33,7 +33,6 @@ const VIDEO_URL = "video-url";
 const SWITCH = "switch";
 const CHECKBOX = "checkbox";
 const USER = "user";
-const DOMAIN = "domain";
 const TEAM = "team";
 
 const IMAGE = "image";
@@ -58,7 +57,6 @@ const LEGACY_ATTR_TYPES = {
   SWITCH,
   CHECKBOX,
   USER,
-  DOMAIN,
   TEAM,
   IMAGE,
   FILE,
@@ -170,10 +168,6 @@ const run = async () => {
       }
       case LEGACY_ATTR_TYPES.USER: {
         type = ATTR_TYPES.USER;
-        break;
-      }
-      case LEGACY_ATTR_TYPES.DOMAIN: {
-        type = ATTR_TYPES.DOMAIN;
         break;
       }
       case LEGACY_ATTR_TYPES.TEAM: {

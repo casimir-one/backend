@@ -24,7 +24,6 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 
 const run = async () => {
-  const DOMAINS_LIST = "domains-list";
   const USERS_LIST = "users-list";
 
   const chainService = await ChainService.getInstanceAsync(config);
@@ -34,24 +33,6 @@ const run = async () => {
 
   const portalPromises = [];
   const portals = await PortalProfile.find({});
-
-
-  const projectDomainsAttribute = {
-    _id: mongoose.Types.ObjectId("5f62d4fa98f46d2938dde1eb"),
-    type: DOMAINS_LIST,
-    isVisible: true,
-    isRequired: true,
-    isFilterable: true,
-    title: "Domains",
-    shortTitle: "Domains",
-    description: "",
-    valueOptions: [],
-    defaultValue: null,
-    blockchainFieldMeta: {
-      isPartial: false,
-      field: "domains"
-    }
-  };
 
   const projectGroupAttribute = {
     _id: mongoose.Types.ObjectId("5f690af5cdaaa53a27af4a30"),
@@ -126,7 +107,6 @@ const run = async () => {
   for (let i = 0; i < portals.length; i++) {
     let portalProfile = portals[i];
 
-    portalProfile.settings.projectAttributes.push(projectDomainsAttribute);
     portalProfile.settings.projectAttributes.push(projectGroupAttribute);
     portalProfile.settings.projectAttributes.push(projectVisibilityAttribute);
     portalProfile.settings.projectAttributes.push(projectInventorsAttribute);
@@ -142,11 +122,6 @@ const run = async () => {
   for (let i = 0; i < projects.length; i++) {
     let project = projects[i];
     let chainProject = chainProjects.find(r => r.projectId == project._id.toString());
-    
-    project.attributes.push({
-      value: chainProject.disciplines.map(d => d),
-      attributeId: projectDomainsAttribute._id
-    });
 
     project.attributes.push({
       value: chainProject.teamId,

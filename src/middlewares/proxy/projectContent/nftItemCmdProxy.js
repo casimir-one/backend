@@ -1,11 +1,8 @@
-import { NftCollectionMetadataService, NftItemMetadataService, ContractAgreementDtoService, PortalService } from '../../../services';
-import { getPortalAccessToken } from '../../../utils/network';
-import { CONTRACT_AGREEMENT_TYPE } from '@deip/constants';
+import { NftCollectionMetadataService, NftItemMetadataService, PortalService } from '../../../services';
 
 const portalService = new PortalService();
 const nftCollectionMetadataService = new NftCollectionMetadataService();
 const nftItemMetadataService = new NftItemMetadataService();
-const contractAgreementDtoService = new ContractAgreementDtoService();
 
 
 function nftItemCmdProxy(options = {}) {
@@ -28,25 +25,10 @@ function nftItemCmdProxy(options = {}) {
     if (ctx.req.method === "POST" || (ctx.req.method === "PUT" && projectContent.portalId == currentPortal.id)) {
       await next();
     } else {
-      const requestedPortal = await portalService.getPortal(projectContent.portalId);
-      const jwtUsername = ctx.state.user.username;
-      const projectLicenses = await contractAgreementDtoService.getContractAgreements({ parties: [jwtUsername], type: CONTRACT_AGREEMENT_TYPE.PROJECT_LICENSE });
-      const projectLicense = projectLicenses.find(p => p.terms.projectId === projectContent.projectId)
-      if (projectLicense) {
-        const accessToken = await getPortalAccessToken({
-          profile: {
-            ...requestedPortal,
-            id: requestedPortal._id
-          }
-        });
-        let url = `${requestedPortal.serverUrl}${ctx.request.originalUrl}`.replace(ctx.request.querystring, '');
-        url += `authorization=${accessToken}`;
-        for (const [key, value] of Object.entries(ctx.query)) {
-          if (key != 'authorization') {
-            url += `&${key}=${value}`
-          }
-        }
-        ctx.redirect(url);
+      const requestedPortal = await portalService.getPortal(project.portalId);
+      if (true) { /* TODO: check access for the requested source and chunk an access token to request the different portal's server */
+        ctx.status = 307;
+        ctx.redirect(`${requestedPortal.serverUrl}${ctx.request.originalUrl}`);
         return;
       } else {
         ctx.assert(false, 403);

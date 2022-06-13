@@ -23,7 +23,6 @@ mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
 
 const run = async () => {
   const TEAMS_LIST = "teams-list";
-  const DOMAINS_LIST = "domains-list";
 
   const portalPromises = [];
   const portals = await PortalProfile.find({});
@@ -47,12 +46,6 @@ const run = async () => {
         projectAttribute.isHidden = true;
       } else {
         projectAttribute.isHidden = false;
-      }
-
-      if (projectAttribute.type == DOMAINS_LIST || projectAttribute.type == ATTR_TYPES.DOMAIN || projectAttribute.type == TEAMS_LIST || projectAttribute.type == ATTR_TYPES.TEAM) {
-        projectAttribute.isEditable = false;
-      } else {
-        projectAttribute.isEditable = true;
       }
     }
 

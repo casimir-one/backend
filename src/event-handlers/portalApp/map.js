@@ -2,19 +2,14 @@ import { APP_EVENT } from '@deip/constants';
 import {
   assetEventHandler,
   attributeEventHandler,
-  contractAgreementEventHandler,
   documentTemplateEventHandler,
   fileUploadEventHandler,
-  investmentOpportunityEventHandler,
   layoutEventHandler,
   portalEventHandler,
   proposalEventHandler,
-  reviewEventHandler,
   teamEventHandler,
   userEventHandler,
   userInviteEventHandler,
-  userNotificationEventHandler,
-  userSettingsEventHandler,
   mailEventHandler
 } from './index';
 
@@ -27,8 +22,7 @@ module.exports = {
   ],
 
   [APP_EVENT.PROPOSAL_ACCEPTED]: [
-    { h: proposalEventHandler, await: true },
-    { h: contractAgreementEventHandler, await: true }
+    { h: proposalEventHandler, await: true }
   ],
 
   [APP_EVENT.PROPOSAL_DECLINED]: [
@@ -36,59 +30,33 @@ module.exports = {
   ],
 
   [APP_EVENT.NFT_COLLECTION_METADATA_CREATED]: [
-    { h: assetEventHandler, await: true },
-    // { h: userNotificationEventHandler, await: false }
+    { h: assetEventHandler, await: true }
   ],
 
   [APP_EVENT.NFT_COLLECTION_METADATA_UPDATED]: [
-    { h: assetEventHandler, await: true },
-    // { h: userNotificationEventHandler, await: false }
+    { h: assetEventHandler, await: true }
   ],
 
   [APP_EVENT.PROJECT_PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: false },
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_PROPOSAL_ACCEPTED]: [
-    { h: userNotificationEventHandler, await: false }
+    { h: proposalEventHandler, await: false }
   ],
 
   [APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: false },
-    { h: userNotificationEventHandler, await: false }
+    { h: proposalEventHandler, await: false }
   ],
 
   [APP_EVENT.TEAM_INVITE_CREATED]: [
     { h: proposalEventHandler, await: true },
-    { h: userInviteEventHandler, await: false },
-    { h: userNotificationEventHandler, await: false }
+    { h: userInviteEventHandler, await: false }
   ],
 
   [APP_EVENT.TEAM_INVITE_ACCEPTED]: [
-    { h: userInviteEventHandler, await: false },
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.TEAM_INVITE_DECLINED]: [
-    { h: userNotificationEventHandler, await: false }
+    { h: userInviteEventHandler, await: false }
   ],
 
   [APP_EVENT.DAO_MEMBER_ADDED]: [
     { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
-  ],
-
-  [APP_EVENT.LEAVE_TEAM_CREATED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.LEAVE_TEAM_ACCEPTED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.LEAVE_TEAM_DECLINED]: [
-    { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.DAO_MEMBER_REMOVED]: [
@@ -135,48 +103,8 @@ module.exports = {
     { h: userEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCEPTED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.INVESTMENT_OPPORTUNITY_CREATED]: [
-    { h: investmentOpportunityEventHandler, await: true }
-  ],
-
-  [APP_EVENT.INVESTMENT_OPPORTUNITY_PARTICIPATED]: [
-    { h: investmentOpportunityEventHandler, await: true }
-  ],
-
-  [APP_EVENT.FT_TRANSFERED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.NFT_TRANSFERRED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
   [APP_EVENT.FT_CREATED]: [
     { h: assetEventHandler, await: false }
-  ],
-
-  [APP_EVENT.NFT_COLLECTION_CREATED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.FT_ISSUED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.NFT_ITEM_CREATED]: [
-    { h: userNotificationEventHandler, await: false }
   ],
 
   [APP_EVENT.DOCUMENT_TEMPLATE_CREATED]: [
@@ -215,77 +143,11 @@ module.exports = {
   ],
 
   [APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED]: [
-    { h: assetEventHandler, await: true },
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_CONTENT_PROPOSAL_ACCEPTED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_CONTENT_PROPOSAL_DECLINED]: [
-    { h: userNotificationEventHandler, await: false }
+    { h: assetEventHandler, await: true }
   ],
 
   [APP_EVENT.NFT_ITEM_METADATA_CREATED]: [
-    { h: assetEventHandler, await: true },
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.REVIEW_REQUEST_CREATED]: [
-    { h: reviewEventHandler, await: true },
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.REVIEW_REQUEST_DECLINED]: [
-    { h: reviewEventHandler, await: false }
-  ],
-
-  [APP_EVENT.REVIEW_CREATED]: [
-    { h: reviewEventHandler, await: true },
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.UPVOTED_REVIEW]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_NDA_CREATED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_NDA_PROPOSAL_CREATED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_NDA_PROPOSAL_DECLINED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_CREATED]: [
-    { h: contractAgreementEventHandler, await: true },
-    { h: fileUploadEventHandler, await: true }
-  ],
-
-  [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_ACCEPTED]: [
-    { h: userNotificationEventHandler, await: false }
-  ],
-
-  [APP_EVENT.CONTRACT_AGREEMENT_PROPOSAL_DECLINED]: [
-    { h: contractAgreementEventHandler, await: true },
-  ],
-
-  [APP_EVENT.CONTRACT_AGREEMENT_CREATED]: [
-    { h: contractAgreementEventHandler, await: true },
-    { h: fileUploadEventHandler, await: true }
-  ],
-
-  [APP_EVENT.CONTRACT_AGREEMENT_ACCEPTED]: [
-    { h: contractAgreementEventHandler, await: true },
-  ],
-
-  [APP_EVENT.CONTRACT_AGREEMENT_REJECTED]: [
-    { h: contractAgreementEventHandler, await: true },
+    { h: assetEventHandler, await: true }
   ],
 
   [APP_EVENT.PORTAL_PROFILE_UPDATED]: [
@@ -307,22 +169,6 @@ module.exports = {
 
   [APP_EVENT.NETWORK_SETTINGS_UPDATED]: [
     { h: portalEventHandler, await: true },
-  ],
-
-  [APP_EVENT.USER_PROFILE_DELETED]: [
-    { h: userEventHandler, await: true },
-  ],
-
-  [APP_EVENT.BOOKMARK_CREATED]: [
-    { h: userSettingsEventHandler, await: true },
-  ],
-
-  [APP_EVENT.BOOKMARK_DELETED]: [
-    { h: userSettingsEventHandler, await: true },
-  ],
-
-  [APP_EVENT.NOTIFICATIONS_MARKED_AS_READ]: [
-    { h: userNotificationEventHandler, await: true },
   ],
 
   [APP_EVENT.LAYOUT_CREATED]: [

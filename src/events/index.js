@@ -23,13 +23,6 @@ import UserAuthorityAlteredEvent from './impl/UserAuthorityAlteredEvent';
 import DaoCreatedEvent from './impl/DaoCreatedEvent';
 import DaoUpdatedEvent from './impl/DaoUpdatedEvent';
 
-import ProjectTokenSaleProposalCreatedEvent from './impl/ProjectTokenSaleProposalCreatedEvent';
-import ProjectTokenSaleProposalAcceptedEvent from './impl/ProjectTokenSaleProposalAcceptedEvent';
-import ProjectTokenSaleProposalDeclinedEvent from './impl/ProjectTokenSaleProposalDeclinedEvent';
-
-import InvestmentOpportunityCreatedEvent from './impl/InvestmentOpportunityCreatedEvent';
-import InvestmentOpportunityParticipatedEvent from './impl/InvestmentOpportunityParticipatedEvent';
-
 import FungibleTokenTransferedEvent from './impl/FungibleTokenTransferedEvent';
 import NonFungibleTokenTransferedEvent from './impl/NonFungibleTokenTransferedEvent';
 import FungibleTokenCreatedEvent from './impl/FungibleTokenCreatedEvent';
@@ -57,34 +50,11 @@ import NftItemMetadataDraftDeletedEvent from './impl/NftItemMetadataDraftDeleted
 import NftItemMetadataDraftUpdatedEvent from './impl/NftItemMetadataDraftUpdatedEvent';
 import NftItemMetadataCreatedEvent from './impl/NftItemMetadataCreatedEvent';
 
-import ReviewRequestCreatedEvent from './impl/ReviewRequestCreatedEvent';
-import ReviewRequestDeclinedEvent from './impl/ReviewRequestDeclinedEvent';
-import ReviewCreatedEvent from './impl/ReviewCreatedEvent';
-import UpvotedReviewEvent from './impl/UpvotedReviewEvent';
-
-import ProjectNdaCreatedEvent from './impl/ProjectNdaCreatedEvent';
-import ProjectNdaProposalCreatedEvent from './impl/ProjectNdaProposalCreatedEvent';
-import ProjectNdaProposalAcceptedEvent from './impl/ProjectNdaProposalAcceptedEvent';
-import ProjectNdaProposalDeclinedEvent from './impl/ProjectNdaProposalDeclinedEvent';
-
-import ContractAgreementCreatedEvent from './impl/ContractAgreementCreatedEvent';
-import ContractAgreementProposalCreatedEvent from './impl/ContractAgreementProposalCreatedEvent';
-import ContractAgreementProposalAcceptedEvent from './impl/ContractAgreementProposalAcceptedEvent';
-import ContractAgreementProposalDeclinedEvent from './impl/ContractAgreementProposalDeclinedEvent';
-import ContractAgreementAcceptedEvent from './impl/ContractAgreementAcceptedEvent';
-import ContractAgreementRejectedEvent from './impl/ContractAgreementRejectedEvent';
-
 import AttributeSettingsUpdatedEvent from './impl/AttributeSettingsUpdatedEvent';
 import LayoutSettingsUpdatedEvent from './impl/LayoutSettingsUpdatedEvent';
 import NetworkSettingsUpdatedEvent from './impl/NetworkSettingsUpdatedEvent';
 import PortalProfileUpdatedEvent from './impl/PortalProfileUpdatedEvent';
 import PortalSettingsUpdatedEvent from './impl/PortalSettingsUpdatedEvent';
-
-import UserProfileDeletedEvent from './impl/UserProfileDeletedEvent';
-
-import BookmarkCreatedEvent from './impl/BookmarkCreatedEvent';
-import BookmarkDeletedEvent from './impl/BookmarkDeletedEvent';
-import NotificationsMarkedAsReadEvent from './impl/NotificationsMarkedAsReadEvent';
 
 import LayoutCreatedEvent from './impl/LayoutCreatedEvent';
 import LayoutUpdatedEvent from './impl/LayoutUpdatedEvent';
@@ -118,14 +88,6 @@ module.exports = {
   DaoUpdatedEvent,
 
   UserAuthorityAlteredEvent,
-  UserProfileDeletedEvent,
-
-  ProjectTokenSaleProposalCreatedEvent,
-  ProjectTokenSaleProposalAcceptedEvent,
-  ProjectTokenSaleProposalDeclinedEvent,
-
-  InvestmentOpportunityCreatedEvent,
-  InvestmentOpportunityParticipatedEvent,
 
   FungibleTokenTransferedEvent,
   NonFungibleTokenTransferedEvent,
@@ -154,32 +116,11 @@ module.exports = {
   NftItemMetadataDraftUpdatedEvent,
   NftItemMetadataCreatedEvent,
 
-  ReviewRequestCreatedEvent,
-  ReviewRequestDeclinedEvent,
-  ReviewCreatedEvent,
-  UpvotedReviewEvent,
-
-  ProjectNdaCreatedEvent,
-  ProjectNdaProposalCreatedEvent,
-  ProjectNdaProposalAcceptedEvent,
-  ProjectNdaProposalDeclinedEvent,
-
-  ContractAgreementCreatedEvent,
-  ContractAgreementProposalCreatedEvent,
-  ContractAgreementProposalAcceptedEvent,
-  ContractAgreementProposalDeclinedEvent,
-  ContractAgreementAcceptedEvent,
-  ContractAgreementRejectedEvent,
-
   AttributeSettingsUpdatedEvent,
   LayoutSettingsUpdatedEvent,
   NetworkSettingsUpdatedEvent,
   PortalProfileUpdatedEvent,
   PortalSettingsUpdatedEvent,
-
-  BookmarkCreatedEvent,
-  BookmarkDeletedEvent,
-  NotificationsMarkedAsReadEvent,
 
   LayoutCreatedEvent,
   LayoutUpdatedEvent,

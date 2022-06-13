@@ -6,8 +6,7 @@ import {
   LayoutUpdatedEvent,
   LayoutSettingsUpdatedEvent,
   AttributeSettingsUpdatedEvent,
-  NetworkSettingsUpdatedEvent,
-  UserProfileDeletedEvent
+  NetworkSettingsUpdatedEvent
 } from './../../events';
 
 class PortalCmdHandler extends BaseCmdHandler {
@@ -54,12 +53,6 @@ portalCmdHandler.register(APP_CMD.UPDATE_NETWORK_SETTINGS, (cmd, ctx) => {
   const networkSettings = cmd.getCmdPayload();
   
   ctx.state.appEvents.push(new NetworkSettingsUpdatedEvent({ networkSettings, portalId: ctx.state.portal.id }));
-});
-
-portalCmdHandler.register(APP_CMD.DELETE_USER_PROFILE, (cmd, ctx) => {
-  const { username } = cmd.getCmdPayload();
-  
-  ctx.state.appEvents.push(new UserProfileDeletedEvent({ username }));
 });
 
 module.exports = portalCmdHandler;

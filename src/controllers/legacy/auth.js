@@ -58,37 +58,6 @@ const signIn = async function (ctx) {
   }
 }
 
-
-const chunkPortalAccessToken = async function (ctx) {
-  const { clientPortalId, secretSigHex } = ctx.request.body;
-  const { id: currentPortalId } = ctx.state.portal;
-
-  try {
-    const portalDtoService = new PortalDtoService();
-    const clientPortal = await portalDtoService.getPortal(clientPortalId);
-    const chainService = await ChainService.getInstanceAsync(config);
-    const isValidSig = chainService.verifySignature(clientPortal.pubKey, config.SIG_SEED, secretSigHex);
-
-    if (!isValidSig) {
-      throw new UnauthorizedError(`Signature from '${clientPortalId}' portal is not valid`);
-    }
-
-    const jwtToken = jwt.sign({
-      username: clientPortalId, 
-      portal: currentPortalId,
-      isPortal: true,
-      exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
-    }, config.JWT_SECRET);
-
-    ctx.successRes({ jwtToken });
-    
-  } catch (err) {
-    console.error(err);
-    ctx.errorRes(err);
-  }
-}
-
 export default {
-  signIn,
-  chunkPortalAccessToken
+  signIn
 }

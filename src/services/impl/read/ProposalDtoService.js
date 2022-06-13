@@ -5,14 +5,12 @@ import { PROJECT_STATUS } from './../../../constants';
 import NftCollectionDtoService from './NftCollectionDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
-import InvestmentOpportunityDtoService from './InvestmentOpportunityDtoService';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
 const nftCollectionDtoService = new NftCollectionDtoService({ scoped: false });
-const invstOppDtoService = new InvestmentOpportunityDtoService({ scoped: false });
 
 
 class ProposalDtoService extends BaseService {
@@ -93,20 +91,6 @@ class ProposalDtoService extends BaseService {
           let isApproved = members.some(member => proposal.approvers.some((name) => name == member)) || proposal.approvers.some((name) => name == party);
           let isRejected = members.some(member => proposal.rejectors.some((name) => name == member)) || proposal.rejectors.some((name) => name == party);
           let isHidden = false;
-
-          // TODO: move to event handler
-          if (proposal.type == APP_PROPOSAL.PROJECT_NDA_PROPOSAL) {
-            isHidden = teams.some(({ portalId }) => chainAccount.daoId === portalId);
-            if (!isApproved && !isRejected && proposal.status != PROPOSAL_STATUS.PENDING) {
-              const team = teams.find(team => team._id == party);
-              if (team._id == team.portalId) {
-                if (proposal.status == PROPOSAL_STATUS.REJECTED)
-                  isRejected = true;
-                if (proposal.status == PROPOSAL_STATUS.APPROVED)
-                  isApproved = true;
-              }
-            }
-          }
 
           parties[key] = {
             isProposer: party == proposal.creator,
@@ -199,9 +183,6 @@ class ProposalDtoService extends BaseService {
       return acc;
     }, {});
 
-    const contractAgreementContracts = await this.extendContractAgreementProposals(grouped[APP_PROPOSAL.CONTRACT_AGREEMENT_PROPOSAL] || []);
-    result.push(...contractAgreementContracts);
-
     const tokenSwapsProposals = await this.extendTokenSwapProposals(grouped[APP_PROPOSAL.TOKENS_SWAP_PROPOSAL] || []);
     result.push(...tokenSwapsProposals);
 
@@ -223,49 +204,13 @@ class ProposalDtoService extends BaseService {
     const projectContentProposals = await this.extendProjectContentProposals(grouped[APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL] || []);
     result.push(...projectContentProposals);
 
-    const projectTokenSaleProposals = await this.extendProjectTokenSaleProposals(grouped[APP_PROPOSAL.PROJECT_FUNDRASE_PROPOSAL] || []);
-    result.push(...projectTokenSaleProposals);
-
     const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL] || []);
     result.push(...userInvitationProposals);
 
     const userLeavingProposals = await this.extendUserLeavingProposals(grouped[APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL] || []);
     result.push(...userLeavingProposals);
 
-    const projectNdaProposals = await this.extendProjectNdaProposals(grouped[APP_PROPOSAL.PROJECT_NDA_PROPOSAL] || []);
-    result.push(...projectNdaProposals);
-
     return result;
-  }
-
-
-  async extendContractAgreementProposals(requests) {
-    const accountNames = requests.reduce((acc, req) => {
-      if (!acc.some(a => a == req.details.creator)) {
-        acc.push(req.details.creator);
-      }
-      return acc;
-    }, []);
-
-    const projectIds = requests.reduce((acc, req) => {
-      if (!acc.some(r => r == req.details.projectId)) {
-        acc.push(req.details.projectId);
-      }
-      return acc;
-    }, []);
-
-
-    // currently we allow to buy the license only for user account
-    const users = await userDtoService.getUsers(accountNames);
-    const projects = await nftCollectionDtoService.getNftCollections(projectIds, Object.values(PROJECT_STATUS));
-
-    return requests.map((req) => {
-      const extendedDetails = {
-        requester: users.find(u => u.account.name == req.details.creator),
-        project: projects.find(p => p._id == req.details.projectId)
-      }
-      return { ...req, extendedDetails };
-    })
   }
 
   async extendTokenSwapProposals(proposals) {
@@ -421,54 +366,6 @@ class ProposalDtoService extends BaseService {
     });
   }
 
-  async extendProjectTokenSaleProposals(proposals) {
-    const accountNames = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.teamId)) {
-        acc.push(proposal.details.teamId);
-      }
-      return acc;
-    }, []);
-
-    const projectsIds = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.projectId)) {
-        acc.push(proposal.details.projectId);
-      }
-      return acc;
-    }, []);
-
-    const invstOppsIds = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.projectTokenSaleId)) {
-        acc.push(proposal.details.projectTokenSaleId);
-      }
-      return acc;
-    }, []);
-
-
-    const teams = await teamDtoService.getTeams(accountNames);
-    const projects = await nftCollectionDtoService.getNftCollections(projectsIds, Object.values(PROJECT_STATUS));
-    const invstOpps = await invstOppDtoService.getInvstOpps(invstOppsIds);
-
-    return proposals.map((proposal) => {
-      const team = teams.find(team => team._id == proposal.details.teamId);
-      const project = projects.find(project => project._id == proposal.details.projectId);
-      const invstOpp = invstOpps.find(invstOpp => invstOpp._id == proposal.details.projectTokenSaleId);
-
-      const extendedDetails = { 
-        team, 
-        project, 
-        projectTokenSale: {
-          ...invstOpp, 
-          soft_cap: invstOpp.softCap, 
-          hard_cap: invstOpp.hardCap, 
-          security_tokens_on_sale: invstOpp.shares 
-        }
-      };
-      return { ...proposal, extendedDetails };
-    });
-
-  }
-
-
   async extendUserInvitationProposals(proposals) {
     const accountNames = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.invitee)) {
@@ -515,23 +412,7 @@ class ProposalDtoService extends BaseService {
 
   }
 
-  async extendProjectNdaProposals(proposals) {
-    const projectIds = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.projectId)) {
-        acc.push(proposal.details.projectId);
-      }
-      return acc;
-    }, []);
 
-    const projects = await nftCollectionDtoService.getNftCollections(projectIds, Object.values(PROJECT_STATUS));
-
-    return proposals.map(proposal => {
-      const project = projects.find(project => project._id == proposal.details.projectId);
-      return { ...proposal, extendedDetails: { project } };
-    })
-  }
-
-  
   async getAccountProposals(username) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();

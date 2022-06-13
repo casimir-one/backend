@@ -41,7 +41,6 @@ const ATTR_TYPES = {
   15: 'location',
   16: 'richText',
   501: 'stepper', // feature
-  502: 'domain', // feature
   503: 'teamSelect', // feature
   504: 'expressLicensing', // feature
   505: 'networkContentAccess', // feature

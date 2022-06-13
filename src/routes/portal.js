@@ -30,12 +30,6 @@ protected_route.put('/network-settings', compose([portalRoute, portalAdminGuard]
 protected_route.put('/settings/attribute-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalAttributeSettings);
 protected_route.put('/settings/layout-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalLayoutSettings);
 
-protected_route.post('/v2/registry/sign-up', compose([portalRoute, portalAdminGuard]), usersCtrl.createUser);
-// TODO: replace with specific command handlers
-protected_route.put('/v2/registry/sign-ups/approve', compose([portalRoute, portalAdminGuard]), /* portalCtrl.approveSignUpRequest */ usersCtrl.createUser);
-protected_route.get('/registry/sign-ups', compose([portalRoute, portalAdminGuard]), portalCtrl.getSignUpRequests);
-protected_route.put('/registry/sign-ups/reject', compose([portalRoute, portalAdminGuard]), portalCtrl.rejectSignUpRequest);
-
 const routes = { 
   protected: koa_router().use('/portal', protected_route.routes()),
   public: koa_router().use('/portal', public_route.routes())
