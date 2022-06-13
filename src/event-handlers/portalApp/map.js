@@ -9,7 +9,6 @@ import {
   proposalEventHandler,
   teamEventHandler,
   userEventHandler,
-  userInviteEventHandler,
   mailEventHandler
 } from './index';
 
@@ -43,15 +42,6 @@ module.exports = {
 
   [APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED]: [
     { h: proposalEventHandler, await: false }
-  ],
-
-  [APP_EVENT.TEAM_INVITE_CREATED]: [
-    { h: proposalEventHandler, await: true },
-    { h: userInviteEventHandler, await: false }
-  ],
-
-  [APP_EVENT.TEAM_INVITE_ACCEPTED]: [
-    { h: userInviteEventHandler, await: false }
   ],
 
   [APP_EVENT.DAO_MEMBER_ADDED]: [

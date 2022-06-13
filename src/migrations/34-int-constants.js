@@ -31,7 +31,6 @@ const Schema = mongoose.Schema;
 // const DraftSchema = require('../schemas/DraftSchema');
 // const ProjectContentSchema = require('../schemas/ProjectContentSchema');
 // const ProjectSchema = require('../schemas/ProjectSchema');
-// const UserInviteSchema = require('../schemas/UserInviteSchema');
 // const UserSchema = require('../schemas/UserSchema');
 
 const DraftSchemaClass = new Schema({
@@ -102,22 +101,6 @@ const ProjectSchemaClass = new Schema({
   "status": { type: Schema.Types.Mixed, required: false },
   "isDefault": { type: Boolean, default: false }
 }, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } });
-
-const UserInviteSchemaClass = new Schema({
-  "_id": { type: String },
-  "portalId": { type: String, required: true },
-  "invitee": { type: String, required: true, index: true },
-  "creator": { type: String },
-  "teamId": { type: String, required: true, index: true },
-  "notes": { type: String, required: false, trim: true },
-  "rewardShare": { type: String, default: undefined },
-  "failReason": { type: String },
-  "status": {
-    type: Schema.Types.Mixed,
-    required: true
-  },
-  "expiration": { type: Date, required: true, index: true },
-}, { timestamps: { createdAt: 'created_at', 'updatedAt': 'updated_at' } })
 
 const UserRole = new Schema({
   "_id": false,
@@ -250,7 +233,6 @@ const PortalSchemaClass = new Schema({
 const DraftSchema = mongoose.model('draft', DraftSchemaClass);
 const ProjectContentSchema = mongoose.model('project-content', ProjectContentSchemaClass);
 const ProjectSchema = mongoose.model('project', ProjectSchemaClass);
-const UserInviteSchema = mongoose.model('user-invites', UserInviteSchemaClass);
 const UserSchema = mongoose.model('user-profile', UserSchemaClass);
 const PortalSchema = mongoose.model('portal', PortalSchemaClass);
 
@@ -270,19 +252,6 @@ const PROJECT_STATUS = {
   "proposed": 1,
   "approved": 2,
   "deleted": 3,
-}
-
-const USER_INVITE_STATUS = {
-  SENT: "sent",
-  APPROVED: "approved",
-  REJECTED: "rejected",
-  EXPIRED: "expired",
-  PROPOSED: "proposed", //deprecated
-  "sent": 1,
-  "approved": 2,
-  "rejected": 3,
-  "expired": 4,
-  "proposed": 5,
 }
 
 const USER_PROFILE_STATUS = {
@@ -309,14 +278,12 @@ const run = async () => {
   const draftsPromises = [];
   const projectContentsPromises = [];
   const projectsPromises = [];
-  const userInvitesPromises = [];
   const usersPromises = [];
   const portalsPromises = [];
 
   const drafts = await DraftSchema.find({});
   const projectContents = await ProjectContentSchema.find({});
   const projects = await ProjectSchema.find({});
-  const userInvites = await UserInviteSchema.find({});
   const users = await UserSchema.find({});
   const portals = await PortalSchema.find({});
 
@@ -350,14 +317,6 @@ const run = async () => {
     }
   }
 
-  for (let i = 0; i < userInvites.length; i++) {
-    const userInvite = userInvites[i];
-    if (USER_INVITE_STATUS[userInvite.status]) {
-      userInvite.status = USER_INVITE_STATUS[userInvite.status];
-      userInvitesPromises.push(userInvite.save());
-    }
-  }
-
   for (let i = 0; i < users.length; i++) {
     const user = users[i];
     if (USER_PROFILE_STATUS[user.status]) {
@@ -380,7 +339,6 @@ const run = async () => {
   await Promise.all(draftsPromises);
   await Promise.all(projectContentsPromises);
   await Promise.all(projectsPromises);
-  await Promise.all(userInvitesPromises);
   await Promise.all(usersPromises);
   await Promise.all(portalsPromises);
 };

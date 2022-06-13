@@ -10,7 +10,6 @@ import {
   documentTemplatesCtrl,
   revenuesCtrl,
   portalCtrl,
-  invitesCtrl,
   layoutsCtrl
 } from '../controllers';
 
@@ -41,9 +40,6 @@ protected_route.put('/v2/proposals/update', proposalsCtrl.acceptProposal)
 protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
 protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountProposals)
-
-protected_route.get('/v2/invites/:username', invitesCtrl.getUserInvites)
-protected_route.get('/v2/invites/team/:teamId', invitesCtrl.getTeamPendingInvites)
 
 public_route.get('/network/portals/listing', portalCtrl.getNetworkPortals)
 public_route.get('/network/portals/:portal', portalCtrl.getNetworkPortal)

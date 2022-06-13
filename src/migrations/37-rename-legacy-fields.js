@@ -89,22 +89,6 @@ const ProposalSchemaClass = new Schema({
   "rejectors": { type: Array, default: [] },
 }, { timestamps: true });
 
-const UserInviteSchemaClass = new Schema({
-  "_id": { type: String },
-  "tenantId": { type: String, required: true },
-  "invitee": { type: String, required: true, index: true },
-  "creator": { type: String },
-  "researchGroupExternalId": { type: String, required: true, index: true },
-  "notes": { type: String, required: false, trim: true },
-  "rewardShare": { type: String, default: undefined },
-  "failReason": { type: String },
-  "status": {
-    type: Number,
-    required: true
-  },
-  "expiration": { type: Number, required: true, index: true },
-}, { timestamps: true });
-
 const AssetSettingsSchema = new Schema({
   "_id": false,
   "projectId": { type: String, required: false, default: null },
@@ -283,8 +267,6 @@ const AssetDepositRequestSchema = mongoose.model('asset-deposit-request', AssetD
 
 const PortalSchema = mongoose.model('tenants-profiles', PortalSchemaClass);
 
-const UserInviteSchema = mongoose.model('user-invite', UserInviteSchemaClass);
-
 const ProposalSchema = mongoose.model('proposals', ProposalSchemaClass);
 
 const run = async () => {
@@ -326,13 +308,6 @@ const run = async () => {
   await UserSchema.updateMany({}, {
     $rename: { "tenantId": "portalId" },
     $unset: { "roles.$[].researchGroupExternalId": true },
-  }, { multi: true });
-
-  await UserInviteSchema.updateMany({}, {
-    $rename: {
-      "tenantId": "portalId",
-      "researchGroupExternalId": "teamId"
-    }
   }, { multi: true });
 
   await TeamSchema.updateMany({}, {

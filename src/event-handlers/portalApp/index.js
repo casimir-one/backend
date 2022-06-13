@@ -1,6 +1,5 @@
 import proposalEventHandler from './imp/ProposalEventHandler';
 import teamEventHandler from './imp/TeamEventHandler';
-import userInviteEventHandler from './imp/UserInviteEventHandler';
 import attributeEventHandler from './imp/AttributeEventHandler';
 import userEventHandler from './imp/UserEventHandler';
 import documentTemplateEventHandler from './imp/DocumentTemplateEventHandler';
@@ -14,7 +13,6 @@ import mailEventHandler from './imp/MailEventHandler';
 module.exports = {
   proposalEventHandler,
   teamEventHandler,
-  userInviteEventHandler,
   attributeEventHandler,
   userEventHandler,
   documentTemplateEventHandler,
