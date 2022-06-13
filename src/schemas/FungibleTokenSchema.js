@@ -7,8 +7,7 @@ const FungibleTokenMetadataSchema = new Schema({
   "_id": false,
   "projectId": { type: String, required: false, default: null },
   "maxSupply": { type: String, required: false },
-  "minBallance": { type: String, required: false },
-  "licenseRevenueHoldersShare": { type: String, required: false }
+  "minBallance": { type: String, required: false }
 });
 
 const FungibleTokenSchema = new Schema({

@@ -39,8 +39,7 @@ class FungibleTokenDtoService extends BaseService {
         current_supply: chainFungibleToken ? chainFungibleToken.currentSupply : null,
         string_symbol: chainFungibleToken ? chainFungibleToken.symbol : null,
         tokenized_project: fungibleToken.metadata.projectId || null,
-        tokenizedProject: fungibleToken.metadata.projectId || null,
-        license_revenue_holders_share: fungibleToken.metadata.licenseRevenueHoldersShare || null
+        tokenizedProject: fungibleToken.metadata.projectId || null
       }
 
     });

@@ -18,7 +18,6 @@ import {
 } from '../../services';
 import { assetCmdHandler } from './../../command-handlers';
 import { ProjectContentPackageForm, ProjectForm } from '../../forms';
-import readArchive from './../../dar/readArchive';
 import FileStorage from './../../storage';
 
 
@@ -416,39 +415,6 @@ class AssetsController extends BaseController {
     }
   });
 
-  getNftItemDarArchiveStaticFiles = this.query({
-    h: async (ctx) => {
-      try {
-        const nftItemId = ctx.params.nftItemId;
-        const filename = ctx.params.file;
-        const nftItemMetadata = await nftItemMetadataService.getNftItemMetadata(nftItemId);
-        const filepath = FileStorage.getProjectDarArchiveFilePath(nftItemMetadata.nftCollectionId, nftItemMetadata.folder, filename);
-
-        const buff = await FileStorage.get(filepath);
-        const ext = filename.substr(filename.lastIndexOf('.') + 1);
-        const name = filename.substr(0, filename.lastIndexOf('.'));
-        const isImage = ['png', 'jpeg', 'jpg'].some(e => e == ext);
-        const isPdf = ['pdf'].some(e => e == ext);
-
-        if (isImage) {
-          ctx.response.set('Content-Type', `image/${ext}`);
-          ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-          ctx.successRes(buff, { withoutWrap: true });
-        } else if (isPdf) {
-          ctx.response.set('Content-Type', `application/${ext}`);
-          ctx.response.set('Content-Disposition', `inline; filename="${slug(name)}.${ext}"`);
-          ctx.successRes(buff, { withoutWrap: true });
-        } else {
-          ctx.response.set('Content-Disposition', `attachment; filename="${slug(name)}.${ext}"`);
-          ctx.successRes(buff, { withoutWrap: true });
-        }
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
   getNftItemMetadata = this.query({
     h: async (ctx) => {
       try {
@@ -529,56 +495,6 @@ class AssetsController extends BaseController {
 
         const buff = await FileStorage.get(filepath);
         ctx.successRes(buff, { withoutWrap: true });
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getNftItemDar = this.query({
-    h: async (ctx) => {
-      try {
-        const nftItemId = ctx.params.nftItemId;
-        const authorization = ctx.request.header['authorization'];
-        const jwt = authorization.substring(authorization.indexOf("Bearer ") + "Bearer ".length, authorization.length);
-
-        const dirPathData = {};
-        const nftItemMetadata = await nftItemMetadataService.getNftItemMetadata(nftItemId);
-
-        if (!nftItemMetadata) {
-          const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(nftItemId);
-          if (!draft) {
-            throw new NotFoundError(`Dar for "${nftItemId}" id is not found`);
-          }
-          dirPathData.nftCollectionId = draft.nftCollectionId
-          dirPathData.folder = draft.folder
-        } else {
-          dirPathData.nftCollectionId = nftItemMetadata.nftCollectionId
-          dirPathData.folder = nftItemMetadata.folder
-        }
-
-        const archiveDir = FileStorage.getProjectDarArchiveDirPath(dirPathData.nftCollectionId, dirPathData.folder);
-        const exists = await FileStorage.exists(archiveDir);
-
-        if (!exists) {
-          throw new NotFoundError(`Dar "${archiveDir}" is not found`);
-        }
-
-        const opts = {}
-        const rawArchive = await readArchive(archiveDir, {
-          noBinaryContent: true,
-          ignoreDotFiles: true,
-          versioning: opts.versioning
-        })
-        Object.keys(rawArchive.resources).forEach(recordPath => {
-          const record = rawArchive.resources[recordPath]
-          if (record._binary) {
-            delete record._binary
-            record.encoding = 'url'
-            record.data = `${config.DEIP_SERVER_URL}/api/v2/nft-item/texture/${nftItemId}/assets/${record.path}?authorization=${jwt}`;
-          }
-        })
-        ctx.successRes(rawArchive, { withoutWrap: true });
       } catch (err) {
         ctx.errorRes(err);
       }
@@ -774,11 +690,11 @@ class AssetsController extends BaseController {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
 
-          if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR || draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+          if (draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
             const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.nftCollectionId, draft.folder);
             const exists = await FileStorage.exists(archiveDir);
             if (!exists) {
-              throw new NotFoundError(`Dar "${archiveDir}" is not found`);
+              throw new NotFoundError(`Dir "${archiveDir}" is not found`);
             }
           }
         };

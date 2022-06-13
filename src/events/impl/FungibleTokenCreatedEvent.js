@@ -21,14 +21,9 @@ class FungibleTokenCreatedEvent extends BaseEvent {
     assert(!!maxSupply, "'maxSupply' is required");
 
     if (metadata) { // keep this until we have working F-NFT
-      const { projectId, teamId, licenseRevenue } = metadata;
+      const { projectId, teamId } = metadata;
       assert(!!projectId, "'projectId' is required for project token");
       assert(!!teamId, "'teamId' is required for project token");
-
-      if (licenseRevenue) {
-        const { holdersShare } = licenseRevenue;
-        assert(!!holdersShare, "'holdersShare' is required for project 'licenseRevenue' option");
-      }
     }
 
     super(APP_EVENT.FT_CREATED, eventPayload);

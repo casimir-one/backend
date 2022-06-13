@@ -1,8 +1,6 @@
 
 import { APP_EVENT, PROJECT_CONTENT_FORMAT } from '@deip/constants';
 import mongoose from 'mongoose';
-import cloneArchive from '../../../dar/cloneArchive';
-import writeArchive from '../../../dar/writeArchive';
 import { NftItemMetadataDraftService, PortalService } from '../../../services';
 import FileStorage from '../../../storage';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
@@ -45,22 +43,12 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async
 
   const { nftCollectionId, entityId, formatType, uploadedFiles } = event.getEventPayload();
 
-  if (formatType === PROJECT_CONTENT_FORMAT.DAR || formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
+  if (formatType === PROJECT_CONTENT_FORMAT.PACKAGE && uploadedFiles.length > 0) {
     const _id = mongoose.Types.ObjectId(entityId);
+    const tempDestinationPath = uploadedFiles[0].destination;
+    const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(nftCollectionId, _id);
 
-    if (formatType == PROJECT_CONTENT_FORMAT.DAR) {
-      const darPath = FileStorage.getProjectDarArchiveDirPath(nftCollectionId, _id);
-      const blankDarPath = FileStorage.getProjectBlankDarArchiveDirPath();
-
-      await cloneArchive(blankDarPath, darPath, true);
-    }
-    if (formatType == PROJECT_CONTENT_FORMAT.PACKAGE && uploadedFiles.length > 0) {
-      const tempDestinationPath = uploadedFiles[0].destination;
-
-      const projectContentPackageDirPath = FileStorage.getProjectContentPackageDirPath(nftCollectionId, _id);
-
-      await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
-    }
+    await FileStorage.rename(tempDestinationPath, projectContentPackageDirPath);
   }
 });
 
@@ -70,13 +58,6 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async
 
   const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(draftId);
 
-  if (draft.formatType === PROJECT_CONTENT_FORMAT.DAR) {
-    const opts = {}
-    const archiveDir = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
-    const version = await writeArchive(archiveDir, xmlDraft, {
-      versioning: opts.versioning
-    })
-  }
   if (draft.formatType === PROJECT_CONTENT_FORMAT.PACKAGE) {
     const filesPathToDelete = draft.packageFiles
       .filter(({ filename }) => !uploadedFiles.some(({ originalname }) => originalname === filename))
@@ -91,10 +72,7 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async
 
   const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(_id)
 
-  if (draft.type === PROJECT_CONTENT_FORMAT.DAR) {
-    const darPath = FileStorage.getProjectDarArchiveDirPath(draft.projectId, draft.folder);
-    await FileStorage.rmdir(darPath);
-  } else if (draft.type === PROJECT_CONTENT_FORMAT.PACKAGE) {
+  if (draft.type === PROJECT_CONTENT_FORMAT.PACKAGE) {
     const packagePath = FileStorage.getProjectContentPackageDirPath(draft.projectId, draft.hash);
     await FileStorage.rmdir(packagePath);
   }

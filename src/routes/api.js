@@ -8,7 +8,6 @@ import {
   assetsCtrl,
   usersCtrl,
   documentTemplatesCtrl,
-  revenuesCtrl,
   portalCtrl,
   layoutsCtrl
 } from '../controllers';
