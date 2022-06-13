@@ -1,13 +1,5 @@
 import { APP_PROPOSAL } from '@deip/constants';
 
-import TeamInviteCreatedEvent from './../impl/TeamInviteCreatedEvent';
-import TeamInviteAcceptedEvent from './../impl/TeamInviteAcceptedEvent';
-import TeamInviteDeclinedEvent from './../impl/TeamInviteDeclinedEvent';
-
-import TeamLeavingCreatedEvent from '../impl/TeamLeavingCreatedEvent';
-import TeamLeavingAcceptedEvent from '../impl/TeamLeavingAcceptedEvent';
-import TeamLeavingDeclinedEvent from '../impl/TeamLeavingDeclinedEvent';
-
 import TeamUpdateProposalAcceptedEvent from './../impl/TeamUpdateProposalAcceptedEvent';
 import TeamUpdateProposalCreatedEvent from './../impl/TeamUpdateProposalCreatedEvent';
 import TeamUpdateProposalDeclinedEvent from './../impl/TeamUpdateProposalDeclinedEvent';
@@ -25,16 +17,8 @@ import TokenSwapProposalDeclinedEvent from '../impl/TokenSwapProposalDeclinedEve
 
 
 module.exports = {
-  [APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL]: {
-    CREATED: TeamInviteCreatedEvent,
-    ACCEPTED: TeamInviteAcceptedEvent,
-    DECLINED: TeamInviteDeclinedEvent
-  },
-  [APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL]: {
-    CREATED: TeamLeavingCreatedEvent,
-    ACCEPTED: TeamLeavingAcceptedEvent,
-    DECLINED: TeamLeavingDeclinedEvent
-  },
+  [APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL]: {},
+  [APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL]: {},
   [APP_PROPOSAL.TEAM_UPDATE_PROPOSAL]: {
     CREATED: TeamUpdateProposalCreatedEvent,
     ACCEPTED: TeamUpdateProposalAcceptedEvent,

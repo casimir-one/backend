@@ -6,7 +6,6 @@ import usersCtrl from './impl/UsersController';
 import documentTemplatesCtrl from './impl/DocumentTemplatesController';
 import revenuesCtrl from './impl/RevenuesController';
 import portalCtrl from './impl/PortalController';
-import invitesCtrl from './impl/InvitesController';
 import layoutsCtrl from './impl/LayoutsController';
 
 module.exports = {
@@ -18,6 +17,5 @@ module.exports = {
   documentTemplatesCtrl,
   revenuesCtrl,
   portalCtrl,
-  invitesCtrl,
   layoutsCtrl
 }

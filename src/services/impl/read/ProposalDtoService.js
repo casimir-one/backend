@@ -204,12 +204,6 @@ class ProposalDtoService extends BaseService {
     const projectContentProposals = await this.extendProjectContentProposals(grouped[APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL] || []);
     result.push(...projectContentProposals);
 
-    const userInvitationProposals = await this.extendUserInvitationProposals(grouped[APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL] || []);
-    result.push(...userInvitationProposals);
-
-    const userLeavingProposals = await this.extendUserLeavingProposals(grouped[APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL] || []);
-    result.push(...userLeavingProposals);
-
     return result;
   }
 
@@ -364,52 +358,6 @@ class ProposalDtoService extends BaseService {
       const extendedDetails = { team, project };
       return { ...proposal, extendedDetails };
     });
-  }
-
-  async extendUserInvitationProposals(proposals) {
-    const accountNames = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.invitee)) {
-        acc.push(proposal.details.invitee);
-      }
-      if (!acc.some(a => a == proposal.details.teamId)) {
-        acc.push(proposal.details.teamId);
-      }
-      return acc;
-    }, []);
-
-    const users = await userDtoService.getUsers(accountNames);
-    const teams = await teamDtoService.getTeams(accountNames)
-
-    return proposals.map((proposal) => {
-      const team = teams.find(team => team._id == proposal.details.teamId);
-      const invitee = users.find(users => users._id == proposal.details.invitee);
-      const extendedDetails = { team, invitee };
-      return { ...proposal, extendedDetails };
-    });
-  }
-
-
-  async extendUserLeavingProposals(proposals) {
-    const accountNames = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.member)) {
-        acc.push(proposal.details.member);
-      }
-      if (!acc.some(a => a == proposal.details.teamId)) {
-        acc.push(proposal.details.teamId);
-      }
-      return acc;
-    }, []);
-
-    const users = await userDtoService.getUsers(accountNames);
-    const teams = await teamDtoService.getTeams(accountNames);
-
-    return proposals.map((proposal) => {
-      const team = teams.find(team => team._id == proposal.details.teamId);
-      const member = users.find(user => user._id == proposal.details.member);
-      const extendedDetails = { team, member };
-      return { ...proposal, extendedDetails };
-    });
-
   }
 
 

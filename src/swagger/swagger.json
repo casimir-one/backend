@@ -26,14 +26,6 @@
       }
     },
     {
-      "name": "invites",
-      "description": "invites",
-      "externalDocs": {
-        "description": "Find out more",
-        "url": "http://swagger.io"
-      }
-    },
-    {
       "name": "project",
       "description": "Everything about Projects",
       "externalDocs": {
@@ -380,88 +372,6 @@
           },
           "404": {
             "description": "Proposal not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/invites/{username}": {
-      "get": {
-        "tags": [
-          "invites"
-        ],
-        "summary": "Find invites",
-        "description": "Return an array of invites",
-        "operationId": "getInvitesByUsername",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "username",
-            "in": "path",
-            "description": "",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Invite"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Invites not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/invites/team/{teamId}": {
-      "get": {
-        "tags": [
-          "invites"
-        ],
-        "summary": "Find invites",
-        "description": "Return an array of invites",
-        "operationId": "getInvitesByTeamId",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "teamId",
-            "in": "path",
-            "description": "",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "$ref": "#/definitions/Invite"
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Invites not found"
           }
         },
         "security": [
@@ -4861,41 +4771,6 @@
           "items": {
             "type": "string"
           }
-        }
-      }
-    },
-    "Invite": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "portalId": {
-          "type": "string"
-        },
-        "invitee": {
-          "type": "string"
-        },
-        "creator": {
-          "type": "string"
-        },
-        "teamId": {
-          "type": "string"
-        },
-        "notes": {
-          "type": "string"
-        },
-        "rewardShare": {
-          "type": "string"
-        },
-        "failReason": {
-          "type": "string"
-        },
-        "status": {
-          "type": "number"
-        },
-        "expiration": {
-          "type": "number"
         }
       }
     },

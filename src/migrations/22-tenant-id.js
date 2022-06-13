@@ -20,7 +20,6 @@ const Project = require('./../schemas/ProjectSchema');
 const ProjectContent = require('./../schemas/ProjectContentSchema');
 const Team = require('./../schemas/TeamSchema');
 const UserSchema = require('./../schemas/UserSchema');
-const UserInviteSchema = require('./../schemas/UserInviteSchema');
 
 
 mongoose.connect(config.DEIP_MONGO_STORAGE_CONNECTION_URL);
@@ -33,7 +32,6 @@ const run = async () => {
   await ProjectContent.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
   await Team.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
   await UserSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
-  await UserInviteSchema.update({}, { $set: { "portalId": config.TENANT } }, { multi: true });
   
 };
 

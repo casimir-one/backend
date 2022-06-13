@@ -11,10 +11,6 @@ import ProposalCreatedEvent from './impl/ProposalCreatedEvent';
 import ProposalAcceptedEvent from './impl/ProposalAcceptedEvent';
 import ProposalDeclinedEvent from './impl/ProposalDeclinedEvent';
 
-import TeamInviteCreatedEvent from './impl/TeamInviteCreatedEvent';
-import TeamInviteAcceptedEvent from './impl/TeamInviteAcceptedEvent';
-import TeamInviteDeclinedEvent from './impl/TeamInviteDeclinedEvent';
-
 import AttributeCreatedEvent from './impl/AttributeCreatedEvent';
 import AttributeUpdatedEvent from './impl/AttributeUpdatedEvent';
 import AttributeDeletedEvent from './impl/AttributeDeletedEvent';
@@ -72,10 +68,6 @@ module.exports = {
   ProposalAcceptedEvent,
   ProposalDeclinedEvent,
   
-  TeamInviteCreatedEvent,
-  TeamInviteAcceptedEvent,
-  TeamInviteDeclinedEvent,
-
   TeamUpdateProposalAcceptedEvent,
   TeamUpdateProposalCreatedEvent,
   TeamUpdateProposalDeclinedEvent,

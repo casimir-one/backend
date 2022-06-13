@@ -283,15 +283,6 @@ const run = async ({
           return { ...doc, name: "Ariel Scientific Innovations Ltd", portalId: PORTAL };
         }
       }
-      else if (collectionName == 'user-invites') {
-        if (blackListUsers.some(name => doc.invitee == name || doc.creator == name)) {
-          return null;
-        }
-        if (outdatedProposals.some(id => doc._id == id)) {
-          return null;
-        }
-        return { ...doc, portalId: PORTAL, expiration: new Date().getTime() + 86400000 * 365 * 3 }
-      }
       
       return { ...doc, portalId: PORTAL };
       
