@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
 
-const TokenSchema = new Schema({
+const VerificationTokenSchema = new Schema({
   "portalId": { type: String, required: true },
   "token": { type: String, required: true },
   "refId": { type: String, required: true },
@@ -10,9 +10,9 @@ const TokenSchema = new Schema({
   "expirationTime": { type: Date, required: true }
 }, { timestamps: true });
 
-TokenSchema.index({ token: 1 }, { unique: true });
-TokenSchema.index({ expirationTime: 1 },{ expireAfterSeconds: 0 });
+VerificationTokenSchema.index({ token: 1 }, { unique: true });
+VerificationTokenSchema.index({ expirationTime: 1 },{ expireAfterSeconds: 0 });
 
-const model = mongoose.model('token', TokenSchema);
+const model = mongoose.model('verification-token', VerificationTokenSchema);
 
 module.exports = model;

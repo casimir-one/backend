@@ -112,7 +112,7 @@ class NftItemDtoService extends BaseService {
     return result;
   }
 
-  async getNonFungibleTokenClassInstancesByOwner(account, nftCollectionId) {
+  async getNFTItemsByOwnerAndNFTCollection(account, nftCollectionId) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
@@ -120,7 +120,7 @@ class NftItemDtoService extends BaseService {
     return result;
   }
 
-  async getNonFungibleTokenClassesInstancesByOwner(account) {
+  async getNFTItemsByOwner(account) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 

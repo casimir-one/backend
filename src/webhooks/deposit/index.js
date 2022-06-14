@@ -5,12 +5,12 @@ import { TextEncoder } from 'util';
 import { DEPOSIT_REQUEST_STATUS } from '@deip/constants';
 import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 import { ChainService } from '@deip/chain-service';
-import { IssueFungibleTokenCmd } from '@deip/commands';
+import { IssueFTCmd } from '@deip/commands';
 import { UnauthorizedError, BadRequestError, NotFoundError } from './../../errors'; 
-import { FungibleTokenDtoService } from './../../services';
+import { FTClassDtoService } from './../../services';
 
 
-const fungibleTokenDtoService = new FungibleTokenDtoService();
+const ftClassDtoService = new FTClassDtoService();
 
 function Encodeuint8arr(seed) {
   return new TextEncoder("utf-8").encode(seed);
@@ -43,7 +43,7 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
       throw new BadRequestError(`Asset with symbol ${currency} is not supported`);
     }
 
-    const asset = await fungibleTokenDtoService.getFungibleTokenBySymbol(currency);
+    const asset = await ftClassDtoService.getFTClassBySymbol(currency);
     if (!asset) {
       throw new BadRequestError(`Asset with symbol ${currency} is not found`);
     }
@@ -71,7 +71,7 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
-        const issueAssetCmd = new IssueFungibleTokenCmd({
+        const issueAssetCmd = new IssueFTCmd({
           issuer: regacc,
           tokenId: asset._id,
           amount: amount / 100, // cents
@@ -143,7 +143,7 @@ const createAssetDepositRequest = async (ctx) => {
       throw new BadRequestError(`Asset with symbol ${currency} is not supported`);
     }
 
-    const asset = await fungibleTokenDtoService.getFungibleTokenBySymbol(currency);
+    const asset = await ftClassDtoService.getFTClassBySymbol(currency);
     if (!asset) {
       throw new BadRequestError(`Asset with symbol ${currency} is not found`);
     }
@@ -245,19 +245,19 @@ const confirmAssetDepositRequest = async (ctx) => {
       throw new UnauthorizedError(`Provided signature is not valid for provided invoice`);
     }
 
-    const asset = await fungibleTokenDtoService.getFungibleTokenBySymbol(depositRequest.currency.toUpperCase());
+    const asset = await ftClassDtoService.getFTClassBySymbol(depositRequest.currency.toUpperCase());
     const { username: regacc, wif: regaccPrivKey } = config.FAUCET_ACCOUNT;
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
 
-        const issueFungibleTokenCmd = new IssueFungibleTokenCmd({
+        const issueFTCmd = new IssueFTCmd({
           issuer: regacc,
           tokenId: asset._id,
           amount: amount / 100, // cents
           recipient: account
         });
 
-        txBuilder.addCmd(issueFungibleTokenCmd);
+        txBuilder.addCmd(issueFTCmd);
         return txBuilder.end();
       })
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));

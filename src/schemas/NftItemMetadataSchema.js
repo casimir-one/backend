@@ -1,7 +1,7 @@
 
 import mongoose from 'mongoose';
 import AttributeValueSchema from './AttributeValueSchema';
-import { PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_TYPES } from '@deip/constants';
+import { NFT_ITEM_METADATA_FORMAT, NFT_ITEM_METADATA_TYPES } from '@deip/constants';
 
 const Schema = mongoose.Schema;
 
@@ -24,12 +24,12 @@ const NftItemMetadataSchema = new Schema({
   "attributes": [AttributeValueSchema],
   "contentType": {
     type: Number,
-    enum: [...Object.values(PROJECT_CONTENT_TYPES)],
-    default: PROJECT_CONTENT_TYPES.ANNOUNCEMENT
+    enum: [...Object.values(NFT_ITEM_METADATA_TYPES)],
+    default: NFT_ITEM_METADATA_TYPES.ANNOUNCEMENT
   },
   "formatType": {
     type: Number,
-    enum: [...Object.values(PROJECT_CONTENT_FORMAT)],
+    enum: [...Object.values(NFT_ITEM_METADATA_FORMAT)],
     required: true
   },
   "packageFiles": [{

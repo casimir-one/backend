@@ -1,5 +1,5 @@
 import BaseEvent from '../base/BaseEvent';
-import { APP_EVENT, PROJECT_CONTENT_FORMAT } from '@deip/constants';
+import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
 import assert from 'assert';
 
 class NftItemMetadataDraftUpdatedEvent extends BaseEvent {
@@ -12,7 +12,7 @@ class NftItemMetadataDraftUpdatedEvent extends BaseEvent {
     } = eventPayload;
 
     assert(!!draftId, "'draftId' is required");
-    if (formatType && formatType === PROJECT_CONTENT_FORMAT.JSON) {
+    if (formatType && formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
       assert(!!jsonData, `'jsonData' is required for ${formatType} formatType`);
     }
 

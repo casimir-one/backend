@@ -85,14 +85,6 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_DECLINED, async (event) => {
   });
 });
 
-proposalEventHandler.register(APP_EVENT.PROJECT_PROPOSAL_CREATED, async (event) => {
-  // TODO: create multisig transaction read schema
-});
-
-proposalEventHandler.register(APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED, async (event) => {
-  // TODO: create multisig transaction read schema
-});
-
 proposalEventHandler.register(APP_EVENT.TEAM_UPDATE_PROPOSAL_ACCEPTED, async (event) => {
   // TODO: create multisig transaction read schema
 });

@@ -1,5 +1,5 @@
 import BaseController from '../base/BaseController';
-import { UserDtoService, AttributeDtoService, UserService, TokenService } from '../../services';
+import { UserDtoService, AttributeDtoService, UserService, VerificationTokenService } from '../../services';
 import sharp from 'sharp';
 import qs from 'qs';
 import config from '../../config';
@@ -9,7 +9,7 @@ import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_R
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, FailedDependencyError, ConflictError, ForbiddenError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
-import { TransferFungibleTokenCmd } from '@deip/commands';
+import { TransferFTCmd } from '@deip/commands';
 import { transporter } from './../../nodemailer';
 import { genSha256Hash, genRipemd160Hash } from '@deip/toolbox';
 
@@ -17,7 +17,7 @@ import { genSha256Hash, genRipemd160Hash } from '@deip/toolbox';
 const userDtoService = new UserDtoService();
 const attributeDtoService = new AttributeDtoService();
 const userService = new UserService();
-const tokenService = new TokenService();
+const verificationTokenService = new VerificationTokenService();
 
 const validateEmail = (email) => {
   const patternStr = ['^(([^<>()[\\]\\.,;:\\s@"]+(\\.[^<>()\\[\\]\\.,;:\\s@"]+)*)',
@@ -68,7 +68,7 @@ class UsersController extends BaseController {
               throw new BadRequestError(`'confirmationCode' field are required`);
             }
 
-            const token = await tokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
+            const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
             if (token && token.refId !== genRipemd160Hash(email)) {
               throw new ForbiddenError(`Incorrect confirmation code`);
             }
@@ -97,7 +97,7 @@ class UsersController extends BaseController {
 
               if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
                 const { owner: { auths: [{ key: pubKey }]} } = authority;
-                const seedFundingCmd = new TransferFungibleTokenCmd({
+                const seedFundingCmd = new TransferFTCmd({
                   from: faucetUsername,
                   to: pubKey,
                   tokenId: config.CORE_ASSET.id,
@@ -106,7 +106,7 @@ class UsersController extends BaseController {
                 txBuilder.addCmd(seedFundingCmd);
               }
 
-              const daoFundingCmd = new TransferFungibleTokenCmd({
+              const daoFundingCmd = new TransferFTCmd({
                 from: faucetUsername,
                 to: entityId,
                 tokenId: config.CORE_ASSET.id,
@@ -393,7 +393,7 @@ class UsersController extends BaseController {
             .then((txBuilder) => {
               const { authority } = alterDaoAuthorityCmd.getCmdPayload();
               const { owner: { auths: [{ key: pubKey }] } } = authority;
-              const seedFundingCmd = new TransferFungibleTokenCmd({
+              const seedFundingCmd = new TransferFTCmd({
                 from: faucetUsername,
                 to: pubKey,
                 tokenId: config.CORE_ASSET.id,

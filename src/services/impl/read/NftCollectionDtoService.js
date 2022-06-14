@@ -17,7 +17,7 @@ class NftCollectionDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const chainNftCollections = await chainRpc.getNonFungibleTokenClassesAsync();
-    const projectsAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT || 'project');
+    const nftCollectionsAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.NFT_COLLECTION || 'nftCollection');
 
     const filter = {
       searchTerm: "",
@@ -64,7 +64,7 @@ class NftCollectionDtoService extends BaseService {
         return p.portalId == portalId;
       }))
       .filter(p => !filter.attributes.length || filter.attributes.every(fAttr => {
-        const attribute = projectsAttributes.find(attr => attr._id.toString() === fAttr.attributeId.toString());
+        const attribute = nftCollectionsAttributes.find(attr => attr._id.toString() === fAttr.attributeId.toString());
         if (!attribute)
           return false;
 
@@ -107,8 +107,8 @@ class NftCollectionDtoService extends BaseService {
     return result;
   }
 
-  async getNftCollectionsByIssuer(daoId) {
-    const nftCollections = await this.findMany({ daoId });
+  async getNftCollectionsByIssuer(issuer) {
+    const nftCollections = await this.findMany({ issuer: issuer });
     if (!nftCollections.length) return [];
     const result = await this.mapNftCollections(nftCollections, { isDefault: false });
     return result;

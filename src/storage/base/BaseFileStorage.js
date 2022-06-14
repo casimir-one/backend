@@ -9,15 +9,15 @@ const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
 
-const projectDir = 'projects';
-const projectDirPath = (baseDir, projectId) => `${baseDir}/${projectDir}/${projectId}`;
-const projectFilePath = (baseDir, projectId, filename) => `${projectDirPath(baseDir, projectId)}/${filename}`;
-const projectAttributeDirPath = (baseDir, projectId, attributeId) => `${projectDirPath(baseDir, projectId)}/${attributeId}`;
-const projectAttributeFilePath = (baseDir, projectId, attributeId, filename) => `${projectAttributeDirPath(baseDir, projectId, attributeId)}/${filename}`;
-const projectContentPackageDirPath = (baseDir, projectId, packageHash) => `${projectDirPath(baseDir, projectId)}/${packageHash}`;
-const projectContentPackageFilePath = (baseDir, projectId, packageHash, fileHash) => `${projectContentPackageDirPath(baseDir, projectId, packageHash)}/${fileHash}`;
-const projectDarArchiveDirPath = (baseDir, projectId, archiveName) => `${projectDirPath(baseDir, projectId)}/${archiveName}`;
-const projectContentPackageTempDirPath = (baseDir, projectId, sessionId) => `${projectDirPath(baseDir, projectId)}/temp-${sessionId}`;
+const nftCollectionDir = 'nft-collections';
+const nftCollectionDirPath = (baseDir, nftCollectionId) => `${baseDir}/${nftCollectionDir}/${nftCollectionId}`;
+const nftCollectionFilePath = (baseDir, nftCollectionId, filename) => `${nftCollectionDirPath(baseDir, nftCollectionId)}/${filename}`;
+const nftCollectionAttributeDirPath = (baseDir, nftCollectionId, attributeId) => `${nftCollectionDirPath(baseDir, nftCollectionId)}/${attributeId}`;
+const nftCollectionAttributeFilePath = (baseDir, nftCollectionId, attributeId, filename) => `${nftCollectionAttributeDirPath(baseDir, nftCollectionId, attributeId)}/${filename}`;
+const nftItemMetadataPackageDirPath = (baseDir, nftCollectionId, packageHash) => `${nftCollectionDirPath(baseDir, nftCollectionId)}/${packageHash}`;
+const nftItemMetadataPackageFilePath = (baseDir, nftCollectionId, packageHash, fileHash) => `${nftItemMetadataPackageDirPath(baseDir, nftCollectionId, packageHash)}/${fileHash}`;
+const nftCollectionArchiveDirPath = (baseDir, nftCollectionId, archiveName) => `${nftCollectionDirPath(baseDir, nftCollectionId)}/${archiveName}`;
+const nftItemMetadataPackageTempDirPath = (baseDir, nftCollectionId, sessionId) => `${nftCollectionDirPath(baseDir, nftCollectionId)}/temp-${sessionId}`;
 
 const accountDir = 'accounts';
 const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
@@ -78,36 +78,36 @@ class BaseFileStorage {
   async putPassThroughStream(remotePath, passThroughSteam, options = {}) { throw new Error("Not implemented"); }
 
 
-  getProjectDirPath(projectId) {
-    return projectDirPath(this._baseDirPath, projectId);
+  getNftCollectionDirPath(nftCollectionId) {
+    return nftCollectionDirPath(this._baseDirPath, nftCollectionId);
   }
 
-  getProjectFilePath(projectId, filename) {
-    return projectFilePath(this._baseDirPath, projectId, filename);
+  getNftCollectionFilePath(nftCollectionId, filename) {
+    return nftCollectionFilePath(this._baseDirPath, nftCollectionId, filename);
   }
 
-  getProjectAttributeDirPath(projectId, attributeId) {
-    return projectAttributeDirPath(this._baseDirPath, projectId, attributeId);
+  getNftCollectionAttributeDirPath(nftCollectionId, attributeId) {
+    return nftCollectionAttributeDirPath(this._baseDirPath, nftCollectionId, attributeId);
   }
 
-  getProjectAttributeFilePath(projectId, attributeId, filename) {
-    return projectAttributeFilePath(this._baseDirPath, projectId, attributeId, filename);
+  getNftCollectionAttributeFilePath(nftCollectionId, attributeId, filename) {
+    return nftCollectionAttributeFilePath(this._baseDirPath, nftCollectionId, attributeId, filename);
   }
 
-  getProjectContentPackageDirPath(projectId, packageHash) {
-    return projectContentPackageDirPath(this._baseDirPath, projectId, packageHash);
+  getNftItemMetadataPackageDirPath(nftCollectionId, packageHash) {
+    return nftItemMetadataPackageDirPath(this._baseDirPath, nftCollectionId, packageHash);
   }
 
-  getProjectContentPackageFilePath(projectId, packageHash, fileHash) {
-    return projectContentPackageFilePath(this._baseDirPath, projectId, packageHash, fileHash);
+  getNftItemMetadataPackageFilePath(nftCollectionId, packageHash, fileHash) {
+    return nftItemMetadataPackageFilePath(this._baseDirPath, nftCollectionId, packageHash, fileHash);
   }
 
-  getProjectDarArchiveDirPath(projectId, archiveName) {
-    return projectDarArchiveDirPath(this._baseDirPath, projectId, archiveName);
+  getNftCollectionArchiveDirPath(nftCollectionId, archiveName) {
+    return nftCollectionArchiveDirPath(this._baseDirPath, nftCollectionId, archiveName);
   }
   
-  getProjectContentPackageTempDirPath(projectId, sessionId) {
-    return projectContentPackageTempDirPath(this._baseDirPath, projectId, sessionId);
+  getNftItemMetadataPackageTempDirPath(nftCollectionId, sessionId) {
+    return nftItemMetadataPackageTempDirPath(this._baseDirPath, nftCollectionId, sessionId);
   }
 
   getAccountDirPath(username) {
