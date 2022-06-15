@@ -25,7 +25,7 @@ class NftItemDtoService extends BaseService {
 
     return nftItemsMetadatas.map((nftItemMetadata) => {
       let chainNftItem = chainNftItems.find((chainNftItem) =>
-        chainNftItem
+        chainNftItem.nftItemsIds
         && chainNftItem.nftItemsIds.some(id => id == nftItemMetadata._id.nftItemId)
         && chainNftItem.nftCollectionId == nftItemMetadata._id.nftCollectionId
       );
@@ -67,8 +67,8 @@ class NftItemDtoService extends BaseService {
     });
   }
 
-  async getNftItem(nftItemId) {
-    const nftItemMetadata = await this.findOne({ _id: nftItemId });
+  async getNftItem({ nftItemId, nftCollectionId }) {
+    const nftItemMetadata = await this.findOne({ _id: { nftItemId, nftCollectionId } });
     if (!nftItemMetadata) return null;
     const [result] = await this.mapNftItems([nftItemMetadata]);
     return result;
