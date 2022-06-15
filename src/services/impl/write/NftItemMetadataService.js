@@ -95,13 +95,13 @@ class NftItemMetadataService extends BaseService {
     return result;
   }
 
-  async removeNftItemMetadataById(id) {
-    const result = await this.deleteOne({ _id: id });
+  async removeNftItemMetadataById({ nftItemId, nftCollectionId }) {
+    const result = await this.deleteOne({ _id: { nftItemId, nftCollectionId } });
     return result;
   }
   
   async removeNftItemMetadataByHash(nftCollectionId, hash) {
-    const result = await this.deleteOne({ nftCollectionId: nftCollectionId, hash });
+    const result = await this.deleteOne({ nftCollectionId, hash });
     return result;
   }
 
@@ -110,8 +110,8 @@ class NftItemMetadataService extends BaseService {
     return result;
   }
 
-  async getNftItemMetadata(nftItemId) {
-    const result = await this.findOne({ _id: nftItemId });
+  async getNftItemMetadata({ nftItemId, nftCollectionId }) {
+    const result = await this.findOne({ _id: { nftItemId, nftCollectionId } });
     return result;
   }
 

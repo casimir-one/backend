@@ -308,9 +308,10 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const nftCollectionId = ctx.params.nftCollectionId;
-        const nftItem = await nftItemDtoService.getNftItem(nftCollectionId);
+        const nftItemId = ctx.params.nftItemId;
+        const nftItem = await nftItemDtoService.getNftItem({ nftItemId, nftCollectionId });
         if (!nftItem) {
-          throw new NotFoundError(`NftItem "${nftCollectionId}" is not found`);
+          throw new NotFoundError(`NftItem "${nftItemId}" in ${nftCollectionId} nft collection is not found`);
         }
         ctx.successRes(nftItem);
       } catch (err) {
@@ -413,21 +414,10 @@ class AssetsController extends BaseController {
     }
   });
 
-  getNftItemMetadata = this.query({
-    h: async (ctx) => {
-      try {
-        const refId = ctx.params.refId;
-        const nftItemMetadata = await nftItemMetadataService.getNftItemMetadata(refId);
-        ctx.successRes(nftItemMetadata);
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
   getNftItemPackageFile = this.query({
     h: async (ctx) => {
       try {
+        const nftCollectionId = ctx.params.nftCollectionId;
         const nftItemId = ctx.params.nftItemId;
         const fileHash = ctx.params.fileHash;
         const isDownload = ctx.query.download === 'true';
@@ -437,8 +427,8 @@ class AssetsController extends BaseController {
           packageFiles: '',
           folder: ''
         };
+        const nftItemMetadata = await nftItemMetadataService.getNftItemMetadata({ nftItemId, nftCollectionId });
 
-        const nftItemMetadata = await nftItemMetadataService.getNftItemMetadata(nftItemId);
         if (!nftItemMetadata) {
           const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(nftItemId);
           if (!draft) {
@@ -554,8 +544,8 @@ class AssetsController extends BaseController {
             if (nftItemMetadata) {
               throw new ConflictError(`Nft item metadata with "${draft.hash}" hash already exist`);
             }
-            if (draft.status != NFT_ITEM_METADATA_DRAFT_STATUS.IN_PROGRESS) {
-              throw new BadRequestError(`Nft item metadata "${draft.nftCollectionId}" is in '${draft.status}' status`);
+            if (draft.status != NFT_ITEM_METADATA_DRAFT_STATUS.APPROVED) {
+              throw new BadRequestError(`Nft item metadata "${draft.nftCollectionId}" isn't in 'Approved' status`);
             }
         };
 
@@ -1033,7 +1023,7 @@ class AssetsController extends BaseController {
           if (instance.nftItemsIds.includes(nftItemId)) {
             throw new ConflictError(`nftItemId ${nftItemId} already exist`);
           }
-          if (nftItemId === 0) {
+          if (nftItemId == 0) {
             throw new BadRequestError(`nftItemId cant not be 0`);
           }
         };
