@@ -125,7 +125,8 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     title,
     jsonData,
     metadata,
-    attributes
+    attributes,
+    status
   } = event.getEventPayload();
 
   const _id = mongoose.Types.ObjectId(entityId);
@@ -141,7 +142,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     owner,
     ownedByTeam,
     folder: _id,
-    status: PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS,
+    status: status || PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS,
     authors: authors || [],
     references: references || [],
     packageFiles: [],
