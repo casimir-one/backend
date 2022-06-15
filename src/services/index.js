@@ -19,9 +19,9 @@ import PortalDtoService from './impl/read/PortalDtoService';
 import PortalService from './impl/write/PortalService';
 import LayoutDtoService from './impl/read/LayoutDtoService';
 import LayoutService from './impl/write/LayoutService';
-import FungibleTokenDtoService from './impl/read/FungibleTokenDtoService';
-import FungibleTokenService from './impl/write/FungibleTokenService';
-import TokenService from './impl/write/TokenService';
+import FTClassDtoService from './impl/read/FTClassDtoService';
+import FTClassService from './impl/write/FTClassService';
+import VerificationTokenService from './impl/write/VerificationTokenService';
 
 module.exports = {
   TeamService,
@@ -55,8 +55,8 @@ module.exports = {
   LayoutDtoService,
   LayoutService,
 
-  FungibleTokenDtoService,
-  FungibleTokenService,
+  FTClassDtoService,
+  FTClassService,
 
-  TokenService
+  VerificationTokenService
 }

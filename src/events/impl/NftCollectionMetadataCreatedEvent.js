@@ -7,13 +7,13 @@ class NftCollectionMetadataCreatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      nftCollectionId,
+      entityId,
       issuer,
       attributes,
       isDefault
     } = eventPayload;
 
-    assert(!!nftCollectionId, "'nftCollectionId' is required");
+    assert(!!entityId, "'entityId' is required");
     assert(!!issuer, "'issuer' is required");
 
     super(APP_EVENT.NFT_COLLECTION_METADATA_CREATED, eventPayload);

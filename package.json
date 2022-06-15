@@ -1,7 +1,7 @@
 {
   "name": "deip-dapp",
   "version": "1.0.0",
-  "description": "A Vue.js project",
+  "description": "DEIP Off-Chain Server",
   "author": "Yahor Tsaryk <yahor.tsaryk@deip.world>",
   "private": true,
   "scripts": {

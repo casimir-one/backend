@@ -19,18 +19,18 @@ import UserAuthorityAlteredEvent from './impl/UserAuthorityAlteredEvent';
 import DaoCreatedEvent from './impl/DaoCreatedEvent';
 import DaoUpdatedEvent from './impl/DaoUpdatedEvent';
 
-import FungibleTokenTransferedEvent from './impl/FungibleTokenTransferedEvent';
-import NonFungibleTokenTransferedEvent from './impl/NonFungibleTokenTransferedEvent';
-import FungibleTokenCreatedEvent from './impl/FungibleTokenCreatedEvent';
+import FTTransferredEvent from './impl/FTTransferredEvent';
+import NFTTransferredEvent from './impl/NFTTransferredEvent';
+import FTCreatedEvent from './impl/FTCreatedEvent';
 import NftCollectionCreatedEvent from './impl/NftCollectionCreatedEvent';
-import FungibleTokenIssuedEvent from './impl/FungibleTokenIssuedEvent';
+import FTIssuedEvent from './impl/FTIssuedEvent';
 import NftItemIssuedEvent from './impl/NftItemIssuedEvent';
-import FungibleTokenTransferProposalCreatedEvent from './impl/FungibleTokenTransferProposalCreatedEvent';
-import FungibleTokenTransferProposalAcceptedEvent from './impl/FungibleTokenTransferProposalAcceptedEvent';
-import FungibleTokenTransferProposalDeclinedEvent from './impl/FungibleTokenTransferProposalDeclinedEvent';
-import NonFungibleTokenTransferProposalCreatedEvent from './impl/NonFungibleTokenTransferProposalCreatedEvent';
-import NonFungibleTokenTransferProposalAcceptedEvent from './impl/NonFungibleTokenTransferProposalAcceptedEvent';
-import NonFungibleTokenTransferProposalDeclinedEvent from './impl/NonFungibleTokenTransferProposalDeclinedEvent';
+import FTTransferProposalCreatedEvent from './impl/FTTransferProposalCreatedEvent';
+import FTTransferProposalAcceptedEvent from './impl/FTTransferProposalAcceptedEvent';
+import FTTransferProposalDeclinedEvent from './impl/FTTransferProposalDeclinedEvent';
+import NFTTransferProposalCreatedEvent from './impl/NFTTransferProposalCreatedEvent';
+import NFTTransferProposalAcceptedEvent from './impl/NFTTransferProposalAcceptedEvent';
+import NFTTransferProposalDeclinedEvent from './impl/NFTTransferProposalDeclinedEvent';
 import TokenSwapProposalCreatedEvent from './impl/TokenSwapProposalCreatedEvent';
 import TokenSwapProposalAcceptedEvent from './impl/TokenSwapProposalAcceptedEvent';
 import TokenSwapProposalDeclinedEvent from './impl/TokenSwapProposalDeclinedEvent';
@@ -81,18 +81,18 @@ module.exports = {
 
   UserAuthorityAlteredEvent,
 
-  FungibleTokenTransferedEvent,
-  NonFungibleTokenTransferedEvent,
-  FungibleTokenCreatedEvent,
+  FTTransferredEvent,
+  NFTTransferredEvent,
+  FTCreatedEvent,
   NftCollectionCreatedEvent,
-  FungibleTokenIssuedEvent,
+  FTIssuedEvent,
   NftItemIssuedEvent,
-  FungibleTokenTransferProposalCreatedEvent,
-  FungibleTokenTransferProposalAcceptedEvent,
-  FungibleTokenTransferProposalDeclinedEvent,
-  NonFungibleTokenTransferProposalCreatedEvent,
-  NonFungibleTokenTransferProposalAcceptedEvent,
-  NonFungibleTokenTransferProposalDeclinedEvent,
+  FTTransferProposalCreatedEvent,
+  FTTransferProposalAcceptedEvent,
+  FTTransferProposalDeclinedEvent,
+  NFTTransferProposalCreatedEvent,
+  NFTTransferProposalAcceptedEvent,
+  NFTTransferProposalDeclinedEvent,
   TokenSwapProposalCreatedEvent,
   TokenSwapProposalAcceptedEvent,
   TokenSwapProposalDeclinedEvent,

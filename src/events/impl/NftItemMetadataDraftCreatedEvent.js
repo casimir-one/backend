@@ -1,5 +1,5 @@
 import BaseEvent from './../base/BaseEvent';
-import { APP_EVENT, PROJECT_CONTENT_FORMAT, PROJECT_CONTENT_DRAFT_STATUS } from '@deip/constants';
+import { APP_EVENT, NFT_ITEM_METADATA_FORMAT, NFT_ITEM_METADATA_DRAFT_STATUS } from '@deip/constants';
 import assert from 'assert';
 
 class NftItemMetadataDraftCreatedEvent extends BaseEvent {
@@ -18,13 +18,13 @@ class NftItemMetadataDraftCreatedEvent extends BaseEvent {
     assert(!!entityId, "'entityId' is required");
     assert(!!formatType, "'formatType' is required");
     assert(!!owner, "'owner' is required");
-    if (formatType === PROJECT_CONTENT_FORMAT.JSON) {
+    if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
       assert(!!jsonData, `'jsonData' is required for ${formatType} formatType`);
     }
     if (status) {
       const validStatuses = [
-        PROJECT_CONTENT_DRAFT_STATUS.IN_PROGRESS,
-        PROJECT_CONTENT_DRAFT_STATUS.PROPOSED
+        NFT_ITEM_METADATA_DRAFT_STATUS.IN_PROGRESS,
+        NFT_ITEM_METADATA_DRAFT_STATUS.PROPOSED
       ];
       assert(validStatuses.includes(status), "'status' is invalid");
     }

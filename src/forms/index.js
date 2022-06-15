@@ -1,14 +1,14 @@
-import ProjectForm from './impl/ProjectForm';
+import NftCollectionForm from './impl/NftCollectionForm';
 import TeamForm from './impl/TeamForm';
 import UserForm from './impl/UserForm';
-import ProjectContentPackageForm from './impl/ProjectContentPackageForm';
+import NftItemMetadataForm from './impl/NftItemMetadataForm';
 import PortalSettingsForm from './impl/PortalSettingsForm';
 
 
 module.exports = {
-  ProjectForm,
+  NftCollectionForm,
   TeamForm,
   UserForm,
-  ProjectContentPackageForm,
+  NftItemMetadataForm,
   PortalSettingsForm
 }

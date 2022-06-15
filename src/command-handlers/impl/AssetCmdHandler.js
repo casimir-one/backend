@@ -1,12 +1,11 @@
 import { APP_CMD } from '@deip/constants';
-import { PROJECT_STATUS } from './../../constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import {
-  FungibleTokenTransferedEvent,
-  NonFungibleTokenTransferedEvent,
-  FungibleTokenCreatedEvent,
+  FTTransferredEvent,
+  NFTTransferredEvent,
+  FTCreatedEvent,
   NftCollectionCreatedEvent,
-  FungibleTokenIssuedEvent,
+  FTIssuedEvent,
   NftItemIssuedEvent,
   NftCollectionMetadataCreatedEvent,
   NftCollectionMetadataUpdatedEvent,
@@ -14,8 +13,6 @@ import {
   NftItemMetadataDraftDeletedEvent,
   NftItemMetadataDraftUpdatedEvent,
   NftItemMetadataCreatedEvent,
-  ProjectContentStatusUpdatedEvent,
-  ProjectContentMetadataUpdatedEvent,
   NftItemMetadataDraftStatusUpdatedEvent,
   NftItemMetadataDraftModerationMsgUpdatedEvent
 } from './../../events';
@@ -32,17 +29,19 @@ const assetCmdHandler = new AssetCmdHandler();
 
 assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION_METADATA, (cmd, ctx) => {
   const { 
-    entityId: nftCollectionId, 
+    entityId, 
     issuer, 
     attributes,
-    isDefault
+    isDefault,
+    issuedByTeam
   } = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new NftCollectionMetadataCreatedEvent({
-    nftCollectionId,
+    entityId,
     issuer,
     attributes,
-    isDefault
+    isDefault,
+    issuedByTeam
   }));
 
 });
@@ -95,47 +94,33 @@ assetCmdHandler.register(APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT, (cmd, ctx) => {
 });
 
 assetCmdHandler.register(APP_CMD.CREATE_NFT_ITEM_METADATA, (cmd, ctx) => {
-  const projectContent = cmd.getCmdPayload();
+  const data = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new NftItemMetadataCreatedEvent({
-    ...projectContent,
+    ...data,
     creator: ctx.state.user.username
   }));
-});
-
-assetCmdHandler.register(APP_CMD.UPDATE_PROJECT_CONTENT_STATUS, (cmd, ctx) => {
-
-  const { status, _id } = cmd.getCmdPayload();
-
-  ctx.state.appEvents.push(new ProjectContentStatusUpdatedEvent({ status, _id }));
-});
-
-assetCmdHandler.register(APP_CMD.UPDATE_PROJECT_CONTENT_METADATA, (cmd, ctx) => {
-
-  const { metadata, _id } = cmd.getCmdPayload();
-
-  ctx.state.appEvents.push(new ProjectContentMetadataUpdatedEvent({ metadata, _id }));
 });
 
 assetCmdHandler.register(APP_CMD.TRANSFER_FT, (cmd, ctx) => {
 
   const transferData = cmd.getCmdPayload();
   
-  ctx.state.appEvents.push(new FungibleTokenTransferedEvent(transferData));
+  ctx.state.appEvents.push(new FTTransferredEvent(transferData));
 });
 
 assetCmdHandler.register(APP_CMD.TRANSFER_NFT, (cmd, ctx) => {
 
   const transferData = cmd.getCmdPayload();
   
-  ctx.state.appEvents.push(new NonFungibleTokenTransferedEvent(transferData));
+  ctx.state.appEvents.push(new NFTTransferredEvent(transferData));
 });
 
 assetCmdHandler.register(APP_CMD.CREATE_FT, (cmd, ctx) => {
 
   const asset = cmd.getCmdPayload();
   
-  ctx.state.appEvents.push(new FungibleTokenCreatedEvent(asset));
+  ctx.state.appEvents.push(new FTCreatedEvent(asset));
 });
 
 assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION, (cmd, ctx) => {
@@ -149,7 +134,7 @@ assetCmdHandler.register(APP_CMD.ISSUE_FT, (cmd, ctx) => {
 
   const asset = cmd.getCmdPayload();
   
-  ctx.state.appEvents.push(new FungibleTokenIssuedEvent(asset));
+  ctx.state.appEvents.push(new FTIssuedEvent(asset));
 });
 
 assetCmdHandler.register(APP_CMD.CREATE_NFT_ITEM, (cmd, ctx) => {

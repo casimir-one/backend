@@ -1,4 +1,4 @@
-import { TOKEN_LIFETIME } from './../constants';
+import { VERIFICATION_TOKEN_LIFETIME } from './../constants';
 
 export const defaultHtmlMessageForConfirmRegistration = (confirmationCode) => `
 <table role="“presentation”" width="100%" style="background-color:#f4f4f6;width:100%" cellspacing="“0”" cellpadding="“0”">
@@ -27,7 +27,7 @@ export const defaultHtmlMessageForConfirmRegistration = (confirmationCode) => `
                                   <p style="margin:0;padding:0;font-size:16px;line-height:24px;color:#565365;font-weight:400;margin-bottom:20px;font-family:CircularXXWeb-Book,Helvetica,Arial">Please enter this confirmation code in the window where you started creating your account:</p>
                                   <p style="margin:0;padding:0;font-size: 28px;line-height:24px;/* color:#565365; */font-weight: bold;text-align: center;margin-bottom:20px;background-color: #f3f4f8;padding: 30px 0;font-family: monospace;letter-spacing: 10px;">${confirmationCode}</p>
                                   <p style="margin:0;padding:0;font-size:16px;line-height:24px;color:#565365;font-weight:400;margin-bottom:20px;font-family:CircularXXWeb-Book,Helvetica,Arial">
-                                    This code is only for you. Please <b>don't share</b> it with others. Code expires in ${Math.floor(TOKEN_LIFETIME/1000/60)} minutes.</p>
+                                    This code is only for you. Please <b>don't share</b> it with others. Code expires in ${Math.floor(VERIFICATION_TOKEN_LIFETIME/1000/60)} minutes.</p>
                                   <p style="margin:0;padding:0;font-size:16px;line-height:24px;color:#565365;font-weight:400;margin-bottom:0px;font-family:CircularXXWeb-Book,Helvetica,Arial">If you didn't create an account, please ignore this message.</p>
                                 </td>
                               </tr>

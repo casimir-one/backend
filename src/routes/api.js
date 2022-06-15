@@ -12,14 +12,6 @@ import {
   layoutsCtrl
 } from '../controllers';
 
-import attributeFileProxy from './../middlewares/proxy/attribute/attributeFileProxy';
-import nftCollectionCmdProxy from '../middlewares/proxy/project/nftCollectionCmdProxy';
-import nftItemCmdProxy from '../middlewares/proxy/projectContent/nftItemCmdProxy';
-import nftItemMetadataDraftCmdProxy from '../middlewares/proxy/projectContent/nftItemMetadataDraftCmdProxy';
-import teamCmdProxy from './../middlewares/proxy/team/teamCmdProxy';
-import teamLogoProxy from './../middlewares/proxy/team/teamLogoProxy';
-import userCmdProxy from './../middlewares/proxy/user/userCmdProxy';
-
 import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
 
 const protected_route = koa_router()
@@ -45,8 +37,8 @@ public_route.get('/network/portals/:portal', portalCtrl.getNetworkPortal)
 
 /* V2 */
 
-protected_route.post('/v2/team', compose([teamCmdProxy()]), teamsCtrl.createTeam)
-protected_route.put('/v2/team', compose([teamCmdProxy()]), teamsCtrl.updateTeam)
+protected_route.post('/v2/team', teamsCtrl.createTeam)
+protected_route.put('/v2/team', teamsCtrl.updateTeam)
 public_route.get('/v2/teams', teamsCtrl.getTeams)
 protected_route.post('/v2/team/join', teamsCtrl.joinTeam)
 protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)
@@ -55,7 +47,7 @@ public_route.get('/v2/teams/listing-paginated', teamsCtrl.getTeamsListingPaginat
 public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
 public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
 public_route.get('/v2/teams/portal/:portalId', teamsCtrl.getTeamsByPortal)
-public_route.get('/team/logo/:teamId', compose([teamLogoProxy()]), teamsCtrl.getTeamLogo)
+public_route.get('/team/logo/:teamId', teamsCtrl.getTeamLogo)
 
 public_route.get('/v2/attributes', attributesCtrl.getAttributes);
 public_route.get('/v2/attributes/scope/:scope', attributesCtrl.getAttributesByScope);
@@ -66,7 +58,7 @@ public_route.get('/v2/attributes/system', attributesCtrl.getSystemAttributes);
 protected_route.post('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
 protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
 protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
-public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', compose([attributeFileProxy()]), attributesCtrl.getAttributeFile);
+public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', attributesCtrl.getAttributeFile);
 
 protected_route.get('/v2/assets/deposit/history/account/:account', assetsCtrl.getAccountDepositHistory)
 public_route.get('/v2/assets/type/:type', assetsCtrl.getAssetsByType)
@@ -90,26 +82,26 @@ public_route.get('/v2/tokens/nft/items/portal/:portalId', assetsCtrl.getNftItems
 public_route.get('/v2/tokens/nft/item/draft/:nftItemDraftId', assetsCtrl.getNftItemMetadataDraft)
 public_route.get('/v2/tokens/nft/item/package/:nftItemId/:fileHash', assetsCtrl.getNftItemPackageFile)
 
-public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFungibleTokenById)
-public_route.get('/v2/tokens/ft/symbol/:symbol', assetsCtrl.getFungibleTokenBySymbol)
-public_route.get('/v2/tokens/ft/issuer/:issuer', assetsCtrl.getFungibleTokensByIssuer)
-public_route.get(['/v2/tokens/ft/limit/:limit/', '/v2/tokens/ft/limit/:limit/:lowerBoundSymbol'], assetsCtrl.lookupFungibleTokens)
-protected_route.get('/v2/tokens/ft/owner/:owner/symbol/:symbol', assetsCtrl.getFungibleTokenBalance)
-protected_route.get('/v2/tokens/ft/owner/:owner', assetsCtrl.getFungibleTokenBalancesByOwner)
-public_route.get('/v2/tokens/ft/accounts/symbol/:symbol', assetsCtrl.getFungibleTokenBalancesBySymbol)
-protected_route.post('/v2/tokens/ft/transfer', assetsCtrl.createFungibleTokenTransferRequest)
-protected_route.post('/v2/tokens/nft/transfer', assetsCtrl.createNonFungibleTokenTransferRequest)
+public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFTClassById)
+public_route.get('/v2/tokens/ft/symbol/:symbol', assetsCtrl.getFTClassBySymbol)
+public_route.get('/v2/tokens/ft/issuer/:issuer', assetsCtrl.getFTClassesByIssuer)
+public_route.get(['/v2/tokens/ft/limit/:limit/', '/v2/tokens/ft/limit/:limit/:lowerBoundSymbol'], assetsCtrl.lookupFTClassess)
+protected_route.get('/v2/tokens/ft/owner/:owner/symbol/:symbol', assetsCtrl.getFTClassBalance)
+protected_route.get('/v2/tokens/ft/owner/:owner', assetsCtrl.getFTClassBalancesByOwner)
+public_route.get('/v2/tokens/ft/accounts/symbol/:symbol', assetsCtrl.getFTClassBalancesBySymbol)
+protected_route.post('/v2/tokens/ft/transfer', assetsCtrl.createFTTransferRequest)
+protected_route.post('/v2/tokens/nft/transfer', assetsCtrl.createNFTTransferRequest)
 protected_route.post('/v2/tokens/swap', assetsCtrl.createTokenSwapRequest)
-protected_route.post('/v2/tokens/ft/create', assetsCtrl.createFungibleToken)
+protected_route.post('/v2/tokens/ft/create', assetsCtrl.createFTClass)
 protected_route.post('/v2/tokens/nft/create', assetsCtrl.createNftCollection)
 protected_route.post('/v2/tokens/nft/metadata/create', assetsCtrl.createNftCollectionMetadata)
-protected_route.put('/v2/tokens/nft/metadata/update', compose([nftCollectionCmdProxy()]), assetsCtrl.updateNftCollectionMetadata)
-protected_route.post('/v2/tokens/ft/issue', assetsCtrl.issueFungibleToken)
+protected_route.put('/v2/tokens/nft/metadata/update', assetsCtrl.updateNftCollectionMetadata)
+protected_route.post('/v2/tokens/ft/issue', assetsCtrl.issueFT)
 protected_route.post('/v2/tokens/nft/item/create', assetsCtrl.createNftItem)
-protected_route.post('/v2/tokens/nft/item/metadata/create', compose([nftItemCmdProxy()]), assetsCtrl.createNftItemMetadata)
-protected_route.post('/v2/tokens/nft/item/metadata/draft/create', compose([nftItemMetadataDraftCmdProxy()]), assetsCtrl.createNftItemMetadataDraft)
-protected_route.put('/v2/tokens/nft/item/metadata/draft/update', compose([nftItemMetadataDraftCmdProxy()]), assetsCtrl.updateNftItemMetadataDraft)
-protected_route.put('/v2/tokens/nft/item/metadata/draft/delete', compose([nftItemMetadataDraftCmdProxy()]), assetsCtrl.deleteNftItemMetadataDraft)
+protected_route.post('/v2/tokens/nft/item/metadata/create', assetsCtrl.createNftItemMetadata)
+protected_route.post('/v2/tokens/nft/item/metadata/draft/create', assetsCtrl.createNftItemMetadataDraft)
+protected_route.put('/v2/tokens/nft/item/metadata/draft/update', assetsCtrl.updateNftItemMetadataDraft)
+protected_route.put('/v2/tokens/nft/item/metadata/draft/delete', assetsCtrl.deleteNftItemMetadataDraft)
 protected_route.put('/v2/tokens/nft/item/metadata/draft/moderate', assetsCtrl.moderateNftItemMetadataDraft)
 
 public_route.get('/v2/user/profile/:username', usersCtrl.getUserProfile)
@@ -124,8 +116,8 @@ public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
 public_route.get('/v2/users/portal/:portalId', usersCtrl.getUsersByPortal)
 public_route.post('/v2/user/registration-code/email/send', usersCtrl.sendRegistrationCodeByEmail)
 
-protected_route.put('/v2/user/update', compose([userCmdProxy()]), usersCtrl.updateUser)
-protected_route.put('/v2/user/update/password', compose([userCmdProxy()]), usersCtrl.updateUserPassword)
+protected_route.put('/v2/user/update', usersCtrl.updateUser)
+protected_route.put('/v2/user/update/password', usersCtrl.updateUserPassword)
 public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
 
 public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)

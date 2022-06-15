@@ -14,13 +14,13 @@ class NftCollectionMetadataService extends BaseService {
   }
 
   async getNftCollectionMetadata(nftCollectionId) {
-    const project = await this.findOne({ _id: nftCollectionId });
-    return project || null;
+    const nftCollection = await this.findOne({ _id: nftCollectionId });
+    return nftCollection || null;
   }
 
   async getNftCollectionMetadatas(nftCollectionIds) {
-    const project = await this.findMany({ _id: { $in: [...nftCollectionIds] } });
-    return project || null;
+    const nftCollection = await this.findMany({ _id: { $in: [...nftCollectionIds] } });
+    return nftCollection || null;
   }
 
   async createNftCollectionMetadata({
@@ -62,12 +62,12 @@ class NftCollectionMetadataService extends BaseService {
   
   async mapAttributes(attributes) {
     const attributeDtoService = new AttributeDtoService();
-    const projectAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.PROJECT || 'project');
+    const nftCollectionAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.NFT_COLLECTION || 'nftCollection');
 
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.attributeId.toString());
 
-      const attribute = projectAttributes.find(a => a._id.toString() == rAttrId);
+      const attribute = nftCollectionAttributes.find(a => a._id.toString() == rAttrId);
       let rAttrValue = null;
 
       if (!attribute) {

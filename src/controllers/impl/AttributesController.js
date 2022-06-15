@@ -167,8 +167,8 @@ class AttributesController extends BaseController {
         const imageQuery = ctx.query.image === 'true';
         let filepath = '';
         switch (scope) {
-          case ATTR_SCOPES.PROJECT || 'project':
-            filepath = isEntityRootFolder ? FileStorage.getProjectFilePath(entityId, filename) : FileStorage.getProjectAttributeFilePath(entityId, attributeId, filename);
+          case ATTR_SCOPES.NFT_COLLECTION || 'nftCollection':
+            filepath = isEntityRootFolder ? FileStorage.getNftCollectionFilePath(entityId, filename) : FileStorage.getNftCollectionAttributeFilePath(entityId, attributeId, filename);
             const fileExists = await FileStorage.exists(filepath);
             if (!fileExists) {
               throw new NotFoundError(`${filepath} is not found`);

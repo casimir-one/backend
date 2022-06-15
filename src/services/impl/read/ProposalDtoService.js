@@ -1,7 +1,6 @@
 import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
 import ProposalSchema from './../../../schemas/ProposalSchema';
-import { PROJECT_STATUS } from './../../../constants';
 import NftCollectionDtoService from './NftCollectionDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
@@ -186,23 +185,14 @@ class ProposalDtoService extends BaseService {
     const tokenSwapsProposals = await this.extendTokenSwapProposals(grouped[APP_PROPOSAL.TOKENS_SWAP_PROPOSAL] || []);
     result.push(...tokenSwapsProposals);
 
-    const fungibleTokenTransfersProposals = await this.extendFungibleTokenTransferProposals(grouped[APP_PROPOSAL.FT_TRANSFER_PROPOSAL] || []);
-    result.push(...fungibleTokenTransfersProposals);
+    const ftTransfersProposals = await this.extendFTTransferProposals(grouped[APP_PROPOSAL.FT_TRANSFER_PROPOSAL] || []);
+    result.push(...ftTransfersProposals);
 
-    const nonFungibleTokenTransfersProposals = await this.extendNonFungibleTokenTransferProposals(grouped[APP_PROPOSAL.NFT_TRANSFER_PROPOSAL] || []);
-    result.push(...nonFungibleTokenTransfersProposals);
+    const nftTransfersProposals = await this.extendNFTTransferProposals(grouped[APP_PROPOSAL.NFT_TRANSFER_PROPOSAL] || []);
+    result.push(...nftTransfersProposals);
 
-    const projectProposals = await this.extendProjectProposals(grouped[APP_PROPOSAL.PROJECT_PROPOSAL] || []);
-    result.push(...projectProposals);
-
-    const projectUpdateProposals = await this.extendProjectUpdateProposals(grouped[APP_PROPOSAL.PROJECT_UPDATE_PROPOSAL] || []);
-    result.push(...projectUpdateProposals);
-
-    const projectGroupUpdateProposals = await this.extendTeamUpdateProposals(grouped[APP_PROPOSAL.TEAM_UPDATE_PROPOSAL] || []);
-    result.push(...projectGroupUpdateProposals);
-
-    const projectContentProposals = await this.extendProjectContentProposals(grouped[APP_PROPOSAL.PROJECT_CONTENT_PROPOSAL] || []);
-    result.push(...projectContentProposals);
+    const teamUpdateProposals = await this.extendTeamUpdateProposals(grouped[APP_PROPOSAL.TEAM_UPDATE_PROPOSAL] || []);
+    result.push(...teamUpdateProposals);
 
     return result;
   }
@@ -229,7 +219,7 @@ class ProposalDtoService extends BaseService {
     });
   }
 
-  async extendFungibleTokenTransferProposals(proposals) {
+  async extendFTTransferProposals(proposals) {
     const accountNames = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.party1)) {
         acc.push(proposal.details.party1);
@@ -251,7 +241,7 @@ class ProposalDtoService extends BaseService {
     })
   }
 
-  async extendNonFungibleTokenTransferProposals(proposals) {
+  async extendNFTTransferProposals(proposals) {
     const accountNames = proposals.reduce((acc, proposal) => {
       if (!acc.some(a => a == proposal.details.party1)) {
         acc.push(proposal.details.party1);
@@ -271,49 +261,6 @@ class ProposalDtoService extends BaseService {
       const extendedDetails = { party1, party2 };
       return { ...proposal, extendedDetails };
     })
-  }
-
-  async extendProjectProposals(proposals) {
-    const accountNames = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.teamId)) {
-        acc.push(proposal.details.teamId);
-      }
-      return acc;
-    }, []);
-
-    const teams = await teamDtoService.getTeams(accountNames.map(a => a));
-    return proposals.map((proposal) => {
-      const team = teams.find(team => team._id == proposal.details.teamId);
-      const extendedDetails = { team };
-      return { ...proposal, extendedDetails };
-    });
-  }
-
-
-  async extendProjectUpdateProposals(proposals) {
-    const accountNames = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.teamId)) {
-        acc.push(proposal.details.teamId);
-      }
-      return acc;
-    }, []);
-
-    const projectsIds = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.projectId)) {
-        acc.push(proposal.details.projectId);
-      }
-      return acc;
-    }, []);
-
-    const teams = await teamDtoService.getTeams(accountNames);
-    const projects = await nftCollectionDtoService.getNftCollections(projectsIds, Object.values(PROJECT_STATUS));
-
-    return proposals.map((proposal) => {
-      const team = teams.find(team => team._id == proposal.details.teamId);
-      const project = projects.find(project => project._id == proposal.details.projectId);
-      const extendedDetails = { team, project };
-      return { ...proposal, extendedDetails };
-    });
   }
 
 
@@ -329,33 +276,6 @@ class ProposalDtoService extends BaseService {
     return proposals.map((proposal) => {
       const team = teams.find(team => team._id == proposal.details.teamId);
       const extendedDetails = { team };
-      return { ...proposal, extendedDetails };
-    });
-  }
-
-
-  async extendProjectContentProposals(proposals) {
-    const accountNames = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.teamId)) {
-        acc.push(proposal.details.teamId);
-      }
-      return acc;
-    }, []);
-
-    const projectIds = proposals.reduce((acc, proposal) => {
-      if (!acc.some(a => a == proposal.details.projectId)) {
-        acc.push(proposal.details.projectId);
-      }
-      return acc;
-    }, []);
-
-    const teams = await teamDtoService.getTeams(accountNames);
-    const projects = await nftCollectionDtoService.getNftCollections(projectIds, Object.values(PROJECT_STATUS));
-
-    return proposals.map((proposal) => {
-      const team = teams.find(team => team._id == proposal.details.teamId);
-      const project = projects.find(project => project._id == proposal.details.projectId);
-      const extendedDetails = { team, project };
       return { ...proposal, extendedDetails };
     });
   }

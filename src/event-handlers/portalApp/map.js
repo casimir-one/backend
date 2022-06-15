@@ -36,14 +36,6 @@ module.exports = {
     { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: false }
-  ],
-
-  [APP_EVENT.PROJECT_UPDATE_PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: false }
-  ],
-
   [APP_EVENT.DAO_MEMBER_ADDED]: [
     { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
@@ -119,7 +111,7 @@ module.exports = {
     { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.PROJECT_CONTENT_DRAFT_STATUS_UPDATED]: [
+  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED]: [
     { h: assetEventHandler, await: true }
   ],
 
@@ -129,10 +121,6 @@ module.exports = {
 
   [APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED]: [
     { h: fileUploadEventHandler, await: true },
-    { h: assetEventHandler, await: true }
-  ],
-
-  [APP_EVENT.PROJECT_CONTENT_PROPOSAL_CREATED]: [
     { h: assetEventHandler, await: true }
   ],
 

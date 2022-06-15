@@ -1,8 +1,8 @@
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import { APP_EVENT } from '@deip/constants';
-import { TOKEN_LIFETIME } from './../../../constants';
+import { VERIFICATION_TOKEN_LIFETIME } from './../../../constants';
 import {
-  TokenService
+  VerificationTokenService
 } from './../../../services';
 import { genSha256Hash, genRipemd160Hash } from '@deip/toolbox';
 import { transporter, defaultMailOptionsForConfirmRegistration } from './../../../nodemailer';
@@ -19,7 +19,7 @@ class MailEventHandler extends PortalAppEventHandler {
 }
 
 const mailEventHandler = new MailEventHandler();
-const tokenService = new TokenService();
+const verificationTokenService = new VerificationTokenService();
 
 mailEventHandler.register(APP_EVENT.REGISTRATION_CODE_SENDED_BY_EMAIL, async (event) => {
   const { email } = event.getEventPayload();
@@ -28,25 +28,25 @@ mailEventHandler.register(APP_EVENT.REGISTRATION_CODE_SENDED_BY_EMAIL, async (ev
   for (let i = 0; i < 6; i++) confirmationCode += crypto.randomInt(10);
 
   const refId = genRipemd160Hash(email);
-  const oldToken = await tokenService.getTokenByRefId(refId);
+  const oldToken = await verificationTokenService.getTokenByRefId(refId);
   if (oldToken) {
-    await tokenService.deleteTokenById(oldToken._id)
+    await verificationTokenService.deleteTokenById(oldToken._id)
   }
 
   const mailOptions = defaultMailOptionsForConfirmRegistration({ email, confirmationCode });
   await transporter.sendMail(mailOptions)
 
-  await tokenService.createToken({
+  await verificationTokenService.createToken({
     token: genSha256Hash(confirmationCode),
     refId,
-    expirationTime: new Date().getTime() + TOKEN_LIFETIME
+    expirationTime: new Date().getTime() + VERIFICATION_TOKEN_LIFETIME
   })
 });
 
 mailEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
   const { confirmationCode, email, isTeamAccount } = event.getEventPayload();
   if (config.NEED_CONFIRM_REGISTRATION && !isTeamAccount) {
-    await tokenService.deleteTokenByTokenHash(genSha256Hash(confirmationCode))
+    await verificationTokenService.deleteTokenByTokenHash(genSha256Hash(confirmationCode))
   }
 });
 

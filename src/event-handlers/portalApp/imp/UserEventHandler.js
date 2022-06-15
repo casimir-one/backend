@@ -1,8 +1,7 @@
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import { SYSTEM_ROLE as USER_ROLES, APP_EVENT, USER_PROFILE_STATUS } from '@deip/constants';
 import {
-  UserService,
-  TokenService
+  UserService
 } from './../../../services';
 
 
@@ -16,7 +15,6 @@ class UserEventHandler extends PortalAppEventHandler {
 
 const userEventHandler = new UserEventHandler();
 const userService = new UserService();
-const tokenService = new TokenService();
 
 userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
 

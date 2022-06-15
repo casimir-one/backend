@@ -1,16 +1,16 @@
-import fungibleTokenEventHandler from './impl/FungibleTokenEventHandler';
+import ftEventHandler from './impl/FTEventHandler';
 import blockEventHandler from './impl/BlockEventHandler';
 import daoEventHandler from './impl/DaoEventHandler';
 import proposalEventHandler from './impl/ProposalEventHandler';
-import nativeFungibleTokenEventHandler from './impl/NativeFungibleTokenEventHandler';
-import nonFungibleTokenEventHandler from './impl/NonFungibleTokenEventHandler';
+import nativeFTEventHandler from './impl/NativeFTEventHandler';
+import nftEventHandler from './impl/NFTEventHandler';
 
 
 module.exports = {
-    fungibleTokenEventHandler,
+    ftEventHandler,
     blockEventHandler,
     daoEventHandler,
     proposalEventHandler,
-    nativeFungibleTokenEventHandler,
-    nonFungibleTokenEventHandler,
+    nativeFTEventHandler,
+    nftEventHandler,
 }

@@ -1,5 +1,5 @@
 
-import { ASSESSMENT_CRITERIA_TYPE, PROJECT_CONTENT_TYPES, SIGN_UP_POLICY } from '@deip/constants';
+import { ASSESSMENT_CRITERIA_TYPE, NFT_ITEM_METADATA_TYPES, SIGN_UP_POLICY } from '@deip/constants';
 import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
@@ -40,8 +40,8 @@ const AppModuleMap = new Schema({
 
   "admin-panel-members-management": { type: Boolean, default: false },
   "admin-panel-members-registration": { type: Boolean, default: false },
-  "admin-panel-projects-management": { type: Boolean, default: false },
-  "admin-panel-projects-registration": { type: Boolean, default: false },
+  "admin-panel-nft-collections-management": { type: Boolean, default: false },
+  "admin-panel-nft-collections-registration": { type: Boolean, default: false },
   "admin-panel-attributes-management": { type: Boolean, default: false },
   "admin-panel-attributes-registration": { type: Boolean, default: false },
   "admin-panel-faq-setup": { type: Boolean, default: false },
@@ -62,22 +62,22 @@ const GlobalNetworkSettings = new Schema({
   "isGlobalScopeVisible": { type: Boolean, default: false }
 });
 
-const ProjectContentAssessmentCriteria = new Schema({
+const NftItemMetadataAssessmentCriteria = new Schema({
   "_id": false,
   "id": { type: Number, required: true },
   "title": { type: String, required: true },
   "max": { type: Number, required: true }
 });
 
-const ProjectContentAssessmentCriterias = new Schema({
+const NftItemMetadataAssessmentCriterias = new Schema({
   "_id": false,
   "contentType": { type: Number, required: true },
-  "values": [ProjectContentAssessmentCriteria]
+  "values": [NftItemMetadataAssessmentCriteria]
 });
 
 const PortalModerationConfigSchema = new Schema({
   "_id": false,
-  "projectContentDraftModerationRequired": { type: Boolean, required: false },
+  "nftItemMetadataDraftModerationRequired": { type: Boolean, required: false },
   "moderators": { type: Array, required: false }
 });
 
@@ -98,9 +98,9 @@ const PortalSchema = new Schema({
       required: true
     },
     "assesmentCriterias": {
-      type: [ProjectContentAssessmentCriterias],
+      type: [NftItemMetadataAssessmentCriterias],
       default: [{
-        contentType: PROJECT_CONTENT_TYPES.UNKNOWN,
+        contentType: NFT_ITEM_METADATA_TYPES.UNKNOWN,
         values: [
           { id: ASSESSMENT_CRITERIA_TYPE.NOVELTY, title: 'Novelty', max: 5 },
           { id: ASSESSMENT_CRITERIA_TYPE.TECHNICAL_QUALITY, title: 'Technical Quality', max: 5 },

@@ -3,7 +3,7 @@ import { APP_PROPOSAL, APP_EVENT } from '@deip/constants';
 import assert from 'assert';
 
 
-class ProjectUpdateProposalDeclinedEvent extends BaseEvent {
+class TeamUpdateProposalDeclinedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -15,9 +15,9 @@ class ProjectUpdateProposalDeclinedEvent extends BaseEvent {
     assert(APP_PROPOSAL.TEAM_UPDATE_PROPOSAL == proposalCmd.getProposalType(), `This event must be generated out of ${APP_PROPOSAL.TEAM_UPDATE_PROPOSAL} proposal`);
 
     const proposedCmds = proposalCmd.getProposedCmds();
-    const updateProjectCmd = proposedCmds[0];
+    const updateTeamCmd = proposedCmds[0];
     const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
-    const { entityId: teamId, attributes } = updateProjectCmd.getCmdPayload();
+    const { entityId: teamId, attributes } = updateTeamCmd.getCmdPayload();
 
     assert(!!proposalId, `'proposalId' is required`);
     assert(!!expirationTime, `'expirationTime' is required`);
@@ -26,7 +26,6 @@ class ProjectUpdateProposalDeclinedEvent extends BaseEvent {
     super(APP_EVENT.TEAM_UPDATE_PROPOSAL_DECLINED, {
       proposalId,
       expirationTime,
-      projectId,
       teamId,
       attributes,
       proposalCtx
@@ -36,4 +35,4 @@ class ProjectUpdateProposalDeclinedEvent extends BaseEvent {
 }
 
 
-module.exports = ProjectUpdateProposalDeclinedEvent;
+module.exports = TeamUpdateProposalDeclinedEvent;

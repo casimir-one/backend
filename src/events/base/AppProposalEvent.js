@@ -4,12 +4,12 @@ import TeamUpdateProposalAcceptedEvent from './../impl/TeamUpdateProposalAccepte
 import TeamUpdateProposalCreatedEvent from './../impl/TeamUpdateProposalCreatedEvent';
 import TeamUpdateProposalDeclinedEvent from './../impl/TeamUpdateProposalDeclinedEvent';
 
-import FungibleTokenTransferProposalCreatedEvent from './../impl/FungibleTokenTransferProposalCreatedEvent';
-import FungibleTokenTransferProposalAcceptedEvent from '../impl/FungibleTokenTransferProposalAcceptedEvent';
-import FungibleTokenTransferProposalDeclinedEvent from '../impl/FungibleTokenTransferProposalDeclinedEvent';
-import NonFungibleTokenTransferProposalCreatedEvent from './../impl/NonFungibleTokenTransferProposalCreatedEvent';
-import NonFungibleTokenTransferProposalAcceptedEvent from '../impl/NonFungibleTokenTransferProposalAcceptedEvent';
-import NonFungibleTokenTransferProposalDeclinedEvent from '../impl/NonFungibleTokenTransferProposalDeclinedEvent';
+import FTTransferProposalCreatedEvent from '../impl/FTTransferProposalCreatedEvent';
+import FTTransferProposalAcceptedEvent from '../impl/FTTransferProposalAcceptedEvent';
+import FTTransferProposalDeclinedEvent from '../impl/FTTransferProposalDeclinedEvent';
+import NFTTransferProposalCreatedEvent from '../impl/NFTTransferProposalCreatedEvent';
+import NFTTransferProposalAcceptedEvent from '../impl/NFTTransferProposalAcceptedEvent';
+import NFTTransferProposalDeclinedEvent from '../impl/NFTTransferProposalDeclinedEvent';
 
 import TokenSwapProposalCreatedEvent from '../impl/TokenSwapProposalCreatedEvent';
 import TokenSwapProposalAcceptedEvent from '../impl/TokenSwapProposalAcceptedEvent';
@@ -25,14 +25,14 @@ module.exports = {
     DECLINED: TeamUpdateProposalDeclinedEvent
   },
   [APP_PROPOSAL.FT_TRANSFER_PROPOSAL]: {
-    CREATED: FungibleTokenTransferProposalCreatedEvent,
-    ACCEPTED: FungibleTokenTransferProposalAcceptedEvent,
-    DECLINED: FungibleTokenTransferProposalDeclinedEvent
+    CREATED: FTTransferProposalCreatedEvent,
+    ACCEPTED: FTTransferProposalAcceptedEvent,
+    DECLINED: FTTransferProposalDeclinedEvent
   },
   [APP_PROPOSAL.NFT_TRANSFER_PROPOSAL]: {
-    CREATED: NonFungibleTokenTransferProposalCreatedEvent,
-    ACCEPTED: NonFungibleTokenTransferProposalAcceptedEvent,
-    DECLINED: NonFungibleTokenTransferProposalDeclinedEvent
+    CREATED: NFTTransferProposalCreatedEvent,
+    ACCEPTED: NFTTransferProposalAcceptedEvent,
+    DECLINED: NFTTransferProposalDeclinedEvent
   },
   [APP_PROPOSAL.TOKENS_SWAP_PROPOSAL]: {
     CREATED: TokenSwapProposalCreatedEvent,

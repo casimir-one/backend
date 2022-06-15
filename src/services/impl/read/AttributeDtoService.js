@@ -24,14 +24,14 @@ class AttributeDtoService extends BaseService {
     return mapAttributes;
   }
   
-  async getAttributesByScope(scope = ATTR_SCOPES.PROJECT || 'project') {
+  async getAttributesByScope(scope = ATTR_SCOPES.NFT_COLLECTION || 'nftCollection') {
     const result = await this.findMany({ scope });
     if (!result.length) return [];
     const mapAttributes = await this.mapAttributes(result);
     return mapAttributes;
   }
   
-  async getNetworkAttributesByScope(scope = ATTR_SCOPES.PROJECT || 'project') {
+  async getNetworkAttributesByScope(scope = ATTR_SCOPES.NFT_COLLECTION || 'nftCollection') {
     const result = await this.findMany({ scope })
     if (!result.length) return [];
     const mapAttributes = await this.mapAttributes(result);
