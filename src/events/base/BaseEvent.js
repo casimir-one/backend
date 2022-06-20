@@ -34,9 +34,8 @@ class BaseEvent {
     return this._timestamp;
   }
 
-  setEventIssuer(ctx) {
-    const issuer = ctx.state.user;
-    this._eventIssuer = issuer?.username;
+  setEventIssuer(username) {
+    this._eventIssuer = username;
   }
 
   getEventIssuer() {

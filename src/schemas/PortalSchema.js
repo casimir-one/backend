@@ -62,17 +62,17 @@ const GlobalNetworkSettings = new Schema({
   "isGlobalScopeVisible": { type: Boolean, default: false }
 });
 
-const NftItemMetadataAssessmentCriteria = new Schema({
+const NFTItemMetadataAssessmentCriteria = new Schema({
   "_id": false,
   "id": { type: Number, required: true },
   "title": { type: String, required: true },
   "max": { type: Number, required: true }
 });
 
-const NftItemMetadataAssessmentCriterias = new Schema({
+const NFTItemMetadataAssessmentCriterias = new Schema({
   "_id": false,
   "contentType": { type: Number, required: true },
-  "values": [NftItemMetadataAssessmentCriteria]
+  "values": [NFTItemMetadataAssessmentCriteria]
 });
 
 const PortalModerationConfigSchema = new Schema({
@@ -98,7 +98,7 @@ const PortalSchema = new Schema({
       required: true
     },
     "assesmentCriterias": {
-      type: [NftItemMetadataAssessmentCriterias],
+      type: [NFTItemMetadataAssessmentCriterias],
       default: [{
         contentType: NFT_ITEM_METADATA_TYPES.UNKNOWN,
         values: [

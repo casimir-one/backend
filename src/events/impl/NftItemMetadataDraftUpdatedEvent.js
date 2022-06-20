@@ -1,8 +1,8 @@
-import BaseEvent from '../base/BaseEvent';
 import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
 import assert from 'assert';
+import BaseEvent from '../base/BaseEvent';
 
-class NftItemMetadataDraftUpdatedEvent extends BaseEvent {
+class NFTItemMetadataDraftUpdatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -21,4 +21,4 @@ class NftItemMetadataDraftUpdatedEvent extends BaseEvent {
 
 }
 
-module.exports = NftItemMetadataDraftUpdatedEvent;
+module.exports = NFTItemMetadataDraftUpdatedEvent;

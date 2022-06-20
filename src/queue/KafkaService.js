@@ -1,8 +1,8 @@
 import { assert, Singleton } from "@deip/toolbox";
 import { Kafka } from "kafkajs";
-import BaseEvent from '../events/base/BaseEvent';
 import { parseChainEvent } from "../events/base/ChainEvent";
-import { logError } from "../utils/log";
+import { logError, logInfo } from "../utils/log";
+import { rebuildEvent } from './../events/rebuilder';
 
 
 export default class KafkaService extends Singleton {
@@ -51,14 +51,16 @@ export default class KafkaService extends Singleton {
       await this.producer.send({ topic, messages })
         .catch(err => {
           logError("KafkaService sendEvents", err);
+        }).finally(() => {
+          const bytes = Buffer.byteLength(JSON.stringify(messages));
+          logInfo("KafkaService sendEvent buffer size is ", {
+            bytes,
+            kiloBytes: bytes / 1024,
+          })
         })
     }
   }
 
-  parseAppEvent = (rawEvent) => {
-    const { eventNum, eventPayload, eventIssuer } = rawEvent;
-    return eventNum && new BaseEvent(eventNum, eventPayload, eventIssuer);
-  }
 
   parseChainEvent = (rawEvent) =>
     rawEvent.type && parseChainEvent(rawEvent);
@@ -68,7 +70,7 @@ export default class KafkaService extends Singleton {
     const rawEvent = JSON.parse(message.value.toString());
 
     return [
-      this.parseAppEvent,
+      rebuildEvent,
       this.parseChainEvent
     ].map(parseF => parseF(rawEvent)).filter(Boolean).find(Boolean);
   }

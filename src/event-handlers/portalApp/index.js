@@ -20,5 +20,5 @@ module.exports = {
   fileUploadEventHandler,
   portalEventHandler,
   layoutEventHandler,
-  mailEventHandler
+  mailEventHandler,
 };

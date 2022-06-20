@@ -9,7 +9,7 @@ import {
   proposalEventHandler,
   teamEventHandler,
   userEventHandler,
-  mailEventHandler
+  mailEventHandler,
 } from './index';
 
 /* Priority is defined by the order of handlers */
@@ -163,5 +163,29 @@ module.exports = {
 
   [APP_EVENT.REGISTRATION_CODE_SENDED_BY_EMAIL]: [
     { h: mailEventHandler, await: true }
+  ],
+
+  [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_CREATED]: [
+    { h: proposalEventHandler, await: true }
+  ],
+
+  [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_ACCEPTED]: [
+    { h: proposalEventHandler, await: false }
+  ],
+
+  [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_DECLINED]: [
+    { h: proposalEventHandler, await: false }
+  ],
+
+  [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_CREATED]: [
+    { h: proposalEventHandler, await: true },
+  ],
+
+  [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_ACCEPTED]: [
+    { h: proposalEventHandler, await: false }
+  ],
+
+  [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_DECLINED]: [
+    { h: proposalEventHandler, await: false }
   ],
 };

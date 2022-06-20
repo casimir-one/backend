@@ -1,11 +1,12 @@
+import { ChainService } from '@deip/chain-service';
+import { DOMAIN_EVENT } from '@deip/constants';
 import config from "../config";
 import { QUEUE_TOPIC } from "../constants";
 import ChainDomainEventHandler from "../event-handlers/base/ChainDomainEventHandler";
 import QueueService from "../queue/QueueService";
-import { logInfo, logWarn } from "../utils/log";
+import { logError, logProcessManagerInfo, logWarn } from "../utils/log";
 import { waitChainBlockAsync } from "../utils/network";
 import APP_CMD_TO_BC_EVENT_PROCESSOR from './AppCmdToBlockchainEvent';
-import { logError } from "../utils/log";
 
 
 QueueService.getInstanceAsync(config).then(async queueService => {
@@ -38,13 +39,14 @@ const fire = async (event) => {
     const [key, { matchF, res, rej, expiredAt }] = handler;
     try {
       const isExpired = Date.now() > expiredAt;
-      if (matchF(event)) {
+      const matchResult = await matchF(event);
+      if (matchResult) {
         unsubscribe(key);
         await res(event);
       } else if (isExpired) {
         unsubscribe(key);
-        logError("Process manager handler expired");
-        rej(new Error("Process manager handler expired"));
+        logError("ProcessManager handler expired", key);
+        rej(new Error("ProcessManager handler expired"));
       }
     } catch (err) {
       rej(err);
@@ -54,7 +56,7 @@ const fire = async (event) => {
 
 const waitForEvent = (appCmd, matchF) => new Promise(async (res, rej) => {
   if (config.QUEUE_SERVICE === "pubsub") {
-    console.log("Process manager is not connected to blockchain events, waiting for timeout");
+    logProcessManagerInfo("ProcessManager is not connected to blockchain events, waiting for timeout");
     return waitChainBlockAsync(res);
   }
   if (config.QUEUE_SERVICE === "kafka") {
@@ -63,7 +65,7 @@ const waitForEvent = (appCmd, matchF) => new Promise(async (res, rej) => {
   }
 })
 
-const waitForCommand = (txInfo) => async (appCmd) => {
+const waitForCommand = (txInfo, chainService) => async (appCmd) => {
   const cmdName = appCmd.getCmdName();
   const cmdNum = appCmd.getCmdNum();
   const eventProcessors = APP_CMD_TO_BC_EVENT_PROCESSOR[cmdNum] || [];
@@ -73,14 +75,16 @@ const waitForCommand = (txInfo) => async (appCmd) => {
     return waitChainBlockAsync();
   }
 
-  return waitForEvent(appCmd, (event) => {
+  logProcessManagerInfo(`ProcessManager, cmd ${cmdName} waiting for event: ${eventProcessors.map(x => DOMAIN_EVENT[x.eventNum]).join(' or ')}`);
+
+  return waitForEvent(appCmd, async (event) => {
     for (const eventProcessor of eventProcessors) {
       const { eventNum, matchF } = eventProcessor;
 
       if (event.getEventNum() === eventNum) {
-        const isMatched = matchF ? matchF(txInfo, appCmd, event) : true;
+        const isMatched = matchF ? await matchF({ txInfo, appCmd, event, chainService }) : true;
         if (isMatched) {
-          logInfo(`Process manager, event matched success`, { cmdName, eventNum })
+          logProcessManagerInfo(`ProcessManager, cmd ${cmdName} matched success with event ${DOMAIN_EVENT[eventNum]}`);
           return event;
         }
       }
@@ -88,7 +92,11 @@ const waitForCommand = (txInfo) => async (appCmd) => {
   });
 }
 
-const waitForCommands = (txInfo, appCmds) => Promise.all(appCmds.map(waitForCommand(txInfo)));
+const waitForCommands = async (txInfo, appCmds) => {
+  const chainService = await ChainService.getInstanceAsync(config);
+
+  return Promise.all(appCmds.map(waitForCommand(txInfo, chainService)));
+};
 
 export const processManager = {
   waitForCommands,

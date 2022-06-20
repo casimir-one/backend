@@ -1,12 +1,13 @@
-import BaseEvent from './../base/BaseEvent';
-import { APP_EVENT, NFT_ITEM_METADATA_FORMAT, NFT_ITEM_METADATA_DRAFT_STATUS } from '@deip/constants';
+import { APP_EVENT, NFT_ITEM_METADATA_DRAFT_STATUS, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
 import assert from 'assert';
+import BaseEvent from '../base/BaseEvent';
 
-class NftItemMetadataDraftCreatedEvent extends BaseEvent {
+class NFTItemMetadataDraftCreatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
       nftCollectionId,
+      nftItemId,
       entityId,
       formatType,
       jsonData,
@@ -16,6 +17,7 @@ class NftItemMetadataDraftCreatedEvent extends BaseEvent {
 
     assert(!!nftCollectionId, "'nftCollectionId' is required");
     assert(!!entityId, "'entityId' is required");
+    assert(!!nftItemId, "'nftItemId' is required");
     assert(!!formatType, "'formatType' is required");
     assert(!!owner, "'owner' is required");
     if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
@@ -34,4 +36,4 @@ class NftItemMetadataDraftCreatedEvent extends BaseEvent {
 
 }
 
-module.exports = NftItemMetadataDraftCreatedEvent;
+module.exports = NFTItemMetadataDraftCreatedEvent;

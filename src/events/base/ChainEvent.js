@@ -23,7 +23,7 @@ const chainEventNameToDomainEventNum = createEnum({
   "native_ft_transfer": DOMAIN_EVENT.NATIVE_FT_TRANSFER,
 
   // PROPOSAL
-  "proposal_proposed": DOMAIN_EVENT.PROPOSAL_PROPOSED,
+  "proposal_proposed": DOMAIN_EVENT.PROPOSAL_CREATED,
   "proposal_approved": DOMAIN_EVENT.PROPOSAL_APPROVED,
   "proposal_revokedApproval": DOMAIN_EVENT.PROPOSAL_REVOKED_APPROVAL,
   "proposal_resolved": DOMAIN_EVENT.PROPOSAL_RESOLVED,

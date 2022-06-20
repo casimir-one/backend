@@ -1,16 +1,19 @@
 import BaseService from '../../base/BaseService';
-import NftItemMetadataSchema from '../../../schemas/NftItemMetadataSchema';
+import NFTItemMetadataSchema from '../../../schemas/NFTItemMetadataSchema';
 
-class NftItemMetadataService extends BaseService {
+class NFTItemMetadataService extends BaseService {
 
-  constructor(options = { scoped: true }) { 
-    super(NftItemMetadataSchema, options);
+  constructor(options = { scoped: true }) {
+    super(NFTItemMetadataSchema, options);
   }
 
-  async createNftItemMetadata({
-    _id,
+  buildId = ({ nftCollectionId, nftItemId }) => ({ nftItemId: String(nftItemId), nftCollectionId: String(nftCollectionId) });
+
+  async createNFTItemMetadata({
     nftCollectionId,
+    nftItemId,
     owner,
+    ownerAddress,
     ownedByTeam,
     attributes,
     folder,
@@ -29,9 +32,10 @@ class NftItemMetadataService extends BaseService {
   }) {
 
     const result = await this.createOne({
-      _id,
+      _id: this.buildId({ nftCollectionId, nftItemId }),
       nftCollectionId,
       owner,
+      ownerAddress,
       ownedByTeam,
       attributes,
       folder,
@@ -53,9 +57,11 @@ class NftItemMetadataService extends BaseService {
   }
 
 
-  async updateNftItemMetadata({
-    _id,
+  async updateNFTItemMetadata({
+    nftCollectionId,
+    nftItemId,
     owner,
+    ownerAddress,
     ownedByTeam,
     attributes,
     folder,
@@ -73,8 +79,9 @@ class NftItemMetadataService extends BaseService {
     status,
   }) {
 
-    const result = await this.updateOne({ _id }, {
+    const result = await this.updateOne({ _id: this.buildId({ nftItemId, nftCollectionId }) }, {
       owner,
+      ownerAddress,
       ownedByTeam,
       attributes,
       folder,
@@ -95,30 +102,30 @@ class NftItemMetadataService extends BaseService {
     return result;
   }
 
-  async removeNftItemMetadataById({ nftItemId, nftCollectionId }) {
-    const result = await this.deleteOne({ _id: { nftItemId, nftCollectionId } });
+  async removeNFTItemMetadataById({ nftItemId, nftCollectionId }) {
+    const result = await this.deleteOne({ _id: this.buildId({ nftItemId, nftCollectionId }) });
     return result;
   }
-  
-  async removeNftItemMetadataByHash(nftCollectionId, hash) {
+
+  async removeNFTItemMetadataByHash(nftCollectionId, hash) {
     const result = await this.deleteOne({ nftCollectionId, hash });
     return result;
   }
 
-  async findNftItemsMetadataByNftCollection(nftCollectionId) {
+  async findNFTItemsMetadataByNftCollection(nftCollectionId) {
     const result = await this.findMany({ nftCollectionId });
     return result;
   }
 
-  async getNftItemMetadata({ nftItemId, nftCollectionId }) {
-    const result = await this.findOne({ _id: { nftItemId, nftCollectionId } });
+  async getNFTItemMetadata({ nftItemId, nftCollectionId }) {
+    const result = await this.findOne({ _id: this.buildId({ nftItemId, nftCollectionId }) });
     return result;
   }
 
-  async findNftItemMetadataByHash(nftCollectionId, hash) {
+  async findNFTItemMetadataByHash(nftCollectionId, hash) {
     const result = await this.findOne({ nftCollectionId, hash });
     return result;
   }
 }
 
-export default NftItemMetadataService;
+export default NFTItemMetadataService;

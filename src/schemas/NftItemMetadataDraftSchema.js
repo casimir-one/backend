@@ -5,9 +5,10 @@ import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
 
-const NftItemMetadataDraftSchema = new Schema({
+const NFTItemMetadataDraftSchema = new Schema({
   "portalId": { type: String, required: true },
   "nftCollectionId": { type: String, required: true },
+  "nftItemId": { type: String, required: true },
   "owner": { type: String, required: true },
   "ownedByTeam": { type: Boolean, default: false },
   "folder": { type: String, required: true },
@@ -42,8 +43,9 @@ const NftItemMetadataDraftSchema = new Schema({
   "references": [{ type: String }],
   "foreignReferences": [{ type: String }],
   "moderationMessage": { type: String },
+  "lazySellProposalId": { type: String }, //TODO: remove when we have onchain market
 }, { timestamps: true });
 
-const model = mongoose.model('nft-item-metadata-draft', NftItemMetadataDraftSchema);
+const model = mongoose.model('nft-item-metadata-draft', NFTItemMetadataDraftSchema);
 
 module.exports = model;

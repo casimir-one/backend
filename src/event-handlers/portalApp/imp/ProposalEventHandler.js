@@ -2,9 +2,12 @@ import { ChainService } from '@deip/chain-service';
 import { APP_EVENT } from '@deip/constants';
 import config from '../../../config';
 import APP_PROPOSAL_EVENT from '../../../events/base/AppProposalEvent';
-import { ProposalService, TeamDtoService } from '../../../services';
+import {
+  ProposalService,
+  TeamDtoService,
+  NFTItemMetadataDraftService
+} from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
-
 
 class ProposalEventHandler extends PortalAppEventHandler {
 
@@ -18,6 +21,7 @@ const proposalEventHandler = new ProposalEventHandler();
 
 const proposalService = new ProposalService();
 const teamDtoService = new TeamDtoService();
+const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
 
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {
@@ -67,6 +71,7 @@ proposalEventHandler.register(APP_EVENT.PROPOSAL_ACCEPTED, async (event) => {
   const { proposalId, status, account } = event.getEventPayload();
 
   const proposal = await proposalService.getProposal(proposalId);
+
   const approvers = [...proposal.approvers, account];
   await proposalService.updateProposal(proposalId, {
     status: status,
@@ -96,5 +101,33 @@ proposalEventHandler.register(APP_EVENT.TEAM_UPDATE_PROPOSAL_CREATED, async (eve
 proposalEventHandler.register(APP_EVENT.TEAM_UPDATE_PROPOSAL_DECLINED, async (event) => {
   // TODO: create multisig transaction read schema
 });
+
+proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_CREATED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_ACCEPTED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.PROJECT_TOKEN_SALE_PROPOSAL_DECLINED, async (event) => {
+  // TODO: create multisig transaction read schema
+});
+
+proposalEventHandler.register(APP_EVENT.NFT_LAZY_SELL_PROPOSAL_CREATED, async (event) => {
+  const { proposalId, nftCollectionId, nftItemId, } = event.getEventPayload();
+
+  const draft = await nftItemMetadataDraftService.findOne({ nftCollectionId, nftItemId });
+
+  await nftItemMetadataDraftService.updateOne({ _id: draft._id }, { lazySellProposalId: proposalId });
+});
+
+
+proposalEventHandler.register(APP_EVENT.NFT_LAZY_SELL_PROPOSAL_ACCEPTED, async (event) => { });
+proposalEventHandler.register(APP_EVENT.NFT_LAZY_SELL_PROPOSAL_DECLINED, async (event) => { });
+proposalEventHandler.register(APP_EVENT.NFT_LAZY_BUY_PROPOSAL_CREATED, async (event) => { });
+proposalEventHandler.register(APP_EVENT.NFT_LAZY_SELL_PROPOSAL_DECLINED, async (event) => { });
+
+
 
 module.exports = proposalEventHandler;

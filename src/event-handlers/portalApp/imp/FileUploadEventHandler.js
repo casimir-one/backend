@@ -1,7 +1,7 @@
 
 import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
 import mongoose from 'mongoose';
-import { NftItemMetadataDraftService, PortalService } from '../../../services';
+import { NFTItemMetadataDraftService, PortalService } from '../../../services';
 import FileStorage from '../../../storage';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
@@ -13,7 +13,7 @@ class FileUploadEventHandler extends PortalAppEventHandler {
 
 const fileUploadEventHandler = new FileUploadEventHandler();
 const portalService = new PortalService();
-const nftItemMetadataDraftService = new NftItemMetadataDraftService();
+const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
 
 fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
   const { banner, logo, portalId } = event.getEventPayload();
@@ -46,7 +46,7 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async
   if (formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE && uploadedFiles.length > 0) {
     const _id = mongoose.Types.ObjectId(entityId);
     const tempDestinationPath = uploadedFiles[0].destination;
-    const nftItemMetadataPackageDirPath = FileStorage.getNftItemMetadataPackageDirPath(nftCollectionId, _id);
+    const nftItemMetadataPackageDirPath = FileStorage.getNFTItemMetadataPackageDirPath(nftCollectionId, _id);
 
     await FileStorage.rename(tempDestinationPath, nftItemMetadataPackageDirPath);
   }
@@ -56,12 +56,12 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async
 
   const { _id: draftId, uploadedFiles } = event.getEventPayload();
 
-  const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(draftId);
+  const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
 
   if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
     const filesPathToDelete = draft.packageFiles
       .filter(({ filename }) => !uploadedFiles.some(({ originalname }) => originalname === filename))
-      .map(({ filename }) => FileStorage.getNftItemMetadataPackageFilePath(draft.nftCollectionId, draft.folder, filename));
+      .map(({ filename }) => FileStorage.getNFTItemMetadataPackageFilePath(draft.nftCollectionId, draft.folder, filename));
 
     await Promise.all(filesPathToDelete.map(filePath => FileStorage.delete(filePath)));
   }
@@ -70,10 +70,10 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async
 fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async (event) => {
   const { _id } = event.getEventPayload();
 
-  const draft = await nftItemMetadataDraftService.getNftItemMetadataDraft(_id)
+  const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(_id)
 
   if (draft.type === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-    const packagePath = FileStorage.getNftItemMetadataPackageDirPath(draft.nftCollectionId, draft.hash);
+    const packagePath = FileStorage.getNFTItemMetadataPackageDirPath(draft.nftCollectionId, draft.hash);
     await FileStorage.rmdir(packagePath);
   }
 });

@@ -15,13 +15,13 @@ const destinationHandler = (fileStorage, sessionId) => function () {
     let nftCollectionFilesStorage = '';
 
     if (draftId && mongoose.Types.ObjectId.isValid(draftId)) {
-      nftCollectionFilesStorage = fileStorage.getNftItemMetadataPackageDirPath(nftCollectionId, draftId);
+      nftCollectionFilesStorage = fileStorage.getNFTItemMetadataPackageDirPath(nftCollectionId, draftId);
     } else {
-      nftCollectionFilesStorage = fileStorage.getNftItemMetadataPackageTempDirPath(nftCollectionId, sessionId);
+      nftCollectionFilesStorage = fileStorage.getNFTItemMetadataPackageTempDirPath(nftCollectionId, sessionId);
     }
     const exists = await fileStorage.exists(nftCollectionFilesStorage);
     if (exists) {
-      const filePath = fileStorage.getNftItemMetadataPackageFilePath(nftCollectionId, draftId, file.originalname);
+      const filePath = fileStorage.getNFTItemMetadataPackageFilePath(nftCollectionId, draftId, file.originalname);
       const fileExists = await fileStorage.exists(filePath);
       if (fileExists) {
         await fileStorage.delete(filePath);
@@ -46,7 +46,7 @@ const fileFilterHandler = (req, file, callback) => {
   callback(null, true);
 }
 
-class NftItemMetadataForm extends BaseForm {
+class NFTItemMetadataForm extends BaseForm {
 
   constructor(nextHandler) {
     const sessionId = uuidv4();
@@ -72,4 +72,4 @@ class NftItemMetadataForm extends BaseForm {
 }
 
 
-export default NftItemMetadataForm;
+export default NFTItemMetadataForm;

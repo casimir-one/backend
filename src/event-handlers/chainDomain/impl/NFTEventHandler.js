@@ -1,6 +1,10 @@
 import { DOMAIN_EVENT } from '@deip/constants';
+import {
+  NFTItemMetadataDraftService,
+  NFTItemMetadataService, ProposalService, TeamService, UserService
+} from '../../../services';
+import { logWarn } from '../../../utils/log';
 import ChainDomainEventHandler from '../../base/ChainDomainEventHandler';
-
 
 class NFTEventHandler extends ChainDomainEventHandler {
 
@@ -10,6 +14,11 @@ class NFTEventHandler extends ChainDomainEventHandler {
 }
 
 const nftEventHandler = new NFTEventHandler();
+const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
+const nftItemMetadataService = new NFTItemMetadataService();
+const proposalService = new ProposalService();
+const userService = new UserService();
+const teamService = new TeamService();
 
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_APPROVAL_CANCELED, async (event) => {
@@ -68,8 +77,31 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_FROZEN, async (event) => {
   console.log("NFT_FROZEN", event.getEventPayload())
 });
 
-nftEventHandler.register(DOMAIN_EVENT.NFT_ISSUED, async (event) => {
-  console.log("NFT_ISSUED", event.getEventPayload())
+nftEventHandler.register(DOMAIN_EVENT.NFT_ITEM_CREATED, async (event) => {
+  const { class: nftCollectionId, instance: nftItemId, owner: ownerAddress } = event.getEventPayload();
+
+  const draft = await nftItemMetadataDraftService.findOne({ nftItemId: String(nftItemId), nftCollectionId: String(nftCollectionId) });
+  if (!draft) {
+    logWarn("Chain eventHandler, nft item already created");
+  }
+  let ownerDao;
+  ownerDao = await userService.findOne({ address: ownerAddress });
+  if (!ownerDao) {
+    ownerDao = await teamService.findOne({ address: ownerAddress });
+  }
+  const nftItem = await nftItemMetadataService.createNFTItemMetadata({
+    ...draft,
+    _id: { nftItemId: String(nftItemId), nftCollectionId: String(nftCollectionId) },
+    nftCollectionId,
+    owner: ownerDao?._id || null,
+    ownedByTeam: !!ownerDao?.members,
+    ownerAddress,
+    metadata: {
+      ...draft.metadata,
+    }
+  });
+
+  await nftItemMetadataDraftService.deleteNFTItemMetadataDraft(draft._id);
 });
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_METADATA_CLEARED, async (event) => {
@@ -97,7 +129,33 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_THAWED, async (event) => {
 });
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_TRANSFERRED, async (event) => {
-  console.log("NFT_TRANSFERRED", event.getEventPayload())
+  const {
+    class: nftCollectionId,
+    instance: nftItemId,
+    from: fromAddress,
+    to: toAddress
+  } = event.getEventPayload();
+
+  const nftItem = await nftItemMetadataService.getNFTItemMetadata({ nftItemId, nftCollectionId });
+  if (!nftItem) {
+    logWarn("Chain eventHandler, nft item does not exist");
+    return;
+  }
+
+  let newOwnerDao;
+  newOwnerDao = await userService.findOne({ address: toAddress });
+  if (!newOwnerDao) {
+    newOwnerDao = await teamService.findOne({ address: toAddress });
+  }
+
+  await nftItemMetadataService.updateNFTItemMetadata({
+    nftItemId,
+    nftCollectionId,
+    owner: newOwnerDao?._id || null,
+    ownerAddress: toAddress,
+    ownedByTeam: !!ownerDao?.members,
+  });
+
 });
 
-module.exports = nftEventHandler;
+module.exports = nftEventHandler

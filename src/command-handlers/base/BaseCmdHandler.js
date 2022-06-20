@@ -16,6 +16,7 @@ import {
 } from '../../utils/log';
 import QueueService from "../../queue/QueueService";
 import { processManager } from "../../process-manager";
+import { rebuildCmd } from '../../events/rebuilder';
 
 
 const proposalService = new ProposalService({ scoped: false });
@@ -35,7 +36,7 @@ class BaseCmdHandler extends EventEmitter {
       try {
         logCmdInfo(`Command ${cmd.getCmdName()} is being handled by ${this.constructor.name} ${ctx.state.proposalsStackFrame ? 'within ' + APP_PROPOSAL[ctx.state.proposalsStackFrame.type] + ' flow (' + ctx.state.proposalsStackFrame.proposalId + ')' : ''}`);
         handler(cmd, ctx);
-      } catch(err) {
+      } catch (err) {
         logError(`Command ${cmd.getCmdName()} ${ctx.state.proposalsStackFrame ? 'within ' + APP_PROPOSAL[ctx.state.proposalsStackFrame.type] + ' flow (' + ctx.state.proposalsStackFrame.proposalId + ')' : ''} failed with an error:`, err);
         throw err;
       }
@@ -43,8 +44,8 @@ class BaseCmdHandler extends EventEmitter {
   }
 
   async process(msg, ctx,
-    validate = async (appCmds, ctx) => {},
-    alterOffchainWriteModel = async (appCmds, ctx) => {},
+    validate = async (appCmds, ctx) => { },
+    alterOffchainWriteModel = async (appCmds, ctx) => { },
     alterOnchainWriteModel = async (tx, ctx) => {
       const chainService = await ChainService.getInstanceAsync(config);
       const chainRpc = chainService.getChainRpc();
@@ -70,18 +71,17 @@ class BaseCmdHandler extends EventEmitter {
       await alterOffchainWriteModel(appCmds, ctx);
     }
 
-    const { proposalsIds, newProposalsCmds } = this.extractAlteredProposals(appCmds);
+    const { proposalsIds, newProposalsCmds } = await this.extractAlteredProposals(appCmds);
     if (proposalsIds.length) { // Until we have blockchain-emitted events and a saga we have to check proposal status manually
       ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
     }
-
     // The rest code must be synchronous
     BaseCmdHandler.Dispatch(appCmds, ctx);
 
     const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
 
     //set events issuer for sending results to the sockets
-    for (const event of events) event.setEventIssuer(ctx)
+    for (const event of events) event.setEventIssuer(ctx.state.user?.username);
 
     this.logEvents(events);
 
@@ -129,7 +129,7 @@ class BaseCmdHandler extends EventEmitter {
   }
 
 
-  extractAlteredProposals(appCmds) {
+  async extractAlteredProposals(appCmds) {
     const newProposalsCmds = [];
     const proposalCmds = appCmds.filter(cmd => {
       return cmd instanceof CreateProposalCmd;
@@ -174,12 +174,28 @@ class BaseCmdHandler extends EventEmitter {
       })));
     }
 
+    for (const cmd of appCmds) {
+      if (cmd instanceof AcceptProposalCmd) {
+        const acceptedProposal = await proposalService.getProposal(cmd.getCmdPayload().entityId);
+        const nestedProposedCmds = acceptedProposal?.details?.proposalCtx?.proposedCmds;
+        if (nestedProposedCmds && nestedProposedCmds.length) {
+          const rebuildedProposalCmds = nestedProposedCmds.map(rebuildCmd);
+          for (const nesetdCmd of rebuildedProposalCmds) {
+            if (nesetdCmd instanceof AcceptProposalCmd) {
+              proposalUpdates.push({
+                cmd: nesetdCmd, isNewProposal: false, isAccepted: true, isDeclined: false
+              })
+            }
+          }
+        }
+      }
+    }
+
     const proposalsIds = proposalUpdates.reduce((acc, item) => {
       let { cmd, isNewProposal, isAccepted, isDeclined } = item;
       let { entityId: proposalId } = cmd.getCmdPayload();
       return acc.some(p => p.proposalId === proposalId) ? acc : [...acc, { proposalId, isNewProposal, isAccepted, isDeclined }];
     }, []);
-
     return { proposalsIds, newProposalsCmds };
   }
 

@@ -17,23 +17,23 @@ const proposalCmdHandler = new ProposalCmdHandler();
 
 
 proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
-  const { entityId: proposalId, 
-    creator, 
-    type 
+  const { entityId: proposalId,
+    creator,
+    type
   } = cmd.getCmdPayload();
 
   const { status } = ctx.state.updatedProposals[proposalId];
 
   ctx.state.appEvents.push(new ProposalCreatedEvent({
     proposalId: proposalId,
-    status: status,
+    status,
     type: type,
     proposalCmd: cmd,
     creator: creator,
     proposalCtx: ctx.state.proposalsStackFrame
   }));
 
-  
+
   const ProposalCreatedHookEvent = APP_PROPOSAL_EVENT[type]['CREATED'];
   if (ProposalCreatedHookEvent) {
     ctx.state.appEvents.push(new ProposalCreatedHookEvent({
@@ -43,7 +43,7 @@ proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
   } else {
     logWarn(`WARNING: No proposal hook event found for ${APP_PROPOSAL[type]} workflow at 'CREATED' stage`);
   }
-  
+
 });
 
 
@@ -67,10 +67,10 @@ proposalCmdHandler.register(APP_CMD.ACCEPT_PROPOSAL, (cmd, ctx) => {
   }));
 
   if (status == PROPOSAL_STATUS.APPROVED) {
-    
+
     ctx.state.proposalsStack.push(proposalCtx);
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1];
-    
+
     ProposalCmdHandler.Dispatch(proposedCmds, ctx);
 
     const ProposalAcceptedHookEvent = APP_PROPOSAL_EVENT[type]['ACCEPTED'];
@@ -82,7 +82,7 @@ proposalCmdHandler.register(APP_CMD.ACCEPT_PROPOSAL, (cmd, ctx) => {
     } else {
       logWarn(`WARNING: No proposal hook event found for ${APP_PROPOSAL[type]} workflow at 'ACCEPTED' stage`);
     }
-    
+
     ctx.state.proposalsStack.pop();
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1] || null;
   }
