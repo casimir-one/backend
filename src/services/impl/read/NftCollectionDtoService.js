@@ -49,6 +49,7 @@ class NftCollectionDtoService extends BaseService {
         freezer: chainNftCollection.freezer,
         issuedByTeam: nftCollection.issuedByTeam,
         metadata: {
+          _id: nftCollection._id,
           issuer: nftCollection.issuer,
           attributes: nftCollection.attributes,
           isDefault: nftCollection.isDefault,
