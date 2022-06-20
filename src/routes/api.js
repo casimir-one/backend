@@ -67,7 +67,7 @@ public_route.get('/v2/assets/limit/:limit', assetsCtrl.lookupAssets)
 
 public_route.get('/v2/tokens/nft/:nftCollectionId', assetsCtrl.getNftCollection)
 public_route.get('/v2/tokens/nft/default/:issuer', assetsCtrl.getDefaultNftCollection)
-public_route.get('/v2/tokens/nfts', assetsCtrl.getNftCollections)
+public_route.get('/v2/tokens/nfts', assetsCtrl.getNftCollectionsByIds)
 public_route.get('/v2/tokens/nfts/listing', assetsCtrl.getPublicNftCollectionsListing)
 protected_route.get('/v2/tokens/nfts/listing/issuer/:issuer', assetsCtrl.getNftCollectionsByIssuer)
 public_route.get('/v2/tokens/nfts/portal/listing', assetsCtrl.getNftCollectionsByPortal)
