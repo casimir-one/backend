@@ -244,16 +244,16 @@ class AssetsController extends BaseController {
     }
   });
 
-  getNftCollections = this.query({
+  getNftCollectionsByIds = this.query({
     h: async (ctx) => {
       try {
         const query = qs.parse(ctx.query);
-        const nftCollectionsIds = query.nftCollectionsIds;
-        if (!Array.isArray(nftCollectionsIds)) {
-          throw new BadRequestError(`nftCollectionsIds must be an array of ids`);
+        const nftCollectionIds = query.nftCollectionIds;
+        if (!Array.isArray(nftCollectionIds)) {
+          throw new BadRequestError(`nftCollectionIds must be an array of ids`);
         }
 
-        const result = await nftCollectionDtoService.getNftCollections(nftCollectionsIds);
+        const result = await nftCollectionDtoService.getNftCollections(nftCollectionIds);
         ctx.successRes(result);
       } catch (err) {
         ctx.errorRes(err);

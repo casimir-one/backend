@@ -93,8 +93,8 @@ class NftCollectionDtoService extends BaseService {
     return result;
   }
 
-  async getNftCollections(nftCollectionsIds) {
-    const nftCollections = await this.findMany({ _id: { $in: [...nftCollectionsIds] } });
+  async getNftCollections(nftCollectionIds) {
+    const nftCollections = await this.findMany({ _id: { $in: [...nftCollectionIds] } });
     if (!nftCollections.length) return [];
     const result = await this.mapNftCollections(nftCollections);
     return result;
