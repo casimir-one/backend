@@ -11,11 +11,12 @@ const idSchema = new Schema({
   "nftCollectionId": { type: String, required: true }
 });
 
-const NftItemMetadataSchema = new Schema({
+const NFTItemMetadataSchema = new Schema({
   "_id": idSchema,
   "portalId": { type: String, required: true },
   "nftCollectionId": { type: String, required: true },
-  "owner": { type: String, required: true },
+  "owner": { type: String, required: false }, //in case of nft owned by address without dao
+  "ownerAddress": { type: String, required: false },
   "ownedByTeam": { type: Boolean, default: false },
   "folder": { type: String, required: true },
   "title": { type: String, required: true },
@@ -45,6 +46,6 @@ const NftItemMetadataSchema = new Schema({
   "foreignReferences": [{ type: String }],
 }, { timestamps: true });
 
-const model = mongoose.model('nft-item-metadata', NftItemMetadataSchema);
+const model = mongoose.model('nft-item-metadata', NFTItemMetadataSchema);
 
 module.exports = model;

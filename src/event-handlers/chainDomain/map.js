@@ -28,7 +28,7 @@ module.exports = {
 
   // ## PROPOSAL
 
-  [DOMAIN_EVENT.PROPOSAL_PROPOSED]: [
+  [DOMAIN_EVENT.PROPOSAL_CREATED]: [
     { h: proposalEventHandler, await: false }
   ],
   [DOMAIN_EVENT.PROPOSAL_APPROVED]: [
@@ -151,8 +151,8 @@ module.exports = {
   [DOMAIN_EVENT.NFT_FROZEN]: [
     { h: nftEventHandler, await: false }
   ],
-  [DOMAIN_EVENT.NFT_ISSUED]: [
-    { h: nftEventHandler, await: false }
+  [DOMAIN_EVENT.NFT_ITEM_CREATED]: [
+    { h: nftEventHandler, await: true }
   ],
   [DOMAIN_EVENT.NFT_METADATA_CLEARED]: [
     { h: nftEventHandler, await: false }
@@ -173,6 +173,6 @@ module.exports = {
     { h: nftEventHandler, await: false }
   ],
   [DOMAIN_EVENT.NFT_TRANSFERRED]: [
-    { h: nftEventHandler, await: false }
+    { h: nftEventHandler, await: true }
   ],
 };

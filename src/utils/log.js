@@ -7,11 +7,16 @@ const logWarn = (msg) => console.warn(chalk.yellow(msg));
 const logCmdInfo = (msg) => console.info(chalk.blue(msg));
 const logEventInfo = (msg) => console.info(chalk.cyan(msg));
 
+const logProcessManagerInfo = (msg, data) => data ?
+  console.info(chalk.magenta(msg), data) :
+  console.info(chalk.magenta(msg))
+
 
 module.exports = {
   logInfo,
   logError,
   logWarn,
   logCmdInfo,
-  logEventInfo
+  logEventInfo,
+  logProcessManagerInfo
 }

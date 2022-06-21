@@ -1,6 +1,6 @@
-import BaseEvent from './../base/BaseEvent';
 import { APP_EVENT } from '@deip/constants';
 import assert from 'assert';
+import BaseEvent from './../base/BaseEvent';
 
 class PortalProfileUpdatedEvent extends BaseEvent {
 

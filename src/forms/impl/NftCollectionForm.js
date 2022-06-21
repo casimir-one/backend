@@ -18,12 +18,12 @@ const destinationHandler = (fileStorage) => function () {
     const parts = file.originalname.split(NFT_COLLECTION_ATTRIBUTE_ID_SPLITTER);
     const nftCollectionAttributeId = parts[0];
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(nftCollectionAttributeId)) {
-      folderPath = fileStorage.getNftCollectionAttributeDirPath(nftCollectionId, nftCollectionAttributeId);
+      folderPath = fileStorage.getNFTCollectionAttributeDirPath(nftCollectionId, nftCollectionAttributeId);
       const name = file.originalname.substring(`${nftCollectionAttributeId}${NFT_COLLECTION_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
-      filePath = fileStorage.getNftCollectionAttributeFilePath(nftCollectionId, nftCollectionAttributeId, name);
+      filePath = fileStorage.getNFTCollectionAttributeFilePath(nftCollectionId, nftCollectionAttributeId, name);
     } else {
-      folderPath = fileStorage.getNftCollectionDirPath(nftCollectionId);
-      filePath = fileStorage.getNftCollectionFilePath(file.originalname);
+      folderPath = fileStorage.getNFTCollectionDirPath(nftCollectionId);
+      filePath = fileStorage.getNFTCollectionFilePath(file.originalname);
     }
 
     const folderExists = await fileStorage.exists(folderPath);
@@ -67,7 +67,7 @@ const fileFilterHandler = (req, file, callback) => {
 }
 
 
-class NftCollectionForm extends BaseForm {
+class NFTCollectionForm extends BaseForm {
 
   constructor(nextHandler) {
 
@@ -93,4 +93,4 @@ class NftCollectionForm extends BaseForm {
 
 
 
-module.exports = NftCollectionForm;
+module.exports = NFTCollectionForm;

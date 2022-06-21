@@ -1,5 +1,5 @@
 import BaseService from '../../base/BaseService';
-import NftCollectionMetadataSchema from '../../../schemas/NftCollectionMetadataSchema';
+import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
 import config from '../../../config';
 import { ChainService } from '@deip/chain-service';
 import AttributeDtoService from './AttributeDtoService';
@@ -7,13 +7,13 @@ import { ATTR_SCOPES } from '@deip/constants';
 
 const attributeDtoService = new AttributeDtoService();
 
-class NftCollectionDtoService extends BaseService {
+class NFTCollectionDtoService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(NftCollectionMetadataSchema, options);
+    super(NFTCollectionMetadataSchema, options);
   }
 
-  async mapNftCollections(nftCollections, filterObj) {
+  async mapNFTCollections(nftCollections, filterObj) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const chainNftCollections = await chainRpc.getNonFungibleTokenClassesAsync();
@@ -39,6 +39,7 @@ class NftCollectionDtoService extends BaseService {
         nftCollectionId: chainNftCollection.nftCollectionId,
         nftItemsCount: chainNftCollection.nftItemsCount,
         instanceMetadatasCount: chainNftCollection.instanceMetadatasCount,
+        nextNftItemId: nftCollection.nextNftItemId,
         issuer: nftCollection.issuer,
         symbol: chainNftCollection.symbol,
         attributesCount: chainNftCollection.attributesCount,
@@ -86,51 +87,51 @@ class NftCollectionDtoService extends BaseService {
       .sort((a, b) => b.createdAt - a.createdAt);
   }
 
-  async getNftCollection(nftCollectionId) {
+  async getNFTCollection(nftCollectionId) {
     const nftCollectionMetadata = await this.findOne({ _id: nftCollectionId });
     if (!nftCollectionMetadata) return null;
-    const results = await this.mapNftCollections([nftCollectionMetadata]);
+    const results = await this.mapNFTCollections([nftCollectionMetadata]);
     const [result] = results;
     return result;
   }
 
-  async getNftCollections(nftCollectionIds) {
+  async getNFTCollections(nftCollectionIds) {
     const nftCollections = await this.findMany({ _id: { $in: [...nftCollectionIds] } });
     if (!nftCollections.length) return [];
-    const result = await this.mapNftCollections(nftCollections);
+    const result = await this.mapNFTCollections(nftCollections);
     return result;
   }
 
-  async lookupNftCollections(filter) {
+  async lookupNFTCollections(filter) {
     const nftCollections = await this.findMany({});
     if (!nftCollections.length) return [];
-    const result = await this.mapNftCollections(nftCollections, { ...filter, isDefault: false });
+    const result = await this.mapNFTCollections(nftCollections, { ...filter, isDefault: false });
     return result;
   }
 
-  async getNftCollectionsByIssuer(issuer) {
+  async getNFTCollectionsByIssuer(issuer) {
     const nftCollections = await this.findMany({ issuer: issuer });
     if (!nftCollections.length) return [];
-    const result = await this.mapNftCollections(nftCollections, { isDefault: false });
+    const result = await this.mapNFTCollections(nftCollections, { isDefault: false });
     return result;
   }
 
-  async getNftCollectionsByPortal(portalId) {
+  async getNFTCollectionsByPortal(portalId) {
     const available = await this.findMany({});
     const nftCollections = available.filter(p => p.portalId == portalId);
     if (!nftCollections.length) return [];
-    const result = await this.mapNftCollections(nftCollections, { isDefault: false });
+    const result = await this.mapNFTCollections(nftCollections, { isDefault: false });
     return result;
   }
 
-  async getDefaultNftCollection(daoId) {
+  async getDefaultNFTCollection(daoId) {
     const nftCollection = await this.findOne({ isDefault: true, daoId });
     if (!nftCollection) return null;
-    const results = await this.mapNftCollections([nftCollection], { isDefault: true });
+    const results = await this.mapNFTCollections([nftCollection], { isDefault: true });
     const [result] = results;
     return result;
   }
 
 }
 
-export default NftCollectionDtoService;
+export default NFTCollectionDtoService;

@@ -1,29 +1,29 @@
-import mongoose from 'mongoose';
-import BaseService from '../../base/BaseService';
-import NftCollectionMetadataSchema from '../../../schemas/NftCollectionMetadataSchema';
-import AttributeDtoService from '../read/AttributeDtoService';
-import { logWarn } from '../../../utils/log';
-import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
+import { ATTR_SCOPES } from '@deip/constants';
 import { isArray } from '@deip/toolbox';
+import mongoose from 'mongoose';
+import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
+import { logWarn } from '../../../utils/log';
+import BaseService from '../../base/BaseService';
+import AttributeDtoService from '../read/AttributeDtoService';
 
 
-class NftCollectionMetadataService extends BaseService {
+class NFTCollectionMetadataService extends BaseService {
 
-  constructor(options = { scoped: true }) { 
-    super(NftCollectionMetadataSchema, options);
+  constructor(options = { scoped: true }) {
+    super(NFTCollectionMetadataSchema, options);
   }
 
-  async getNftCollectionMetadata(nftCollectionId) {
+  async getNFTCollectionMetadata(nftCollectionId) {
     const nftCollection = await this.findOne({ _id: nftCollectionId });
     return nftCollection || null;
   }
 
-  async getNftCollectionMetadatas(nftCollectionIds) {
+  async getNFTCollectionMetadatas(nftCollectionIds) {
     const nftCollection = await this.findMany({ _id: { $in: [...nftCollectionIds] } });
     return nftCollection || null;
   }
 
-  async createNftCollectionMetadata({
+  async createNFTCollectionMetadata({
     _id,
     issuer,
     attributes = [],
@@ -43,7 +43,7 @@ class NftCollectionMetadataService extends BaseService {
   }
 
 
-  async updateNftCollectionMetadata({
+  async updateNFTCollectionMetadata({
     _id,
     attributes
   }) {
@@ -59,7 +59,15 @@ class NftCollectionMetadataService extends BaseService {
     return result;
   }
 
-  
+  async increaseNftCollectionNextItemId(_id) {
+    const result = await this._schema.updateOne({ _id: String(_id) },
+      { $inc: { nextNftItemId: 1 } }
+    );
+
+    return result;
+  }
+
+
   async mapAttributes(attributes) {
     const attributeDtoService = new AttributeDtoService();
     const nftCollectionAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.NFT_COLLECTION || 'nftCollection');
@@ -71,7 +79,7 @@ class NftCollectionMetadataService extends BaseService {
       let rAttrValue = null;
 
       if (!attribute) {
-        console.warn(`WARNING: ${rAttrId} is obsolete attribute`);
+        logWarn(`WARNING: ${rAttrId} is obsolete attribute`);
       }
 
       if (!attribute || rAttr.value == null) {
@@ -91,4 +99,4 @@ class NftCollectionMetadataService extends BaseService {
   }
 }
 
-export default NftCollectionMetadataService;
+export default NFTCollectionMetadataService;

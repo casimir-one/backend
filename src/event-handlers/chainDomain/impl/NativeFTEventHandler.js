@@ -11,9 +11,7 @@ class NativeFTEventHandler extends ChainDomainEventHandler {
 
 const nativeFTEventHandler = new NativeFTEventHandler();
 
-nativeFTEventHandler.register(DOMAIN_EVENT.NATIVE_FT_TRANSFER, async (event) => {
-  console.log("NATIVE_FT_TRANSFER", event.getEventPayload())
-});
+nativeFTEventHandler.register(DOMAIN_EVENT.NATIVE_FT_TRANSFER, async (event) => { });
 
 
 module.exports = nativeFTEventHandler;

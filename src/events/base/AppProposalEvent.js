@@ -15,6 +15,13 @@ import TokenSwapProposalCreatedEvent from '../impl/TokenSwapProposalCreatedEvent
 import TokenSwapProposalAcceptedEvent from '../impl/TokenSwapProposalAcceptedEvent';
 import TokenSwapProposalDeclinedEvent from '../impl/TokenSwapProposalDeclinedEvent';
 
+import NFTLazySellProposalCreatedEvent from '../impl/NFTLazySellProposalCreatedEvent';
+import NFTLazySellProposalAcceptedEvent from '../impl/NFTLazySellProposalAcceptedEvent';
+import NFTLazySellProposalDeclinedEvent from '../impl/NFTLazySellProposalDeclinedEvent';
+
+import NFTLazyBuyProposalCreatedEvent from '../impl/NFTLazyBuyProposalCreatedEvent';
+import NFTLazyBuyProposalAcceptedEvent from '../impl/NFTLazyBuyProposalAcceptedEvent';
+import NFTLazyBuyProposalDeclinedEvent from '../impl/NFTLazyBuyProposalDeclinedEvent';
 
 module.exports = {
   [APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL]: {},
@@ -38,5 +45,15 @@ module.exports = {
     CREATED: TokenSwapProposalCreatedEvent,
     ACCEPTED: TokenSwapProposalAcceptedEvent,
     DECLINED: TokenSwapProposalDeclinedEvent
-  }
+  },
+  [APP_PROPOSAL.NFT_LAZY_SELL_PROPOSAL]: {
+    CREATED: NFTLazySellProposalCreatedEvent,
+    ACCEPTED: NFTLazySellProposalAcceptedEvent,
+    DECLINED: NFTLazySellProposalDeclinedEvent
+  },
+  [APP_PROPOSAL.NFT_LAZY_BUY_PROPOSAL]: {
+    CREATED: NFTLazyBuyProposalCreatedEvent,
+    ACCEPTED: NFTLazyBuyProposalAcceptedEvent,
+    DECLINED: NFTLazyBuyProposalDeclinedEvent
+  },
 }

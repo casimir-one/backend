@@ -78,35 +78,35 @@ class BaseFileStorage {
   async putPassThroughStream(remotePath, passThroughSteam, options = {}) { throw new Error("Not implemented"); }
 
 
-  getNftCollectionDirPath(nftCollectionId) {
+  getNFTCollectionDirPath(nftCollectionId) {
     return nftCollectionDirPath(this._baseDirPath, nftCollectionId);
   }
 
-  getNftCollectionFilePath(nftCollectionId, filename) {
+  getNFTCollectionFilePath(nftCollectionId, filename) {
     return nftCollectionFilePath(this._baseDirPath, nftCollectionId, filename);
   }
 
-  getNftCollectionAttributeDirPath(nftCollectionId, attributeId) {
+  getNFTCollectionAttributeDirPath(nftCollectionId, attributeId) {
     return nftCollectionAttributeDirPath(this._baseDirPath, nftCollectionId, attributeId);
   }
 
-  getNftCollectionAttributeFilePath(nftCollectionId, attributeId, filename) {
+  getNFTCollectionAttributeFilePath(nftCollectionId, attributeId, filename) {
     return nftCollectionAttributeFilePath(this._baseDirPath, nftCollectionId, attributeId, filename);
   }
 
-  getNftItemMetadataPackageDirPath(nftCollectionId, packageHash) {
+  getNFTItemMetadataPackageDirPath(nftCollectionId, packageHash) {
     return nftItemMetadataPackageDirPath(this._baseDirPath, nftCollectionId, packageHash);
   }
 
-  getNftItemMetadataPackageFilePath(nftCollectionId, packageHash, fileHash) {
+  getNFTItemMetadataPackageFilePath(nftCollectionId, packageHash, fileHash) {
     return nftItemMetadataPackageFilePath(this._baseDirPath, nftCollectionId, packageHash, fileHash);
   }
 
-  getNftCollectionArchiveDirPath(nftCollectionId, archiveName) {
+  getNFTCollectionArchiveDirPath(nftCollectionId, archiveName) {
     return nftCollectionArchiveDirPath(this._baseDirPath, nftCollectionId, archiveName);
   }
   
-  getNftItemMetadataPackageTempDirPath(nftCollectionId, sessionId) {
+  getNFTItemMetadataPackageTempDirPath(nftCollectionId, sessionId) {
     return nftItemMetadataPackageTempDirPath(this._baseDirPath, nftCollectionId, sessionId);
   }
 

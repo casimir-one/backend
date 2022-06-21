@@ -168,7 +168,7 @@ class AttributesController extends BaseController {
         let filepath = '';
         switch (scope) {
           case ATTR_SCOPES.NFT_COLLECTION || 'nftCollection':
-            filepath = isEntityRootFolder ? FileStorage.getNftCollectionFilePath(entityId, filename) : FileStorage.getNftCollectionAttributeFilePath(entityId, attributeId, filename);
+            filepath = isEntityRootFolder ? FileStorage.getNFTCollectionFilePath(entityId, filename) : FileStorage.getNFTCollectionAttributeFilePath(entityId, attributeId, filename);
             const fileExists = await FileStorage.exists(filepath);
             if (!fileExists) {
               throw new NotFoundError(`${filepath} is not found`);
