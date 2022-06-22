@@ -11,7 +11,7 @@ const NFTCollectionMetadataSchema = new Schema({
   "attributes": [AttributeValueSchema],
   "isDefault": { type: Boolean, default: false },
   "issuedByTeam": { type: Boolean, default: false },
-  "nextNftItemId": { type: Number, default: 0 },
+  "nextNftItemId": { type: Number, default: 1 },
 }, { timestamps: true });
 
 const model = mongoose.model('nft-collection-metadata', NFTCollectionMetadataSchema);
