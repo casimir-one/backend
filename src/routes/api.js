@@ -76,10 +76,10 @@ public_route.get('/v2/tokens/nft/items/listing', assetsCtrl.getPublicNFTItemsLis
 public_route.get('/v2/tokens/nft/items/listing-paginated', assetsCtrl.getNFTItemsListingPaginated)
 public_route.get('/v2/tokens/nft/items/drafts/listing-paginated', assetsCtrl.getNFTItemsMetadataDraftsListingPaginated)
 public_route.get('/v2/tokens/nft/items/drafts/nft-collection/:nftCollectionId', assetsCtrl.getNFTItemMetadataDraftsByNFTCollection)
+public_route.get('/v2/tokens/nft/item/draft/:nftItemDraftId', assetsCtrl.getNFTItemMetadataDraft)
 public_route.get('/v2/tokens/nft/item/:nftCollectionId/:nftItemId', assetsCtrl.getNFTItem)
 public_route.get('/v2/tokens/nft/items/nft-collection/:nftCollectionId', assetsCtrl.getNFTItemsByNFTCollection)
 public_route.get('/v2/tokens/nft/items/portal/:portalId', assetsCtrl.getNFTItemsByPortal)
-public_route.get('/v2/tokens/nft/item/draft/:nftItemDraftId', assetsCtrl.getNFTItemMetadataDraft)
 public_route.get('/v2/tokens/nft/item/package/:nftCollectionId/:nftItemId/:fileHash', assetsCtrl.getNFTItemPackageFile)
 
 public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFTClassById)
