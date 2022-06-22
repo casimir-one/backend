@@ -8,7 +8,6 @@ import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
 import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
 import ProposalService from './../../services/impl/write/ProposalService';
 import config from './../../config';
-import { QUEUE_TOPIC } from './../../constants';
 import {
   logError,
   logWarn,
@@ -85,8 +84,8 @@ class BaseCmdHandler extends EventEmitter {
 
     this.logEvents(events);
 
-    const queueService = await QueueService.getInstanceAsync(config.QUEUE_SERVICE);
-    await queueService.sendEvents(QUEUE_TOPIC.APP_EVENT, events);
+    const queueService = await QueueService.getInstanceAsync(config);
+    await queueService.sendEvents(config.KAFKA_APP_TOPIC, events);
   };
 
 

@@ -1,7 +1,6 @@
 import { ChainService } from '@deip/chain-service';
 import { DOMAIN_EVENT } from '@deip/constants';
 import config from "../config";
-import { QUEUE_TOPIC } from "../constants";
 import ChainDomainEventHandler from "../event-handlers/base/ChainDomainEventHandler";
 import QueueService from "../queue/QueueService";
 import { logError, logProcessManagerInfo, logWarn } from "../utils/log";
@@ -10,7 +9,7 @@ import APP_CMD_TO_BC_EVENT_PROCESSOR from './AppCmdToBlockchainEvent';
 
 
 QueueService.getInstanceAsync(config).then(async queueService => {
-  await queueService.subscribeEach(config.KAFKA_CHAIN_GROUP_ID, QUEUE_TOPIC.BLOCKCHAIN, async (topic, event) => {
+  await queueService.subscribeEach(config.KAFKA_CHAIN_GROUP_ID, config.KAFKA_CHAIN_TOPIC, async (topic, event) => {
     await ChainDomainEventHandler.Broadcast([event]);
     await fire(event);
   })
