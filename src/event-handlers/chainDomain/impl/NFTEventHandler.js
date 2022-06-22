@@ -83,12 +83,13 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_ITEM_CREATED, async (event) => {
   const draft = await nftItemMetadataDraftService.findOne({ nftItemId: String(nftItemId), nftCollectionId: String(nftCollectionId) });
   if (!draft) {
     logWarn("Chain eventHandler, nft item already created");
+    return;
   }
-  let ownerDao;
-  ownerDao = await userService.findOne({ address: ownerAddress });
+  let ownerDao = await userService.findOne({ address: ownerAddress });
   if (!ownerDao) {
     ownerDao = await teamService.findOne({ address: ownerAddress });
   }
+  
   const nftItem = await nftItemMetadataService.createNFTItemMetadata({
     ...draft,
     _id: { nftItemId: String(nftItemId), nftCollectionId: String(nftCollectionId) },
@@ -153,9 +154,8 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_TRANSFERRED, async (event) => {
     nftCollectionId,
     owner: newOwnerDao?._id || null,
     ownerAddress: toAddress,
-    ownedByTeam: !!ownerDao?.members,
+    ownedByTeam: !!newOwnerDao?.members,
   });
-
 });
 
 module.exports = nftEventHandler
