@@ -8,15 +8,15 @@ const checkMatch = (obj) => !Object.values(obj).includes(false);
 
 const APP_CMD_TO_BC_EVENT_PROCESSOR = {
 
-  [APP_CMD.CREATE_DAO]: [{
-    eventNum: DOMAIN_EVENT.DAO_CREATE,
-    matchF: ({ txInfo, appCmd, event }) => {
-      const { entityId: cmdDaoId } = appCmd.getCmdPayload();
-      const { dao: { id: eventDaoIdBuffer } } = event.getEventPayload();
+  // [APP_CMD.CREATE_DAO]: [{
+  //   eventNum: DOMAIN_EVENT.DAO_CREATE,
+  //   matchF: ({ txInfo, appCmd, event }) => {
+  //     const { entityId: cmdDaoId } = appCmd.getCmdPayload();
+  //     const { dao: { id: eventDaoIdBuffer } } = event.getEventPayload();
 
-      return cmdDaoId === Buffer.from(eventDaoIdBuffer).toString('hex');
-    }
-  }],
+  //     return cmdDaoId === Buffer.from(eventDaoIdBuffer).toString('hex');
+  //   }
+  // }],
 
   [APP_CMD.TRANSFER_FT]: [
     {
