@@ -2,8 +2,7 @@ import {
   APP_EVENT,
   ASSET_TYPE,
   NFT_ITEM_METADATA_DRAFT_STATUS,
-  NFT_ITEM_METADATA_FORMAT,
-  NFT_ITEM_METADATA_TYPES
+  NFT_ITEM_METADATA_FORMAT
 } from '@deip/constants';
 import {
   AssetService,
@@ -110,7 +109,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     nftCollectionId,
     nftItemId,
     entityId,
-    contentType = NFT_ITEM_METADATA_TYPES.ANNOUNCEMENT,
     formatType,
     authors,
     owner,
@@ -132,7 +130,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     nftItemId,
     hash: '',
     algo: 'sha256',
-    contentType,
     formatType,
     owner,
     ownedByTeam,
@@ -171,7 +168,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (eve
     _id: draftId,
     authors,
     title,
-    contentType = NFT_ITEM_METADATA_TYPES.ANNOUNCEMENT,
     formatType,
     references,
     status,
@@ -198,7 +194,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (eve
     _id: draftId,
     authors,
     title,
-    contentType,
     references,
     status,
     jsonData,
@@ -220,7 +215,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_CREATED, async (event) =>
     nftCollectionId,
     owner,
     ownedByTeam,
-    contentType = NFT_ITEM_METADATA_TYPES.ANNOUNCEMENT,
     nftItemMetadataDraftId,
     authors,
     references,
@@ -239,7 +233,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_CREATED, async (event) =>
     owner,
     ownedByTeam,
     title,
-    contentType,
     authors,
     references,
     attributes,

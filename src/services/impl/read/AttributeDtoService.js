@@ -1,5 +1,4 @@
 import AttributeSchema from './../../../schemas/AttributeSchema';
-import { ATTR_SCOPES } from '@deip/constants';
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 
@@ -24,14 +23,14 @@ class AttributeDtoService extends BaseService {
     return mapAttributes;
   }
   
-  async getAttributesByScope(scope = ATTR_SCOPES.NFT_COLLECTION || 'nftCollection') {
+  async getAttributesByScope(scope = 'nftCollection') {
     const result = await this.findMany({ scope });
     if (!result.length) return [];
     const mapAttributes = await this.mapAttributes(result);
     return mapAttributes;
   }
   
-  async getNetworkAttributesByScope(scope = ATTR_SCOPES.NFT_COLLECTION || 'nftCollection') {
+  async getNetworkAttributesByScope(scope = 'nftCollection') {
     const result = await this.findMany({ scope })
     if (!result.length) return [];
     const mapAttributes = await this.mapAttributes(result);

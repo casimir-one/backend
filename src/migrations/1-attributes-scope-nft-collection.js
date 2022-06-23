@@ -48,10 +48,47 @@ const AttributeSchema = new Schema({
   "isGlobalScope": { type: Boolean, default: false }
 });
 
+const LayoutSchema = new Schema({
+  "portalId": { type: String, required: true },
+  "name": { type: String, required: true },
+  "value": { type: Array, required: true },
+  "scope": { type: Schema.Types.Mixed },
+  "type": { type: String, required: true }
+}, { timestamps: true });
+
+const PortalSchema = new Schema({
+  "_id": { type: String },
+  "name": { type: String },
+  "serverUrl": { type: String, required: true },
+  "shortName": { type: String },
+  "description": { type: String },
+  "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
+  "logo": { type: String, default: "default_portal_logo.png" },
+  "banner": { type: String, default: "default_banner_logo.png" },
+  "network": { type: Schema.Types.Mixed },
+  "settings": {
+    "signUpPolicy": { type: Schema.Types.Mixed },
+    "attributeOverwrites": { type: Schema.Types.Mixed },
+    "attributeSettings": { type: Object },
+    "layoutSettings": { type: Object },
+    "layouts": { type: Schema.Types.Mixed },
+    "faq": { type: Schema.Types.Mixed },
+    "theme": { type: Object },
+    "modules": { type: Schema.Types.Mixed },
+    "roles": { type: Schema.Types.Mixed },
+    "moderation": { type: Schema.Types.Mixed }
+  }
+}, { timestamps: true, minimize: false });
+
+
+const LayoutSchemaRefs = mongoose.model('layout', LayoutSchema);
 const AttributesRefs = mongoose.model('attributes', AttributeSchema);
+const PortalsRefs = mongoose.model('portal', PortalSchema);
 
 const run = async () => {
   const attributesPromises = [];
+  const layoutsPromises = [];
+  const portalsPromises = [];
 
   const attributesRefs = await AttributesRefs.find({});
   for (let i = 0; i < attributesRefs.length; i++) {
@@ -61,11 +98,36 @@ const run = async () => {
       attributeRef.scope = 'nftCollection';
       attributesPromises.push(attributeRef.save());
     }
+  }
 
+  const layoutSchemaRefs = await LayoutSchemaRefs.find({});
+  for (let i = 0; i < layoutSchemaRefs.length; i++) {
+    const layoutRef = layoutSchemaRefs[i];
+    const layoutRefObj = layoutRef.toObject();
+    if (layoutRefObj.scope === 'project') {
+      layoutRef.scope = 'nftCollection';
+      layoutsPromises.push(layoutRef.save());
+    }
+  }
+
+  const portalsRefs = await PortalsRefs.find({});
+  for (let i = 0; i < portalsRefs.length; i++) {
+    const portalRef = portalsRefs[i];
+    const portalRefObj = portalRef.toObject();
+    if(portalRefObj.settings?.attributeSettings?.mappedKeys?.length) {
+      portalRefObj.settings.attributeSettings.mappedKeys.forEach((item, index) => {
+        if (item?.key?.includes('project.')) {
+          item.key = item.key.replace('project.', 'nftCollection.')
+        }
+      })
+      portalRef.settings.attributeSettings = portalRefObj.settings.attributeSettings
+    }
+    portalsPromises.push(portalRef.save());
   }
 
   await Promise.all(attributesPromises);
-    
+  await Promise.all(layoutsPromises);
+  await Promise.all(portalsPromises);
 };
 
 run()

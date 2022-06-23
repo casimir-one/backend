@@ -10,7 +10,6 @@ class NFTItemMetadataCreatedEvent extends BaseEvent {
       nftCollectionId,
       owner,
       nftItemMetadataDraftId,
-      contentType,
       authors,
       title,
     } = eventPayload;

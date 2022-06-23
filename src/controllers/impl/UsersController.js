@@ -5,7 +5,7 @@ import qs from 'qs';
 import config from '../../config';
 import FileStorage from './../../storage';
 import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
-import { APP_CMD, ATTR_SCOPES, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_ROLES, USER_PROFILE_STATUS } from '@deip/constants';
+import { APP_CMD, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_ROLES, USER_PROFILE_STATUS } from '@deip/constants';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, FailedDependencyError, ConflictError, ForbiddenError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
@@ -440,7 +440,7 @@ class UsersController extends BaseController {
 
         if (user && user.profile && user.profile.attributes) {
           // temp solution //
-          const attrs = await attributeDtoService.getNetworkAttributesByScope(ATTR_SCOPES.USER || 'user');
+          const attrs = await attributeDtoService.getNetworkAttributesByScope('user');
           const attr = attrs.find(
             ({
               type,

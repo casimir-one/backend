@@ -1,5 +1,5 @@
 
-import { ASSESSMENT_CRITERIA_TYPE, NFT_ITEM_METADATA_TYPES, SIGN_UP_POLICY } from '@deip/constants';
+import { SIGN_UP_POLICY } from '@deip/constants';
 import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
@@ -62,19 +62,6 @@ const GlobalNetworkSettings = new Schema({
   "isGlobalScopeVisible": { type: Boolean, default: false }
 });
 
-const NFTItemMetadataAssessmentCriteria = new Schema({
-  "_id": false,
-  "id": { type: Number, required: true },
-  "title": { type: String, required: true },
-  "max": { type: Number, required: true }
-});
-
-const NFTItemMetadataAssessmentCriterias = new Schema({
-  "_id": false,
-  "contentType": { type: Number, required: true },
-  "values": [NFTItemMetadataAssessmentCriteria]
-});
-
 const PortalModerationConfigSchema = new Schema({
   "_id": false,
   "nftItemMetadataDraftModerationRequired": { type: Boolean, required: false },
@@ -96,17 +83,6 @@ const PortalSchema = new Schema({
       type: Number,
       enum: [...Object.values(SIGN_UP_POLICY)],
       required: true
-    },
-    "assesmentCriterias": {
-      type: [NFTItemMetadataAssessmentCriterias],
-      default: [{
-        contentType: NFT_ITEM_METADATA_TYPES.UNKNOWN,
-        values: [
-          { id: ASSESSMENT_CRITERIA_TYPE.NOVELTY, title: 'Novelty', max: 5 },
-          { id: ASSESSMENT_CRITERIA_TYPE.TECHNICAL_QUALITY, title: 'Technical Quality', max: 5 },
-          { id: ASSESSMENT_CRITERIA_TYPE.COMMERCIALIZATION, title: 'Commercialization', max: 5 }
-        ]
-      }]
     },
     "attributeOverwrites": [AttributeOverwrite],
     "attributeSettings": { type: Object },
