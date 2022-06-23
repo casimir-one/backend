@@ -1,4 +1,3 @@
-import { ATTR_SCOPES } from '@deip/constants';
 import { isArray } from '@deip/toolbox';
 import mongoose from 'mongoose';
 import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
@@ -70,7 +69,7 @@ class NFTCollectionMetadataService extends BaseService {
 
   async mapAttributes(attributes) {
     const attributeDtoService = new AttributeDtoService();
-    const nftCollectionAttributes = await attributeDtoService.getAttributesByScope(ATTR_SCOPES.NFT_COLLECTION || 'nftCollection');
+    const nftCollectionAttributes = await attributeDtoService.getAttributesByScope('nftCollection');
 
     return attributes.map(rAttr => {
       const rAttrId = mongoose.Types.ObjectId(rAttr.attributeId.toString());

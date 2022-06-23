@@ -36,7 +36,6 @@ class NFTItemDtoService extends BaseService {
         createdAt: nftItemMetadata.createdAt || nftItemMetadata.created_at,
         updatedAt: nftItemMetadata.updatedAt || nftItemMetadata.updated_at,
         metadata: nftItemMetadata.metadata,
-        contentType: nftItemMetadata.contentType,
         formatType: nftItemMetadata.formatType,
       },
       portalId: nftItemMetadata.portalId

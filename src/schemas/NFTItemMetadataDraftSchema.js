@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { NFT_ITEM_METADATA_DRAFT_STATUS, NFT_ITEM_METADATA_FORMAT, NFT_ITEM_METADATA_TYPES } from '@deip/constants';
+import { NFT_ITEM_METADATA_DRAFT_STATUS, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
 import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
@@ -16,11 +16,6 @@ const NFTItemMetadataDraftSchema = new Schema({
   "attributes": [AttributeValueSchema],
   "hash": { type: String, index: true },
   "algo": { type: String },
-  "contentType": {
-    type: Number,
-    enum: [...Object.values(NFT_ITEM_METADATA_TYPES)],
-    default: NFT_ITEM_METADATA_TYPES.ANNOUNCEMENT
-  },
   "formatType": {
     type: Number,
     enum: [...Object.values(NFT_ITEM_METADATA_FORMAT)],

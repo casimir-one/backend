@@ -1,4 +1,4 @@
-import { APP_CMD, ATTR_SCOPES } from '@deip/constants';
+import { APP_CMD } from '@deip/constants';
 import BaseController from './../base/BaseController';
 import { BadRequestError, NotFoundError } from './../../errors';
 import {attributeCmdHandler} from './../../command-handlers';
@@ -167,14 +167,14 @@ class AttributesController extends BaseController {
         const imageQuery = ctx.query.image === 'true';
         let filepath = '';
         switch (scope) {
-          case ATTR_SCOPES.NFT_COLLECTION || 'nftCollection':
+          case 'nftCollection':
             filepath = isEntityRootFolder ? FileStorage.getNFTCollectionFilePath(entityId, filename) : FileStorage.getNFTCollectionAttributeFilePath(entityId, attributeId, filename);
             const fileExists = await FileStorage.exists(filepath);
             if (!fileExists) {
               throw new NotFoundError(`${filepath} is not found`);
             }
             break;
-          case ATTR_SCOPES.TEAM || 'team':
+          case 'team':
             filepath = isEntityRootFolder ? FileStorage.getTeamFilePath(entityId, filename) : FileStorage.getTeamAttributeFilePath(entityId, attributeId, filename);
             if (imageQuery) {
               const exists = await FileStorage.exists(filepath);
@@ -183,7 +183,7 @@ class AttributesController extends BaseController {
               }
             }
             break;
-          case ATTR_SCOPES.USER || 'user':
+          case 'user':
             filepath = isEntityRootFolder ? FileStorage.getAccountFilePath(entityId, filename) : FileStorage.getAccountAttributeFilePath(entityId, attributeId, filename);
             if (imageQuery) {
               const exists = await FileStorage.exists(filepath);
