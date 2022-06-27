@@ -2,6 +2,7 @@ import { ChainService } from '@deip/chain-service';
 import { AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
 import { 
   APP_CMD,
+  APP_PROPOSAL,
   NftItemMetadataDraftStatus,
   NFT_ITEM_METADATA_FORMAT
  } from '@casimir/platform-core';
@@ -501,46 +502,53 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_NFT_ITEM_METADATA);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { nftItemMetadataDraftId, nftCollectionId } = appCmd.getCmdPayload();
-          const username = ctx.state.user.username;
+          const validateCreateNFTItemMetadata = async (createNFTItemMetadataCmd, cmdStack) => {
+            const { nftItemMetadataDraftId, nftCollectionId } = createNFTItemMetadataCmd.getCmdPayload();
+            const username = ctx.state.user.username;
 
-          const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
+            const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
 
-          if (!nftCollection) {
-            throw new BadRequestError(`Nft collection ${nftCollectionId} doesn't exist`);
-          }
+            if (!nftCollection) {
+              throw new BadRequestError(`Nft collection ${nftCollectionId} doesn't exist`);
+            }
 
-          if (nftCollection.issuedByTeam) {
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
-            if (!isAuthorized) {
+            if (nftCollection.issuedByTeam) {
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to create nft item metadata for "${nftCollectionId}" nft collection`);
+              }
+            } else if (nftCollection.issuer !== username) {
               throw new ForbiddenError(`"${username}" is not permitted to create nft item metadata for "${nftCollectionId}" nft collection`);
             }
-          } else if (nftCollection.issuer !== username) {
-            throw new ForbiddenError(`"${username}" is not permitted to create nft item metadata for "${nftCollectionId}" nft collection`);
-          }
 
-          const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(nftItemMetadataDraftId);
+            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(nftItemMetadataDraftId);
 
-          if (!draft) {
-            throw new NotFoundError(`Draft with "${nftItemMetadataDraftId}" id is not found`);
-          }
-          const nftItemMetadata = await nftItemMetadataService.findNFTItemMetadataByHash(draft.nftCollectionId, draft.hash);
+            if (!draft) {
+              throw new NotFoundError(`Draft with "${nftItemMetadataDraftId}" id is not found`);
+            }
+            const nftItemMetadata = await nftItemMetadataService.findNFTItemMetadataByHash(draft.nftCollectionId, draft.hash);
 
-          if (nftItemMetadata) {
-            throw new ConflictError(`Nft item metadata with "${draft.hash}" hash already exist`);
-          }
+            if (nftItemMetadata) {
+              throw new ConflictError(`Nft item metadata with "${draft.hash}" hash already exist`);
+            }
 
-          const moderationRequired = ctx.state.portal.settings.moderation.nftItemMetadataDraftModerationRequired;
-          if (
-            moderationRequired &&
-            draft.status != NftItemMetadataDraftStatus.APPROVED
-          ) {
-            throw new BadRequestError(`Nft item metadata "${draft.nftCollectionId}" isn't in 'Approved' status`);
-          }
+            const moderationRequired = ctx.state.portal.settings.moderation.nftItemMetadataDraftModerationRequired;
+            if (
+              moderationRequired &&
+              draft.status != NftItemMetadataDraftStatus.APPROVED
+            ) {
+              throw new BadRequestError(`Nft item metadata "${draft.nftCollectionId}" isn't in 'Approved' status`);
+            }
+          };
+
+          const createNFTItemMetadataSettings = {
+            cmdNum: APP_CMD.CREATE_NFT_ITEM_METADATA,
+            validate: validateCreateNFTItemMetadata
+          };
+
+          const validCmdsOrder = [createNFTItemMetadataSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -558,35 +566,42 @@ class AssetsController extends BaseController {
     form: NFTItemMetadataForm, h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { nftCollectionId, owner, ownedByTeam } = appCmd.getCmdPayload();
-          const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
+          const validateCreateNFTItemMetadataDraft = async (createNFTItemMetadataDraftCmd, cmdStack) => {
+            const { nftCollectionId, owner, ownedByTeam } = createNFTItemMetadataDraftCmd.getCmdPayload();
+            const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
 
-          if (!nftCollection) {
-            throw new BadRequestError(`Nft collection "${nftCollectionId}" doesn't exist`);
-          }
+            if (!nftCollection) {
+              throw new BadRequestError(`Nft collection "${nftCollectionId}" doesn't exist`);
+            }
 
-          const username = ctx.state.user.username;
+            const username = ctx.state.user.username;
 
-          if (nftCollection.issuedByTeam) {
-            if (ownedByTeam && owner !== nftCollection.issuer) {
-              throw new BadRequestError(`Can't create nft item metadata draft by other team for team nft collection`);
+            if (nftCollection.issuedByTeam) {
+              if (ownedByTeam && owner !== nftCollection.issuer) {
+                throw new BadRequestError(`Can't create nft item metadata draft by other team for team nft collection`);
+              }
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to create nft item metadata draft`);
+              }
+            } else {
+              if (ownedByTeam) {
+                throw new BadRequestError(`Can't create nft item metadata draft by team for user nft collection`);
+              }
+              if (nftCollection.issuer !== owner || owner !== username) {
+                throw new ForbiddenError(`"${username}" is not permitted to create nft collection metadata draft`);
+              }
             }
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
-            if (!isAuthorized) {
-              throw new ForbiddenError(`"${username}" is not permitted to create nft item metadata draft`);
-            }
-          } else {
-            if (ownedByTeam) {
-              throw new BadRequestError(`Can't create nft item metadata draft by team for user nft collection`);
-            }
-            if (nftCollection.issuer !== owner || owner !== username) {
-              throw new ForbiddenError(`"${username}" is not permitted to create nft collection metadata draft`);
-            }
-          }
+          };
+
+          const createNFTItemMetadataDraftSettings = {
+            cmdNum: APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT,
+            validate: validateCreateNFTItemMetadataDraft
+          };
+
+          const validCmdsOrder = [createNFTItemMetadataDraftSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;
@@ -610,44 +625,50 @@ class AssetsController extends BaseController {
     form: NFTItemMetadataForm, h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const validateUpdateNFTItemMetadataDraft = async (updateNFTItemMetadataDraftCmd, cmdStack) => {
+            const { _id: nftItemDraftId } = updateNFTItemMetadataDraftCmd.getCmdPayload();
 
-          const { _id: nftItemDraftId } = appCmd.getCmdPayload();
+            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(nftItemDraftId);
 
-          const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(nftItemDraftId);
+            if (!draft) {
+              throw new NotFoundError(`Draft for "${nftItemDraftId}" id is not found`);
+            }
+            if (draft.status != NftItemMetadataDraftStatus.IN_PROGRESS) {
+              throw new BadRequestError(`Draft "${nftItemDraftId}" is locked for updates`);
+            }
 
-          if (!draft) {
-            throw new NotFoundError(`Draft for "${nftItemDraftId}" id is not found`);
-          }
-          if (draft.status != NftItemMetadataDraftStatus.IN_PROGRESS) {
-            throw new BadRequestError(`Draft "${nftItemDraftId}" is locked for updates`);
-          }
+            const username = ctx.state.user.username;
 
-          const username = ctx.state.user.username;
-
-          if (draft.ownedByTeam) {
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
-            if (!isAuthorized) {
+            if (draft.ownedByTeam) {
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
+              }
+            } else if (draft.owner !== username) {
               throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
             }
-          } else if (draft.owner !== username) {
-            throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
-          }
 
-          if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
-            throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
-          }
-
-          if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-            const archiveDir = FileStorage.getNFTCollectionArchiveDirPath(draft.nftCollectionId, draft.folder);
-            const exists = await FileStorage.exists(archiveDir);
-            if (!exists) {
-              throw new NotFoundError(`Dir "${archiveDir}" is not found`);
+            if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
+              throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
             }
-          }
+
+            if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
+              const archiveDir = FileStorage.getNFTCollectionArchiveDirPath(draft.nftCollectionId, draft.folder);
+              const exists = await FileStorage.exists(archiveDir);
+              if (!exists) {
+                throw new NotFoundError(`Dir "${archiveDir}" is not found`);
+              }
+            }
+          };
+
+          const updateNFTItemMetadataDraftSettings = {
+            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT,
+            validate: validateUpdateNFTItemMetadataDraft
+          };
+
+          const validCmdsOrder = [updateNFTItemMetadataDraftSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;
@@ -669,39 +690,43 @@ class AssetsController extends BaseController {
   deleteNFTItemMetadataDraft = this.command({
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts app cmd`);
-          }
-
-          const { _id } = appCmd.getCmdPayload();
-          const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(_id);
-          if (!draft) {
-            throw new NotFoundError(`Draft for "${_id}" id is not found`);
-          }
-
-          const user = await userService.getUser(draft.owner);
-          const username = ctx.state.user.username;
-
-          if (user) {
-            if (user._id !== username) {
-              throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
+          const validateDeleteNFTItemMetadataDraft = async (deleteNFTItemMetadataDraftCmd, cmdStack) => {
+            const { _id } = deleteNFTItemMetadataDraftCmd.getCmdPayload();
+            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(_id);
+            if (!draft) {
+              throw new NotFoundError(`Draft for "${_id}" id is not found`);
             }
-          } else {
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
-            if (!isAuthorized) {
-              throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
+
+            const user = await userService.getUser(draft.owner);
+            const username = ctx.state.user.username;
+
+            if (user) {
+              if (user._id !== username) {
+                throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
+              }
+            } else {
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
+              }
             }
-          }
 
-          // if there is a proposal for this content (no matter is it approved or still in voting progress)
-          // we must respond with an error as blockchain hashed data should not be modified
-          if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
-            throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
-          }
+            // if there is a proposal for this content (no matter is it approved or still in voting progress)
+            // we must respond with an error as blockchain hashed data should not be modified
+            if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
+              throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
+            }
+          };
 
+          const deleteNFTItemMetadataDraftSettings = {
+            cmdNum: APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT,
+            validate: validateDeleteNFTItemMetadataDraft
+          };
+
+          const validCmdsOrder = [deleteNFTItemMetadataDraftSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;
@@ -715,48 +740,42 @@ class AssetsController extends BaseController {
     }
   });
 
-  uploadNFTItemMetadataPackage = this.command({
-    form: NFTItemMetadataForm, h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-        };
-
-
-        const msg = ctx.state.msg;
-
-        await assetCmdHandler.process(msg, ctx, validate);
-
-        const nftItemDraftId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT, '_id');
-
-        ctx.successRes({
-          _id: nftItemDraftId
-        });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
 
   createFTTransferRequest = this.command({
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_FT || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
-            const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_FT)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.TRANSFER_FT]} protocol cmd`);
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
             }
+          };
+
+          const createFTTransferRequestSettings = {
+            cmdNum: APP_CMD.TRANSFER_FT
           }
+
+          const createProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.FT_TRANSFER_PROPOSAL,
+            proposedCmdsOrder: [createFTTransferRequestSettings]
+          };
+
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
+          }
+
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [createFTTransferRequestSettings],
+            [createProposalSettings],
+            [createProposalSettings, acceptProposalSettings]
+          ];
+
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
 
         const msg = ctx.state.msg;
@@ -776,16 +795,37 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_NFT || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
-            const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_NFT)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.TRANSFER_NFT]} protocol cmd`);
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
             }
+          };
+
+          const createNFTTransferRequestSettings = {
+            cmdNum: APP_CMD.TRANSFER_NFT
           }
+
+          const createProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.NFT_TRANSFER_PROPOSAL,
+            proposedCmdsOrder: [createNFTTransferRequestSettings]
+          };
+
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
+          }
+
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [createNFTTransferRequestSettings],
+            [createProposalSettings],
+            [createProposalSettings, acceptProposalSettings]
+          ];
+
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
 
         const msg = ctx.state.msg;
@@ -805,16 +845,65 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
-            const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.TRANSFER_FT || cmd.getCmdNum() === APP_CMD.TRANSFER_NFT)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.TRANSFER_FT]} or ${APP_CMD[APP_CMD.TRANSFER_NFT]} protocol cmd`);
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
             }
+          };
+
+          const createNFTTransferRequestSettings = {
+            cmdNum: APP_CMD.TRANSFER_NFT
           }
+
+          const createFTTransferRequestSettings = {
+            cmdNum: APP_CMD.TRANSFER_FT
+          }
+
+          const defaultTokensSwapProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.TOKENS_SWAP_PROPOSAL
+          };
+
+          const createProposalFTToFTSettings = {
+            ...defaultTokensSwapProposalSettings,
+            proposedCmdsOrder: [createFTTransferRequestSettings, createFTTransferRequestSettings]
+          };
+
+          const createProposalNFTToNFTSettings = {
+            ...defaultTokensSwapProposalSettings,
+            proposedCmdsOrder: [createNFTTransferRequestSettings, createNFTTransferRequestSettings]
+          };
+
+          const createProposalFTToNFTSettings = {
+            ...defaultTokensSwapProposalSettings,
+            proposedCmdsOrder: [createFTTransferRequestSettings, createNFTTransferRequestSettings]
+          };
+
+          const createProposalNFTToFTSettings = {
+            ...defaultTokensSwapProposalSettings,
+            proposedCmdsOrder: [createNFTTransferRequestSettings, createFTTransferRequestSettings]
+          };
+
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
+          }
+
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [createProposalFTToFTSettings],
+            [createProposalNFTToNFTSettings],
+            [createProposalFTToNFTSettings],
+            [createProposalNFTToFTSettings],
+            [createProposalFTToFTSettings, acceptProposalSettings],
+            [createProposalNFTToNFTSettings, acceptProposalSettings],
+            [createProposalFTToNFTSettings, acceptProposalSettings],
+            [createProposalNFTToFTSettings, acceptProposalSettings]
+          ];
+
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
 
         const msg = ctx.state.msg;
@@ -833,36 +922,56 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          if (appCmds.length !== 2) throw new BadRequestError(`This endpoint accepts only lazySell proposal`);
+          const validateTransferFT = async (transferFTCmd, cmdStack) => {
+            const { from, to, amount, tokenId } = transferFTCmd.getCmdPayload();
 
-          const [proposalCmd, acceptProposalCmd] = appCmds;
-          if (proposalCmd.getCmdNum() !== APP_CMD.CREATE_PROPOSAL)
-            throw new BadRequestError(`Wrong cmd order`);
+            if (from !== config.TENANT_HOT_WALLET.daoId)
+              throw new BadRequestError(`TransferFtCmd wrong params`);
+          };
 
-          if (acceptProposalCmd.getCmdNum() !== APP_CMD.ACCEPT_PROPOSAL)
-            throw new BadRequestError(`Wrong cmd order`);
+          const validateCreateNFTItem = async (createNFTItemCmd, cmdStack) => {
+            const { issuer, recipient, classId, instanceId } = createNFTItemCmd.getCmdPayload();
 
-          const proposedCmds = proposalCmd.getProposedCmds();
-          if (proposedCmds.length !== 2) throw new BadRequestError(`This endpoint accepts only lazySell proposal`);
-          const [transferFtCmd, createNFTItemCmd] = proposedCmds;
+            if (recipient !== config.TENANT_HOT_WALLET.daoId)
+              throw new BadRequestError(`IssueNftCmd wrong params`);
+          };
 
-          if (
-            transferFtCmd.getCmdNum() !== APP_CMD.TRANSFER_FT ||
-            createNFTItemCmd.getCmdNum() !== APP_CMD.CREATE_NFT_ITEM
-          ) throw new BadRequestError(`Wrong cmd order`);
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
+            }
+          };
 
-          const { from, to, amount, tokenId } = transferFtCmd.getCmdPayload();
+          const transferFTSettings = {
+            cmdNum: APP_CMD.TRANSFER_FT,
+            validate: validateTransferFT
+          };
 
-          if (from !== config.TENANT_HOT_WALLET.daoId)
-            throw new BadRequestError(`TransferFtCmd wrong params`);
+          const createNFTItemSettings = {
+            cmdNum: APP_CMD.CREATE_NFT_ITEM,
+            validate: validateCreateNFTItem
+          };
 
-          const { issuer, recipient, classId, instanceId } = createNFTItemCmd.getCmdPayload();
+          const createProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.NFT_LAZY_SELL_PROPOSAL,
+            proposedCmdsOrder: [transferFTSettings, createNFTItemSettings]
+          };
 
-          if (recipient !== config.TENANT_HOT_WALLET.daoId)
-            throw new BadRequestError(`IssueNftCmd wrong params`);
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
+          }
 
-          //TODO: check that classId belongs to isser and draft exists 
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [createProposalSettings],
+            [createProposalSettings, acceptProposalSettings]
+          ];
 
+          await this.validateCmds(appCmds, validCmdsOrders);         
         };
 
         const msg = ctx.state.msg;
@@ -886,32 +995,49 @@ class AssetsController extends BaseController {
         const chainService = await ChainService.getInstanceAsync(config);
         const chainNodeClient = chainService.getChainNodeClient();
         const chainTxBuilder = chainService.getChainTxBuilder();
-
-
+  
         const validate = async (appCmds) => {
-          // if (appCmds.length !== 3) throw new BadRequestError(`This endpoint accepts only lazyBuy proposal`);
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
+            }
+          };
 
-          const [proposalCmd, acceptRootProposalCmd] = appCmds;
-          if (
-            proposalCmd.getCmdNum() !== APP_CMD.CREATE_PROPOSAL ||
-            acceptRootProposalCmd.getCmdNum() !== APP_CMD.ACCEPT_PROPOSAL
-          ) throw new BadRequestError(`Wrong cmd order`);
+          const transferFTSettings = {
+            cmdNum: APP_CMD.TRANSFER_FT
+          };
 
+          const acceptProposal1Settings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL
+          };
 
-          const proposedCmds = proposalCmd.getProposedCmds();
-          if (proposedCmds.length !== 3) throw new BadRequestError(`This endpoint accepts only lazyBuy proposal`);
+          const transferNFTSettings = {
+            cmdNum: APP_CMD.TRANSFER_NFT
+          };
 
-          const [transferFtCmd, acceptProposalCmd, transferNftCmd] = proposedCmds;
+          const createProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.NFT_LAZY_BUY_PROPOSAL,
+            proposedCmdsOrder: [transferFTSettings, acceptProposal1Settings, transferNFTSettings]
+          };
 
-          if (
-            transferFtCmd.getCmdNum() !== APP_CMD.TRANSFER_FT ||
-            acceptProposalCmd.getCmdNum() !== APP_CMD.ACCEPT_PROPOSAL ||
-            transferNftCmd.getCmdNum() !== APP_CMD.TRANSFER_NFT
-          ) throw new BadRequestError(`Wrong cmd order`);
+          const acceptProposal2Settings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
+          }
 
-          //TODO: validate proposal inner cmds
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [createProposalSettings],
+            [createProposalSettings, acceptProposal2Settings]
+          ];
 
+          await this.validateCmds(appCmds, validCmdsOrders);         
         };
+        
+        //TODO: validate proposal inner cmds
 
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
@@ -952,10 +1078,13 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_FT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const createFTSettings = {
+            cmdNum: APP_CMD.CREATE_FT
+          };
+
+          const validCmdsOrder = [createFTSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;
@@ -973,20 +1102,28 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_NFT_COLLECTION);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { issuedByTeam, issuer } = appCmd.getCmdPayload();
-          const username = ctx.state.user.username;
-          if (issuedByTeam) {
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(issuer, username)
-            if (!isAuthorized) {
-              throw new ForbiddenError(`"${username}" is not permitted to create nft collection`);
+          const validateCreateNFTCollection = async (createNFTCollectionCmd, cmdStack) => {
+            const { issuedByTeam, issuer } = createNFTCollectionCmd.getCmdPayload();
+            const username = ctx.state.user.username;
+
+            if (issuedByTeam) {
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(issuer, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to create nft collection`);
+              }
+            } else if (issuer !== username) {
+              throw new BadRequestError(`Can't create nft collection for other accounts`);
             }
-          } else if (issuer !== username) {
-            throw new BadRequestError(`Can't create nft collection for other accounts`);
-          }
+          };
+
+          const createNFTCollectionSettings = {
+            cmdNum: APP_CMD.CREATE_NFT_COLLECTION,
+            validate: validateCreateNFTCollection
+          };
+          
+          const validCmdsOrder = [createNFTCollectionSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -1006,20 +1143,28 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_NFT_COLLECTION_METADATA);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { issuedByTeam, issuer } = appCmd.getCmdPayload();
-          const username = ctx.state.user.username;
-          if (issuedByTeam) {
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(issuer, username)
-            if (!isAuthorized) {
-              throw new ForbiddenError(`"${username}" is not permitted to create nft collection`);
+          const validateCreateNFTCollectionMetadata = async (createNFTCollectionMetadataCmd, cmdStack) => {
+            const { issuedByTeam, issuer } = createNFTCollectionMetadataCmd.getCmdPayload();
+            const username = ctx.state.user.username;
+
+            if (issuedByTeam) {
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(issuer, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to create nft collection`);
+              }
+            } else if (issuer !== username) {
+              throw new BadRequestError(`Can't create nft collection for other accounts`);
             }
-          } else if (issuer !== username) {
-            throw new BadRequestError(`Can't create nft collection for other accounts`);
-          }
+          };
+
+          const createNFTCollectionMetadataSettings = {
+            cmdNum: APP_CMD.CREATE_NFT_COLLECTION_METADATA,
+            validate: validateCreateNFTCollectionMetadata
+          };
+          
+          const validCmdsOrder = [createNFTCollectionMetadataSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -1039,28 +1184,33 @@ class AssetsController extends BaseController {
     form: NFTCollectionForm,
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_NFT_COLLECTION_METADATA);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const validateUpdateNFTCollectionMetadata = async (updateNFTCollectionMetadataCmd, cmdStack) => {
+            const { _id: nftCollectionId } = updateNFTCollectionMetadataCmd.getCmdPayload();
+            const nftCollectionMetadata = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
+            if (!nftCollectionMetadata) {
+              throw new BadRequestError(`Nft collection "${nftCollectionId}" doesn't exist`);
+            }
+            const username = ctx.state.user.username;
 
-          const { _id: nftCollectionId } = appCmd.getCmdPayload();
-          const nftCollectionMetadata = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
-          if (!nftCollectionMetadata) {
-            throw new BadRequestError(`Nft collection "${nftCollectionId}" doesn't exist`);
-          }
-          const username = ctx.state.user.username;
-
-          if (nftCollectionMetadata.issuedByTeam) {
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollectionMetadata.issuer, username)
-            if (!isAuthorized) {
+            if (nftCollectionMetadata.issuedByTeam) {
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollectionMetadata.issuer, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
+              }
+            } else if (nftCollectionMetadata.issuer !== username) {
               throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
             }
-          } else if (nftCollectionMetadata.issuer !== username) {
-            throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
-          }
+          };
+
+          const updateNFTCollectionMetadataSettings = {
+            cmdNum: APP_CMD.UPDATE_NFT_COLLECTION_METADATA,
+            validate: validateUpdateNFTCollectionMetadata
+          };
+          
+          const validCmdsOrder = [updateNFTCollectionMetadataSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -1077,14 +1227,17 @@ class AssetsController extends BaseController {
   });
 
   //needed?? createNFTItem
-  issueFt = this.command({
+  issueFT = this.command({
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ISSUE_FT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const issueFTSettings = {
+            cmdNum: APP_CMD.ISSUE_FT
+          };
+          
+          const validCmdsOrder = [issueFTSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -1106,39 +1259,46 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_NFT_ITEM);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const {
-            nftCollectionId,
-            nftItemId
-          } = appCmd.getCmdPayload();
+          const validateCreateNFTItem = async (createNFTItemCmd, cmdStack) => {
+            const {
+              nftCollectionId,
+              nftItemId
+            } = createNFTItemCmd.getCmdPayload();
 
-          const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
+            const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
 
-          if (!nftCollection) {
-            throw new BadRequestError(`Nft collection ${nftCollectionId} doesn't exist`);
-          }
+            if (!nftCollection) {
+              throw new BadRequestError(`Nft collection ${nftCollectionId} doesn't exist`);
+            }
 
-          const username = ctx.state.user.username;
+            const username = ctx.state.user.username;
 
-          if (nftCollection.issuedByTeam) {
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
-            if (!isAuthorized) {
+            if (nftCollection.issuedByTeam) {
+              const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
+              if (!isAuthorized) {
+                throw new ForbiddenError(`"${username}" is not permitted to create nft item for "${nftCollectionId}" nft collection`);
+              }
+            } else if (nftCollection.issuer !== username) {
               throw new ForbiddenError(`"${username}" is not permitted to create nft item for "${nftCollectionId}" nft collection`);
             }
-          } else if (nftCollection.issuer !== username) {
-            throw new ForbiddenError(`"${username}" is not permitted to create nft item for "${nftCollectionId}" nft collection`);
-          }
 
-          const instance = await nftItemDtoService.getNFTItemsByOwnerAndNFTCollection(ctx.state.user.username, nftCollectionId);
-          if (instance.nftItemsIds.includes(nftItemId)) {
-            throw new ConflictError(`nftItemId ${nftItemId} already exist`);
-          }
-          if (nftItemId == 0) {
-            throw new BadRequestError(`nftItemId cant not be 0`);
-          }
+            const instance = await nftItemDtoService.getNFTItemsByOwnerAndNFTCollection(ctx.state.user.username, nftCollectionId);
+            if (instance.nftItemsIds.includes(nftItemId)) {
+              throw new ConflictError(`nftItemId ${nftItemId} already exist`);
+            }
+            if (nftItemId == 0) {
+              throw new BadRequestError(`nftItemId cant not be 0`);
+            }
+          };
+
+          const createNFTItemSettings = {
+            cmdNum: APP_CMD.CREATE_NFT_ITEM,
+            validate: validateCreateNFTItem
+          };
+          
+          const validCmdsOrder = [createNFTItemSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -1160,28 +1320,20 @@ class AssetsController extends BaseController {
         const chainTxBuilder = chainService.getChainTxBuilder();
 
         const validate = async (appCmds) => {
-          const validCmds = [APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_MODERATION_MSG];
-          const appCmd = appCmds.find(cmd => validCmds.includes(cmd.getCmdNum()));
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const validateUpdateNFTItemMetadataDraftStatus = async (updateNFTItemMetadataDraftStatusCmd, cmdStack) => {
+            const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = NftItemMetadataDraftStatus;
+            const jwtUsername = ctx.state.user.username;
+            const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
+            const isModerator = moderators.includes(jwtUsername);
+            const { _id: draftId, status } = updateNFTItemMetadataDraftStatusCmd.getCmdPayload();
+            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
+            if (!draft)
+              throw new NotFoundError(`Draft for "${draftId}" id is not found`);
 
-          const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = NftItemMetadataDraftStatus;
-          const jwtUsername = ctx.state.user.username;
-          const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
-          const isModerator = moderators.includes(jwtUsername);
-          const { _id: draftId } = appCmd.getCmdPayload();
-          const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
-          if (!draft)
-            throw new NotFoundError(`Draft for "${draftId}" id is not found`);
+            const isAuthorized = await teamDtoService.authorizeTeamAccount(draft?.owner, jwtUsername);
 
-          const isAuthorized = await teamDtoService.authorizeTeamAccount(draft?.owner, jwtUsername);
-
-          if (!isAuthorized && !isModerator)
-            throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
-
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS) {
-            const { status } = appCmd.getCmdPayload();
+            if (!isAuthorized && !isModerator)
+              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
 
             if (!Object.values(NftItemMetadataDraftStatus).includes(status))
               throw new BadRequestError(`This endpoint accepts only nft item metadata draft status`)
@@ -1218,16 +1370,49 @@ class AssetsController extends BaseController {
               if (isAuthorized && status !== IN_PROGRESS)
                 throw new BadRequestError("Bad status");
             }
-          }
+          };
 
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_MODERATION_MSG) {
+          const validateUpdateNFTItemMetadataDraftModerationMsg = async (updateNFTItemMetadataDraftModerationMsgCmd, cmdStack) => {
+            const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = NftItemMetadataDraftStatus;
+            const jwtUsername = ctx.state.user.username;
+            const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
+            const isModerator = moderators.includes(jwtUsername);
+            const { _id: draftId } = updateNFTItemMetadataDraftModerationMsgCmd.getCmdPayload();
+            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
+            if (!draft)
+              throw new NotFoundError(`Draft for "${draftId}" id is not found`);
+
+            const isAuthorized = await teamDtoService.authorizeTeamAccount(draft?.owner, jwtUsername);
+
+            if (!isAuthorized && !isModerator)
+              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
+
             //moderator can change message if status is PROPOSED
             if (!isModerator)
               throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit moderation message`);
             if (draft.status !== PROPOSED)
               throw new BadRequestError("Bad status");
-          }
+          };
+
+          const updateNFTItemMetadataDraftStatusSettings = {
+            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS,
+            validate: validateUpdateNFTItemMetadataDraftStatus
+          };
+
+          const updateNFTItemMetadataDraftModerationMsgSettings = {
+            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_MODERATION_MSG,
+            validate: validateUpdateNFTItemMetadataDraftModerationMsg
+          };
+
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [updateNFTItemMetadataDraftStatusSettings],
+            [updateNFTItemMetadataDraftModerationMsgSettings]
+          ];
+          
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
+
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
 
@@ -1235,7 +1420,7 @@ class AssetsController extends BaseController {
         const changeStatusCmd = msg.appCmds.find(x => x.getCmdNum() === APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS);
         if (
           changeStatusCmd &&
-          changeStatusCmd.getCmdPayload().status == NFT_ITEM_METADATA_DRAFT_STATUS.REJECTED &&
+          changeStatusCmd.getCmdPayload().status == NftItemMetadataDraftStatus.REJECTED &&
           config.TENANT_HOT_WALLET
         ) {
           // Lazy sell proposal decline flow

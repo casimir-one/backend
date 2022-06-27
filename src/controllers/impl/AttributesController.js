@@ -89,12 +89,14 @@ class AttributesController extends BaseController {
   createAttribute = this.command({
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_ATTRIBUTE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const createAttributeSettings = {
+            cmdNum: APP_CMD.CREATE_ATTRIBUTE
+          };
+
+          const validCmdsOrder = [createAttributeSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;
@@ -112,12 +114,14 @@ class AttributesController extends BaseController {
   updateAttribute = this.command({
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ATTRIBUTE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const updateAttributeSettings = {
+            cmdNum: APP_CMD.UPDATE_ATTRIBUTE
+          };
+
+          const validCmdsOrder = [updateAttributeSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;
@@ -135,12 +139,14 @@ class AttributesController extends BaseController {
   deleteAttribute = this.command({
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.DELETE_ATTRIBUTE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const deleteAttributeSettings = {
+            cmdNum: APP_CMD.DELETE_ATTRIBUTE
+          };
+
+          const validCmdsOrder = [deleteAttributeSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;

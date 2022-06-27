@@ -250,14 +250,14 @@ const confirmAssetDepositRequest = async (ctx) => {
     const tx = await chainTxBuilder.begin()
       .then((txBuilder) => {
 
-        const issueFtCmd = new IssueFTCmd({
+        const issueFTCmd = new IssueFTCmd({
           issuer: regacc,
           tokenId: asset._id,
           amount: amount / 100, // cents
           recipient: account
         });
 
-        txBuilder.addCmd(issueFtCmd);
+        txBuilder.addCmd(issueFTCmd);
         return txBuilder.end();
       })
       .then((packedTx) => packedTx.signAsync(regaccPrivKey, chainNodeClient));

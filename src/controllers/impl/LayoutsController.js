@@ -53,10 +53,13 @@ class LayoutsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_LAYOUT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const createLayoutSettings = {
+            cmdNum: APP_CMD.CREATE_LAYOUT
+          };
+          
+          const validCmdsOrder = [createLayoutSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
@@ -74,15 +77,22 @@ class LayoutsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_LAYOUT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { _id: layoutId } = appCmd.getCmdPayload();
-          const layout = await layoutService.getLayout(layoutId);
-          if (!layout) {
-            throw new NotFoundError(`Layout '${layoutId}' does not exist`);
-          }
+          const validateUpdateLayout = async (updateLayoutCmd, cmdStack) => {
+            const { _id: layoutId } = updateLayoutCmd.getCmdPayload();
+            const layout = await layoutService.getLayout(layoutId);
+            if (!layout) {
+              throw new NotFoundError(`Layout '${layoutId}' does not exist`);
+            }
+          };
+
+          const updateLayoutSettings = {
+            cmdNum: APP_CMD.UPDATE_LAYOUT,
+            validate: validateUpdateLayout
+          };
+          
+          const validCmdsOrder = [updateLayoutSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
@@ -100,15 +110,22 @@ class LayoutsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.DELETE_LAYOUT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { layoutId } = appCmd.getCmdPayload();
-          const layout = await layoutService.getLayout(layoutId);
-          if (!layout) {
-            throw new ConflictError(`Layout ${layoutId} is already deleted`);
-          }
+          const validateDeleteLayout = async (deleteLayoutCmd, cmdStack) => {
+            const { layoutId } = deleteLayoutCmd.getCmdPayload();
+            const layout = await layoutService.getLayout(layoutId);
+            if (!layout) {
+              throw new ConflictError(`Layout ${layoutId} is already deleted`);
+            }
+          };
+
+          const deleteLayoutSettings = {
+            cmdNum: APP_CMD.DELETE_LAYOUT,
+            validate: validateDeleteLayout
+          };
+          
+          const validCmdsOrder = [deleteLayoutSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;

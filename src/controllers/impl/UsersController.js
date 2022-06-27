@@ -41,38 +41,44 @@ class UsersController extends BaseController {
         const chainTxBuilder = chainService.getChainTxBuilder();
 
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-
-          const { entityId, email, roles, creator, confirmationCode } = appCmd.getCmdPayload();
-          if (Array.isArray(roles) && roles.find(({ role }) => role === SYSTEM_ROLE.ADMIN)) {
-            throw new BadRequestError(`Can't create admin account`);
-          }
-
-          if (!entityId || !creator) {
-            throw new BadRequestError(`'entityId', 'creator' fields are required`);
-          }
-
-          if (!validateEmail(email)) {
-            throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
-          }
-
-          const existingProfile = await userService.getUser(entityId);
-          if (existingProfile) {
-            throw new ConflictError(`Profile for '${entityId}' is under consideration or has been approved already`);
-          }
-          if (config.NEED_CONFIRM_REGISTRATION) {
-            if (!confirmationCode) {
-              throw new BadRequestError(`'confirmationCode' field are required`);
+          const validateCreateDAO = async (createDAOCmd, cmdStack) => {
+            const { entityId, email, roles, creator, confirmationCode } = createDAOCmd.getCmdPayload();
+            if (Array.isArray(roles) && roles.find(({ role }) => role === SYSTEM_ROLE.ADMIN)) {
+              throw new BadRequestError(`Can't create admin account`);
             }
 
-            const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
-            if (token && token.refId !== genRipemd160Hash(email)) {
-              throw new ForbiddenError(`Incorrect confirmation code`);
+            if (!entityId || !creator) {
+              throw new BadRequestError(`'entityId', 'creator' fields are required`);
             }
-          }
+
+            if (!validateEmail(email)) {
+              throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
+            }
+
+            const existingProfile = await userService.getUser(entityId);
+            if (existingProfile) {
+              throw new ConflictError(`Profile for '${entityId}' is under consideration or has been approved already`);
+            }
+            if (config.NEED_CONFIRM_REGISTRATION) {
+              if (!confirmationCode) {
+                throw new BadRequestError(`'confirmationCode' field are required`);
+              }
+
+              const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
+              if (token && token.refId !== genRipemd160Hash(email)) {
+                throw new ForbiddenError(`Incorrect confirmation code`);
+              }
+            }
+          };
+
+          const createDAOSettings = {
+            cmdNum: APP_CMD.CREATE_DAO,
+            validate: validateCreateDAO
+          };
+          
+          const validCmdsOrder = [createDAOSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -143,38 +149,44 @@ class UsersController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.IMPORT_DAO);
-          if (!appCmd) {
-            throw new BadRequestError(`Wrong cmd`);
-          }
+          const validateImportDAO = async (importDAOCmd, cmdStack) => {
+            const { entityId, email, creator, confirmationCode, isTeamAccount } = importDAOCmd.getCmdPayload();
 
-          const { entityId, email, creator, confirmationCode, isTeamAccount } = appCmd.getCmdPayload();
-
-          if (!entityId) {
-            throw new BadRequestError(`'entityId' field are required`);
-          }
-          if (isTeamAccount) {
-            throw new BadRequestError(`Team account cannot be imported`);
-          }
-
-          const existingProfile = await userService.getUser(entityId);
-          if (existingProfile) {
-            throw new ConflictError(`Profile for '${entityId}' is under consideration or has been imported already`);
-          }
-
-          if (config.NEED_CONFIRM_REGISTRATION) {
-            if (!validateEmail(email)) {
-              throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
+            if (!entityId) {
+              throw new BadRequestError(`'entityId' field are required`);
             }
-            if (!confirmationCode) {
-              throw new BadRequestError(`'confirmationCode' field are required`);
+            if (isTeamAccount) {
+              throw new BadRequestError(`Team account cannot be imported`);
             }
+  
+            const existingProfile = await userService.getUser(entityId);
+            if (existingProfile) {
+              throw new ConflictError(`Profile for '${entityId}' is under consideration or has been imported already`);
+            }
+  
+            if (config.NEED_CONFIRM_REGISTRATION) {
+              if (!validateEmail(email)) {
+                throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
+              }
+              if (!confirmationCode) {
+                throw new BadRequestError(`'confirmationCode' field are required`);
+              }
+  
+              const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
+              if (token && token.refId !== genRipemd160Hash(email)) {
+                throw new ForbiddenError(`Incorrect confirmation code`);
+              }
+            }
+          };
 
-            const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
-            if (token && token.refId !== genRipemd160Hash(email)) {
-              throw new ForbiddenError(`Incorrect confirmation code`);
-            }
-          }
+          const importDAOSettings = {
+            cmdNum: APP_CMD.IMPORT_DAO,
+            validate: validateImportDAO
+          };
+          
+          const validCmdsOrder = [importDAOSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -196,18 +208,25 @@ class UsersController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.SEND_REGISTRATION_CODE_BY_EMAIL);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { email } = appCmd.getCmdPayload();
-          if (!validateEmail(email)) {
-            throw new BadRequestError(`Invalid email address`);
-          }
-          const isTransporterCanConnect = await transporter.verify();
-          if (!isTransporterCanConnect) {
-            throw new FailedDependencyError(`Can't send email for confirm registration, please try again later`);
-          }
+          const validateSendRegistrationCodeByEmail = async (sendRegistrationCodeByEmailCmd, cmdStack) => {
+            const { email } = sendRegistrationCodeByEmailCmd.getCmdPayload();
+            if (!validateEmail(email)) {
+              throw new BadRequestError(`Invalid email address`);
+            }
+            const isTransporterCanConnect = await transporter.verify();
+            if (!isTransporterCanConnect) {
+              throw new FailedDependencyError(`Can't send email for confirm registration, please try again later`);
+            }
+          };
+
+          const sendRegistrationCodeByEmailSettings = {
+            cmdNum: APP_CMD.SEND_REGISTRATION_CODE_BY_EMAIL,
+            validate: validateSendRegistrationCodeByEmail
+          };
+          
+          const validCmdsOrder = [sendRegistrationCodeByEmailSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -383,18 +402,23 @@ class UsersController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_DAO) {
+          const validateUpdateUser = async (updateUserCmd, cmdStack) => {
             const {
               isTeamAccount
-            } = appCmd.getCmdPayload();
+            } = updateUserCmd.getCmdPayload();
             if (isTeamAccount) {
               throw new BadRequestError(`This endpoint should be for user account`);
             }
-          }
+          };
+
+          const updateUserSettings = {
+            cmdNum: APP_CMD.UPDATE_DAO,
+            validate: validateUpdateUser
+          };
+          
+          const validCmdsOrder = [updateUserSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -415,18 +439,23 @@ class UsersController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_DAO_AUTHORITY);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          if (appCmd.getCmdNum() === APP_CMD.ALTER_DAO_AUTHORITY) {
+          const validateUpdateUserPassword = async (updateUserPasswordCmd, cmdStack) => {
             const {
               isTeamAccount
-            } = appCmd.getCmdPayload();
+            } = updateUserPasswordCmd.getCmdPayload();
             if (isTeamAccount) {
               throw new BadRequestError(`This endpoint should be for user account`);
             }
-          }
+          };
+
+          const updateUserSettings = {
+            cmdNum: APP_CMD.ALTER_DAO_AUTHORITY,
+            validate: validateUpdateUserPassword
+          };
+          
+          const validCmdsOrder = [updateUserSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
 

@@ -2,6 +2,7 @@ import BaseController from './../base/BaseController';
 import proposalCmdHandler from './../../command-handlers/impl/ProposalCmdHandler';
 import { ProposalDtoService } from './../../services';
 import { NotFoundError } from './../../errors';
+import { APP_CMD } from '@deip/constants';
 
 const proposalDtoService = new ProposalDtoService();
 
@@ -43,8 +44,18 @@ class ProposalsController extends BaseController {
   acceptProposal = this.command({
     h: async (ctx) => {
       try {
+        const validate = async (appCmds) => {
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL
+          };
+          
+          const validCmdsOrder = [acceptProposalSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+
         const msg = ctx.state.msg;
-        await proposalCmdHandler.process(msg, ctx);
+        await proposalCmdHandler.process(msg, ctx, validate);
 
         ctx.successRes();
 
@@ -58,8 +69,18 @@ class ProposalsController extends BaseController {
   declineProposal = this.command({
     h: async (ctx) => {
       try {
+        const validate = async (appCmds) => {
+          const declineProposalSettings = {
+            cmdNum: APP_CMD.DECLINE_PROPOSAL
+          };
+          
+          const validCmdsOrder = [declineProposalSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+
         const msg = ctx.state.msg;
-        await proposalCmdHandler.process(msg, ctx);
+        await proposalCmdHandler.process(msg, ctx, validate);
 
         ctx.successRes();
 

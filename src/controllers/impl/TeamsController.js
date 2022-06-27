@@ -1,5 +1,5 @@
 import qs from 'qs';
-import { APP_CMD } from '@casimir/platform-core';
+import { APP_CMD, APP_PROPOSAL } from '@casimir/platform-core';
 import BaseController from './../base/BaseController';
 import { TeamForm } from '../../forms';
 import { BadRequestError, NotFoundError, ConflictError } from '../../errors';
@@ -113,18 +113,22 @@ class TeamsController extends BaseController {
     form: TeamForm,
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
-          if (appCmd.getCmdNum() === APP_CMD.CREATE_DAO) {
-            const { isTeamAccount } = appCmd.getCmdPayload();
+          const validateCreateTeam = async (createTeamCmd, cmdStack) => {
+            const { isTeamAccount } = createTeamCmd.getCmdPayload();
             if (!isTeamAccount) {
               throw new BadRequestError(`This endpoint should be for team account`);
             }
-          }
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          };
+
+          const createTeamSettings = {
+            cmdNum: APP_CMD.CREATE_DAO,
+            validate: validateCreateTeam
+          };
+          
+          const validCmdsOrder = [createTeamSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -146,24 +150,48 @@ class TeamsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO || cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          if (appCmd.getCmdNum() === APP_CMD.UPDATE_DAO) {
+          const validateUpdateDao = (updateDaoCmd, cmdStack) => {
             const {
               isTeamAccount
-            } = appCmd.getCmdPayload();
+            } = updateDaoCmd.getCmdPayload();
+
             if (!isTeamAccount) {
               throw new BadRequestError(`This endpoint should be for team account`);
             }
           }
-          if (appCmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL) {
-            const proposedCmds = appCmd.getProposedCmds();
-            if (!proposedCmds.some(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DAO)) {
-              throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.UPDATE_DAO]} protocol cmd`);
+
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
             }
+          };
+
+          const updateDaoSettings = {
+            cmdNum: APP_CMD.UPDATE_DAO,
+            validate: validateUpdateDao
           }
+
+          const createProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.TEAM_UPDATE_PROPOSAL,
+            proposedCmdsOrder: [updateDaoSettings]
+          };
+
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
+          }
+
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [updateDaoSettings],
+            [createProposalSettings],
+            [createProposalSettings, acceptProposalSettings]
+          ];
+
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
 
         const msg = ctx.state.msg;
@@ -183,28 +211,51 @@ class TeamsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          const validateJoinTeam = async (joinTeamCmd, cmdStack) => {
+            const { member, teamId } = joinTeamCmd.getCmdPayload();
+            const user = await userService.getUser(member);
+
+            if (!user) {
+              throw new NotFoundError(`User "${member}" username is not found`);
+            }
+
+            const team = await teamService.getTeam(teamId);
+            if (team.members.includes(member)) {
+              throw new ConflictError(`User ${member} username already joined`);
+            }
+          };
+
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
+            }
+          };
+
+          const joinTeamSettings = {
+            cmdNum: APP_CMD.ADD_DAO_MEMBER,
+            validate: validateJoinTeam
+          };
+
+          const createProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.ADD_DAO_MEMBER_PROPOSAL,
+            proposedCmdsOrder: [joinTeamSettings]
+          };
+
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
           }
 
-          const proposedCmds = appCmd.getProposedCmds();
-          const joinTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ADD_DAO_MEMBER);
-
-          if (!joinTeamCmd) {
-            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.ADD_DAO_MEMBER]} protocol cmd`);
-          }
-          const { member, teamId } = joinTeamCmd.getCmdPayload();
-          const user = await userService.getUser(member);
-
-          if (!user) {
-            throw new NotFoundError(`User "${member}" username is not found`);
-          }
-
-          const team = await teamService.getTeam(teamId);
-          if (team.members.includes(member)) {
-            throw new ConflictError(`User ${member} username already joined`);
-          }
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [createProposalSettings],
+            [createProposalSettings, acceptProposalSettings]
+          ];
+          
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
 
         const msg = ctx.state.msg;
@@ -223,28 +274,51 @@ class TeamsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_PROPOSAL);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
+          const validateLeaveTeam = async (leaveTeamCmd, cmdStack) => {
+            const { member, teamId } = leaveTeamCmd.getCmdPayload();
+            const user = await userService.getUser(member);
+
+            if (!user) {
+              throw new NotFoundError(`User "${member}" username is not found`);
+            }
+
+            const team = await teamService.getTeam(teamId);
+            if (!team.members.includes(member)) {
+              throw new ConflictError(`User ${member} username already left`);
+            }
+          };
+
+          const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
+            const { entityId } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            if (!createProposalCmd) {
+              throw new BadRequestError(`Can't accept proposal`);
+            }
+          };
+
+          const leaveTeamSettings = {
+            cmdNum: APP_CMD.REMOVE_DAO_MEMBER,
+            validate: validateLeaveTeam
+          };
+
+          const createProposalSettings = {
+            cmdNum: APP_CMD.CREATE_PROPOSAL,
+            proposalType: APP_PROPOSAL.REMOVE_DAO_MEMBER_PROPOSAL,
+            proposedCmdsOrder: [leaveTeamSettings]
+          };
+
+          const acceptProposalSettings = {
+            cmdNum: APP_CMD.ACCEPT_PROPOSAL,
+            validate: validateAcceptProposal
           }
 
-          const proposedCmds = appCmd.getProposedCmds();
-          const leaveTeamCmd = proposedCmds.find(cmd => cmd.getCmdNum() === APP_CMD.REMOVE_DAO_MEMBER);
-
-          if (!leaveTeamCmd) {
-            throw new BadRequestError(`Proposal must contain ${APP_CMD[APP_CMD.REMOVE_DAO_MEMBER]} protocol cmd`);
-          }
-          const { member, teamId } = leaveTeamCmd.getCmdPayload();
-          const user = await userService.getUser(member);
-
-          if (!user) {
-            throw new NotFoundError(`User "${member}" username is not found`);
-          }
-
-          const team = await teamService.getTeam(teamId);
-          if (!team.members.includes(member)) {
-            throw new ConflictError(`User ${member} username already left`);
-          }
+          // array of orders if can be a few valid orders
+          const validCmdsOrders = [
+            [createProposalSettings],
+            [createProposalSettings, acceptProposalSettings]
+          ];
+          
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
 
         const msg = ctx.state.msg;
