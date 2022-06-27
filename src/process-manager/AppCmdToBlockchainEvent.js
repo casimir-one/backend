@@ -1,10 +1,13 @@
+import { SubstrateChainUtils } from '@deip/chain-service';
 import { APP_CMD, DOMAIN_EVENT } from "@deip/constants";
 import config from "../config";
-import { SubstrateChainUtils } from '@deip/chain-service';
 
+const { toAddress, toHexFormat } = SubstrateChainUtils;
 
-
-const checkMatch = (obj) => !Object.values(obj).includes(false);
+const checkMatch = (obj) => {
+  console.log("ProcessManager checkMatch", obj);
+  return !Object.values(obj).includes(false);
+};
 
 const APP_CMD_TO_BC_EVENT_PROCESSOR = {
 
@@ -13,8 +16,9 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
   //   matchF: ({ txInfo, appCmd, event }) => {
   //     const { entityId: cmdDaoId } = appCmd.getCmdPayload();
   //     const { dao: { id: eventDaoIdBuffer } } = event.getEventPayload();
-
-  //     return cmdDaoId === Buffer.from(eventDaoIdBuffer).toString('hex');
+  //     return checkMatch({
+  //       daoId: cmdDaoId === Buffer.from(eventDaoIdBuffer).toString('hex')
+  //     })
   //   }
   // }],
 
@@ -22,16 +26,16 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
     {
       eventNum: DOMAIN_EVENT.NATIVE_FT_TRANSFER,
       matchF: ({ txInfo, appCmd, event, chainService }) => {
-        const { from: cmdFromDaoId, to: cmdToDaoId, amount: cmdAmount, tokenId } = appCmd.getCmdPayload();
+        const { from: cmdFrom, to: cmdTo, amount: cmdAmount, tokenId: cmdTokenId } = appCmd.getCmdPayload();
         const { from: eventFromAddress, to: eventToAddress, amount: eventAmount } = event.getEventPayload();
-        // const chainNodeClient = chainService.getChainNodeClient();
-        // const registry = chainNodeClient.registry;
+
+        const { registry } = chainService.getChainNodeClient();
 
         return checkMatch({
-          // from: SubstrateChainUtils.daoIdToAddress(cmdFromDaoId, registry) === eventFromAddress,
-          // to: SubstrateChainUtils.daoIdToAddress(cmdToDaoId, registry) === eventToAddress,
+          from: toAddress(cmdFrom, registry) === eventFromAddress,
+          to: toAddress(cmdTo, registry) === eventToAddress,
           amount: cmdAmount == eventAmount,
-          tokenId: tokenId == config.CORE_ASSET.id
+          tokenId: cmdTokenId == config.CORE_ASSET.id
         });
       }
     },
@@ -40,20 +44,26 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
       matchF: ({ txInfo, appCmd, event, chainService }) => {
         const { from: cmdFromDaoId, to: cmdToDaoId, amount: cmdAmount, tokenId } = appCmd.getCmdPayload();
         const { from: eventFromAddress, to: eventToAddress, amount: eventAmount } = event.getEventPayload();
-        //TODO: find a way to match daoId with address
-        //TODO: add tokenId match
-        return +cmdAmount === +eventAmount;
+
+        const { registry } = chainService.getChainNodeClient();
+
+        return checkMatch({
+          from: toAddress(cmdFromDaoId, registry) === eventFromAddress,
+          to: toAddress(cmdToDaoId, registry) === eventToAddress,
+          amount: cmdAmount == eventAmount,
+          // tokenId: tokenId == eventTokenId
+        })
       }
     },
   ],
 
-  // [APP_CMD.TRANSFER_NFT]: [{
-  //   eventNum: DOMAIN_EVENT.NFT_TRANSFERRED,
-  //    matchF: ({txInfo, appCmd, event, chainService}) => {
-  //     //TODO: add match f
-  //     return true;
-  //   }
-  // }],
+  [APP_CMD.TRANSFER_NFT]: [{
+    eventNum: DOMAIN_EVENT.NFT_TRANSFERRED,
+    matchF: ({ txInfo, appCmd, event, chainService }) => {
+      //TODO: add match f
+      return true;
+    }
+  }],
 
   [APP_CMD.CREATE_FT]: [{
     eventNum: DOMAIN_EVENT.FT_CLASS_CREATED,
@@ -61,7 +71,9 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
       const { entityId: cmdFtId } = appCmd.getCmdPayload();
       const { asset_id: eventFtId } = event.getEventPayload();
 
-      return cmdFtId === eventFtId;
+      return checkMatch({
+        ftId: cmdFtId == eventFtId
+      })
     }
   }],
 
@@ -71,7 +83,26 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
       const { tokenId: cmdFtId, amount: cmdAmount } = appCmd.getCmdPayload();
       const { asset_id: eventFtId, total_supply: eventAmount } = event.getEventPayload();
 
-      return cmdFtId === eventFtId && cmdAmount === eventAmount;
+      return checkMatch({
+        ftId: cmdFtId == eventFtId,
+        amount: cmdAmount == eventAmount
+      })
+    }
+  }],
+
+  [APP_CMD.CREATE_NFT_COLLECTION]: [{
+    eventNum: DOMAIN_EVENT.NFT_COLLECTION_CREATED,
+    matchF: ({ txInfo, appCmd, event, chainService }) => {
+      const { entityId: cmdClassId, issuer: cmdIssuer } = appCmd.getCmdPayload();
+      const { class: eventClassId, creator: eventIssuerAddress, owner: eventOwnerAddress } = event.getEventPayload();
+
+      const { registry } = chainService.getChainNodeClient();
+
+
+      return checkMatch({
+        classId: cmdClassId == eventClassId,
+        issuer: toAddress(cmdIssuer, registry) == eventIssuerAddress,
+      })
     }
   }],
 
@@ -80,8 +111,13 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
     matchF: ({ txInfo, appCmd, event, chainService }) => {
       const { creator: cmdIssuerDaoId, entityId: cmdProposalId } = appCmd.getCmdPayload();
       const { author: eventIssuerAddress, proposal_id: eventProposalId } = event.getEventPayload();
-      //TODO: cmdIssuerDaoId.toAddress === eventIssuerAddress
-      return eventProposalId === `0x${cmdProposalId}`;
+
+      const { registry } = chainService.getChainNodeClient();
+
+      return checkMatch({
+        issuer: toAddress(cmdIssuerDaoId, registry) === eventIssuerAddress,
+        proposalId: toHexFormat(cmdProposalId) === eventProposalId
+      })
     }
   }],
 
@@ -91,17 +127,47 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
       matchF: ({ txInfo, appCmd, event, chainService }) => {
         const { entityId: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
         const { proposal_id: eventProposalIdBuffer, member: eventIssuerAddress } = event.getEventPayload();
-        //TODO: cmdIssuerDaoId.toAddress === eventIssuerAddress
-        return cmdProposalId === Buffer.from(eventProposalIdBuffer).toString('hex');
+
+        const { registry } = chainService.getChainNodeClient();
+
+        return checkMatch({
+          proposalId: cmdProposalId === Buffer.from(eventProposalIdBuffer).toString('hex'),
+          issuer: toAddress(cmdIssuerDaoId, registry) === eventIssuerAddress
+        })
       }
     },
     {
       eventNum: DOMAIN_EVENT.PROPOSAL_RESOLVED,
       matchF: ({ txInfo, appCmd, event, chainService }) => {
         const { entityId: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
-        const { proposal_id: eventProposalIdBuffer, member: eventIssuerAddress } = event.getEventPayload();
-        //TODO: cmdIssuerDaoId.toAddress === eventIssuerAddress
-        return cmdProposalId === Buffer.from(eventProposalIdBuffer).toString('hex');
+        const { proposal_id: eventProposalIdBuffer, member: eventIssuerAddress, state } = event.getEventPayload();
+
+        const { registry } = chainService.getChainNodeClient();
+
+        return checkMatch({
+          issuer: daoIdToAddress(toHexFormat(cmdIssuerDaoId), registry) === eventIssuerAddress,
+          proposalId: cmdProposalId === Buffer.from(eventProposalIdBuffer).toString('hex'),
+          state: state === 'Done'
+        })
+      }
+    }
+  ],
+
+  [APP_CMD.DECLINE_PROPOSAL]: [
+    //TODO: add proposal_declined event when it will be implemented on blockchain
+    {
+      eventNum: DOMAIN_EVENT.PROPOSAL_RESOLVED,
+      matchF: ({ txInfo, appCmd, event, chainService }) => {
+        const { entityId: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
+        const { proposal_id: eventProposalIdBuffer, member: eventIssuerAddress, state } = event.getEventPayload();
+
+        const { registry } = chainService.getChainNodeClient();
+
+        return checkMatch({
+          issuer: toAddress(cmdIssuerDaoId, registry) === eventIssuerAddress,
+          proposalId: cmdProposalId === Buffer.from(eventProposalIdBuffer).toString('hex'),
+          state: state === "Rejected",
+        });
       }
     }
   ]

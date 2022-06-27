@@ -1,5 +1,5 @@
 import { ChainService } from '@deip/chain-service';
-import { AcceptProposalCmd } from '@deip/commands';
+import { AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
 import {
   APP_CMD,
   NFT_ITEM_METADATA_DRAFT_STATUS,
@@ -19,7 +19,8 @@ import {
   NFTItemMetadataService,
   TeamDtoService,
   UserDtoService,
-  UserService
+  UserService,
+  ProposalDtoService,
 } from '../../services';
 import BaseController from '../base/BaseController';
 import { assetCmdHandler } from './../../command-handlers';
@@ -38,6 +39,7 @@ const ftClassDtoService = new FTClassDtoService();
 const nftCollectionDtoService = new NFTCollectionDtoService();
 const nftItemDtoService = new NFTItemDtoService();
 const userService = new UserService();
+const proposalDtoService = new ProposalDtoService();
 
 class AssetsController extends BaseController {
 
@@ -891,7 +893,6 @@ class AssetsController extends BaseController {
         const chainService = await ChainService.getInstanceAsync(config);
         const chainNodeClient = chainService.getChainNodeClient();
         const chainTxBuilder = chainService.getChainTxBuilder();
-        const chainRpc = chainService.getChainRpc();
 
 
         const validate = async (appCmds) => {
@@ -1161,6 +1162,10 @@ class AssetsController extends BaseController {
   moderateNFTItemMetadataDraft = this.command({
     h: async (ctx) => {
       try {
+        const chainService = await ChainService.getInstanceAsync(config);
+        const chainNodeClient = chainService.getChainNodeClient();
+        const chainTxBuilder = chainService.getChainTxBuilder();
+      
         const validate = async (appCmds) => {
           const validCmds = [APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_MODERATION_MSG];
           const appCmd = appCmds.find(cmd => validCmds.includes(cmd.getCmdNum()));
@@ -1231,8 +1236,40 @@ class AssetsController extends BaseController {
           }
         };
         const msg = ctx.state.msg;
-
         await assetCmdHandler.process(msg, ctx, validate);
+
+
+        const changeStatusCmd = msg.appCmds.find(x => x.getCmdNum() === APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS);
+        if (
+          changeStatusCmd &&
+          changeStatusCmd.getCmdPayload().status == NFT_ITEM_METADATA_DRAFT_STATUS.REJECTED &&
+          config.TENANT_HOT_WALLET
+        ) {
+          // Lazy sell proposal decline flow
+          const { _id: draftId } = changeStatusCmd.getCmdPayload();
+
+          const nftItemDraft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
+
+          // findOne because mapProposal is not working correctly
+          const lazySellProposal = await proposalDtoService.findOne({ _id: nftItemDraft.lazySellProposalId });
+          const { batchWeight } = lazySellProposal;
+          const { daoId: hotWalletDaoId, privKey: hotWalletPrivKey } = config.TENANT_HOT_WALLET;
+
+          const declineProposalTx = await chainTxBuilder.begin()
+            .then((txBuilder) => {
+              const declineLazySellProposalCmd = new DeclineProposalCmd({
+                entityId: nftItemDraft.lazySellProposalId,
+                account: hotWalletDaoId,
+                batchWeight
+              });
+              txBuilder.addCmd(declineLazySellProposalCmd);
+
+              return txBuilder.end();
+            })
+            .then((acceptTx) => acceptTx.signAsync(hotWalletPrivKey, chainNodeClient))
+
+          await assetCmdHandler.process(declineProposalTx.getPayload(), ctx);
+        }
 
         //after separate cmd validation all appCmds should have draft _id in payload
         const draftId = this.extractEntityId(msg, msg.appCmds[0].getCmdNum(), '_id');

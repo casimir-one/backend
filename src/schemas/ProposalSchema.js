@@ -14,6 +14,7 @@ const ProposalSchema = new Schema({
   "decisionMakers": { type: Array, default: [] },
   "approvers": { type: Array, default: [] },
   "rejectors": { type: Array, default: [] },
+  "batchWeight": { type: String, required: true },
 }, { timestamps: true });
 
 const model = mongoose.model('proposal', ProposalSchema);
