@@ -11,12 +11,14 @@ class ProposalCreatedEvent extends BaseEvent {
       type,
       status,
       proposalCmd,
+      batchWeight,
     } = eventPayload;
 
     assert(!!proposalId, "'proposalId' is required");
     assert(!!type, "'type' is required");
     assert(!!status, "'status' is required");
     assert(!!proposalCmd, "'proposalCmd' is required");
+    assert(!!batchWeight, "'batchWeight' is required")
 
     super(APP_EVENT.PROPOSAL_CREATED, eventPayload);
   }

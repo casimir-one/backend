@@ -1,6 +1,7 @@
 import { DOMAIN_EVENT, PROPOSAL_STATUS } from '@deip/constants';
 import { ProposalService } from '../../../services';
 import ChainDomainEventHandler from '../../base/ChainDomainEventHandler';
+import { logWarn } from './../../../utils/log';
 
 class ProposalEventHandler extends ChainDomainEventHandler {
 
@@ -24,30 +25,41 @@ proposalEventHandler.register(DOMAIN_EVENT.PROPOSAL_APPROVED, async (event) => {
 });
 
 proposalEventHandler.register(DOMAIN_EVENT.PROPOSAL_REVOKED_APPROVAL, async (event) => {
-  console.log("CHAIN_PROPOSAL.REVOKED_APPROVAL", event.getEventPayload())
+  console.log("CHAIN_PROPOSAL.PROPOSAL_REVOKED_APPROVAL", event.getEventPayload())
 });
 
 proposalEventHandler.register(DOMAIN_EVENT.PROPOSAL_RESOLVED, async (event) => {
+  console.log("CHAIN_PROPOSAL.PROPOSAL_RESOLVED", event.getEventPayload())
   const {
     proposal_id: proposalIdBuffer,
     state //??? 
   } = event.getEventPayload();
 
   const proposalId = Buffer.from(proposalIdBuffer).toString('hex');
-  await proposalService.updateProposal(proposalId, {
-    status: PROPOSAL_STATUS.APPROVED,
-  });
+  const proposal = await proposalService.getProposal(proposalId);
+  if (!proposal) {
+    logWarn(`Proposal ${proposalId} not found`);
+    return;
+  }
 });
 
 proposalEventHandler.register(DOMAIN_EVENT.PROPOSAL_EXPIRED, async (event) => {
+  console.log("CHAIN_PROPOSAL.PROPOSAL EXPIRED", event.getEventPayload())
   const {
     proposal_id: proposalIdBuffer,
   } = event.getEventPayload();
 
   const proposalId = Buffer.from(proposalIdBuffer).toString('hex');
-  await proposalService.updateProposal(proposalId, {
-    status: PROPOSAL_STATUS.EXPIRED,
-  });
+
+  const proposal = await proposalService.getProposal(proposalId);
+  if (!proposal) {
+    logWarn(`Proposal ${proposalId} not found`);
+    return;
+  }
+
+  if (proposal.status !== PROPOSAL_STATUS.EXPIRED) {
+    await proposalService.updateProposal(proposalId, { status: PROPOSAL_STATUS.EXPIRED, });
+  }
 });
 
 module.exports = proposalEventHandler;

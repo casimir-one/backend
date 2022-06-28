@@ -29,7 +29,8 @@ class ProposalService extends BaseService {
     details,
     portalIdsScope,
     creator,
-    decisionMakers
+    decisionMakers,
+    batchWeight,
   }) {
 
     const result = await this.createOne({
@@ -42,7 +43,8 @@ class ProposalService extends BaseService {
       portalIdsScope: portalIdsScope,
       decisionMakers: decisionMakers,
       approvers: [],
-      rejectors: []
+      rejectors: [],
+      batchWeight
     });
 
     return result;

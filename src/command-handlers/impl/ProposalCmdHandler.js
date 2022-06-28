@@ -19,18 +19,20 @@ const proposalCmdHandler = new ProposalCmdHandler();
 proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
   const { entityId: proposalId,
     creator,
-    type
+    type,
+    batchWeight
   } = cmd.getCmdPayload();
 
   const { status } = ctx.state.updatedProposals[proposalId];
-
+  
   ctx.state.appEvents.push(new ProposalCreatedEvent({
     proposalId: proposalId,
     status,
     type: type,
     proposalCmd: cmd,
     creator: creator,
-    proposalCtx: ctx.state.proposalsStackFrame
+    proposalCtx: ctx.state.proposalsStackFrame,
+    batchWeight,
   }));
 
 

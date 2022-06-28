@@ -11,7 +11,10 @@ class NFTLazySellProposalDeclinedEvent extends BaseEvent {
     } = eventPayload;
     //TODO: remove when we have onchain market
 
+    const { entityId: proposalId, expirationTime, proposedCmds } = proposalCmd.getCmdPayload();
+
     super(APP_EVENT.NFT_LAZY_SELL_PROPOSAL_DECLINED, {
+      proposalId,
       proposalCmd,
       proposalCtx
     });
