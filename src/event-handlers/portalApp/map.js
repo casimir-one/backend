@@ -76,6 +76,10 @@ module.exports = {
     { h: mailEventHandler, await: true },
   ],
 
+  [APP_EVENT.DAO_IMPORTED]: [
+    { h: userEventHandler, await: true },
+  ],
+
   [APP_EVENT.DAO_UPDATED]: [
     { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }

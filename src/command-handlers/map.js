@@ -17,6 +17,7 @@ module.exports = {
   [APP_CMD.REMOVE_DAO_MEMBER]: accountCmdHandler,
   [APP_CMD.CREATE_DAO]: accountCmdHandler,
   [APP_CMD.UPDATE_DAO]: accountCmdHandler,
+  [APP_CMD.IMPORT_DAO]: accountCmdHandler,
   [APP_CMD.ALTER_DAO_AUTHORITY]: accountCmdHandler,
   [APP_CMD.CREATE_PROPOSAL]: proposalCmdHandler,
   [APP_CMD.ACCEPT_PROPOSAL]: proposalCmdHandler,

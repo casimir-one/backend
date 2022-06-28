@@ -1,6 +1,8 @@
 import { APP_EVENT } from '@deip/constants';
 import { AttributeDtoService, TeamService } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
+import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
+import config from '../../../config';
 
 class TeamEventHandler extends PortalAppEventHandler {
 
@@ -26,17 +28,24 @@ teamEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
   } = event.getEventPayload();
 
   if (isTeamAccount) {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const { registry } = chainService.getChainNodeClient();
+
+    const address = SubstrateChainUtils.toAddress(daoId, registry)
+
     const team = await teamService.createTeam({
       _id: daoId,
       creator: creator,
       name: description, // TODO: extract from attributes
       description: description,
       attributes: attributes,
-      members: [creator]
+      members: [creator],
+      address
     });
   }
 
 });
+
 
 teamEventHandler.register(APP_EVENT.DAO_UPDATED, async (event) => {
 

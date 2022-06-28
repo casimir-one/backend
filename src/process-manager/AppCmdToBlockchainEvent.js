@@ -4,23 +4,20 @@ import config from "../config";
 
 const { toAddress, toHexFormat } = SubstrateChainUtils;
 
-const checkMatch = (obj) => {
-  console.log("ProcessManager checkMatch", obj);
-  return !Object.values(obj).includes(false);
-};
+const checkMatch = (obj) => !Object.values(obj).includes(false);
 
 const APP_CMD_TO_BC_EVENT_PROCESSOR = {
 
-  // [APP_CMD.CREATE_DAO]: [{
-  //   eventNum: DOMAIN_EVENT.DAO_CREATE,
-  //   matchF: ({ txInfo, appCmd, event }) => {
-  //     const { entityId: cmdDaoId } = appCmd.getCmdPayload();
-  //     const { dao: { id: eventDaoIdBuffer } } = event.getEventPayload();
-  //     return checkMatch({
-  //       daoId: cmdDaoId === Buffer.from(eventDaoIdBuffer).toString('hex')
-  //     })
-  //   }
-  // }],
+  [APP_CMD.CREATE_DAO]: [{
+    eventNum: DOMAIN_EVENT.DAO_CREATE,
+    matchF: ({ txInfo, appCmd, event }) => {
+      const { entityId: cmdDaoId } = appCmd.getCmdPayload();
+      const { dao: { id: eventDaoIdBuffer } } = event.getEventPayload();
+      return checkMatch({
+        daoId: cmdDaoId === Buffer.from(eventDaoIdBuffer).toString('hex')
+      })
+    }
+  }],
 
   [APP_CMD.TRANSFER_FT]: [
     {
@@ -145,7 +142,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
         const { registry } = chainService.getChainNodeClient();
 
         return checkMatch({
-          issuer: daoIdToAddress(toHexFormat(cmdIssuerDaoId), registry) === eventIssuerAddress,
+          issuer: toAddress(cmdIssuerDaoId, registry) === eventIssuerAddress,
           proposalId: cmdProposalId === Buffer.from(eventProposalIdBuffer).toString('hex'),
           state: state === 'Done'
         })

@@ -25,19 +25,6 @@ daoEventHandler.register(DOMAIN_EVENT.DAO_METADATA_UPDATED, async (event) => {
 
 daoEventHandler.register(DOMAIN_EVENT.DAO_CREATE, async (event) => {
   console.log("EVENT CHAIN_DAO_CREATE", event.getEventPayload())
-  const { dao: { dao_key: address, id } } = event.getEventPayload();
-  const eventDaoId = Buffer.from(id).toString('hex');
-  //setting address to user-dao or team-dao
-  const user = await userService.findOne({ _id: eventDaoId });
-  if (user) {
-    await userService.updateOne({ _id: eventDaoId }, { address });
-    return;
-  }
-
-  const team = await teamService.findOne({ _id: eventDaoId });
-  if (team) {
-    await teamService.updateOne({ _id: eventDaoId }, { address });
-  }
 });
 
 

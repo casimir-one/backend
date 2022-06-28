@@ -2,12 +2,14 @@ import { APP_CMD, USER_PROFILE_STATUS } from '@deip/constants';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import {
   DaoCreatedEvent,
+  DAOImportedEvent,
   DaoUpdatedEvent,
   DaoMemberAddedEvent,
   DaoMemberRemovedEvent,
   UserAuthorityAlteredEvent
 } from './../../events';
 import config from './../../config';
+import { logError } from './../../utils/log';
 
 class AccountCmdHandler extends BaseCmdHandler {
 
@@ -23,7 +25,7 @@ const accountCmdHandler = new AccountCmdHandler();
 
 accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
 
-  const { 
+  const {
     entityId,
     creator,
     authority,
@@ -53,8 +55,30 @@ accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
   ctx.state.appEvents.push(new DaoCreatedEvent(daoInfo));
 });
 
+accountCmdHandler.register(APP_CMD.IMPORT_DAO, (cmd, ctx) => {
+
+  const {
+    entityId,
+    authority,
+    isTeamAccount,
+    attributes,
+    roles,
+  } = cmd.getCmdPayload();
+
+  const daoInfo = {
+    daoId: entityId,
+    attributes,
+    isTeamAccount,
+  };
+  daoInfo.status = USER_PROFILE_STATUS.APPROVED;
+  daoInfo.pubKey = authority.owner.auths[0].key;
+  daoInfo.roles = roles;
+
+  ctx.state.appEvents.push(new DAOImportedEvent(daoInfo));
+});
+
 accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
-  const { 
+  const {
     entityId,
     creator,
     isTeamAccount,
@@ -82,7 +106,7 @@ accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
 });
 
 accountCmdHandler.register(APP_CMD.ALTER_DAO_AUTHORITY, (cmd, ctx) => {
-  const { 
+  const {
     entityId,
     isTeamAccount,
     authority,

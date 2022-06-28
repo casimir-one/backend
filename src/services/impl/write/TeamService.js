@@ -13,7 +13,8 @@ class TeamService extends BaseService {
     _id,
     creator,
     attributes,
-    members
+    members,
+    address
   }) {
 
     const attributeDtoService = new AttributeDtoService();
@@ -32,7 +33,8 @@ class TeamService extends BaseService {
       _id,
       creator,
       attributes,
-      members
+      members,
+      address
     });
 
     return result;

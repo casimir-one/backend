@@ -83,7 +83,7 @@ class UsersController extends BaseController {
 
         const { creator, entityId, authority } = createAccountCmd.getCmdPayload();
         const { wif: faucetPrivKey, username: faucetUsername, fundingAmount: faucetFundingAmount } = config.FAUCET_ACCOUNT;
-        
+
         if (creator === faucetUsername) {
           await msg.tx.signAsync(faucetPrivKey, chainNodeClient);
         }
@@ -96,7 +96,7 @@ class UsersController extends BaseController {
             .then((txBuilder) => {
 
               if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
-                const { owner: { auths: [{ key: pubKey }]} } = authority;
+                const { owner: { auths: [{ key: pubKey }] } } = authority;
                 const seedFundingCmd = new TransferFTCmd({
                   from: faucetUsername,
                   to: pubKey,
@@ -130,6 +130,59 @@ class UsersController extends BaseController {
         } else {
           await accountCmdHandler.process(msg, ctx, validate);
         }
+
+        ctx.successRes({ _id: entityId });
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  importDAO = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.IMPORT_DAO);
+          if (!appCmd) {
+            throw new BadRequestError(`Wrong cmd`);
+          }
+
+          const { entityId, email, creator, confirmationCode, isTeamAccount } = appCmd.getCmdPayload();
+
+          if (!entityId) {
+            throw new BadRequestError(`'entityId' field are required`);
+          }
+          if (isTeamAccount) {
+            throw new BadRequestError(`Team account cannot be imported`);
+          }
+
+          const existingProfile = await userService.getUser(entityId);
+          if (existingProfile) {
+            throw new ConflictError(`Profile for '${entityId}' is under consideration or has been imported already`);
+          }
+
+          if (config.NEED_CONFIRM_REGISTRATION) {
+            if (!validateEmail(email)) {
+              throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
+            }
+            if (!confirmationCode) {
+              throw new BadRequestError(`'confirmationCode' field are required`);
+            }
+
+            const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
+            if (token && token.refId !== genRipemd160Hash(email)) {
+              throw new ForbiddenError(`Incorrect confirmation code`);
+            }
+          }
+        };
+
+        const msg = ctx.state.msg;
+
+        const importAccountCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.IMPORT_DAO);
+        const { entityId } = importAccountCmd.getCmdPayload();
+
+        await accountCmdHandler.process(msg, ctx, validate);
 
         ctx.successRes({ _id: entityId });
 

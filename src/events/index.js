@@ -17,6 +17,7 @@ import AttributeDeletedEvent from './impl/AttributeDeletedEvent';
 
 import UserAuthorityAlteredEvent from './impl/UserAuthorityAlteredEvent';
 import DaoCreatedEvent from './impl/DaoCreatedEvent';
+import DAOImportedEvent from './impl/DAOImportedEvent';
 import DaoUpdatedEvent from './impl/DaoUpdatedEvent';
 
 import FTTransferredEvent from './impl/FTTransferredEvent';
@@ -86,6 +87,7 @@ module.exports = {
 
   DaoCreatedEvent,
   DaoUpdatedEvent,
+  DAOImportedEvent,
 
   UserAuthorityAlteredEvent,
 
