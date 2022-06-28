@@ -48,19 +48,14 @@ class NFTCollectionDtoService extends BaseService {
         admin: chainNftCollection.admin,
         freezer: chainNftCollection.freezer,
         issuedByTeam: nftCollection.issuedByTeam,
-        metadata: {
-          _id: nftCollection._id,
-          issuer: nftCollection.issuer,
-          attributes: nftCollection.attributes,
-          isDefault: nftCollection.isDefault,
-          portalId: nftCollection.portalId,
-          createdAt: nftCollection.createdAt,
-          updatedAt: nftCollection.updatedAt
-        },
+        attributes: nftCollection.attributes,
+        isDefault: nftCollection.isDefault,
+        createdAt: nftCollection.createdAt,
+        updatedAt: nftCollection.updatedAt,
         portalId: nftCollection.portalId
       };
     })
-      .filter(p => filter.isDefault === undefined || filter.isDefault === p.metadata.isDefault)
+      .filter(p => filter.isDefault === undefined || filter.isDefault === p.isDefault)
       .filter(p => !filter.portalIds.length || filter.portalIds.some(portalId => {
         return p.portalId == portalId;
       }))
@@ -69,7 +64,7 @@ class NFTCollectionDtoService extends BaseService {
         if (!attribute)
           return false;
 
-        const rAttr = p.metadata.attributes.find(rAttr => rAttr.attributeId.toString() === fAttr.attributeId.toString());
+        const rAttr = p.attributes.find(rAttr => rAttr.attributeId.toString() === fAttr.attributeId.toString());
         return fAttr.values.some((v) => {
           if (!rAttr || !rAttr.value)
             return !v || v === 'false';
