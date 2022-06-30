@@ -9,8 +9,7 @@ class NFTCollectionMetadataCreatedEvent extends BaseEvent {
     const {
       entityId,
       issuer,
-      attributes,
-      isDefault
+      attributes
     } = eventPayload;
 
     assert(!!entityId, "'entityId' is required");

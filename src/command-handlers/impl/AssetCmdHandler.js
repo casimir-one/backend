@@ -32,7 +32,6 @@ assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION_METADATA, (cmd, ctx) => {
     entityId, 
     issuer, 
     attributes,
-    isDefault,
     issuedByTeam
   } = cmd.getCmdPayload();
 
@@ -40,7 +39,6 @@ assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION_METADATA, (cmd, ctx) => {
     entityId,
     issuer,
     attributes,
-    isDefault,
     issuedByTeam
   }));
 

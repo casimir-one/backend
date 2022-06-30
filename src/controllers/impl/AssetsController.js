@@ -241,18 +241,6 @@ class AssetsController extends BaseController {
     }
   });
 
-  getDefaultNFTCollection = this.query({
-    h: async (ctx) => {
-      try {
-        const issuer = ctx.params.issuer;
-        const result = await nftCollectionDtoService.getDefaultNFTCollection(issuer);
-        ctx.successRes(result);
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
   getNFTCollectionsByIds = this.query({
     h: async (ctx) => {
       try {

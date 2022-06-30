@@ -26,14 +26,12 @@ class NFTCollectionMetadataService extends BaseService {
     _id,
     issuer,
     attributes = [],
-    isDefault,
     issuedByTeam
   }) {
     const mappedAttributes = await this.mapAttributes(attributes);
     const result = await this.createOne({
       _id,
       issuer,
-      isDefault,
       attributes: mappedAttributes,
       issuedByTeam
     })
