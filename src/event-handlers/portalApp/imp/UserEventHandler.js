@@ -1,9 +1,8 @@
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import { SYSTEM_ROLE as USER_ROLES, APP_EVENT, USER_PROFILE_STATUS } from '@deip/constants';
-import {
-  UserService
-} from './../../../services';
-
+import { UserService } from './../../../services';
+import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
+import config from '../../../config';
 
 class UserEventHandler extends PortalAppEventHandler {
 
@@ -42,6 +41,11 @@ userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
       });
     }
   } else {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const { registry } = chainService.getChainNodeClient();
+
+    const address = SubstrateChainUtils.toAddress(daoId, registry)
+
     const createdUserProfile = await userService.createUser({
       username: daoId,
       status,
@@ -51,9 +55,38 @@ userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
       roles: roles.map(r => ({
         role: r.role,
         teamId: r.teamId
-      }))
+      })),
+      address
     });
   }
+});
+
+userEventHandler.register(APP_EVENT.DAO_IMPORTED, async (event) => {
+
+  const {
+    daoId,
+    status,
+    pubKey,
+    attributes,
+    roles
+  } = event.getEventPayload();
+
+  const chainService = await ChainService.getInstanceAsync(config);
+  const { registry } = chainService.getChainNodeClient();
+
+  const address = SubstrateChainUtils.toAddress(daoId, registry)
+  const createdUserProfile = await userService.createUser({
+    username: daoId,
+    status,
+    signUpPubKey: pubKey,
+    attributes,
+    roles: roles.map(r => ({
+      role: r.role,
+      teamId: r.teamId
+    })),
+    address,
+    email: null
+  });
 });
 
 userEventHandler.register(APP_EVENT.DAO_UPDATED, async (event) => {

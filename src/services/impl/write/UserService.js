@@ -1,11 +1,10 @@
-import BaseService from './../../base/BaseService';
-import UserSchema from './../../../schemas/UserSchema';
-import { USER_PROFILE_STATUS } from '@deip/constants';
 import config from './../../../config';
+import UserSchema from './../../../schemas/UserSchema';
+import BaseService from './../../base/BaseService';
 
 class UserService extends BaseService {
 
-  constructor(options = { scoped: true }) { 
+  constructor(options = { scoped: true }) {
     super(UserSchema, options);
   }
 
@@ -17,7 +16,8 @@ class UserService extends BaseService {
     email,
     teams,
     attributes,
-    roles
+    roles,
+    address
   }) {
 
     const result = await this.createOne({
@@ -28,7 +28,8 @@ class UserService extends BaseService {
       attributes: attributes,
       portal: portal,
       teams: teams,
-      roles: roles
+      roles: roles,
+      address
     });
 
     return result;

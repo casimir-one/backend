@@ -27,7 +27,8 @@ import {
     NFTItemMetadataDraftModerationMsgUpdatedEvent,
     DaoCreatedEvent,
     NFTCollectionMetadataCreatedEvent,
-    NFTCollectionCreatedEvent
+    NFTCollectionCreatedEvent,
+    DAOImportedEvent
 } from './index.js';
 
 
@@ -44,9 +45,8 @@ const buildCmdProposedCmds = (cmdPayload) => {
 }
 
 const buildEvent = (ProxyClass, updatePayloadF) => (payload) => {
-    let _payload = payload;
-    if (updatePayloadF) _payload = updatePayloadF(payload);
-
+    const _payload = updatePayloadF ? updatePayloadF(payload) : payload;
+    
     return new ProxyClass(_payload);
 }
 const buildCmd = buildEvent;
@@ -65,6 +65,7 @@ const cmdParser = {
 
 const eventParser = {
     [APP_EVENT.DAO_CREATED]: buildEvent(DaoCreatedEvent),
+    [APP_EVENT.DAO_IMPORTED]: buildEvent(DAOImportedEvent),
 
     [APP_EVENT.FT_TRANSFERRED]: buildEvent(FTTransferredEvent),
     [APP_EVENT.NFT_TRANSFERRED]: buildEvent(NFTTransferredEvent),
