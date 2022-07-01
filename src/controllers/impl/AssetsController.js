@@ -533,7 +533,12 @@ class AssetsController extends BaseController {
           if (nftItemMetadata) {
             throw new ConflictError(`Nft item metadata with "${draft.hash}" hash already exist`);
           }
-          if (draft.status != NFT_ITEM_METADATA_DRAFT_STATUS.APPROVED) {
+
+          const moderationRequired = ctx.state.portal.settings.moderation.nftItemMetadataDraftModerationRequired;
+          if (
+            moderationRequired &&
+            draft.status != NFT_ITEM_METADATA_DRAFT_STATUS.APPROVED
+          ) {
             throw new BadRequestError(`Nft item metadata "${draft.nftCollectionId}" isn't in 'Approved' status`);
           }
         };
@@ -626,10 +631,10 @@ class AssetsController extends BaseController {
           if (draft.ownedByTeam) {
             const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
             if (!isAuthorized) {
-              throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
+              throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
             }
           } else if (draft.owner !== username) {
-            throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
+            throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
           }
 
           if (draft.status == NFT_ITEM_METADATA_DRAFT_STATUS.PROPOSED) {
@@ -682,12 +687,12 @@ class AssetsController extends BaseController {
 
           if (user) {
             if (user._id !== username) {
-              throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
+              throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
             }
           } else {
             const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
             if (!isAuthorized) {
-              throw new ForbiddenError(`"${username}" is not permitted to edit "${nftCollectionId}" nft collection`);
+              throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
             }
           }
 
@@ -1153,7 +1158,7 @@ class AssetsController extends BaseController {
         const chainService = await ChainService.getInstanceAsync(config);
         const chainNodeClient = chainService.getChainNodeClient();
         const chainTxBuilder = chainService.getChainTxBuilder();
-      
+
         const validate = async (appCmds) => {
           const validCmds = [APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_MODERATION_MSG];
           const appCmd = appCmds.find(cmd => validCmds.includes(cmd.getCmdNum()));
