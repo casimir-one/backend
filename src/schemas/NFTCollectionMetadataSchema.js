@@ -9,7 +9,6 @@ const NFTCollectionMetadataSchema = new Schema({
   "portalId": { type: String, required: true },
   "issuer": { type: String, required: true },
   "attributes": [AttributeValueSchema],
-  "isDefault": { type: Boolean, default: false },
   "issuedByTeam": { type: Boolean, default: false },
   "nextNftItemId": { type: Number, default: 1 },
 }, { timestamps: true });

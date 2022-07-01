@@ -77,7 +77,6 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_CREATED, async (eve
     entityId,
     issuer,
     attributes,
-    isDefault,
     issuedByTeam
   } = event.getEventPayload();
 
@@ -85,7 +84,6 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_CREATED, async (eve
     _id: entityId,
     issuer,
     attributes,
-    isDefault,
     issuedByTeam
   });
 

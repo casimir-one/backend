@@ -422,50 +422,6 @@
         ]
       }
     },
-    "/api/v2/project/default/{accountId}": {
-      "get": {
-        "tags": [
-          "project"
-        ],
-        "summary": "Find user projects by accountId",
-        "description": "Returns an array of projects",
-        "operationId": "getTeamDefaultProject",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "accountId",
-            "in": "path",
-            "description": "accountId of the user whose projects you want to get",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Project"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Project not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
     "/api/v2/projects": {
       "get": {
         "tags": [
@@ -4807,10 +4763,6 @@
               }
             }
           }
-        },
-        "isDefault": {
-          "type": "boolean",
-          "default": false
         },
         "isFinished": {
           "type": "boolean",
