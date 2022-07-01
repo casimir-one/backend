@@ -1,4 +1,4 @@
-import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
+import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@casimir/platform-core';
 import assert from 'assert';
 import BaseEvent from '../base/BaseEvent';
 

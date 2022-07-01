@@ -1,4 +1,4 @@
-import { APP_CMD } from '@deip/constants';
+import { APP_CMD } from '@casimir/platform-core';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import { AttributeCreatedEvent, AttributeUpdatedEvent, AttributeDeletedEvent } from './../../events';
 

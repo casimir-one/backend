@@ -1,5 +1,4 @@
 
-import { SIGN_UP_POLICY } from '@deip/constants';
 import mongoose from 'mongoose';
 
 const Schema = mongoose.Schema;
@@ -79,11 +78,6 @@ const PortalSchema = new Schema({
   "banner": { type: String, default: "default_banner_logo.png" },
   "network": GlobalNetworkSettings,
   "settings": {
-    "signUpPolicy": {
-      type: Number,
-      enum: [...Object.values(SIGN_UP_POLICY)],
-      required: true
-    },
     "attributeOverwrites": [AttributeOverwrite],
     "attributeSettings": { type: Object },
     "layoutSettings": { type: Object },

@@ -1,9 +1,9 @@
 import {
   APP_EVENT,
-  ASSET_TYPE,
-  NFT_ITEM_METADATA_DRAFT_STATUS,
+  AssetType,
+  NftItemMetadataDraftStatus,
   NFT_ITEM_METADATA_FORMAT
-} from '@deip/constants';
+} from '@casimir/platform-core';
 import {
   AssetService,
   FTClassService,
@@ -58,7 +58,7 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
     precision,
     issuer,
     description,
-    type: ASSET_TYPE.FT,
+    type: AssetType.FT,
     metadata: settings
   });
 
@@ -68,7 +68,7 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
     precision,
     issuer,
     description,
-    type: ASSET_TYPE.FT
+    type: AssetType.FT
   });
 });
 
@@ -132,7 +132,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     owner,
     ownedByTeam,
     folder: _id,
-    status: status || NFT_ITEM_METADATA_DRAFT_STATUS.IN_PROGRESS,
+    status: status || NftItemMetadataDraftStatus.IN_PROGRESS,
     authors: authors || [],
     references: references || [],
     packageFiles: [],

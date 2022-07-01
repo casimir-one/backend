@@ -3,6 +3,7 @@ import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataS
 import config from '../../../config';
 import { ChainService } from '@deip/chain-service';
 import AttributeDtoService from './AttributeDtoService';
+import { AttributeScope } from '@casimir/platform-core';
 
 const attributeDtoService = new AttributeDtoService();
 
@@ -16,7 +17,7 @@ class NFTCollectionDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
     const chainNftCollections = await chainRpc.getNonFungibleTokenClassesAsync();
-    const nftCollectionsAttributes = await attributeDtoService.getAttributesByScope('nftCollection');
+    const nftCollectionsAttributes = await attributeDtoService.getAttributesByScope(AttributeScope.NFT_COLLECTION);
 
     const filter = {
       searchTerm: "",

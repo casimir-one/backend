@@ -1,11 +1,10 @@
-import { USER_PROFILE_STATUS } from '@deip/constants';
+import { ProtocolChain, USER_PROFILE_STATUS } from '@casimir/platform-core';
 import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 import { genRipemd160Hash } from '@deip/toolbox';
 import TeamService from '../write/TeamService';
-import { PROTOCOL_CHAIN } from '@deip/constants';
 
 
 const teamService = new TeamService()
@@ -22,7 +21,7 @@ class UserDtoService extends BaseService {
 
     // temp for substrate migration
     const isValidChainId = (value) => { 
-      return config.PROTOCOL === PROTOCOL_CHAIN.GRAPHENE || (value.length === 40 && /^[0-9a-fA-F]+$/.test(value));
+      return config.PROTOCOL === ProtocolChain.GRAPHENE || (value.length === 40 && /^[0-9a-fA-F]+$/.test(value));
     };
     const chainAccounts = await chainRpc.getAccountsAsync(users.map(user => isValidChainId(user._id) ? user._id : genRipemd160Hash(user.email)));
     const portalProfile = await this.getPortalInstance();

@@ -1,4 +1,4 @@
-import { DOMAIN_EVENT } from '@deip/constants';
+import { DOMAIN_EVENT } from '@casimir/platform-core';
 import { createEnum } from '@deip/toolbox';
 import assert from "assert";
 import { logWarn } from "../../utils/log";

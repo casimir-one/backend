@@ -1,5 +1,5 @@
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
-import { APP_EVENT } from '@deip/constants';
+import { APP_EVENT } from '@casimir/platform-core';
 import { VERIFICATION_TOKEN_LIFETIME } from './../../../constants';
 import {
   VerificationTokenService

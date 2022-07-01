@@ -1,4 +1,4 @@
-import { APP_EVENT } from '@deip/constants';
+import { APP_EVENT } from '@casimir/platform-core';
 import { PortalService } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 

@@ -1,5 +1,5 @@
+import { SYSTEM_ROLE, APP_EVENT, USER_PROFILE_STATUS } from '@casimir/platform-core';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
-import { SYSTEM_ROLE as USER_ROLES, APP_EVENT, USER_PROFILE_STATUS } from '@deip/constants';
 import { UserService } from './../../../services';
 import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
 import config from '../../../config';
@@ -37,7 +37,7 @@ userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
         email: userInfo.email,
         attributes: userInfo.attributes,
         teams: [...userInfo.teams, daoId],
-        roles: [...userInfo.roles, { role: USER_ROLES.TEAM_ADMIN, teamId: daoId }]
+        roles: [...userInfo.roles, { role: SYSTEM_ROLE.TEAM_ADMIN, teamId: daoId }]
       });
     }
   } else {

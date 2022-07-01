@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { DEPOSIT_REQUEST_STATUS } from '@deip/constants';
+import { DepositRequestStatus } from '@casimir/platform-core';
 
 const Schema = mongoose.Schema;
 
@@ -11,7 +11,7 @@ const AssetDepositRequestSchema = new Schema({
   "account": { type: String, required: true }, // target balance owner
   "requestToken": { type: String, required: true, index: { unique: true } },
   "timestamp": { type: Number, required: true },
-  "status": { type: Number, enum: [...Object.values(DEPOSIT_REQUEST_STATUS)], required: true, default: DEPOSIT_REQUEST_STATUS.PENDING },
+  "status": { type: Number, enum: Object.values(DepositRequestStatus), required: true, default: DepositRequestStatus.PENDING },
   "txInfo": { type: Object, required: false },
   "invoice": { type: Object, required: false }
 }, { timestamps: true });

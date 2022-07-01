@@ -1,4 +1,4 @@
-import { APP_EVENT } from '@deip/constants';
+import { APP_EVENT } from '@casimir/platform-core';
 import { AttributeDtoService, TeamService } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import { ChainService, SubstrateChainUtils } from '@deip/chain-service';

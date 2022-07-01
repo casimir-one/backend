@@ -1,6 +1,6 @@
 import BaseController from '../base/BaseController';
 import { PortalService, PortalDtoService, UserDtoService } from '../../services';
-import { APP_CMD, USER_PROFILE_STATUS } from '@deip/constants';
+import { APP_CMD } from '@casimir/platform-core';
 import { BadRequestError, NotFoundError } from '../../errors';
 import { portalCmdHandler } from '../../command-handlers';
 import sharp from 'sharp';

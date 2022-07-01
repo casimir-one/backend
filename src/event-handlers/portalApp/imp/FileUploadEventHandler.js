@@ -1,5 +1,5 @@
 
-import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
+import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@casimir/platform-core';
 import mongoose from 'mongoose';
 import { NFTItemMetadataDraftService, PortalService } from '../../../services';
 import FileStorage from '../../../storage';

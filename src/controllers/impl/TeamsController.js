@@ -1,5 +1,5 @@
 import qs from 'qs';
-import { APP_CMD } from '@deip/constants';
+import { APP_CMD } from '@casimir/platform-core';
 import BaseController from './../base/BaseController';
 import { TeamForm } from '../../forms';
 import { BadRequestError, NotFoundError, ConflictError } from '../../errors';

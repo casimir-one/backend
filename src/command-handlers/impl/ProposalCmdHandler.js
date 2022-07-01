@@ -1,4 +1,4 @@
-import { APP_CMD, APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
+import { ProposalStatus, APP_CMD, APP_PROPOSAL } from '@casimir/platform-core';
 import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import BaseCmdHandler from './../base/BaseCmdHandler';
@@ -68,7 +68,7 @@ proposalCmdHandler.register(APP_CMD.ACCEPT_PROPOSAL, (cmd, ctx) => {
     account: account
   }));
 
-  if (status == PROPOSAL_STATUS.APPROVED) {
+  if (status == ProposalStatus.APPROVED) {
 
     ctx.state.proposalsStack.push(proposalCtx);
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1];
@@ -111,7 +111,7 @@ proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, (cmd, ctx) => {
     account: account
   }));
 
-  if (status == PROPOSAL_STATUS.REJECTED) {
+  if (status == ProposalStatus.REJECTED) {
 
     ctx.state.proposalsStack.push(proposalCtx);
     ctx.state.proposalsStackFrame = ctx.state.proposalsStack[ctx.state.proposalsStack.length - 1];

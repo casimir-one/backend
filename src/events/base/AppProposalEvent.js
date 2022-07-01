@@ -1,4 +1,4 @@
-import { APP_PROPOSAL } from '@deip/constants';
+import { APP_PROPOSAL } from '@casimir/platform-core';
 
 import TeamUpdateProposalAcceptedEvent from './../impl/TeamUpdateProposalAcceptedEvent';
 import TeamUpdateProposalCreatedEvent from './../impl/TeamUpdateProposalCreatedEvent';

@@ -1,5 +1,5 @@
 import BaseService from './../../base/BaseService';
-import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
+import { APP_PROPOSAL, ProposalStatus } from '@casimir/platform-core';
 import ProposalSchema from './../../../schemas/ProposalSchema';
 import NFTCollectionDtoService from './NFTCollectionDtoService';
 import TeamDtoService from './TeamDtoService';
@@ -93,7 +93,7 @@ class ProposalDtoService extends BaseService {
 
           parties[key] = {
             isProposer: party == proposal.creator,
-            status: isApproved ? PROPOSAL_STATUS.APPROVED : isRejected ? PROPOSAL_STATUS.REJECTED : PROPOSAL_STATUS.PENDING,
+            status: isApproved ? ProposalStatus.APPROVED : isRejected ? ProposalStatus.REJECTED : ProposalStatus.PENDING,
             account: users.find(user => user._id == party) || teams.find(team => team._id == party),
             isHidden,
             signers: [

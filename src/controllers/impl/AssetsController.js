@@ -1,10 +1,10 @@
 import { ChainService } from '@deip/chain-service';
 import { AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
-import {
+import { 
   APP_CMD,
-  NFT_ITEM_METADATA_DRAFT_STATUS,
-  NFT_ITEM_METADATA_FORMAT,
-} from '@deip/constants';
+  NftItemMetadataDraftStatus,
+  NFT_ITEM_METADATA_FORMAT
+ } from '@casimir/platform-core';
 import slug from 'limax';
 import mongoose from 'mongoose';
 import qs from 'qs';
@@ -537,7 +537,7 @@ class AssetsController extends BaseController {
           const moderationRequired = ctx.state.portal.settings.moderation.nftItemMetadataDraftModerationRequired;
           if (
             moderationRequired &&
-            draft.status != NFT_ITEM_METADATA_DRAFT_STATUS.APPROVED
+            draft.status != NftItemMetadataDraftStatus.APPROVED
           ) {
             throw new BadRequestError(`Nft item metadata "${draft.nftCollectionId}" isn't in 'Approved' status`);
           }
@@ -622,7 +622,7 @@ class AssetsController extends BaseController {
           if (!draft) {
             throw new NotFoundError(`Draft for "${nftItemDraftId}" id is not found`);
           }
-          if (draft.status != NFT_ITEM_METADATA_DRAFT_STATUS.IN_PROGRESS) {
+          if (draft.status != NftItemMetadataDraftStatus.IN_PROGRESS) {
             throw new BadRequestError(`Draft "${nftItemDraftId}" is locked for updates`);
           }
 
@@ -637,7 +637,7 @@ class AssetsController extends BaseController {
             throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
           }
 
-          if (draft.status == NFT_ITEM_METADATA_DRAFT_STATUS.PROPOSED) {
+          if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
 
@@ -698,7 +698,7 @@ class AssetsController extends BaseController {
 
           // if there is a proposal for this content (no matter is it approved or still in voting progress)
           // we must respond with an error as blockchain hashed data should not be modified
-          if (draft.status == NFT_ITEM_METADATA_DRAFT_STATUS.PROPOSED) {
+          if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
             throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
           }
 
@@ -1166,7 +1166,7 @@ class AssetsController extends BaseController {
             throw new BadRequestError(`This endpoint accepts protocol cmd`);
           }
 
-          const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = NFT_ITEM_METADATA_DRAFT_STATUS;
+          const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = NftItemMetadataDraftStatus;
           const jwtUsername = ctx.state.user.username;
           const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
           const isModerator = moderators.includes(jwtUsername);
@@ -1183,7 +1183,7 @@ class AssetsController extends BaseController {
           if (appCmd.getCmdNum() === APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS) {
             const { status } = appCmd.getCmdPayload();
 
-            if (!NFT_ITEM_METADATA_DRAFT_STATUS[status])
+            if (!Object.values(NftItemMetadataDraftStatus).includes(status))
               throw new BadRequestError(`This endpoint accepts only nft item metadata draft status`)
 
             if (draft.status === IN_PROGRESS) {
