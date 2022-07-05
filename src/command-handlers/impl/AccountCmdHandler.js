@@ -1,4 +1,4 @@
-import { APP_CMD, USER_PROFILE_STATUS } from '@deip/constants';
+import { APP_CMD, USER_PROFILE_STATUS } from '@casimir/platform-core';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import {
   DaoCreatedEvent,

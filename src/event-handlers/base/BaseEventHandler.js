@@ -1,5 +1,5 @@
 import EventEmitter from 'events';
-import { APP_PROPOSAL } from '@deip/constants';
+import { APP_PROPOSAL } from '@casimir/platform-core';
 import { socketServer } from "../../websocket";
 import {
   logError,

@@ -2,7 +2,7 @@ import config from './../../config';
 import qs from 'qs';
 import crypto from '@deip/lib-crypto';
 import { TextEncoder } from 'util';
-import { DEPOSIT_REQUEST_STATUS } from '@deip/constants';
+import { DepositRequestStatus } from '@casimir/platform-core';
 import AssetDepositRequest from './../../schemas/AssetDepositRequestSchema';
 import { ChainService } from '@deip/chain-service';
 import { IssueFTCmd } from '@deip/commands';
@@ -93,7 +93,7 @@ const processAssetDepositRequestForTestnet = async (ctx) => {
       timestamp,
       account,
       username,
-      status: DEPOSIT_REQUEST_STATUS.APPROVED,
+      status: DepositRequestStatus.APPROVED,
       requestToken: sigHex,
       invoice: {},
       txInfo
@@ -233,7 +233,7 @@ const confirmAssetDepositRequest = async (ctx) => {
     }
 
     const depositRequest = depositRequestDoc.toObject();
-    if (depositRequest.status != DEPOSIT_REQUEST_STATUS.PENDING) {
+    if (depositRequest.status != DepositRequestStatus.PENDING) {
       throw new BadRequestError(`Deposit request with ${requestToken} has been already resolved`);
     }
 
@@ -266,7 +266,7 @@ const confirmAssetDepositRequest = async (ctx) => {
     const verifiedTx = await trx.verifyByPortalAsync({ verificationPubKey: config.TENANT_PORTAL.pubKey, verificationPrivKey: config.TENANT_PORTAL.privKey }, chainNodeClient);
     const txInfo = await chainRpc.sendTxAsync(verifiedTx);
 
-    depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.APPROVED;
+    depositRequestDoc.status = DepositRequestStatus.APPROVED;
     depositRequestDoc.txInfo = txInfo;
     depositRequestDoc.invoice = invoice;
     const approvedDepositRequest = await depositRequestDoc.save();
@@ -276,7 +276,7 @@ const confirmAssetDepositRequest = async (ctx) => {
   } catch (err) {
 
     if (depositRequestDoc) {
-      depositRequestDoc.status = DEPOSIT_REQUEST_STATUS.REJECTED;
+      depositRequestDoc.status = DepositRequestStatus.REJECTED;
       depositRequestDoc.invoice = invoice;
       const rejectedDepositRequest = await depositRequestDoc.save();
     }

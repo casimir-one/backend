@@ -5,7 +5,7 @@ import qs from 'qs';
 import config from '../../config';
 import FileStorage from './../../storage';
 import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
-import { APP_CMD, ATTR_TYPES, PROTOCOL_CHAIN, SYSTEM_ROLE as USER_ROLES, USER_PROFILE_STATUS } from '@deip/constants';
+import { APP_CMD, AttributeScope, ProtocolChain, SYSTEM_ROLE, USER_PROFILE_STATUS } from '@casimir/platform-core';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, FailedDependencyError, ConflictError, ForbiddenError } from './../../errors';
 import { ChainService } from '@deip/chain-service';
@@ -47,7 +47,7 @@ class UsersController extends BaseController {
           }
 
           const { entityId, email, roles, creator, confirmationCode } = appCmd.getCmdPayload();
-          if (Array.isArray(roles) && roles.find(({ role }) => role === USER_ROLES.ADMIN)) {
+          if (Array.isArray(roles) && roles.find(({ role }) => role === SYSTEM_ROLE.ADMIN)) {
             throw new BadRequestError(`Can't create admin account`);
           }
 
@@ -88,14 +88,14 @@ class UsersController extends BaseController {
           await msg.tx.signAsync(faucetPrivKey, chainNodeClient);
         }
 
-        const isPreFunding = config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE && !!faucetFundingAmount;
-        const isPostFunding = config.PROTOCOL === PROTOCOL_CHAIN.GRAPHENE && !!faucetFundingAmount;
+        const isPreFunding = config.PROTOCOL === ProtocolChain.SUBSTRATE && !!faucetFundingAmount;
+        const isPostFunding = config.PROTOCOL === ProtocolChain.GRAPHENE && !!faucetFundingAmount;
 
         const fundUserAccount = async () => {
           const fundingTx = await chainTxBuilder.begin()
             .then((txBuilder) => {
 
-              if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
+              if (config.PROTOCOL === ProtocolChain.SUBSTRATE) {
                 const { owner: { auths: [{ key: pubKey }] } } = authority;
                 const seedFundingCmd = new TransferFTCmd({
                   from: faucetUsername,
@@ -462,7 +462,7 @@ class UsersController extends BaseController {
 
         await accountCmdHandler.process(msg, ctx, validate);
         // @temp solution for TESTNET
-        if (config.PROTOCOL === PROTOCOL_CHAIN.SUBSTRATE) {
+        if (config.PROTOCOL === ProtocolChain.SUBSTRATE) {
           await fundUserAccount();
         }
 
@@ -493,13 +493,13 @@ class UsersController extends BaseController {
 
         if (user && user.profile && user.profile.attributes) {
           // temp solution //
-          const attrs = await attributeDtoService.getNetworkAttributesByScope('user');
+          const attrs = await attributeDtoService.getNetworkAttributesByScope(AttributeScope.USER);
           const attr = attrs.find(
             ({
               type,
               title,
               portalId
-            }) => title === 'Avatar' && (type === ATTR_TYPES.IMAGE || type === 'image') && portalId === user.portalId
+            }) => title === 'Avatar' && type === 'image' && portalId === user.portalId
           );
           const userAttr = user.profile.attributes.find(({
             attributeId

@@ -4,7 +4,7 @@ import util from 'util';
 import path from 'path';
 import assert from 'assert';
 import { ChainService } from '@deip/chain-service';
-import { APP_PROPOSAL, PROPOSAL_STATUS } from '@deip/constants';
+import { APP_PROPOSAL, ProposalStatus } from '@casimir/platform-core';
 import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
 import ProposalService from './../../services/impl/write/ProposalService';
 import config from './../../config';
@@ -211,7 +211,7 @@ class BaseCmdHandler extends EventEmitter {
       const proposedCmds = proposalCmd.getProposedCmds();
       const type = proposalCmd.getProposalType();
       const chainProposal = chainProposals.filter((p) => !!p).find(p => p.proposalId === proposalId);
-      const status = chainProposal ? chainProposal.status : isAccepted ? PROPOSAL_STATUS.APPROVED : isDeclined ? PROPOSAL_STATUS.REJECTED : PROPOSAL_STATUS.PENDING;
+      const status = chainProposal ? chainProposal.status : isAccepted ? ProposalStatus.APPROVED : isDeclined ? ProposalStatus.REJECTED : ProposalStatus.PENDING;
       return {
         proposalId,
         type,
@@ -225,7 +225,7 @@ class BaseCmdHandler extends EventEmitter {
       const proposalCmd = newProposalsCmds.find(cmd => cmd.getProtocolEntityId() === proposalId);
       const proposedCmds = proposalCmd.getProposedCmds();
       const type = proposalCmd.getProposalType();
-      const status = PROPOSAL_STATUS.PENDING;
+      const status = ProposalStatus.PENDING;
       return {
         proposalId,
         type,

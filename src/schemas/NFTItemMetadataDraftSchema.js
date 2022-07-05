@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { NFT_ITEM_METADATA_DRAFT_STATUS, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
+import { NftItemMetadataDraftStatus, NFT_ITEM_METADATA_FORMAT } from '@casimir/platform-core';
 import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
@@ -23,7 +23,7 @@ const NFTItemMetadataDraftSchema = new Schema({
   },
   "status": {
     type: Number,
-    enum: [...Object.values(NFT_ITEM_METADATA_DRAFT_STATUS)],
+    enum: Object.values(NftItemMetadataDraftStatus),
     required: true
   },
   "packageFiles": [{

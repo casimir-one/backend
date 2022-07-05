@@ -1,5 +1,5 @@
 import { SubstrateChainUtils } from '@deip/chain-service';
-import { APP_CMD, DOMAIN_EVENT } from "@deip/constants";
+import { APP_CMD, DOMAIN_EVENT } from "@casimir/platform-core";
 import config from "../config";
 
 const { toAddress, toHexFormat } = SubstrateChainUtils;

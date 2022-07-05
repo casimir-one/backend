@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ASSET_TYPE } from '@deip/constants';
+import { AssetType } from '@casimir/platform-core';
 
 const Schema = mongoose.Schema;
 
@@ -13,9 +13,9 @@ const AssetSchema = new Schema({
   "description": { type: String, required: false },
   "type": {
     type: Number,
-    enum: [...Object.values(ASSET_TYPE)],
+    enum: Object.values(AssetType),
     required: true,
-    default: ASSET_TYPE.FT
+    default: AssetType.FT
   },
   "isGlobalScope": { type: Boolean, default: false }
 });

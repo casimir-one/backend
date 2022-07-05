@@ -3,7 +3,7 @@ import AssetDepositRequestSchema from '../../../schemas/AssetDepositRequestSchem
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
 import AssetSchema from './../../../schemas/AssetSchema';
-import { ASSET_TYPE } from '@deip/constants';
+import { AssetType } from '@casimir/platform-core';
 
 
 class AssetDtoService extends BaseService {
@@ -22,7 +22,7 @@ class AssetDtoService extends BaseService {
         type: asset.type,
         name: asset.name
       };
-      if (asset.type === ASSET_TYPE.FT || asset.type === ASSET_TYPE.CORE) {
+      if (asset.type === AssetType.FT || asset.type === AssetType.CORE) {
         return {
           ...defaultModel,
           symbol: asset.symbol,

@@ -1,5 +1,5 @@
 import { ChainService } from '@deip/chain-service';
-import { DOMAIN_EVENT } from '@deip/constants';
+import { DOMAIN_EVENT } from '@casimir/platform-core';
 import config from "../config";
 import ChainDomainEventHandler from "../event-handlers/base/ChainDomainEventHandler";
 import QueueService from "../queue/QueueService";

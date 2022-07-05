@@ -1,4 +1,4 @@
-import { DOMAIN_EVENT, PROPOSAL_STATUS } from '@deip/constants';
+import { DOMAIN_EVENT, ProposalStatus } from '@casimir/platform-core';
 import { ProposalService } from '../../../services';
 import ChainDomainEventHandler from '../../base/ChainDomainEventHandler';
 import { logWarn } from './../../../utils/log';
@@ -57,8 +57,8 @@ proposalEventHandler.register(DOMAIN_EVENT.PROPOSAL_EXPIRED, async (event) => {
     return;
   }
 
-  if (proposal.status !== PROPOSAL_STATUS.EXPIRED) {
-    await proposalService.updateProposal(proposalId, { status: PROPOSAL_STATUS.EXPIRED, });
+  if (proposal.status !== ProposalStatus.EXPIRED) {
+    await proposalService.updateProposal(proposalId, { status: ProposalStatus.EXPIRED, });
   }
 });
 

@@ -1,4 +1,4 @@
-import { APP_EVENT, NFT_ITEM_METADATA_DRAFT_STATUS, NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
+import { APP_EVENT, NftItemMetadataDraftStatus, NFT_ITEM_METADATA_FORMAT } from '@casimir/platform-core';
 import assert from 'assert';
 import BaseEvent from '../base/BaseEvent';
 
@@ -25,8 +25,8 @@ class NFTItemMetadataDraftCreatedEvent extends BaseEvent {
     }
     if (status) {
       const validStatuses = [
-        NFT_ITEM_METADATA_DRAFT_STATUS.IN_PROGRESS,
-        NFT_ITEM_METADATA_DRAFT_STATUS.PROPOSED
+        NftItemMetadataDraftStatus.IN_PROGRESS,
+        NftItemMetadataDraftStatus.PROPOSED
       ];
       assert(validStatuses.includes(status), "'status' is invalid");
     }

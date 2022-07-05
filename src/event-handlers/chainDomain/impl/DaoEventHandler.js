@@ -1,4 +1,4 @@
-import { DOMAIN_EVENT } from '@deip/constants';
+import { DOMAIN_EVENT } from '@casimir/platform-core';
 import { TeamService, UserService } from '../../../services';
 import ChainDomainEventHandler from '../../base/ChainDomainEventHandler';
 

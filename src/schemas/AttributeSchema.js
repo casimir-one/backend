@@ -1,6 +1,5 @@
 import mongoose from 'mongoose';
-import { ATTR_SCOPES, ATTR_TYPES } from '@deip/constants';
-
+import { ATTRIBUTE_TYPES, AttributeScope } from '@casimir/platform-core'
 
 const Schema = mongoose.Schema;
 
@@ -24,7 +23,7 @@ const AttributeSchema = new Schema({
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: String,
-    enum: [...Object.values(ATTR_TYPES)],
+    enum: ATTRIBUTE_TYPES,
     required: true
   },
   "isFilterable": { type: Boolean, default: false },
@@ -41,7 +40,7 @@ const AttributeSchema = new Schema({
   "blockchainFieldMeta": BlockchainFieldMeta,
   "scope": {
     type: String,
-    enum: [...Object.values(ATTR_SCOPES)],
+    enum: Object.values(AttributeScope),
     required: true
   },
   "isGlobalScope": { type: Boolean, default: false }

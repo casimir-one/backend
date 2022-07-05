@@ -6,7 +6,7 @@ import {
     TransferFTCmd,
     TransferNFTCmd
 } from '@deip/commands';
-import { APP_CMD, APP_EVENT } from '@deip/constants';
+import { APP_CMD, APP_EVENT } from '@casimir/platform-core';
 import { logWarn } from '../utils/log';
 import BaseEvent from './base/BaseEvent';
 import {

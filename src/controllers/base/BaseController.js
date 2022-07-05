@@ -2,7 +2,7 @@ import { JsonDataMsg, MultFormDataMsg } from '@deip/messages';
 import config from '../../config';
 import { ChainService } from '@deip/chain-service';
 import { BadRequestError } from './../../errors';
-import { APP_CMD } from '@deip/constants';
+import { APP_CMD } from '@casimir/platform-core';
 
 
 class MessageHandler {

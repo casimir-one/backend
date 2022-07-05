@@ -1,4 +1,4 @@
-import { APP_EVENT, DOMAIN_EVENT } from '@deip/constants';
+import { APP_EVENT, DOMAIN_EVENT } from '@casimir/platform-core';
 
 class BaseEvent {
 

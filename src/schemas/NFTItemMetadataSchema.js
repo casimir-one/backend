@@ -1,7 +1,7 @@
 
 import mongoose from 'mongoose';
 import AttributeValueSchema from './AttributeValueSchema';
-import { NFT_ITEM_METADATA_FORMAT } from '@deip/constants';
+import { NFT_ITEM_METADATA_FORMAT } from '@casimir/platform-core';
 
 const Schema = mongoose.Schema;
 
