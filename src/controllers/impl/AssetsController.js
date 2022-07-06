@@ -532,7 +532,7 @@ class AssetsController extends BaseController {
               throw new ConflictError(`Nft item metadata with "${draft.hash}" hash already exist`);
             }
 
-            const moderationRequired = ctx.state.portal.settings.moderation.nftItemMetadataDraftModerationRequired;
+            const moderationRequired = ctx.state.portal.profile.settings.moderation.nftItemMetadataDraftModerationRequired;
             if (
               moderationRequired &&
               draft.status != NftItemMetadataDraftStatus.APPROVED
