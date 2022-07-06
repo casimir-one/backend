@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { ATTRIBUTE_TYPES, AttributeScope } from '@casimir/platform-core'
+import { AttributeScope } from '@casimir/platform-core'
 
 const Schema = mongoose.Schema;
 
@@ -23,7 +23,6 @@ const AttributeSchema = new Schema({
   "isSystem": { type: Boolean, default: false },
   "type": {
     type: String,
-    enum: ATTRIBUTE_TYPES,
     required: true
   },
   "isFilterable": { type: Boolean, default: false },
