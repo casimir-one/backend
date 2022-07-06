@@ -38,12 +38,14 @@ class DocumentTemplatesController extends BaseController {
   createDocumentTemplate = this.command({
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DOCUMENT_TEMPLATE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const createDocumentTemplateSettings = {
+            cmdNum: APP_CMD.CREATE_DOCUMENT_TEMPLATE
+          };
+
+          const validCmdsOrder = [createDocumentTemplateSettings];
+
+          await this.validateCmds(appCmds, validCmdsOrder);         
         };
 
         const msg = ctx.state.msg;
@@ -61,20 +63,26 @@ class DocumentTemplatesController extends BaseController {
   updateDocumentTemplate = this.command({
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_DOCUMENT_TEMPLATE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { account } = appCmd.getCmdPayload();
-          const username = ctx.state.user.username;
-          if (account !== username) {
-            const isMember = await teamDtoService.authorizeTeamAccount(account, username);
-            if (!isMember) {
-              throw new ForbiddenError(`You have no permission to edit this document`);
+          const validateUpdateDocumentTemplate = async (updateDocumentTemplateCmd, cmdStack) => {
+            const { account } = updateDocumentTemplateCmd.getCmdPayload();
+            const username = ctx.state.user.username;
+            if (account !== username) {
+              const isMember = await teamDtoService.authorizeTeamAccount(account, username);
+              if (!isMember) {
+                throw new ForbiddenError(`You have no permission to edit this document`);
+              }
             }
-          }
+          };
+
+          const updateDocumentTemplateSettings = {
+            cmdNum: APP_CMD.UPDATE_DOCUMENT_TEMPLATE,
+            validate: validateUpdateDocumentTemplate
+          };
+          
+          const validCmdsOrder = [updateDocumentTemplateSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -92,25 +100,31 @@ class DocumentTemplatesController extends BaseController {
   deleteDocumentTemplate = this.command({
     h: async (ctx) => {
       try {
-
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.DELETE_DOCUMENT_TEMPLATE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
-          const { documentTemplateId } = appCmd.getCmdPayload();
-          const documentTemplate = await documentTemplateDtoService.getDocumentTemplate(documentTemplateId);
-          if (!documentTemplate) {
-            throw new ConflictError(`DocumentTemplate ${documentTemplateId} is already deleted`);
-          }
-          const username = ctx.state.user.username;
-          const { account } = documentTemplate;
-          if (account !== username) {
-            const isMember = await teamDtoService.authorizeTeamAccount(account, username);
-            if (!isMember) {
-              throw new ForbiddenError(`You have no permission to delete this document`);
+          const validateDeleteDocumentTemplate = async (deleteDocumentTemplateCmd, cmdStack) => {
+            const { documentTemplateId } = deleteDocumentTemplateCmd.getCmdPayload();
+            const documentTemplate = await documentTemplateDtoService.getDocumentTemplate(documentTemplateId);
+            if (!documentTemplate) {
+              throw new ConflictError(`DocumentTemplate ${documentTemplateId} is already deleted`);
             }
-          }
+            const username = ctx.state.user.username;
+            const { account } = documentTemplate;
+            if (account !== username) {
+              const isMember = await teamDtoService.authorizeTeamAccount(account, username);
+              if (!isMember) {
+                throw new ForbiddenError(`You have no permission to delete this document`);
+              }
+            }
+          };
+
+          const deleteDocumentTemplateSettings = {
+            cmdNum: APP_CMD.DELETE_DOCUMENT_TEMPLATE,
+            validate: validateDeleteDocumentTemplate
+          };
+          
+          const validCmdsOrder = [deleteDocumentTemplateSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;

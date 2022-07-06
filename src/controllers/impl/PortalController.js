@@ -194,10 +194,13 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_PORTAL_SETTINGS);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const updatePortalSettings = {
+            cmdNum: APP_CMD.UPDATE_PORTAL_SETTINGS
+          };
+          
+          const validCmdsOrder = [updatePortalSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
@@ -215,10 +218,13 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_LAYOUT_SETTINGS);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const updatePortalLayoutSettings = {
+            cmdNum: APP_CMD.UPDATE_LAYOUT_SETTINGS
+          };
+          
+          const validCmdsOrder = [updatePortalLayoutSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
@@ -236,10 +242,13 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_LAYOUT);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const updatePortalLayoutsSettings = {
+            cmdNum: APP_CMD.UPDATE_LAYOUT
+          };
+          
+          const validCmdsOrder = [updatePortalLayoutsSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
@@ -257,10 +266,13 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_ATTRIBUTE_SETTINGS);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const updatePortalAttributeSettings = {
+            cmdNum: APP_CMD.UPDATE_ATTRIBUTE_SETTINGS
+          };
+          
+          const validCmdsOrder = [updatePortalAttributeSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
@@ -278,10 +290,13 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_PORTAL_PROFILE);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const updatePortalProfileSettings = {
+            cmdNum: APP_CMD.UPDATE_PORTAL_PROFILE
+          };
+          
+          const validCmdsOrder = [updatePortalProfileSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
@@ -299,10 +314,13 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.UPDATE_NETWORK_SETTINGS);
-          if (!appCmd) {
-            throw new BadRequestError(`This endpoint accepts protocol cmd`);
-          }
+          const updatePortalNetworkSettings = {
+            cmdNum: APP_CMD.UPDATE_NETWORK_SETTINGS
+          };
+          
+          const validCmdsOrder = [updatePortalNetworkSettings];
+          
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
         
         const msg = ctx.state.msg;
