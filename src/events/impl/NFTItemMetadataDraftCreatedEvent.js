@@ -18,11 +18,8 @@ class NFTItemMetadataDraftCreatedEvent extends BaseEvent {
     assert(!!nftCollectionId, "'nftCollectionId' is required");
     assert(!!entityId, "'entityId' is required");
     assert(!!nftItemId, "'nftItemId' is required");
-    assert(!!formatType, "'formatType' is required");
     assert(!!owner, "'owner' is required");
-    if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
-      assert(!!jsonData, `'jsonData' is required for ${formatType} formatType`);
-    }
+    
     if (status) {
       const validStatuses = [
         NftItemMetadataDraftStatus.IN_PROGRESS,
