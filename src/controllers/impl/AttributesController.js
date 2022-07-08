@@ -180,6 +180,14 @@ class AttributesController extends BaseController {
               throw new NotFoundError(`${filepath} is not found`);
             }
             break;
+          case AttributeScope.NFT_ITEM:
+            const { nftCollectionId, nftItemId } = JSON.parse(entityId);
+            filepath = attributeId ? FileStorage.getNFTItemMetadataAttributeFilePath(nftCollectionId, nftItemId, attributeId, filename) : FileStorage.getNFTItemMetadataFilePath(nftCollectionId, nftItemId, filename);
+            const nftItemFileExists = await FileStorage.exists(filepath);
+            if (!nftItemFileExists) {
+              throw new NotFoundError(`${filepath} is not found`);
+            }
+            break;
           case AttributeScope.TEAM:
             filepath = isEntityRootFolder ? FileStorage.getTeamFilePath(entityId, filename) : FileStorage.getTeamAttributeFilePath(entityId, attributeId, filename);
             if (imageQuery) {

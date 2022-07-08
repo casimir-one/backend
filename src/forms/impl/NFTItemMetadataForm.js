@@ -5,39 +5,56 @@ import mongoose from 'mongoose';
 import { v4 as uuidv4 } from 'uuid';
 
 const NFT_COLLECTION_ID = "nft-collection-id";
-const DRAFT_HEADER = "entity-id";
+const NFT_ITEM_ID = "nft-item-id";
+const ATTRIBUTE_ID_SPLITTER = '-';
 
-const destinationHandler = (fileStorage, sessionId) => function () {
+const destinationHandler = (fileStorage) => function () {
   return async function (req, file, callback) {
     const nftCollectionId = req.headers[NFT_COLLECTION_ID];
-    const draftId = req.headers[DRAFT_HEADER];
+    const nftItemId = req.headers[NFT_ITEM_ID];
+    let folderPath = "";
+    let filePath = "";
 
-    let nftCollectionFilesStorage = '';
+    const parts = file.originalname.split(ATTRIBUTE_ID_SPLITTER);
+    const attrId = parts[0];
 
-    if (draftId && mongoose.Types.ObjectId.isValid(draftId)) {
-      nftCollectionFilesStorage = fileStorage.getNFTItemMetadataPackageDirPath(nftCollectionId, draftId);
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(attrId)) {
+      folderPath = fileStorage.getNFTItemMetadataAttributeDirPath(nftCollectionId, nftItemId, attrId);
+      const name = file.originalname.substring(`${attrId}${ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+      filePath = fileStorage.getNFTItemMetadataAttributeFilePath(nftCollectionId, nftItemId, attrId, name);
     } else {
-      nftCollectionFilesStorage = fileStorage.getNFTItemMetadataPackageTempDirPath(nftCollectionId, sessionId);
+      folderPath = fileStorage.getNFTItemMetadataDirPath(nftCollectionId);
+      filePath = fileStorage.getNFTItemMetadataFilePath(file.originalname);
     }
-    const exists = await fileStorage.exists(nftCollectionFilesStorage);
-    if (exists) {
-      const filePath = fileStorage.getNFTItemMetadataPackageFilePath(nftCollectionId, draftId, file.originalname);
+
+    const folderExists = await fileStorage.exists(folderPath);
+    if (folderExists) {
       const fileExists = await fileStorage.exists(filePath);
       if (fileExists) {
         await fileStorage.delete(filePath);
       }
     } else {
-      await fileStorage.mkdir(nftCollectionFilesStorage);
+      await fileStorage.mkdir(folderPath);
     }
 
-    callback(null, nftCollectionFilesStorage);
+    callback(null, folderPath);
   };
 }
 
 
 const filenameHandler = () => function () {
   return function (req, file, callback) {
-    callback(null, file.originalname);
+    let name = "";
+    const parts = file.originalname.split(ATTRIBUTE_ID_SPLITTER);
+    const attrId = parts[0];
+
+    if (parts.length > 1 && mongoose.Types.ObjectId.isValid(attrId)) {
+      name = file.originalname.substring(`${attrId}${ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+    } else {
+      name = file.originalname;
+    }
+
+    callback(null, name);
   }
 }
 
