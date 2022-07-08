@@ -19,14 +19,13 @@ const NFTItemMetadataSchema = new Schema({
   "ownerAddress": { type: String, required: false },
   "ownedByTeam": { type: Boolean, default: false },
   "folder": { type: String, required: true },
-  "title": { type: String, required: true },
+  "title": { type: String },
   "hash": { type: String, index: true },
   "algo": { type: String },
   "attributes": [AttributeValueSchema],
   "formatType": {
     type: Number,
     enum: [...Object.values(NFT_ITEM_METADATA_FORMAT)],
-    required: true
   },
   "packageFiles": [{
     "_id": false,
