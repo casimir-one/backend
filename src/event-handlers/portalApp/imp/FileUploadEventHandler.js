@@ -43,28 +43,32 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async
 
   const { nftCollectionId, entityId, formatType, uploadedFiles } = event.getEventPayload();
 
-  if (formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE && uploadedFiles.length > 0) {
-    const _id = mongoose.Types.ObjectId(entityId);
-    const tempDestinationPath = uploadedFiles[0].destination;
-    const nftItemMetadataPackageDirPath = FileStorage.getNFTItemMetadataPackageDirPath(nftCollectionId, _id);
+  // temp solution
 
-    await FileStorage.rename(tempDestinationPath, nftItemMetadataPackageDirPath);
-  }
+  // if (formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE && uploadedFiles.length > 0) {
+  //   const _id = mongoose.Types.ObjectId(entityId);
+  //   const tempDestinationPath = uploadedFiles[0].destination;
+  //   const nftItemMetadataDirPath = FileStorage.getNFTItemMetadataDirPath(nftCollectionId, _id);
+
+  //   await FileStorage.rename(tempDestinationPath, nftItemMetadataDirPath);
+  // }
 });
 
 fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (event) => {
 
   const { _id: draftId, uploadedFiles } = event.getEventPayload();
 
-  const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
+  // temp solution
+  
+  // const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
 
-  if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-    const filesPathToDelete = draft.packageFiles
-      .filter(({ filename }) => !uploadedFiles.some(({ originalname }) => originalname === filename))
-      .map(({ filename }) => FileStorage.getNFTItemMetadataPackageFilePath(draft.nftCollectionId, draft.folder, filename));
+  // if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
+  //   const filesPathToDelete = draft.packageFiles
+  //     .filter(({ filename }) => !uploadedFiles.some(({ originalname }) => originalname === filename))
+  //     .map(({ filename }) => FileStorage.getNFTItemMetadataFilePath(draft.nftCollectionId, draft.folder, filename));
 
-    await Promise.all(filesPathToDelete.map(filePath => FileStorage.delete(filePath)));
-  }
+  //   await Promise.all(filesPathToDelete.map(filePath => FileStorage.delete(filePath)));
+  // }
 });
 
 fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async (event) => {
@@ -73,7 +77,7 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async
   const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(_id)
 
   if (draft.type === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-    const packagePath = FileStorage.getNFTItemMetadataPackageDirPath(draft.nftCollectionId, draft.hash);
+    const packagePath = FileStorage.getNFTItemMetadataDirPath(draft.nftCollectionId, draft.hash);
     await FileStorage.rmdir(packagePath);
   }
 });

@@ -141,20 +141,25 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     attributes
   }
 
-  if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
-    const packageHash = genSha256Hash(JSON.stringify(jsonData));
-    draftData.jsonData = jsonData;
-    draftData.hash = packageHash;
-    draftData.packageFiles = [];
-  } else {
-    const nftItemMetadataPackageDirPath = FileStorage.getNFTItemMetadataPackageDirPath(nftCollectionId, _id);
-    const hashObj = await FileStorage.calculateDirHash(nftItemMetadataPackageDirPath, options);
-    const hashes = hashObj.children.map(f => f.hash);
-    hashes.sort();
-    const packageHash = genSha256Hash(hashes.join(","));
-    draftData.hash = packageHash;
-    draftData.packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
-  }
+  // temp solution
+
+  // if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
+  //   const packageHash = genSha256Hash(JSON.stringify(jsonData));
+  //   draftData.jsonData = jsonData;
+  //   draftData.hash = packageHash;
+  //   draftData.packageFiles = [];
+  // } else {
+  //   const nftItemMetadataDirPath = FileStorage.getNFTItemMetadataDirPath(nftCollectionId, nftItemId);
+  //   const hashObj = await FileStorage.calculateDirHash(nftItemMetadataDirPath, options);
+  //   const hashes = hashObj.children.map(f => f.hash);
+  //   hashes.sort();
+  //   const packageHash = genSha256Hash(hashes.join(","));
+  //   draftData.hash = packageHash;
+  //   draftData.packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
+  // }
+
+  draftData.hash = genSha256Hash(JSON.stringify(attributes));
+  draftData.packageFiles = [];
 
   await nftItemMetadataDraftService.createNFTItemMetadataDraft(draftData);
   await nftCollectionMetadataService.increaseNftCollectionNextItemId(nftCollectionId);
@@ -174,19 +179,25 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (eve
     attributes,
   } = event.getEventPayload();
 
-  const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
   let packageHash = '';
   let packageFiles = [];
-  if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
-    packageHash = genSha256Hash(JSON.stringify(jsonData));
-  } else if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-    const nftItemMetadataPackageDirPath = FileStorage.getNFTCollectionArchiveDirPath(draft.nftCollectionId, draftId);
-    const hashObj = await FileStorage.calculateDirHash(nftItemMetadataPackageDirPath, options);
-    const hashes = hashObj.children.map(f => f.hash);
-    hashes.sort();
-    packageHash = genSha256Hash(hashes.join(","));
-    packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
-  }
+  
+  //temp solution
+
+  // const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
+
+  // if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
+  //   packageHash = genSha256Hash(JSON.stringify(jsonData));
+  // } else if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
+  //   const nftItemMetadataDirPath = FileStorage.getNFTCollectionArchiveDirPath(draft.nftCollectionId, draftId);
+  //   const hashObj = await FileStorage.calculateDirHash(nftItemMetadataDirPath, options);
+  //   const hashes = hashObj.children.map(f => f.hash);
+  //   hashes.sort();
+  //   packageHash = genSha256Hash(hashes.join(","));
+  //   packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
+  // }
+
+  packageHash = genSha256Hash(JSON.stringify(attributes));
 
   await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
     _id: draftId,
