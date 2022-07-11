@@ -1,9 +1,8 @@
-import { ProtocolChain, USER_PROFILE_STATUS } from '@casimir/platform-core';
+import { USER_PROFILE_STATUS } from '@casimir/platform-core';
 import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
 import config from './../../../config';
 import { ChainService } from '@deip/chain-service';
-import { genRipemd160Hash } from '@deip/toolbox';
 import TeamService from '../write/TeamService';
 
 
@@ -19,33 +18,11 @@ class UserDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    // temp for substrate migration
-    const isValidChainId = (value) => { 
-      return config.PROTOCOL === ProtocolChain.GRAPHENE || (value.length === 40 && /^[0-9a-fA-F]+$/.test(value));
-    };
-    const chainAccounts = await chainRpc.getAccountsAsync(users.map(user => isValidChainId(user._id) ? user._id : genRipemd160Hash(user.email)));
     const portalProfile = await this.getPortalInstance();
     const chainBalances = await Promise.all(users.map((user) => chainRpc.getFungibleTokenBalancesByOwnerAsync(user._id)));
 
     return users.map((user) => {
-
-      const chainAccount = chainAccounts.find((chainAccount) => chainAccount && chainAccount.daoId == user._id);
-
-      const balances = [];
-      let pubKey;
-
-      if (chainAccount) {
-
-        const userBalances = chainBalances.flat().filter((chainBalance) => chainBalances && chainBalance.account === chainAccount.daoId);
-        balances.push(...userBalances);
-
-        pubKey = chainAccount.authority.owner.auths
-          .filter((auth) => !!auth.pubKey)
-          .map((auth) => auth.pubKey)[0];
-
-      } else {
-        console.warn(`User account with ID '${user._id}' is not found in the Chain`);
-      }
+      const userBalances = chainBalances.flat().filter((chainBalance) => chainBalances && chainBalance.account === user._id);
 
       const appModules = portalProfile.settings.modules;
       const roleInfo = portalProfile.settings.roles.find((appRole) => user.roles.some((userRole) => appRole.role == userRole.role));
@@ -60,28 +37,17 @@ class UserDtoService extends BaseService {
         portalId: user.portalId,
         email: user.email,
         attributes: user.attributes,
-        balances: balances,
+        balances: userBalances,
         modules: modules,
         roles: roles,
-        pubKey: pubKey || null,
-        signUpPubKey: user.signUpPubKey || null,
+        pubKey: user.signUpPubKey || null,
         status: user.status,
         teams: user.teams,
         createdAt: user.createdAt || user.created_at,
         updatedAt: user.updatedAt || user.updated_at,
-        metadataHash: chainAccount ? chainAccount.metadata : null,
-
 
         // @deprecated
-        username: user._id,
-        entityId: user._id,
-        account: chainAccount ? { ...chainAccount, balances } : { balances },
-        profile: {
-          ...user,
-          modules,
-          roles
-        },
-        created: user.createdAt
+        username: user._id
       };
     });
   }

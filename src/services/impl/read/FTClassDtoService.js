@@ -11,17 +11,7 @@ class FTClassDtoService extends BaseService {
   }
 
   async mapFTClassess(ftClasses) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-    const chainFTClasses = await Promise.all(ftClasses.map(a => chainRpc.getFungibleTokenBySymbolAsync(a.symbol)));
-    
     return ftClasses.map((ftClass) => {
-
-      const chainFTClass = chainFTClasses.find((chainFTClass) => chainFTClass && chainFTClass.symbol == ftClass.symbol);
-      if (!chainFTClass) {
-        console.warn(`Fungible token with symbol '${ftClass.symbol}' is not found in the Chain`);
-      }
-
       return { 
         _id: ftClass._id,
         portalId: ftClass.portalId,
@@ -30,14 +20,7 @@ class FTClassDtoService extends BaseService {
         issuer: ftClass.issuer,
         description: ftClass.description,
         metadata: { ...ftClass.metadata },
-        type: ftClass.type,
-        currentSupply: chainFTClass ? chainFTClass.currentSupply : null,
-        
-        // @deprecated
-        settings: { ...ftClass.metadata },
-        max_supply: chainFTClass ? chainFTClass.currentSupply : null,
-        current_supply: chainFTClass ? chainFTClass.currentSupply : null,
-        string_symbol: chainFTClass ? chainFTClass.symbol : null
+        type: ftClass.type
       }
 
     });

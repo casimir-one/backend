@@ -354,18 +354,8 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const nftItems = await nftItemDtoService.lookupNFTItems();
-        const nftItemsIds = nftItems.reduce((acc, nftItem) => {
-          if (!acc.some(nftCollectionId => nftCollectionId == nftItem.nftCollectionId)) {
-            acc.push(nftItem.nftCollectionId);
-          }
-          return acc;
-        }, []);
 
-        const nftCollections = await nftCollectionDtoService.getNFTCollections(nftItemsIds);
-        const publicNftCollectionsIds = nftCollections.filter(r => !r.isPrivate).map(r => r._id);
-        const result = nftItems.filter(nftItem => publicNftCollectionsIds.some(id => id == nftItem.nftCollectionId))
-
-        ctx.successRes(result);
+        ctx.successRes(nftItems);
       } catch (err) {
         ctx.errorRes(err);
       }

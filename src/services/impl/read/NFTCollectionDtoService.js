@@ -1,7 +1,5 @@
 import BaseService from '../../base/BaseService';
 import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
-import config from '../../../config';
-import { ChainService } from '@deip/chain-service';
 import AttributeDtoService from './AttributeDtoService';
 import { AttributeScope } from '@casimir/platform-core';
 
@@ -14,9 +12,6 @@ class NFTCollectionDtoService extends BaseService {
   }
 
   async mapNFTCollections(nftCollections, filterObj) {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-    const chainNftCollections = await chainRpc.getNonFungibleTokenClassesAsync();
     const nftCollectionsAttributes = await attributeDtoService.getAttributesByScope(AttributeScope.NFT_COLLECTION);
 
     const filter = {
@@ -27,15 +22,8 @@ class NFTCollectionDtoService extends BaseService {
     }
 
     return nftCollections.map((nftCollection) => {
-      let chainNftCollection = chainNftCollections.find((chainNftCollection) => chainNftCollection && chainNftCollection.nftCollectionId == nftCollection._id);
-      if (!chainNftCollection) {
-        console.warn(`NftCollection with ID '${nftCollection._id}' is not found in the Chain`);
-        chainNftCollection = {};
-      }
-
       return {
-        _id: chainNftCollection.nftCollectionId,
-        nftItemsCount: chainNftCollection.nftItemsCount,
+        _id: nftCollection._id,
         nextNftItemId: nftCollection.nextNftItemId,
         issuer: nftCollection.issuer,
         issuedByTeam: nftCollection.issuedByTeam,
