@@ -13,42 +13,22 @@ class TeamDtoService extends BaseService {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const chainAccounts = await chainRpc.getAccountsAsync(teams.map(team => team._id));
     const chainBalances = await Promise.all(teams.map(team => chainRpc.getFungibleTokenBalancesByOwnerAsync(team._id)));
 
     return teams.map((team) => {
-      const chainAccount = chainAccounts.find((chainAccount) => chainAccount && chainAccount.daoId == team._id);
-
-      const balances = [];
-      if (chainAccount) {
-        const teamBalances = chainBalances.flat().filter((chainBalance) => chainBalance && chainBalance.account === team._id);
-        balances.push(...teamBalances);
-      } else {
-        console.warn(`Team account with ID '${team._id}' is not found in the Chain`);
-      }
+      const teamBalances = chainBalances.flat().filter((chainBalance) => chainBalance && chainBalance.account === team._id);
 
       return {
         _id: team._id,
         portalId: team.portalId,
         attributes: team.attributes,
         creator: team.creator,
-        balances: balances,
+        balances: teamBalances,
         members: team.members,
         name: team.name || "",
         description: team.description || "",
         createdAt: team.createdAt || team.created_at,
-        updatedAt: team.updatedAt || team.updated_at,
-        metadataHash: chainAccount ? chainAccount.metadata : null,
-
-
-        // @deprecated
-        // external_id: team._id,
-        entityId: team._id,
-        teamRef: team,
-        is_dao: true,
-        is_personal: false,
-        account: chainAccount ? { ...chainAccount, balances } : { balances },
-        created: team.createdAt
+        updatedAt: team.updatedAt || team.updated_at
       }
     });
   }

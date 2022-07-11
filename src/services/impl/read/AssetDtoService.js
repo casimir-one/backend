@@ -1,7 +1,5 @@
 import BaseService from './../../base/BaseService';
 import AssetDepositRequestSchema from '../../../schemas/AssetDepositRequestSchema';
-import config from './../../../config';
-import { ChainService } from '@deip/chain-service';
 import AssetSchema from './../../../schemas/AssetSchema';
 import { AssetType } from '@casimir/platform-core';
 

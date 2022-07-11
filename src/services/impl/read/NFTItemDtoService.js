@@ -11,7 +11,6 @@ class NFTItemDtoService extends BaseService {
   }
 
   async mapNFTItems(nftItemsMetadatas) {
-
     return nftItemsMetadatas.map((nftItemMetadata) => ({
       _id: nftItemMetadata._id,
       nftItemId: nftItemMetadata._id.nftItemId,

@@ -4796,9 +4796,6 @@
               "precision": {
                 "type": "number"
               },
-              "currentSupply": {
-                "type": "string"
-              },
               "id": {
                 "type": "string"
               },
@@ -5051,9 +5048,6 @@
         },
         "type": {
           "type": "number"
-        },
-        "currentSupply": {
-          "type": "string"
         }
       }
     },
