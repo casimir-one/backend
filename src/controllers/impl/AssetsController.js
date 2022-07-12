@@ -1,11 +1,11 @@
 import { ChainService } from '@deip/chain-service';
 import { AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
-import { 
+import {
   APP_CMD,
   APP_PROPOSAL,
   NftItemMetadataDraftStatus,
   NFT_ITEM_METADATA_FORMAT
- } from '@casimir/platform-core';
+} from '@casimir/platform-core';
 import slug from 'limax';
 import mongoose from 'mongoose';
 import qs from 'qs';
@@ -591,7 +591,7 @@ class AssetsController extends BaseController {
 
           const validCmdsOrder = [createNFTItemMetadataDraftSettings];
 
-          await this.validateCmds(appCmds, validCmdsOrder);         
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -660,7 +660,7 @@ class AssetsController extends BaseController {
 
           const validCmdsOrder = [updateNFTItemMetadataDraftSettings];
 
-          await this.validateCmds(appCmds, validCmdsOrder);         
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -718,7 +718,7 @@ class AssetsController extends BaseController {
 
           const validCmdsOrder = [deleteNFTItemMetadataDraftSettings];
 
-          await this.validateCmds(appCmds, validCmdsOrder);         
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -963,7 +963,7 @@ class AssetsController extends BaseController {
             [createProposalSettings, acceptProposalSettings]
           ];
 
-          await this.validateCmds(appCmds, validCmdsOrders);         
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
 
         const msg = ctx.state.msg;
@@ -987,7 +987,7 @@ class AssetsController extends BaseController {
         const chainService = await ChainService.getInstanceAsync(config);
         const chainNodeClient = chainService.getChainNodeClient();
         const chainTxBuilder = chainService.getChainTxBuilder();
-  
+
         const validate = async (appCmds) => {
           const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
             const { entityId } = acceptProposalCmd.getCmdPayload();
@@ -1026,9 +1026,9 @@ class AssetsController extends BaseController {
             [createProposalSettings, acceptProposal2Settings]
           ];
 
-          await this.validateCmds(appCmds, validCmdsOrders);         
+          await this.validateCmds(appCmds, validCmdsOrders);
         };
-        
+
         //TODO: validate proposal inner cmds
 
         const msg = ctx.state.msg;
@@ -1076,7 +1076,7 @@ class AssetsController extends BaseController {
 
           const validCmdsOrder = [createFTSettings];
 
-          await this.validateCmds(appCmds, validCmdsOrder);         
+          await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
@@ -1112,9 +1112,9 @@ class AssetsController extends BaseController {
             cmdNum: APP_CMD.CREATE_NFT_COLLECTION,
             validate: validateCreateNFTCollection
           };
-          
+
           const validCmdsOrder = [createNFTCollectionSettings];
-          
+
           await this.validateCmds(appCmds, validCmdsOrder);
         };
 
@@ -1153,9 +1153,9 @@ class AssetsController extends BaseController {
             cmdNum: APP_CMD.CREATE_NFT_COLLECTION_METADATA,
             validate: validateCreateNFTCollectionMetadata
           };
-          
+
           const validCmdsOrder = [createNFTCollectionMetadataSettings];
-          
+
           await this.validateCmds(appCmds, validCmdsOrder);
         };
 
@@ -1199,9 +1199,9 @@ class AssetsController extends BaseController {
             cmdNum: APP_CMD.UPDATE_NFT_COLLECTION_METADATA,
             validate: validateUpdateNFTCollectionMetadata
           };
-          
+
           const validCmdsOrder = [updateNFTCollectionMetadataSettings];
-          
+
           await this.validateCmds(appCmds, validCmdsOrder);
         };
 
@@ -1226,9 +1226,9 @@ class AssetsController extends BaseController {
           const issueFTSettings = {
             cmdNum: APP_CMD.ISSUE_FT
           };
-          
+
           const validCmdsOrder = [issueFTSettings];
-          
+
           await this.validateCmds(appCmds, validCmdsOrder);
         };
 
@@ -1287,9 +1287,9 @@ class AssetsController extends BaseController {
             cmdNum: APP_CMD.CREATE_NFT_ITEM,
             validate: validateCreateNFTItem
           };
-          
+
           const validCmdsOrder = [createNFTItemSettings];
-          
+
           await this.validateCmds(appCmds, validCmdsOrder);
         };
 
@@ -1399,9 +1399,13 @@ class AssetsController extends BaseController {
           // array of orders if can be a few valid orders
           const validCmdsOrders = [
             [updateNFTItemMetadataDraftStatusSettings],
-            [updateNFTItemMetadataDraftModerationMsgSettings]
+            [updateNFTItemMetadataDraftModerationMsgSettings],
+            [
+              updateNFTItemMetadataDraftStatusSettings,
+              updateNFTItemMetadataDraftModerationMsgSettings
+            ],
           ];
-          
+
           await this.validateCmds(appCmds, validCmdsOrders);
         };
 
@@ -1419,9 +1423,9 @@ class AssetsController extends BaseController {
           const { _id: draftId } = changeStatusCmd.getCmdPayload();
 
           const nftItemDraft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
-
           // findOne because mapProposal is not working correctly
           const lazySellProposal = await proposalDtoService.findOne({ _id: nftItemDraft.lazySellProposalId });
+          if (!lazySellProposal) throw new Error("Cannot find lazy sell proposal to decline");
           const { batchWeight } = lazySellProposal;
           const { daoId: hotWalletDaoId, privKey: hotWalletPrivKey } = config.TENANT_HOT_WALLET;
 
