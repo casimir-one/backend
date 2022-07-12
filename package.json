@@ -15,11 +15,11 @@
     "dev": "nodemon -w src --exec \"npm run start\""
   },
   "dependencies": {
-    "@casimir/platform-core": "1.389.1",
-    "@deip/chain-service": "1.389.1",
-    "@deip/commands": "1.389.1",
+    "@casimir/platform-core": "1.389.2",
+    "@deip/chain-service": "1.389.2",
+    "@deip/commands": "1.389.2",
     "@deip/lib-crypto": "1.375.1",
-    "@deip/messages": "1.389.1",
+    "@deip/messages": "1.389.2",
     "@deip/toolbox": "1.388.0",
     "@koa/cors": "^2.2.1",
     "axios": "^0.15.3",
