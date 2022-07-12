@@ -25,6 +25,7 @@ class TeamDtoService extends BaseService {
         creator: team.creator,
         balances: teamBalances,
         members: team.members,
+        address: team.address,
         name: team.name || "",
         description: team.description || "",
         createdAt: team.createdAt || team.created_at,
