@@ -43,6 +43,7 @@ class UserDtoService extends BaseService {
         pubKey: user.signUpPubKey || null,
         status: user.status,
         teams: user.teams,
+        address: user.address,
         createdAt: user.createdAt || user.created_at,
         updatedAt: user.updatedAt || user.updated_at,
 
@@ -123,7 +124,7 @@ class UserDtoService extends BaseService {
     return result;
   }
 
-  
+
   async getUsersListing(status) {
     const users = await this.findMany({ status: status ? status : USER_PROFILE_STATUS.APPROVED });
     if (!users.length) return [];
