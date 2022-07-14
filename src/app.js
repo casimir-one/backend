@@ -41,7 +41,7 @@ app.use(require('./routes/api.js').public.routes());
 app.use(require('./routes/portal.js').public.routes());
 app.use(require('./routes/webhook.js').public.routes());
 if (config.ENVIRONMENT !== 'production') {
-  app.use(require('./routes/swagger.js').public.routes()); 
+  app.use(require('./routes/swagger.js').public.routes());
 }
 
 // user auth layer

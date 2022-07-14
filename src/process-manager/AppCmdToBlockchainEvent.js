@@ -6,11 +6,11 @@ const { toAddress, toHexFormat } = SubstrateChainUtils;
 
 const checkMatch = (obj) => !Object.values(obj).includes(false);
 
-const APP_CMD_TO_BC_EVENT_PROCESSOR = {
+export const APP_CMD_TO_BC_EVENT_PROCESSOR = {
 
   [APP_CMD.CREATE_DAO]: [{
     eventNum: DOMAIN_EVENT.DAO_CREATE,
-    matchF: ({ txInfo, appCmd, event }) => {
+    matchF: ({ txInfo, appCmd, event, chainService }) => {
       const { entityId: cmdDaoId } = appCmd.getCmdPayload();
       const { dao: { id: eventDaoIdBuffer } } = event.getEventPayload();
       return checkMatch({
@@ -101,7 +101,29 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
         issuer: toAddress(cmdIssuer, registry) == eventIssuerAddress,
       })
     }
-  }],
+  }, {
+    eventNum: DOMAIN_EVENT.NFT_TEAM_CHANGED,
+    matchF: ({ txInfo, appCmd, event, chainService }) => {
+      const { entityId: cmdClassId, issuer: cmdIssuer } = appCmd.getCmdPayload();
+      const {
+        class: eventClassId,
+        issuer: eventIssuerAddress,
+        admin: eventAdminAddress,
+        freezer: eventFreezerAddress
+      } = event.getEventPayload();
+
+      const { registry } = chainService.getChainNodeClient();
+
+
+      return checkMatch({
+        classId: cmdClassId == eventClassId,
+        issuer: toAddress(cmdIssuer, registry) == eventIssuerAddress,
+        admin: toAddress(cmdIssuer, registry) == eventAdminAddress,
+        freezer: toAddress(cmdIssuer, registry) == eventFreezerAddress,
+      })
+    }
+  }
+  ],
 
   [APP_CMD.CREATE_PROPOSAL]: [{
     eventNum: DOMAIN_EVENT.PROPOSAL_CREATED,
@@ -169,5 +191,3 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
     }
   ]
 }
-
-module.exports = APP_CMD_TO_BC_EVENT_PROCESSOR;

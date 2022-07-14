@@ -45,6 +45,7 @@ mailEventHandler.register(APP_EVENT.REGISTRATION_CODE_SENDED_BY_EMAIL, async (ev
 
 mailEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
   const { confirmationCode, email, isTeamAccount } = event.getEventPayload();
+
   if (config.NEED_CONFIRM_REGISTRATION && !isTeamAccount) {
     await verificationTokenService.deleteTokenByTokenHash(genSha256Hash(confirmationCode))
   }

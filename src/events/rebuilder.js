@@ -46,9 +46,10 @@ const buildCmdProposedCmds = (cmdPayload) => {
 
 const buildEvent = (ProxyClass, updatePayloadF) => (payload) => {
     const _payload = updatePayloadF ? updatePayloadF(payload) : payload;
-    
+
     return new ProxyClass(_payload);
 }
+
 const buildCmd = buildEvent;
 
 
@@ -89,6 +90,7 @@ const eventParser = {
     [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_CREATED]: buildEvent(NFTLazyBuyProposalCreatedEvent, buildEventProposalCmd),
     [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_ACCEPTED]: buildEvent(NFTLazyBuyProposalAcceptedEvent, buildEventProposalCmd),
     [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_DECLINED]: buildEvent(NFTLazyBuyProposalDeclinedEvent),
+
 }
 
 const rebuildCmd = rawCmd => {
@@ -101,20 +103,32 @@ const rebuildCmd = rawCmd => {
     return rebuildF ? rebuildF(_cmdPayload) : _cmdPayload;
 };
 
-//Process application rawEvent from external queue service (kafka) into rich AppEvent
+//Process application rawEvent from external~ queue service (kafka) into rich AppEvent
+//TODO: move buildChainEvent to this func
 const rebuildEvent = rawEvent => {
-    const { eventNum, eventPayload, eventIssuer } = rawEvent;
+    try {
+        const { eventNum, eventPayload, eventIssuer, txInfo = [] } = rawEvent;
+        const parseF = eventParser[eventNum];
+        if (eventNum && !parseF) {
+            logWarn(`WARNING: Event rebuilder don't support event ${APP_EVENT[eventNum]}:${eventNum}`);
+        }
+        
+        const event = eventNum && parseF ? parseF(eventPayload)
+            : eventNum && new BaseEvent(eventNum, eventPayload);
 
-    const parseF = eventParser[eventNum];
-    if (eventNum && !parseF)
-        logWarn(`WARNING: Event rebuilder don't support event ${APP_EVENT[eventNum]}:${eventNum}`);
+        // const rebuildedAssociated = associatedEvents.map(JSON.parse).map(rebuildEvent);
 
-    const event = eventNum && parseF ? parseF(eventPayload, eventIssuer)
-        : eventNum && new BaseEvent(eventNum, eventPayload, eventIssuer);
+        if (event) {
+            eventIssuer && event.setEventIssuer(eventIssuer);
+            txInfo && event.setTxInfo(txInfo);
+            // associatedEvents.length && event.setAssociatedEvents(rebuildedAssociated);
+        }
 
-    if (event && eventIssuer) event.setEventIssuer(eventIssuer);
-
-    return event;
+        return event;
+    } catch (err) {
+        logError("rebuildEvent error", err);
+        throw new Error(err)
+    }
 }
 
 module.exports = {

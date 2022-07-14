@@ -161,6 +161,9 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
   draftData.hash = genSha256Hash(JSON.stringify(attributes));
   draftData.packageFiles = [];
 
+  draftData.hash = genSha256Hash(JSON.stringify(attributes));
+  draftData.packageFiles = [];
+
   await nftItemMetadataDraftService.createNFTItemMetadataDraft(draftData);
   await nftCollectionMetadataService.increaseNftCollectionNextItemId(nftCollectionId);
 });
@@ -196,6 +199,8 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (eve
   //   packageHash = genSha256Hash(hashes.join(","));
   //   packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
   // }
+
+  packageHash = genSha256Hash(JSON.stringify(attributes));
 
   packageHash = genSha256Hash(JSON.stringify(attributes));
 

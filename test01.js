@@ -1,0 +1,1 @@
+console.log("TEST 1, evns = ", process.env.NODE_ENV_TEST);

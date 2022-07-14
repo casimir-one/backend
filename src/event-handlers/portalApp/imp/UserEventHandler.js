@@ -1,5 +1,6 @@
 import { SYSTEM_ROLE, APP_EVENT, USER_PROFILE_STATUS } from '@casimir/platform-core';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
+
 import { UserService } from './../../../services';
 import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
 import config from '../../../config';
@@ -41,10 +42,18 @@ userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
       });
     }
   } else {
+
+    const associatedEvents = event.getAssociatedEvents();
+
+    const daoCreatedChainEvent = associatedEvents.find(e => e.getEventNum() === DOMAIN_EVENT.DAO_CREATE);
+    console.log('daoCreatedChainEvent', daoCreatedChainEvent)
+
+
     const chainService = await ChainService.getInstanceAsync(config);
     const { registry } = chainService.getChainNodeClient();
 
     const address = SubstrateChainUtils.toAddress(daoId, registry)
+    const eventAddress = daoCreatedChainEvent.getEventPayload().dao.dao_key;
 
     const createdUserProfile = await userService.createUser({
       username: daoId,

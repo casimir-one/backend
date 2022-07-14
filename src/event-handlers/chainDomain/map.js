@@ -130,10 +130,10 @@ module.exports = {
   [DOMAIN_EVENT.NFT_CLASS_FROZEN]: [
     { h: nftEventHandler, await: false }
   ],
-  [DOMAIN_EVENT.NFT_CLASS_METADATA_CLEARED]: [
+  [DOMAIN_EVENT.NFT_COLLECTION_METADATA_CLEARED]: [
     { h: nftEventHandler, await: false }
   ],
-  [DOMAIN_EVENT.NFT_CLASS_METADATA_SET]: [
+  [DOMAIN_EVENT.NFT_COLLECTION_METADATA_SET]: [
     { h: nftEventHandler, await: false }
   ],
   [DOMAIN_EVENT.NFT_CLASS_THAWED]: [
