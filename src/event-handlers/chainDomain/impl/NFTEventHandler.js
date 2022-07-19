@@ -49,12 +49,12 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_CLASS_FROZEN, async (event) => {
   console.log("NFT_CLASS_FROZEN", event.getEventPayload())
 });
 
-nftEventHandler.register(DOMAIN_EVENT.NFT_CLASS_METADATA_CLEARED, async (event) => {
-  console.log("NFT_CLASS_METADATA_CLEARED", event.getEventPayload())
+nftEventHandler.register(DOMAIN_EVENT.NFT_COLLECTION_METADATA_CLEARED, async (event) => {
+  console.log("NFT_COLLECTION_METADATA_CLEARED", event.getEventPayload())
 });
 
-nftEventHandler.register(DOMAIN_EVENT.NFT_CLASS_METADATA_SET, async (event) => {
-  console.log("NFT_CLASS_METADATA_SET", event.getEventPayload())
+nftEventHandler.register(DOMAIN_EVENT.NFT_COLLECTION_METADATA_SET, async (event) => {
+  console.log("NFT_COLLECTION_METADATA_SET", event.getEventPayload())
 });
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_CLASS_THAWED, async (event) => {
@@ -62,7 +62,7 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_CLASS_THAWED, async (event) => {
 });
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_COLLECTION_CREATED, async (event) => {
-  console.log("NFT_COLLECTION_CREATED", event.getEventPayload())
+  // console.log("NFT_COLLECTION_CREATED", event.getEventPayload())
 });
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_DESTROYED, async (event) => {
@@ -122,7 +122,7 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_REDEPOSITED, async (event) => {
 });
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_TEAM_CHANGED, async (event) => {
-  console.log("NFT_TEAM_CHANGED", event.getEventPayload())
+  // console.log("NFT_TEAM_CHANGED", event.getEventPayload())
 });
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_THAWED, async (event) => {

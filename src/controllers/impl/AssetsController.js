@@ -28,7 +28,7 @@ import { assetCmdHandler } from './../../command-handlers';
 import config from './../../config';
 import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from './../../errors';
 import FileStorage from './../../storage';
-
+import { CreateNFTCollectionWorkflow } from './../../workflows/CreateNFTCollectionWorkflow';
 
 const nftCollectionMetadataService = new NFTCollectionMetadataService();
 const teamDtoService = new TeamDtoService();
@@ -492,6 +492,7 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
+
           const validateCreateNFTItemMetadata = async (createNFTItemMetadataCmd, cmdStack) => {
             const { nftItemMetadataDraftId, nftCollectionId } = createNFTItemMetadataCmd.getCmdPayload();
             const username = ctx.state.user.username;
@@ -1090,40 +1091,67 @@ class AssetsController extends BaseController {
     }
   });
 
+  // createNFTCollection = this.command({
+  //   h: async (ctx) => {
+  //     try {
+  //       const validate = async (appCmds) => {
+  //         const validateCreateNFTCollection = async (createNFTCollectionCmd, cmdStack) => {
+  //           const { issuedByTeam, issuer } = createNFTCollectionCmd.getCmdPayload();
+  //           const username = ctx.state.user.username;
+
+  //           if (issuedByTeam) {
+  //             const isAuthorized = await teamDtoService.authorizeTeamAccount(issuer, username)
+  //             if (!isAuthorized) {
+  //               throw new ForbiddenError(`"${username}" is not permitted to create nft collection`);
+  //             }
+  //           } else if (issuer !== username) {
+  //             throw new BadRequestError(`Can't create nft collection for other accounts`);
+  //           }
+  //         };
+
+  //         const createNFTCollectionSettings = {
+  //           cmdNum: APP_CMD.CREATE_NFT_COLLECTION,
+  //           validate: validateCreateNFTCollection
+  //         };
+
+  //         const validCmdsOrder = [createNFTCollectionSettings];
+
+  //         // await this.validateCmds(appCmds, validCmdsOrder);
+  //       };
+
+  //       const msg = ctx.state.msg;
+  //       await assetCmdHandler.process(msg, ctx, validate);
+
+
+  //       // const workflow = new CreateNFTCollectionWorkflow(ctx, msg);
+  //       // await super.sendChainTxAndProcessWorkflow(tx, workflow);
+
+  //       // await workflow.validateCmdOrder(ctx);
+
+  //       // await assetCmdHandler.process(msg, ctx, validate);
+  //       const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION);
+  //       ctx.successRes({ _id: entityId });
+  //     } catch (err) {
+  //       console.error("err", err)
+  //       ctx.status = err.httpStatus || 500;
+  //       ctx.body = err.message;
+  //     }
+  //   }
+  // }); 
+
   createNFTCollection = this.command({
     h: async (ctx) => {
       try {
-        const validate = async (appCmds) => {
-          const validateCreateNFTCollection = async (createNFTCollectionCmd, cmdStack) => {
-            const { issuedByTeam, issuer } = createNFTCollectionCmd.getCmdPayload();
-            const username = ctx.state.user.username;
+        const { tx, appCmds } = ctx.state.msg;
 
-            if (issuedByTeam) {
-              const isAuthorized = await teamDtoService.authorizeTeamAccount(issuer, username)
-              if (!isAuthorized) {
-                throw new ForbiddenError(`"${username}" is not permitted to create nft collection`);
-              }
-            } else if (issuer !== username) {
-              throw new BadRequestError(`Can't create nft collection for other accounts`);
-            }
-          };
+        const workflow = new CreateNFTCollectionWorkflow(appCmds);
+        await this.sendChainTxAndProcessWorkflow(tx, workflow);
 
-          const createNFTCollectionSettings = {
-            cmdNum: APP_CMD.CREATE_NFT_COLLECTION,
-            validate: validateCreateNFTCollection
-          };
-
-          const validCmdsOrder = [createNFTCollectionSettings];
-
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-
-        const msg = ctx.state.msg;
-        await assetCmdHandler.process(msg, ctx, validate);
-
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION);
+        const entityId = this.extractEntityId(ctx.state.msg, APP_CMD.CREATE_NFT_COLLECTION);
         ctx.successRes({ _id: entityId });
       } catch (err) {
+        console.error("err", err)
+        process.exit(1);
         ctx.status = err.httpStatus || 500;
         ctx.body = err.message;
       }

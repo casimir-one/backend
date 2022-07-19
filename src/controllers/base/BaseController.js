@@ -1,8 +1,10 @@
+import { APP_CMD } from '@casimir/platform-core';
+import { ChainService } from '@deip/chain-service';
 import { JsonDataMsg, MultFormDataMsg } from '@deip/messages';
 import config from '../../config';
-import { ChainService } from '@deip/chain-service';
+import { OffchainProcessManager } from '../../process-manager/OffchainProcessManager';
+import { logDebug } from '../../utils/log';
 import { BadRequestError } from './../../errors';
-import { APP_CMD } from '@casimir/platform-core';
 
 
 class MessageHandler {
@@ -83,7 +85,7 @@ class BaseController {
     return new ActionHandler(actionHandler);
   }
 
-  async validateCmds(cmds, validOrders) {
+  static async validateCmds(cmds, validOrders) {
     const validateOrder = async (appCmds, validCmdsOrder) => {
       const orderLength = validCmdsOrder.length;
 
@@ -132,7 +134,7 @@ class BaseController {
           await validate(appCmd, appCmds);
         }
 
-        if (i+1 === orderLength) {
+        if (i + 1 === orderLength) {
           return true;
         }
       }
@@ -151,14 +153,14 @@ class BaseController {
       }
     }
 
-    const validatedSuccess = await validateFunc(cmds, validOrders);
+    const validatedSuccess = await validateFunc(ctx, cmds, validOrders);
 
     if (!validatedSuccess) {
       throw new BadRequestError(`Wrong cmd order`);
     }
   }
 
-  extractEntityId(msg, cmdNum, key='entityId') {
+  extractEntityId(msg, cmdNum, key = 'entityId') {
     const { appCmds } = msg;
     const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == cmdNum || cmd.getCmdNum() == APP_CMD.CREATE_PROPOSAL);
 
@@ -170,6 +172,34 @@ class BaseController {
     } else {
       return null;
     }
+  }
+
+  async sendChainTxAndProcessWorkflow(tx, workflow) {
+    const chainService = await ChainService.getInstanceAsync(config);
+    const chainRpc = chainService.getChainRpc();
+    const chainNodeClient = chainService.getChainNodeClient();
+    // const eventStore = await EventStore.getInstanceAsync(config);
+    // const eventBus = await EventBus.getInstanceAsync(config);
+    const offchainProcessManager = await OffchainProcessManager.getInstanceAsync(config);
+
+    const verifiedTxPromise = tx.isOnBehalfPortal()
+      ? tx.verifyByPortalAsync({ verificationPubKey: config.TENANT_PORTAL.pubKey, verificationPrivKey: config.TENANT_PORTAL.privKey }, chainNodeClient)
+      : Promise.resolve(tx.getSignedRawTx());
+    const verifiedTx = await verifiedTxPromise;
+
+    const lastBlockNumber = await chainRpc.getBlockAsync();
+    const txHash = await chainRpc.sendTxAsync(verifiedTx);
+
+    // This needs to be validated for concurrent updates of the same entity
+    const workflowId = await offchainProcessManager.queueOffchainWorkflow(txHash, lastBlockNumber, workflow);
+    const appEvents = await offchainProcessManager.waitOffchainWorkflow(workflowId);
+
+    logDebug("sendChainTxAndProcessWorkflow finished, appEvents:", appEvents);
+
+    //I'm not sure if this is the best way to do this, because server might fail in the middle of this process and we will have only chainEvents to process
+    //mb the better option would be transfer this dispatch to the processManager
+    // await eventStore.saveBatch(appEvents);
+    // eventBus.dispatch(appEvents);
   }
 
 }

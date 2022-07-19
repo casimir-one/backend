@@ -11,10 +11,11 @@ import config from './../../config';
 import {
   logError,
   logWarn,
-  logCmdInfo
+  logCmdInfo,
+  logDebug
 } from '../../utils/log';
 import QueueService from "../../queue/QueueService";
-import { processManager } from "../../process-manager";
+import { processManager, redis } from "../../process-manager";
 import { rebuildCmd } from '../../events/rebuilder';
 
 
@@ -34,6 +35,7 @@ class BaseCmdHandler extends EventEmitter {
     this.on(cmdNum, (cmd, ctx) => {
       try {
         logCmdInfo(`Command ${cmd.getCmdName()} is being handled by ${this.constructor.name} ${ctx.state.proposalsStackFrame ? 'within ' + APP_PROPOSAL[ctx.state.proposalsStackFrame.type] + ' flow (' + ctx.state.proposalsStackFrame.proposalId + ')' : ''}`);
+        logDebug(`${cmd.getCmdName()} CMD PAYLOAD`, cmd.getCmdPayload());
         handler(cmd, ctx);
       } catch (err) {
         logError(`Command ${cmd.getCmdName()} ${ctx.state.proposalsStackFrame ? 'within ' + APP_PROPOSAL[ctx.state.proposalsStackFrame.type] + ' flow (' + ctx.state.proposalsStackFrame.proposalId + ')' : ''} failed with an error:`, err);
@@ -55,37 +57,92 @@ class BaseCmdHandler extends EventEmitter {
       const verifiedTx = await verifiedTxPromise;
 
       const txInfo = await chainRpc.sendTxAsync(verifiedTx);
-      await processManager.waitForCommands(txInfo, msg.appCmds);
+      console.log("txinfo", txInfo)
+      // const chainEvents = await processManager.waitForCommands(txInfo, msg.appCmds);
+
       return txInfo;
     },
   ) {
 
     const { tx, appCmds } = msg;
-
     await validate(appCmds, ctx);
 
-    if (tx) { // Until we have blockchain-emitted events and a saga we have to validate write model separately
-      await alterOnchainWriteModel(tx, ctx);
-    } else {
-      await alterOffchainWriteModel(appCmds, ctx);
-    }
-
-    const { proposalsIds, newProposalsCmds } = await this.extractAlteredProposals(appCmds);
-    if (proposalsIds.length) { // Until we have blockchain-emitted events and a saga we have to check proposal status manually
-      ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
-    }
-    // The rest code must be synchronous
-    BaseCmdHandler.Dispatch(appCmds, ctx);
-
+    BaseCmdHandler.Dispatch(appCmds, ctx); //For what? why no events = BaseCmdHandler.process(appCmds, ctx)? why state?
     const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
-
-    //set events issuer for sending results to the sockets
     for (const event of events) event.setEventIssuer(ctx.state.user?.username);
-
     this.logEvents(events);
 
-    const queueService = await QueueService.getInstanceAsync(config);
-    await queueService.sendEvents(config.KAFKA_APP_TOPIC, events);
+    if (tx) {
+      const txInfo = await alterOnchainWriteModel(tx, ctx);
+
+      for (const event of events) event.setTxInfo(txInfo);
+      await processManager.pushEventToProcessorAsync(txInfo, events);
+
+      const chainEvents = await processManager.waitForCommands(txInfo, msg.appCmds).catch(err => {
+        logError(`Error while waiting for commands:, redis clearnup`, { err });
+        processManager.cleanupEvents(txInfo);
+        throw err;
+      });
+
+      await processManager.pushEventToProcessorAsync(txInfo, chainEvents);
+    } else {
+      await alterOffchainWriteModel(appCmds, ctx);
+      const queueService = await QueueService.getInstanceAsync(config);
+      await queueService.sendEvents(config.KAFKA_APP_TOPIC, events);
+    }
+
+    // this.logEvents(events);
+
+
+
+
+    // let txInfo;
+    // if (tx) { // Until we have blockchain-emitted events and a saga we have to validate write model separately
+    //   txInfo = await alterOnchainWriteModel(tx, ctx);
+    // } else {
+    //   await alterOffchainWriteModel(appCmds, ctx);
+    // }
+
+
+    // if (txInfo) {
+    //   for (const event of events) event.setTxInfo(txInfo);
+
+    //   redis.setArray(txInfo, events);
+    //   const chainEvents = await processManager.waitForCommands(txInfo, msg.appCmds);
+    //   redis.setArray(txInfo, chainEvents);
+
+    // } else {
+
+
+    // }
+
+
+    // let txResult;
+    // if (tx) { // Until we have blockchain-emitted events and a saga we have to validate write model separately
+    //   txResult = await alterOnchainWriteModel(tx, ctx);
+    // } else {
+    //   await alterOffchainWriteModel(appCmds, ctx);
+    // }
+
+    // const { proposalsIds, newProposalsCmds } = await this.extractAlteredProposals(appCmds);
+    // if (proposalsIds.length) { // Until we have blockchain-emitted events and a saga we have to check proposal status manually
+    //   ctx.state.updatedProposals = await this.extractUpdatedProposals({ proposalsIds, newProposalsCmds });
+    // }
+
+    // The rest code must be synchronous
+    // BaseCmdHandler.Dispatch(appCmds, ctx);
+    // const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
+
+    // for (const event of events) {
+    //   //set events issuer for sending results to the sockets
+    //   event.setEventIssuer(ctx.state.user?.username);
+    //   event.setTxInfo(txInfo);
+    // }
+
+    // this.logEvents(events);
+
+    // const queueService = await QueueService.getInstanceAsync(config);
+    // await queueService.sendEvents(config.KAFKA_APP_TOPIC, events);
   };
 
 
@@ -104,9 +161,9 @@ class BaseCmdHandler extends EventEmitter {
         logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command`);
         continue;
       }
-
+      const events = [];
       if (cmdHandler.isRegistered(cmd.getCmdNum())) {
-        cmdHandler.handle(cmd, ctx);
+        events.push(cmdHandler.handle(cmd, ctx));
       } else {
         logWarn(`WARNING: No command handler registered for ${cmd.getCmdName()} command in ${cmdHandler.constructor.name}`);
       }

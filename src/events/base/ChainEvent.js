@@ -8,11 +8,14 @@ export const parseChainEvent = (rawEvent) => {
   assert(!!rawEvent.name, "ChainEvent should have name");
   const eventNum = chainEventNameToDomainEventNum[rawEvent.name];
   if (eventNum) {
-    return new BaseEvent(eventNum, rawEvent.data)
+    return new BaseEvent(eventNum, {
+      ...rawEvent.data,
+      meta: rawEvent.meta,
+    })
   } else {
     logWarn(`ChainEvent '${rawEvent.name}' is not supported!`);
   }
-}
+};
 
 const chainEventNameToDomainEventNum = createEnum({
   // BASE
@@ -62,8 +65,8 @@ const chainEventNameToDomainEventNum = createEnum({
   "uniques_attribute_set": DOMAIN_EVENT.NFT_ATTRIBUTE_SET,
   "uniques_burned": DOMAIN_EVENT.NFT_BURNED,
   "uniques_class_frozen": DOMAIN_EVENT.NFT_CLASS_FROZEN,
-  "uniques_class_metadata_cleared": DOMAIN_EVENT.NFT_CLASS_METADATA_CLEARED,
-  "uniques_class_metadata_set": DOMAIN_EVENT.NFT_CLASS_METADATA_SET,
+  "uniques_class_metadata_cleared": DOMAIN_EVENT.NFT_COLLECTION_METADATA_CLEARED,
+  "uniques_class_metadata_set": DOMAIN_EVENT.NFT_COLLECTION_METADATA_SET,
   "uniques_class_thawed": DOMAIN_EVENT.NFT_CLASS_THAWED,
   "uniques_created": DOMAIN_EVENT.NFT_COLLECTION_CREATED,
   "uniques_destroyed": DOMAIN_EVENT.NFT_DESTROYED,

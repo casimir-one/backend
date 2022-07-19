@@ -1,10 +1,11 @@
 import EventEmitter from 'events';
-import { APP_PROPOSAL } from '@casimir/platform-core';
+import { APP_PROPOSAL, DOMAIN_EVENT } from '@casimir/platform-core';
 import { socketServer } from "../../websocket";
 import {
   logError,
   logWarn,
-  logEventInfo
+  logEventInfo,
+  logDebug
 } from '../../utils/log';
 
 
@@ -38,6 +39,8 @@ class BaseEventHandler extends EventEmitter {
     })
       .then(() => {
         logEventInfo(`Event ${event.getEventName()} is handled by ${this.constructor.name} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''}`);
+        if (event.getEventNum() === DOMAIN_EVENT.BLOCK_CREATED) return;
+        logDebug(`${event.getEventName()} EVENT PAYLOAD `, event.getEventPayload());
       })
       .catch((err) => {
         logError(`Event ${event.getEventName()} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''} failed with an error:`, err);

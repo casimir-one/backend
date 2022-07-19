@@ -2,12 +2,12 @@ import { APP_EVENT, DOMAIN_EVENT } from '@casimir/platform-core';
 
 class BaseEvent {
 
-  constructor(eventNum, eventPayload, eventIssuer) {
+  constructor(eventNum, eventPayload) {
     this._eventNum = eventNum;
     this._eventPayload = eventPayload;
     this._proposalCtx = eventPayload.proposalCtx || null;
     this._timestamp = Date.now();
-    this._eventIssuer = eventIssuer;
+    this._txInfo = eventPayload.txInfo || null;
   }
 
   getEventNum() {
@@ -42,6 +42,21 @@ class BaseEvent {
     return this._eventIssuer;
   }
 
+  setTxInfo(txInfo) {
+    this._txInfo = txInfo;
+  }
+  getTxInfo() {
+    return this._txInfo;
+  }
+
+  setAssociatedEvents(events) {
+    this._associatedEvents = events;
+  }
+
+  getAssociatedEvents() {
+    return this._associatedEvents;
+  }
+
   toString() {
     return JSON.stringify({
       timestamp: this.getTimestamp(),
@@ -49,7 +64,9 @@ class BaseEvent {
       eventName: this.getEventName(),
       eventPayload: this.getEventPayload(),
       eventIssuer: this.getEventIssuer(),
-      proposalCtx: this.getProposalCtx()
+      txInfo: this.getTxInfo(),
+      proposalCtx: this.getProposalCtx(),
+      associatedEvents: this.getAssociatedEvents() && this.getAssociatedEvents().map(x => x.toString()),
     });
 
   }

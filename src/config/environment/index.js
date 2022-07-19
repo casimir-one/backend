@@ -9,7 +9,7 @@ const env = (process.env.DEIP_CONFIG || process.env.NODE_ENV == 'local')
   : process.env.NODE_ENV || 'development';
 
 require('dotenv').config({
-  path: __dirname + '/' +
+  path: process.env.NODE_ENV_PATH ? process.env.NODE_ENV_PATH : __dirname + '/' +
     (env == 'production' ? '.prod.env' : env == 'development' ? '.dev.env' : process.env.DEIP_CONFIG ? ('.' + process.env.DEIP_CONFIG + '.env') : '.local.env')
 });
 
@@ -18,6 +18,10 @@ function parseJsonEnvVar(jsonEnvVarName, defaultValue) {
   const jsonEnvVar = process.env[jsonEnvVarName];
   if (!jsonEnvVar && defaultValue === undefined)
     throw new Error(jsonEnvVarName + " json environment variable is not defined. Specify it in the config or provide a default value");
+
+  // const isObjectOrArray = jsonEnvVar.startsWith('[') || jsonEnvVar.startsWith('{');
+  // const resultEnvToParse = isObjectOrArray ? `'${jsonEnvVar}'` : jsonEnvVar;
+
   return jsonEnvVar ? JSON.parse(jsonEnvVar) : defaultValue;
 }
 
@@ -59,7 +63,6 @@ const config = {
   KAFKA_CHAIN_GROUP_ID: process.env.KAFKA_CHAIN_GROUP_ID,
   KAFKA_APP_TOPIC: process.env.KAFKA_APP_TOPIC,
   KAFKA_CHAIN_TOPIC: process.env.KAFKA_CHAIN_TOPIC,
-  PROCESS_MANAGER_WAITING_FOR_MILLIS: process.env.PROCESS_MANAGER_WAITING_FOR_MILLIS ? parseInt(process.env.PROCESS_MANAGER_WAITING_FOR_MILLIS) : 42000, // 8 block time
 
   NEED_CONFIRM_REGISTRATION: process.env.NEED_CONFIRM_REGISTRATION === 'true' ? true : false,
   EMAIL_CONECTION: parseJsonEnvVar('EMAIL_CONECTION', {})

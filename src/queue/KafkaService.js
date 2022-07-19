@@ -6,6 +6,7 @@ import { rebuildEvent } from './../events/rebuilder';
 
 
 export default class KafkaService extends Singleton {
+  
   producer;
   consumer;
   kafka;
@@ -27,6 +28,7 @@ export default class KafkaService extends Singleton {
   }
 
   async init() {
+    if(this._inited) return this;
     this.kafka = new Kafka({
       clientId: this.clientId,
       brokers: this.brokers,
@@ -41,6 +43,7 @@ export default class KafkaService extends Singleton {
     this.producer = this.kafka.producer();
     await this.producer.connect();
 
+    this._inited = true;
     return this;
   }
 

@@ -7,7 +7,7 @@ export default class QueueService extends Singleton {
     super();
     let impl;
 
-    switch ( config.QUEUE_SERVICE ) {
+    switch (config.QUEUE_SERVICE) {
       case "kafka": {
         impl = KafkaService.getInstance(config);
         break;
