@@ -43,31 +43,6 @@ const userService = new UserService();
 const proposalDtoService = new ProposalDtoService();
 
 class AssetsController extends BaseController {
-
-  getAccountDepositHistory = this.query({
-    h: async (ctx) => {
-      try {
-        const query = qs.parse(ctx.query);
-        const status = query.status;
-        const account = ctx.params.account;
-        const username = ctx.state.user.username;
-        if (account != username) {
-          const users = await userDtoService.getUsersByTeam(account);
-          if (!users.find(u => u.username == username)) {
-            throw new ForbiddenError(`You have no permission to get info about '${account}' account or ${account} doesn't exist`);
-          }
-        }
-        const history = await assetDtoService.getAccountDepositHistory(account, status);
-        ctx.successRes(history);
-      }
-      catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-
   getAssetsByType = this.query({
     h: async (ctx) => {
       try {

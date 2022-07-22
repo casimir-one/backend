@@ -1,5 +1,4 @@
 import BaseService from './../../base/BaseService';
-import AssetDepositRequestSchema from '../../../schemas/AssetDepositRequestSchema';
 import AssetSchema from './../../../schemas/AssetSchema';
 import { AssetType } from '@casimir/platform-core';
 
@@ -48,14 +47,6 @@ class AssetDtoService extends BaseService {
     const result = await this.mapAssets(assets);
     return result;
   }
-
-  async getAccountDepositHistory(account, status) {
-    const query = { account };
-    if (status) query.status = status;
-    const history = await AssetDepositRequestSchema.find(query)
-    return history;
-  }
-
 }
 
 

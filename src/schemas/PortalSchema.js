@@ -26,7 +26,6 @@ const AppModuleMap = new Schema({
   "app-crowdfunding": { type: Boolean, default: false },
   "app-assets-management": { type: Boolean, default: false },
   "app-assets-withdrawal": { type: Boolean, default: false },
-  "app-assets-deposit": { type: Boolean, default: false },
   "app-grants-management": { type: Boolean, default: false },
   "app-blockchain-explorer": { type: Boolean, default: false },
   "app-user-personal-workspace": { type: Boolean, default: false },

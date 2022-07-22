@@ -1804,50 +1804,6 @@
         ]
       }
     },
-    "/api/v2/assets/deposit/history/account/{account}": {
-      "get": {
-        "tags": [
-          "asset"
-        ],
-        "summary": "Find assets",
-        "description": "Return an array of assets",
-        "operationId": "getAccountDepositHistory",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "account",
-            "in": "path",
-            "description": "account",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Deposit"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Asset not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
     "/api/v2/assets/type/{type}": {
       "get": {
         "tags": [
@@ -5038,49 +4994,6 @@
         },
         "metadataHash": {
           "type": "string"
-        }
-      }
-    },
-    "Deposit": {
-      "type": "object",
-      "properties": {
-        "_id": {
-          "type": "string"
-        },
-        "status": {
-          "type": "number"
-        },
-        "assetId": {
-          "type": "string"
-        },
-        "currency": {
-          "type": "string"
-        },
-        "amount": {
-          "type": "number"
-        },
-        "timestamp": {
-          "type": "number"
-        },
-        "account": {
-          "type": "string"
-        },
-        "username": {
-          "type": "string"
-        },
-        "requestToken": {
-          "type": "string"
-        },
-        "txInfo": {
-          "type": "string"
-        },
-        "createdAt": {
-          "type": "string",
-          "format": "date-time"
-        },
-        "updatedAt": {
-          "type": "string",
-          "format": "date-time"
         }
       }
     },

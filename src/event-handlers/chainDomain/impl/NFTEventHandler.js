@@ -114,10 +114,6 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_OWNER_CHANGED, async (event) => {
   console.log("NFT_OWNER_CHANGED", event.getEventPayload())
 });
 
-nftEventHandler.register(DOMAIN_EVENT.NFT_REDEPOSITED, async (event) => {
-  console.log("NFT_REDEPOSITED", event.getEventPayload())
-});
-
 nftEventHandler.register(DOMAIN_EVENT.NFT_TEAM_CHANGED, async (event) => {
   console.log("NFT_TEAM_CHANGED", event.getEventPayload())
 });

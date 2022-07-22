@@ -163,9 +163,6 @@ module.exports = {
   [DOMAIN_EVENT.NFT_OWNER_CHANGED]: [
     { h: nftEventHandler, await: false }
   ],
-  [DOMAIN_EVENT.NFT_REDEPOSITED]: [
-    { h: nftEventHandler, await: false }
-  ],
   [DOMAIN_EVENT.NFT_TEAM_CHANGED]: [
     { h: nftEventHandler, await: false }
   ],
