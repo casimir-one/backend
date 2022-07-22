@@ -1,8 +1,7 @@
 import {
   APP_EVENT,
   AssetType,
-  NftItemMetadataDraftStatus,
-  NFT_ITEM_METADATA_FORMAT
+  NftItemMetadataDraftStatus
 } from '@casimir/platform-core';
 import {
   AssetService,
@@ -13,11 +12,7 @@ import {
 } from '../../../services';
 import { genSha256Hash } from '@deip/toolbox';
 import mongoose from 'mongoose';
-import path from 'path';
-import FileStorage from '../../../storage';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
-
-const options = { algo: 'sha256', encoding: 'hex', files: { ignoreRootName: true, ignoreBasename: true }, folder: { ignoreRootName: true } };
 
 
 class AssetEventHandler extends PortalAppEventHandler {
@@ -107,14 +102,9 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     nftCollectionId,
     nftItemId,
     entityId,
-    formatType,
     authors,
     owner,
     ownedByTeam,
-    references,
-    title,
-    jsonData,
-    metadata,
     attributes,
     status
   } = event.getEventPayload();
@@ -123,43 +113,18 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
 
   const draftData = {
     _id,
-    title: title || _id,
     nftCollectionId,
     nftItemId,
     hash: '',
     algo: 'sha256',
-    formatType,
     owner,
     ownedByTeam,
-    folder: _id,
     status: status || NftItemMetadataDraftStatus.IN_PROGRESS,
     authors: authors || [],
-    references: references || [],
-    packageFiles: [],
-    foreignReferences: [],
-    metadata,
     attributes
   }
 
-  // temp solution
-
-  // if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
-  //   const packageHash = genSha256Hash(JSON.stringify(jsonData));
-  //   draftData.jsonData = jsonData;
-  //   draftData.hash = packageHash;
-  //   draftData.packageFiles = [];
-  // } else {
-  //   const nftItemMetadataDirPath = FileStorage.getNFTItemMetadataDirPath(nftCollectionId, nftItemId);
-  //   const hashObj = await FileStorage.calculateDirHash(nftItemMetadataDirPath, options);
-  //   const hashes = hashObj.children.map(f => f.hash);
-  //   hashes.sort();
-  //   const packageHash = genSha256Hash(hashes.join(","));
-  //   draftData.hash = packageHash;
-  //   draftData.packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
-  // }
-
   draftData.hash = genSha256Hash(JSON.stringify(attributes));
-  draftData.packageFiles = [];
 
   await nftItemMetadataDraftService.createNFTItemMetadataDraft(draftData);
   await nftCollectionMetadataService.increaseNftCollectionNextItemId(nftCollectionId);
@@ -170,45 +135,19 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (eve
   const {
     _id: draftId,
     authors,
-    title,
-    formatType,
-    references,
     status,
-    jsonData,
-    metadata,
     attributes,
   } = event.getEventPayload();
 
   let packageHash = '';
-  let packageFiles = [];
-  
-  //temp solution
-
-  // const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
-
-  // if (formatType === NFT_ITEM_METADATA_FORMAT.JSON) {
-  //   packageHash = genSha256Hash(JSON.stringify(jsonData));
-  // } else if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-  //   const nftItemMetadataDirPath = FileStorage.getNFTCollectionArchiveDirPath(draft.nftCollectionId, draftId);
-  //   const hashObj = await FileStorage.calculateDirHash(nftItemMetadataDirPath, options);
-  //   const hashes = hashObj.children.map(f => f.hash);
-  //   hashes.sort();
-  //   packageHash = genSha256Hash(hashes.join(","));
-  //   packageFiles = hashObj.children.map((f) => ({ filename: f.name, hash: f.hash, ext: path.extname(f.name) }));
-  // }
 
   packageHash = genSha256Hash(JSON.stringify(attributes));
 
   await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
     _id: draftId,
     authors,
-    title,
-    references,
     status,
-    jsonData,
-    metadata,
     hash: packageHash,
-    packageFiles,
     attributes,
   })
 });
@@ -226,10 +165,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_CREATED, async (event) =>
     ownedByTeam,
     nftItemMetadataDraftId,
     authors,
-    references,
-    title,
     entityId,
-    metadata,
     attributes
   } = event.getEventPayload();
 
@@ -241,14 +177,8 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_CREATED, async (event) =>
     nftCollectionId,
     owner,
     ownedByTeam,
-    title,
     authors,
-    references,
     attributes,
-    metadata: {
-      ...draft.metadata,
-      ...metadata
-    }
   })
 
   await nftItemMetadataDraftService.deleteNFTItemMetadataDraft(draft._id);

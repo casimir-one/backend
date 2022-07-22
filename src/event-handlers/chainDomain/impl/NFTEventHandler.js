@@ -97,9 +97,6 @@ nftEventHandler.register(DOMAIN_EVENT.NFT_ITEM_CREATED, async (event) => {
     owner: ownerDao?._id || null,
     ownedByTeam: !!ownerDao?.members,
     ownerAddress,
-    metadata: {
-      ...draft.metadata,
-    }
   });
 
   await nftItemMetadataDraftService.deleteNFTItemMetadataDraft(draft._id);

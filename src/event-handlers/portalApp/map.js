@@ -106,7 +106,6 @@ module.exports = {
   ],
 
   [APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED]: [
-    { h: fileUploadEventHandler, await: true },
     { h: assetEventHandler, await: true }
   ],
 

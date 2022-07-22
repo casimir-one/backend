@@ -4067,18 +4067,6 @@
                 "content": {
                   "type": "string"
                 },
-                "authors": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "references": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
                 "proposalInfo": {
                   "type": "object",
                   "properties": {
@@ -4136,12 +4124,6 @@
               "properties": {
                 "_id": {
                   "type": "string"
-                },
-                "formatType": {
-                  "type": "number"
-                },
-                "jsonData": {
-                  "type": "object"
                 },
                 "status": {
                   "type": "number"
@@ -4236,29 +4218,11 @@
                 "contentType": {
                   "type": "number"
                 },
-                "authors": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "references": {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                "formatType": {
-                  "type": "number"
-                },
                 "files": {
                   "type": "array",
                   "items": {
                     "type": "file"
                   }
-                },
-                "jsonData": {
-                  "type": "object"
                 }
               }
             }
@@ -4299,12 +4263,6 @@
               "properties": {
                 "_id": {
                   "type": "string"
-                },
-                "formatType": {
-                  "type": "number"
-                },
-                "jsonData": {
-                  "type": "object"
                 }
               }
             }
@@ -5361,12 +5319,6 @@
         "teamId": {
           "type": "string"
         },
-        "folder": {
-          "type": "string"
-        },
-        "title": {
-          "type": "string"
-        },
         "hash": {
           "type": "string"
         },
@@ -5376,49 +5328,8 @@
         "contentType": {
           "type": "number"
         },
-        "formatType": {
-          "type": "number"
-        },
         "status": {
           "type": "number"
-        },
-        "packageFiles": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "filename": {
-                "type": "string"
-              },
-              "hash": {
-                "type": "string"
-              },
-              "ext": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "jsonData": {
-          "type": "object"
-        },
-        "authors": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "references": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "foreignReferences": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         }
       }
     },
@@ -5437,18 +5348,6 @@
         "teamId": {
           "type": "string"
         },
-        "title": {
-          "type": "string"
-        },
-        "folder": {
-          "type": "string"
-        },
-        "authors": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
         "hash": {
           "type": "string"
         },
@@ -5460,35 +5359,6 @@
         },
         "status": {
           "type": "number"
-        },
-        "packageFiles": {
-          "type": "array",
-          "items": {
-            "type": "object",
-            "properties": {
-              "filename": {
-                "type": "string"
-              },
-              "hash": {
-                "type": "string"
-              },
-              "ext": {
-                "type": "string"
-              }
-            }
-          }
-        },
-        "references": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "foreignReferences": {
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
         },
         "createdAt": {
           "type": "string",
@@ -5505,9 +5375,6 @@
           "type": "object"
         },
         "contentType": {
-          "type": "number"
-        },
-        "formatType": {
           "type": "number"
         }
       }

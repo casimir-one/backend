@@ -16,18 +16,9 @@ class NFTItemMetadataService extends BaseService {
     ownerAddress,
     ownedByTeam,
     attributes,
-    folder,
-    title,
     hash,
     algo,
-    formatType,
-    packageFiles,
-    jsonData,
-    metadata,
     authors,
-    references,
-    foreignReferences,
-    status
   }) {
 
     const result = await this.createOne({
@@ -37,18 +28,9 @@ class NFTItemMetadataService extends BaseService {
       ownerAddress,
       ownedByTeam,
       attributes,
-      folder,
-      title,
       hash,
       algo,
-      formatType,
-      packageFiles,
-      jsonData,
-      metadata,
       authors,
-      references,
-      foreignReferences,
-      status
     });
 
     return result;
@@ -62,18 +44,9 @@ class NFTItemMetadataService extends BaseService {
     ownerAddress,
     ownedByTeam,
     attributes,
-    folder,
-    title,
     hash,
     algo,
-    formatType,
-    packageFiles,
-    jsonData,
-    metadata,
     authors,
-    references,
-    foreignReferences,
-    status,
   }) {
 
     const result = await this.updateOne({ _id: this.buildId({ nftItemId, nftCollectionId }) }, {
@@ -81,18 +54,9 @@ class NFTItemMetadataService extends BaseService {
       ownerAddress,
       ownedByTeam,
       attributes,
-      folder,
-      title,
       hash,
       algo,
-      formatType,
-      packageFiles,
-      jsonData,
-      metadata,
       authors,
-      references,
-      foreignReferences,
-      status
     });
 
     return result;
