@@ -57,8 +57,6 @@ import LayoutCreatedEvent from './impl/LayoutCreatedEvent';
 import LayoutUpdatedEvent from './impl/LayoutUpdatedEvent';
 import LayoutDeletedEvent from './impl/LayoutDeletedEvent';
 
-import RegistrationCodeSendedByEmailEvent from './impl/RegistrationCodeSendedByEmailEvent';
-
 import NFTLazySellProposalCreatedEvent from './impl/NFTLazySellProposalCreatedEvent';
 import NFTLazySellProposalAcceptedEvent from './impl/NFTLazySellProposalAcceptedEvent';
 import NFTLazySellProposalDeclinedEvent from './impl/NFTLazySellProposalDeclinedEvent';
@@ -127,8 +125,6 @@ module.exports = {
   LayoutCreatedEvent,
   LayoutUpdatedEvent,
   LayoutDeletedEvent,
-
-  RegistrationCodeSendedByEmailEvent,
 
   NFTLazySellProposalCreatedEvent,
   NFTLazySellProposalAcceptedEvent,

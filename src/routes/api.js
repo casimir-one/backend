@@ -114,7 +114,6 @@ public_route.get('/v2/users', usersCtrl.getUsers)
 public_route.get('/v2/users/listing', usersCtrl.getUsersListing)
 public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
 public_route.get('/v2/users/portal/:portalId', usersCtrl.getUsersByPortal)
-public_route.post('/v2/user/registration-code/email/send', usersCtrl.sendRegistrationCodeByEmail)
 
 protected_route.put('/v2/user/update', usersCtrl.updateUser)
 protected_route.put('/v2/user/update/password', usersCtrl.updateUserPassword)

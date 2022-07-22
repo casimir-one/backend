@@ -165,10 +165,6 @@ module.exports = {
     { h: layoutEventHandler, await: true },
   ],
 
-  [APP_EVENT.REGISTRATION_CODE_SENDED_BY_EMAIL]: [
-    { h: mailEventHandler, await: true }
-  ],
-
   [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_CREATED]: [
     { h: proposalEventHandler, await: true }
   ],
