@@ -5,7 +5,6 @@ import assetCmdHandler from './impl/AssetCmdHandler';
 import documentTemplateCmdHandler from './impl/DocumentTemplateCmdHandler';
 import portalCmdHandler from './impl/PortalCmdHandler';
 import layoutCmdHandler from './impl/LayoutCmdHandler';
-import mailCmdHandler from './impl/MailCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -15,5 +14,4 @@ module.exports = {
   documentTemplateCmdHandler,
   portalCmdHandler,
   layoutCmdHandler,
-  mailCmdHandler
 }

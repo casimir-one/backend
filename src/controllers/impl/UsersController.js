@@ -204,42 +204,6 @@ class UsersController extends BaseController {
     }
   });
 
-  sendRegistrationCodeByEmail = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const validateSendRegistrationCodeByEmail = async (sendRegistrationCodeByEmailCmd, cmdStack) => {
-            const { email } = sendRegistrationCodeByEmailCmd.getCmdPayload();
-            if (!validateEmail(email)) {
-              throw new BadRequestError(`Invalid email address`);
-            }
-            const isTransporterCanConnect = await transporter.verify();
-            if (!isTransporterCanConnect) {
-              throw new FailedDependencyError(`Can't send email for confirm registration, please try again later`);
-            }
-          };
-
-          const sendRegistrationCodeByEmailSettings = {
-            cmdNum: APP_CMD.SEND_REGISTRATION_CODE_BY_EMAIL,
-            validate: validateSendRegistrationCodeByEmail
-          };
-          
-          const validCmdsOrder = [sendRegistrationCodeByEmailSettings];
-          
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-
-        const msg = ctx.state.msg;
-        await accountCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
   getUser = this.query({
     h: async (ctx) => {
       try {

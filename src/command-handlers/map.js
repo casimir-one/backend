@@ -7,7 +7,6 @@ import {
   documentTemplateCmdHandler,
   portalCmdHandler,
   layoutCmdHandler,
-  mailCmdHandler
 } from './index';
 
 
@@ -48,6 +47,5 @@ module.exports = {
   [APP_CMD.UPDATE_NETWORK_SETTINGS]: portalCmdHandler,
   [APP_CMD.CREATE_LAYOUT]: layoutCmdHandler,
   [APP_CMD.UPDATE_LAYOUT]: layoutCmdHandler,
-  [APP_CMD.DELETE_LAYOUT]: layoutCmdHandler,
-  [APP_CMD.SEND_REGISTRATION_CODE_BY_EMAIL]: mailCmdHandler
+  [APP_CMD.DELETE_LAYOUT]: layoutCmdHandler
 };
