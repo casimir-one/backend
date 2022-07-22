@@ -13,19 +13,11 @@ class NFTItemMetadataDraftService extends BaseService {
     nftItemId,
     owner,
     ownedByTeam,
-    folder,
     attributes,
-    title,
     hash,
     algo,
-    formatType,
     status,
-    packageFiles,
-    jsonData,
-    metadata,
     authors,
-    references,
-    foreignReferences
   }) {
     const draft = await this.createOne({
       _id,
@@ -33,19 +25,11 @@ class NFTItemMetadataDraftService extends BaseService {
       nftItemId,
       owner,
       ownedByTeam,
-      folder,
-      title,
       attributes,
       hash,
       algo,
-      formatType,
       status,
-      packageFiles,
-      jsonData,
-      metadata,
       authors,
-      references,
-      foreignReferences
     });
 
     return draft;
@@ -53,36 +37,20 @@ class NFTItemMetadataDraftService extends BaseService {
 
   async updateNFTItemMetadataDraft({
     _id: id,
-    folder,
-    title,
     attributes,
     hash,
     algo,
-    formatType,
     status,
-    packageFiles,
-    jsonData,
-    metadata,
     authors,
-    references,
-    foreignReferences,
     moderationMessage,
     lazySellProposalId //TODO: remove when we have onchain market
   }) {
     const updatedDraft = await this.updateOne({ _id: id }, {
-      folder,
-      title,
       attributes,
       hash,
       algo,
-      formatType,
       status,
-      packageFiles,
-      jsonData,
-      metadata,
       authors,
-      references,
-      foreignReferences,
       moderationMessage,
       lazySellProposalId //TODO: remove when we have onchain market
     });

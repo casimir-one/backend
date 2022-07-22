@@ -18,20 +18,13 @@ class NFTItemDtoService extends BaseService {
       ownerAddress: nftItemMetadata.ownerAddress,
       ownedByTeam: nftItemMetadata.ownedByTeam,
       nftCollectionId: nftItemMetadata.nftCollectionId,
-      title: nftItemMetadata.title,
-      folder: nftItemMetadata.folder,
       authors: nftItemMetadata.authors,
+      attributes: nftItemMetadata.attributes,
       hash: nftItemMetadata.hash,
       algo: nftItemMetadata.algo,
-      type: nftItemMetadata.type,
       status: nftItemMetadata.status,
-      packageFiles: nftItemMetadata.packageFiles,
-      references: nftItemMetadata.references,
-      foreignReferences: nftItemMetadata.foreignReferences,
       createdAt: nftItemMetadata.createdAt || nftItemMetadata.created_at,
       updatedAt: nftItemMetadata.updatedAt || nftItemMetadata.updated_at,
-      metadata: nftItemMetadata.metadata,
-      formatType: nftItemMetadata.formatType,
       portalId: nftItemMetadata.portalId
     }));
   }

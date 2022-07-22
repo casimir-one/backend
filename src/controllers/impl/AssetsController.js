@@ -404,7 +404,6 @@ class AssetsController extends BaseController {
 
         const dirPathData = {
           nftCollectionId: '',
-          packageFiles: '',
           folder: ''
         };
         const nftItemMetadata = await nftItemMetadataService.getNFTItemMetadata({ nftItemId, nftCollectionId });
@@ -416,16 +415,9 @@ class AssetsController extends BaseController {
           }
           dirPathData.nftCollectionId = draft.nftCollectionId
           dirPathData.folder = draft.folder
-          dirPathData.packageFiles = draft.packageFiles
         } else {
           dirPathData.nftCollectionId = nftItemMetadata.nftCollectionId
           dirPathData.folder = nftItemMetadata.folder
-          dirPathData.packageFiles = nftItemMetadata.packageFiles
-        }
-
-        const file = dirPathData.packageFiles.find(f => f.hash == fileHash);
-        if (!file) {
-          throw new NotFoundError(`File "${fileHash}" is not found`);
         }
 
         const filename = file.filename;
@@ -641,16 +633,6 @@ class AssetsController extends BaseController {
             if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
               throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
             }
-
-            // temp solution
-
-            // if (draft.formatType === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-            //   const archiveDir = FileStorage.getNFTCollectionArchiveDirPath(draft.nftCollectionId, draft.folder);
-            //   const exists = await FileStorage.exists(archiveDir);
-            //   if (!exists) {
-            //     throw new NotFoundError(`Dir "${archiveDir}" is not found`);
-            //   }
-            // }
           };
 
           const updateNFTItemMetadataDraftSettings = {

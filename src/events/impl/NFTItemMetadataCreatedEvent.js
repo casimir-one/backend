@@ -10,8 +10,6 @@ class NFTItemMetadataCreatedEvent extends BaseEvent {
       nftCollectionId,
       owner,
       nftItemMetadataDraftId,
-      authors,
-      title,
     } = eventPayload;
 
     assert(!!entityId, "'entityId' is required");

@@ -18,26 +18,10 @@ const NFTItemMetadataSchema = new Schema({
   "owner": { type: String, required: false }, //in case of nft owned by address without dao
   "ownerAddress": { type: String, required: false },
   "ownedByTeam": { type: Boolean, default: false },
-  "folder": { type: String, required: true },
-  "title": { type: String },
   "hash": { type: String, index: true },
   "algo": { type: String },
   "attributes": [AttributeValueSchema],
-  "formatType": {
-    type: Number,
-    enum: [...Object.values(NFT_ITEM_METADATA_FORMAT)],
-  },
-  "packageFiles": [{
-    "_id": false,
-    "filename": { type: String, required: true },
-    "hash": { type: String, required: true },
-    "ext": { type: String, required: true },
-  }],
-  "jsonData": { type: Object },
-  "metadata": { type: Object },
-  "authors": [{ type: String }],
-  "references": [{ type: String }],
-  "foreignReferences": [{ type: String }],
+  "authors": [{ type: String }]
 }, { timestamps: true });
 
 const model = mongoose.model('nft-item-metadata', NFTItemMetadataSchema);
