@@ -60,7 +60,6 @@ protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), a
 protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
 public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', attributesCtrl.getAttributeFile);
 
-protected_route.get('/v2/assets/deposit/history/account/:account', assetsCtrl.getAccountDepositHistory)
 public_route.get('/v2/assets/type/:type', assetsCtrl.getAssetsByType)
 protected_route.get('/v2/assets/issuer/:issuer', assetsCtrl.getAssetsByIssuer)
 public_route.get('/v2/assets/limit/:limit', assetsCtrl.lookupAssets)

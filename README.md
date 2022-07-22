@@ -31,8 +31,7 @@ npm run server
 * [Schemas](https://github.com/DEIPworld/deip-offchain-server/tree/develop/src/schemas) are used to write read models. 
 * Subsidiary [scripts](https://github.com/DEIPworld/deip-offchain-server/tree/develop/src/scripts). 
 * Internal [services](https://github.com/DEIPworld/deip-offchain-server/tree/develop/src/services) are used for data handling.
-* A file [storage](https://github.com/DEIPworld/deip-offchain-server/tree/develop/src/storage) system. Local storage and SMTP server storage can both be used. 
-* [webhooks/deposit](https://github.com/DEIPworld/deip-offchain-server/tree/develop/src/webhooks/deposit) — accepts requests to build a certain logic for infrastructure and third-party services.
+* A file [storage](https://github.com/DEIPworld/deip-offchain-server/tree/develop/src/storage) system. Local storage and SMTP server storage can both be used.
 
 
 

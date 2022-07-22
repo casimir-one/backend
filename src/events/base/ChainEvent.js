@@ -73,7 +73,6 @@ const chainEventNameToDomainEventNum = createEnum({
   "uniques_metadata_cleared": DOMAIN_EVENT.NFT_METADATA_CLEARED,
   "uniques_metadata_set": DOMAIN_EVENT.NFT_METADATA_SET,
   "uniques_owner_changed": DOMAIN_EVENT.NFT_OWNER_CHANGED,
-  "uniques_redeposited": DOMAIN_EVENT.NFT_REDEPOSITED,
   "uniques_team_changed": DOMAIN_EVENT.NFT_TEAM_CHANGED,
   "uniques_thawed": DOMAIN_EVENT.NFT_THAWED,
   "uniques_transferred": DOMAIN_EVENT.NFT_TRANSFERRED
