@@ -51,7 +51,6 @@ app.use(require('./middlewares/auth/portalAuth.js')());
 // protected routes layer
 app.use(require('./routes/api.js').protected.routes());
 app.use(require('./routes/portal.js').protected.routes());
-app.use(require('./routes/webhook').protected.routes());
 
 QueueService.getInstanceAsync(config).then(() => {
   console.log("QueueService started");
