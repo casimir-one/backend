@@ -1279,7 +1279,8 @@ class AssetsController extends BaseController {
             if (!draft)
               throw new NotFoundError(`Draft for "${draftId}" id is not found`);
 
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(draft?.owner, jwtUsername);
+            const isAuthorized = draft?.owner === jwtUsername 
+              || await teamDtoService.authorizeTeamAccount(draft?.owner, jwtUsername);
 
             if (!isAuthorized && !isModerator)
               throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
