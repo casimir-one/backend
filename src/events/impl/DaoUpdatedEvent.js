@@ -17,7 +17,6 @@ class DaoUpdatedEvent extends BaseEvent {
     assert(!!daoId, "'daoId' is required");
     assert(!!attributes && attributes.length, "'attributes' required");
     if (!isTeamAccount) {
-      assert(!!email, "'email' required");
       assert(!!status, "'status' required");
     }
 
