@@ -103,7 +103,7 @@ class BaseService {
       if (!key.match(mongoOperatorRegex)) return null;
 
       const arrayOperators = ['$in', '$nin'];
-      const allowedOperators = [...arrayOperators, '$gt', '$lt'];
+      const allowedOperators = [...arrayOperators, '$gt', '$lt', '$exists'];
       if (!allowedOperators.includes(key)) throw new Error(`Match operator ${key} is not allowed`);
     }
 
