@@ -1,4 +1,4 @@
-import { ChainService } from '@deip/chain-service';
+import { ChainService } from '@casimir/chain-service';
 import { DOMAIN_EVENT } from '@casimir/platform-core';
 import config from "../config";
 import ChainDomainEventHandler from "../event-handlers/base/ChainDomainEventHandler";

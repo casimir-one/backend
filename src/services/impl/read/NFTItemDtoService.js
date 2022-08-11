@@ -1,4 +1,4 @@
-import { ChainService } from '@deip/chain-service';
+import { ChainService } from '@casimir/chain-service';
 import config from '../../../config';
 import NFTItemMetadataSchema from '../../../schemas/NFTItemMetadataSchema';
 import BaseService from '../../base/BaseService';

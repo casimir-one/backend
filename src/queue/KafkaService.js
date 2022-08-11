@@ -1,4 +1,4 @@
-import { assert, Singleton } from "@deip/toolbox";
+import { assert, Singleton } from "@casimir/toolbox";
 import { Kafka } from "kafkajs";
 import { parseChainEvent } from "../events/base/ChainEvent";
 import { logError, logInfo } from "../utils/log";

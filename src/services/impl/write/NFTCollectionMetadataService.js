@@ -1,5 +1,5 @@
 import { AttributeScope } from '@casimir/platform-core';
-import { isArray } from '@deip/toolbox';
+import { isArray } from '@casimir/toolbox';
 import mongoose from 'mongoose';
 import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
 import { logWarn } from '../../../utils/log';

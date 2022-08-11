@@ -6,7 +6,7 @@ import koa_bodyparser from "koa-bodyparser";
 import cors from '@koa/cors';
 import config from './config';
 import jsonResponse from './response';
-import { ChainService } from '@deip/chain-service';
+import { ChainService } from '@casimir/chain-service';
 import QueueService from "./queue/QueueService";
 
 if (!config.TENANT) throw new Error(`Portal is not specified`);

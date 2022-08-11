@@ -2,7 +2,7 @@
 import config from './../config';
 import request from 'request';
 import util from 'util';
-import crypto from '@deip/lib-crypto';
+import crypto from '@casimir/lib-crypto';
 import { TextEncoder } from 'util';
 
 const requestPromise = util.promisify(request);

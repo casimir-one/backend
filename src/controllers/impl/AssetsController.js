@@ -1,5 +1,5 @@
-import { ChainService } from '@deip/chain-service';
-import { AcceptProposalCmd, DeclineProposalCmd } from '@deip/commands';
+import { ChainService } from '@casimir/chain-service';
+import { AcceptProposalCmd, DeclineProposalCmd } from '@casimir/commands';
 import {
   APP_CMD,
   APP_PROPOSAL,

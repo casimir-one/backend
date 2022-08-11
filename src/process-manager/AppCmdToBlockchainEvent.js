@@ -1,4 +1,4 @@
-import { SubstrateChainUtils } from '@deip/chain-service';
+import { SubstrateChainUtils } from '@casimir/chain-service';
 import { APP_CMD, DOMAIN_EVENT } from "@casimir/platform-core";
 import config from "../config";
 

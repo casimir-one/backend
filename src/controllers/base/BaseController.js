@@ -1,6 +1,6 @@
-import { JsonDataMsg, MultFormDataMsg } from '@deip/messages';
+import { JsonDataMsg, MultFormDataMsg } from '@casimir/messages';
 import config from '../../config';
-import { ChainService } from '@deip/chain-service';
+import { ChainService } from '@casimir/chain-service';
 import { BadRequestError } from './../../errors';
 import { APP_CMD } from '@casimir/platform-core';
 

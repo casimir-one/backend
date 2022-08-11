@@ -1,5 +1,5 @@
 import { DOMAIN_EVENT } from '@casimir/platform-core';
-import { createEnum } from '@deip/toolbox';
+import { createEnum } from '@casimir/toolbox';
 import assert from "assert";
 import { logWarn } from "../../utils/log";
 import BaseEvent from './BaseEvent';

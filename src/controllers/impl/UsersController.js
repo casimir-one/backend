@@ -8,10 +8,10 @@ import { accountCmdHandler, assetCmdHandler } from './../../command-handlers';
 import { APP_CMD, AttributeScope, ProtocolChain, SYSTEM_ROLE, USER_PROFILE_STATUS } from '@casimir/platform-core';
 import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, FailedDependencyError, ConflictError, ForbiddenError } from './../../errors';
-import { ChainService } from '@deip/chain-service';
-import { TransferFTCmd } from '@deip/commands';
+import { ChainService } from '@casimir/chain-service';
+import { TransferFTCmd } from '@casimir/commands';
 import { transporter } from './../../nodemailer';
-import { genSha256Hash, genRipemd160Hash } from '@deip/toolbox';
+import { genSha256Hash, genRipemd160Hash } from '@casimir/toolbox';
 
 
 const userDtoService = new UserDtoService();
