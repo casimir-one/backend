@@ -1,7 +1,7 @@
 import { SYSTEM_ROLE, APP_EVENT, USER_PROFILE_STATUS } from '@casimir/platform-core';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import { UserService } from './../../../services';
-import { ChainService, SubstrateChainUtils } from '@deip/chain-service';
+import { ChainService, SubstrateChainUtils } from '@casimir/chain-service';
 import config from '../../../config';
 
 class UserEventHandler extends PortalAppEventHandler {

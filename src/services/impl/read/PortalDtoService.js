@@ -1,6 +1,6 @@
 import PortalSchema from '../../../schemas/PortalSchema';
 import config from '../../../config';
-import { ChainService } from '@deip/chain-service';
+import { ChainService } from '@casimir/chain-service';
 import TeamDtoService from './TeamDtoService';
 
 const teamDtoService = new TeamDtoService();

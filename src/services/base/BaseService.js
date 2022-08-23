@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { isArray, isObject } from '@deip/toolbox';
+import { isArray, isObject } from '@casimir/toolbox';
 import config from './../../config';
 import PortalSchema from './../../schemas/PortalSchema';
 

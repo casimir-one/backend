@@ -5,7 +5,7 @@ import NFTCollectionDtoService from './NFTCollectionDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
 import config from './../../../config';
-import { ChainService } from '@deip/chain-service';
+import { ChainService } from '@casimir/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });

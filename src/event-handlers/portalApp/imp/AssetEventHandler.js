@@ -10,7 +10,7 @@ import {
   NFTItemMetadataDraftService,
   NFTItemMetadataService,
 } from '../../../services';
-import { genSha256Hash } from '@deip/toolbox';
+import { genSha256Hash } from '@casimir/toolbox';
 import mongoose from 'mongoose';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 

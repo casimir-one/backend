@@ -1,4 +1,4 @@
-import { ChainService } from '@deip/chain-service';
+import { ChainService } from '@casimir/chain-service';
 import { APP_EVENT } from '@casimir/platform-core';
 import config from '../../../config';
 import APP_PROPOSAL_EVENT from '../../../events/base/AppProposalEvent';
