@@ -1,10 +1,10 @@
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
-import { APP_EVENT } from '@casimir/platform-core';
+import { APP_EVENT } from '@casimir.one/platform-core';
 import { VERIFICATION_TOKEN_LIFETIME } from './../../../constants';
 import {
   VerificationTokenService
 } from './../../../services';
-import { genSha256Hash, genRipemd160Hash } from '@casimir/toolbox';
+import { genSha256Hash, genRipemd160Hash } from '@casimir.one/toolbox';
 import { transporter, defaultMailOptionsForConfirmRegistration } from './../../../nodemailer';
 import config from './../../../config';
 import crypto from 'crypto'

@@ -1,4 +1,4 @@
-import { Singleton } from '@casimir/toolbox';
+import { Singleton } from '@casimir.one/toolbox';
 import KafkaService from "./KafkaService";
 import PubSubService from "./PubSubService";
 

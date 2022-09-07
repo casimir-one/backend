@@ -1,4 +1,4 @@
-import { DOMAIN_EVENT, ProposalStatus } from '@casimir/platform-core';
+import { DOMAIN_EVENT, ProposalStatus } from '@casimir.one/platform-core';
 import { ProposalService } from '../../../services';
 import ChainDomainEventHandler from '../../base/ChainDomainEventHandler';
 import { logWarn } from './../../../utils/log';

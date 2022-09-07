@@ -1,4 +1,4 @@
-import { APP_CMD } from '@casimir/platform-core';
+import { APP_CMD } from '@casimir.one/platform-core';
 import BaseCmdHandler from './../base/BaseCmdHandler';
 import { DocumentTemplateCreatedEvent, DocumentTemplateUpdatedEvent, DocumentTemplateDeletedEvent } from './../../events';
 

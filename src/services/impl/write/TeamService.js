@@ -1,7 +1,7 @@
 import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
 import AttributeDtoService from './../read/AttributeDtoService';
-import { AttributeScope } from '@casimir/platform-core'
+import { AttributeScope } from '@casimir.one/platform-core'
 
 class TeamService extends BaseService {
 

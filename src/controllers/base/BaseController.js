@@ -1,8 +1,8 @@
-import { JsonDataMsg, MultFormDataMsg } from '@casimir/messages';
+import { JsonDataMsg, MultFormDataMsg } from '@casimir.one/messages';
 import config from '../../config';
-import { ChainService } from '@casimir/chain-service';
+import { ChainService } from '@casimir.one/chain-service';
 import { BadRequestError } from './../../errors';
-import { APP_CMD } from '@casimir/platform-core';
+import { APP_CMD } from '@casimir.one/platform-core';
 
 
 class MessageHandler {

@@ -5,8 +5,8 @@ import {
     DeclineProposalCmd,
     TransferFTCmd,
     TransferNFTCmd
-} from '@casimir/commands';
-import { APP_CMD, APP_EVENT } from '@casimir/platform-core';
+} from '@casimir.one/commands';
+import { APP_CMD, APP_EVENT } from '@casimir.one/platform-core';
 import { logWarn } from '../utils/log';
 import BaseEvent from './base/BaseEvent';
 import {

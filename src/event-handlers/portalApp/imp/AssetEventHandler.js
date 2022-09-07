@@ -2,7 +2,7 @@ import {
   APP_EVENT,
   AssetType,
   NftItemMetadataDraftStatus
-} from '@casimir/platform-core';
+} from '@casimir.one/platform-core';
 import {
   AssetService,
   FTClassService,
@@ -10,7 +10,7 @@ import {
   NFTItemMetadataDraftService,
   NFTItemMetadataService,
 } from '../../../services';
-import { genSha256Hash } from '@casimir/toolbox';
+import { genSha256Hash } from '@casimir.one/toolbox';
 import mongoose from 'mongoose';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 

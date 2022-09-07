@@ -1,4 +1,4 @@
-import { APP_CMD } from '@casimir/platform-core';
+import { APP_CMD } from '@casimir.one/platform-core';
 import {
   proposalCmdHandler,
   accountCmdHandler,

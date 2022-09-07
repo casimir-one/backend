@@ -1,5 +1,5 @@
 import AttributeSchema from './../../../schemas/AttributeSchema';
-import { AttributeScope } from '@casimir/platform-core';
+import { AttributeScope } from '@casimir.one/platform-core';
 import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 

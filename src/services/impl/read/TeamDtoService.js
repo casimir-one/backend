@@ -1,7 +1,7 @@
 import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
 import config from './../../../config';
-import { ChainService } from '@casimir/chain-service';
+import { ChainService } from '@casimir.one/chain-service';
 
 
 class TeamDtoService extends BaseService {

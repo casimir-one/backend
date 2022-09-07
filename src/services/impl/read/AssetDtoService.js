@@ -1,6 +1,6 @@
 import BaseService from './../../base/BaseService';
 import AssetSchema from './../../../schemas/AssetSchema';
-import { AssetType } from '@casimir/platform-core';
+import { AssetType } from '@casimir.one/platform-core';
 
 
 class AssetDtoService extends BaseService {

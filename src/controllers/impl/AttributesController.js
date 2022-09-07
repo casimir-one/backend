@@ -1,4 +1,4 @@
-import { APP_CMD, AttributeScope } from '@casimir/platform-core';
+import { APP_CMD, AttributeScope } from '@casimir.one/platform-core';
 import BaseController from './../base/BaseController';
 import { BadRequestError, NotFoundError } from './../../errors';
 import {attributeCmdHandler} from './../../command-handlers';

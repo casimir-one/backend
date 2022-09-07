@@ -2,7 +2,7 @@ const _ = require('lodash');
 const path = require('path');
 const fs = require('fs');
 const FILE_STORAGE = require('./../../constants/fileStorage').default;
-const { ProtocolChain } = require('@casimir/platform-core');
+const { ProtocolChain } = require('@casimir.one/platform-core');
 
 const env = (process.env.DEIP_CONFIG || process.env.NODE_ENV == 'local')
   ? 'local'

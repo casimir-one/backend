@@ -1,7 +1,7 @@
-import { APP_EVENT } from '@casimir/platform-core';
+import { APP_EVENT } from '@casimir.one/platform-core';
 import { AttributeDtoService, TeamService } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
-import { ChainService, SubstrateChainUtils } from '@casimir/chain-service';
+import { ChainService, SubstrateChainUtils } from '@casimir.one/chain-service';
 import config from '../../../config';
 
 class TeamEventHandler extends PortalAppEventHandler {

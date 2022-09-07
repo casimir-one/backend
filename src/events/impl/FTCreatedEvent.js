@@ -1,5 +1,5 @@
 import BaseEvent from '../base/BaseEvent';
-import { APP_EVENT } from '@casimir/platform-core';
+import { APP_EVENT } from '@casimir.one/platform-core';
 import assert from 'assert';
 
 class FTCreatedEvent extends BaseEvent {

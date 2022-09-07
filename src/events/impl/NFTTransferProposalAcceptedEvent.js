@@ -1,4 +1,4 @@
-import { APP_EVENT, APP_PROPOSAL } from '@casimir/platform-core';
+import { APP_EVENT, APP_PROPOSAL } from '@casimir.one/platform-core';
 import assert from 'assert';
 import BaseEvent from '../base/BaseEvent';
 

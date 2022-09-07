@@ -1,4 +1,4 @@
-import { USER_PROFILE_STATUS } from '@casimir/platform-core';
+import { USER_PROFILE_STATUS } from '@casimir.one/platform-core';
 import BaseService from '../../base/BaseService';
 import UserSchema from './../../../schemas/UserSchema';
 import TeamService from '../write/TeamService';

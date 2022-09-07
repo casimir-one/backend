@@ -1,11 +1,11 @@
-import { ChainService } from '@casimir/chain-service';
-import { AcceptProposalCmd, DeclineProposalCmd } from '@casimir/commands';
+import { ChainService } from '@casimir.one/chain-service';
+import { AcceptProposalCmd, DeclineProposalCmd } from '@casimir.one/commands';
 import {
   APP_CMD,
   APP_PROPOSAL,
   NftItemMetadataDraftStatus,
   NFT_ITEM_METADATA_FORMAT
-} from '@casimir/platform-core';
+} from '@casimir.one/platform-core';
 import slug from 'limax';
 import mongoose from 'mongoose';
 import qs from 'qs';

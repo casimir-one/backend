@@ -1,4 +1,4 @@
-import { Singleton } from "@casimir/toolbox";
+import { Singleton } from "@casimir.one/toolbox";
 import PubSub from "pubsub-js";
 
 export default class PubSubService extends Singleton {

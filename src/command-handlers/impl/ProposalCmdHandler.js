@@ -1,4 +1,4 @@
-import { ProposalStatus, APP_CMD, APP_PROPOSAL } from '@casimir/platform-core';
+import { ProposalStatus, APP_CMD, APP_PROPOSAL } from '@casimir.one/platform-core';
 import { logWarn } from './../../utils/log';
 import APP_PROPOSAL_EVENT from './../../events/base/AppProposalEvent';
 import BaseCmdHandler from './../base/BaseCmdHandler';

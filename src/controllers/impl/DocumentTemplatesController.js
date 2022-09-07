@@ -1,4 +1,4 @@
-import { APP_CMD } from '@casimir/platform-core';
+import { APP_CMD } from '@casimir.one/platform-core';
 import BaseController from '../base/BaseController';
 import { BadRequestError, ForbiddenError } from '../../errors';
 import { documentTemplateCmdHandler } from '../../command-handlers';

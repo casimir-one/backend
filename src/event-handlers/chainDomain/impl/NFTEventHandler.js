@@ -1,4 +1,4 @@
-import { DOMAIN_EVENT } from '@casimir/platform-core';
+import { DOMAIN_EVENT } from '@casimir.one/platform-core';
 import {
   NFTItemMetadataDraftService,
   NFTItemMetadataService, ProposalService, TeamService, UserService

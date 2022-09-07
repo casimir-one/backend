@@ -1,5 +1,5 @@
 
-import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@casimir/platform-core';
+import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@casimir.one/platform-core';
 import { NFTItemMetadataDraftService, PortalService } from '../../../services';
 import FileStorage from '../../../storage';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';

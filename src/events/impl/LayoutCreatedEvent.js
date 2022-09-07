@@ -1,6 +1,6 @@
 import BaseEvent from './../base/BaseEvent';
 import assert from 'assert';
-import { AttributeScope, APP_EVENT } from '@casimir/platform-core';
+import { AttributeScope, APP_EVENT } from '@casimir.one/platform-core';
 
 class LayoutCreatedEvent extends BaseEvent {
 

@@ -1,4 +1,4 @@
-import { createEnum } from '@casimir/toolbox';
+import { createEnum } from '@casimir.one/toolbox';
 
 const FILE_STORAGE = createEnum({
   LOCAL_FILESYSTEM: 1,

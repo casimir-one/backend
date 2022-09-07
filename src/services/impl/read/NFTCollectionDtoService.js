@@ -1,7 +1,7 @@
 import BaseService from '../../base/BaseService';
 import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
 import AttributeDtoService from './AttributeDtoService';
-import { AttributeScope } from '@casimir/platform-core';
+import { AttributeScope } from '@casimir.one/platform-core';
 
 const attributeDtoService = new AttributeDtoService();
 

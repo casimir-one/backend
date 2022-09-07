@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { AssetType } from '@casimir/platform-core';
+import { AssetType } from '@casimir.one/platform-core';
 
 const Schema = mongoose.Schema;
 

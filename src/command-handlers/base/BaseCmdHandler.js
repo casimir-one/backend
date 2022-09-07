@@ -3,9 +3,9 @@ import fs from 'fs';
 import util from 'util';
 import path from 'path';
 import assert from 'assert';
-import { ChainService } from '@casimir/chain-service';
-import { APP_PROPOSAL, ProposalStatus } from '@casimir/platform-core';
-import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@casimir/commands';
+import { ChainService } from '@casimir.one/chain-service';
+import { APP_PROPOSAL, ProposalStatus } from '@casimir.one/platform-core';
+import { CreateProposalCmd, AcceptProposalCmd, DeclineProposalCmd } from '@casimir.one/commands';
 import ProposalService from './../../services/impl/write/ProposalService';
 import config from './../../config';
 import {

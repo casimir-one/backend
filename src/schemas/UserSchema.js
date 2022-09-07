@@ -1,6 +1,6 @@
 
 import mongoose from 'mongoose';
-import { USER_PROFILE_STATUS } from '@casimir/platform-core';
+import { USER_PROFILE_STATUS } from '@casimir.one/platform-core';
 import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;

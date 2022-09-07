@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { AttributeScope } from '@casimir/platform-core';
+import { AttributeScope } from '@casimir.one/platform-core';
 const Schema = mongoose.Schema;
 
 const LayoutSchema = new Schema({

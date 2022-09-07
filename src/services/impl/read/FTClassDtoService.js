@@ -1,6 +1,6 @@
 import BaseService from '../../base/BaseService';
 import config from '../../../config';
-import { ChainService } from '@casimir/chain-service';
+import { ChainService } from '@casimir.one/chain-service';
 import FTClassSchema from '../../../schemas/FTClassSchema';
 
 
