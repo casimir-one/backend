@@ -45,8 +45,6 @@ const config = {
   CHAIN_BLOCK_INTERVAL_MILLIS: process.env.CHAIN_BLOCK_INTERVAL_MILLIS ? parseInt(process.env.CHAIN_BLOCK_INTERVAL_MILLIS) : 3000,
   FAUCET_ACCOUNT: parseJsonEnvVar('FAUCET_ACCOUNT'),
   CORE_ASSET: parseJsonEnvVar('CORE_ASSET'),
-  DEIP_SERVER_URL: process.env.DEIP_SERVER_URL,
-  DEIP_CLIENT_URL: process.env.DEIP_CLIENT_URL,
   SIG_SEED: process.env.SIG_SEED,
   JWT_SECRET: process.env.JWT_SECRET,
 
