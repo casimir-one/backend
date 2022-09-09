@@ -1,15 +1,15 @@
 import { WebSocketServer } from 'ws';
 import { WS } from "./websocket";
-import { verifySocketClient } from "./auth";
+// import { verifySocketClient } from "./auth";
 import { logInfo, logWarn } from "../utils/log";
 
 const WS_HOST = process.env.WS_HOST || '0.0.0.0';
-const WS_PORT = process.env.WS_PORT || 9083;
+const WS_PORT = process.env.WS_PORT || 8080;
 
 const wss = new WebSocketServer({
   host: WS_HOST,
   port: WS_PORT,
-  verifyClient: verifySocketClient,
+  // verifyClient: verifySocketClient,
 });
 
 const usernameToSocket = new Map(); // username -> WS
