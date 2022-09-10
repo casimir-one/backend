@@ -23,9 +23,7 @@ const init = function(server) {
 
   const wss = new WebSocketServer({
     server: server,
-    verifyClient: verifySocketClient,
-    minVersion: 'TLSv1',
-    maxVersion: 'TLSv1.3',
+    verifyClient: verifySocketClient
   });
 
   const usernameToSocket = new Map(); // username -> WS
