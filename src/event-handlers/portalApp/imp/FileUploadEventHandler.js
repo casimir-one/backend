@@ -16,6 +16,7 @@ const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
 
 fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
   const { banner, logo, portalId } = event.getEventPayload();
+  console.log("PP_EVENT.PORTAL_SETTINGS_UPDATED", event);
 
   const portal = await portalService.getPortal(portalId);
   const oldBanner = portal.banner;
@@ -39,8 +40,8 @@ fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event)
 });
 
 fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (event) => {
-
   const { _id: draftId, uploadedFiles } = event.getEventPayload();
+  console.log("APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED", event);
 
   const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
 
@@ -65,6 +66,7 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async
 });
 
 fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async (event) => {
+    console.log("APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED", event);
   const { _id } = event.getEventPayload();
 
   const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(_id)

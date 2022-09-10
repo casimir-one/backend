@@ -15,16 +15,32 @@ const destinationHandler = (fileStorage) => function () {
     let folderPath = "";
     let filePath = "";
 
+    console.log("file -->", file)
+
+    console.log("file.originalname -->", file.originalname)
+
     const parts = file.originalname.split(ATTRIBUTE_ID_SPLITTER);
+    console.log("parts -->", parts)
+
     const attrId = parts[0];
 
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(attrId)) {
       folderPath = fileStorage.getNFTItemMetadataAttributeDirPath(nftCollectionId, nftItemId, attrId);
+      console.log("folderPath -->", folderPath)
+
       const name = file.originalname.substring(`${attrId}${ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
+      console.log("name -->", name)
+
       filePath = fileStorage.getNFTItemMetadataAttributeFilePath(nftCollectionId, nftItemId, attrId, name);
+      console.log("filePath -->", filePath)
+
     } else {
       folderPath = fileStorage.getNFTItemMetadataDirPath(nftCollectionId, nftItemId);
+      console.log("folderPath -->", folderPath)
+
       filePath = fileStorage.getNFTItemMetadataFilePath(nftCollectionId, nftItemId, file.originalname);
+      console.log("filePath -->", filePath)
+
     }
 
     const folderExists = await fileStorage.exists(folderPath);
@@ -68,6 +84,8 @@ class NFTItemMetadataForm extends BaseForm {
   constructor(nextHandler) {
     const sessionId = uuidv4();
 
+    console.log("sessionId  -->", sessionId)
+
     const filesUploader = multer({
       storage: getFileStorageUploader(destinationHandler, filenameHandler, sessionId),
       fileFilter: fileFilterHandler
@@ -77,8 +95,10 @@ class NFTItemMetadataForm extends BaseForm {
 
     const formHandler = (ctx) => multerHandler(ctx, () => new Promise((resolve, reject) => {
       try {
+        console.log("ctx.req.files  -->", ctx.req.files)
         resolve({ files: ctx.req.files });
       } catch (err) {
+        console.log("err -->", err)
         reject(err);
       }
     }));

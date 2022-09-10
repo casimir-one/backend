@@ -522,6 +522,7 @@ class AssetsController extends BaseController {
   createNFTItemMetadataDraft = this.command({
     form: NFTItemMetadataForm, h: async (ctx) => {
       try {
+        console.log("In controller createNFTItemMetadataDraft")
         const validate = async (appCmds) => {
           const validateCreateNFTItemMetadataDraft = async (createNFTItemMetadataDraftCmd, cmdStack) => {
             const { nftCollectionId, owner, ownedByTeam } = createNFTItemMetadataDraftCmd.getCmdPayload();
