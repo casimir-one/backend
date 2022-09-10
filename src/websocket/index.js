@@ -1,6 +1,6 @@
 import { WebSocketServer } from 'ws';
 import { WS } from "./websocket";
-// import { verifySocketClient } from "./auth";
+import { verifySocketClient } from "./auth";
 import { logInfo, logWarn, logError } from "../utils/log";
 import util from 'util';
 
@@ -10,7 +10,7 @@ const WS_PORT = process.env.WS_PORT || 8083;
 const wss = new WebSocketServer({
   host: WS_HOST,
   port: WS_PORT,
-  // verifyClient: verifySocketClient,
+  verifyClient: verifySocketClient,
 });
 
 const usernameToSocket = new Map(); // username -> WS
