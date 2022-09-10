@@ -2,7 +2,6 @@ import { WebSocketServer } from 'ws';
 import { WS } from "./websocket";
 import { verifySocketClient } from "./auth";
 import { logInfo, logWarn, logError } from "../utils/log";
-import util from 'util';
 
 const WS_HOST = process.env.WS_HOST || '0.0.0.0';
 const WS_PORT = process.env.WS_PORT || 8083;
@@ -11,6 +10,8 @@ const wss = new WebSocketServer({
   host: WS_HOST,
   port: WS_PORT,
   verifyClient: verifySocketClient,
+  minVersion: 'TLSv1',
+  maxVersion: 'TLSv1.3',
 });
 
 const usernameToSocket = new Map(); // username -> WS
@@ -30,8 +31,7 @@ wss.on('listening', () => {
 })
 
 wss.on('connection', (websocket, req) => {
-  // console.log(util.inspect(req, {showHidden: false, depth: null, colors: true}))
-  // logInfo("WSS new connection", req.info)
+  logInfo(`WSS Client connection ...`);
 
   const ws = new WS(websocket);
   addConnection(req.info, ws);
@@ -54,7 +54,6 @@ wss.on('connection', (websocket, req) => {
 wss.on('error', (error) => {
   logError("WSS error:", error)
 })
-
 
 wss.on('close', (arg) => {
   logInfo("WSS close:", arg)
