@@ -61,10 +61,14 @@ const destinationHandler = (fileStorage) => function () {
 const filenameHandler = () => function () {
   return function (req, file, callback) {
     let name = "";
+    console.log("filenameHandler file -->", file)
+
+    console.log("filenameHandler file.originalname -->", file.originalname)
     const parts = file.originalname.split(ATTRIBUTE_ID_SPLITTER);
     const attrId = parts[0];
 
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(attrId)) {
+      console.log("filenameHandler parts.length -->", attrId)
       name = file.originalname.substring(`${attrId}${ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
     } else {
       name = file.originalname;
