@@ -23,7 +23,7 @@ const destinationHandler = (fileStorage) => function () {
       filePath = fileStorage.getNFTCollectionAttributeFilePath(nftCollectionId, nftCollectionAttributeId, name);
     } else {
       folderPath = fileStorage.getNFTCollectionDirPath(nftCollectionId);
-      filePath = fileStorage.getNFTCollectionFilePath(file.originalname);
+      filePath = fileStorage.getNFTCollectionFilePath(nftCollectionId, file.originalname);
     }
 
     const folderExists = await fileStorage.exists(folderPath);
