@@ -49,7 +49,7 @@ const config = {
   JWT_SECRET: process.env.JWT_SECRET,
 
   QUEUE_SERVICE: process.env.QUEUE_SERVICE || 'pubsub', //kafka | pubsub
-  KAFKA_CLIENT_ID: 'offchain-server',
+  KAFKA_CLIENT_ID: process.env.KAFKA_CLIENT_ID,
   KAFKA_BROKER_URLS: process.env.QUEUE_SERVICE === 'kafka' ? parseJsonEnvVar('KAFKA_BROKER_URLS') : [],
   KAFKA_USER: process.env.KAFKA_USER,
   KAFKA_PASSWORD: process.env.KAFKA_PASSWORD,
