@@ -1,4 +1,5 @@
 import Koa from 'koa';
+import http from 'http';
 import json from 'koa-json';
 import logger from 'koa-logger';
 import serve from 'koa-static';
@@ -18,7 +19,6 @@ const app = new Koa();
 
 require('./database');
 require('./queue');
-require('./websocket');
 require('./process-manager');
 
 app.use(jsonResponse());
@@ -58,6 +58,9 @@ QueueService.getInstanceAsync(config).then(() => {
   console.log("QueueService error", err.message)
 })
 
+const server = http.createServer(app.callback());
+require('./websocket').init(server);
+
 ChainService.getInstanceAsync({
   PROTOCOL: config.PROTOCOL,
   DEIP_FULL_NODE_URL: config.DEIP_FULL_NODE_URL,
@@ -67,12 +70,13 @@ ChainService.getInstanceAsync({
 })
   .then(() => {
     console.log(config);
-    app.listen(PORT, HOST, () => {
+    server.listen(PORT, HOST, () => {
       console.log(`Running on http://${HOST}:${PORT}`);
     });
-    app.on('error', function (err, ctx) {
+    server.on('error', function (err, ctx) {
       console.log('Server error', err);
     });
   });
 
-module.exports = app;
+
+module.exports = server;

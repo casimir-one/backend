@@ -1,6 +1,6 @@
 import EventEmitter from 'events';
 import { APP_PROPOSAL } from '@casimir.one/platform-core';
-import { socketServer } from "../../websocket";
+import { getSocketServerInstance } from "../../websocket";
 import {
   logError,
   logWarn,
@@ -46,6 +46,7 @@ class BaseEventHandler extends EventEmitter {
   }
 
   sendToSockets(event, err) {
+    const socketServer = getSocketServerInstance();
     return socketServer.sendEvent(event, err)
   }
 
@@ -66,6 +67,8 @@ class BaseEventHandler extends EventEmitter {
   static async Broadcast(events, ctx) {
     const handlers = this.getHandlers();
     if (!handlers) throw new Error("Cannot find handlers");
+
+    const socketServer = getSocketServerInstance();
 
     let chain = new Promise((start) => { start() });
 
