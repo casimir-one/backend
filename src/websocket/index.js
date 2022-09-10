@@ -1,7 +1,7 @@
 import { WebSocketServer } from 'ws';
 import { WS } from "./websocket";
 // import { verifySocketClient } from "./auth";
-import { logInfo, logWarn } from "../utils/log";
+import { logInfo, logWarn, logError } from "../utils/log";
 
 const WS_HOST = process.env.WS_HOST || '0.0.0.0';
 const WS_PORT = process.env.WS_PORT || 8083;
@@ -38,6 +38,15 @@ wss.on('connection', (websocket, req) => {
     deleteConnection(req.info)
     logWarn(`WSS Client disconnected: ${code} Reason: ${reason}`);
   });
+})
+
+wss.on('error', (error) => {
+  logError("WSS error:", error)
+})
+
+
+wss.on('close', (arg) => {
+  logInfo("WSS close:", arg)
 })
 
 const _send = (msg, payload, username) => {
