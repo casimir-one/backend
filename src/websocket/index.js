@@ -2,6 +2,7 @@ import { WebSocketServer } from 'ws';
 import { WS } from "./websocket";
 // import { verifySocketClient } from "./auth";
 import { logInfo, logWarn, logError } from "../utils/log";
+import util from 'util';
 
 const WS_HOST = process.env.WS_HOST || '0.0.0.0';
 const WS_PORT = process.env.WS_PORT || 8083;
@@ -29,6 +30,7 @@ wss.on('listening', () => {
 })
 
 wss.on('connection', (websocket, req) => {
+  console.log(util.inspect(req, {showHidden: false, depth: null, colors: true}))
   logInfo("WSS new connection", req.info)
 
   const ws = new WS(websocket);
