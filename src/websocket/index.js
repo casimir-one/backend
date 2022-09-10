@@ -30,8 +30,8 @@ wss.on('listening', () => {
 })
 
 wss.on('connection', (websocket, req) => {
-  console.log(util.inspect(req, {showHidden: false, depth: null, colors: true}))
-  logInfo("WSS new connection", req.info)
+  // console.log(util.inspect(req, {showHidden: false, depth: null, colors: true}))
+  // logInfo("WSS new connection", req.info)
 
   const ws = new WS(websocket);
   addConnection(req.info, ws);
@@ -40,6 +40,15 @@ wss.on('connection', (websocket, req) => {
     deleteConnection(req.info)
     logWarn(`WSS Client disconnected: ${code} Reason: ${reason}`);
   });
+
+  ws.on('error', (error) => {
+    logWarn(`WSS Client error:`, error);
+  });
+
+  ws.on('close', (arg) => {
+    logWarn(`WSS Client closed:`, arg);
+  });
+
 })
 
 wss.on('error', (error) => {
