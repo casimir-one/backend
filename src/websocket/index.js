@@ -4,7 +4,7 @@ import { WS } from "./websocket";
 import { logInfo, logWarn } from "../utils/log";
 
 const WS_HOST = process.env.WS_HOST || '0.0.0.0';
-const WS_PORT = process.env.WS_PORT || 8080;
+const WS_PORT = process.env.WS_PORT || 8083;
 
 const wss = new WebSocketServer({
   host: WS_HOST,

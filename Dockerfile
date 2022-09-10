@@ -37,5 +37,6 @@ RUN mkdir files && mkdir logs
 
 RUN npm run build
 EXPOSE 80
+EXPOSE 8083
 
 CMD [ "npm", "run", "serve" ]
