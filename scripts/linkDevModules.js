@@ -12,7 +12,7 @@ const prompt = inquirer.createPromptModule();
 let monorepoPath = path.join(__dirname, '..', '..', 'casimir-frontend');
 
 if(!fs.existsSync(monorepoPath)) {
-  monorepoPath = path.join(__dirname, '..', '..', 'deip-modules');
+  monorepoPath = path.join(__dirname, '..', '..', 'casimir-frontend');
 }
 
 // eslint-disable-next-line import/no-dynamic-require

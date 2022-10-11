@@ -8,7 +8,7 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 local-files/*
-src/config/environment/.local*.env
+src/config/environment/.local.*.env
 src/config/environment/.demo.env
 src/config/environment/.demo*.env
 src/config/environment/.tto*.env

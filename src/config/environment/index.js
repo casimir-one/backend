@@ -1,6 +1,3 @@
-const _ = require('lodash');
-const path = require('path');
-const fs = require('fs');
 const FILE_STORAGE = require('./../../constants/fileStorage').default;
 const { ProtocolChain } = require('@casimir.one/platform-core');
 
@@ -16,8 +13,10 @@ require('dotenv').config({
 
 function parseJsonEnvVar(jsonEnvVarName, defaultValue) {
   const jsonEnvVar = process.env[jsonEnvVarName];
-  if (!jsonEnvVar && defaultValue === undefined)
-    throw new Error(jsonEnvVarName + " json environment variable is not defined. Specify it in the config or provide a default value");
+  if (!jsonEnvVar && defaultValue === undefined) {
+      const msg = jsonEnvVarName + " json environment variable is not defined. Specify it in the config or provide a default value";
+      throw new Error(msg);
+  }
   return jsonEnvVar ? JSON.parse(jsonEnvVar) : defaultValue;
 }
 
@@ -43,7 +42,7 @@ const config = {
   TENANT_PRIV_KEY: process.env.TENANT_PRIV_KEY,
   CHAIN_ID: process.env.CHAIN_ID,
   CHAIN_BLOCK_INTERVAL_MILLIS: process.env.CHAIN_BLOCK_INTERVAL_MILLIS ? parseInt(process.env.CHAIN_BLOCK_INTERVAL_MILLIS) : 3000,
-  FAUCET_ACCOUNT: parseJsonEnvVar('FAUCET_ACCOUNT'),
+  FAUCET_ACCOUNT: parseJsonEnvVar('FAUCET_ACCOUNT', null),
   CORE_ASSET: parseJsonEnvVar('CORE_ASSET'),
   SIG_SEED: process.env.SIG_SEED,
   JWT_SECRET: process.env.JWT_SECRET,
