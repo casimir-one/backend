@@ -1,18 +1,29 @@
-# DEIP Off-Chain Server
+# Casimir Off-Chain Server
 
-DEIP Off-chain server is a part of the off-chain cluster. In addition to rendering and storing read models, it also displays them immediately to the end-user. Essentially, the server functions as a proxy between the blockchain and the front-end. A signed user transaction is sent to the server, then to the blockchain. This allows the creation of the correct read model and authentication of the user. 
+Casimir Off-chain server is a part of the off-chain cluster. In addition to rendering and storing read models, it also displays them immediately to the end-user. Essentially, the server functions as a proxy between the blockchain and the front-end. A signed user transaction is sent to the server, then to the blockchain. This allows the creation of the correct read model and authentication of the user.
 
-DEIP Off-chain server is blockchain agnostic and can be used with any blockchain. It is available to all portals connected to the DEIP Network, which makes it a universal server.
+Casimir Off-chain server is blockchain agnostic and can be used with any blockchain. It is available to all portals connected to the Network, which makes it a universal server.
 
 The server is based on Command Query Responsibility Segregation (CQRS), which maximizes its performance, scalability, and security. It is also connected to the file storage system. Therefore, local storage and SMTP server storage can both be used. MongoDB is used to store the read models.
 
 ## Local Development
 
+1. See the [repo](https://github.com/casimir-ai/nft-marketplace-template-docker) with docker template configuration. Go through the ["Backend and Frontend development on local environment"](https://github.com/casimir-ai/nft-marketplace-template-docker#backend-and-frontend-development-on-local-environment) section
+
+2. Start the Casimir server in dev mode server using the [local config](https://github.com/casimir-ai/backend/blob/develop/src/config/environment/.local.env)
+
 ``` bash
-
-npm run server
-
+DEIP_CONFIG=local npm run dev
 ```
+
+3. If you need to work with [Casimir packages](https://github.com/casimir-ai/frontend) that the Casimir server depends on, you can link your local Casimir packages repo by running:
+
+``` bash
+npm run linkModules
+```
+
+This will allow you to develop both [Casimir packages](https://github.com/casimir-ai/frontend) repo and Casimir server repo locally without packages publishing
+
 
 ### Environment
 
