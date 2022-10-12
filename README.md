@@ -10,13 +10,13 @@ The server is based on Command Query Responsibility Segregation (CQRS), which ma
 
 1. See the [repo](https://github.com/casimir-ai/nft-marketplace-template-docker) with docker template configuration. Go through the ["Backend and Frontend development on local environment"](https://github.com/casimir-ai/nft-marketplace-template-docker#backend-and-frontend-development-on-local-environment) section
 
-2. Start the Casimir server in dev mode server using the [local config](https://github.com/casimir-ai/backend/blob/develop/src/config/environment/.local.env):
+2. Start the server in dev mode using the [local config](https://github.com/casimir-ai/backend/blob/develop/src/config/environment/.local.env):
 
 ``` bash
 DEIP_CONFIG=local npm run dev
 ```
 
-3. If you need to work with [Casimir packages](https://github.com/casimir-ai/frontend) that the Casimir server depends on, you can link your local Casimir packages repo by running the following command. This will allow you to develop both [Casimir packages](https://github.com/casimir-ai/frontend) repo and [Casimir server](https://github.com/casimir-ai/backend) repo locally without packages re-publishing.
+3. If you need to work with [Casimir packages](https://github.com/casimir-ai/frontend) that the  server depends on, you can link your local Casimir packages repo by running the following command. This will allow you to develop both [Casimir packages](https://github.com/casimir-ai/frontend) repo and [Casimir server](https://github.com/casimir-ai/backend) repo locally without packages re-publishing.
 
 ``` bash
 npm run linkModules
