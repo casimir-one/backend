@@ -62,5 +62,8 @@ const config = {
   EMAIL_CONECTION: parseJsonEnvVar('EMAIL_CONECTION', {})
 };
 
+if (!fs.existsSync(config.TENANT_LOG_DIR)) {
+  fs.mkdirSync(config.TENANT_LOG_DIR);
+}
 
 module.exports = config;
