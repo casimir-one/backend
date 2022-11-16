@@ -44,7 +44,7 @@ if (config.ENVIRONMENT !== 'production') {
 }
 
 // user auth layer
-app.use(require('./middlewares/auth/userAuth.js')());
+// app.use(require('./middlewares/auth/userAuth.js')());
 // portal auth layer
 app.use(require('./middlewares/auth/portalAuth.js')());
 
