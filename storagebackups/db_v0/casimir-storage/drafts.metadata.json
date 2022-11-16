@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"casimir-storage.drafts"},{"v":2,"key":{"hash":1},"name":"hash_1","background":true,"ns":"casimir-storage.drafts"}],"uuid":"0d350feb7eed4a03bd960cb0b517e63c"}
