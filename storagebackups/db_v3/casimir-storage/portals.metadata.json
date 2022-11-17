@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"casimir-storage.portals"},{"v":2,"key":{"email":1},"name":"email_1","ns":"casimir-storage.portals","background":true}],"uuid":"657d7afbacf34468bff8e6c62ee941bb"}
