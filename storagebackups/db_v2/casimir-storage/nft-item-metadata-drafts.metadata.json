@@ -1,0 +1,1 @@
+{"options":{},"indexes":[{"v":2,"key":{"_id":1},"name":"_id_","ns":"casimir-storage.nft-item-metadata-drafts"},{"v":2,"key":{"hash":1},"name":"hash_1","ns":"casimir-storage.nft-item-metadata-drafts","background":true}],"uuid":"a91bec6fdce146e0999240817d9f20ab"}

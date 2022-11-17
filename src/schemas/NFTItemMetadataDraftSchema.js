@@ -17,6 +17,7 @@ const NFTItemMetadataDraftSchema = new Schema({
   "status": {
     type: Number,
     enum: Object.values(NftItemMetadataDraftStatus),
+    default: NftItemMetadataDraftStatus.PROPOSED,
     required: true
   },
   "authors": [{ type: String }],

@@ -525,30 +525,11 @@ class AssetsController extends BaseController {
         console.log("In controller createNFTItemMetadataDraft")
         const validate = async (appCmds) => {
           const validateCreateNFTItemMetadataDraft = async (createNFTItemMetadataDraftCmd, cmdStack) => {
-            const { nftCollectionId, owner, ownedByTeam } = createNFTItemMetadataDraftCmd.getCmdPayload();
+            const { nftCollectionId } = createNFTItemMetadataDraftCmd.getCmdPayload();
             const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
 
             if (!nftCollection) {
               throw new BadRequestError(`Nft collection "${nftCollectionId}" doesn't exist`);
-            }
-
-            const username = ctx.state.user.username;
-
-            if (nftCollection.issuedByTeam) {
-              if (ownedByTeam && owner !== nftCollection.issuer) {
-                throw new BadRequestError(`Can't create nft item metadata draft by other team for team nft collection`);
-              }
-              const isAuthorized = await teamDtoService.authorizeTeamAccount(nftCollection.issuer, username)
-              if (!isAuthorized) {
-                throw new ForbiddenError(`"${username}" is not permitted to create nft item metadata draft`);
-              }
-            } else {
-              if (ownedByTeam) {
-                throw new BadRequestError(`Can't create nft item metadata draft by team for user nft collection`);
-              }
-              if (nftCollection.issuer !== owner || owner !== username) {
-                throw new ForbiddenError(`"${username}" is not permitted to create nft collection metadata draft`);
-              }
             }
           };
 
@@ -1265,146 +1246,11 @@ class AssetsController extends BaseController {
   moderateNFTItemMetadataDraft = this.command({
     h: async (ctx) => {
       try {
-        const chainService = await ChainService.getInstanceAsync(config);
-        const chainNodeClient = chainService.getChainNodeClient();
-        const chainTxBuilder = chainService.getChainTxBuilder();
-
-        const validate = async (appCmds) => {
-          const validateUpdateNFTItemMetadataDraftStatus = async (updateNFTItemMetadataDraftStatusCmd, cmdStack) => {
-            const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = NftItemMetadataDraftStatus;
-            const jwtUsername = ctx.state.user.username;
-            const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
-            const isModerator = moderators.includes(jwtUsername);
-            const { _id: draftId, status } = updateNFTItemMetadataDraftStatusCmd.getCmdPayload();
-            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
-            if (!draft)
-              throw new NotFoundError(`Draft for "${draftId}" id is not found`);
-
-            const isAuthorized = draft?.owner === jwtUsername 
-              || await teamDtoService.authorizeTeamAccount(draft?.owner, jwtUsername);
-
-            if (!isAuthorized && !isModerator)
-              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
-
-            if (!Object.values(NftItemMetadataDraftStatus).includes(status))
-              throw new BadRequestError(`This endpoint accepts only nft item metadata draft status`)
-
-            if (draft.status === IN_PROGRESS) {
-              //user can change status from IN_PROGRESS to PROPOSED
-              if (!isAuthorized)
-                throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
-              if (status !== PROPOSED)
-                throw new BadRequestError("Bad status");
-            }
-
-            if (draft.status === PROPOSED) {
-              //moderator can change status to APPROVED or REJECTED
-              if (!isModerator)
-                throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
-              if (status !== APPROVED && status !== REJECTED)
-                throw new BadRequestError("Bad status");
-            }
-
-            if (draft.status === APPROVED) {
-              //moderator can change status from APPROVED to REJECTED
-              if (!isModerator)
-                throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit status`);
-              if (status !== REJECTED)
-                throw new BadRequestError("Bad status");
-            }
-
-            if (draft.status === REJECTED) {
-              //moderator can change status from REJECTED to APPROVED
-              //user can change status from REJECTED to IN_PROGRESS
-              if (isModerator && status !== APPROVED)
-                throw new BadRequestError("Bad status");
-              if (isAuthorized && status !== IN_PROGRESS)
-                throw new BadRequestError("Bad status");
-            }
-          };
-
-          const validateUpdateNFTItemMetadataDraftModerationMsg = async (updateNFTItemMetadataDraftModerationMsgCmd, cmdStack) => {
-            const { IN_PROGRESS, PROPOSED, REJECTED, APPROVED } = NftItemMetadataDraftStatus;
-            const jwtUsername = ctx.state.user.username;
-            const moderators = ctx.state.portal.profile.settings.moderation.moderators || [];
-            const isModerator = moderators.includes(jwtUsername);
-            const { _id: draftId } = updateNFTItemMetadataDraftModerationMsgCmd.getCmdPayload();
-            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
-            if (!draft)
-              throw new NotFoundError(`Draft for "${draftId}" id is not found`);
-
-            const isAuthorized = await teamDtoService.authorizeTeamAccount(draft?.owner, jwtUsername);
-
-            if (!isAuthorized && !isModerator)
-              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit "${draftId}" draft`);
-
-            //moderator can change message if status is PROPOSED
-            if (!isModerator)
-              throw new ForbiddenError(`"${jwtUsername}" is not permitted to edit moderation message`);
-            if (draft.status !== PROPOSED)
-              throw new BadRequestError("Bad status");
-          };
-
-          const updateNFTItemMetadataDraftStatusSettings = {
-            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS,
-            validate: validateUpdateNFTItemMetadataDraftStatus
-          };
-
-          const updateNFTItemMetadataDraftModerationMsgSettings = {
-            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_MODERATION_MSG,
-            validate: validateUpdateNFTItemMetadataDraftModerationMsg
-          };
-
-          // array of orders if can be a few valid orders
-          const validCmdsOrders = [
-            [updateNFTItemMetadataDraftStatusSettings],
-            [updateNFTItemMetadataDraftModerationMsgSettings],
-            [
-              updateNFTItemMetadataDraftStatusSettings,
-              updateNFTItemMetadataDraftModerationMsgSettings
-            ],
-          ];
-
-          await this.validateCmds(appCmds, validCmdsOrders);
-        };
+        const validate = async (appCmds) => {};
 
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-
-
-        const changeStatusCmd = msg.appCmds.find(x => x.getCmdNum() === APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS);
-        if (
-          changeStatusCmd &&
-          changeStatusCmd.getCmdPayload().status == NftItemMetadataDraftStatus.REJECTED &&
-          config.TENANT_HOT_WALLET
-        ) {
-          // Lazy sell proposal decline flow
-          const { _id: draftId } = changeStatusCmd.getCmdPayload();
-
-          const nftItemDraft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(draftId);
-          // findOne because mapProposal is not working correctly
-          const lazySellProposal = await proposalDtoService.findOne({ _id: nftItemDraft.lazySellProposalId });
-          if (!lazySellProposal) throw new Error("Cannot find lazy sell proposal to decline");
-          const { batchWeight } = lazySellProposal;
-          const { daoId: hotWalletDaoId, privKey: hotWalletPrivKey } = config.TENANT_HOT_WALLET;
-
-          const declineProposalTx = await chainTxBuilder.begin()
-            .then((txBuilder) => {
-              const declineLazySellProposalCmd = new DeclineProposalCmd({
-                entityId: nftItemDraft.lazySellProposalId,
-                account: hotWalletDaoId,
-                batchWeight
-              });
-              txBuilder.addCmd(declineLazySellProposalCmd);
-
-              return txBuilder.end();
-            })
-            .then((acceptTx) => acceptTx.signAsync(hotWalletPrivKey, chainNodeClient))
-
-          await assetCmdHandler.process(declineProposalTx.getPayload(), ctx);
-        }
-
-        //after separate cmd validation all appCmds should have draft _id in payload
+        // after separate cmd validation all appCmds should have draft _id in payload
         const draftId = this.extractEntityId(msg, msg.appCmds[0].getCmdNum(), '_id');
 
         ctx.successRes({
