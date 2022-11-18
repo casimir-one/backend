@@ -261,7 +261,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED, asy
 
     sendEmailNotification(updatedDraft.owner, 
       `Your asset has been approved`, 
-      `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved !</p>`
+      `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved ! Your queue number is <b>${queueNumber}</b></p>`
     );
   } else {
     const updatedDraft = await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
