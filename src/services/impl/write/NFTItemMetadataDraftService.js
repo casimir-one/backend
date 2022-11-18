@@ -43,6 +43,7 @@ class NFTItemMetadataDraftService extends BaseService {
     status,
     authors,
     moderationMessage,
+    queueNumber,
     lazySellProposalId //TODO: remove when we have onchain market
   }) {
     const updatedDraft = await this.updateOne({ _id: id }, {
@@ -52,6 +53,7 @@ class NFTItemMetadataDraftService extends BaseService {
       status,
       authors,
       moderationMessage,
+      queueNumber,
       lazySellProposalId //TODO: remove when we have onchain market
     });
 

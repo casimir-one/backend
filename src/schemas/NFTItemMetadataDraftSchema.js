@@ -14,6 +14,7 @@ const NFTItemMetadataDraftSchema = new Schema({
   "attributes": [AttributeValueSchema],
   "hash": { type: String, index: true },
   "algo": { type: String },
+  "queueNumber": { type: Number, default: -1 },
   "status": {
     type: Number,
     enum: Object.values(NftItemMetadataDraftStatus),

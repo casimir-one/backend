@@ -76,6 +76,7 @@ const PortalSchema = new Schema({
   "logo": { type: String, default: "default_portal_logo.png" },
   "banner": { type: String, default: "default_banner_logo.png" },
   "network": GlobalNetworkSettings,
+  "maxQueueNumber": {type: Number, default: 0 },
   "settings": {
     "attributeOverwrites": [AttributeOverwrite],
     "attributeSettings": { type: Object },

@@ -42,6 +42,16 @@ const nftItemDtoService = new NFTItemDtoService();
 const userService = new UserService();
 const proposalDtoService = new ProposalDtoService();
 
+const validateEmail = (email) => {
+  const patternStr = ['^(([^<>()[\\]\\.,;:\\s@"]+(\\.[^<>()\\[\\]\\.,;:\\s@"]+)*)',
+    '|(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.',
+    '[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+',
+    '[a-zA-Z]{2,}))$'].join('');
+  const pattern = new RegExp(patternStr);
+
+  return pattern.test(email) && email.split('@')[0].length <= 64;
+}
+
 class AssetsController extends BaseController {
   getAssetsByType = this.query({
     h: async (ctx) => {
@@ -523,10 +533,23 @@ class AssetsController extends BaseController {
     form: NFTItemMetadataForm, h: async (ctx) => {
       try {
         console.log("In controller createNFTItemMetadataDraft")
+
+        let email;
+        
         const validate = async (appCmds) => {
           const validateCreateNFTItemMetadataDraft = async (createNFTItemMetadataDraftCmd, cmdStack) => {
             const { nftCollectionId } = createNFTItemMetadataDraftCmd.getCmdPayload();
             const nftCollection = await nftCollectionMetadataService.getNFTCollectionMetadata(nftCollectionId);
+            const { appCmds } = msg;
+            const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT);
+            if (!appCmd) {
+              throw new BadRequestError(`'CREATE_NFT_ITEM_METADATA_DRAFT' is not found`);
+            }
+
+            email = appCmd.getCmdPayload().owner;
+            if (!email || !validateEmail(email)) {
+              throw new BadRequestError(`Email is invalid or not provided`);
+            }
 
             if (!nftCollection) {
               throw new BadRequestError(`Nft collection "${nftCollectionId}" doesn't exist`);
@@ -1246,13 +1269,26 @@ class AssetsController extends BaseController {
   moderateNFTItemMetadataDraft = this.command({
     h: async (ctx) => {
       try {
-        const validate = async (appCmds) => {};
+
+        let newStatus;
+        let draftId;
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS);
+            if (!appCmd) {
+              throw new BadRequestError(`'APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS' is not found`);
+            }
+
+            newStatus = appCmd.getCmdPayload().status;
+            draftId = appCmd.getCmdPayload()._id;
+
+            if (newStatus != NftItemMetadataDraftStatus.APPROVED && newStatus != NftItemMetadataDraftStatus.REJECTED) {
+              throw new BadRequestError(`Unrecognized status provided`);
+            }
+        };
 
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
         // after separate cmd validation all appCmds should have draft _id in payload
-        const draftId = this.extractEntityId(msg, msg.appCmds[0].getCmdNum(), '_id');
-
         ctx.successRes({
           _id: draftId
         });

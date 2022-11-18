@@ -65,6 +65,13 @@ class PortalService {
     return savedPortalProfile.toObject();
   }
 
+  async increasePortalMaxQueueNumber(portalId) {
+    const portalProfile = await PortalSchema.findOne({ _id: portalId });
+    const newNumber = portalProfile.maxQueueNumber + 1;
+    portalProfile.maxQueueNumber = newNumber;
+    const savedPortalProfile = await portalProfile.save();
+    return newNumber;
+  }
 
   async updatePortalNetworkSettings(portalId, {
     globalNetworkIsVisible

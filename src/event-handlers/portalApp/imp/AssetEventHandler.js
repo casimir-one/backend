@@ -9,10 +9,62 @@ import {
   NFTCollectionMetadataService,
   NFTItemMetadataDraftService,
   NFTItemMetadataService,
+  PortalService
 } from '../../../services';
 import { genSha256Hash } from '@casimir.one/toolbox';
 import mongoose from 'mongoose';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
+import config from '../../../config';
+
+const nodemailer = require("nodemailer");
+const { google } = require("googleapis");
+const USER = config.GMAIL_USER;
+const CLIENT_ID = config.GMAIL_CLIENT_ID;
+const CLIENT_SECRET = config.GMAIL_CLIENT_SECRET;
+const REFRESH_TOKEN = config.GMAIL_REFRESH_TOKEN;
+
+const sendEmailNotification = (to, subject, html) => {
+  const OAuth2 = google.auth.OAuth2;
+  const oauth2Client = new OAuth2(
+        CLIENT_ID, // ClientID
+        CLIENT_SECRET, // Client Secret
+       "https://developers.google.com/oauthplayground" // Redirect URL
+  );
+
+  oauth2Client.setCredentials({
+      refresh_token: REFRESH_TOKEN
+  });
+  const accessToken = oauth2Client.getAccessToken()
+
+
+  const smtpTransport = nodemailer.createTransport({
+      service: "gmail",
+      auth: {
+            type: "OAuth2",
+            user: USER, 
+            clientId: CLIENT_ID,
+            clientSecret: CLIENT_SECRET,
+            refreshToken: REFRESH_TOKEN,
+            accessToken: accessToken
+      }
+  });
+
+
+  const mailOptions = {
+      from: USER,
+      to: to,
+      subject: subject,
+      generateTextFromHTML: true,
+      html: html
+  };
+
+  smtpTransport.sendMail(mailOptions, (error, response) => {
+      error ? console.log(error) : console.log(response);
+      smtpTransport.close();
+  });
+
+};
+
 
 
 class AssetEventHandler extends PortalAppEventHandler {
@@ -29,6 +81,7 @@ const ftClassService = new FTClassService();
 const nftCollectionMetadataService = new NFTCollectionMetadataService();
 const nftItemMetadataService = new NFTItemMetadataService();
 const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
+const portalService = new PortalService();
 
 assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
 
@@ -128,6 +181,8 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
 
   await nftItemMetadataDraftService.createNFTItemMetadataDraft(draftData);
   await nftCollectionMetadataService.increaseNftCollectionNextItemId(nftCollectionId);
+
+  sendEmailNotification(owner, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
 });
 
 assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (event) => {
@@ -196,10 +251,29 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDA
 assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED, async (event) => {
   const { _id, status } = event.getEventPayload();
 
-  await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
-    _id,
-    status,
-  })
+  if (status == NftItemMetadataDraftStatus.APPROVED) {
+    const queueNumber = await portalService.increasePortalMaxQueueNumber(config.TENANT);
+    const updatedDraft = await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
+      _id,
+      status,
+      queueNumber
+    });
+
+    sendEmailNotification(updatedDraft.owner, 
+      `Your asset has been approved`, 
+      `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved !</p>`
+    );
+  } else {
+    const updatedDraft = await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
+      _id,
+      status,
+    });
+    sendEmailNotification(updatedDraft.owner, 
+      `Your asset has been declined`, 
+      `<p>Unfortunately, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been declined</p>`
+    );
+  }
+
 });
 
 module.exports = assetEventHandler;
