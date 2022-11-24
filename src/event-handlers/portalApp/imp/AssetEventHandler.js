@@ -8,7 +8,6 @@ import {
   FTClassService,
   NFTCollectionMetadataService,
   NFTItemMetadataDraftService,
-  NFTItemMetadataService,
   PortalService
 } from '../../../services';
 import { genSha256Hash } from '@casimir.one/toolbox';
@@ -79,7 +78,6 @@ const assetEventHandler = new AssetEventHandler();
 const assetService = new AssetService();
 const ftClassService = new FTClassService();
 const nftCollectionMetadataService = new NFTCollectionMetadataService();
-const nftItemMetadataService = new NFTItemMetadataService();
 const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
 const portalService = new PortalService();
 
@@ -118,23 +116,6 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
     description,
     type: AssetType.FT
   });
-});
-
-assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_CREATED, async (event) => {
-  const {
-    entityId,
-    issuer,
-    attributes,
-    issuedByTeam
-  } = event.getEventPayload();
-
-  await nftCollectionMetadataService.createNFTCollectionMetadata({
-    _id: entityId,
-    issuer,
-    attributes,
-    issuedByTeam
-  });
-
 });
 
 assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_UPDATED, async (event) => {
@@ -182,7 +163,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
   await nftItemMetadataDraftService.createNFTItemMetadataDraft(draftData);
   await nftCollectionMetadataService.increaseNftCollectionNextItemId(nftCollectionId);
 
-  sendEmailNotification(owner, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
+  // sendEmailNotification(owner, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
 });
 
 assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (event) => {
@@ -213,32 +194,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async (eve
   await nftItemMetadataDraftService.deleteNFTItemMetadataDraft(_id);
 });
 
-assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_CREATED, async (event) => {
-  const {
-    nftCollectionId,
-    owner,
-    ownedByTeam,
-    nftItemMetadataDraftId,
-    authors,
-    entityId,
-    attributes
-  } = event.getEventPayload();
-
-  const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(nftItemMetadataDraftId)
-
-  await nftItemMetadataService.createNFTItemMetadata({
-    ...draft,
-    _id: { nftItemId: entityId, nftCollectionId: nftCollectionId },
-    nftCollectionId,
-    owner,
-    ownedByTeam,
-    authors,
-    attributes,
-  })
-
-  await nftItemMetadataDraftService.deleteNFTItemMetadataDraft(draft._id);
-});
-
 assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDATED, async (event) => {
   const { _id, moderationMessage } = event.getEventPayload();
 
@@ -259,19 +214,19 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED, asy
       queueNumber
     });
 
-    sendEmailNotification(updatedDraft.owner, 
-      `Your asset has been approved`, 
-      `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved ! Your queue number is <b>${queueNumber}</b></p>`
-    );
+    // sendEmailNotification(updatedDraft.owner, 
+    //   `Your asset has been approved`, 
+    //   `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved ! Your queue number is <b>${queueNumber}</b></p>`
+    // );
   } else {
     const updatedDraft = await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
       _id,
       status,
     });
-    sendEmailNotification(updatedDraft.owner, 
-      `Your asset has been declined`, 
-      `<p>Unfortunately, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been declined</p>`
-    );
+    // sendEmailNotification(updatedDraft.owner, 
+    //   `Your asset has been declined`, 
+    //   `<p>Unfortunately, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been declined</p>`
+    // );
   }
 
 });

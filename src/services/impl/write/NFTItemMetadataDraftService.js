@@ -74,21 +74,7 @@ class NFTItemMetadataDraftService extends BaseService {
     const draft = await this.findOne({ _id: id });
     return draft;
   }
-
-  async getNFTItemMetadataDraftByHash(hash) {
-    const draft = await this.findOne({ hash });
-    return draft;
-  }
-
-  async getNFTItemMetadataDraftsByNFTCollection(nftCollectionId) {
-    const drafts = await this.findMany({ nftCollectionId });
-    return drafts;
-  }
-
-  async lookupNFTItemMetadataDraftsWithPagination(filter, sort, pagination) {
-    const drafts = await this.findManyPaginated(filter, sort, pagination);
-    return drafts;
-  }
+  
 }
 
 export default NFTItemMetadataDraftService;

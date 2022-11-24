@@ -13,7 +13,6 @@ import UserService from './impl/write/UserService';
 import DocumentTemplateDtoService from './impl/read/DocumentTemplateDtoService';
 import DocumentTemplateService from './impl/write/DocumentTemplateService';
 import NFTItemDtoService from './impl/read/NFTItemDtoService';
-import NFTItemMetadataService from './impl/write/NFTItemMetadataService';
 import NFTItemMetadataDraftService from './impl/write/NFTItemMetadataDraftService';
 import PortalDtoService from './impl/read/PortalDtoService';
 import PortalService from './impl/write/PortalService';
@@ -46,7 +45,6 @@ module.exports = {
   DocumentTemplateService,
 
   NFTItemDtoService,
-  NFTItemMetadataService,
   NFTItemMetadataDraftService,
 
   PortalDtoService,
