@@ -4,111 +4,59 @@ class PortalService {
 
   constructor() {};
 
-  async createPortalProfile({
-    portalId,
-    name,
-    shortName,
-    description,
-    email,
-    logo,
-    banner
-  }, {
-    signUpPolicy,
-    faq,
-    layouts
-  }) {
-
-    const portalProfile = new PortalSchema({
-      _id: portalId,
-      name: name,
-      shortName: shortName,
-      description: description,
-      email: email,
-      logo: logo,
-      banner: banner,
-      settings: {
-        signUpPolicy,
-        faq,
-        layouts: layouts || {}
-      }
-    });
-
-    const savedPortalProfile = await portalProfile.save();
-    return savedPortalProfile.toObject();
+  async getPortal(id) {
+    const portal = await PortalSchema.findOne({ _id: id });
+    if (!portal) return null;
+    return portal;
   }
 
-  async updatePortalProfile(portalId, {
+  async updatePortal(portalId, {
     name,
     shortName,
     description,
     email,
     logo,
     banner
-  }, {
-    faq
   }) {
 
-    const portalProfile = await PortalSchema.findOne({ _id: portalId });
-    if (!portalProfile) {
+    const portal = await PortalSchema.findOne({ _id: portalId });
+    if (!portal) {
       throw new Error(`Portal ${portalId} does not exist`);
     }
 
-    portalProfile.name = name !== undefined ? name : portalProfile.name;
-    portalProfile.shortName = shortName !== undefined ? shortName : portalProfile.shortName;
-    portalProfile.description = description !== undefined ? description : portalProfile.description;
-    portalProfile.email = email !== undefined ? email : portalProfile.email;
-    portalProfile.logo = logo !== undefined ? logo : portalProfile.logo;
-    portalProfile.banner = banner !== undefined ? banner : portalProfile.banner;
-    portalProfile.settings.faq = faq !== undefined ? faq : portalProfile.settings.faq;
+    portal.name = name !== undefined ? name : portal.name;
+    portal.shortName = shortName !== undefined ? shortName : portal.shortName;
+    portal.description = description !== undefined ? description : portal.description;
+    portal.email = email !== undefined ? email : portal.email;
+    portal.logo = logo !== undefined ? logo : portal.logo;
+    portal.banner = banner !== undefined ? banner : portal.banner;
     
-    const savedPortalProfile = await portalProfile.save();
+    const savedPortalProfile = await portal.save();
     return savedPortalProfile.toObject();
   }
 
   async increasePortalMaxQueueNumber(portalId) {
-    const portalProfile = await PortalSchema.findOne({ _id: portalId });
-    const newNumber = portalProfile.maxQueueNumber + 1;
-    portalProfile.maxQueueNumber = newNumber;
-    const savedPortalProfile = await portalProfile.save();
+    const portal = await PortalSchema.findOne({ _id: portalId });
+    const newNumber = portal.maxQueueNumber + 1;
+    portal.maxQueueNumber = newNumber;
+    await portal.save();
     return newNumber;
   }
 
-  async updatePortalNetworkSettings(portalId, {
-    globalNetworkIsVisible
-  }) {
-    const portalProfile = await PortalSchema.findOne({ _id: portalId });
-    portalProfile.network.isGlobalScopeVisible = !!globalNetworkIsVisible;
-    const savedPortalProfile = await portalProfile.save();
+  async updatePortalAttributeMappings(portalId, attributeMappings) {
+    const portal = await PortalSchema.findOne({ _id: portalId });
+    portal.settings.attributeMappings = attributeMappings;
+    const savedPortalProfile = await portal.save();
     return savedPortalProfile.toObject();
   }
 
-  async updatePortalAttributeSettings(portalId, attributeSettings) {
-    const portalProfile = await PortalSchema.findOne({ _id: portalId });
-    portalProfile.settings.attributeSettings = attributeSettings;
-    const savedPortalProfile = await portalProfile.save();
+  async updatePortalLayoutMappings(portalId, layoutMappings) {
+    const portal = await PortalSchema.findOne({ _id: portalId });
+    portal.settings.layoutMappings = layoutMappings;
+    const savedPortalProfile = await portal.save();
     return savedPortalProfile.toObject();
   }
 
-  async updatePortalLayouts(portalId, layouts) {
-    const portalProfile = await PortalSchema.findOne({ _id: portalId });
-    portalProfile.settings.layouts = layouts;
-    const savedPortalProfile = await portalProfile.save();
-    return savedPortalProfile.toObject();
-  }
-
-  async updatePortalLayoutSettings(portalId, layoutSettings) {
-    const portalProfile = await PortalSchema.findOne({ _id: portalId });
-    portalProfile.settings.layoutSettings = layoutSettings;
-    const savedPortalProfile = await portalProfile.save();
-    return savedPortalProfile.toObject();
-  }
-
-  async getPortal(id) {
-    const portalProfile = await PortalSchema.findOne({ _id: id });
-    if (!portalProfile) return null;
-
-    return portalProfile;
-  }
 }
 
 export default PortalService;

@@ -485,25 +485,7 @@ class UsersController extends BaseController {
         let buff;
 
         if (user && user.profile && user.profile.attributes) {
-          // temp solution //
-          const attrs = await attributeDtoService.getNetworkAttributesByScope(AttributeScope.USER);
-          const attr = attrs.find(
-            ({
-              type,
-              title,
-              portalId
-            }) => title === 'Avatar' && type === 'image' && portalId === user.portalId
-          );
-          const userAttr = user.profile.attributes.find(({
-            attributeId
-          }) => attributeId.toString() === (attr ? attr._id.toString() : ''));
-          const filepath = FileStorage.getAccountAvatarFilePath(user.account.name, userAttr ? userAttr.value : 'default');
-          const exists = await FileStorage.exists(filepath);
-          if (exists) {
-            buff = await FileStorage.get(filepath);
-          } else {
-            src = defaultAvatar;
-          }
+
         } else {
           src = defaultAvatar;
         }

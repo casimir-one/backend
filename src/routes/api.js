@@ -32,9 +32,6 @@ protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
 protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountProposals)
 
-public_route.get('/network/portals/listing', portalCtrl.getNetworkPortals)
-public_route.get('/network/portals/:portal', portalCtrl.getNetworkPortal)
-
 /* V2 */
 
 protected_route.post('/v2/team', teamsCtrl.createTeam)
@@ -51,10 +48,8 @@ public_route.get('/team/logo/:teamId', teamsCtrl.getTeamLogo)
 
 public_route.get('/v2/attributes', attributesCtrl.getAttributes);
 public_route.get('/v2/attributes/scope/:scope', attributesCtrl.getAttributesByScope);
-public_route.get('/v2/attributes/scope/network/:scope', attributesCtrl.getNetworkAttributesByScope);
 public_route.get('/v2/attribute/:id', attributesCtrl.getAttribute);
-public_route.get('/v2/attributes/network', attributesCtrl.getNetworkAttributes);
-public_route.get('/v2/attributes/system', attributesCtrl.getSystemAttributes);
+
 protected_route.post('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
 protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
 protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
@@ -64,14 +59,10 @@ public_route.get('/v2/assets/type/:type', assetsCtrl.getAssetsByType)
 protected_route.get('/v2/assets/issuer/:issuer', assetsCtrl.getAssetsByIssuer)
 public_route.get('/v2/assets/limit/:limit', assetsCtrl.lookupAssets)
 
-public_route.get('/v2/tokens/nft/:nftCollectionId', assetsCtrl.getNFTCollection)
-public_route.get('/v2/tokens/nfts', assetsCtrl.getNFTCollectionsByIds)
-public_route.get('/v2/tokens/nfts/listing', assetsCtrl.getPublicNFTCollectionsListing)
-protected_route.get('/v2/tokens/nfts/listing/issuer/:issuer', assetsCtrl.getNFTCollectionsByIssuer)
-public_route.get('/v2/tokens/nfts/portal/listing', assetsCtrl.getNFTCollectionsByPortal)
-protected_route.post('/v2/tokens/nft/create', assetsCtrl.createNFTCollection)
-protected_route.post('/v2/tokens/nft/metadata/create', assetsCtrl.createNFTCollectionMetadata)
-protected_route.put('/v2/tokens/nft/metadata/update', assetsCtrl.updateNFTCollectionMetadata)
+public_route.get('/v3/collections', assetsCtrl.getNFTCollections)
+public_route.get('/v3/collections/:nftCollectionId', assetsCtrl.getNFTCollection)
+protected_route.post('/v3/collections', assetsCtrl.createNFTCollection)
+protected_route.put('/v3/collections', assetsCtrl.updateNFTCollection)
 
 public_route.get('/v2/tokens/nft/items/drafts/listing-paginated', assetsCtrl.getNFTItemsMetadataDraftsListingPaginated)
 public_route.get('/v2/tokens/nft/items/drafts/nft-collection/:nftCollectionId', assetsCtrl.getNFTItemMetadataDraftsByNFTCollection)

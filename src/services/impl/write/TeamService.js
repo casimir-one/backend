@@ -1,7 +1,5 @@
 import BaseService from './../../base/BaseService';
 import TeamSchema from './../../../schemas/TeamSchema';
-import AttributeDtoService from './../read/AttributeDtoService';
-import { AttributeScope } from '@casimir.one/platform-core'
 
 class TeamService extends BaseService {
 
@@ -16,18 +14,6 @@ class TeamService extends BaseService {
     members,
     address
   }) {
-
-    const attributeDtoService = new AttributeDtoService();
-    const systemAttributes = await attributeDtoService.getSystemAttributes();
-    const teamAttr = systemAttributes.find(attr => (attr.scope == AttributeScope.TEAM) && (attr.type == 'text'));
-
-    // Team attribute is required
-    if (teamAttr && !attributes.some(rAttr => rAttr.attributeId === teamAttr._id.toString())) {
-      attributes.push({
-        attributeId: teamAttr._id.toString(),
-        value: `Team ${_id}`
-      })
-    }
 
     const result = await this.createOne({
       _id,

@@ -36,48 +36,11 @@ class AttributesController extends BaseController {
     }
   });
 
-  getNetworkAttributesByScope = this.query({
-    h: async (ctx) => {
-      try {
-        const scope = ctx.params.scope;
-        const attributes = await attributeDtoService.getNetworkAttributesByScope(scope);
-        ctx.successRes(attributes);
-      } catch (err) {
-        console.error(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
   getAttribute = this.query({
     h: async (ctx) => {
       try {
         const attributeId = ctx.params.id;
         const attributes = await attributeDtoService.getAttribute(attributeId);
-        ctx.successRes(attributes);
-      } catch (err) {
-        console.error(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getNetworkAttributes = this.query({
-    h: async (ctx) => {
-      try {
-        const attributes = await attributeDtoService.getNetworkAttributes();
-        ctx.successRes(attributes);
-      } catch (err) {
-        console.error(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getSystemAttributes = this.query({
-    h: async (ctx) => {
-      try {
-        const attributes = await attributeDtoService.getSystemAttributes();
         ctx.successRes(attributes);
       } catch (err) {
         console.error(err);

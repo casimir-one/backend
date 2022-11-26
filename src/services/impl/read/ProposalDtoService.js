@@ -1,7 +1,6 @@
 import BaseService from './../../base/BaseService';
 import { APP_PROPOSAL, ProposalStatus } from '@casimir.one/platform-core';
 import ProposalSchema from './../../../schemas/ProposalSchema';
-import NFTCollectionDtoService from './NFTCollectionDtoService';
 import TeamDtoService from './TeamDtoService';
 import UserDtoService from './UserDtoService';
 import config from './../../../config';
@@ -9,7 +8,6 @@ import { ChainService } from '@casimir.one/chain-service';
 
 const userDtoService = new UserDtoService({ scoped: false });
 const teamDtoService = new TeamDtoService({ scoped: false });
-const nftCollectionDtoService = new NFTCollectionDtoService({ scoped: false });
 
 
 class ProposalDtoService extends BaseService {

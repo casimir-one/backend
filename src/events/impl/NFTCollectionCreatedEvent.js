@@ -7,10 +7,10 @@ class NFTCollectionCreatedEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
       entityId,
-      issuer,
+      ownerId,
     } = eventPayload;
 
-    assert(!!issuer, "'issuer' is required");
+    assert(!!ownerId, "'ownerId' is required");
     assert(!!entityId, "'entityId' is required");
 
     super(APP_EVENT.NFT_COLLECTION_CREATED, eventPayload);

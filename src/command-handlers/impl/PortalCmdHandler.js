@@ -38,15 +38,13 @@ portalCmdHandler.register(APP_CMD.UPDATE_LAYOUT, (cmd, ctx) => {
 });
 
 portalCmdHandler.register(APP_CMD.UPDATE_LAYOUT_SETTINGS, (cmd, ctx) => {
-  const layoutSettings = cmd.getCmdPayload();
-  
-  ctx.state.appEvents.push(new LayoutSettingsUpdatedEvent({ layoutSettings, portalId: ctx.state.portal.id }));
+  const layoutMappings = cmd.getCmdPayload();
+  ctx.state.appEvents.push(new LayoutSettingsUpdatedEvent({ layoutMappings, portalId: ctx.state.portal.id }));
 });
 
 portalCmdHandler.register(APP_CMD.UPDATE_ATTRIBUTE_SETTINGS, (cmd, ctx) => {
-  const attributeSettings = cmd.getCmdPayload();
-  
-  ctx.state.appEvents.push(new AttributeSettingsUpdatedEvent({ attributeSettings, portalId: ctx.state.portal.id }));
+  const attributeMappings = cmd.getCmdPayload();
+  ctx.state.appEvents.push(new AttributeSettingsUpdatedEvent({ attributeMappings, portalId: ctx.state.portal.id }));
 });
 
 portalCmdHandler.register(APP_CMD.UPDATE_NETWORK_SETTINGS, (cmd, ctx) => {

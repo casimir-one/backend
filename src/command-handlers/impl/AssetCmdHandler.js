@@ -30,16 +30,14 @@ const assetCmdHandler = new AssetCmdHandler();
 assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION_METADATA, (cmd, ctx) => {
   const { 
     entityId, 
-    issuer, 
+    ownerId, 
     attributes,
-    issuedByTeam
   } = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new NFTCollectionMetadataCreatedEvent({
     entityId,
-    issuer,
+    ownerId,
     attributes,
-    issuedByTeam
   }));
 
 });

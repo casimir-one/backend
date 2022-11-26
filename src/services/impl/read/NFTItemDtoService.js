@@ -1,5 +1,3 @@
-import { ChainService } from '@casimir.one/chain-service';
-import config from '../../../config';
 import NFTItemMetadataDraftSchema from '../../../schemas/NFTItemMetadataDraftSchema';
 import BaseService from '../../base/BaseService';
 
@@ -16,7 +14,6 @@ class NFTItemDtoService extends BaseService {
       nftItemId: nftItemMetadata._id.nftItemId,
       owner: nftItemMetadata.owner,
       ownerAddress: nftItemMetadata.ownerAddress,
-      ownedByTeam: nftItemMetadata.ownedByTeam,
       nftCollectionId: nftItemMetadata.nftCollectionId,
       authors: nftItemMetadata.authors,
       attributes: nftItemMetadata.attributes,

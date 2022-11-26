@@ -23,70 +23,25 @@ class PortalDtoService {
       .map((auth) => auth.pubKey)[0];
 
     return { 
-      id: id, 
+      _id: id,
+      id: id, // obsolete
       pubKey: pubKey || null, 
       account: chainAccount,
-      profile: portal,
-      admins: admins 
-    };
-
-  }
-
-  async getNetworkPortal(id) {
-    const doc = await PortalSchema.findOne({ _id: id });
-    if (!doc) return null;
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-    const portal = doc.toObject();
-    const chainAccount = await chainRpc.getAccountAsync(id);
-
-    return { 
-      id: portal._id, 
-      account: chainAccount,
-      profile: { 
-        ...portal,
-      }, 
-      network: undefined 
+      admins: admins,
+      ...portal
     };
   }
 
-  async getNetworkPortals() {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const chainRpc = chainService.getChainRpc();
-    const docs = await PortalSchema.find({});
-    const portals = docs.map(doc => doc.toObject());
-    const chainAccounts = await chainRpc.getAccountsAsync(portals.map(p => p._id));
-
-    const result = portals.map((portal) => {
-      const chainAccount = chainAccounts.find(a => a.name == portal._id);
-      return { 
-        id: portal._id,
-        account: chainAccount,
-        profile: { 
-          ...portal
-        }, 
-        network: undefined 
-      };
-    });
-    return result;
-  }
-
-  async getPortalAttributeSettings(portalId) {
+  async getPortalAttributeMappings(portalId) {
     const portal = await PortalSchema.findOne({ _id: portalId });
     if (!portal) return null;
-    return portal.settings.attributeSettings;
+    return portal.settings.attributeMappings;
   }
 
-  async getPortalLayouts(portalId) {
+  async getPortalLayoutMappings(portalId) {
     const portal = await PortalSchema.findOne({ _id: portalId });
     if (!portal) return null;
-    return portal.settings.layouts;
-  }
-
-  async getPortalLayoutSettings(portalId) {
-    const portal = await PortalSchema.findOne({ _id: portalId });
-    if (!portal) return null;
-    return portal.settings.layoutSettings;
+    return portal.settings.layoutMappings;
   }
 
 }

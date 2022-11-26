@@ -7,10 +7,10 @@ class LayoutSettingsUpdatedEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
       portalId,
-      layoutSettings
+      layoutMappings
     } = eventPayload;
 
-    assert(!!layoutSettings, "'layoutSettings' is required");
+    assert(!!layoutMappings, "'layoutMappings' is required");
 
     super(APP_EVENT.LAYOUT_SETTINGS_UPDATED, eventPayload);
   }

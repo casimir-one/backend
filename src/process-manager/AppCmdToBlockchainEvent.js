@@ -90,7 +90,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
   [APP_CMD.CREATE_NFT_COLLECTION]: [{
     eventNum: DOMAIN_EVENT.NFT_COLLECTION_CREATED,
     matchF: ({ txInfo, appCmd, event, chainService }) => {
-      const { entityId: cmdClassId, issuer: cmdIssuer } = appCmd.getCmdPayload();
+      const { entityId: cmdClassId, ownerId: cmdIssuer } = appCmd.getCmdPayload();
       const { class: eventClassId, creator: eventIssuerAddress, owner: eventOwnerAddress } = event.getEventPayload();
 
       const { registry } = chainService.getChainNodeClient();
@@ -98,7 +98,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
 
       return checkMatch({
         classId: cmdClassId == eventClassId,
-        issuer: toAddress(cmdIssuer, registry) == eventIssuerAddress,
+        ownerId: toAddress(cmdIssuer, registry) == eventIssuerAddress,
       })
     }
   }],

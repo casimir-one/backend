@@ -20,14 +20,12 @@ portalEventHandler.register(APP_EVENT.PORTAL_PROFILE_UPDATED, async (event) => {
     shortName,
     description,
     email,
-    settings: {
-      faq
-    },
+    settings: {},
     portalId
   } = event.getEventPayload();
 
   const portal = await portalService.getPortal(portalId);
-  const updatedPortalProfile = await portalService.updatePortalProfile(
+  await portalService.updatePortal(
     portalId,
     {
       ...portal,
@@ -37,55 +35,25 @@ portalEventHandler.register(APP_EVENT.PORTAL_PROFILE_UPDATED, async (event) => {
       email
     },
     {
-      ...portal.settings,
-      faq
+      ...portal.settings
     }
   );
 });
 
-portalEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
-  const { title, banner, logo, portalId } = event.getEventPayload();
-
-  const updatedPortalProfile = await portalService.updatePortalProfile(portalId, {
-    banner,
-    logo,
-    name: title
-  }, {});
-});
-
-portalEventHandler.register(APP_EVENT.LAYOUT_UPDATED, async (event) => {
-  const { portalId, layout } = event.getEventPayload();
-
-  const updatedPortalProfile = await portalService.updatePortalLayouts(
-    portalId,
-    layout
-  );
-});
-
 portalEventHandler.register(APP_EVENT.LAYOUT_SETTINGS_UPDATED, async (event) => {
-  const { portalId, layoutSettings } = event.getEventPayload();
-
-  const updatedPortalProfile = await portalService.updatePortalLayoutSettings(
+  const { portalId, layoutMappings } = event.getEventPayload();
+  await portalService.updatePortalLayoutMappings(
     portalId,
-    layoutSettings
+    layoutMappings
   );
 });
 
 portalEventHandler.register(APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED, async (event) => {
-  const { portalId, attributeSettings } = event.getEventPayload();
+  const { portalId, attributeMappings } = event.getEventPayload();
 
-  const updatedPortalProfile = await portalService.updatePortalAttributeSettings(
+  const updatedPortalProfile = await portalService.updatePortalAttributeMappings(
     portalId,
-    attributeSettings
-  );
-});
-
-portalEventHandler.register(APP_EVENT.NETWORK_SETTINGS_UPDATED, async (event) => {
-  const { portalId, networkSettings } = event.getEventPayload();
-
-  const updatedPortalProfile = await portalService.updatePortalNetworkSettings(
-    portalId,
-    networkSettings
+    attributeMappings
   );
 });
 

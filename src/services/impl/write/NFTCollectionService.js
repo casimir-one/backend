@@ -1,47 +1,39 @@
 import { AttributeScope } from '@casimir.one/platform-core';
 import { isArray } from '@casimir.one/toolbox';
 import mongoose from 'mongoose';
-import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
+import NFTCollectionSchema from '../../../schemas/NFTCollectionSchema';
 import { logWarn } from '../../../utils/log';
 import BaseService from '../../base/BaseService';
 import AttributeDtoService from '../read/AttributeDtoService';
 
 
-class NFTCollectionMetadataService extends BaseService {
+class NFTCollectionService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(NFTCollectionMetadataSchema, options);
+    super(NFTCollectionSchema, options);
   }
 
-  async getNFTCollectionMetadata(nftCollectionId) {
+  async getNFTCollection(nftCollectionId) {
     const nftCollection = await this.findOne({ _id: nftCollectionId });
     return nftCollection || null;
   }
 
-  async getNFTCollectionMetadatas(nftCollectionIds) {
-    const nftCollection = await this.findMany({ _id: { $in: [...nftCollectionIds] } });
-    return nftCollection || null;
-  }
-
-  async createNFTCollectionMetadata({
+  async createNFTCollection({
     _id,
-    issuer,
+    ownerId,
     attributes = [],
-    issuedByTeam
   }) {
     const mappedAttributes = await this.mapAttributes(attributes);
     const result = await this.createOne({
       _id,
-      issuer,
+      ownerId,
       attributes: mappedAttributes,
-      issuedByTeam
-    })
+    });
 
     return result;
   }
 
-
-  async updateNFTCollectionMetadata({
+  async updateNFTCollection({
     _id,
     attributes
   }) {
@@ -97,4 +89,4 @@ class NFTCollectionMetadataService extends BaseService {
   }
 }
 
-export default NFTCollectionMetadataService;
+export default NFTCollectionService;

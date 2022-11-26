@@ -123,170 +123,7 @@ class PortalController extends BaseController {
     }
   });
 
-  getNetworkPortal = this.query({
-    h: async (ctx) => {
-      try {
-        const portalId = ctx.params.portal;
-        const result = await portalDtoService.getNetworkPortal(portalId);
-        ctx.successRes(result);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-  
-  
-  getNetworkPortals = this.query({
-    h: async (ctx) => {
-      try {
-        const result = await portalDtoService.getNetworkPortals();
-        ctx.successRes(result);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-
-  getPortalAttributeSettings = this.query({
-    h: async (ctx) => {
-      try {
-        const portalId = ctx.state.portal.id;
-        const result = await portalDtoService.getPortalAttributeSettings(portalId);
-        ctx.successRes(result);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-  
-  getPortalLayouts = this.query({
-    h: async (ctx) => {
-      try {
-        const portalId = ctx.state.portal.id;
-        const result = await portalDtoService.getPortalLayouts(portalId);
-        ctx.successRes(result);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getPortalLayoutSettings = this.query({
-    h: async (ctx) => {
-      try {
-        const portalId = ctx.state.portal.id;
-        const result = await portalDtoService.getPortalLayoutSettings(portalId);
-        ctx.successRes(result);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  updatePortalSettings = this.command({
-    form: PortalSettingsForm,
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const updatePortalSettings = {
-            cmdNum: APP_CMD.UPDATE_PORTAL_SETTINGS
-          };
-          
-          const validCmdsOrder = [updatePortalSettings];
-          
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-        
-        const msg = ctx.state.msg;
-        await portalCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  updatePortalLayoutSettings = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const updatePortalLayoutSettings = {
-            cmdNum: APP_CMD.UPDATE_LAYOUT_SETTINGS
-          };
-          
-          const validCmdsOrder = [updatePortalLayoutSettings];
-          
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-        
-        const msg = ctx.state.msg;
-        await portalCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  updatePortalLayouts = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const updatePortalLayoutsSettings = {
-            cmdNum: APP_CMD.UPDATE_LAYOUT
-          };
-          
-          const validCmdsOrder = [updatePortalLayoutsSettings];
-          
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-        
-        const msg = ctx.state.msg;
-        await portalCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  updatePortalAttributeSettings = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const updatePortalAttributeSettings = {
-            cmdNum: APP_CMD.UPDATE_ATTRIBUTE_SETTINGS
-          };
-          
-          const validCmdsOrder = [updatePortalAttributeSettings];
-          
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-        
-        const msg = ctx.state.msg;
-        await portalCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  updatePortalProfile = this.command({
+  updatePortal = this.command({
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
@@ -310,15 +147,41 @@ class PortalController extends BaseController {
     }
   });
 
-  updatePortalNetworkSettings = this.command({
+  getPortalAttributeMappings = this.query({
+    h: async (ctx) => {
+      try {
+        const portalId = ctx.state.portal.id;
+        const result = await portalDtoService.getPortalAttributeMappings(portalId);
+        ctx.successRes(result);
+      } catch (err) {
+        console.log(err);
+        ctx.errorRes(err);
+      }
+    }
+  });
+  
+  getPortalLayoutMappings = this.query({
+    h: async (ctx) => {
+      try {
+        const portalId = ctx.state.portal.id;
+        const result = await portalDtoService.getPortalLayoutMappings(portalId);
+        ctx.successRes(result);
+      } catch (err) {
+        console.log(err);
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  updatePortalAttributeMappings = this.command({
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const updatePortalNetworkSettings = {
-            cmdNum: APP_CMD.UPDATE_NETWORK_SETTINGS
+          const updatePortalAttributeMappings = {
+            cmdNum: APP_CMD.UPDATE_ATTRIBUTE_SETTINGS
           };
           
-          const validCmdsOrder = [updatePortalNetworkSettings];
+          const validCmdsOrder = [updatePortalAttributeMappings];
           
           await this.validateCmds(appCmds, validCmdsOrder);
         };
@@ -333,6 +196,29 @@ class PortalController extends BaseController {
       }
     }
   });
+
+  updatePortalLayoutMappings = this.command({
+    h: async (ctx) => {
+      try {
+
+        const validate = async (appCmds) => {
+          const updatePortalLayoutMappings = {
+            cmdNum: APP_CMD.UPDATE_LAYOUT_SETTINGS
+          };
+          const validCmdsOrder = [updatePortalLayoutMappings];
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+        
+        const msg = ctx.state.msg;
+        await portalCmdHandler.process(msg, ctx, validate);
+        ctx.successRes();
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
 }
 
 const portalCtrl = new PortalController();

@@ -1336,50 +1336,6 @@
         ]
       }
     },
-    "/api/v2/attributes/scope/network/{scope}": {
-      "get": {
-        "tags": [
-          "attribute"
-        ],
-        "summary": "Find network attributes",
-        "description": "Return an array of network attributes",
-        "operationId": "getNetworkAttributesByScope",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "scope",
-            "in": "path",
-            "description": "scope of attributes",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Attribute"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Attributes not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
     "/api/v2/attribute/{id}": {
       "get": {
         "tags": [
@@ -1661,78 +1617,6 @@
         "responses": {
           "405": {
             "description": "Invalid input"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/attributes/network": {
-      "get": {
-        "tags": [
-          "attribute"
-        ],
-        "summary": "Find all network attributes",
-        "description": "Return an array of all network attributes",
-        "operationId": "getNetworkAttributes",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Attribute"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Attributes not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/attributes/system": {
-      "get": {
-        "tags": [
-          "attribute"
-        ],
-        "summary": "Find all system attributes",
-        "description": "Return an array of all system attributes",
-        "operationId": "getSystemAttributes",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Attribute"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Attributes not found"
           }
         },
         "security": [

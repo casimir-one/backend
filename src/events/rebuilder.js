@@ -75,8 +75,8 @@ const eventParser = {
     [APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED]: buildEvent(NFTItemMetadataDraftStatusUpdatedEvent),
     [APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDATED]: buildEvent(NFTItemMetadataDraftModerationMsgUpdatedEvent),
 
-    [APP_EVENT.NFT_COLLECTION_CREATED]: buildEvent(NFTCollectionCreatedEvent),
-    [APP_EVENT.NFT_COLLECTION_METADATA_CREATED]: buildEvent(NFTCollectionMetadataCreatedEvent),
+    // [APP_EVENT.NFT_COLLECTION_CREATED]: buildEvent(NFTCollectionCreatedEvent),
+    // [APP_EVENT.NFT_COLLECTION_METADATA_CREATED]: buildEvent(NFTCollectionMetadataCreatedEvent),
 
     [APP_EVENT.PROPOSAL_CREATED]: buildEvent(ProposalCreatedEvent, buildEventProposalCmd),
     [APP_EVENT.PROPOSAL_ACCEPTED]: buildEvent(ProposalAcceptedEvent),

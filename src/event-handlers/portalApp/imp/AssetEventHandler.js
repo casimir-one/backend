@@ -6,7 +6,7 @@ import {
 import {
   AssetService,
   FTClassService,
-  NFTCollectionMetadataService,
+  NFTCollectionService,
   NFTItemMetadataDraftService,
   PortalService
 } from '../../../services';
@@ -77,7 +77,7 @@ class AssetEventHandler extends PortalAppEventHandler {
 const assetEventHandler = new AssetEventHandler();
 const assetService = new AssetService();
 const ftClassService = new FTClassService();
-const nftCollectionMetadataService = new NFTCollectionMetadataService();
+const nftCollectionService = new NFTCollectionService();
 const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
 const portalService = new PortalService();
 
@@ -118,13 +118,29 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
   });
 });
 
+
+assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_CREATED, async (event) => {
+  const {
+    entityId,
+    attributes,
+    ownerId,
+  } = event.getEventPayload();
+
+  await nftCollectionService.createNFTCollection({
+    _id: entityId,
+    attributes,
+    ownerId
+  });
+});
+
+
 assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_UPDATED, async (event) => {
   const {
     _id,
     attributes
   } = event.getEventPayload();
 
-  await nftCollectionMetadataService.updateNFTCollectionMetadata({
+  await nftCollectionService.updateNFTCollection({
     _id,
     attributes
   });
@@ -138,7 +154,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     entityId,
     authors,
     owner,
-    ownedByTeam,
     attributes,
     status
   } = event.getEventPayload();
@@ -152,7 +167,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     hash: '',
     algo: 'sha256',
     owner,
-    ownedByTeam,
     status: status || NftItemMetadataDraftStatus.IN_PROGRESS,
     authors: authors || [],
     attributes
@@ -161,7 +175,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
   draftData.hash = genSha256Hash(JSON.stringify(attributes));
 
   await nftItemMetadataDraftService.createNFTItemMetadataDraft(draftData);
-  await nftCollectionMetadataService.increaseNftCollectionNextItemId(nftCollectionId);
+  await nftCollectionService.increaseNftCollectionNextItemId(nftCollectionId);
 
   // sendEmailNotification(owner, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
 });

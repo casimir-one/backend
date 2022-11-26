@@ -1,17 +1,17 @@
 import BaseService from '../../base/BaseService';
-import NFTCollectionMetadataSchema from '../../../schemas/NFTCollectionMetadataSchema';
+import NFTCollectionSchema from '../../../schemas/NFTCollectionSchema';
 import AttributeDtoService from './AttributeDtoService';
 import { AttributeScope } from '@casimir.one/platform-core';
 
 const attributeDtoService = new AttributeDtoService();
 
-class NFTCollectionDtoService extends BaseService {
+class NFTCollectionDTOService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(NFTCollectionMetadataSchema, options);
+    super(NFTCollectionSchema, options);
   }
 
-  async mapNFTCollections(nftCollections, filterObj) {
+  async mapDTOs(nftCollections, filterObj) {
     const nftCollectionsAttributes = await attributeDtoService.getAttributesByScope(AttributeScope.NFT_COLLECTION);
 
     const filter = {
@@ -25,14 +25,13 @@ class NFTCollectionDtoService extends BaseService {
       return {
         _id: nftCollection._id,
         nextNftItemId: nftCollection.nextNftItemId,
-        issuer: nftCollection.issuer,
-        issuedByTeam: nftCollection.issuedByTeam,
+        ownerId: nftCollection.ownerId,
         attributes: nftCollection.attributes,
         createdAt: nftCollection.createdAt,
         updatedAt: nftCollection.updatedAt,
         portalId: nftCollection.portalId
       };
-    })
+    }) // TODO: Replace with db query
       .filter(p => !filter.portalIds.length || filter.portalIds.some(portalId => {
         return p.portalId == portalId;
       }))
@@ -58,42 +57,22 @@ class NFTCollectionDtoService extends BaseService {
       .sort((a, b) => b.createdAt - a.createdAt);
   }
 
-  async getNFTCollection(nftCollectionId) {
-    const nftCollectionMetadata = await this.findOne({ _id: nftCollectionId });
+  async getNFTCollectionDTO(id) {
+    const nftCollectionMetadata = await this.findOne({ _id: id });
     if (!nftCollectionMetadata) return null;
-    const results = await this.mapNFTCollections([nftCollectionMetadata]);
+    const results = await this.mapDTOs([nftCollectionMetadata]);
     const [result] = results;
     return result;
   }
 
-  async getNFTCollections(nftCollectionIds) {
-    const nftCollections = await this.findMany({ _id: { $in: [...nftCollectionIds] } });
+  async getNFTCollectionsDTOs(filter) {
+    const f = filter.ids ? { _id: { $in: [...filter.ids] } } : {};
+    const nftCollections = await this.findMany(f);
     if (!nftCollections.length) return [];
-    const result = await this.mapNFTCollections(nftCollections);
+    const result = await this.mapDTOs(nftCollections, { ...filter });
     return result;
   }
 
-  async lookupNFTCollections(filter) {
-    const nftCollections = await this.findMany({});
-    if (!nftCollections.length) return [];
-    const result = await this.mapNFTCollections(nftCollections, { ...filter });
-    return result;
-  }
-
-  async getNFTCollectionsByIssuer(issuer) {
-    const nftCollections = await this.findMany({ issuer: issuer });
-    if (!nftCollections.length) return [];
-    const result = await this.mapNFTCollections(nftCollections);
-    return result;
-  }
-
-  async getNFTCollectionsByPortal(portalId) {
-    const available = await this.findMany({});
-    const nftCollections = available.filter(p => p.portalId == portalId);
-    if (!nftCollections.length) return [];
-    const result = await this.mapNFTCollections(nftCollections);
-    return result;
-  }
 }
 
-export default NFTCollectionDtoService;
+export default NFTCollectionDTOService;

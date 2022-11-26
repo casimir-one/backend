@@ -16,7 +16,7 @@ const signIn = async function (ctx) {
     if (!user || user.portalId != portal.id) {
       ctx.successRes({
         success: false,
-        error: `User '${username}' is not a member of '${portal.profile.name}'`
+        error: `User '${username}' is not a member of '${portal.name}'`
       });
       return;
     }

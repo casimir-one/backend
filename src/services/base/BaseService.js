@@ -33,34 +33,13 @@ class BaseService {
   async getBaseScopeQuery() {
     const portalProfile = await this.getPortalInstance();
     if (!this._scoped) return {};
-
-    if (portalProfile.network.isGlobalScopeVisible) {
-      const portals = await PortalSchema.find({});
-      const portalProfiles = portals.map(t => t.toObject());
-      return {
-        $or: [
-          { portalId: { $in: [...portalProfiles.map(t => t._id)] } },
-          { portalIdsScope: { $in: [...portalProfiles.map(t => t._id)] } },
-          { isGlobalScope: true }
-        ]
-      };
-    } else if (portalProfile.network.visiblePortalIds.length) {
-      return {
-        $or: [
-          { portalId: { $in: [...portalProfile.network.visiblePortalIds] } },
-          { portalIdsScope: { $in: [...portalProfile.network.visiblePortalIds] } },
-          { isGlobalScope: true }
-        ]
-      };
-    } else {
-      return {
-        $or: [
-          { portalId: { $in: [portalProfile._id] } },
-          { portalIdsScope: { $in: [portalProfile._id] } },
-          { isGlobalScope: true }
-        ]
-      };
-    }
+    return {
+      $or: [
+        { portalId: { $in: [portalProfile._id] } },
+        { portalIdsScope: { $in: [portalProfile._id] } },
+        { isGlobalScope: true }
+      ]
+    };
   }
 
 

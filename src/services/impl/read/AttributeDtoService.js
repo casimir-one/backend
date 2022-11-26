@@ -1,6 +1,5 @@
 import AttributeSchema from './../../../schemas/AttributeSchema';
 import { AttributeScope } from '@casimir.one/platform-core';
-import mongoose from 'mongoose';
 import BaseService from './../../base/BaseService';
 
 class AttributeDtoService extends BaseService {
@@ -10,11 +9,16 @@ class AttributeDtoService extends BaseService {
   }
   
   async mapAttributes(attrs) {
-    const portal = await this.getPortalInstance();
     return attrs.map((attr) => {
-      const overwriteAttr = portal.settings.attributeOverwrites.find(({_id}) => mongoose.Types.ObjectId(_id).toString() == mongoose.Types.ObjectId(attr._id).toString()) || {};
-      return {...attr, ...overwriteAttr}
+      return { ...attr }
     })
+  }
+
+  async getAttribute(attributeId) {
+    const result = await this.findOne({ _id: attributeId });
+    if (!result) return;
+    const mapAttributes = await this.mapAttributes([result]);
+    return mapAttributes[0];
   }
   
   async getAttributes() {
@@ -31,33 +35,6 @@ class AttributeDtoService extends BaseService {
     return mapAttributes;
   }
   
-  async getNetworkAttributesByScope(scope = AttributeScope.NFT_COLLECTION) {
-    const result = await this.findMany({ scope })
-    if (!result.length) return [];
-    const mapAttributes = await this.mapAttributes(result);
-    return mapAttributes;
-  }
-  
-  async getAttribute(attributeId) {
-    const result = await this.findOne({ _id: attributeId });
-    if (!result) return;
-    const mapAttributes = await this.mapAttributes([result]);
-    return mapAttributes[0];
-  }
-  
-  async getNetworkAttributes() {
-    const result = await this.findMany({});
-    if (!result.length) return [];
-    const mapAttributes = await this.mapAttributes(result);
-    return mapAttributes;
-  }
-  
-  async getSystemAttributes() {
-    const result = await this.findMany({ isSystem: true });
-    if (!result.length) return [];
-    const mapAttributes = await this.mapAttributes(result);
-    return mapAttributes;
-  }
 }
 
 export default AttributeDtoService;

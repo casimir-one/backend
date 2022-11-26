@@ -4,15 +4,14 @@ import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
 
-const NFTCollectionMetadataSchema = new Schema({
+const NFTCollectionSchema = new Schema({
   "_id": { type: String, required: true },
   "portalId": { type: String, required: true },
-  "issuer": { type: String, required: true },
+  "ownerId": { type: String, required: true },
   "attributes": [AttributeValueSchema],
-  "issuedByTeam": { type: Boolean, default: false },
   "nextNftItemId": { type: Number, default: 1 },
 }, { timestamps: true });
 
-const model = mongoose.model('nft-collection-metadata', NFTCollectionMetadataSchema);
+const model = mongoose.model('nft-collection-metadata', NFTCollectionSchema);
 
 module.exports = model;

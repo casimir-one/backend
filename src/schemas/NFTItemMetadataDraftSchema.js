@@ -10,7 +10,6 @@ const NFTItemMetadataDraftSchema = new Schema({
   "nftCollectionId": { type: String, required: true },
   "nftItemId": { type: String, required: true },
   "owner": { type: String, required: true },
-  "ownedByTeam": { type: Boolean, default: false },
   "attributes": [AttributeValueSchema],
   "hash": { type: String, index: true },
   "algo": { type: String },

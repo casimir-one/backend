@@ -7,10 +7,10 @@ class AttributeSettingsUpdatedEvent extends BaseEvent {
   constructor(eventPayload) {
     const {
       portalId,
-      attributeSettings
+      attributeMappings
     } = eventPayload;
 
-    assert(!!attributeSettings, "'attributeSettings' is required");
+    assert(!!attributeMappings, "'attributeMappings' is required");
 
     super(APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED, eventPayload);
   }

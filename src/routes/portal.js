@@ -15,8 +15,8 @@ public_route.get('/', portalRoute, portalCtrl.getPortal);
 public_route.get('/banner', portalRoute, portalCtrl.getPortalImgs);
 public_route.get('/logo', portalRoute, portalCtrl.getPortalImgs);
 public_route.post('/sign-in', portalRoute, auth.signIn);
-public_route.get('/settings/attribute-settings', portalCtrl.getPortalAttributeSettings);
-public_route.get('/settings/layout-settings', portalCtrl.getPortalLayoutSettings);
+public_route.get('/settings/attribute-mappings', portalCtrl.getPortalAttributeMappings);
+public_route.get('/settings/layout-mappings', portalCtrl.getPortalLayoutMappings);
 
 
 async function portalAdminGuard(ctx, next) {
@@ -24,11 +24,9 @@ async function portalAdminGuard(ctx, next) {
   await next();
 }
 
-protected_route.put('/profile', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalProfile);
-protected_route.put('/settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalSettings);
-protected_route.put('/network-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalNetworkSettings);
-protected_route.put('/settings/attribute-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalAttributeSettings);
-protected_route.put('/settings/layout-settings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalLayoutSettings);
+protected_route.put('/', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortal);
+protected_route.put('/settings/attribute-mappings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalAttributeMappings);
+protected_route.put('/settings/layout-mappings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalLayoutMappings);
 
 const routes = { 
   protected: koa_router().use('/portal', protected_route.routes()),
