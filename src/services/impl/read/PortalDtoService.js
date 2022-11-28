@@ -44,6 +44,12 @@ class PortalDtoService {
     return portal.settings.layoutMappings;
   }
 
+  async getPortalCustomFields(portalId) {
+    const portal = await PortalSchema.findOne({ _id: portalId });
+    if (!portal) return null;
+    return portal.settings.customFields;
+  }
+
 }
 
 export default PortalDtoService;

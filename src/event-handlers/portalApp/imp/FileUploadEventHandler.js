@@ -16,7 +16,6 @@ const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
 
 fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
   const { banner, logo, portalId } = event.getEventPayload();
-  console.log("PP_EVENT.PORTAL_SETTINGS_UPDATED", event);
 
   const portal = await portalService.getPortal(portalId);
   const oldBanner = portal.banner;

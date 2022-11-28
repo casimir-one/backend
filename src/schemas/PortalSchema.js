@@ -18,7 +18,7 @@ const UserRoleModuleMap = new Schema({
 
 const NFTModerationConfigSchema = new Schema({
   "_id": false,
-  "isRequired": { type: Boolean, required: false },
+  "isRequired": { type: Boolean, required: true, default: false },
   "moderators": { type: Array, required: false }
 });
 
@@ -30,11 +30,11 @@ const PortalSchema = new Schema({
   "email": { type: String, default: null, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
   "logo": { type: String, default: "default_portal_logo.png" },
   "banner": { type: String, default: "default_banner_logo.png" },
-  "maxQueueNumber": {type: Number, default: 0 },
+  "maxQueueNumber": { type: Number, default: 0 },
   "settings": {
-    "nftCollectionId": { type: String, default: null }, // active collection
-    "attributeMappings": { type: Object },
-    "layoutMappings": { type: Object },
+    "customFields": { type: Object, default: {} }, // todo: should be the extensible object for portal custom fields
+    "attributeMappings": { type: Object }, // move out
+    "layoutMappings": { type: Object }, // move out
     "theme": { type: Object },
     "modules": AppModuleMap,
     "roles": [UserRoleModuleMap],

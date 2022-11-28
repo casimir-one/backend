@@ -66,7 +66,7 @@ class NFTCollectionDTOService extends BaseService {
   }
 
   async getNFTCollectionsDTOs(filter) {
-    const f = filter.ids ? { _id: { $in: [...filter.ids] } } : {};
+    const f = filter && filter.ids ? { _id: { $in: [...filter.ids] } } : {};
     const nftCollections = await this.findMany(f);
     if (!nftCollections.length) return [];
     const result = await this.mapDTOs(nftCollections, { ...filter });

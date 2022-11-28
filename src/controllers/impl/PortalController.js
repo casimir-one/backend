@@ -147,6 +147,19 @@ class PortalController extends BaseController {
     }
   });
 
+  getPortalCustomFields = this.query({
+    h: async (ctx) => {
+      try {
+        const portalId = ctx.state.portal.id;
+        const result = await portalDtoService.getPortalCustomFields(portalId);
+        ctx.successRes(result);
+      } catch (err) {
+        console.log(err);
+        ctx.errorRes(err);
+      }
+    }
+  });
+
   getPortalAttributeMappings = this.query({
     h: async (ctx) => {
       try {
@@ -168,6 +181,27 @@ class PortalController extends BaseController {
         ctx.successRes(result);
       } catch (err) {
         console.log(err);
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  updatePortalCustomFields = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const updatePortalCustomFields = {
+            cmdNum: APP_CMD.UPDATE_PORTAL_SETTINGS
+          };
+          const validCmdsOrder = [updatePortalCustomFields];
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+        
+        const msg = ctx.state.msg;
+        await portalCmdHandler.process(msg, ctx, validate);
+        ctx.successRes();
+
+      } catch (err) {
         ctx.errorRes(err);
       }
     }

@@ -17,6 +17,7 @@ public_route.get('/logo', portalRoute, portalCtrl.getPortalImgs);
 public_route.post('/sign-in', portalRoute, auth.signIn);
 public_route.get('/settings/attribute-mappings', portalCtrl.getPortalAttributeMappings);
 public_route.get('/settings/layout-mappings', portalCtrl.getPortalLayoutMappings);
+public_route.get('/settings/custom-fields', portalCtrl.getPortalCustomFields);
 
 
 async function portalAdminGuard(ctx, next) {
@@ -27,6 +28,7 @@ async function portalAdminGuard(ctx, next) {
 protected_route.put('/', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortal);
 protected_route.put('/settings/attribute-mappings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalAttributeMappings);
 protected_route.put('/settings/layout-mappings', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalLayoutMappings);
+protected_route.put('/settings/custom-fields', compose([portalRoute, portalAdminGuard]), portalCtrl.updatePortalCustomFields);
 
 const routes = { 
   protected: koa_router().use('/portal', protected_route.routes()),

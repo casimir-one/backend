@@ -57,6 +57,13 @@ class PortalService {
     return savedPortalProfile.toObject();
   }
 
+  async updatePortalCustomFields(portalId, customFields) { // should be custom extensible object after moving to modules
+    const portal = await PortalSchema.findOne({ _id: portalId });
+    portal.settings.customFields = customFields;
+    const savedPortalProfile = await portal.save();
+    return savedPortalProfile.toObject();
+  }
+
 }
 
 export default PortalService;

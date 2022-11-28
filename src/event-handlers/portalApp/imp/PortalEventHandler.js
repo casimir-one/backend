@@ -15,6 +15,7 @@ const portalEventHandler = new PortalEventHandler();
 const portalService = new PortalService();
 
 portalEventHandler.register(APP_EVENT.PORTAL_PROFILE_UPDATED, async (event) => {
+  // todo: update logo and title only
   const {
     name,
     shortName,
@@ -50,10 +51,18 @@ portalEventHandler.register(APP_EVENT.LAYOUT_SETTINGS_UPDATED, async (event) => 
 
 portalEventHandler.register(APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED, async (event) => {
   const { portalId, attributeMappings } = event.getEventPayload();
-
-  const updatedPortalProfile = await portalService.updatePortalAttributeMappings(
+  await portalService.updatePortalAttributeMappings(
     portalId,
     attributeMappings
+  );
+});
+
+
+portalEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
+  const { portalId, customFields } = event.getEventPayload();
+  await portalService.updatePortalCustomFields(
+    portalId,
+    customFields
   );
 });
 
