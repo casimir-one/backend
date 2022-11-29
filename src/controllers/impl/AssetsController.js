@@ -179,8 +179,8 @@ class AssetsController extends BaseController {
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
         const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */)
-        const nftItemDraftId = mongoose.Types.ObjectId(entityId);
-        ctx.successRes({ _id: nftItemDraftId });
+        const nftItemId = mongoose.Types.ObjectId(entityId);
+        ctx.successRes({ _id: nftItemId });
 
       } catch (err) {
         ctx.errorRes(err);
