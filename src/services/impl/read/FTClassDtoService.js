@@ -56,11 +56,11 @@ class FTClassDtoService extends BaseService {
     return result;
   }
 
-  async getFTClassBalance(owner, symbol) {
+  async getFTClassBalance(ownerId, symbol) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const chainBalance = await chainRpc.getFungibleTokenBalanceByOwnerAndSymbolAsync(owner, symbol);
+    const chainBalance = await chainRpc.getFungibleTokenBalanceByOwnerAndSymbolAsync(ownerId, symbol);
     if (!chainBalance) return null;
 
     const token = await this.findOne({ symbol: chainBalance.symbol });
@@ -71,7 +71,7 @@ class FTClassDtoService extends BaseService {
     return {
       tokenId: chainBalance.assetId,
       amount: chainBalance.amount,
-      owner: chainBalance.account,
+      ownerId: chainBalance.account,
       symbol: chainBalance.symbol,
       precision: chainBalance.precision,
       type: token.type,
@@ -84,11 +84,11 @@ class FTClassDtoService extends BaseService {
     }
   }
 
-  async getFTClassBalancesByOwner(owner) {
+  async getFTClassBalancesByOwner(ownerId) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
 
-    const chainBalances = await chainRpc.getFungibleTokenBalancesByOwnerAsync(owner);
+    const chainBalances = await chainRpc.getFungibleTokenBalancesByOwnerAsync(ownerId);
     const tokens = await this.findMany({ symbol: { $in: [...chainBalances.map(chainBalance => chainBalance.symbol)] } });
 
     return chainBalances.map((chainBalance) => {
@@ -100,7 +100,7 @@ class FTClassDtoService extends BaseService {
       return {
         tokenId: chainBalance.assetId,
         amount: chainBalance.amount,
-        owner: chainBalance.account,
+        ownerId: chainBalance.account,
         symbol: chainBalance.symbol,
         precision: chainBalance.precision,
 
@@ -129,7 +129,7 @@ class FTClassDtoService extends BaseService {
       return {
         tokenId: chainBalance.assetId,
         amount: chainBalance.amount,
-        owner: chainBalance.account,
+        ownerId: chainBalance.account,
         symbol: chainBalance.symbol,
         precision: chainBalance.precision,
 

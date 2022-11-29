@@ -153,21 +153,23 @@ class AssetsController extends BaseController {
           const cmd = {
             cmdNum: APP_CMD.CREATE_NFT_ITEM,
             validate: async (createNFTItemCmd) => {
-              const { nftCollectionId } = createNFTItemCmd.getCmdPayload();
-              const nftCollection = await nftCollectionService.getNFTCollection(nftCollectionId);
               const { appCmds } = msg;
               const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.CREATE_NFT_ITEM);
               if (!appCmd) {
                 throw new BadRequestError(`'CREATE_NFT_ITEM' is not found`);
               }
 
-              email = appCmd.getCmdPayload().owner;
+              email = appCmd.getCmdPayload().ownerId; // temp wip
               if (!email || !validateEmail(email)) {
                 throw new BadRequestError(`Email is invalid or not provided`);
               }
 
-              if (!nftCollection) {
-                throw new BadRequestError(`NFT collection with '${nftCollectionId}' is not found`);
+              const { nftCollectionId } = createNFTItemCmd.getCmdPayload();
+              if (nftCollectionId) {
+                const nftCollection = await nftCollectionService.getNFTCollection(nftCollectionId);
+                if (!nftCollection) {
+                  throw new BadRequestError(`NFT collection with '${nftCollectionId}' is not found`);
+                }
               }
             }
           };
@@ -231,7 +233,7 @@ class AssetsController extends BaseController {
                 throw new NotFoundError(`NFT Item with "${_id}" id is not found`);
               }
 
-              const user = await userService.getUser(nftItem.owner);
+              const user = await userService.getUser(nftItem.ownerId);
               const username = ctx.state.user.username;
 
               if (user) {
@@ -239,7 +241,7 @@ class AssetsController extends BaseController {
                   throw new ForbiddenError(`"${username}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
                 }
               } else {
-                const isAuthorized = await teamDtoService.authorizeTeamAccount(nftItem.owner, username)
+                const isAuthorized = await teamDtoService.authorizeTeamAccount(nftItem.ownerId, username)
                 if (!isAuthorized) {
                   throw new ForbiddenError(`"${username}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
                 }
@@ -358,8 +360,8 @@ class AssetsController extends BaseController {
   getFTClassBalance = this.query({
     h: async (ctx) => {
       try {
-        const { owner, symbol } = ctx.params;
-        const asset = await ftClassDtoService.getFTClassBalance(owner, symbol);
+        const { ownerId, symbol } = ctx.params;
+        const asset = await ftClassDtoService.getFTClassBalance(ownerId, symbol);
         if (!asset) {
           throw new NotFoundError(`Asset "${symbol}" is not found`);
         }
@@ -376,8 +378,8 @@ class AssetsController extends BaseController {
   getFTClassBalancesByOwner = this.query({
     h: async (ctx) => {
       try {
-        const owner = ctx.params.owner;
-        const asset = await ftClassDtoService.getFTClassBalancesByOwner(owner);
+        const ownerId = ctx.params.ownerId;
+        const asset = await ftClassDtoService.getFTClassBalancesByOwner(ownerId);
         ctx.successRes(asset);
       }
       catch (err) {

@@ -190,10 +190,10 @@ class PortalController extends BaseController {
     h: async (ctx) => {
       try {
         const validate = async (appCmds) => {
-          const updatePortalCustomFields = {
+          const cmd1 = {
             cmdNum: APP_CMD.UPDATE_PORTAL_SETTINGS
           };
-          const validCmdsOrder = [updatePortalCustomFields];
+          const validCmdsOrder = [cmd1];
           await this.validateCmds(appCmds, validCmdsOrder);
         };
         

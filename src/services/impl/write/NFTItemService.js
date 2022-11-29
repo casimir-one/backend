@@ -16,24 +16,24 @@ class NFTItemService extends BaseService {
     _id,
     nftCollectionId,
     nftItemId,
-    owner,
+    ownerId,
+    creatorId,
     attributes,
     hash,
     algo,
     status,
-    authors,
   }) {
 
     const nftItem = await this.createOne({
       _id,
       nftCollectionId,
       nftItemId,
-      owner,
+      ownerId,
+      creatorId,
       attributes,
       hash,
       algo,
       status,
-      authors,
     });
 
     return nftItem;
@@ -45,7 +45,6 @@ class NFTItemService extends BaseService {
     hash,
     algo,
     status,
-    authors,
     queueNumber,
   }) {
 
@@ -54,7 +53,6 @@ class NFTItemService extends BaseService {
       hash,
       algo,
       status,
-      authors,
       queueNumber,
     });
 

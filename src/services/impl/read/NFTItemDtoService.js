@@ -12,10 +12,9 @@ class NFTItemDTOService extends BaseService {
     return nftItems.map((nftItem) => ({
       _id: nftItem._id,
       nftItemId: nftItem.nftItemId,
-      owner: nftItem.owner,
-      ownerAddress: nftItem.ownerAddress,
+      ownerId: nftItem.ownerId,
+      creatorId: nftItem.creatorId,
       nftCollectionId: nftItem.nftCollectionId,
-      authors: nftItem.authors,
       attributes: nftItem.attributes,
       hash: nftItem.hash,
       algo: nftItem.algo,

@@ -10,17 +10,18 @@ class NFTItemCreatedEvent extends BaseEvent {
       nftItemId,
       entityId,
       status,
-      owner
+      ownerId,
+      creatorId
     } = eventPayload;
 
-    assert(!!nftCollectionId, "'nftCollectionId' is required");
+    // assert(!!nftCollectionId, "'nftCollectionId' is required");
     assert(!!entityId, "'entityId' is required");
     assert(!!nftItemId, "'nftItemId' is required");
-    assert(!!owner, "'owner' is required");
+    assert(!!ownerId, "'ownerId' is required");
+    assert(!!creatorId, "'creatorId' is required");
     
     if (status) {
       const validStatuses = [
-        NftItemMetadataDraftStatus.IN_PROGRESS,
         NftItemMetadataDraftStatus.PROPOSED
       ];
       assert(validStatuses.includes(status), "'status' is invalid");

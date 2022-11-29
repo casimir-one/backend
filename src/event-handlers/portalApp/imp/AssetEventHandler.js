@@ -150,8 +150,8 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
     nftCollectionId,
     nftItemId,
     entityId,
-    authors,
-    owner,
+    ownerId,
+    creatorId,
     attributes,
     status
   } = event.getEventPayload();
@@ -163,9 +163,9 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
     nftItemId,
     hash: '',
     algo: 'sha256',
-    owner,
+    ownerId,
+    creatorId,
     status: status || NftItemMetadataDraftStatus.IN_PROGRESS,
-    authors: authors || [],
     attributes
   }
 
@@ -173,13 +173,12 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
   await nftItemService.createNFTItem(nftItem);
   await nftCollectionService.increaseNftCollectionNextItemId(nftCollectionId);
 
-  // sendEmailNotification(owner, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
+  // sendEmailNotification(ownerId, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
 });
 
 assetEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
   const {
     _id: nftItemId,
-    authors,
     status,
     attributes,
   } = event.getEventPayload();
@@ -187,7 +186,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
   const packageHash = genSha256Hash(JSON.stringify(attributes));
   await nftItemService.updateNFTItem({
     _id: nftItemId,
-    authors,
     status,
     hash: packageHash,
     attributes,
@@ -210,7 +208,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
       queueNumber
     });
 
-    // sendEmailNotification(updatedDraft.owner, 
+    // sendEmailNotification(updatedDraft.ownerId, 
     //   `Your asset has been approved`, 
     //   `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved ! Your queue number is <b>${queueNumber}</b></p>`
     // );
@@ -219,7 +217,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
       _id,
       status,
     });
-    // sendEmailNotification(updatedDraft.owner, 
+    // sendEmailNotification(updatedDraft.ownerId, 
     //   `Your asset has been declined`, 
     //   `<p>Unfortunately, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been declined</p>`
     // );

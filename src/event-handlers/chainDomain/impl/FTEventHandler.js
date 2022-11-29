@@ -12,8 +12,8 @@ class FTEventHandler extends ChainDomainEventHandler {
 const ftEventHandler = new FTEventHandler();
 
 ftEventHandler.register(DOMAIN_EVENT.FT_CLASS_CREATED, async (event) => {
-  const { asset_id, creator, owner } = event.getEventPayload();
-  console.log("FT_CLASS_CREATED", {asset_id, creator, owner})
+  const { asset_id, creator, ownerId } = event.getEventPayload();
+  console.log("FT_CLASS_CREATED", {asset_id, creator, ownerId})
 });
 
 ftEventHandler.register(DOMAIN_EVENT.FT_ISSUED, async (event) => {

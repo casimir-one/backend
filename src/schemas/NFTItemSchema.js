@@ -7,9 +7,10 @@ const Schema = mongoose.Schema;
 
 const NFTItemSchema = new Schema({
   "portalId": { type: String, required: true },
-  "nftCollectionId": { type: String, required: true },
+  "nftCollectionId": { type: String, required: false },
   "nftItemId": { type: String, required: true },
-  "owner": { type: String, required: true },
+  "ownerId": { type: String, required: true },
+  "creatorId": { type: String, required: true },
   "attributes": [AttributeValueSchema],
   "hash": { type: String, index: true },
   "algo": { type: String },
@@ -19,8 +20,7 @@ const NFTItemSchema = new Schema({
     enum: Object.values(NftItemMetadataDraftStatus),
     default: NftItemMetadataDraftStatus.PROPOSED,
     required: true
-  },
-  "authors": [{ type: String }]
+  }
 }, { timestamps: true });
 
 const model = mongoose.model('nft-item', NFTItemSchema);
