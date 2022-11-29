@@ -1,6 +1,6 @@
 import { APP_EVENT, NftItemMetadataDraftStatus } from '@casimir.one/platform-core';
 import assert from 'assert';
-import BaseEvent from '../base/BaseEvent';
+import BaseEvent from '../../base/BaseEvent';
 
 class NFTItemCreatedEvent extends BaseEvent {
 

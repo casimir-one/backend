@@ -199,7 +199,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_DELETED, async (event) => {
   await nftItemService.deleteNFTItem(_id);
 });
 
-assetEventHandler.register(APP_EVENT.NFT_ITEM_STATUS_UPDATED, async (event) => {
+assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
   const { _id, status } = event.getEventPayload();
 
   if (status == NftItemMetadataDraftStatus.APPROVED) {

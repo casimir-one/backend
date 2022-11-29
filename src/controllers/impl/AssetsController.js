@@ -87,7 +87,7 @@ class AssetsController extends BaseController {
         };
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION_METADATA /* APP_CMD.CREATE_NFT_COLLECTION */);
+        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION);
         ctx.successRes({ _id: String(entityId) });
 
       } catch (err) {
@@ -106,7 +106,7 @@ class AssetsController extends BaseController {
         };
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION_METADATA, '_id' /* APP_CMD.UPDATE_NFT_COLLECTION */);
+        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION, '_id');
         ctx.successRes({ _id: String(entityId) });
 
       } catch (err) {
@@ -151,14 +151,14 @@ class AssetsController extends BaseController {
 
         const validate = async (appCmds) => {
           const cmd = {
-            cmdNum: APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */,
+            cmdNum: APP_CMD.CREATE_NFT_ITEM,
             validate: async (createNFTItemCmd) => {
               const { nftCollectionId } = createNFTItemCmd.getCmdPayload();
               const nftCollection = await nftCollectionService.getNFTCollection(nftCollectionId);
               const { appCmds } = msg;
-              const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */);
+              const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.CREATE_NFT_ITEM);
               if (!appCmd) {
-                throw new BadRequestError(`'CREATE_NFT_ITEM_METADATA_DRAFT' is not found`);
+                throw new BadRequestError(`'CREATE_NFT_ITEM' is not found`);
               }
 
               email = appCmd.getCmdPayload().owner;
@@ -178,7 +178,7 @@ class AssetsController extends BaseController {
 
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */)
+        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM)
         const nftItemId = mongoose.Types.ObjectId(entityId);
         ctx.successRes({ _id: nftItemId });
 
@@ -193,12 +193,12 @@ class AssetsController extends BaseController {
       try {
         const validate = async (appCmds) => {
           const cmd1 = {
-            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.UPDATE_NFT_ITEM */,
+            cmdNum: APP_CMD.UPDATE_NFT_ITEM,
             validate: async (updateNFTItemCmd) => {
               const { _id: nftItemId } = updateNFTItemCmd.getCmdPayload();
               const nftItem = await nftItemService.getNFTItem(nftItemId);
               if (!nftItem) {
-                throw new NotFoundError(`NF Item with "${nftItemId}" id is not found`);
+                throw new NotFoundError(`NFT Item with "${nftItemId}" id is not found`);
               }
             }
           };
@@ -209,7 +209,7 @@ class AssetsController extends BaseController {
 
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const nftItemId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.UPDATE_NFT_ITEM */, '_id');
+        const nftItemId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_ITEM, '_id');
         ctx.successRes({ _id: nftItemId });
 
       } catch (err) {
@@ -223,9 +223,9 @@ class AssetsController extends BaseController {
       try {
         const validate = async (appCmds) => {
           const cmd1 = {
-            cmdNum: APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.DELETE_NFT_ITEM */,
-            validate: async (deleteNFTItemCmd) => {
-              const { _id } = deleteNFTItemCmd.getCmdPayload();
+            cmdNum: APP_CMD.DELETE_NFT_ITEM,
+            validate: async (cmd) => {
+              const { _id } = cmd.getCmdPayload();
               const nftItem = await nftItemService.getNFTItem(_id);
               if (!nftItem) {
                 throw new NotFoundError(`NFT Item with "${_id}" id is not found`);
@@ -267,9 +267,9 @@ class AssetsController extends BaseController {
       try {
 
         const validate = async (appCmds) => {
-          const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS /* APP_CMD.UPDATE_NFT_ITEM_STATUS */);
+          const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.MODERATE_NFT_ITEM);
             if (!appCmd) {
-              throw new BadRequestError(`'APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS' is not found`);
+              throw new BadRequestError(`'APP_CMD.MODERATE_NFT_ITEM' is not found`);
             }
 
             const { status } = appCmd.getCmdPayload();
@@ -280,7 +280,7 @@ class AssetsController extends BaseController {
 
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const nftItemId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS /* APP_CMD.UPDATE_NFT_ITEM_STATUS */, '_id');
+        const nftItemId = this.extractEntityId(msg, APP_CMD.MODERATE_NFT_ITEM, '_id');
         ctx.successRes({ _id: nftItemId });
 
       } catch (err) {

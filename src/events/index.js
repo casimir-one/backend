@@ -1,5 +1,11 @@
-import NFTCollectionCreatedEvent from './impl/NFTCollectionCreatedEvent';
-import NFTCollectionUpdatedEvent from './impl/NFTCollectionUpdatedEvent';
+import NFTCollectionCreatedEvent from './impl/nft-collections/NFTCollectionCreatedEvent';
+import NFTCollectionUpdatedEvent from './impl/nft-collections/NFTCollectionUpdatedEvent';
+
+import NFTItemCreatedEvent from './impl/nft-items/NFTItemCreatedEvent';
+import NFTItemUpdatedEvent from './impl/nft-items/NFTItemUpdatedEvent';
+import NFTItemDeletedEvent from './impl/nft-items/NFTItemDeletedEvent';
+import NFTItemModeratedEvent from './impl/nft-items/NFTItemModeratedEvent';
+
 import DaoMemberAddedEvent from './impl/DaoMemberAddedEvent';
 import DaoMemberRemovedEvent from './impl/DaoMemberRemovedEvent';
 
@@ -38,11 +44,6 @@ import DocumentTemplateCreatedEvent from './impl/DocumentTemplateCreatedEvent';
 import DocumentTemplateUpdatedEvent from './impl/DocumentTemplateUpdatedEvent';
 import DocumentTemplateDeletedEvent from './impl/DocumentTemplateDeletedEvent';
 
-import NFTItemStatusUpdatedEvent from './impl/NFTItemStatusUpdatedEvent';
-import NFTItemCreatedEvent from './impl/NFTItemCreatedEvent';
-import NFTItemDeletedEvent from './impl/NFTItemDeletedEvent';
-import NFTItemUpdatedEvent from './impl/NFTItemUpdatedEvent';
-
 import AttributeSettingsUpdatedEvent from './impl/AttributeSettingsUpdatedEvent';
 import LayoutSettingsUpdatedEvent from './impl/LayoutSettingsUpdatedEvent';
 import PortalProfileUpdatedEvent from './impl/PortalProfileUpdatedEvent';
@@ -60,7 +61,7 @@ module.exports = {
   NFTItemCreatedEvent,
   NFTItemUpdatedEvent,
   NFTItemDeletedEvent,
-  NFTItemStatusUpdatedEvent,
+  NFTItemModeratedEvent,
 
   AttributeCreatedEvent,
   AttributeUpdatedEvent,

@@ -118,7 +118,7 @@ module.exports = {
     { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.NFT_ITEM_STATUS_UPDATED]: [
+  [APP_EVENT.NFT_ITEM_MODERATED]: [
     { h: assetEventHandler, await: true }
   ],
 

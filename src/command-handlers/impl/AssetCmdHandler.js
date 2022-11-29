@@ -10,7 +10,7 @@ import {
   NFTItemCreatedEvent,
   NFTItemDeletedEvent,
   NFTItemUpdatedEvent,
-  NFTItemStatusUpdatedEvent,
+  NFTItemModeratedEvent,
 } from './../../events';
 
 class AssetCmdHandler extends BaseCmdHandler {
@@ -23,7 +23,7 @@ class AssetCmdHandler extends BaseCmdHandler {
 
 const assetCmdHandler = new AssetCmdHandler();
 
-assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION_METADATA /* APP_CMD.CREATE_NFT_COLLECTION */, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION, (cmd, ctx) => {
   const { 
     entityId, 
     ownerId, 
@@ -38,7 +38,7 @@ assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION_METADATA /* APP_CMD.CREAT
 
 });
 
-assetCmdHandler.register(APP_CMD.UPDATE_NFT_COLLECTION_METADATA /* APP_CMD.UPDATE_NFT_COLLECTION */, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.UPDATE_NFT_COLLECTION, (cmd, ctx) => {
   const {
     _id,
     attributes
@@ -51,25 +51,24 @@ assetCmdHandler.register(APP_CMD.UPDATE_NFT_COLLECTION_METADATA /* APP_CMD.UPDAT
 
 });
 
-
-assetCmdHandler.register(APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.CREATE_NFT_ITEM, (cmd, ctx) => {
   const data = cmd.getCmdPayload();
   ctx.state.appEvents.push(new NFTItemCreatedEvent({ ...data, uploadedFiles: ctx.req.files }));
 });
 
-assetCmdHandler.register(APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.UPDATE_NFT_ITEM */, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.UPDATE_NFT_ITEM, (cmd, ctx) => {
   const data = cmd.getCmdPayload();
   ctx.state.appEvents.push(new NFTItemUpdatedEvent({ ...data, uploadedFiles: ctx.req.files }));
 });
 
-assetCmdHandler.register(APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.DELETE_NFT_ITEM */, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.DELETE_NFT_ITEM, (cmd, ctx) => {
   const { _id } = cmd.getCmdPayload();
   ctx.state.appEvents.push(new NFTItemDeletedEvent({ _id }));
 });
 
-assetCmdHandler.register(APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS /* APP_CMD.UPDATE_NFT_ITEM_STATUS */, (cmd, ctx) => {
+assetCmdHandler.register(APP_CMD.MODERATE_NFT_ITEM, (cmd, ctx) => {
   const { _id, status } = cmd.getCmdPayload();
-  ctx.state.appEvents.push(new NFTItemStatusUpdatedEvent({ _id, status }));
+  ctx.state.appEvents.push(new NFTItemModeratedEvent({ _id, status }));
 });
 
 

@@ -11,6 +11,14 @@ import {
 
 
 module.exports = {
+  [APP_CMD.CREATE_NFT_COLLECTION]: assetCmdHandler,
+  [APP_CMD.UPDATE_NFT_COLLECTION]: assetCmdHandler,
+
+  [APP_CMD.CREATE_NFT_ITEM]: assetCmdHandler,
+  [APP_CMD.UPDATE_NFT_ITEM]: assetCmdHandler,
+  [APP_CMD.DELETE_NFT_ITEM]: assetCmdHandler,
+  [APP_CMD.MODERATE_NFT_ITEM]: assetCmdHandler,
+
   [APP_CMD.ADD_DAO_MEMBER]: accountCmdHandler,
   [APP_CMD.REMOVE_DAO_MEMBER]: accountCmdHandler,
   [APP_CMD.CREATE_DAO]: accountCmdHandler,
@@ -26,16 +34,10 @@ module.exports = {
   [APP_CMD.TRANSFER_FT]: assetCmdHandler,
   [APP_CMD.TRANSFER_NFT]: assetCmdHandler,
   [APP_CMD.CREATE_FT]: assetCmdHandler,
-  [APP_CMD.CREATE_NFT_COLLECTION_METADATA /* APP_CMD.CREATE_NFT_COLLECTION */]: assetCmdHandler,
-  [APP_CMD.UPDATE_NFT_COLLECTION_METADATA /* APP_CMD.UPDATE_NFT_COLLECTION */]: assetCmdHandler,
   [APP_CMD.ISSUE_FT]: assetCmdHandler,
   [APP_CMD.CREATE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
   [APP_CMD.UPDATE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
   [APP_CMD.DELETE_DOCUMENT_TEMPLATE]: documentTemplateCmdHandler,
-  [APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */]: assetCmdHandler,
-  [APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.UPDATE_NFT_ITEM */]: assetCmdHandler,
-  [APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.DELETE_NFT_ITEM */]: assetCmdHandler,
-  [APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS /* APP_CMD.UPDATE_NFT_ITEM_STATUS */]: assetCmdHandler,
   [APP_CMD.UPDATE_PORTAL_PROFILE]: portalCmdHandler,
   [APP_CMD.UPDATE_PORTAL_SETTINGS]: portalCmdHandler,
   [APP_CMD.UPDATE_LAYOUT_SETTINGS]: portalCmdHandler,

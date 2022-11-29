@@ -1,19 +1,19 @@
 import { APP_EVENT } from '@casimir.one/platform-core';
 import assert from 'assert';
-import BaseEvent from '../base/BaseEvent';
+import BaseEvent from '../../base/BaseEvent';
 
-class NFTItemUpdatedEvent extends BaseEvent {
+class NFTItemDeletedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      _id,
+      _id
     } = eventPayload;
 
     assert(!!_id, "'_id' is required");
 
-    super(APP_EVENT.NFT_ITEM_UPDATED, eventPayload);
+    super(APP_EVENT.NFT_ITEM_DELETED, eventPayload);
   }
 
 }
 
-module.exports = NFTItemUpdatedEvent;
+module.exports = NFTItemDeletedEvent;
