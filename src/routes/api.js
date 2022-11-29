@@ -55,23 +55,17 @@ protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), a
 protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
 public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', attributesCtrl.getAttributeFile);
 
-public_route.get('/v2/assets/type/:type', assetsCtrl.getAssetsByType)
-protected_route.get('/v2/assets/issuer/:issuer', assetsCtrl.getAssetsByIssuer)
-public_route.get('/v2/assets/limit/:limit', assetsCtrl.lookupAssets)
-
 public_route.get('/v3/collections', assetsCtrl.getNFTCollections)
 public_route.get('/v3/collections/:nftCollectionId', assetsCtrl.getNFTCollection)
 protected_route.post('/v3/collections', assetsCtrl.createNFTCollection)
 protected_route.put('/v3/collections', assetsCtrl.updateNFTCollection)
 
-public_route.get('/v2/tokens/nft/items/drafts/listing-paginated', assetsCtrl.getNFTItemsMetadataDraftsListingPaginated)
-public_route.get('/v2/tokens/nft/items/drafts/nft-collection/:nftCollectionId', assetsCtrl.getNFTItemMetadataDraftsByNFTCollection)
-public_route.get('/v2/tokens/nft/item/draft/:nftItemDraftId', assetsCtrl.getNFTItemMetadataDraft)
-protected_route.post('/v2/tokens/nft/item/metadata/draft/create', assetsCtrl.createNFTItemMetadataDraft)
-protected_route.put('/v2/tokens/nft/item/metadata/draft/update', assetsCtrl.updateNFTItemMetadataDraft)
-protected_route.put('/v2/tokens/nft/item/metadata/draft/delete', assetsCtrl.deleteNFTItemMetadataDraft)
-protected_route.put('/v2/tokens/nft/item/metadata/draft/moderate', assetsCtrl.moderateNFTItemMetadataDraft)
-public_route.get('/v2/tokens/nft/items/portal/:portalId', assetsCtrl.getNFTItemsByPortal)
+public_route.get('/v3/items', assetsCtrl.getNFTItemsPaginated)
+public_route.get('/v3/items/:nftItemId', assetsCtrl.getNFTItem)
+protected_route.post('/v3/items', assetsCtrl.createNFTItem)
+protected_route.put('/v3/items', assetsCtrl.updateNFTItem)
+protected_route.put('/v3/items/moderate', assetsCtrl.moderateNFTItem)
+protected_route.delete('/v3/items', assetsCtrl.deleteNFTItem)
 
 public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFTClassById)
 public_route.get('/v2/tokens/ft/symbol/:symbol', assetsCtrl.getFTClassBySymbol)

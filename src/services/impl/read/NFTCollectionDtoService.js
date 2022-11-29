@@ -58,9 +58,9 @@ class NFTCollectionDTOService extends BaseService {
   }
 
   async getNFTCollectionDTO(id) {
-    const nftCollectionMetadata = await this.findOne({ _id: id });
-    if (!nftCollectionMetadata) return null;
-    const results = await this.mapDTOs([nftCollectionMetadata]);
+    const nftCollection = await this.findOne({ _id: id });
+    if (!nftCollection) return null;
+    const results = await this.mapDTOs([nftCollection]);
     const [result] = results;
     return result;
   }

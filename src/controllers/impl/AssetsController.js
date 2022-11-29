@@ -1,22 +1,18 @@
 import { ChainService } from '@casimir.one/chain-service';
-import { AcceptProposalCmd, DeclineProposalCmd } from '@casimir.one/commands';
 import {
   APP_CMD,
   APP_PROPOSAL,
   NftItemMetadataDraftStatus,
-  NFT_ITEM_METADATA_FORMAT
 } from '@casimir.one/platform-core';
-import slug from 'limax';
 import mongoose from 'mongoose';
 import qs from 'qs';
 import { NFTCollectionForm, NFTItemMetadataForm } from '../../forms';
 import {
-  AssetDtoService,
   FTClassDtoService,
   NFTCollectionDTOService,
   NFTCollectionService,
-  NFTItemDtoService,
-  NFTItemMetadataDraftService,
+  NFTItemDTOService,
+  NFTItemService,
   TeamDtoService,
   UserDtoService,
   UserService,
@@ -31,12 +27,11 @@ import FileStorage from './../../storage';
 
 const nftCollectionService = new NFTCollectionService();
 const teamDtoService = new TeamDtoService();
-const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
-const assetDtoService = new AssetDtoService();
+const nftItemService = new NFTItemService();
 const userDtoService = new UserDtoService();
 const ftClassDtoService = new FTClassDtoService();
 const nftCollectionDtoService = new NFTCollectionDTOService();
-const nftItemDtoService = new NFTItemDtoService();
+const nftItemDtoService = new NFTItemDTOService();
 const userService = new UserService();
 const proposalDtoService = new ProposalDtoService();
 
@@ -52,13 +47,15 @@ const validateEmail = (email) => {
 
 class AssetsController extends BaseController {
 
+  // NFT Collections
+
   getNFTCollection = this.query({
     h: async (ctx) => {
       try {
         const nftCollectionId = ctx.params.nftCollectionId;
         const nftCollection = await nftCollectionDtoService.getNFTCollectionDTO(nftCollectionId);
         if (!nftCollection) {
-          throw new NotFoundError(`NftCollection "${nftCollectionId}" id is not found`);
+          throw new NotFoundError(`NFT Collection with '${nftCollectionId}' id is not found`);
         }
         ctx.successRes(nftCollection);
       } catch (err) {
@@ -81,50 +78,216 @@ class AssetsController extends BaseController {
     }
   });
 
-  getAssetsByType = this.query({
+  createNFTCollection = this.command({
+    form: NFTCollectionForm,
     h: async (ctx) => {
       try {
-        const type = ctx.params.type
-        const assets = await assetDtoService.getAssetsByType(type);
-        ctx.successRes(assets);
+        const validate = async (appCmds) => {
+          return true;
+        };
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION_METADATA /* APP_CMD.CREATE_NFT_COLLECTION */);
+        ctx.successRes({ _id: String(entityId) });
+
+      } catch (err) {
+        ctx.status = err.httpStatus || 500;
+        ctx.body = err.message;
       }
-      catch (err) {
-        console.log(err);
+    }
+  });
+
+  updateNFTCollection = this.command({
+    form: NFTCollectionForm,
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          return true;
+        };
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION_METADATA, '_id' /* APP_CMD.UPDATE_NFT_COLLECTION */);
+        ctx.successRes({ _id: String(entityId) });
+
+      } catch (err) {
         ctx.errorRes(err);
       }
     }
   });
 
+  // NFT Items
 
-  getAssetsByIssuer = this.query({
+  getNFTItem = this.query({
     h: async (ctx) => {
       try {
-        const issuer = ctx.params.issuer
-        const assets = await assetDtoService.getAssetsByIssuer(issuer);
-        ctx.successRes(assets);
-      }
-      catch (err) {
-        console.log(err);
+        const nftItemId = ctx.params.nftItemId;
+        const result = await nftItemDtoService.getNFTItemDTO(nftItemId);
+        ctx.successRes(result);
+      } catch (err) {
         ctx.errorRes(err);
       }
     }
   });
 
-
-  lookupAssets = this.query({
+  getNFTItemsPaginated = this.query({
     h: async (ctx) => {
       try {
-        const limit = ctx.params.limit;
-        const assets = await assetDtoService.lookupAssets(limit);
-        ctx.successRes(assets);
-      }
-      catch (err) {
-        console.log(err);
+        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
+        const { 
+          paginationMeta, 
+          result 
+        } = await nftItemDtoService.getNFTItemsDTOsPaginated(filter, sort, { page, pageSize });
+        ctx.successRes(result, { extraInfo: paginationMeta });
+      } catch (err) {
         ctx.errorRes(err);
       }
     }
   });
 
+  createNFTItem = this.command({
+    form: NFTItemMetadataForm, h: async (ctx) => {
+      try {
+        let email;
+
+        const validate = async (appCmds) => {
+          const cmd = {
+            cmdNum: APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */,
+            validate: async (createNFTItemCmd) => {
+              const { nftCollectionId } = createNFTItemCmd.getCmdPayload();
+              const nftCollection = await nftCollectionService.getNFTCollection(nftCollectionId);
+              const { appCmds } = msg;
+              const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */);
+              if (!appCmd) {
+                throw new BadRequestError(`'CREATE_NFT_ITEM_METADATA_DRAFT' is not found`);
+              }
+
+              email = appCmd.getCmdPayload().owner;
+              if (!email || !validateEmail(email)) {
+                throw new BadRequestError(`Email is invalid or not provided`);
+              }
+
+              if (!nftCollection) {
+                throw new BadRequestError(`NFT collection with '${nftCollectionId}' is not found`);
+              }
+            }
+          };
+
+          const validCmdsOrder = [cmd];
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.CREATE_NFT_ITEM */)
+        const nftItemDraftId = mongoose.Types.ObjectId(entityId);
+        ctx.successRes({ _id: nftItemDraftId });
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  updateNFTItem = this.command({
+    form: NFTItemMetadataForm, h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const cmd1 = {
+            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.UPDATE_NFT_ITEM */,
+            validate: async (updateNFTItemCmd) => {
+              const { _id: nftItemId } = updateNFTItemCmd.getCmdPayload();
+              const nftItem = await nftItemService.getNFTItem(nftItemId);
+              if (!nftItem) {
+                throw new NotFoundError(`NF Item with "${nftItemId}" id is not found`);
+              }
+            }
+          };
+
+          const validCmdsOrder = [cmd1];
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+        const nftItemId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.UPDATE_NFT_ITEM */, '_id');
+        ctx.successRes({ _id: nftItemId });
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  deleteNFTItem = this.command({
+    h: async (ctx) => {
+      try {
+        const validate = async (appCmds) => {
+          const cmd1 = {
+            cmdNum: APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT /* APP_CMD.DELETE_NFT_ITEM */,
+            validate: async (deleteNFTItemCmd) => {
+              const { _id } = deleteNFTItemCmd.getCmdPayload();
+              const nftItem = await nftItemService.getNFTItem(_id);
+              if (!nftItem) {
+                throw new NotFoundError(`NFT Item with "${_id}" id is not found`);
+              }
+
+              const user = await userService.getUser(nftItem.owner);
+              const username = ctx.state.user.username;
+
+              if (user) {
+                if (user._id !== username) {
+                  throw new ForbiddenError(`"${username}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
+                }
+              } else {
+                const isAuthorized = await teamDtoService.authorizeTeamAccount(nftItem.owner, username)
+                if (!isAuthorized) {
+                  throw new ForbiddenError(`"${username}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
+                }
+              }
+            }
+          };
+
+          const validCmdsOrder = [cmd1];
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+
+        ctx.successRes();
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
+  moderateNFTItem = this.command({
+    h: async (ctx) => {
+      try {
+
+        const validate = async (appCmds) => {
+          const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS /* APP_CMD.UPDATE_NFT_ITEM_STATUS */);
+            if (!appCmd) {
+              throw new BadRequestError(`'APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS' is not found`);
+            }
+
+            const { status } = appCmd.getCmdPayload();
+            if (status != NftItemMetadataDraftStatus.APPROVED && status != NftItemMetadataDraftStatus.REJECTED) {
+              throw new BadRequestError(`Unrecognized NFT Item status provided`);
+            }
+        };
+
+        const msg = ctx.state.msg;
+        await assetCmdHandler.process(msg, ctx, validate);
+        const nftItemId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS /* APP_CMD.UPDATE_NFT_ITEM_STATUS */, '_id');
+        ctx.successRes({ _id: nftItemId });
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
 
   getFTClassById = this.query({
     h: async (ctx) => {
@@ -239,221 +402,6 @@ class AssetsController extends BaseController {
     }
   });
 
-  getNFTItemsByPortal = this.query({
-    h: async (ctx) => {
-      try {
-        const portalId = ctx.params.portalId;
-        const result = await nftItemDtoService.getNFTItemsByPortal(portalId)
-        ctx.successRes(result);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getNFTItemsMetadataDraftsListingPaginated = this.query({
-    h: async (ctx) => {
-      try {
-        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
-        const {
-          paginationMeta,
-          result
-        } = await nftItemDtoService.lookupNFTItemMetadataDraftsWithPagination(filter, sort, { page, pageSize });
-
-        ctx.successRes(result, { extraInfo: paginationMeta });
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getNFTItemMetadataDraftsByNFTCollection = this.query({
-    h: async (ctx) => {
-      try {
-
-        const nftCollectionId = ctx.params.nftCollectionId;
-        const result = await nftItemDtoService.getNFTItemMetadataDraftsByNFTCollection(nftCollectionId);
-        ctx.successRes(result);
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getNFTItemMetadataDraft = this.query({
-    h: async (ctx) => {
-      try {
-
-        const nftItemDraftId = ctx.params.nftItemDraftId;
-        const result = await nftItemMetadataDraftService.getNFTItemMetadataDraft(nftItemDraftId);
-        ctx.successRes(result);
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  createNFTItemMetadataDraft = this.command({
-    form: NFTItemMetadataForm, h: async (ctx) => {
-      try {
-        console.log("In controller createNFTItemMetadataDraft")
-
-        let email;
-        
-        const validate = async (appCmds) => {
-          const validateCreateNFTItemMetadataDraft = async (createNFTItemMetadataDraftCmd, cmdStack) => {
-            const { nftCollectionId } = createNFTItemMetadataDraftCmd.getCmdPayload();
-            const nftCollection = await nftCollectionService.getNFTCollection(nftCollectionId);
-            const { appCmds } = msg;
-            const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT);
-            if (!appCmd) {
-              throw new BadRequestError(`'CREATE_NFT_ITEM_METADATA_DRAFT' is not found`);
-            }
-
-            email = appCmd.getCmdPayload().owner;
-            if (!email || !validateEmail(email)) {
-              throw new BadRequestError(`Email is invalid or not provided`);
-            }
-
-            if (!nftCollection) {
-              throw new BadRequestError(`Nft collection "${nftCollectionId}" doesn't exist`);
-            }
-          };
-
-          const createNFTItemMetadataDraftSettings = {
-            cmdNum: APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT,
-            validate: validateCreateNFTItemMetadataDraft
-          };
-
-          const validCmdsOrder = [createNFTItemMetadataDraftSettings];
-
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-
-        const msg = ctx.state.msg;
-
-        await assetCmdHandler.process(msg, ctx, validate);
-
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM_METADATA_DRAFT)
-        const nftItemDraftId = mongoose.Types.ObjectId(entityId);
-
-        ctx.successRes({
-          _id: nftItemDraftId
-        });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  updateNFTItemMetadataDraft = this.command({
-    form: NFTItemMetadataForm, h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const validateUpdateNFTItemMetadataDraft = async (updateNFTItemMetadataDraftCmd, cmdStack) => {
-            const { _id: nftItemDraftId } = updateNFTItemMetadataDraftCmd.getCmdPayload();
-
-            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(nftItemDraftId);
-
-            if (!draft) {
-              throw new NotFoundError(`Draft for "${nftItemDraftId}" id is not found`);
-            }
-            if (draft.status != NftItemMetadataDraftStatus.IN_PROGRESS) {
-              throw new BadRequestError(`Draft "${nftItemDraftId}" is locked for updates`);
-            }
-
-            const username = ctx.state.user.username;
-
-
-            if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
-              throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
-            }
-          };
-
-          const updateNFTItemMetadataDraftSettings = {
-            cmdNum: APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT,
-            validate: validateUpdateNFTItemMetadataDraft
-          };
-
-          const validCmdsOrder = [updateNFTItemMetadataDraftSettings];
-
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-
-        const msg = ctx.state.msg;
-
-        await assetCmdHandler.process(msg, ctx, validate);
-
-        const nftItemDraftId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT, '_id');
-
-        ctx.successRes({
-          _id: nftItemDraftId
-        });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  deleteNFTItemMetadataDraft = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const validateDeleteNFTItemMetadataDraft = async (deleteNFTItemMetadataDraftCmd, cmdStack) => {
-            const { _id } = deleteNFTItemMetadataDraftCmd.getCmdPayload();
-            const draft = await nftItemMetadataDraftService.getNFTItemMetadataDraft(_id);
-            if (!draft) {
-              throw new NotFoundError(`Draft for "${_id}" id is not found`);
-            }
-
-            const user = await userService.getUser(draft.owner);
-            const username = ctx.state.user.username;
-
-            if (user) {
-              if (user._id !== username) {
-                throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
-              }
-            } else {
-              const isAuthorized = await teamDtoService.authorizeTeamAccount(draft.owner, username)
-              if (!isAuthorized) {
-                throw new ForbiddenError(`"${username}" is not permitted to edit "${draft.nftCollectionId}" nft collection`);
-              }
-            }
-
-            // if there is a proposal for this content (no matter is it approved or still in voting progress)
-            // we must respond with an error as blockchain hashed data should not be modified
-            if (draft.status == NftItemMetadataDraftStatus.PROPOSED) {
-              throw new ConflictError(`Content with hash ${draft.hash} has been proposed already and cannot be deleted`);
-            }
-          };
-
-          const deleteNFTItemMetadataDraftSettings = {
-            cmdNum: APP_CMD.DELETE_NFT_ITEM_METADATA_DRAFT,
-            validate: validateDeleteNFTItemMetadataDraft
-          };
-
-          const validCmdsOrder = [deleteNFTItemMetadataDraftSettings];
-
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-
-        const msg = ctx.state.msg;
-        await assetCmdHandler.process(msg, ctx, validate);
-
-        ctx.successRes();
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-
   createFTTransferRequest = this.command({
     h: async (ctx) => {
       try {
@@ -527,47 +475,6 @@ class AssetsController extends BaseController {
     }
   });
 
-
-  createNFTCollection = this.command({
-    form: NFTCollectionForm,
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          return true;
-        };
-        const msg = ctx.state.msg;
-        await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION_METADATA);
-        ctx.successRes({ _id: String(entityId) });
-
-      } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
-      }
-    }
-  });
-
-
-  updateNFTCollection = this.command({
-    form: NFTCollectionForm,
-    h: async (ctx) => {
-      try {
-
-        const validate = async (appCmds) => {
-          return true;
-        };
-        const msg = ctx.state.msg;
-        await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION_METADATA, '_id');
-        ctx.successRes({ _id: String(entityId) });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-
   issueFT = this.command({
     h: async (ctx) => {
       try {
@@ -596,38 +503,6 @@ class AssetsController extends BaseController {
     }
   });
 
-  moderateNFTItemMetadataDraft = this.command({
-    h: async (ctx) => {
-      try {
-
-        let newStatus;
-        let draftId;
-        const validate = async (appCmds) => {
-          const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS);
-            if (!appCmd) {
-              throw new BadRequestError(`'APP_CMD.UPDATE_NFT_ITEM_METADATA_DRAFT_STATUS' is not found`);
-            }
-
-            newStatus = appCmd.getCmdPayload().status;
-            draftId = appCmd.getCmdPayload()._id;
-
-            if (newStatus != NftItemMetadataDraftStatus.APPROVED && newStatus != NftItemMetadataDraftStatus.REJECTED) {
-              throw new BadRequestError(`Unrecognized status provided`);
-            }
-        };
-
-        const msg = ctx.state.msg;
-        await assetCmdHandler.process(msg, ctx, validate);
-        // after separate cmd validation all appCmds should have draft _id in payload
-        ctx.successRes({
-          _id: draftId
-        });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  })
 }
 
 

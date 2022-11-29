@@ -4,10 +4,9 @@ import {
   NftItemMetadataDraftStatus
 } from '@casimir.one/platform-core';
 import {
-  AssetService,
   FTClassService,
   NFTCollectionService,
-  NFTItemMetadataDraftService,
+  NFTItemService,
   PortalService
 } from '../../../services';
 import { genSha256Hash } from '@casimir.one/toolbox';
@@ -75,10 +74,9 @@ class AssetEventHandler extends PortalAppEventHandler {
 }
 
 const assetEventHandler = new AssetEventHandler();
-const assetService = new AssetService();
 const ftClassService = new FTClassService();
 const nftCollectionService = new NFTCollectionService();
-const nftItemMetadataDraftService = new NFTItemMetadataDraftService();
+const nftItemService = new NFTItemService();
 const portalService = new PortalService();
 
 assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
@@ -119,7 +117,7 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
 });
 
 
-assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_CREATED, async (event) => {
+assetEventHandler.register(APP_EVENT.NFT_COLLECTION_CREATED, async (event) => {
   const {
     entityId,
     attributes,
@@ -134,7 +132,7 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_CREATED, async (eve
 });
 
 
-assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_UPDATED, async (event) => {
+assetEventHandler.register(APP_EVENT.NFT_COLLECTION_UPDATED, async (event) => {
   const {
     _id,
     attributes
@@ -146,7 +144,7 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_METADATA_UPDATED, async (eve
   });
 });
 
-assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (event) => {
+assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
 
   const {
     nftCollectionId,
@@ -159,8 +157,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
   } = event.getEventPayload();
 
   const _id = mongoose.Types.ObjectId(entityId);
-
-  const draftData = {
+  const nftItem = {
     _id,
     nftCollectionId,
     nftItemId,
@@ -172,29 +169,24 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED, async (eve
     attributes
   }
 
-  draftData.hash = genSha256Hash(JSON.stringify(attributes));
-
-  await nftItemMetadataDraftService.createNFTItemMetadataDraft(draftData);
+  nftItem.hash = genSha256Hash(JSON.stringify(attributes));
+  await nftItemService.createNFTItem(nftItem);
   await nftCollectionService.increaseNftCollectionNextItemId(nftCollectionId);
 
   // sendEmailNotification(owner, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
 });
 
-assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (event) => {
-
+assetEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
   const {
-    _id: draftId,
+    _id: nftItemId,
     authors,
     status,
     attributes,
   } = event.getEventPayload();
 
-  let packageHash = '';
-
-  packageHash = genSha256Hash(JSON.stringify(attributes));
-
-  await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
-    _id: draftId,
+  const packageHash = genSha256Hash(JSON.stringify(attributes));
+  await nftItemService.updateNFTItem({
+    _id: nftItemId,
     authors,
     status,
     hash: packageHash,
@@ -202,27 +194,17 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED, async (eve
   })
 });
 
-assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, async (event) => {
+assetEventHandler.register(APP_EVENT.NFT_ITEM_DELETED, async (event) => {
   const { _id } = event.getEventPayload();
-
-  await nftItemMetadataDraftService.deleteNFTItemMetadataDraft(_id);
+  await nftItemService.deleteNFTItem(_id);
 });
 
-assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDATED, async (event) => {
-  const { _id, moderationMessage } = event.getEventPayload();
-
-  await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
-    _id,
-    moderationMessage
-  })
-});
-
-assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED, async (event) => {
+assetEventHandler.register(APP_EVENT.NFT_ITEM_STATUS_UPDATED, async (event) => {
   const { _id, status } = event.getEventPayload();
 
   if (status == NftItemMetadataDraftStatus.APPROVED) {
     const queueNumber = await portalService.increasePortalMaxQueueNumber(config.TENANT);
-    const updatedDraft = await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
+    await nftItemService.updateNFTItem({
       _id,
       status,
       queueNumber
@@ -233,7 +215,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED, asy
     //   `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved ! Your queue number is <b>${queueNumber}</b></p>`
     // );
   } else {
-    const updatedDraft = await nftItemMetadataDraftService.updateNFTItemMetadataDraft({
+    await nftItemService.updateNFTItem({
       _id,
       status,
     });

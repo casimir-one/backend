@@ -151,9 +151,6 @@ module.exports = {
   [DOMAIN_EVENT.NFT_FROZEN]: [
     { h: nftEventHandler, await: false }
   ],
-  [DOMAIN_EVENT.NFT_ITEM_CREATED]: [
-    { h: nftEventHandler, await: true }
-  ],
   [DOMAIN_EVENT.NFT_METADATA_CLEARED]: [
     { h: nftEventHandler, await: false }
   ],

@@ -3,7 +3,7 @@ import { APP_EVENT } from '@casimir.one/platform-core';
 import assert from 'assert';
 
 
-class NFTCollectionMetadataUpdatedEvent extends BaseEvent {
+class NFTCollectionUpdatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -13,10 +13,10 @@ class NFTCollectionMetadataUpdatedEvent extends BaseEvent {
 
     assert(!!_id, "'_id' is required");
 
-    super(APP_EVENT.NFT_COLLECTION_METADATA_UPDATED, eventPayload);
+    super(APP_EVENT.NFT_COLLECTION_UPDATED, eventPayload);
   }
 
 }
 
 
-module.exports = NFTCollectionMetadataUpdatedEvent;
+module.exports = NFTCollectionUpdatedEvent;

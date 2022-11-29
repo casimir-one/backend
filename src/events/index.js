@@ -1,5 +1,5 @@
-import NFTCollectionMetadataCreatedEvent from './impl/NFTCollectionMetadataCreatedEvent';
-import NFTCollectionMetadataUpdatedEvent from './impl/NFTCollectionMetadataUpdatedEvent';
+import NFTCollectionCreatedEvent from './impl/NFTCollectionCreatedEvent';
+import NFTCollectionUpdatedEvent from './impl/NFTCollectionUpdatedEvent';
 import DaoMemberAddedEvent from './impl/DaoMemberAddedEvent';
 import DaoMemberRemovedEvent from './impl/DaoMemberRemovedEvent';
 
@@ -23,9 +23,7 @@ import DaoUpdatedEvent from './impl/DaoUpdatedEvent';
 import FTTransferredEvent from './impl/FTTransferredEvent';
 import NFTTransferredEvent from './impl/NFTTransferredEvent';
 import FTCreatedEvent from './impl/FTCreatedEvent';
-import NFTCollectionCreatedEvent from './impl/NFTCollectionCreatedEvent';
 import FTIssuedEvent from './impl/FTIssuedEvent';
-import NFTItemCreatedEvent from './impl/NFTItemCreatedEvent';
 import FTTransferProposalCreatedEvent from './impl/FTTransferProposalCreatedEvent';
 import FTTransferProposalAcceptedEvent from './impl/FTTransferProposalAcceptedEvent';
 import FTTransferProposalDeclinedEvent from './impl/FTTransferProposalDeclinedEvent';
@@ -40,16 +38,13 @@ import DocumentTemplateCreatedEvent from './impl/DocumentTemplateCreatedEvent';
 import DocumentTemplateUpdatedEvent from './impl/DocumentTemplateUpdatedEvent';
 import DocumentTemplateDeletedEvent from './impl/DocumentTemplateDeletedEvent';
 
-import NFTItemMetadataDraftModerationMsgUpdatedEvent from './impl/NFTItemMetadataDraftModerationMsgUpdatedEvent';
-import NFTItemMetadataDraftStatusUpdatedEvent from './impl/NFTItemMetadataDraftStatusUpdatedEvent';
-import NFTItemMetadataDraftCreatedEvent from './impl/NFTItemMetadataDraftCreatedEvent';
-import NFTItemMetadataDraftDeletedEvent from './impl/NFTItemMetadataDraftDeletedEvent';
-import NFTItemMetadataDraftUpdatedEvent from './impl/NFTItemMetadataDraftUpdatedEvent';
-import NFTItemMetadataCreatedEvent from './impl/NFTItemMetadataCreatedEvent';
+import NFTItemStatusUpdatedEvent from './impl/NFTItemStatusUpdatedEvent';
+import NFTItemCreatedEvent from './impl/NFTItemCreatedEvent';
+import NFTItemDeletedEvent from './impl/NFTItemDeletedEvent';
+import NFTItemUpdatedEvent from './impl/NFTItemUpdatedEvent';
 
 import AttributeSettingsUpdatedEvent from './impl/AttributeSettingsUpdatedEvent';
 import LayoutSettingsUpdatedEvent from './impl/LayoutSettingsUpdatedEvent';
-import NetworkSettingsUpdatedEvent from './impl/NetworkSettingsUpdatedEvent';
 import PortalProfileUpdatedEvent from './impl/PortalProfileUpdatedEvent';
 import PortalSettingsUpdatedEvent from './impl/PortalSettingsUpdatedEvent';
 
@@ -57,19 +52,25 @@ import LayoutCreatedEvent from './impl/LayoutCreatedEvent';
 import LayoutUpdatedEvent from './impl/LayoutUpdatedEvent';
 import LayoutDeletedEvent from './impl/LayoutDeletedEvent';
 
-import NFTLazySellProposalCreatedEvent from './impl/NFTLazySellProposalCreatedEvent';
-import NFTLazySellProposalAcceptedEvent from './impl/NFTLazySellProposalAcceptedEvent';
-import NFTLazySellProposalDeclinedEvent from './impl/NFTLazySellProposalDeclinedEvent';
-
-import NFTLazyBuyProposalCreatedEvent from './impl/NFTLazyBuyProposalCreatedEvent';
-import NFTLazyBuyProposalAcceptedEvent from './impl/NFTLazyBuyProposalAcceptedEvent';
-import NFTLazyBuyProposalDeclinedEvent from './impl/NFTLazyBuyProposalDeclinedEvent';
 
 module.exports = {
-  NFTCollectionMetadataCreatedEvent,
-  NFTCollectionMetadataUpdatedEvent,
-  DaoMemberAddedEvent,
-  DaoMemberRemovedEvent,
+  NFTCollectionCreatedEvent,
+  NFTCollectionUpdatedEvent,
+
+  NFTItemCreatedEvent,
+  NFTItemUpdatedEvent,
+  NFTItemDeletedEvent,
+  NFTItemStatusUpdatedEvent,
+
+  AttributeCreatedEvent,
+  AttributeUpdatedEvent,
+  AttributeDeletedEvent,
+  AttributeSettingsUpdatedEvent,
+
+  LayoutCreatedEvent,
+  LayoutUpdatedEvent,
+  LayoutDeletedEvent,
+  LayoutSettingsUpdatedEvent,
 
   ProposalCreatedEvent,
   ProposalAcceptedEvent,
@@ -79,12 +80,10 @@ module.exports = {
   TeamUpdateProposalCreatedEvent,
   TeamUpdateProposalDeclinedEvent,
 
-  AttributeCreatedEvent,
-  AttributeUpdatedEvent,
-  AttributeDeletedEvent,
-
   DaoCreatedEvent,
   DaoUpdatedEvent,
+  DaoMemberAddedEvent,
+  DaoMemberRemovedEvent,
   DAOImportedEvent,
 
   UserAuthorityAlteredEvent,
@@ -92,9 +91,7 @@ module.exports = {
   FTTransferredEvent,
   NFTTransferredEvent,
   FTCreatedEvent,
-  NFTCollectionCreatedEvent,
   FTIssuedEvent,
-  NFTItemCreatedEvent,
   FTTransferProposalCreatedEvent,
   FTTransferProposalAcceptedEvent,
   FTTransferProposalDeclinedEvent,
@@ -109,28 +106,6 @@ module.exports = {
   DocumentTemplateUpdatedEvent,
   DocumentTemplateDeletedEvent,
 
-  NFTItemMetadataDraftModerationMsgUpdatedEvent,
-  NFTItemMetadataDraftStatusUpdatedEvent,
-  NFTItemMetadataDraftCreatedEvent,
-  NFTItemMetadataDraftDeletedEvent,
-  NFTItemMetadataDraftUpdatedEvent,
-  NFTItemMetadataCreatedEvent,
-
-  AttributeSettingsUpdatedEvent,
-  LayoutSettingsUpdatedEvent,
-  NetworkSettingsUpdatedEvent,
   PortalProfileUpdatedEvent,
   PortalSettingsUpdatedEvent,
-
-  LayoutCreatedEvent,
-  LayoutUpdatedEvent,
-  LayoutDeletedEvent,
-
-  NFTLazySellProposalCreatedEvent,
-  NFTLazySellProposalAcceptedEvent,
-  NFTLazySellProposalDeclinedEvent,
-
-  NFTLazyBuyProposalCreatedEvent,
-  NFTLazyBuyProposalAcceptedEvent,
-  NFTLazyBuyProposalDeclinedEvent,
 }

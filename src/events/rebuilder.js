@@ -1,6 +1,5 @@
 import {
     AcceptProposalCmd,
-    CreateNftItemCmd,
     CreateProposalCmd,
     DeclineProposalCmd,
     TransferFTCmd,
@@ -11,23 +10,11 @@ import { logWarn } from '../utils/log';
 import BaseEvent from './base/BaseEvent';
 import {
     FTTransferredEvent,
-    NFTItemMetadataDraftCreatedEvent,
-    NFTLazyBuyProposalAcceptedEvent,
-    NFTLazyBuyProposalCreatedEvent,
-    NFTLazyBuyProposalDeclinedEvent,
-    NFTLazySellProposalAcceptedEvent,
-    NFTLazySellProposalCreatedEvent,
-    NFTLazySellProposalDeclinedEvent,
     NFTTransferredEvent,
     ProposalAcceptedEvent,
     ProposalCreatedEvent,
     ProposalDeclinedEvent,
-    NFTItemCreatedEvent,
-    NFTItemMetadataDraftStatusUpdatedEvent,
-    NFTItemMetadataDraftModerationMsgUpdatedEvent,
     DaoCreatedEvent,
-    NFTCollectionMetadataCreatedEvent,
-    NFTCollectionCreatedEvent,
     DAOImportedEvent
 } from './index.js';
 
@@ -59,7 +46,6 @@ const cmdParser = {
 
     [APP_CMD.TRANSFER_FT]: buildCmd(TransferFTCmd),
     [APP_CMD.TRANSFER_NFT]: buildCmd(TransferNFTCmd),
-    [APP_CMD.CREATE_NFT_ITEM]: buildCmd(CreateNftItemCmd),
 }
 
 
@@ -70,25 +56,9 @@ const eventParser = {
     [APP_EVENT.FT_TRANSFERRED]: buildEvent(FTTransferredEvent),
     [APP_EVENT.NFT_TRANSFERRED]: buildEvent(NFTTransferredEvent),
 
-    [APP_EVENT.NFT_ITEM_CREATED]: buildEvent(NFTItemCreatedEvent),
-    [APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED]: buildEvent(NFTItemMetadataDraftCreatedEvent),
-    [APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED]: buildEvent(NFTItemMetadataDraftStatusUpdatedEvent),
-    [APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDATED]: buildEvent(NFTItemMetadataDraftModerationMsgUpdatedEvent),
-
-    // [APP_EVENT.NFT_COLLECTION_CREATED]: buildEvent(NFTCollectionCreatedEvent),
-    // [APP_EVENT.NFT_COLLECTION_METADATA_CREATED]: buildEvent(NFTCollectionMetadataCreatedEvent),
-
     [APP_EVENT.PROPOSAL_CREATED]: buildEvent(ProposalCreatedEvent, buildEventProposalCmd),
     [APP_EVENT.PROPOSAL_ACCEPTED]: buildEvent(ProposalAcceptedEvent),
-    [APP_EVENT.PROPOSAL_DECLINED]: buildEvent(ProposalDeclinedEvent),
-
-    [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_CREATED]: buildEvent(NFTLazySellProposalCreatedEvent, buildEventProposalCmd),
-    [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_ACCEPTED]: buildEvent(NFTLazySellProposalAcceptedEvent, buildEventProposalCmd),
-    [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_DECLINED]: buildEvent(NFTLazySellProposalDeclinedEvent, buildEventProposalCmd),
-
-    [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_CREATED]: buildEvent(NFTLazyBuyProposalCreatedEvent, buildEventProposalCmd),
-    [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_ACCEPTED]: buildEvent(NFTLazyBuyProposalAcceptedEvent, buildEventProposalCmd),
-    [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_DECLINED]: buildEvent(NFTLazyBuyProposalDeclinedEvent),
+    [APP_EVENT.PROPOSAL_DECLINED]: buildEvent(ProposalDeclinedEvent)
 }
 
 const rebuildCmd = rawCmd => {

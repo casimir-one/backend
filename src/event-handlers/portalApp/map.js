@@ -28,14 +28,6 @@ module.exports = {
     { h: proposalEventHandler, await: true }
   ],
 
-  [APP_EVENT.NFT_COLLECTION_METADATA_CREATED]: [
-    { h: assetEventHandler, await: true }
-  ],
-
-  [APP_EVENT.NFT_COLLECTION_METADATA_UPDATED]: [
-    { h: assetEventHandler, await: true }
-  ],
-
   [APP_EVENT.DAO_MEMBER_ADDED]: [
     { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
@@ -68,6 +60,10 @@ module.exports = {
 
   [APP_EVENT.ATTRIBUTE_DELETED]: [
     { h: attributeEventHandler, await: true }
+  ],
+
+  [APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED]: [
+    { h: portalEventHandler, await: true },
   ],
 
   [APP_EVENT.DAO_CREATED]: [
@@ -105,29 +101,29 @@ module.exports = {
     { h: documentTemplateEventHandler, await: false }
   ],
 
-  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_CREATED]: [
+  [APP_EVENT.NFT_COLLECTION_CREATED]: [
     { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_UPDATED]: [
+  [APP_EVENT.NFT_COLLECTION_UPDATED]: [
+    { h: assetEventHandler, await: true }
+  ],
+
+  [APP_EVENT.NFT_ITEM_CREATED]: [
+    { h: assetEventHandler, await: true }
+  ],
+
+  [APP_EVENT.NFT_ITEM_UPDATED]: [
     { h: fileUploadEventHandler, await: true },
     { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED]: [
+  [APP_EVENT.NFT_ITEM_STATUS_UPDATED]: [
     { h: assetEventHandler, await: true }
   ],
 
-  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_MODERATION_MSG_UPDATED]: [
-    { h: assetEventHandler, await: true }
-  ],
-
-  [APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED]: [
+  [APP_EVENT.NFT_ITEM_DELETED]: [
     { h: fileUploadEventHandler, await: true },
-    { h: assetEventHandler, await: true }
-  ],
-
-  [APP_EVENT.NFT_ITEM_METADATA_CREATED]: [
     { h: assetEventHandler, await: true }
   ],
 
@@ -144,14 +140,6 @@ module.exports = {
     { h: portalEventHandler, await: true },
   ],
 
-  [APP_EVENT.ATTRIBUTE_SETTINGS_UPDATED]: [
-    { h: portalEventHandler, await: true },
-  ],
-
-  [APP_EVENT.NETWORK_SETTINGS_UPDATED]: [
-    { h: portalEventHandler, await: true },
-  ],
-
   [APP_EVENT.LAYOUT_CREATED]: [
     { h: layoutEventHandler, await: true },
   ],
@@ -162,29 +150,5 @@ module.exports = {
 
   [APP_EVENT.LAYOUT_DELETED]: [
     { h: layoutEventHandler, await: true },
-  ],
-
-  [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: true }
-  ],
-
-  [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_ACCEPTED]: [
-    { h: proposalEventHandler, await: false }
-  ],
-
-  [APP_EVENT.NFT_LAZY_SELL_PROPOSAL_DECLINED]: [
-    { h: proposalEventHandler, await: false }
-  ],
-
-  [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_CREATED]: [
-    { h: proposalEventHandler, await: true },
-  ],
-
-  [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_ACCEPTED]: [
-    { h: proposalEventHandler, await: false }
-  ],
-
-  [APP_EVENT.NFT_LAZY_BUY_PROPOSAL_DECLINED]: [
-    { h: proposalEventHandler, await: false }
-  ],
+  ]
 };

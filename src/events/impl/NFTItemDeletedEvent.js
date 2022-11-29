@@ -2,7 +2,7 @@ import { APP_EVENT } from '@casimir.one/platform-core';
 import assert from 'assert';
 import BaseEvent from "../base/BaseEvent";
 
-class NFTItemMetadataDraftDeletedEvent extends BaseEvent {
+class NFTItemDeletedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -11,9 +11,9 @@ class NFTItemMetadataDraftDeletedEvent extends BaseEvent {
 
     assert(!!_id, "'_id' is required");
 
-    super(APP_EVENT.NFT_ITEM_METADATA_DRAFT_DELETED, eventPayload);
+    super(APP_EVENT.NFT_ITEM_DELETED, eventPayload);
   }
 
 }
 
-module.exports = NFTItemMetadataDraftDeletedEvent;
+module.exports = NFTItemDeletedEvent;

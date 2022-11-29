@@ -12,6 +12,6 @@ const NFTCollectionSchema = new Schema({
   "nextNftItemId": { type: Number, default: 1 },
 }, { timestamps: true });
 
-const model = mongoose.model('nft-collection-metadata', NFTCollectionSchema);
+const model = mongoose.model('nft-collection', NFTCollectionSchema);
 
 module.exports = model;

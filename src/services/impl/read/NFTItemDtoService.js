@@ -1,50 +1,46 @@
-import NFTItemMetadataDraftSchema from '../../../schemas/NFTItemMetadataDraftSchema';
+import NFTItemSchema from '../../../schemas/NFTItemSchema';
 import BaseService from '../../base/BaseService';
 
 
-class NFTItemDtoService extends BaseService {
+class NFTItemDTOService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(NFTItemMetadataDraftSchema, options);
+    super(NFTItemSchema, options);
   }
 
-  async mapNFTItems(nftItemsMetadatas) {
-    return nftItemsMetadatas.map((nftItemMetadata) => ({
-      _id: nftItemMetadata._id,
-      nftItemId: nftItemMetadata._id.nftItemId,
-      owner: nftItemMetadata.owner,
-      ownerAddress: nftItemMetadata.ownerAddress,
-      nftCollectionId: nftItemMetadata.nftCollectionId,
-      authors: nftItemMetadata.authors,
-      attributes: nftItemMetadata.attributes,
-      hash: nftItemMetadata.hash,
-      algo: nftItemMetadata.algo,
-      status: nftItemMetadata.status,
-      createdAt: nftItemMetadata.createdAt || nftItemMetadata.created_at,
-      updatedAt: nftItemMetadata.updatedAt || nftItemMetadata.updated_at,
-      portalId: nftItemMetadata.portalId
+  async mapDTOs(nftItems) {
+    return nftItems.map((nftItem) => ({
+      _id: nftItem._id,
+      nftItemId: nftItem.nftItemId,
+      owner: nftItem.owner,
+      ownerAddress: nftItem.ownerAddress,
+      nftCollectionId: nftItem.nftCollectionId,
+      authors: nftItem.authors,
+      attributes: nftItem.attributes,
+      hash: nftItem.hash,
+      algo: nftItem.algo,
+      status: nftItem.status,
+      createdAt: nftItem.createdAt || nftItem.created_at,
+      updatedAt: nftItem.updatedAt || nftItem.updated_at,
+      portalId: nftItem.portalId
     }));
   }
 
-  async getNFTItemsByPortal(portalId) {
-    const nftItemsMetadata = await this.findMany({ portalId });
-    if (!nftItemsMetadata.length) return [];
-    const result = await this.mapNFTItems(nftItemsMetadata);
+  async getNFTItemDTO(id) {
+    const nftItem = await this.findOne({ _id: id });
+    if (!nftItem) return null;
+    const results = await this.mapDTOs([nftItem]);
+    const [result] = results;
     return result;
   }
 
-  async getNFTItemMetadataDraftsByNFTCollection(nftCollectionId) {
-    const nftItemsMetadata = await this.findMany({ nftCollectionId });
-    if (!nftItemsMetadata.length) return [];
-    const result = await this.mapNFTItems(nftItemsMetadata);
-    return result;  
-  }
-
-  async lookupNFTItemMetadataDraftsWithPagination(filter, sort, pagination) {
-    const drafts = await this.findManyPaginated(filter, sort, pagination);
-    return drafts;
+  async getNFTItemsDTOsPaginated(filter, sort, pagination) {
+    const f = filter || {};
+    const { paginationMeta, result: nftItems } = await this.findManyPaginated(f, sort, pagination);
+    const result = await this.mapDTOs(nftItems);
+    return { paginationMeta, result };
   }
 
 }
 
-export default NFTItemDtoService;
+export default NFTItemDTOService;

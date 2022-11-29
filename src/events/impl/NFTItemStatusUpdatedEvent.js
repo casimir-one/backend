@@ -2,7 +2,7 @@ import { APP_EVENT, NftItemMetadataDraftStatus } from '@casimir.one/platform-cor
 import assert from 'assert';
 import BaseEvent from '../base/BaseEvent';
 
-class NFTItemMetadataDraftStatusUpdatedEvent extends BaseEvent {
+class NFTItemStatusUpdatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
@@ -14,9 +14,9 @@ class NFTItemMetadataDraftStatusUpdatedEvent extends BaseEvent {
     assert(!!status, "'status' is required");
     assert(Object.values(NftItemMetadataDraftStatus).includes(status), "'status' is invalid");
 
-    super(APP_EVENT.NFT_ITEM_METADATA_DRAFT_STATUS_UPDATED, eventPayload);
+    super(APP_EVENT.NFT_ITEM_STATUS_UPDATED, eventPayload);
   }
 
 }
 
-module.exports = NFTItemMetadataDraftStatusUpdatedEvent;
+module.exports = NFTItemStatusUpdatedEvent;

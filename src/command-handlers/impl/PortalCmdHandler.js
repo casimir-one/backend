@@ -6,7 +6,6 @@ import {
   LayoutUpdatedEvent,
   LayoutSettingsUpdatedEvent,
   AttributeSettingsUpdatedEvent,
-  NetworkSettingsUpdatedEvent
 } from './../../events';
 
 class PortalCmdHandler extends BaseCmdHandler {
@@ -45,12 +44,6 @@ portalCmdHandler.register(APP_CMD.UPDATE_LAYOUT_SETTINGS, (cmd, ctx) => {
 portalCmdHandler.register(APP_CMD.UPDATE_ATTRIBUTE_SETTINGS, (cmd, ctx) => {
   const attributeMappings = cmd.getCmdPayload();
   ctx.state.appEvents.push(new AttributeSettingsUpdatedEvent({ attributeMappings, portalId: ctx.state.portal.id }));
-});
-
-portalCmdHandler.register(APP_CMD.UPDATE_NETWORK_SETTINGS, (cmd, ctx) => {
-  const networkSettings = cmd.getCmdPayload();
-  
-  ctx.state.appEvents.push(new NetworkSettingsUpdatedEvent({ networkSettings, portalId: ctx.state.portal.id }));
 });
 
 module.exports = portalCmdHandler;

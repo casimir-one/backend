@@ -1,11 +1,11 @@
 
 import mongoose from 'mongoose';
-import { NftItemMetadataDraftStatus, NFT_ITEM_METADATA_FORMAT } from '@casimir.one/platform-core';
+import { NftItemMetadataDraftStatus } from '@casimir.one/platform-core';
 import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
 
-const NFTItemMetadataDraftSchema = new Schema({
+const NFTItemSchema = new Schema({
   "portalId": { type: String, required: true },
   "nftCollectionId": { type: String, required: true },
   "nftItemId": { type: String, required: true },
@@ -20,11 +20,9 @@ const NFTItemMetadataDraftSchema = new Schema({
     default: NftItemMetadataDraftStatus.PROPOSED,
     required: true
   },
-  "authors": [{ type: String }],
-  "moderationMessage": { type: String },
-  "lazySellProposalId": { type: String }, //TODO: remove when we have onchain market
+  "authors": [{ type: String }]
 }, { timestamps: true });
 
-const model = mongoose.model('nft-item-metadata-draft', NFTItemMetadataDraftSchema);
+const model = mongoose.model('nft-item', NFTItemSchema);
 
 module.exports = model;
