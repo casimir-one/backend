@@ -7,6 +7,7 @@ import {
   documentTemplateCmdHandler,
   portalCmdHandler,
   layoutCmdHandler,
+  userCmdHandler
 } from './index';
 
 
@@ -18,6 +19,8 @@ module.exports = {
   [APP_CMD.UPDATE_NFT_ITEM]: assetCmdHandler,
   [APP_CMD.DELETE_NFT_ITEM]: assetCmdHandler,
   [APP_CMD.MODERATE_NFT_ITEM]: assetCmdHandler,
+
+  [APP_CMD.CREATE_USER]: userCmdHandler,
 
   [APP_CMD.ADD_DAO_MEMBER]: accountCmdHandler,
   [APP_CMD.REMOVE_DAO_MEMBER]: accountCmdHandler,

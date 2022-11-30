@@ -13,9 +13,8 @@ class NFTItemService extends BaseService {
   }
 
   async createNFTItem({
-    _id,
+    _id: nftItemId,
     nftCollectionId,
-    nftItemId,
     ownerId,
     creatorId,
     attributes,
@@ -25,9 +24,8 @@ class NFTItemService extends BaseService {
   }) {
 
     const nftItem = await this.createOne({
-      _id,
+      _id: nftItemId,
       nftCollectionId,
-      nftItemId,
       ownerId,
       creatorId,
       attributes,
@@ -39,8 +37,7 @@ class NFTItemService extends BaseService {
     return nftItem;
   }
 
-  async updateNFTItem({
-    _id: id,
+  async updateNFTItem(nftItemId, {
     attributes,
     hash,
     algo,
@@ -48,7 +45,7 @@ class NFTItemService extends BaseService {
     queueNumber,
   }) {
 
-    const updatedNftItem = await this.updateOne({ _id: id }, {
+    const updatedNftItem = await this.updateOne({ _id: nftItemId }, {
       attributes,
       hash,
       algo,
@@ -59,8 +56,8 @@ class NFTItemService extends BaseService {
     return updatedNftItem;
   }
 
-  async deleteNFTItem(id) {
-    const deletedNftItem = await this.deleteOne({ _id: id });
+  async deleteNFTItem(nftItemId) {
+    const deletedNftItem = await this.deleteOne({ _id: nftItemId });
     return deletedNftItem;
   }
 

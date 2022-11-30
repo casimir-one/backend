@@ -88,7 +88,7 @@ class AssetsController extends BaseController {
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
         const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION);
-        ctx.successRes({ _id: String(entityId) });
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.status = err.httpStatus || 500;
@@ -107,7 +107,7 @@ class AssetsController extends BaseController {
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
         const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION, '_id');
-        ctx.successRes({ _id: String(entityId) });
+        ctx.successRes({ _id: entityId });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -180,8 +180,8 @@ class AssetsController extends BaseController {
 
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM)
-        const nftItemId = mongoose.Types.ObjectId(entityId);
+
+        const nftItemId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_ITEM)
         ctx.successRes({ _id: nftItemId });
 
       } catch (err) {

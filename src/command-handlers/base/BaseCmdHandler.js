@@ -19,6 +19,7 @@ import { rebuildCmd } from '../../events/rebuilder';
 
 
 const proposalService = new ProposalService({ scoped: false });
+
 class BaseCmdHandler extends EventEmitter {
   constructor() {
     super();

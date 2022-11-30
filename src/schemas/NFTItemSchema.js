@@ -8,7 +8,6 @@ const Schema = mongoose.Schema;
 const NFTItemSchema = new Schema({
   "portalId": { type: String, required: true },
   "nftCollectionId": { type: String, required: false },
-  "nftItemId": { type: String, required: true },
   "ownerId": { type: String, required: true },
   "creatorId": { type: String, required: true },
   "attributes": [AttributeValueSchema],

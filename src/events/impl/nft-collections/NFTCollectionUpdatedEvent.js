@@ -12,6 +12,7 @@ class NFTCollectionUpdatedEvent extends BaseEvent {
     } = eventPayload;
 
     assert(!!_id, "'_id' is required");
+    assert(Array.isArray(attributes), "'attributes' must be array");
 
     super(APP_EVENT.NFT_COLLECTION_UPDATED, eventPayload);
   }

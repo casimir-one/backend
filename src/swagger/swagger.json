@@ -4852,7 +4852,7 @@
         "email": {
           "type": "string"
         },
-        "signUpPubKey": {
+        "pubKey": {
           "type": "string"
         },
         "status": {
@@ -4961,9 +4961,6 @@
           }
         },
         "pubKey": {
-          "type": "string"
-        },
-        "signUpPubKey": {
           "type": "string"
         },
         "status": {

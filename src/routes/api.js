@@ -12,7 +12,6 @@ import {
   layoutsCtrl
 } from '../controllers';
 
-import userAvatarFileReadAuth from './../middlewares/auth/user/readAvatarFileAuth';
 
 const protected_route = koa_router()
 const public_route = koa_router()
@@ -27,12 +26,28 @@ async function portalAdminGuard(ctx, next) {
   await next();
 }
 
+/* V3 [protobuf] */
+
+public_route.get('/v3/collections', assetsCtrl.getNFTCollections);
+public_route.get('/v3/collections/:nftCollectionId', assetsCtrl.getNFTCollection);
+protected_route.post('/v3/collections', assetsCtrl.createNFTCollection);
+protected_route.put('/v3/collections', assetsCtrl.updateNFTCollection);
+
+public_route.get('/v3/items', assetsCtrl.getNFTItemsPaginated);
+public_route.get('/v3/items/:nftItemId', assetsCtrl.getNFTItem);
+protected_route.post('/v3/items', assetsCtrl.createNFTItem);
+protected_route.put('/v3/items', assetsCtrl.updateNFTItem);
+protected_route.put('/v3/items/moderate', assetsCtrl.moderateNFTItem);
+protected_route.delete('/v3/items', assetsCtrl.deleteNFTItem);
+
+protected_route.post('/v3/users', usersCtrl.createUser);
+
+/* V2 */
+
 protected_route.put('/v2/proposals/update', proposalsCtrl.acceptProposal)
 protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
 protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountProposals)
-
-/* V2 */
 
 protected_route.post('/v2/team', teamsCtrl.createTeam)
 protected_route.put('/v2/team', teamsCtrl.updateTeam)
@@ -55,17 +70,6 @@ protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), a
 protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
 public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', attributesCtrl.getAttributeFile);
 
-public_route.get('/v3/collections', assetsCtrl.getNFTCollections)
-public_route.get('/v3/collections/:nftCollectionId', assetsCtrl.getNFTCollection)
-protected_route.post('/v3/collections', assetsCtrl.createNFTCollection)
-protected_route.put('/v3/collections', assetsCtrl.updateNFTCollection)
-
-public_route.get('/v3/items', assetsCtrl.getNFTItemsPaginated)
-public_route.get('/v3/items/:nftItemId', assetsCtrl.getNFTItem)
-protected_route.post('/v3/items', assetsCtrl.createNFTItem)
-protected_route.put('/v3/items', assetsCtrl.updateNFTItem)
-protected_route.put('/v3/items/moderate', assetsCtrl.moderateNFTItem)
-protected_route.delete('/v3/items', assetsCtrl.deleteNFTItem)
 
 public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFTClassById)
 public_route.get('/v2/tokens/ft/symbol/:symbol', assetsCtrl.getFTClassBySymbol)
@@ -90,7 +94,6 @@ public_route.get('/v2/users/portal/:portalId', usersCtrl.getUsersByPortal)
 
 protected_route.put('/v2/user/update', usersCtrl.updateUser)
 protected_route.put('/v2/user/update/password', usersCtrl.updateUserPassword)
-public_route.get('/user/avatar/:username', compose([userAvatarFileReadAuth()]), usersCtrl.getAvatar)
 
 public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)
 public_route.get('/v2/document-templates/account/:account', documentTemplatesCtrl.getDocumentTemplatesByAccount)

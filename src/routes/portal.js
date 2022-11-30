@@ -1,7 +1,6 @@
 import koa_router from 'koa-router'
 import compose from 'koa-compose'
-import auth from '../controllers/legacy/auth'
-import { usersCtrl, portalCtrl } from '../controllers';
+import { portalCtrl } from '../controllers';
 
 const protected_route = koa_router();
 const public_route = koa_router();
@@ -14,7 +13,6 @@ async function portalRoute(ctx, next) {
 public_route.get('/', portalRoute, portalCtrl.getPortal);
 public_route.get('/banner', portalRoute, portalCtrl.getPortalImgs);
 public_route.get('/logo', portalRoute, portalCtrl.getPortalImgs);
-public_route.post('/sign-in', portalRoute, auth.signIn);
 public_route.get('/settings/attribute-mappings', portalCtrl.getPortalAttributeMappings);
 public_route.get('/settings/layout-mappings', portalCtrl.getPortalLayoutMappings);
 public_route.get('/settings/custom-fields', portalCtrl.getPortalCustomFields);

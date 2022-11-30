@@ -1,5 +1,5 @@
 import BaseController from '../base/BaseController';
-import { UserDtoService, AttributeDtoService, UserService, VerificationTokenService } from '../../services';
+import { UserDtoService, AttributeDtoService, UserService } from '../../services';
 import sharp from 'sharp';
 import qs from 'qs';
 import config from '../../config';
@@ -10,14 +10,11 @@ import { UserForm } from './../../forms';
 import { BadRequestError, NotFoundError, FailedDependencyError, ConflictError, ForbiddenError } from './../../errors';
 import { ChainService } from '@casimir.one/chain-service';
 import { TransferFTCmd } from '@casimir.one/commands';
-import { transporter } from './../../nodemailer';
-import { genSha256Hash, genRipemd160Hash } from '@casimir.one/toolbox';
 
 
 const userDtoService = new UserDtoService();
 const attributeDtoService = new AttributeDtoService();
 const userService = new UserService();
-const verificationTokenService = new VerificationTokenService();
 
 const validateEmail = (email) => {
   const patternStr = ['^(([^<>()[\\]\\.,;:\\s@"]+(\\.[^<>()\\[\\]\\.,;:\\s@"]+)*)',
@@ -36,107 +33,30 @@ class UsersController extends BaseController {
     h: async (ctx) => {
       try {
 
-        const chainService = await ChainService.getInstanceAsync(config);
-        const chainNodeClient = chainService.getChainNodeClient();
-        const chainTxBuilder = chainService.getChainTxBuilder();
-
         const validate = async (appCmds) => {
-          const validateCreateDAO = async (createDAOCmd, cmdStack) => {
-            const { entityId, email, roles, creator, confirmationCode } = createDAOCmd.getCmdPayload();
-            if (Array.isArray(roles) && roles.find(({ role }) => role === SYSTEM_ROLE.ADMIN)) {
-              throw new BadRequestError(`Can't create admin account`);
-            }
-
-            if (!entityId || !creator) {
-              throw new BadRequestError(`'entityId', 'creator' fields are required`);
-            }
-
-            if (!validateEmail(email)) {
-              throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
-            }
-
-            const existingProfile = await userService.getUser(entityId);
-            if (existingProfile) {
-              throw new ConflictError(`Profile for '${entityId}' is under consideration or has been approved already`);
-            }
-            if (config.NEED_CONFIRM_REGISTRATION) {
-              if (!confirmationCode) {
-                throw new BadRequestError(`'confirmationCode' field are required`);
+          const cmd1 = {
+            cmdNum: APP_CMD.CREATE_USER,
+            validate: async (cmd) => {
+              const { entityId, email, roles } = cmd.getCmdPayload();
+              if (Array.isArray(roles) && roles.find(({ role }) => role === SYSTEM_ROLE.ADMIN)) {
+                throw new BadRequestError(`Admin user cannot be created`);
               }
-
-              const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
-              if (token && token.refId !== genRipemd160Hash(email)) {
-                throw new ForbiddenError(`Incorrect confirmation code`);
+              if (!entityId) {
+                throw new BadRequestError(`'entityId' fields is required`);
+              }
+              if (!validateEmail(email)) {
+                throw new BadRequestError(`'email' field is required and should be in correct format`);
               }
             }
           };
-
-          const createDAOSettings = {
-            cmdNum: APP_CMD.CREATE_DAO,
-            validate: validateCreateDAO
-          };
-          
-          const validCmdsOrder = [createDAOSettings];
-          
+          const validCmdsOrder = [cmd1];
           await this.validateCmds(appCmds, validCmdsOrder);
         };
 
         const msg = ctx.state.msg;
-        const createAccountCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.CREATE_DAO);
-        if (!createAccountCmd) {
-          throw new BadRequestError(`This endpoint accepts 'CreateAccountCmd'`);
-        }
-
-        const { creator, entityId, authority } = createAccountCmd.getCmdPayload();
-        const { wif: faucetPrivKey, username: faucetUsername, fundingAmount: faucetFundingAmount } = config.FAUCET_ACCOUNT;
-
-        if (creator === faucetUsername) {
-          await msg.tx.signAsync(faucetPrivKey, chainNodeClient);
-        }
-
-        const isPreFunding = config.PROTOCOL === ProtocolChain.SUBSTRATE && !!faucetFundingAmount;
-        const isPostFunding = config.PROTOCOL === ProtocolChain.GRAPHENE && !!faucetFundingAmount;
-
-        const fundUserAccount = async () => {
-          const fundingTx = await chainTxBuilder.begin()
-            .then((txBuilder) => {
-
-              if (config.PROTOCOL === ProtocolChain.SUBSTRATE) {
-                const { owner: { auths: [{ key: pubKey }] } } = authority;
-                const seedFundingCmd = new TransferFTCmd({
-                  from: faucetUsername,
-                  to: pubKey,
-                  tokenId: config.CORE_ASSET.id,
-                  amount: faucetFundingAmount,
-                });
-                txBuilder.addCmd(seedFundingCmd);
-              }
-
-              const daoFundingCmd = new TransferFTCmd({
-                from: faucetUsername,
-                to: entityId,
-                tokenId: config.CORE_ASSET.id,
-                amount: faucetFundingAmount
-              });
-              txBuilder.addCmd(daoFundingCmd);
-
-              return txBuilder.end();
-            })
-            .then((finalizedTx) => finalizedTx.signAsync(faucetPrivKey, chainNodeClient))
-
-          await assetCmdHandler.process(fundingTx.getPayload(), ctx);
-        }
-
-        if (isPreFunding) {
-          await fundUserAccount();
-          await accountCmdHandler.process(msg, ctx, validate);
-        } else if (isPostFunding) {
-          await accountCmdHandler.process(msg, ctx, validate);
-          await fundUserAccount();
-        } else {
-          await accountCmdHandler.process(msg, ctx, validate);
-        }
-
+        await accountCmdHandler.process(msg, ctx, validate);
+        
+        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_USER);
         ctx.successRes({ _id: entityId });
 
       } catch (err) {
@@ -162,20 +82,6 @@ class UsersController extends BaseController {
             const existingProfile = await userService.getUser(entityId);
             if (existingProfile) {
               throw new ConflictError(`Profile for '${entityId}' is under consideration or has been imported already`);
-            }
-  
-            if (config.NEED_CONFIRM_REGISTRATION) {
-              if (!validateEmail(email)) {
-                throw new BadRequestError(`'email' field are required. Email should be correct and contains @`);
-              }
-              if (!confirmationCode) {
-                throw new BadRequestError(`'confirmationCode' field are required`);
-              }
-  
-              const token = await verificationTokenService.getTokenByTokenHash(genSha256Hash(confirmationCode));
-              if (token && token.refId !== genRipemd160Hash(email)) {
-                throw new ForbiddenError(`Incorrect confirmation code`);
-              }
             }
           };
 

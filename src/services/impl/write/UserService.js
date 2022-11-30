@@ -9,57 +9,49 @@ class UserService extends BaseService {
   }
 
   async createUser({
-    username,
-    portal,
-    signUpPubKey,
+    _id: userId,
+    pubKey,
     status,
     email,
-    teams,
     attributes,
     roles,
-    address
   }) {
 
     const result = await this.createOne({
-      _id: username,
-      signUpPubKey: signUpPubKey,
-      status: status,
-      email: email,
-      attributes: attributes,
-      portal: portal,
-      teams: teams,
-      roles: roles,
-      address
+      _id: userId,
+      pubKey,
+      status,
+      email,
+      attributes,
+      roles,
     });
 
     return result;
   }
 
-  async updateUser(username, {
+  async updateUser(userId, {
     status,
     email,
     attributes,
-    teams,
     roles
   }) {
-    const result = await this.updateOne({ _id: username }, {
+    const result = await this.updateOne({ _id: userId }, {
       status,
       email,
       attributes,
-      teams,
       roles
     });
 
     return result;
   }
 
-  async deleteUser(username) {
-    const result = await this.deleteOne({ _id: username })
+  async deleteUser(userId) {
+    const result = await this.deleteOne({ _id: userId })
     return result;
   }
 
-  async getUser(username, status) {
-    const query = { _id: username };
+  async getUser(userId, status) {
+    const query = { _id: userId };
     if (status) {
       query.status = status;
     }

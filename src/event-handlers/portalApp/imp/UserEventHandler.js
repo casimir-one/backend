@@ -1,7 +1,6 @@
-import { SYSTEM_ROLE, APP_EVENT, USER_PROFILE_STATUS } from '@casimir.one/platform-core';
+import { APP_EVENT } from '@casimir.one/platform-core';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import { UserService } from './../../../services';
-import { ChainService, SubstrateChainUtils } from '@casimir.one/chain-service';
 import config from '../../../config';
 
 class UserEventHandler extends PortalAppEventHandler {
@@ -15,130 +14,27 @@ class UserEventHandler extends PortalAppEventHandler {
 const userEventHandler = new UserEventHandler();
 const userService = new UserService();
 
-userEventHandler.register(APP_EVENT.DAO_CREATED, async (event) => {
 
+userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
   const {
-    isTeamAccount,
-    daoId,
-    creator,
-    status,
+    entityId: userId,
     pubKey,
     email,
+    status,
     attributes,
     roles
   } = event.getEventPayload();
 
-  if (isTeamAccount) {
-    const userInfo = await userService.getUser(creator);
-
-    if (userInfo) {
-      const updatedUserProfile = await userService.updateUser(creator, {
-        status: userInfo.status,
-        email: userInfo.email,
-        attributes: userInfo.attributes,
-        teams: [...userInfo.teams, daoId],
-        roles: [...userInfo.roles, { role: SYSTEM_ROLE.TEAM_ADMIN, teamId: daoId }]
-      });
-    }
-  } else {
-    const chainService = await ChainService.getInstanceAsync(config);
-    const { registry } = chainService.getChainNodeClient();
-
-    const address = SubstrateChainUtils.toAddress(daoId, registry)
-
-    const createdUserProfile = await userService.createUser({
-      username: daoId,
-      status,
-      signUpPubKey: pubKey,
-      email,
-      attributes,
-      roles: roles.map(r => ({
-        role: r.role,
-        teamId: r.teamId
-      })),
-      address
-    });
-  }
-});
-
-userEventHandler.register(APP_EVENT.DAO_IMPORTED, async (event) => {
-
-  const {
-    daoId,
-    status,
+  await userService.createUser({
+    _id: userId,
     pubKey,
-    attributes,
-    roles
-  } = event.getEventPayload();
-
-  const chainService = await ChainService.getInstanceAsync(config);
-  const { registry } = chainService.getChainNodeClient();
-
-  const address = SubstrateChainUtils.toAddress(daoId, registry)
-  const createdUserProfile = await userService.createUser({
-    username: daoId,
+    email,
     status,
-    signUpPubKey: pubKey,
     attributes,
     roles: roles.map(r => ({
       role: r.role,
       teamId: r.teamId
-    })),
-    address,
-    email: null
-  });
-});
-
-userEventHandler.register(APP_EVENT.DAO_UPDATED, async (event) => {
-
-  const {
-    isTeamAccount,
-    daoId,
-    status,
-    email,
-    attributes
-  } = event.getEventPayload();
-
-  if (!isTeamAccount) {
-    const updatedUserProfile = await userService.updateUser(daoId, {
-      status,
-      email,
-      attributes
-    });
-  }
-});
-
-userEventHandler.register(APP_EVENT.USER_AUTHORITY_ALTERED, async (event) => {
-
-});
-
-userEventHandler.register(APP_EVENT.DAO_MEMBER_ADDED, async (event) => {
-  const {
-    member,
-    teamId
-  } = event.getEventPayload();
-
-  const userInfo = await userService.getUser(member);
-
-  const updatedUserProfile = await userService.updateUser(member, {
-    teams: [...userInfo.teams, teamId]
-  });
-
-});
-
-userEventHandler.register(APP_EVENT.DAO_MEMBER_REMOVED, async (event) => {
-  const {
-    member,
-    teamId
-  } = event.getEventPayload();
-
-  const userInfo = await userService.getUser(member);
-  const updatedTeams = [...userInfo.teams];
-  const index = updatedTeams.indexOf(teamId);
-  updatedTeams.splice(index, 1);
-
-  const updatedUserProfile = await userService.updateUser(member, {
-    teams: updatedTeams
+    }))
   });
 });
 

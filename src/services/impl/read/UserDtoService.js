@@ -25,10 +25,9 @@ class UserDtoService extends BaseService {
         email: user.email,
         attributes: user.attributes,
         roles: roles,
-        pubKey: user.signUpPubKey || null,
+        pubKey: user.pubKey,
         status: user.status,
         teams: user.teams,
-        address: user.address,
         createdAt: user.createdAt || user.created_at,
         updatedAt: user.updatedAt || user.updated_at,
 

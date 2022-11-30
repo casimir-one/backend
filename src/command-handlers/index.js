@@ -5,6 +5,7 @@ import assetCmdHandler from './impl/AssetCmdHandler';
 import documentTemplateCmdHandler from './impl/DocumentTemplateCmdHandler';
 import portalCmdHandler from './impl/PortalCmdHandler';
 import layoutCmdHandler from './impl/LayoutCmdHandler';
+import userCmdHandler from './impl/UserCmdHandler';
 
 module.exports = {
   accountCmdHandler,
@@ -14,4 +15,5 @@ module.exports = {
   documentTemplateCmdHandler,
   portalCmdHandler,
   layoutCmdHandler,
+  userCmdHandler
 }

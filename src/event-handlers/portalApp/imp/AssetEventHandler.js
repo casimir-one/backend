@@ -147,29 +147,25 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_UPDATED, async (event) => {
 assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
 
   const {
+    entityId: nftItemId,
     nftCollectionId,
-    nftItemId,
-    entityId,
     ownerId,
     creatorId,
     attributes,
     status
   } = event.getEventPayload();
 
-  const _id = mongoose.Types.ObjectId(entityId);
   const nftItem = {
-    _id,
+    _id: nftItemId,
     nftCollectionId,
-    nftItemId,
-    hash: '',
-    algo: 'sha256',
     ownerId,
     creatorId,
-    status: status || NftItemMetadataDraftStatus.IN_PROGRESS,
-    attributes
+    status,
+    attributes,
+    hash: genSha256Hash(JSON.stringify(attributes)),
+    algo: 'sha256'
   }
 
-  nftItem.hash = genSha256Hash(JSON.stringify(attributes));
   await nftItemService.createNFTItem(nftItem);
   await nftCollectionService.increaseNftCollectionNextItemId(nftCollectionId);
 
@@ -184,8 +180,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
   } = event.getEventPayload();
 
   const packageHash = genSha256Hash(JSON.stringify(attributes));
-  await nftItemService.updateNFTItem({
-    _id: nftItemId,
+  await nftItemService.updateNFTItem(nftItemId, {
     status,
     hash: packageHash,
     attributes,
@@ -198,12 +193,11 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_DELETED, async (event) => {
 });
 
 assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
-  const { _id, status } = event.getEventPayload();
+  const { _id: nftItemId, status } = event.getEventPayload();
 
   if (status == NftItemMetadataDraftStatus.APPROVED) {
     const queueNumber = await portalService.increasePortalMaxQueueNumber(config.TENANT);
-    await nftItemService.updateNFTItem({
-      _id,
+    await nftItemService.updateNFTItem(nftItemId, {
       status,
       queueNumber
     });
@@ -213,8 +207,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
     //   `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved ! Your queue number is <b>${queueNumber}</b></p>`
     // );
   } else {
-    await nftItemService.updateNFTItem({
-      _id,
+    await nftItemService.updateNFTItem(nftItemId, {
       status,
     });
     // sendEmailNotification(updatedDraft.ownerId, 

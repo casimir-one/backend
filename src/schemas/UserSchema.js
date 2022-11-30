@@ -5,7 +5,6 @@ import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
 
-
 const UserRole = new Schema({
   "_id": false,
   "role": { type: String, required: true, trim: true },
@@ -16,15 +15,19 @@ const UserRole = new Schema({
 const UserSchema = new Schema({
   "_id": { type: String },
   "portalId": { type: String, required: true },
-  "address": { type: String, required: false },
   "email": { type: String, required: false, trim: true, index: true, match: [/\S+@\S+\.\S+/, 'email is invalid'] },
-  "signUpPubKey": { type: String, default: null },
-  "status": { type: Number, enum: [...Object.values(USER_PROFILE_STATUS)], required: true },
+  "pubKey": { type: String, required: true },
+  "status": { 
+    type: Number, 
+    enum: [...Object.values(USER_PROFILE_STATUS)], 
+    default: USER_PROFILE_STATUS.APPROVED,
+    required: true
+  },
   "teams": { type: [String], default: [] },
   "attributes": [AttributeValueSchema],
   "roles": [UserRole],
 }, { timestamps: true });
 
-const model = mongoose.model('users-dao', UserSchema);
+const model = mongoose.model('user', UserSchema);
 
 module.exports = model;

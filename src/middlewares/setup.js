@@ -10,8 +10,7 @@ function setup(options) {
     ctx.state.updatedProposals = {};
     ctx.state.proposalsStack = [];
     ctx.state.proposalsStackFrame = null;
-    ctx.state.user = { username: "anonymous" };
-
+    
     const portal = await portalDtoService.getPortal(config.TENANT);
     ctx.state.portal = portal;
 

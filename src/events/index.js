@@ -6,6 +6,8 @@ import NFTItemUpdatedEvent from './impl/nft-items/NFTItemUpdatedEvent';
 import NFTItemDeletedEvent from './impl/nft-items/NFTItemDeletedEvent';
 import NFTItemModeratedEvent from './impl/nft-items/NFTItemModeratedEvent';
 
+import UserCreatedEvent from './impl/users/UserCreatedEvent';
+
 import DaoMemberAddedEvent from './impl/DaoMemberAddedEvent';
 import DaoMemberRemovedEvent from './impl/DaoMemberRemovedEvent';
 
@@ -62,6 +64,8 @@ module.exports = {
   NFTItemUpdatedEvent,
   NFTItemDeletedEvent,
   NFTItemModeratedEvent,
+
+  UserCreatedEvent,
 
   AttributeCreatedEvent,
   AttributeUpdatedEvent,

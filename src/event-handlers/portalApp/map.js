@@ -68,7 +68,6 @@ module.exports = {
 
   [APP_EVENT.DAO_CREATED]: [
     { h: teamEventHandler, await: true },
-    { h: userEventHandler, await: true },
     { h: mailEventHandler, await: true },
   ],
 
@@ -79,6 +78,10 @@ module.exports = {
   [APP_EVENT.DAO_UPDATED]: [
     { h: teamEventHandler, await: true },
     { h: userEventHandler, await: true }
+  ],
+
+  [APP_EVENT.USER_CREATED]: [
+    { h: userEventHandler, await: true },
   ],
 
   [APP_EVENT.USER_AUTHORITY_ALTERED]: [

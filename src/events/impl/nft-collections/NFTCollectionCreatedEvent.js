@@ -14,6 +14,7 @@ class NFTCollectionCreatedEvent extends BaseEvent {
 
     assert(!!entityId, "'entityId' is required");
     assert(!!ownerId, "'ownerId' is required");
+    assert(Array.isArray(attributes), "'attributes' must be array");
 
     super(APP_EVENT.NFT_COLLECTION_CREATED, eventPayload);
   }

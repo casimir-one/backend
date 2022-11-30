@@ -16,6 +16,7 @@ const errorRes = (ctx) => (err, {
   errors = [],
   extraInfo = {}
 } = {}) => {
+  console.error(err);
   ctx.status = err.httpStatus || err.status || 500;
   ctx.body = makeDefaultResponse({
     error: {
