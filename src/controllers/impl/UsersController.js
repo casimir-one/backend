@@ -30,6 +30,7 @@ const validateEmail = (email) => {
 class UsersController extends BaseController {
 
   createUser = this.command({
+    form: UserForm,
     h: async (ctx) => {
       try {
 
@@ -64,6 +65,33 @@ class UsersController extends BaseController {
       }
     }
   });
+
+  updateUser = this.command({
+    form: UserForm,
+    h: async (ctx) => {
+
+      try {
+        const validate = async (appCmds) => {
+          const cmd1 = {
+            cmdNum: APP_CMD.UPDATE_USER,
+            validate: async (cmd) => {}
+          };
+          const validCmdsOrder = [cmd1];
+          await this.validateCmds(appCmds, validCmdsOrder);
+        };
+
+        const msg = ctx.state.msg;
+        await accountCmdHandler.process(msg, ctx, validate);
+
+        const _id = this.extractEntityId(msg, APP_CMD.UPDATE_USER);
+        ctx.successRes({ _id: _id });
+
+      } catch (err) {
+        ctx.errorRes(err);
+      }
+    }
+  });
+
 
   importDAO = this.command({
     h: async (ctx) => {
@@ -266,115 +294,6 @@ class UsersController extends BaseController {
       }
     }
   });
-
-  updateUser = this.command({
-    form: UserForm,
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const validateUpdateUser = async (updateUserCmd, cmdStack) => {
-            const {
-              isTeamAccount
-            } = updateUserCmd.getCmdPayload();
-            if (isTeamAccount) {
-              throw new BadRequestError(`This endpoint should be for user account`);
-            }
-          };
-
-          const updateUserSettings = {
-            cmdNum: APP_CMD.UPDATE_DAO,
-            validate: validateUpdateUser
-          };
-          
-          const validCmdsOrder = [updateUserSettings];
-          
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-
-        const msg = ctx.state.msg;
-        await accountCmdHandler.process(msg, ctx, validate);
-
-        const _id = this.extractEntityId(msg, APP_CMD.UPDATE_DAO);
-
-        ctx.successRes({ _id: _id });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-
-  updateUserPassword = this.command({
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          const validateUpdateUserPassword = async (updateUserPasswordCmd, cmdStack) => {
-            const {
-              isTeamAccount
-            } = updateUserPasswordCmd.getCmdPayload();
-            if (isTeamAccount) {
-              throw new BadRequestError(`This endpoint should be for user account`);
-            }
-          };
-
-          const updateUserSettings = {
-            cmdNum: APP_CMD.ALTER_DAO_AUTHORITY,
-            validate: validateUpdateUserPassword
-          };
-          
-          const validCmdsOrder = [updateUserSettings];
-          
-          await this.validateCmds(appCmds, validCmdsOrder);
-        };
-
-
-        const msg = ctx.state.msg;
-        const alterDaoAuthorityCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.ALTER_DAO_AUTHORITY);
-        if (!alterDaoAuthorityCmd) {
-          throw new BadRequestError(`This endpoint accepts 'AlterDaoAuthorityCmd'`);
-        }
-
-        const fundUserAccount = async () => {
-          const chainService = await ChainService.getInstanceAsync(config);
-          const chainNodeClient = chainService.getChainNodeClient();
-          const chainTxBuilder = chainService.getChainTxBuilder();
-
-          const { wif: faucetPrivKey, _id: faucetUsername, fundingAmount: faucetFundingAmount } = config.FAUCET_ACCOUNT;
-          const fundingTx = await chainTxBuilder.begin()
-            .then((txBuilder) => {
-              const { authority } = alterDaoAuthorityCmd.getCmdPayload();
-              const { owner: { auths: [{ key: pubKey }] } } = authority;
-              const seedFundingCmd = new TransferFTCmd({
-                from: faucetUsername,
-                to: pubKey,
-                tokenId: config.CORE_ASSET.id,
-                amount: faucetFundingAmount
-              });
-              txBuilder.addCmd(seedFundingCmd);
-              return txBuilder.end();
-            })
-            .then((finalizedTx) => finalizedTx.signAsync(faucetPrivKey, chainNodeClient))
-
-          await assetCmdHandler.process(fundingTx.getPayload(), ctx);
-        }
-
-        await accountCmdHandler.process(msg, ctx, validate);
-        // @temp solution for TESTNET
-        if (config.PROTOCOL === ProtocolChain.SUBSTRATE) {
-          await fundUserAccount();
-        }
-
-        const { _id } = alterDaoAuthorityCmd.getCmdPayload();
-
-        ctx.successRes({ _id: _id });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
 
   getAvatar = this.query({
     h: async (ctx) => {

@@ -41,6 +41,7 @@ protected_route.put('/v3/items/moderate', assetsCtrl.moderateNFTItem);
 protected_route.delete('/v3/items', assetsCtrl.deleteNFTItem);
 
 protected_route.post('/v3/users', usersCtrl.createUser);
+protected_route.put('/v3/users', usersCtrl.updateUser)
 
 /* V2 */
 
@@ -82,6 +83,7 @@ protected_route.post('/v2/tokens/ft/transfer', assetsCtrl.createFTTransferReques
 protected_route.post('/v2/tokens/ft/create', assetsCtrl.createFTClass)
 protected_route.post('/v2/tokens/ft/issue', assetsCtrl.issueFT)
 
+
 public_route.get('/v2/user/profile/:_id', usersCtrl.getUserProfile)
 public_route.get('/v2/users/profile', usersCtrl.getUsersProfiles)
 public_route.get('/v2/users/active', usersCtrl.getActiveUsersProfiles)
@@ -92,14 +94,13 @@ public_route.get('/v2/users/listing', usersCtrl.getUsersListing)
 public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
 public_route.get('/v2/users/portal/:portalId', usersCtrl.getUsersByPortal)
 
-protected_route.put('/v2/user/update', usersCtrl.updateUser)
-protected_route.put('/v2/user/update/password', usersCtrl.updateUserPassword)
 
 public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)
 public_route.get('/v2/document-templates/account/:account', documentTemplatesCtrl.getDocumentTemplatesByAccount)
 protected_route.post('/v2/document-template', documentTemplatesCtrl.createDocumentTemplate)
 protected_route.put('/v2/document-template', documentTemplatesCtrl.updateDocumentTemplate)
 protected_route.put('/v2/document-template/delete', documentTemplatesCtrl.deleteDocumentTemplate)
+
 
 public_route.get('/v2/layout/:layoutId', layoutsCtrl.getLayout);
 public_route.get('/v2/layouts', layoutsCtrl.getLayouts);
@@ -108,9 +109,11 @@ protected_route.post('/v2/layout', compose([portalAdminGuard]), layoutsCtrl.crea
 protected_route.put('/v2/layout', compose([portalAdminGuard]), layoutsCtrl.updateLayout);
 protected_route.put('/v2/layout/delete', compose([portalAdminGuard]), layoutsCtrl.deleteLayout);
 
+
 const routes = {
   protected: koa_router().use('/api', protected_route.routes()),
   public: koa_router().use('/api', public_route.routes())
 }
+
 
 module.exports = routes;
