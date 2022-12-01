@@ -44,7 +44,7 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
   const nftItem = await nftItemService.getNFTItem(nftItemId);
 
   if (uploadedFiles && uploadedFiles.length) {
-    const dirPath = FileStorage.getNFTItemMetadataDirPath(nftItem.nftCollectionId, nftItem.nftItemId);
+    const dirPath = FileStorage.getNFTItemMetadataDirPath(nftItem.nftCollectionId, nftItem._id);
     const dirHash = await FileStorage.calculateDirHash(dirPath);
 
     const dirFiles = dirHash.children.reduce((acc, elem) => {
@@ -57,7 +57,10 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
 
     const filesPathToDelete = dirFiles
       .filter(({ name }) => !uploadedFiles.some(( { filename }) => filename === name))
-      .map(({ name, folder }) => FileStorage.getNFTItemMetadataAttributeFilePath(nftItem.nftCollectionId, nftItem.nftItemId, folder, name));
+      .map((info) => {
+        const { name, folder } = info;
+        return FileStorage.getNFTItemMetadataAttributeFilePath(nftItem.nftCollectionId, nftItem._id, folder, name);
+      });
 
     await Promise.all(filesPathToDelete.map(filePath => FileStorage.delete(filePath)));
   }
@@ -67,7 +70,7 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_DELETED, async (event) => {
   const { _id } = event.getEventPayload();
   const nftItem = await nftItemService.getNFTItem(_id);
   if (nftItem.type === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
-    const packagePath = FileStorage.getNFTItemMetadataDirPath(nftItem.nftCollectionId, nftItem.nftItemId);
+    const packagePath = FileStorage.getNFTItemMetadataDirPath(nftItem.nftCollectionId, nftItem._id);
     await FileStorage.rmdir(packagePath);
   }
 });

@@ -9,6 +9,8 @@ const stat = util.promisify(fs.stat);
 const unlink = util.promisify(fs.unlink);
 const ensureDir = util.promisify(fsExtra.ensureDir);
 
+const nftItemsWithoutCollectionDir = 'nft-items';
+
 const nftCollectionDir = 'nft-collections';
 const nftCollectionDirPath = (baseDir, nftCollectionId) => `${baseDir}/${nftCollectionDir}/${nftCollectionId}`;
 const nftCollectionFilePath = (baseDir, nftCollectionId, filename) => `${nftCollectionDirPath(baseDir, nftCollectionId)}/${filename}`;
@@ -96,19 +98,23 @@ class BaseFileStorage {
   }
 
   getNFTItemMetadataDirPath(nftCollectionId, nftItemId) {
-    return nftItemMetadataDirPath(this._baseDirPath, nftCollectionId, nftItemId);
+    const collectionId = nftCollectionId || nftItemsWithoutCollectionDir;
+    return nftItemMetadataDirPath(this._baseDirPath, collectionId, nftItemId);
   }
 
   getNFTItemMetadataFilePath(nftCollectionId, nftItemId, filename) {
-    return nftItemMetadataFilePath(this._baseDirPath, nftCollectionId, nftItemId, filename);
+    const collectionId = nftCollectionId || nftItemsWithoutCollectionDir;
+    return nftItemMetadataFilePath(this._baseDirPath, collectionId, nftItemId, filename);
   }
 
   getNFTItemMetadataAttributeDirPath(nftCollectionId, nftItemId, attributeId) {
-    return nftItemMetadataAttributeDirPath(this._baseDirPath, nftCollectionId, nftItemId, attributeId);
+    const collectionId = nftCollectionId || nftItemsWithoutCollectionDir;
+    return nftItemMetadataAttributeDirPath(this._baseDirPath, collectionId, nftItemId, attributeId);
   }
 
   getNFTItemMetadataAttributeFilePath(nftCollectionId, nftItemId, attributeId, filename) {
-    return nftItemMetadataAttributeFilePath(this._baseDirPath, nftCollectionId, nftItemId, attributeId, filename);
+    const collectionId = nftCollectionId || nftItemsWithoutCollectionDir;
+    return nftItemMetadataAttributeFilePath(this._baseDirPath, collectionId, nftItemId, attributeId, filename);
   }
 
   getNFTCollectionArchiveDirPath(nftCollectionId, archiveName) {

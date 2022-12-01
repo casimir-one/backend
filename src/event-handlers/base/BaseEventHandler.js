@@ -40,7 +40,7 @@ class BaseEventHandler extends EventEmitter {
         logEventInfo(`Event ${event.getEventName()} is handled by ${this.constructor.name} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''}`);
       })
       .catch((err) => {
-        logError(`Event ${event.getEventName()} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''} failed with an error:`, err);
+        logError(`Event ${event.getEventName()} ${event.hasProposalCtx() ? 'within ' + APP_PROPOSAL[event.getProposalCtx().type] + ' flow (' + event.getProposalCtx().proposalId + ')' : ''} failed in ${this.constructor.name} with an error:`, err);
         throw err;
       })
   }

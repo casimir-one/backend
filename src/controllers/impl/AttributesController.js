@@ -2,12 +2,13 @@ import { APP_CMD, AttributeScope } from '@casimir.one/platform-core';
 import BaseController from './../base/BaseController';
 import { BadRequestError, NotFoundError } from './../../errors';
 import {attributeCmdHandler} from './../../command-handlers';
-import {AttributeDtoService} from './../../services';
+import { AttributeDtoService, NFTItemDTOService } from './../../services';
 import FileStorage from './../../storage';
 import sharp from 'sharp';
 import slug from 'limax';
 
 const attributeDtoService = new AttributeDtoService();
+const nftItemDtoService = new NFTItemDTOService();
 
 class AttributesController extends BaseController {
   
@@ -144,7 +145,12 @@ class AttributesController extends BaseController {
             }
             break;
           case AttributeScope.NFT_ITEM:
-            const { nftCollectionId, nftItemId } = JSON.parse(_id);
+            const nftItem = await nftItemDtoService.getNFTItemDTO(_id);
+            if (!nftItem) throw new NotFoundError(`NFT item ${_id} is not found`);
+            
+            const nftItemId = nftItem._id;
+            const nftCollectionId = nftItem.nftCollectionId;
+
             filepath = attributeId ? FileStorage.getNFTItemMetadataAttributeFilePath(nftCollectionId, nftItemId, attributeId, filename) : FileStorage.getNFTItemMetadataFilePath(nftCollectionId, nftItemId, filename);
             const nftItemFileExists = await FileStorage.exists(filepath);
             if (!nftItemFileExists) {
