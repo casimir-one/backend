@@ -110,6 +110,9 @@ class AssetsController extends BaseController {
     h: async (ctx) => {
       try {
         const nftItemId = ctx.params.nftItemId;
+        if (!nftItemId) {
+          throw new BadRequestError(`'nftItemId' param is required`);
+        }
         const result = await nftItemDtoService.getNFTItemDTO(nftItemId);
         ctx.successRes(result);
       } catch (err) {
