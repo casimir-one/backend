@@ -4,7 +4,6 @@ import {
   APP_PROPOSAL,
   NftItemMetadataDraftStatus,
 } from '@casimir.one/platform-core';
-import mongoose from 'mongoose';
 import qs from 'qs';
 import { NFTCollectionForm, NFTItemMetadataForm } from '../../forms';
 import {
@@ -21,8 +20,7 @@ import {
 import BaseController from '../base/BaseController';
 import { assetCmdHandler } from './../../command-handlers';
 import config from './../../config';
-import { BadRequestError, ConflictError, ForbiddenError, NotFoundError } from './../../errors';
-import FileStorage from './../../storage';
+import { BadRequestError, ForbiddenError, NotFoundError } from './../../errors';
 
 
 const nftCollectionService = new NFTCollectionService();
@@ -35,15 +33,6 @@ const nftItemDtoService = new NFTItemDTOService();
 const userService = new UserService();
 const proposalDtoService = new ProposalDtoService();
 
-const validateEmail = (email) => {
-  const patternStr = ['^(([^<>()[\\]\\.,;:\\s@"]+(\\.[^<>()\\[\\]\\.,;:\\s@"]+)*)',
-    '|(".+"))@((\\[[0-9]{1,3}\\.[0-9]{1,3}\\.[0-9]{1,3}\\.',
-    '[0-9]{1,3}])|(([a-zA-Z\\-0-9]+\\.)+',
-    '[a-zA-Z]{2,}))$'].join('');
-  const pattern = new RegExp(patternStr);
-
-  return pattern.test(email) && email.split('@')[0].length <= 64;
-}
 
 class AssetsController extends BaseController {
 
@@ -146,9 +135,8 @@ class AssetsController extends BaseController {
 
   createNFTItem = this.command({
     form: NFTItemMetadataForm, h: async (ctx) => {
-      try {
-        let email;
 
+      try {
         const validate = async (appCmds) => {
           const cmd = {
             cmdNum: APP_CMD.CREATE_NFT_ITEM,
@@ -158,12 +146,6 @@ class AssetsController extends BaseController {
               if (!appCmd) {
                 throw new BadRequestError(`'CREATE_NFT_ITEM' is not found`);
               }
-
-              email = appCmd.getCmdPayload().ownerId; // temp wip
-              if (!email || !validateEmail(email)) {
-                throw new BadRequestError(`Email is invalid or not provided`);
-              }
-
               const { nftCollectionId } = createNFTItemCmd.getCmdPayload();
               if (nftCollectionId) {
                 const nftCollection = await nftCollectionService.getNFTCollection(nftCollectionId);
@@ -188,6 +170,7 @@ class AssetsController extends BaseController {
         ctx.errorRes(err);
       }
     }
+
   });
 
   updateNFTItem = this.command({
