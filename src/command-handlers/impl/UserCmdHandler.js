@@ -15,7 +15,7 @@ const userCmdHandler = new UserCmdHandler();
 userCmdHandler.register(APP_CMD.CREATE_USER, (cmd, ctx) => {
 
   const {
-    entityId,
+    _id,
     email,
     pubKey,
     roles,
@@ -23,7 +23,7 @@ userCmdHandler.register(APP_CMD.CREATE_USER, (cmd, ctx) => {
   } = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new UserCreatedEvent({
-    entityId,
+    _id,
     email,
     pubKey,
     roles,

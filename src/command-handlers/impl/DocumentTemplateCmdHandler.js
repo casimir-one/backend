@@ -18,7 +18,7 @@ documentTemplateCmdHandler.register(APP_CMD.CREATE_DOCUMENT_TEMPLATE, (cmd, ctx)
 
   ctx.state.appEvents.push(new DocumentTemplateCreatedEvent({
     ...documentTemplate,
-    creator: ctx.state.user.username,
+    creator: ctx.state.user._id,
     portalId: ctx.state.portal.id
   }));
 });

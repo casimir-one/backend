@@ -16,8 +16,8 @@ class TeamUpdateProposalCreatedEvent extends BaseEvent {
 
     const proposedCmds = proposalCmd.getProposedCmds();
     const updateTeamCmd = proposedCmds[0];
-    const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
-    const { entityId: teamId, attributes } = updateTeamCmd.getCmdPayload();
+    const { _id: proposalId, expirationTime } = proposalCmd.getCmdPayload();
+    const { _id: teamId, attributes } = updateTeamCmd.getCmdPayload();
 
     assert(!!proposalId, `'proposalId' is required`);
     assert(!!expirationTime, `'expirationTime' is required`);

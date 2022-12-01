@@ -17,7 +17,7 @@ const proposalCmdHandler = new ProposalCmdHandler();
 
 
 proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
-  const { entityId: proposalId,
+  const { _id: proposalId,
     creator,
     type,
     batchWeight
@@ -50,7 +50,7 @@ proposalCmdHandler.register(APP_CMD.CREATE_PROPOSAL, (cmd, ctx) => {
 
 
 proposalCmdHandler.register(APP_CMD.ACCEPT_PROPOSAL, (cmd, ctx) => {
-  const { entityId: proposalId, account } = cmd.getCmdPayload();
+  const { _id: proposalId, account } = cmd.getCmdPayload();
 
   const {
     type,
@@ -93,7 +93,7 @@ proposalCmdHandler.register(APP_CMD.ACCEPT_PROPOSAL, (cmd, ctx) => {
 
 
 proposalCmdHandler.register(APP_CMD.DECLINE_PROPOSAL, (cmd, ctx) => {
-  const { entityId: proposalId, account } = cmd.getCmdPayload();
+  const { _id: proposalId, account } = cmd.getCmdPayload();
 
   const {
     type,

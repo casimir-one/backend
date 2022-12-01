@@ -17,7 +17,7 @@ const userService = new UserService();
 
 userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
   const {
-    entityId: userId,
+    _id: userId,
     pubKey,
     email,
     status,

@@ -49,15 +49,6 @@ class NFTCollectionService extends BaseService {
     return result;
   }
 
-  async increaseNftCollectionNextItemId(_id) {
-    const result = await this._schema.updateOne({ _id: String(_id) },
-      { $inc: { nextNftItemId: 1 } }
-    );
-
-    return result;
-  }
-
-
   async mapAttributes(attributes) {
     const attributeDtoService = new AttributeDtoService();
     const nftCollectionAttributes = await attributeDtoService.getAttributesByScope(AttributeScope.NFT_COLLECTION );

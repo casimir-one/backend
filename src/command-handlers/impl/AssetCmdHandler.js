@@ -25,13 +25,13 @@ const assetCmdHandler = new AssetCmdHandler();
 
 assetCmdHandler.register(APP_CMD.CREATE_NFT_COLLECTION, (cmd, ctx) => {
   const { 
-    entityId, 
+    _id, 
     ownerId, 
     attributes,
   } = cmd.getCmdPayload();
 
   ctx.state.appEvents.push(new NFTCollectionCreatedEvent({
-    entityId,
+    _id,
     ownerId,
     attributes,
   }));

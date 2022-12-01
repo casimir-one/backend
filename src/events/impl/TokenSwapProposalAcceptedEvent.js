@@ -16,7 +16,7 @@ class TokenSwapProposalAcceptedEvent extends BaseEvent {
     const proposedCmds = proposalCmd.getProposedCmds();
     const tokenSwapCmd1 = proposedCmds[0];
     const tokenSwapCmd2 = proposedCmds[1];
-    const { entityId: proposalId, expirationTime, creator } = proposalCmd.getCmdPayload();
+    const { _id: proposalId, expirationTime, creator } = proposalCmd.getCmdPayload();
     const { from: party1, to: party2, memo, ...token1 } = tokenSwapCmd1.getCmdPayload();
     const { ...token2 } = tokenSwapCmd2.getCmdPayload();
     assert(!!proposalId, `'proposalId' is required`);

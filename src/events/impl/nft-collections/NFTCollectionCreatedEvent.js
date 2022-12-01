@@ -7,12 +7,12 @@ class NFTCollectionCreatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      entityId,
+      _id,
       ownerId,
       attributes
     } = eventPayload;
 
-    assert(!!entityId, "'entityId' is required");
+    assert(!!_id, "'_id' is required");
     assert(!!ownerId, "'ownerId' is required");
     assert(Array.isArray(attributes), "'attributes' must be array");
 

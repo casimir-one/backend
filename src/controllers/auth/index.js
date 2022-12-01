@@ -17,7 +17,7 @@ const signUp = async function (ctx) {
   // TODO: add conditions for free registration
   const portal = ctx.state.portal;
   const jwtToken = jwt.sign({
-    username: 'admin',
+    _id: 'admin',
     portal: portal.id,
     isPortalAdmin: true,
     exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
@@ -29,25 +29,25 @@ const signUp = async function (ctx) {
 
 
 const signIn = async function (ctx) {
-  const { username, secretSigHex } = ctx.request.body;
+  const { _id, secretSigHex } = ctx.request.body;
   const portal = ctx.state.portal;
 
   try {
 
     const userDtoService = new UserDtoService();
-    const user = await userDtoService.getUser(username);
+    const user = await userDtoService.getUser(_id);
     if (!user || user.portalId != portal.id) {
       ctx.successRes({
         success: false,
-        error: `User '${username}' is not a member of '${portal.name}'`
+        error: `User '${_id}' is not a member of '${portal.name}'`
       });
       return;
     }
 
-    if (ctx.state.isPortalRoute && !portal.admins.some(name => name == username)) {
+    if (ctx.state.isPortalRoute && !portal.admins.some(name => name == _id)) {
       ctx.successRes({
         success: false,
-        error: `User "${username}" does not have admin rights`
+        error: `User "${_id}" does not have admin rights`
       });
       return;
     }
@@ -67,9 +67,9 @@ const signIn = async function (ctx) {
     }
 
     const jwtToken = jwt.sign({
-      username,
+      _id,
       portal: portal.id,
-      isPortalAdmin: portal.admins.some(name => name == username),
+      isPortalAdmin: portal.admins.some(name => name == _id),
       exp: Math.floor(Date.now() / 1000) + (60 * 24 * 60),
     }, config.JWT_SECRET);
 

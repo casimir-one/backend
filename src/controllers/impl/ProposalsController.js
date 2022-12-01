@@ -11,9 +11,9 @@ class ProposalsController extends BaseController {
     h: async (ctx) => {
       try {
         const status = ctx.params.status;
-        const username = ctx.params.username;
+        const _id = ctx.params._id;
 
-        let result = await proposalDtoService.getAccountProposals(username);
+        let result = await proposalDtoService.getAccountProposals(_id);
         result.sort(function (a, b) {
           return new Date(b.proposal.created_at) - new Date(a.proposal.created_at);
         });

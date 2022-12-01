@@ -9,7 +9,7 @@ class FTClassService extends BaseService {
   }
 
   async createFTClass({
-    entityId,
+    _id,
     symbol,
     precision,
     issuer,
@@ -19,7 +19,7 @@ class FTClassService extends BaseService {
   }) {
 
     const result = await this.createOne({
-      _id: entityId,
+      _id: _id,
       symbol,
       precision,
       issuer,

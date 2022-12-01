@@ -128,23 +128,23 @@ class AttributesController extends BaseController {
     h: async (ctx) => {
       try {
         const scope = ctx.params.scope;
-        const entityId = ctx.params.entityId;
+        const _id = ctx.params._id;
         const attributeId = ctx.params.attributeId;
         const filename = ctx.params.filename;
 
-        const isEntityRootFolder = entityId == attributeId;
+        const isEntityRootFolder = _id == attributeId;
         const imageQuery = ctx.query.image === 'true';
         let filepath = '';
         switch (scope) {
           case AttributeScope.NFT_COLLECTION:
-            filepath = isEntityRootFolder ? FileStorage.getNFTCollectionFilePath(entityId, filename) : FileStorage.getNFTCollectionAttributeFilePath(entityId, attributeId, filename);
+            filepath = isEntityRootFolder ? FileStorage.getNFTCollectionFilePath(_id, filename) : FileStorage.getNFTCollectionAttributeFilePath(_id, attributeId, filename);
             const fileExists = await FileStorage.exists(filepath);
             if (!fileExists) {
               throw new NotFoundError(`${filepath} is not found`);
             }
             break;
           case AttributeScope.NFT_ITEM:
-            const { nftCollectionId, nftItemId } = JSON.parse(entityId);
+            const { nftCollectionId, nftItemId } = JSON.parse(_id);
             filepath = attributeId ? FileStorage.getNFTItemMetadataAttributeFilePath(nftCollectionId, nftItemId, attributeId, filename) : FileStorage.getNFTItemMetadataFilePath(nftCollectionId, nftItemId, filename);
             const nftItemFileExists = await FileStorage.exists(filepath);
             if (!nftItemFileExists) {
@@ -152,7 +152,7 @@ class AttributesController extends BaseController {
             }
             break;
           case AttributeScope.TEAM:
-            filepath = isEntityRootFolder ? FileStorage.getTeamFilePath(entityId, filename) : FileStorage.getTeamAttributeFilePath(entityId, attributeId, filename);
+            filepath = isEntityRootFolder ? FileStorage.getTeamFilePath(_id, filename) : FileStorage.getTeamAttributeFilePath(_id, attributeId, filename);
             if (imageQuery) {
               const exists = await FileStorage.exists(filepath);
               if (!exists) {
@@ -161,7 +161,7 @@ class AttributesController extends BaseController {
             }
             break;
           case AttributeScope.USER:
-            filepath = isEntityRootFolder ? FileStorage.getAccountFilePath(entityId, filename) : FileStorage.getAccountAttributeFilePath(entityId, attributeId, filename);
+            filepath = isEntityRootFolder ? FileStorage.getAccountFilePath(_id, filename) : FileStorage.getAccountAttributeFilePath(_id, attributeId, filename);
             if (imageQuery) {
               const exists = await FileStorage.exists(filepath);
               if (!exists) {

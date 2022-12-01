@@ -22,17 +22,14 @@ class UserDtoService extends BaseService {
       return {
         _id: user._id,
         portalId: user.portalId,
+        pubKey: user.pubKey,
         email: user.email,
         attributes: user.attributes,
         roles: roles,
-        pubKey: user.pubKey,
         status: user.status,
         teams: user.teams,
         createdAt: user.createdAt || user.created_at,
-        updatedAt: user.updatedAt || user.updated_at,
-
-        // @deprecated
-        username: user._id
+        updatedAt: user.updatedAt || user.updated_at
       };
     });
   }
@@ -50,8 +47,8 @@ class UserDtoService extends BaseService {
   }
 
 
-  async getUser(username, status) {
-    const query = { _id: username };
+  async getUser(_id, status) {
+    const query = { _id: _id };
     if (status) {
       query.status = status;
     }
@@ -71,8 +68,8 @@ class UserDtoService extends BaseService {
 
 
   // TODO: Remove this
-  async findUserProfileByOwner(username) {
-    const user = await this.findOne({ _id: username });
+  async findUserProfileByOwner(_id) {
+    const user = await this.findOne({ _id: _id });
     return user;
   }
 

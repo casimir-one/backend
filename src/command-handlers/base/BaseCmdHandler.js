@@ -81,7 +81,7 @@ class BaseCmdHandler extends EventEmitter {
     const events = ctx.state.appEvents.splice(0, ctx.state.appEvents.length);
 
     //set events issuer for sending results to the sockets
-    for (const event of events) event.setEventIssuer(ctx.state.user?.username);
+    for (const event of events) event.setEventIssuer(ctx.state.user?._id);
 
     this.logEvents(events);
 
@@ -157,7 +157,7 @@ class BaseCmdHandler extends EventEmitter {
       return cmd instanceof AcceptProposalCmd || cmd instanceof DeclineProposalCmd;
     }).map(cmd => ({
       cmd,
-      isNewProposal: newProposalsCmds.some(proposalCmd => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()),
+      isNewProposal: newProposalsCmds.some(proposalCmd => cmd.getCmdPayload()._id == proposalCmd.getProtocolEntityId()),
       isAccepted: cmd instanceof AcceptProposalCmd,
       isDeclined: cmd instanceof DeclineProposalCmd
     })));
@@ -168,7 +168,7 @@ class BaseCmdHandler extends EventEmitter {
         return cmd instanceof AcceptProposalCmd || cmd instanceof DeclineProposalCmd;
       }).map(cmd => ({
         cmd,
-        isNewProposal: newProposalsCmds.some((proposalCmd) => cmd.getCmdPayload().entityId == proposalCmd.getProtocolEntityId()),
+        isNewProposal: newProposalsCmds.some((proposalCmd) => cmd.getCmdPayload()._id == proposalCmd.getProtocolEntityId()),
         isAccepted: cmd instanceof AcceptProposalCmd,
         isDeclined: cmd instanceof DeclineProposalCmd
       })));
@@ -176,7 +176,7 @@ class BaseCmdHandler extends EventEmitter {
 
     for (const cmd of appCmds) {
       if (cmd instanceof AcceptProposalCmd) {
-        const acceptedProposal = await proposalService.getProposal(cmd.getCmdPayload().entityId);
+        const acceptedProposal = await proposalService.getProposal(cmd.getCmdPayload()._id);
         const nestedProposedCmds = acceptedProposal?.details?.proposalCtx?.proposedCmds;
         if (nestedProposedCmds && nestedProposedCmds.length) {
           const rebuildedProposalCmds = nestedProposedCmds.map(rebuildCmd);
@@ -193,7 +193,7 @@ class BaseCmdHandler extends EventEmitter {
 
     const proposalsIds = proposalUpdates.reduce((acc, item) => {
       let { cmd, isNewProposal, isAccepted, isDeclined } = item;
-      let { entityId: proposalId } = cmd.getCmdPayload();
+      let { _id: proposalId } = cmd.getCmdPayload();
       return acc.some(p => p.proposalId === proposalId) ? acc : [...acc, { proposalId, isNewProposal, isAccepted, isDeclined }];
     }, []);
     return { proposalsIds, newProposalsCmds };

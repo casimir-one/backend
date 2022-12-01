@@ -21,11 +21,11 @@ const nftItemMetadataAttributeDirPath = (baseDir, nftCollectionId, nftItemId, at
 const nftItemMetadataAttributeFilePath = (baseDir, nftCollectionId, nftItemId, attributeId, filename) => `${nftItemMetadataAttributeDirPath(baseDir, nftCollectionId, nftItemId, attributeId)}/${filename}`;
 
 const accountDir = 'accounts';
-const accountDirPath = (baseDir, username) => `${baseDir}/${accountDir}/${username}`;
-const accountFilePath = (baseDir, username, filename) => `${accountDirPath(baseDir, username)}/${filename}`;
-const accountAttributeDirPath = (baseDir, username, attributeId) => `${accountDirPath(baseDir, username)}/${attributeId}`;
-const accountAttributeFilePath = (baseDir, username, attributeId, filename) => `${accountAttributeDirPath(baseDir, username, attributeId)}/${filename}`;
-const accountAvatarFilePath = (baseDir, username, picture) => `${accountDirPath(baseDir, username)}/${picture}`
+const accountDirPath = (baseDir, _id) => `${baseDir}/${accountDir}/${_id}`;
+const accountFilePath = (baseDir, _id, filename) => `${accountDirPath(baseDir, _id)}/${filename}`;
+const accountAttributeDirPath = (baseDir, _id, attributeId) => `${accountDirPath(baseDir, _id)}/${attributeId}`;
+const accountAttributeFilePath = (baseDir, _id, attributeId, filename) => `${accountAttributeDirPath(baseDir, _id, attributeId)}/${filename}`;
+const accountAvatarFilePath = (baseDir, _id, picture) => `${accountDirPath(baseDir, _id)}/${picture}`
 const accountDefaultAvatarFilePath = () => path.join(__dirname, `./../../default/default-avatar.png`);
 
 
@@ -115,24 +115,24 @@ class BaseFileStorage {
     return nftCollectionArchiveDirPath(this._baseDirPath, nftCollectionId, archiveName);
   }
 
-  getAccountDirPath(username) {
-    return accountDirPath(this._baseDirPath, username);
+  getAccountDirPath(_id) {
+    return accountDirPath(this._baseDirPath, _id);
   }
 
-  getAccountAttributeDirPath(username, attributeId) {
-    return accountAttributeDirPath(this._baseDirPath, username, attributeId);
+  getAccountAttributeDirPath(_id, attributeId) {
+    return accountAttributeDirPath(this._baseDirPath, _id, attributeId);
   }
 
-  getAccountAttributeFilePath(username, attributeId, filename) {
-    return accountAttributeFilePath(this._baseDirPath, username, attributeId, filename);
+  getAccountAttributeFilePath(_id, attributeId, filename) {
+    return accountAttributeFilePath(this._baseDirPath, _id, attributeId, filename);
   }
 
-  getAccountFilePath(username, filename) {
-    return accountFilePath(this._baseDirPath, username, filename);
+  getAccountFilePath(_id, filename) {
+    return accountFilePath(this._baseDirPath, _id, filename);
   }
 
-  getAccountAvatarFilePath(username, picture) {
-    return accountAvatarFilePath(this._baseDirPath, username, picture);
+  getAccountAvatarFilePath(_id, picture) {
+    return accountAvatarFilePath(this._baseDirPath, _id, picture);
   }
 
   getAccountDefaultAvatarFilePath() {

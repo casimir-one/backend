@@ -33,7 +33,7 @@ export default class KafkaService extends Singleton {
       connectionTimeout: 3000,
       // sasl: {
       //   mechanism: 'scram-sha-512',
-      //   username: config.KAFKA_USER,
+      //   _id: config.KAFKA_USER,
       //   password: config.KAFKA_PASSWORD
       // },
     });

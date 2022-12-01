@@ -8,18 +8,18 @@ const USER_ATTRIBUTE_ID_SPLITTER = '-';
 
 const destinationHandler = (fileStorage) => function () {
   return async function (req, file, callback) {
-    const username = req.headers[USERNAME_HEADER];
+    const _id = req.headers[USERNAME_HEADER];
     let folderPath = "";
     let filePath = "";
     const parts = file.originalname.split(USER_ATTRIBUTE_ID_SPLITTER);
     const userAttrId = parts[0];
     if (parts.length > 1 && mongoose.Types.ObjectId.isValid(userAttrId)) {
-      folderPath = fileStorage.getAccountAttributeDirPath(username, userAttrId);
+      folderPath = fileStorage.getAccountAttributeDirPath(_id, userAttrId);
       const name = file.originalname.substring(`${userAttrId}${USER_ATTRIBUTE_ID_SPLITTER}`.length, file.originalname.length);
-      filePath = fileStorage.getAccountAttributeFilePath(username, userAttrId, name);
+      filePath = fileStorage.getAccountAttributeFilePath(_id, userAttrId, name);
     } else {
-      folderPath = fileStorage.getAccountDirPath(username);
-      filePath = fileStorage.getAccountFilePath(username, file.originalname);
+      folderPath = fileStorage.getAccountDirPath(_id);
+      filePath = fileStorage.getAccountFilePath(_id, file.originalname);
     }
 
     const folderExists = await fileStorage.exists(folderPath);

@@ -7,11 +7,11 @@ class UserAuthorityAlteredEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      username,
+      _id,
       authority,
     } = eventPayload;
 
-    assert(!!username, "'username' is required");
+    assert(!!_id, "'_id' is required");
     assert(!!authority, "'authority' required");
 
     super(APP_EVENT.USER_AUTHORITY_ALTERED, eventPayload);

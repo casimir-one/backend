@@ -14,10 +14,10 @@ class SftpFileStorage extends BaseFileStorage {
   _username = null;
   _password = null;
 
-  constructor(host = config.TENANT_SFTP_HOST, username = config.TENANT_SFTP_USER, password = config.TENANT_SFTP_PASSWORD) {
+  constructor(host = config.TENANT_SFTP_HOST, _id = config.TENANT_SFTP_USER, password = config.TENANT_SFTP_PASSWORD) {
     super('storage');
     this._host = host;
-    this._username = username;
+    this._username = _id;
     this._password = password;
     this._type = FILE_STORAGE.REMOTE_SFTP;
   }
@@ -29,7 +29,7 @@ class SftpFileStorage extends BaseFileStorage {
     try {
       await sftp.connect({
         host: this._host,
-        username: this._username,
+        _id: this._username,
         password: this._password
       });
       const result = await cmd(sftp);

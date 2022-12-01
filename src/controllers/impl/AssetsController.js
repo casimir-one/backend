@@ -76,8 +76,8 @@ class AssetsController extends BaseController {
         };
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION);
-        ctx.successRes({ _id: entityId });
+        const _id = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION);
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.status = err.httpStatus || 500;
@@ -95,8 +95,8 @@ class AssetsController extends BaseController {
         };
         const msg = ctx.state.msg;
         await assetCmdHandler.process(msg, ctx, validate);
-        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION, '_id');
-        ctx.successRes({ _id: entityId });
+        const _id = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION, '_id');
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -217,16 +217,16 @@ class AssetsController extends BaseController {
               }
 
               const user = await userService.getUser(nftItem.ownerId);
-              const username = ctx.state.user.username;
+              const userId = ctx.state.user._id;
 
               if (user) {
-                if (user._id !== username) {
-                  throw new ForbiddenError(`"${username}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
+                if (user._id !== userId) {
+                  throw new ForbiddenError(`"${userId}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
                 }
               } else {
-                const isAuthorized = await teamDtoService.authorizeTeamAccount(nftItem.ownerId, username)
+                const isAuthorized = await teamDtoService.authorizeTeamAccount(nftItem.ownerId, userId)
                 if (!isAuthorized) {
-                  throw new ForbiddenError(`"${username}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
+                  throw new ForbiddenError(`"${userId}" is not permitted to edit "${nftItem.nftCollectionId}" nft collection`);
                 }
               }
             }
@@ -392,8 +392,8 @@ class AssetsController extends BaseController {
       try {
         const validate = async (appCmds) => {
           const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
-            const { entityId } = acceptProposalCmd.getCmdPayload();
-            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            const { _id } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload()._id === _id);
             if (!createProposalCmd) {
               throw new BadRequestError(`Can't accept proposal`);
             }

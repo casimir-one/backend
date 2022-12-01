@@ -66,9 +66,9 @@ class DocumentTemplatesController extends BaseController {
         const validate = async (appCmds) => {
           const validateUpdateDocumentTemplate = async (updateDocumentTemplateCmd, cmdStack) => {
             const { account } = updateDocumentTemplateCmd.getCmdPayload();
-            const username = ctx.state.user.username;
-            if (account !== username) {
-              const isMember = await teamDtoService.authorizeTeamAccount(account, username);
+            const _id = ctx.state.user._id;
+            if (account !== _id) {
+              const isMember = await teamDtoService.authorizeTeamAccount(account, _id);
               if (!isMember) {
                 throw new ForbiddenError(`You have no permission to edit this document`);
               }
@@ -107,10 +107,10 @@ class DocumentTemplatesController extends BaseController {
             if (!documentTemplate) {
               throw new ConflictError(`DocumentTemplate ${documentTemplateId} is already deleted`);
             }
-            const username = ctx.state.user.username;
+            const _id = ctx.state.user._id;
             const { account } = documentTemplate;
-            if (account !== username) {
-              const isMember = await teamDtoService.authorizeTeamAccount(account, username);
+            if (account !== _id) {
+              const isMember = await teamDtoService.authorizeTeamAccount(account, _id);
               if (!isMember) {
                 throw new ForbiddenError(`You have no permission to delete this document`);
               }

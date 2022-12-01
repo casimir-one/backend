@@ -6,7 +6,7 @@ class FTCreatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      entityId,
+      _id,
       issuer,
       symbol,
       precision,

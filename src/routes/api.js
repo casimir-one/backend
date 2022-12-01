@@ -47,7 +47,7 @@ protected_route.post('/v3/users', usersCtrl.createUser);
 protected_route.put('/v2/proposals/update', proposalsCtrl.acceptProposal)
 protected_route.put('/v2/proposals/decline', proposalsCtrl.declineProposal)
 protected_route.get('/v2/proposals/:proposalId', proposalsCtrl.getProposalById)
-protected_route.get('/v2/proposals/:username/:status', proposalsCtrl.getAccountProposals)
+protected_route.get('/v2/proposals/:_id/:status', proposalsCtrl.getAccountProposals)
 
 protected_route.post('/v2/team', teamsCtrl.createTeam)
 protected_route.put('/v2/team', teamsCtrl.updateTeam)
@@ -57,7 +57,7 @@ protected_route.post('/v2/team/leave', teamsCtrl.leaveTeam)
 public_route.get('/v2/teams/listing', teamsCtrl.getTeamsListing)
 public_route.get('/v2/teams/listing-paginated', teamsCtrl.getTeamsListingPaginated)
 public_route.get('/v2/team/:teamId', teamsCtrl.getTeam)
-public_route.get('/v2/teams/member/:username', teamsCtrl.getTeamsByUser)
+public_route.get('/v2/teams/member/:_id', teamsCtrl.getTeamsByUser)
 public_route.get('/v2/teams/portal/:portalId', teamsCtrl.getTeamsByPortal)
 public_route.get('/team/logo/:teamId', teamsCtrl.getTeamLogo)
 
@@ -68,7 +68,7 @@ public_route.get('/v2/attribute/:id', attributesCtrl.getAttribute);
 protected_route.post('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
 protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
 protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
-public_route.get('/attribute/file/:scope/:entityId/:attributeId/:filename', attributesCtrl.getAttributeFile);
+public_route.get('/attribute/file/:scope/:_id/:attributeId/:filename', attributesCtrl.getAttributeFile);
 
 
 public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFTClassById)
@@ -82,10 +82,10 @@ protected_route.post('/v2/tokens/ft/transfer', assetsCtrl.createFTTransferReques
 protected_route.post('/v2/tokens/ft/create', assetsCtrl.createFTClass)
 protected_route.post('/v2/tokens/ft/issue', assetsCtrl.issueFT)
 
-public_route.get('/v2/user/profile/:username', usersCtrl.getUserProfile)
+public_route.get('/v2/user/profile/:_id', usersCtrl.getUserProfile)
 public_route.get('/v2/users/profile', usersCtrl.getUsersProfiles)
 public_route.get('/v2/users/active', usersCtrl.getActiveUsersProfiles)
-public_route.get('/v2/user/name/:username', usersCtrl.getUser)
+public_route.get('/v2/user/name/:_id', usersCtrl.getUser)
 public_route.get('/v2/user/email/:email', usersCtrl.getUserByEmail)
 public_route.get('/v2/users', usersCtrl.getUsers)
 public_route.get('/v2/users/listing', usersCtrl.getUsersListing)

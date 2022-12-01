@@ -83,8 +83,8 @@ class TeamsController extends BaseController {
       try {
         const { withPortalTeam } = qs.parse(ctx.query);
 
-        const username = ctx.params.username;
-        const result = await teamDtoService.getTeamsByUser(username, withPortalTeam);
+        const _id = ctx.params._id;
+        const result = await teamDtoService.getTeamsByUser(_id, withPortalTeam);
         ctx.successRes(result);
 
       } catch (err) {
@@ -134,9 +134,9 @@ class TeamsController extends BaseController {
         const msg = ctx.state.msg;
         await accountCmdHandler.process(msg, ctx, validate);
 
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_DAO);
+        const _id = this.extractEntityId(msg, APP_CMD.CREATE_DAO);
 
-        ctx.successRes({ _id: entityId });
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -161,8 +161,8 @@ class TeamsController extends BaseController {
           }
 
           const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
-            const { entityId } = acceptProposalCmd.getCmdPayload();
-            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            const { _id } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload()._id === _id);
             if (!createProposalCmd) {
               throw new BadRequestError(`Can't accept proposal`);
             }
@@ -197,9 +197,9 @@ class TeamsController extends BaseController {
         const msg = ctx.state.msg;
         await accountCmdHandler.process(msg, ctx, validate);
 
-        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_DAO);
+        const _id = this.extractEntityId(msg, APP_CMD.UPDATE_DAO);
 
-        ctx.successRes({ _id: entityId });
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -216,18 +216,18 @@ class TeamsController extends BaseController {
             const user = await userService.getUser(member);
 
             if (!user) {
-              throw new NotFoundError(`User "${member}" username is not found`);
+              throw new NotFoundError(`User "${member}" _id is not found`);
             }
 
             const team = await teamService.getTeam(teamId);
             if (team.members.includes(member)) {
-              throw new ConflictError(`User ${member} username already joined`);
+              throw new ConflictError(`User ${member} _id already joined`);
             }
           };
 
           const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
-            const { entityId } = acceptProposalCmd.getCmdPayload();
-            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            const { _id } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload()._id === _id);
             if (!createProposalCmd) {
               throw new BadRequestError(`Can't accept proposal`);
             }
@@ -279,18 +279,18 @@ class TeamsController extends BaseController {
             const user = await userService.getUser(member);
 
             if (!user) {
-              throw new NotFoundError(`User "${member}" username is not found`);
+              throw new NotFoundError(`User "${member}" _id is not found`);
             }
 
             const team = await teamService.getTeam(teamId);
             if (!team.members.includes(member)) {
-              throw new ConflictError(`User ${member} username already left`);
+              throw new ConflictError(`User ${member} _id already left`);
             }
           };
 
           const validateAcceptProposal = (acceptProposalCmd, cmdStack) => {
-            const { entityId } = acceptProposalCmd.getCmdPayload();
-            const createProposalCmd = cmdStack.find(c => c.getCmdPayload().entityId === entityId);
+            const { _id } = acceptProposalCmd.getCmdPayload();
+            const createProposalCmd = cmdStack.find(c => c.getCmdPayload()._id === _id);
             if (!createProposalCmd) {
               throw new BadRequestError(`Can't accept proposal`);
             }

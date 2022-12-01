@@ -7,7 +7,7 @@ class UserCreatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      entityId,
+      _id,
       pubKey,
       email,
       status,
@@ -15,7 +15,7 @@ class UserCreatedEvent extends BaseEvent {
       roles
     } = eventPayload;
 
-    assert(!!entityId, "'entityId' is required");
+    assert(!!_id, "'_id' is required");
     assert(!!pubKey, "'pubKey' is required");
     assert(!!email, "'email' is required");
     assert(!!status, "'status' is required");

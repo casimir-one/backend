@@ -11,7 +11,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
   [APP_CMD.CREATE_DAO]: [{
     eventNum: DOMAIN_EVENT.DAO_CREATE,
     matchF: ({ txInfo, appCmd, event }) => {
-      const { entityId: cmdDaoId } = appCmd.getCmdPayload();
+      const { _id: cmdDaoId } = appCmd.getCmdPayload();
       const { dao: { id: eventDaoIdBuffer } } = event.getEventPayload();
       return checkMatch({
         daoId: cmdDaoId === Buffer.from(eventDaoIdBuffer).toString('hex')
@@ -65,7 +65,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
   [APP_CMD.CREATE_FT]: [{
     eventNum: DOMAIN_EVENT.FT_CLASS_CREATED,
     matchF: ({ txInfo, appCmd, event, chainService }) => {
-      const { entityId: cmdFtId } = appCmd.getCmdPayload();
+      const { _id: cmdFtId } = appCmd.getCmdPayload();
       const { asset_id: eventFtId } = event.getEventPayload();
 
       return checkMatch({
@@ -77,7 +77,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
   [APP_CMD.CREATE_PROPOSAL]: [{
     eventNum: DOMAIN_EVENT.PROPOSAL_CREATED,
     matchF: ({ txInfo, appCmd, event, chainService }) => {
-      const { creator: cmdIssuerDaoId, entityId: cmdProposalId } = appCmd.getCmdPayload();
+      const { creator: cmdIssuerDaoId, _id: cmdProposalId } = appCmd.getCmdPayload();
       const { author: eventIssuerAddress, proposal_id: eventProposalId } = event.getEventPayload();
 
       const { registry } = chainService.getChainNodeClient();
@@ -93,7 +93,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
     {
       eventNum: DOMAIN_EVENT.PROPOSAL_APPROVED,
       matchF: ({ txInfo, appCmd, event, chainService }) => {
-        const { entityId: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
+        const { _id: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
         const { proposal_id: eventProposalIdBuffer, member: eventIssuerAddress } = event.getEventPayload();
 
         const { registry } = chainService.getChainNodeClient();
@@ -107,7 +107,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
     {
       eventNum: DOMAIN_EVENT.PROPOSAL_RESOLVED,
       matchF: ({ txInfo, appCmd, event, chainService }) => {
-        const { entityId: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
+        const { _id: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
         const { proposal_id: eventProposalIdBuffer, member: eventIssuerAddress, state } = event.getEventPayload();
 
         const { registry } = chainService.getChainNodeClient();
@@ -126,7 +126,7 @@ const APP_CMD_TO_BC_EVENT_PROCESSOR = {
     {
       eventNum: DOMAIN_EVENT.PROPOSAL_RESOLVED,
       matchF: ({ txInfo, appCmd, event, chainService }) => {
-        const { entityId: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
+        const { _id: cmdProposalId, account: cmdIssuerDaoId } = appCmd.getCmdPayload();
         const { proposal_id: eventProposalIdBuffer, member: eventIssuerAddress, state } = event.getEventPayload();
 
         const { registry } = chainService.getChainNodeClient();

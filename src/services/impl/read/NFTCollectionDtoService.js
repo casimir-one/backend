@@ -24,7 +24,6 @@ class NFTCollectionDTOService extends BaseService {
     return nftCollections.map((nftCollection) => {
       return {
         _id: nftCollection._id,
-        nextNftItemId: nftCollection.nextNftItemId,
         ownerId: nftCollection.ownerId,
         attributes: nftCollection.attributes,
         createdAt: nftCollection.createdAt,

@@ -9,7 +9,7 @@ class BaseController {
   command({ form: FormHandler, h: actionHandler }) {
     if (!FormHandler)
       return new MessageHandler(new ActionHandler(actionHandler), false);
-      
+
     return new FormHandler(new MessageHandler(new ActionHandler(actionHandler), true));
   }
 
@@ -89,7 +89,7 @@ class BaseController {
     }
   }
 
-  extractEntityId(msg, cmdNum, key='entityId') {
+  extractEntityId(msg, cmdNum, key='_id') {
     const { appCmds } = msg;
     const appCmd = appCmds.find((cmd) => cmd.getCmdNum() == cmdNum || cmd.getCmdNum() == APP_CMD.CREATE_PROPOSAL);
 

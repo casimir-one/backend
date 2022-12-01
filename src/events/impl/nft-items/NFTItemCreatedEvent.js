@@ -6,14 +6,14 @@ class NFTItemCreatedEvent extends BaseEvent {
 
   constructor(eventPayload) {
     const {
-      entityId,
+      _id,
       nftCollectionId,
       status,
       ownerId,
       creatorId
     } = eventPayload;
 
-    assert(!!entityId, "'entityId' is required");
+    assert(!!_id, "'_id' is required");
     // assert(!!nftCollectionId, "'nftCollectionId' is required");
     assert(!!ownerId, "'ownerId' is required");
     assert(!!creatorId, "'creatorId' is required");

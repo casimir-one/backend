@@ -124,7 +124,7 @@ class ProposalDtoService extends BaseService {
         rejectors: chainProposal ? chainProposal.rejectors : proposal.rejectors,
 
         // @deprecated
-        entityId: proposal._id,
+        _id: proposal._id,
         details: proposal.details,
         proposal: chainProposal || null,
       })
@@ -279,10 +279,10 @@ class ProposalDtoService extends BaseService {
   }
 
 
-  async getAccountProposals(username) {
+  async getAccountProposals(_id) {
     const chainService = await ChainService.getInstanceAsync(config);
     const chainRpc = chainService.getChainRpc();
-    const chainAccount = await chainRpc.getAccountAsync(username);
+    const chainAccount = await chainRpc.getAccountAsync(_id);
     const signatories = await this.getPossibleSignatories(chainAccount);
     const proposals = await this.findMany({ decisionMakers: { $in: [...signatories] } });
     const result = await this.mapProposals(proposals);

@@ -34,8 +34,8 @@ class BaseEvent {
     return this._timestamp;
   }
 
-  setEventIssuer(username) {
-    this._eventIssuer = username;
+  setEventIssuer(_id) {
+    this._eventIssuer = _id;
   }
 
   getEventIssuer() {

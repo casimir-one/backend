@@ -114,7 +114,7 @@
             "schema": {
               "type": "object",
               "properties": {
-                "username": {
+                "_id": {
                   "type": "string"
                 },
                 "password": {
@@ -333,7 +333,7 @@
         ]
       }
     },
-    "/api/v2/proposals/{username}/{status}": {
+    "/api/v2/proposals/{_id}/{status}": {
       "get": {
         "tags": [
           "proposal"
@@ -346,7 +346,7 @@
         ],
         "parameters": [
           {
-            "name": "username",
+            "name": "_id",
             "in": "path",
             "description": "",
             "required": true,
@@ -530,12 +530,12 @@
         ]
       }
     },
-    "/api/v2/projects/user/listing/{username}": {
+    "/api/v2/projects/user/listing/{_id}": {
       "get": {
         "tags": [
           "project"
         ],
-        "summary": "Find user projects by username",
+        "summary": "Find user projects by _id",
         "description": "Returns an array of projects",
         "operationId": "getUserProjectsListing",
         "produces": [
@@ -543,9 +543,9 @@
         ],
         "parameters": [
           {
-            "name": "username",
+            "name": "_id",
             "in": "path",
-            "description": "username of the user whose projects you want to get",
+            "description": "_id of the user whose projects you want to get",
             "required": true,
             "type": "string"
           }
@@ -1127,7 +1127,7 @@
         ]
       }
     },
-    "/api/v2/teams/member/{username}": {
+    "/api/v2/teams/member/{_id}": {
       "get": {
         "tags": [
           "team"
@@ -1140,9 +1140,9 @@
         ],
         "parameters": [
           {
-            "name": "username",
+            "name": "_id",
             "in": "path",
-            "description": "username of team member to return",
+            "description": "_id of team member to return",
             "required": true,
             "type": "string"
           }
@@ -1626,7 +1626,7 @@
         ]
       }
     },
-    "/api/attribute/file/{scope}/{entityId}/{attributeId}/{filename}": {
+    "/api/attribute/file/{scope}/{_id}/{attributeId}/{filename}": {
       "get": {
         "tags": [
           "attribute"
@@ -1646,7 +1646,7 @@
             "type": "string"
           },
           {
-            "name": "entityId",
+            "name": "_id",
             "in": "path",
             "description": "id of entity",
             "required": true,
@@ -2733,7 +2733,7 @@
         ]
       }
     },
-    "/api/v2/user/profile/{username}": {
+    "/api/v2/user/profile/{_id}": {
       "get": {
         "tags": [
           "user"
@@ -2746,9 +2746,9 @@
         ],
         "parameters": [
           {
-            "name": "username",
+            "name": "_id",
             "in": "path",
-            "description": "username",
+            "description": "_id",
             "required": true,
             "type": "string"
           }
@@ -2858,7 +2858,7 @@
         ]
       }
     },
-    "/api/v2/user/name/{username}": {
+    "/api/v2/user/name/{_id}": {
       "get": {
         "tags": [
           "user"
@@ -2871,9 +2871,9 @@
         ],
         "parameters": [
           {
-            "name": "username",
+            "name": "_id",
             "in": "path",
-            "description": "username",
+            "description": "_id",
             "required": true,
             "type": "string"
           }
@@ -3181,7 +3181,7 @@
         ]
       }
     },
-    "/api/user/avatar/{username}": {
+    "/api/user/avatar/{_id}": {
       "get": {
         "tags": [
           "user"
@@ -3194,9 +3194,9 @@
         ],
         "parameters": [
           {
-            "name": "username",
+            "name": "_id",
             "in": "path",
-            "description": "username",
+            "description": "_id",
             "required": true,
             "type": "string"
           }

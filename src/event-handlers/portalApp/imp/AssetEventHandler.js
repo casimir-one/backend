@@ -82,7 +82,7 @@ const portalService = new PortalService();
 assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
 
   const {
-    entityId,
+    _id,
     issuer,
     symbol,
     precision,
@@ -97,7 +97,7 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
   };
 
   await ftClassService.createFTClass({
-    entityId,
+    _id,
     symbol,
     precision,
     issuer,
@@ -107,7 +107,7 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
   });
 
   await assetService.createAsset({
-    entityId,
+    _id,
     symbol,
     precision,
     issuer,
@@ -119,13 +119,13 @@ assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
 
 assetEventHandler.register(APP_EVENT.NFT_COLLECTION_CREATED, async (event) => {
   const {
-    entityId,
+    _id,
     attributes,
     ownerId,
   } = event.getEventPayload();
 
   await nftCollectionService.createNFTCollection({
-    _id: entityId,
+    _id: _id,
     attributes,
     ownerId
   });
@@ -147,7 +147,7 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_UPDATED, async (event) => {
 assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
 
   const {
-    entityId: nftItemId,
+    _id: nftItemId,
     nftCollectionId,
     ownerId,
     creatorId,
@@ -167,7 +167,6 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
   }
 
   await nftItemService.createNFTItem(nftItem);
-  await nftCollectionService.increaseNftCollectionNextItemId(nftCollectionId);
 
   // sendEmailNotification(ownerId, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
 });

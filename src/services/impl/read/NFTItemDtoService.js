@@ -11,7 +11,6 @@ class NFTItemDTOService extends BaseService {
   async mapDTOs(nftItems) {
     return nftItems.map((nftItem) => ({
       _id: nftItem._id,
-      nftItemId: nftItem.nftItemId,
       ownerId: nftItem.ownerId,
       creatorId: nftItem.creatorId,
       nftCollectionId: nftItem.nftCollectionId,
@@ -41,5 +40,6 @@ class NFTItemDTOService extends BaseService {
   }
 
 }
+
 
 export default NFTItemDTOService;

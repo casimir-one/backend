@@ -26,16 +26,16 @@ const init = function(server) {
     verifyClient: verifySocketClient
   });
 
-  const usernameToSocket = new Map(); // username -> WS
+  const usernameToSocket = new Map(); // _id -> WS
 
   const addConnection = (info, ws) => {
-    const { username } = info;
-    usernameToSocket.set(username, ws);
+    const { _id } = info;
+    usernameToSocket.set(_id, ws);
   }
 
   const deleteConnection = (info) => {
-    const { username } = info;
-    usernameToSocket.delete(username);
+    const { _id } = info;
+    usernameToSocket.delete(_id);
   }
 
   wss.on('listening', () => {
@@ -71,8 +71,8 @@ const init = function(server) {
     logInfo("WSS close:", arg)
   });
 
-  const _send = (msg, payload, username) => {
-    const client = usernameToSocket.get(username);
+  const _send = (msg, payload, _id) => {
+    const client = usernameToSocket.get(_id);
     if (client) client.send(msg, payload);
   }
 

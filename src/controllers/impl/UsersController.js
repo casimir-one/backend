@@ -37,12 +37,12 @@ class UsersController extends BaseController {
           const cmd1 = {
             cmdNum: APP_CMD.CREATE_USER,
             validate: async (cmd) => {
-              const { entityId, email, roles } = cmd.getCmdPayload();
+              const { _id, email, roles } = cmd.getCmdPayload();
               if (Array.isArray(roles) && roles.find(({ role }) => role === SYSTEM_ROLE.ADMIN)) {
                 throw new BadRequestError(`Admin user cannot be created`);
               }
-              if (!entityId) {
-                throw new BadRequestError(`'entityId' fields is required`);
+              if (!_id) {
+                throw new BadRequestError(`'_id' fields is required`);
               }
               if (!validateEmail(email)) {
                 throw new BadRequestError(`'email' field is required and should be in correct format`);
@@ -56,8 +56,8 @@ class UsersController extends BaseController {
         const msg = ctx.state.msg;
         await accountCmdHandler.process(msg, ctx, validate);
         
-        const entityId = this.extractEntityId(msg, APP_CMD.CREATE_USER);
-        ctx.successRes({ _id: entityId });
+        const _id = this.extractEntityId(msg, APP_CMD.CREATE_USER);
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -70,18 +70,18 @@ class UsersController extends BaseController {
       try {
         const validate = async (appCmds) => {
           const validateImportDAO = async (importDAOCmd, cmdStack) => {
-            const { entityId, email, creator, confirmationCode, isTeamAccount } = importDAOCmd.getCmdPayload();
+            const { _id, email, creator, confirmationCode, isTeamAccount } = importDAOCmd.getCmdPayload();
 
-            if (!entityId) {
-              throw new BadRequestError(`'entityId' field are required`);
+            if (!_id) {
+              throw new BadRequestError(`'_id' field are required`);
             }
             if (isTeamAccount) {
               throw new BadRequestError(`Team account cannot be imported`);
             }
   
-            const existingProfile = await userService.getUser(entityId);
+            const existingProfile = await userService.getUser(_id);
             if (existingProfile) {
-              throw new ConflictError(`Profile for '${entityId}' is under consideration or has been imported already`);
+              throw new ConflictError(`Profile for '${_id}' is under consideration or has been imported already`);
             }
           };
 
@@ -98,11 +98,11 @@ class UsersController extends BaseController {
         const msg = ctx.state.msg;
 
         const importAccountCmd = msg.appCmds.find(cmd => cmd.getCmdNum() === APP_CMD.IMPORT_DAO);
-        const { entityId } = importAccountCmd.getCmdPayload();
+        const { _id } = importAccountCmd.getCmdPayload();
 
         await accountCmdHandler.process(msg, ctx, validate);
 
-        ctx.successRes({ _id: entityId });
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -113,10 +113,10 @@ class UsersController extends BaseController {
   getUser = this.query({
     h: async (ctx) => {
       try {
-        const username = ctx.params.username;
-        const user = await userDtoService.getUser(username);
+        const _id = ctx.params._id;
+        const user = await userDtoService.getUser(_id);
         if (!user) {
-          throw new NotFoundError(`User "${username}" username is not found`);
+          throw new NotFoundError(`User "${_id}" _id is not found`);
         }
         ctx.successRes(user);
 
@@ -179,10 +179,10 @@ class UsersController extends BaseController {
   getUserProfile = this.query({
     h: async (ctx) => {
       try {
-        const username = ctx.params.username;
-        const userProfile = await userDtoService.findUserProfileByOwner(username);
+        const _id = ctx.params._id;
+        const userProfile = await userDtoService.findUserProfileByOwner(_id);
         if (!userProfile) {
-          throw new NotFoundError(`User "${username}" username is not found`);
+          throw new NotFoundError(`User "${_id}" _id is not found`);
         }
         ctx.successRes(userProfile);
       } catch (err) {
@@ -294,9 +294,9 @@ class UsersController extends BaseController {
         const msg = ctx.state.msg;
         await accountCmdHandler.process(msg, ctx, validate);
 
-        const entityId = this.extractEntityId(msg, APP_CMD.UPDATE_DAO);
+        const _id = this.extractEntityId(msg, APP_CMD.UPDATE_DAO);
 
-        ctx.successRes({ _id: entityId });
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -340,7 +340,7 @@ class UsersController extends BaseController {
           const chainNodeClient = chainService.getChainNodeClient();
           const chainTxBuilder = chainService.getChainTxBuilder();
 
-          const { wif: faucetPrivKey, username: faucetUsername, fundingAmount: faucetFundingAmount } = config.FAUCET_ACCOUNT;
+          const { wif: faucetPrivKey, _id: faucetUsername, fundingAmount: faucetFundingAmount } = config.FAUCET_ACCOUNT;
           const fundingTx = await chainTxBuilder.begin()
             .then((txBuilder) => {
               const { authority } = alterDaoAuthorityCmd.getCmdPayload();
@@ -365,9 +365,9 @@ class UsersController extends BaseController {
           await fundUserAccount();
         }
 
-        const { entityId } = alterDaoAuthorityCmd.getCmdPayload();
+        const { _id } = alterDaoAuthorityCmd.getCmdPayload();
 
-        ctx.successRes({ _id: entityId });
+        ctx.successRes({ _id: _id });
 
       } catch (err) {
         ctx.errorRes(err);
@@ -379,12 +379,12 @@ class UsersController extends BaseController {
   getAvatar = this.query({
     h: async (ctx) => {
       try {
-        const username = ctx.params.username;
+        const _id = ctx.params._id;
         const width = ctx.query.width ? parseInt(ctx.query.width) : 200;
         const height = ctx.query.height ? parseInt(ctx.query.height) : 200;
         const noCache = ctx.query.noCache ? ctx.query.noCache === 'true' : false;
         const isRound = ctx.query.round ? ctx.query.round === 'true' : false;
-        const user = await userDtoService.getUser(username);
+        const user = await userDtoService.getUser(_id);
         const defaultAvatar = FileStorage.getAccountDefaultAvatarFilePath();
 
         let src;

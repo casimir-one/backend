@@ -15,7 +15,7 @@ class FTTransferProposalAcceptedEvent extends BaseEvent {
     
     const proposedCmds = proposalCmd.getProposedCmds();
     const transferFTCmd = proposedCmds[0];
-    const { entityId: proposalId, expirationTime } = proposalCmd.getCmdPayload();
+    const { _id: proposalId, expirationTime } = proposalCmd.getCmdPayload();
     const { from: party1, to: party2, amount: asset, memo } = transferFTCmd.getCmdPayload();
     
     assert(!!proposalId, `'proposalId' is required`);

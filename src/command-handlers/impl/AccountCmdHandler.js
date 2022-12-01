@@ -26,7 +26,7 @@ const accountCmdHandler = new AccountCmdHandler();
 accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
 
   const {
-    entityId,
+    _id,
     creator,
     authority,
     isTeamAccount,
@@ -37,7 +37,7 @@ accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
   } = cmd.getCmdPayload();
 
   const daoInfo = {
-    daoId: entityId,
+    daoId: _id,
     attributes,
     isTeamAccount,
   };
@@ -58,7 +58,7 @@ accountCmdHandler.register(APP_CMD.CREATE_DAO, (cmd, ctx) => {
 accountCmdHandler.register(APP_CMD.IMPORT_DAO, (cmd, ctx) => {
 
   const {
-    entityId,
+    _id,
     authority,
     isTeamAccount,
     attributes,
@@ -66,7 +66,7 @@ accountCmdHandler.register(APP_CMD.IMPORT_DAO, (cmd, ctx) => {
   } = cmd.getCmdPayload();
 
   const daoInfo = {
-    daoId: entityId,
+    daoId: _id,
     attributes,
     isTeamAccount,
   };
@@ -79,7 +79,7 @@ accountCmdHandler.register(APP_CMD.IMPORT_DAO, (cmd, ctx) => {
 
 accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
   const {
-    entityId,
+    _id,
     creator,
     isTeamAccount,
     description,
@@ -89,7 +89,7 @@ accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
   } = cmd.getCmdPayload();
 
   const daoInfo = {
-    daoId: entityId,
+    daoId: _id,
     attributes,
     isTeamAccount
   };
@@ -107,14 +107,14 @@ accountCmdHandler.register(APP_CMD.UPDATE_DAO, (cmd, ctx) => {
 
 accountCmdHandler.register(APP_CMD.ALTER_DAO_AUTHORITY, (cmd, ctx) => {
   const {
-    entityId,
+    _id,
     isTeamAccount,
     authority,
   } = cmd.getCmdPayload();
 
   if (!isTeamAccount) {
     ctx.state.appEvents.push(new UserAuthorityAlteredEvent({
-      username: entityId,
+      _id: _id,
       authority
     }));
   }
