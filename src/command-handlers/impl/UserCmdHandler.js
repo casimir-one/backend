@@ -1,6 +1,6 @@
 import { APP_CMD, USER_PROFILE_STATUS } from '@casimir.one/platform-core';
 import BaseCmdHandler from './../base/BaseCmdHandler';
-import { UserCreatedEvent } from './../../events';
+import { UserCreatedEvent, UserUpdatedEvent } from './../../events';
 
 
 class UserCmdHandler extends BaseCmdHandler {
@@ -13,12 +13,10 @@ const userCmdHandler = new UserCmdHandler();
 
 
 userCmdHandler.register(APP_CMD.CREATE_USER, (cmd, ctx) => {
-
   const {
     _id,
     email,
     pubKey,
-    roles,
     attributes,
   } = cmd.getCmdPayload();
 
@@ -26,9 +24,26 @@ userCmdHandler.register(APP_CMD.CREATE_USER, (cmd, ctx) => {
     _id,
     email,
     pubKey,
-    roles,
     attributes,
     status: USER_PROFILE_STATUS.APPROVED,
+  }));
+
+});
+
+
+userCmdHandler.register(APP_CMD.UPDATE_USER, (cmd, ctx) => {
+  const {
+    _id,
+    email,
+    pubKey,
+    attributes,
+  } = cmd.getCmdPayload();
+
+  ctx.state.appEvents.push(new UserUpdatedEvent({
+    _id,
+    email,
+    pubKey,
+    attributes,
   }));
 
 });

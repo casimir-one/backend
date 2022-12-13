@@ -84,6 +84,10 @@ module.exports = {
     { h: userEventHandler, await: true },
   ],
 
+  [APP_EVENT.USER_UPDATED]: [
+    { h: userEventHandler, await: true },
+  ],
+
   [APP_EVENT.USER_AUTHORITY_ALTERED]: [
     { h: userEventHandler, await: true }
   ],

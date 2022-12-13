@@ -38,10 +38,7 @@ class UsersController extends BaseController {
           const cmd1 = {
             cmdNum: APP_CMD.CREATE_USER,
             validate: async (cmd) => {
-              const { _id, email, roles } = cmd.getCmdPayload();
-              if (Array.isArray(roles) && roles.find(({ role }) => role === SYSTEM_ROLE.ADMIN)) {
-                throw new BadRequestError(`Admin user cannot be created`);
-              }
+              const { _id, email } = cmd.getCmdPayload();
               if (!_id) {
                 throw new BadRequestError(`'_id' fields is required`);
               }

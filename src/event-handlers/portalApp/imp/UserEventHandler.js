@@ -3,17 +3,16 @@ import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import { UserService } from './../../../services';
 import config from '../../../config';
 
-class UserEventHandler extends PortalAppEventHandler {
 
+class UserEventHandler extends PortalAppEventHandler {
   constructor() {
     super();
   }
-
 }
 
 const userEventHandler = new UserEventHandler();
 const userService = new UserService();
-
+ 
 
 userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
   const {
@@ -22,7 +21,6 @@ userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
     email,
     status,
     attributes,
-    roles
   } = event.getEventPayload();
 
   await userService.createUser({
@@ -30,12 +28,25 @@ userEventHandler.register(APP_EVENT.USER_CREATED, async (event) => {
     pubKey,
     email,
     status,
-    attributes,
-    roles: roles.map(r => ({
-      role: r.role,
-      teamId: r.teamId
-    }))
+    attributes
   });
 });
+
+
+userEventHandler.register(APP_EVENT.USER_UPDATED, async (event) => {
+  const {
+    _id: userId,
+    pubKey,
+    email,
+    attributes,
+  } = event.getEventPayload();
+
+  await userService.updateUser(userId, {
+    pubKey,
+    email,
+    attributes
+  });
+});
+
 
 module.exports = userEventHandler;

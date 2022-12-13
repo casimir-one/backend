@@ -21,6 +21,7 @@ module.exports = {
   [APP_CMD.MODERATE_NFT_ITEM]: assetCmdHandler,
 
   [APP_CMD.CREATE_USER]: userCmdHandler,
+  [APP_CMD.UPDATE_USER]: userCmdHandler,
 
   [APP_CMD.ADD_DAO_MEMBER]: accountCmdHandler,
   [APP_CMD.REMOVE_DAO_MEMBER]: accountCmdHandler,

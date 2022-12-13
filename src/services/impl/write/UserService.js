@@ -33,13 +33,11 @@ class UserService extends BaseService {
     status,
     email,
     attributes,
-    roles
   }) {
     const result = await this.updateOne({ _id: userId }, {
       status,
       email,
-      attributes,
-      roles
+      attributes
     });
 
     return result;
