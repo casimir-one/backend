@@ -31,10 +31,12 @@ class UserService extends BaseService {
 
   async updateUser(userId, {
     status,
+    pubKey,
     email,
     attributes,
   }) {
     const result = await this.updateOne({ _id: userId }, {
+      pubKey,
       status,
       email,
       attributes
