@@ -2733,50 +2733,6 @@
         ]
       }
     },
-    "/api/v2/user/profile/{_id}": {
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Find user profile",
-        "description": "Return a profile of user",
-        "operationId": "getUserProfile",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "_id",
-            "in": "path",
-            "description": "_id",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/UserProfile"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
     "/api/v2/users/profile": {
       "get": {
         "tags": [
@@ -2858,7 +2814,7 @@
         ]
       }
     },
-    "/api/v2/user/name/{_id}": {
+    "/api/v2/users/{userIdOrEmail}": {
       "get": {
         "tags": [
           "user"
@@ -2874,50 +2830,6 @@
             "name": "_id",
             "in": "path",
             "description": "_id",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/user/email/{email}": {
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Find user",
-        "description": "Return an user",
-        "operationId": "getUserByEmail",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "email",
-            "in": "path",
-            "description": "email",
             "required": true,
             "type": "string"
           }
@@ -2965,139 +2877,6 @@
             "required": true,
             "type": "array",
             "collectionFormat": "multi"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/users/listing": {
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Find users",
-        "description": "Return an array of users",
-        "operationId": "getUsersListing",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "description": "status",
-            "required": true,
-            "type": "array",
-            "collectionFormat": "multi"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/users/team/{teamId}": {
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Find users",
-        "description": "Return an array of users",
-        "operationId": "getUsersByTeam",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "teamId",
-            "in": "path",
-            "description": "teamId",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/User"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "User not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/users/portal/{portalId}": {
-      "get": {
-        "tags": [
-          "user"
-        ],
-        "summary": "Find users",
-        "description": "Return an array of users",
-        "operationId": "getUsersByPortal",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "portalId",
-            "in": "path",
-            "description": "portalId",
-            "required": true,
-            "type": "string"
           }
         ],
         "responses": {

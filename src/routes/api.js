@@ -40,8 +40,10 @@ protected_route.put('/v3/items', assetsCtrl.updateNFTItem);
 protected_route.put('/v3/items/moderate', assetsCtrl.moderateNFTItem);
 protected_route.delete('/v3/items', assetsCtrl.deleteNFTItem);
 
+public_route.get('/v3/users', usersCtrl.getUsersPaginated);
+public_route.get('/v3/users/:usernameOrEmail', usersCtrl.getUser);
 protected_route.post('/v3/users', usersCtrl.createUser);
-protected_route.put('/v3/users', usersCtrl.updateUser)
+protected_route.put('/v3/users', usersCtrl.updateUser);
 
 /* V2 */
 
@@ -82,17 +84,6 @@ public_route.get('/v2/tokens/ft/accounts/symbol/:symbol', assetsCtrl.getFTClassB
 protected_route.post('/v2/tokens/ft/transfer', assetsCtrl.createFTTransferRequest)
 protected_route.post('/v2/tokens/ft/create', assetsCtrl.createFTClass)
 protected_route.post('/v2/tokens/ft/issue', assetsCtrl.issueFT)
-
-
-public_route.get('/v2/user/profile/:_id', usersCtrl.getUserProfile)
-public_route.get('/v2/users/profile', usersCtrl.getUsersProfiles)
-public_route.get('/v2/users/active', usersCtrl.getActiveUsersProfiles)
-public_route.get('/v2/user/name/:_id', usersCtrl.getUser)
-public_route.get('/v2/user/email/:email', usersCtrl.getUserByEmail)
-public_route.get('/v2/users', usersCtrl.getUsers)
-public_route.get('/v2/users/listing', usersCtrl.getUsersListing)
-public_route.get('/v2/users/team/:teamId', usersCtrl.getUsersByTeam)
-public_route.get('/v2/users/portal/:portalId', usersCtrl.getUsersByPortal)
 
 
 public_route.get('/v2/document-template/:documentTemplateId', documentTemplatesCtrl.getDocumentTemplate)
