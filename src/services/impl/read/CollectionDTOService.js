@@ -1,14 +1,14 @@
 import BaseService from '../../base/BaseService';
-import NFTCollectionSchema from '../../../schemas/NFTCollectionSchema';
+import CollectionSchema from '../../../schemas/CollectionSchema';
 import AttributeDtoService from './AttributeDtoService';
 import { AttributeScope } from '@casimir.one/platform-core';
 
 const attributeDtoService = new AttributeDtoService();
 
-class NFTCollectionDTOService extends BaseService {
+class CollectionDTOService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(NFTCollectionSchema, options);
+    super(CollectionSchema, options);
   }
 
   async mapDTOs(nftCollections, filterObj) {
@@ -56,7 +56,7 @@ class NFTCollectionDTOService extends BaseService {
       .sort((a, b) => b.createdAt - a.createdAt);
   }
 
-  async getNFTCollectionDTO(id) {
+  async getCollectionDTO(id) {
     const nftCollection = await this.findOne({ _id: id });
     if (!nftCollection) return null;
     const results = await this.mapDTOs([nftCollection]);
@@ -64,14 +64,13 @@ class NFTCollectionDTOService extends BaseService {
     return result;
   }
 
-  async getNFTCollectionsDTOs(filter) {
-    const f = filter && filter.ids ? { _id: { $in: [...filter.ids] } } : {};
-    const nftCollections = await this.findMany(f);
-    if (!nftCollections.length) return [];
-    const result = await this.mapDTOs(nftCollections, { ...filter });
-    return result;
+  async getCollectionsDTOsPaginated(filter, sort, pagination) {
+    const f = filter || {};
+    const { paginationMeta, result: nftItems } = await this.findManyPaginated(f, sort, pagination);
+    const result = await this.mapDTOs(nftItems);
+    return { paginationMeta, result };
   }
 
 }
 
-export default NFTCollectionDTOService;
+export default CollectionDTOService;

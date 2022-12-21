@@ -8,7 +8,7 @@ class AttributeDtoService extends BaseService {
     super(AttributeSchema, options);
   }
   
-  async mapAttributes(attrs) {
+  async mapDTOs(attrs) {
     return attrs.map((attr) => {
       return { ...attr }
     })
@@ -17,22 +17,22 @@ class AttributeDtoService extends BaseService {
   async getAttribute(attributeId) {
     const result = await this.findOne({ _id: attributeId });
     if (!result) return;
-    const mapAttributes = await this.mapAttributes([result]);
-    return mapAttributes[0];
+    const list = await this.mapDTOs([result]);
+    return list[0];
   }
   
   async getAttributes() {
     const result = await this.findMany({});
     if (!result.length) return [];
-    const mapAttributes = await this.mapAttributes(result);
-    return mapAttributes;
+    const list = await this.mapDTOs(result);
+    return list;
   }
   
   async getAttributesByScope(scope = AttributeScope.NFT_COLLECTION) {
     const result = await this.findMany({ scope });
     if (!result.length) return [];
-    const mapAttributes = await this.mapAttributes(result);
-    return mapAttributes;
+    const list = await this.mapDTOs(result);
+    return list;
   }
   
 }

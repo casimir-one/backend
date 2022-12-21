@@ -1,7 +1,7 @@
 import TeamService from './impl/write/TeamService';
 import TeamDtoService from './impl/read/TeamDtoService';
-import NFTCollectionService from './impl/write/NFTCollectionService';
-import NFTCollectionDTOService from './impl/read/NFTCollectionDTOService';
+import CollectionService from './impl/write/CollectionService';
+import CollectionDTOService from './impl/read/CollectionDTOService';
 import ProposalService from './impl/write/ProposalService';
 import ProposalDtoService from './impl/read/ProposalDtoService';
 import AttributeService from './impl/write/AttributeService';
@@ -24,8 +24,8 @@ module.exports = {
   TeamService,
   TeamDtoService,
 
-  NFTCollectionService,
-  NFTCollectionDTOService,
+  CollectionService,
+  CollectionDTOService,
 
   ProposalService,
   ProposalDtoService,

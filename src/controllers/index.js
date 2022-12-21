@@ -2,6 +2,7 @@ import proposalsCtrl from '../controllers/impl/ProposalsController';
 import teamsCtrl from '../controllers/impl/TeamsController';
 import attributesCtrl from '../controllers/impl/AttributesController';
 import assetsCtrl from './impl/AssetsController';
+import collectionsCtrl from './impl/CollectionsController';
 import usersCtrl from './impl/UsersController';
 import documentTemplatesCtrl from './impl/DocumentTemplatesController';
 import portalCtrl from './impl/PortalController';
@@ -12,6 +13,7 @@ module.exports = {
   teamsCtrl,
   attributesCtrl,
   assetsCtrl,
+  collectionsCtrl,
   usersCtrl,
   documentTemplatesCtrl,
   portalCtrl,

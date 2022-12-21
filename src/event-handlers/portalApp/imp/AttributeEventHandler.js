@@ -1,5 +1,5 @@
 import { APP_EVENT } from '@casimir.one/platform-core';
-import { AttributeService, NFTCollectionDTOService } from '../../../services';
+import { AttributeService } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
 

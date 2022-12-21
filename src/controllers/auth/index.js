@@ -1,6 +1,6 @@
 import jwt from 'jsonwebtoken';
 import config from './../../config';
-import { UserDtoService } from './../../services';
+import { UserService } from './../../services';
 // import { ChainService } from '@casimir.one/chain-service';
 import { sha256 } from '@noble/hashes/sha256';
 import secp256k1 from 'secp256k1';
@@ -12,6 +12,7 @@ const hexToBytes = (hexString) =>
 const bytesToHex = (bytes) =>
   bytes.reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
 
+const userService = new UserService();
 
 const signUp = async function (ctx) {
   // TODO: add conditions for free registration
@@ -34,8 +35,7 @@ const signIn = async function (ctx) {
 
   try {
 
-    const userDtoService = new UserDtoService();
-    const user = await userDtoService.getUser(_id);
+    const user = await userService.getUser(_id);
     if (!user || user.portalId != portal.id) {
       ctx.successRes({
         success: false,

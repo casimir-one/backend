@@ -5,7 +5,7 @@ import {
 } from '@casimir.one/platform-core';
 import {
   FTClassService,
-  NFTCollectionService,
+  CollectionService,
   NFTItemService,
   PortalService
 } from '../../../services';
@@ -75,7 +75,7 @@ class AssetEventHandler extends PortalAppEventHandler {
 
 const assetEventHandler = new AssetEventHandler();
 const ftClassService = new FTClassService();
-const nftCollectionService = new NFTCollectionService();
+const collectionService = new CollectionService();
 const nftItemService = new NFTItemService();
 const portalService = new PortalService();
 
@@ -124,7 +124,7 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_CREATED, async (event) => {
     ownerId,
   } = event.getEventPayload();
 
-  await nftCollectionService.createNFTCollection({
+  await collectionService.createCollection({
     _id: _id,
     attributes,
     ownerId
@@ -138,7 +138,7 @@ assetEventHandler.register(APP_EVENT.NFT_COLLECTION_UPDATED, async (event) => {
     attributes
   } = event.getEventPayload();
 
-  await nftCollectionService.updateNFTCollection({
+  await collectionService.updateCollection({
     _id,
     attributes
   });

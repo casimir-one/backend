@@ -1,4 +1,3 @@
-import { ChainService } from '@casimir.one/chain-service';
 import {
   APP_CMD,
   APP_PROPOSAL,
@@ -8,8 +7,7 @@ import qs from 'qs';
 import { NFTCollectionForm, NFTItemMetadataForm } from '../../forms';
 import {
   FTClassDtoService,
-  NFTCollectionDTOService,
-  NFTCollectionService,
+  CollectionService,
   NFTItemDTOService,
   NFTItemService,
   TeamDtoService,
@@ -23,86 +21,17 @@ import config from './../../config';
 import { BadRequestError, ForbiddenError, NotFoundError } from './../../errors';
 
 
-const nftCollectionService = new NFTCollectionService();
+const collectionService = new CollectionService();
 const teamDtoService = new TeamDtoService();
 const nftItemService = new NFTItemService();
 const userDtoService = new UserDtoService();
 const ftClassDtoService = new FTClassDtoService();
-const nftCollectionDtoService = new NFTCollectionDTOService();
 const nftItemDtoService = new NFTItemDTOService();
 const userService = new UserService();
 const proposalDtoService = new ProposalDtoService();
 
 
 class AssetsController extends BaseController {
-
-  // NFT Collections
-
-  getNFTCollection = this.query({
-    h: async (ctx) => {
-      try {
-        const nftCollectionId = ctx.params.nftCollectionId;
-        const nftCollection = await nftCollectionDtoService.getNFTCollectionDTO(nftCollectionId);
-        if (!nftCollection) {
-          throw new NotFoundError(`NFT Collection with '${nftCollectionId}' id is not found`);
-        }
-        ctx.successRes(nftCollection);
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getNFTCollections = this.query({
-    h: async (ctx) => {
-      try {
-        const query = qs.parse(ctx.query);
-        const filter = query.filter;
-        const result = await nftCollectionDtoService.getNFTCollectionsDTOs(filter);
-        ctx.successRes(result);
-      } catch (err) {
-        console.log(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  createNFTCollection = this.command({
-    form: NFTCollectionForm,
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          return true;
-        };
-        const msg = ctx.state.msg;
-        await assetCmdHandler.process(msg, ctx, validate);
-        const _id = this.extractEntityId(msg, APP_CMD.CREATE_NFT_COLLECTION);
-        ctx.successRes({ _id: _id });
-
-      } catch (err) {
-        ctx.status = err.httpStatus || 500;
-        ctx.body = err.message;
-      }
-    }
-  });
-
-  updateNFTCollection = this.command({
-    form: NFTCollectionForm,
-    h: async (ctx) => {
-      try {
-        const validate = async (appCmds) => {
-          return true;
-        };
-        const msg = ctx.state.msg;
-        await assetCmdHandler.process(msg, ctx, validate);
-        const _id = this.extractEntityId(msg, APP_CMD.UPDATE_NFT_COLLECTION, '_id');
-        ctx.successRes({ _id: _id });
-
-      } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
 
   // NFT Items
 
@@ -151,7 +80,7 @@ class AssetsController extends BaseController {
               }
               const { nftCollectionId } = createNFTItemCmd.getCmdPayload();
               if (nftCollectionId) {
-                const nftCollection = await nftCollectionService.getNFTCollection(nftCollectionId);
+                const nftCollection = await collectionService.getCollection(nftCollectionId);
                 if (!nftCollection) {
                   throw new BadRequestError(`NFT collection with '${nftCollectionId}' is not found`);
                 }

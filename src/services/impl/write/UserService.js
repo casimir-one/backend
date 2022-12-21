@@ -1,4 +1,3 @@
-import config from './../../../config';
 import UserSchema from './../../../schemas/UserSchema';
 import BaseService from './../../base/BaseService';
 
@@ -6,6 +5,15 @@ class UserService extends BaseService {
 
   constructor(options = { scoped: true }) {
     super(UserSchema, options);
+  }
+
+  async getUser(userId, status) {
+    const query = { _id: userId };
+    if (status) {
+      query.status = status;
+    }
+    const user = await this.findOne(query);
+    return user;
   }
 
   async createUser({
@@ -50,29 +58,6 @@ class UserService extends BaseService {
     return result;
   }
 
-  async getUser(userId, status) {
-    const query = { _id: userId };
-    if (status) {
-      query.status = status;
-    }
-    const profile = await this.findOne(query);
-    return profile;
-  }
-
-  async getUserByEmail(email, status) {
-    const query = { email };
-    if (status) {
-      query.status = status;
-    }
-    const profile = await this.findOne(query);
-    if (!profile) return null;
-    return profile;
-  }
-
-  hasRole(user, role, portalId = config.TENANT) {
-    return user.profile.roles
-      .some((userRole) => portalId == userRole.teamId && role == userRole.role);
-  }
 }
 
 export default UserService;

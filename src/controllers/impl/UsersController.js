@@ -21,16 +21,18 @@ const validateEmail = (email) => {
 
 class UsersController extends BaseController {
 
-
-  getUsersPaginated = this.query({
+  
+  getUser = this.query({
     h: async (ctx) => {
       try {
-        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
-        const { 
-          paginationMeta, 
-          result 
-        } = await userDtoService.getUsersPaginated(filter, sort, { page, pageSize });
-        ctx.successRes(result, { extraInfo: paginationMeta });
+        const usernameOrEmail = ctx.params.usernameOrEmail;
+        let user;
+        if (usernameOrEmail.includes('@')) {
+          user = await userDtoService.getUserDTOByEmail(usernameOrEmail);
+        } else {
+          user = await userDtoService.getUserDTO(usernameOrEmail);
+        }
+        ctx.successRes(user || null);
       } catch (err) {
         ctx.errorRes(err);
       }
@@ -38,17 +40,15 @@ class UsersController extends BaseController {
   });
 
 
-  getUser = this.query({
+  getUsers = this.query({
     h: async (ctx) => {
       try {
-        const usernameOrEmail = ctx.params.usernameOrEmail;
-        let user;
-        if (usernameOrEmail.includes('@')) {
-          user = await userDtoService.getUserByEmail(usernameOrEmail);
-        } else {
-          user = await userDtoService.getUser(usernameOrEmail);
-        }
-        ctx.successRes(user || null);
+        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
+        const { 
+          paginationMeta, 
+          result 
+        } = await userDtoService.getUsersDTOsPaginated(filter, sort, { page, pageSize });
+        ctx.successRes(result, { extraInfo: paginationMeta });
       } catch (err) {
         ctx.errorRes(err);
       }

@@ -1,24 +1,24 @@
 import { AttributeScope } from '@casimir.one/platform-core';
 import { isArray } from '@casimir.one/toolbox';
 import mongoose from 'mongoose';
-import NFTCollectionSchema from '../../../schemas/NFTCollectionSchema';
+import CollectionSchema from '../../../schemas/CollectionSchema';
 import { logWarn } from '../../../utils/log';
 import BaseService from '../../base/BaseService';
 import AttributeDtoService from '../read/AttributeDtoService';
 
 
-class NFTCollectionService extends BaseService {
+class CollectionService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(NFTCollectionSchema, options);
+    super(CollectionSchema, options);
   }
 
-  async getNFTCollection(nftCollectionId) {
+  async getCollection(nftCollectionId) {
     const nftCollection = await this.findOne({ _id: nftCollectionId });
     return nftCollection || null;
   }
 
-  async createNFTCollection({
+  async createCollection({
     _id,
     ownerId,
     attributes = [],
@@ -33,7 +33,7 @@ class NFTCollectionService extends BaseService {
     return result;
   }
 
-  async updateNFTCollection({
+  async updateCollection({
     _id,
     attributes
   }) {
@@ -80,4 +80,4 @@ class NFTCollectionService extends BaseService {
   }
 }
 
-export default NFTCollectionService;
+export default CollectionService;

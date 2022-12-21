@@ -6,6 +6,7 @@ import {
   teamsCtrl,
   attributesCtrl,
   assetsCtrl,
+  collectionsCtrl,
   usersCtrl,
   documentTemplatesCtrl,
   portalCtrl,
@@ -28,10 +29,10 @@ async function portalAdminGuard(ctx, next) {
 
 /* V3 [protobuf] */
 
-public_route.get('/v3/collections', assetsCtrl.getNFTCollections);
-public_route.get('/v3/collections/:nftCollectionId', assetsCtrl.getNFTCollection);
-protected_route.post('/v3/collections', assetsCtrl.createNFTCollection);
-protected_route.put('/v3/collections', assetsCtrl.updateNFTCollection);
+public_route.get('/v3/collections', collectionsCtrl.getCollections);
+public_route.get('/v3/collections/:nftCollectionId', collectionsCtrl.getCollection);
+protected_route.post('/v3/collections', collectionsCtrl.createCollection);
+protected_route.put('/v3/collections', collectionsCtrl.updateCollection);
 
 public_route.get('/v3/items', assetsCtrl.getNFTItemsPaginated);
 public_route.get('/v3/items/:nftItemId', assetsCtrl.getNFTItem);
@@ -40,7 +41,7 @@ protected_route.put('/v3/items', assetsCtrl.updateNFTItem);
 protected_route.put('/v3/items/moderate', assetsCtrl.moderateNFTItem);
 protected_route.delete('/v3/items', assetsCtrl.deleteNFTItem);
 
-public_route.get('/v3/users', usersCtrl.getUsersPaginated);
+public_route.get('/v3/users', usersCtrl.getUsers);
 public_route.get('/v3/users/:usernameOrEmail', usersCtrl.getUser);
 protected_route.post('/v3/users', usersCtrl.createUser);
 protected_route.put('/v3/users', usersCtrl.updateUser);

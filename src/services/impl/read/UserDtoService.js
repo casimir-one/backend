@@ -33,7 +33,7 @@ class UserDtoService extends BaseService {
   }
 
 
-  async getUserByEmail(email, status) {
+  async getUserDTOByEmail(email, status) {
     const query = { email };
     if (status) {
       query.status = status;
@@ -45,7 +45,7 @@ class UserDtoService extends BaseService {
   }
 
 
-  async getUser(_id, status) {
+  async getUserDTO(_id, status) {
     const query = { _id: _id };
     if (status) {
       query.status = status;
@@ -57,7 +57,7 @@ class UserDtoService extends BaseService {
   }
 
 
-  async getUsersPaginated(filter, sort, pagination) {
+  async getUsersDTOsPaginated(filter, sort, pagination) {
     const f = filter || {};
     const { paginationMeta, result: nftItems } = await this.findManyPaginated(f, sort, pagination);
     const result = await this.mapDTOs(nftItems);
