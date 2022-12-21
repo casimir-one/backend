@@ -1,11 +1,11 @@
-import NFTItemSchema from '../../../schemas/NFTItemSchema';
+import ItemSchema from '../../../schemas/ItemSchema';
 import BaseService from '../../base/BaseService';
 
 
-class NFTItemDTOService extends BaseService {
+class ItemDTOService extends BaseService {
 
   constructor(options = { scoped: true }) {
-    super(NFTItemSchema, options);
+    super(ItemSchema, options);
   }
 
   async mapDTOs(nftItems) {
@@ -24,7 +24,7 @@ class NFTItemDTOService extends BaseService {
     }));
   }
 
-  async getNFTItemDTO(id) {
+  async getItemDTO(id) {
     const nftItem = await this.findOne({ _id: id });
     if (!nftItem) return null;
     const results = await this.mapDTOs([nftItem]);
@@ -32,7 +32,7 @@ class NFTItemDTOService extends BaseService {
     return result;
   }
 
-  async getNFTItemsDTOsPaginated(filter, sort, pagination) {
+  async getItemsDTOsPaginated(filter, sort, pagination) {
     const f = filter || {};
     const { paginationMeta, result: nftItems } = await this.findManyPaginated(f, sort, pagination);
     const result = await this.mapDTOs(nftItems);
@@ -42,4 +42,4 @@ class NFTItemDTOService extends BaseService {
 }
 
 
-export default NFTItemDTOService;
+export default ItemDTOService;

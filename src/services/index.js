@@ -10,8 +10,8 @@ import UserDtoService from './impl/read/UserDtoService';
 import UserService from './impl/write/UserService';
 import DocumentTemplateDtoService from './impl/read/DocumentTemplateDtoService';
 import DocumentTemplateService from './impl/write/DocumentTemplateService';
-import NFTItemDTOService from './impl/read/NFTItemDTOService';
-import NFTItemService from './impl/write/NFTItemService';
+import ItemDTOService from './impl/read/ItemDTOService';
+import ItemService from './impl/write/ItemService';
 import PortalDtoService from './impl/read/PortalDtoService';
 import PortalService from './impl/write/PortalService';
 import LayoutDtoService from './impl/read/LayoutDtoService';
@@ -39,8 +39,8 @@ module.exports = {
   DocumentTemplateDtoService,
   DocumentTemplateService,
 
-  NFTItemService,
-  NFTItemDTOService,
+  ItemService,
+  ItemDTOService,
 
   PortalService,
   PortalDtoService,

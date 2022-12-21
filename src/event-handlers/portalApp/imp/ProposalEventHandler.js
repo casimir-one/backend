@@ -5,7 +5,6 @@ import APP_PROPOSAL_EVENT from '../../../events/base/AppProposalEvent';
 import {
   ProposalService,
   TeamDtoService,
-  NFTItemService
 } from '../../../services';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
@@ -21,7 +20,6 @@ const proposalEventHandler = new ProposalEventHandler();
 
 const proposalService = new ProposalService();
 const teamDtoService = new TeamDtoService();
-const nftItemService = new NFTItemService();
 
 
 proposalEventHandler.register(APP_EVENT.PROPOSAL_CREATED, async (event) => {

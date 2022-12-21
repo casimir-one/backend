@@ -2,13 +2,14 @@ import { APP_CMD, AttributeScope } from '@casimir.one/platform-core';
 import BaseController from './../base/BaseController';
 import { BadRequestError, NotFoundError } from './../../errors';
 import {attributeCmdHandler} from './../../command-handlers';
-import { AttributeDtoService, NFTItemDTOService } from './../../services';
+import { AttributeDtoService, ItemDTOService } from './../../services';
 import FileStorage from './../../storage';
 import sharp from 'sharp';
 import slug from 'limax';
 
+
 const attributeDtoService = new AttributeDtoService();
-const nftItemDtoService = new NFTItemDTOService();
+const itemDTOService = new ItemDTOService();
 
 class AttributesController extends BaseController {
   
@@ -145,7 +146,7 @@ class AttributesController extends BaseController {
             }
             break;
           case AttributeScope.NFT_ITEM:
-            const nftItem = await nftItemDtoService.getNFTItemDTO(_id);
+            const nftItem = await itemDTOService.getItemDTO(_id);
             if (!nftItem) throw new NotFoundError(`NFT item ${_id} is not found`);
             
             const nftItemId = nftItem._id;

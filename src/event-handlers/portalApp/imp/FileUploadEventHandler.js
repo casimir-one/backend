@@ -1,6 +1,6 @@
 
 import { APP_EVENT, NFT_ITEM_METADATA_FORMAT } from '@casimir.one/platform-core';
-import { NFTItemService, PortalService } from '../../../services';
+import { ItemService, PortalService } from '../../../services';
 import FileStorage from '../../../storage';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 
@@ -13,7 +13,7 @@ class FileUploadEventHandler extends PortalAppEventHandler {
 const fileUploadEventHandler = new FileUploadEventHandler();
 
 const portalService = new PortalService();
-const nftItemService = new NFTItemService();
+const itemService = new ItemService();
 
 fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event) => {
   const { banner, logo, portalId } = event.getEventPayload();
@@ -41,7 +41,7 @@ fileUploadEventHandler.register(APP_EVENT.PORTAL_SETTINGS_UPDATED, async (event)
 
 fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
   const { _id: nftItemId, uploadedFiles } = event.getEventPayload();
-  const nftItem = await nftItemService.getNFTItem(nftItemId);
+  const nftItem = await itemService.getItem(nftItemId);
 
   if (uploadedFiles && uploadedFiles.length) {
     const dirPath = FileStorage.getNFTItemMetadataDirPath(nftItem.nftCollectionId, nftItem._id);
@@ -68,7 +68,7 @@ fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
 
 fileUploadEventHandler.register(APP_EVENT.NFT_ITEM_DELETED, async (event) => {
   const { _id } = event.getEventPayload();
-  const nftItem = await nftItemService.getNFTItem(_id);
+  const nftItem = await itemService.getItem(_id);
   if (nftItem.type === NFT_ITEM_METADATA_FORMAT.PACKAGE) {
     const packagePath = FileStorage.getNFTItemMetadataDirPath(nftItem.nftCollectionId, nftItem._id);
     await FileStorage.rmdir(packagePath);

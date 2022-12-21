@@ -6,11 +6,10 @@ import {
 import {
   FTClassService,
   CollectionService,
-  NFTItemService,
+  ItemService,
   PortalService
 } from '../../../services';
 import { genSha256Hash } from '@casimir.one/toolbox';
-import mongoose from 'mongoose';
 import PortalAppEventHandler from '../../base/PortalAppEventHandler';
 import config from '../../../config';
 
@@ -76,7 +75,7 @@ class AssetEventHandler extends PortalAppEventHandler {
 const assetEventHandler = new AssetEventHandler();
 const ftClassService = new FTClassService();
 const collectionService = new CollectionService();
-const nftItemService = new NFTItemService();
+const itemService = new ItemService();
 const portalService = new PortalService();
 
 assetEventHandler.register(APP_EVENT.FT_CREATED, async (event) => {
@@ -166,8 +165,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_CREATED, async (event) => {
     algo: 'sha256'
   }
 
-  await nftItemService.createNFTItem(nftItem);
-
+  await itemService.createItem(nftItem);
   // sendEmailNotification(ownerId, "Your asset has been uploaded", `<p>Thank you for uploading the asset, we will contact to you after the reviewing step</p>`);
 });
 
@@ -179,7 +177,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
   } = event.getEventPayload();
 
   const packageHash = genSha256Hash(JSON.stringify(attributes));
-  await nftItemService.updateNFTItem(nftItemId, {
+  await itemService.updateItem(nftItemId, {
     status,
     hash: packageHash,
     attributes,
@@ -188,7 +186,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_UPDATED, async (event) => {
 
 assetEventHandler.register(APP_EVENT.NFT_ITEM_DELETED, async (event) => {
   const { _id } = event.getEventPayload();
-  await nftItemService.deleteNFTItem(_id);
+  await itemService.deleteItem(_id);
 });
 
 assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
@@ -196,7 +194,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
 
   if (status == NftItemMetadataDraftStatus.APPROVED) {
     const queueNumber = await portalService.increasePortalMaxQueueNumber(config.TENANT);
-    await nftItemService.updateNFTItem(nftItemId, {
+    await itemService.updateItem(nftItemId, {
       status,
       queueNumber
     });
@@ -206,7 +204,7 @@ assetEventHandler.register(APP_EVENT.NFT_ITEM_MODERATED, async (event) => {
     //   `<p>Congratulations, <a href="${config.APP_ASSET_DETAILS_BASE_URL}/${_id}">your asset</a> has been approved ! Your queue number is <b>${queueNumber}</b></p>`
     // );
   } else {
-    await nftItemService.updateNFTItem(nftItemId, {
+    await itemService.updateItem(nftItemId, {
       status,
     });
     // sendEmailNotification(updatedDraft.ownerId, 

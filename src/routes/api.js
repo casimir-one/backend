@@ -6,6 +6,7 @@ import {
   teamsCtrl,
   attributesCtrl,
   assetsCtrl,
+  itemsCtrl,
   collectionsCtrl,
   usersCtrl,
   documentTemplatesCtrl,
@@ -34,12 +35,12 @@ public_route.get('/v3/collections/:nftCollectionId', collectionsCtrl.getCollecti
 protected_route.post('/v3/collections', collectionsCtrl.createCollection);
 protected_route.put('/v3/collections', collectionsCtrl.updateCollection);
 
-public_route.get('/v3/items', assetsCtrl.getNFTItemsPaginated);
-public_route.get('/v3/items/:nftItemId', assetsCtrl.getNFTItem);
-protected_route.post('/v3/items', assetsCtrl.createNFTItem);
-protected_route.put('/v3/items', assetsCtrl.updateNFTItem);
-protected_route.put('/v3/items/moderate', assetsCtrl.moderateNFTItem);
-protected_route.delete('/v3/items', assetsCtrl.deleteNFTItem);
+public_route.get('/v3/items', itemsCtrl.getItems);
+public_route.get('/v3/items/:nftItemId', itemsCtrl.getItem);
+protected_route.post('/v3/items', itemsCtrl.createItem);
+protected_route.put('/v3/items', itemsCtrl.updateItem);
+protected_route.put('/v3/items/moderate', itemsCtrl.moderateItem);
+protected_route.delete('/v3/items', itemsCtrl.deleteItem);
 
 public_route.get('/v3/users', usersCtrl.getUsers);
 public_route.get('/v3/users/:usernameOrEmail', usersCtrl.getUser);

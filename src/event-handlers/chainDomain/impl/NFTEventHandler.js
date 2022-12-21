@@ -1,6 +1,6 @@
 import { DOMAIN_EVENT } from '@casimir.one/platform-core';
 import {
-  NFTItemService, ProposalService, TeamService, UserService
+  ItemService, ProposalService, TeamService, UserService
 } from '../../../services';
 import { logWarn } from '../../../utils/log';
 import ChainDomainEventHandler from '../../base/ChainDomainEventHandler';
@@ -13,7 +13,6 @@ class NFTEventHandler extends ChainDomainEventHandler {
 }
 
 const nftEventHandler = new NFTEventHandler();
-const nftItemService = new NFTItemService();
 
 
 nftEventHandler.register(DOMAIN_EVENT.NFT_APPROVAL_CANCELED, async (event) => {

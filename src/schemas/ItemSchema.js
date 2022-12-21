@@ -5,7 +5,7 @@ import AttributeValueSchema from './AttributeValueSchema';
 
 const Schema = mongoose.Schema;
 
-const NFTItemSchema = new Schema({
+const ItemSchema = new Schema({
   "portalId": { type: String, required: true },
   "nftCollectionId": { type: String, required: false },
   "ownerId": { type: String, required: true },
@@ -22,6 +22,6 @@ const NFTItemSchema = new Schema({
   }
 }, { timestamps: true });
 
-const model = mongoose.model('nft-item', NFTItemSchema);
+const model = mongoose.model('nft-item', ItemSchema);
 
 module.exports = model;

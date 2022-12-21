@@ -1,18 +1,18 @@
 import BaseService from '../../base/BaseService';
-import NFTItemSchema from '../../../schemas/NFTItemSchema';
+import ItemSchema from '../../../schemas/ItemSchema';
 
-class NFTItemService extends BaseService {
+class ItemService extends BaseService {
 
   constructor(options = { scoped: true }) { 
-    super(NFTItemSchema, options);
+    super(ItemSchema, options);
   }
 
-  async getNFTItem(id) {
+  async getItem(id) {
     const nftItem = await this.findOne({ _id: id });
     return nftItem;
   }
 
-  async createNFTItem({
+  async createItem({
     _id: nftItemId,
     nftCollectionId,
     ownerId,
@@ -37,7 +37,7 @@ class NFTItemService extends BaseService {
     return nftItem;
   }
 
-  async updateNFTItem(nftItemId, {
+  async updateItem(nftItemId, {
     attributes,
     hash,
     algo,
@@ -56,11 +56,11 @@ class NFTItemService extends BaseService {
     return updatedNftItem;
   }
 
-  async deleteNFTItem(nftItemId) {
-    const deletedNftItem = await this.deleteOne({ _id: nftItemId });
-    return deletedNftItem;
+  async deleteItem(nftItemId) {
+    const result = await this.deleteOne({ _id: nftItemId });
+    return result;
   }
 
 }
 
-export default NFTItemService;
+export default ItemService;
