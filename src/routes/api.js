@@ -39,13 +39,16 @@ public_route.get('/v3/items', itemsCtrl.getItems);
 public_route.get('/v3/items/:nftItemId', itemsCtrl.getItem);
 protected_route.post('/v3/items', itemsCtrl.createItem);
 protected_route.put('/v3/items', itemsCtrl.updateItem);
-protected_route.put('/v3/items/moderate', itemsCtrl.moderateItem);
-protected_route.delete('/v3/items', itemsCtrl.deleteItem);
+protected_route.put('/v3/items/delete', itemsCtrl.deleteItem);
+protected_route.put('/v3/items/moderate', itemsCtrl.moderateItem); // TODO: move to a separate module
 
 public_route.get('/v3/users', usersCtrl.getUsers);
 public_route.get('/v3/users/:usernameOrEmail', usersCtrl.getUser);
 protected_route.post('/v3/users', usersCtrl.createUser);
 protected_route.put('/v3/users', usersCtrl.updateUser);
+
+public_route.get('/v3/attributes', attributesCtrl.getAttributes);
+public_route.get('/v3/attributes/:attributeId', attributesCtrl.getAttribute);
 
 /* V2 */
 
@@ -66,13 +69,10 @@ public_route.get('/v2/teams/member/:_id', teamsCtrl.getTeamsByUser)
 public_route.get('/v2/teams/portal/:portalId', teamsCtrl.getTeamsByPortal)
 public_route.get('/team/logo/:teamId', teamsCtrl.getTeamLogo)
 
-public_route.get('/v2/attributes', attributesCtrl.getAttributes);
-public_route.get('/v2/attributes/scope/:scope', attributesCtrl.getAttributesByScope);
-public_route.get('/v2/attribute/:id', attributesCtrl.getAttribute);
 
-protected_route.post('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
-protected_route.put('/v2/attribute', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
-protected_route.put('/v2/attribute/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
+protected_route.post('/v3/attributes', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
+protected_route.put('/v3/attributes', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
+protected_route.put('/v3/attributes/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
 public_route.get('/attribute/file/:scope/:_id/:attributeId/:filename', attributesCtrl.getAttributeFile);
 
 

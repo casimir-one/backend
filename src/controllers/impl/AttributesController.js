@@ -6,33 +6,24 @@ import { AttributeDtoService, ItemDTOService } from './../../services';
 import FileStorage from './../../storage';
 import sharp from 'sharp';
 import slug from 'limax';
+import qs from 'qs';
 
 
 const attributeDtoService = new AttributeDtoService();
 const itemDTOService = new ItemDTOService();
 
 class AttributesController extends BaseController {
-  
+
   getAttributes = this.query({
     h: async (ctx) => {
       try {
-        const attributes = await attributeDtoService.getAttributes();
-        ctx.successRes(attributes);
+        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
+        const { 
+          paginationMeta, 
+          result 
+        } = await attributeDtoService.getAttributesDTOsPaginated(filter, sort, { page, pageSize });
+        ctx.successRes(result, { extraInfo: paginationMeta });
       } catch (err) {
-        console.error(err);
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getAttributesByScope = this.query({
-    h: async (ctx) => {
-      try {
-        const scope = ctx.params.scope;
-        const attributes = await attributeDtoService.getAttributesByScope(scope);
-        ctx.successRes(attributes);
-      } catch (err) {
-        console.error(err);
         ctx.errorRes(err);
       }
     }
@@ -41,7 +32,7 @@ class AttributesController extends BaseController {
   getAttribute = this.query({
     h: async (ctx) => {
       try {
-        const attributeId = ctx.params.id;
+        const attributeId = ctx.params.attributeId;
         const attributes = await attributeDtoService.getAttribute(attributeId);
         ctx.successRes(attributes);
       } catch (err) {

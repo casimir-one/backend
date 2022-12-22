@@ -1,5 +1,4 @@
 import AttributeSchema from './../../../schemas/AttributeSchema';
-import { AttributeScope } from '@casimir.one/platform-core';
 import BaseService from './../../base/BaseService';
 
 class AttributeDtoService extends BaseService {
@@ -27,14 +26,14 @@ class AttributeDtoService extends BaseService {
     const list = await this.mapDTOs(result);
     return list;
   }
-  
-  async getAttributesByScope(scope = AttributeScope.NFT_COLLECTION) {
-    const result = await this.findMany({ scope });
-    if (!result.length) return [];
-    const list = await this.mapDTOs(result);
-    return list;
+
+  async getAttributesDTOsPaginated(filter, sort, pagination) {
+    const f = filter || {};
+    const { paginationMeta, result: nftItems } = await this.findManyPaginated(f, sort, pagination);
+    const result = await this.mapDTOs(nftItems);
+    return { paginationMeta, result };
   }
-  
+
 }
 
 export default AttributeDtoService;

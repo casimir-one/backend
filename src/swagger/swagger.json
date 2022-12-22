@@ -1256,7 +1256,7 @@
         ]
       }
     },
-    "/api/v2/attributes": {
+    "/api/v3/attributes": {
       "get": {
         "tags": [
           "attribute"
@@ -1292,51 +1292,7 @@
         ]
       }
     },
-    "/api/v2/attributes/scope/{scope}": {
-      "get": {
-        "tags": [
-          "attribute"
-        ],
-        "summary": "Find attributes",
-        "description": "Return an array of attributes",
-        "operationId": "getAttributesByScope",
-        "produces": [
-          "application/json"
-        ],
-        "parameters": [
-          {
-            "name": "scope",
-            "in": "path",
-            "description": "scope of attributes",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "successful operation",
-            "schema": {
-              "type": "array",
-              "items": {
-                "$ref": "#/definitions/Attribute"
-              }
-            }
-          },
-          "400": {
-            "description": "Invalid ID supplied"
-          },
-          "404": {
-            "description": "Attributes not found"
-          }
-        },
-        "security": [
-          {
-            "Bearer": []
-          }
-        ]
-      }
-    },
-    "/api/v2/attribute/{id}": {
+    "/api/v3/attributes/{attributeId}": {
       "get": {
         "tags": [
           "attribute"
@@ -1349,7 +1305,7 @@
         ],
         "parameters": [
           {
-            "name": "id",
+            "name": "attributeId",
             "in": "path",
             "description": "id of attribute",
             "required": true,
@@ -1377,7 +1333,7 @@
         ]
       }
     },
-    "/api/v2/attribute": {
+    "/api/v3/attributes": {
       "post": {
         "tags": [
           "attribute"
@@ -1584,7 +1540,7 @@
         ]
       }
     },
-    "/api/v2/attribute/delete": {
+    "/api/v3/attributes/delete": {
       "put": {
         "tags": [
           "attribute"
