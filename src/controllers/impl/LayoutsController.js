@@ -1,8 +1,9 @@
 import BaseController from '../base/BaseController';
 import { LayoutDtoService, LayoutService } from '../../services';
 import { APP_CMD } from '@casimir.one/platform-core';
-import { BadRequestError, NotFoundError, ConflictError } from '../../errors';
+import { NotFoundError, ConflictError } from '../../errors';
 import { portalCmdHandler } from '../../command-handlers';
+import qs from 'qs';
 
 const layoutDtoService = new LayoutDtoService();
 const layoutService = new LayoutService();
@@ -27,10 +28,13 @@ class LayoutsController extends BaseController {
   getLayouts = this.query({
     h: async (ctx) => {
       try {
-        const layouts = await layoutDtoService.getLayouts();
-        ctx.successRes(layouts);
+        const { filter = {}, sort, page, pageSize } = qs.parse(ctx.query);
+        const { 
+          paginationMeta, 
+          result 
+        } = await layoutDtoService.getLayoutsDTOsPaginated(filter, sort, { page, pageSize });
+        ctx.successRes(result, { extraInfo: paginationMeta });
       } catch (err) {
-        console.log(err);
         ctx.errorRes(err);
       }
     }

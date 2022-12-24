@@ -14,6 +14,19 @@ const itemDTOService = new ItemDTOService();
 
 class AttributesController extends BaseController {
 
+  getAttribute = this.query({
+    h: async (ctx) => {
+      try {
+        const attributeId = ctx.params.attributeId;
+        const attributes = await attributeDtoService.getAttribute(attributeId);
+        ctx.successRes(attributes);
+      } catch (err) {
+        console.error(err);
+        ctx.errorRes(err);
+      }
+    }
+  });
+
   getAttributes = this.query({
     h: async (ctx) => {
       try {
@@ -24,19 +37,6 @@ class AttributesController extends BaseController {
         } = await attributeDtoService.getAttributesDTOsPaginated(filter, sort, { page, pageSize });
         ctx.successRes(result, { extraInfo: paginationMeta });
       } catch (err) {
-        ctx.errorRes(err);
-      }
-    }
-  });
-
-  getAttribute = this.query({
-    h: async (ctx) => {
-      try {
-        const attributeId = ctx.params.attributeId;
-        const attributes = await attributeDtoService.getAttribute(attributeId);
-        ctx.successRes(attributes);
-      } catch (err) {
-        console.error(err);
         ctx.errorRes(err);
       }
     }

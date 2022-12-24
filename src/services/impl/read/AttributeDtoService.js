@@ -29,8 +29,8 @@ class AttributeDtoService extends BaseService {
 
   async getAttributesDTOsPaginated(filter, sort, pagination) {
     const f = filter || {};
-    const { paginationMeta, result: nftItems } = await this.findManyPaginated(f, sort, pagination);
-    const result = await this.mapDTOs(nftItems);
+    const { paginationMeta, result: attributes } = await this.findManyPaginated(f, sort, pagination);
+    const result = await this.mapDTOs(attributes);
     return { paginationMeta, result };
   }
 

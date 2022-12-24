@@ -7,6 +7,12 @@ class LayoutDtoService extends BaseService {
     super(LayoutSchema, options);
   }
 
+  async mapDTOs(layouts) {
+    return layouts.map((layout) => {
+      return { ...layout };
+    })
+  }
+
   async getLayout(id) {
     const layout = await this.findOne({ _id: id });
     return layout;
@@ -21,7 +27,14 @@ class LayoutDtoService extends BaseService {
     const layouts = await this.findMany({ scope });
     return layouts;
   }
- 
+
+  async getLayoutsDTOsPaginated(filter, sort, pagination) {
+    const f = filter || {};
+    const { paginationMeta, result: layouts } = await this.findManyPaginated(f, sort, pagination);
+    const result = await this.mapDTOs(layouts);
+    return { paginationMeta, result };
+  }
+
 }
 
 export default LayoutDtoService;

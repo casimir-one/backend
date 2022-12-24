@@ -49,6 +49,17 @@ protected_route.put('/v3/users', usersCtrl.updateUser);
 
 public_route.get('/v3/attributes', attributesCtrl.getAttributes);
 public_route.get('/v3/attributes/:attributeId', attributesCtrl.getAttribute);
+protected_route.post('/v3/attributes', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
+protected_route.put('/v3/attributes', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
+protected_route.put('/v3/attributes/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
+public_route.get('/v3/attributes/file/:scope/:_id/:attributeId/:filename', attributesCtrl.getAttributeFile);
+
+public_route.get('/v3/layouts', layoutsCtrl.getLayouts);
+public_route.get('/v3/layouts/:layoutId', layoutsCtrl.getLayout);
+protected_route.post('/v3/layouts', compose([portalAdminGuard]), layoutsCtrl.createLayout);
+protected_route.put('/v3/layouts', compose([portalAdminGuard]), layoutsCtrl.updateLayout);
+protected_route.put('/v3/layouts/delete', compose([portalAdminGuard]), layoutsCtrl.deleteLayout);
+
 
 /* V2 */
 
@@ -70,11 +81,6 @@ public_route.get('/v2/teams/portal/:portalId', teamsCtrl.getTeamsByPortal)
 public_route.get('/team/logo/:teamId', teamsCtrl.getTeamLogo)
 
 
-protected_route.post('/v3/attributes', compose([portalRoute, portalAdminGuard]), attributesCtrl.createAttribute);
-protected_route.put('/v3/attributes', compose([portalRoute, portalAdminGuard]), attributesCtrl.updateAttribute);
-protected_route.put('/v3/attributes/delete', compose([portalRoute, portalAdminGuard]), attributesCtrl.deleteAttribute);
-public_route.get('/attribute/file/:scope/:_id/:attributeId/:filename', attributesCtrl.getAttributeFile);
-
 
 public_route.get('/v2/tokens/ft/id/:ftId', assetsCtrl.getFTClassById)
 public_route.get('/v2/tokens/ft/symbol/:symbol', assetsCtrl.getFTClassBySymbol)
@@ -93,14 +99,6 @@ public_route.get('/v2/document-templates/account/:account', documentTemplatesCtr
 protected_route.post('/v2/document-template', documentTemplatesCtrl.createDocumentTemplate)
 protected_route.put('/v2/document-template', documentTemplatesCtrl.updateDocumentTemplate)
 protected_route.put('/v2/document-template/delete', documentTemplatesCtrl.deleteDocumentTemplate)
-
-
-public_route.get('/v2/layout/:layoutId', layoutsCtrl.getLayout);
-public_route.get('/v2/layouts', layoutsCtrl.getLayouts);
-public_route.get('/v2/layouts/scope/:scope', layoutsCtrl.getLayoutsByScope);
-protected_route.post('/v2/layout', compose([portalAdminGuard]), layoutsCtrl.createLayout);
-protected_route.put('/v2/layout', compose([portalAdminGuard]), layoutsCtrl.updateLayout);
-protected_route.put('/v2/layout/delete', compose([portalAdminGuard]), layoutsCtrl.deleteLayout);
 
 
 const routes = {
